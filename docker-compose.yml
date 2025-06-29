@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  openldap-source:
+    image: osixia/openldap:1.5.0
+    container_name: target-ldap-source
+    environment:
+      LDAP_ORGANISATION: "Source Company"
+      LDAP_DOMAIN: "source.com"
+      LDAP_BASE_DN: "dc=source,dc=com"
+      LDAP_ADMIN_PASSWORD: "source_password"
+      LDAP_CONFIG_PASSWORD: "config_password"
+      LDAP_RFC2307BIS_SCHEMA: "true"
+      LDAP_TLS: "false"
+    ports:
+      - "20389:389"
+      - "20636:636"
+    volumes:
+      - ./tests/e2e/ldif/source:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service --loglevel debug
+    networks:
+      - ldap-network
+
+  openldap-target:
+    image: osixia/openldap:1.5.0
+    container_name: target-ldap-target
+    environment:
+      LDAP_ORGANISATION: "Target Company"
+      LDAP_DOMAIN: "target.com"
+      LDAP_BASE_DN: "dc=target,dc=com"
+      LDAP_ADMIN_PASSWORD: "target_password"
+      LDAP_CONFIG_PASSWORD: "config_password"
+      LDAP_RFC2307BIS_SCHEMA: "true"
+      LDAP_TLS: "false"
+    ports:
+      - "21389:389"
+      - "21636:636"
+    volumes:
+      - ./tests/e2e/ldif/target:/container/service/slapd/assets/config/bootstrap/ldif/custom
+    command: --copy-service --loglevel debug
+    networks:
+      - ldap-network
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.9.0
+    container_name: target-ldap-admin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: "#PYTHON2BASH:[{'openldap-source': [{'server': [{'tls': False}]}, {'login': [{'bind_id': 'cn=admin,dc=source,dc=com'}]}]}, {'openldap-target': [{'server': [{'tls': False}]}, {'login': [{'bind_id': 'cn=admin,dc=target,dc=com'}]}]}]"
+      PHPLDAPADMIN_HTTPS: "false"
+    ports:
+      - "20080:80"
+    depends_on:
+      - openldap-source
+      - openldap-target
+    networks:
+      - ldap-network
+
+networks:
+  ldap-network:
+    driver: bridge
