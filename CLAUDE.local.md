@@ -219,7 +219,7 @@ class LDAPTargetPatterns:
 
 - **tap-ldap**: Perfect round-trip integration for directory sync
 - **ldap-core-shared**: Shared LDAP models and schema definitions
-- **flx-ldap**: Advanced LDAP transformation capabilities
+- **flext-ldap**: Advanced LDAP transformation capabilities
 - **client-a-oud-mig**: Target for Oracle Directory migration
 
 ### **Enterprise Directory Integration**

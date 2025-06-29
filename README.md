@@ -502,7 +502,7 @@ environments:
 | ---------------------------------------- | --------------- | -------------------- |
 | [tap-ldap](../tap-ldap/)                 | Source tap      | Directory extraction |
 | [ldap-core-shared](../ldap-core-shared/) | Shared models   | LDAP domain models   |
-| [flx-ldap](../flx-ldap/)                 | Migration tools | Directory migration  |
+| [flext-ldap](../flext-ldap/)                 | Migration tools | Directory migration  |
 
 ### **Directory Targets**
 

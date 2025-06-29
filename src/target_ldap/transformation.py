@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, ClassVar
 
-from ldap_core_shared.utils.simple_dn_utils import simple_parse_dn
+from flext_ldap.utils.simple_dn_utils import simple_parse_dn
 
 
 # Simple TransformationAppliedEvent definition until ldap-core-shared is fixed
