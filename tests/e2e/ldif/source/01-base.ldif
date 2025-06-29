@@ -1,0 +1,5 @@
+# Source LDAP base structure
+dn: ou=people,dc=source,dc=com
+objectClass: organizationalUnit
+ou: people
+description: Source user accounts
