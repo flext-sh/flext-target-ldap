@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 from singer_sdk import Target
 from singer_sdk import typing as th
+
 from target_ldap.sinks import (
     GenericSink,
     GroupsSink,

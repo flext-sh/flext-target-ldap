@@ -106,7 +106,7 @@ class LDAPClient:
             yield connection
         finally:
             if connection.bound:
-                connection.unbind()  # type: ignore[no-untyped-call]
+                connection.unbind()
                 logger.info("Disconnected from LDAP server")
 
     def add_entry(
@@ -142,8 +142,7 @@ class LDAPClient:
             attrs["objectClass"] = object_class
 
             # Perform add operation
-            result = conn.add(dn, attributes=attrs)  # type: ignore[no-untyped-call]
-
+            result = conn.add(dn, attributes=attrs)
             if not result:
                 error_msg = f"Failed to add entry {dn}: {conn.result}"
                 logger.error(error_msg)
@@ -195,8 +194,7 @@ class LDAPClient:
                     mod_list[attr] = [(mod_op, value)]
 
             # Perform modify operation
-            result = conn.modify(dn, mod_list)  # type: ignore[no-untyped-call]
-
+            result = conn.modify(dn, mod_list)
             if not result:
                 error_msg = f"Failed to modify entry {dn}: {conn.result}"
                 logger.error(error_msg)
@@ -222,8 +220,7 @@ class LDAPClient:
 
         """
         with self.get_connection() as conn:
-            result = conn.delete(dn)  # type: ignore[no-untyped-call]
-
+            result = conn.delete(dn)
             if not result:
                 error_msg = f"Failed to delete entry {dn}: {conn.result}"
                 logger.error(error_msg)
