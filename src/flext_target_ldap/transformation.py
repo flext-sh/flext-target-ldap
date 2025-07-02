@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, ClassVar
 
 from flext_ldap.utils.simple_dn_utils import simple_parse_dn
@@ -391,7 +391,7 @@ class DataTransformationEngine:
             if result.applied_rules:
                 self.stats["total_transformed"] += 1
                 result.metadata["transformation_timestamp"] = datetime.now(
-                    timezone.utc,
+                    UTC,
                 ).isoformat()
 
                 # Emit transformation event
@@ -449,7 +449,7 @@ class DataTransformationEngine:
         self,
         rule: TransformationRule,
         result: TransformationResult,
-        classification: ClassificationResult,  # noqa: ARG002
+        classification: ClassificationResult,
     ) -> None:
         """Apply a specific transformation rule."""
         action = rule.action
@@ -624,7 +624,7 @@ class DataTransformationEngine:
             "rules_applied": dict(self.stats["rules_applied"]),
             "error_count": len(self.stats["errors"]),
             "warning_count": len(self.stats["warnings"]),
-            "last_updated": datetime.now(timezone.utc).isoformat(),
+            "last_updated": datetime.now(UTC).isoformat(),
         }
 
     def reset_statistics(self) -> None:
@@ -800,5 +800,5 @@ class MigrationValidator:
             * 100,
             "error_count": len(self.validation_stats["errors"]),
             "warning_count": len(self.validation_stats["warnings"]),
-            "last_updated": datetime.now(timezone.utc).isoformat(),
+            "last_updated": datetime.now(UTC).isoformat(),
         }

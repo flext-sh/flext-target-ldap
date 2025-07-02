@@ -339,8 +339,7 @@ class TestTargetLDAPIntegration:
         ]
 
         with open(input_path, "w", encoding="utf-8") as f:
-            for msg in messages:
-                f.write(json.dumps(msg) + "\n")
+            f.writelines(json.dumps(msg) + "\n" for msg in messages)
 
         # Mock connection
         mock_conn_instance = MagicMock()

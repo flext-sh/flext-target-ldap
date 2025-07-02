@@ -196,7 +196,7 @@ class TargetLDAP(Target):
         self,
         stream_name: str,
         *,
-        record: dict[str, Any] | None = None,  # noqa: ARG002
+        record: dict[str, Any] | None = None,
         schema: dict[str, Any] | None = None,
         key_properties: Sequence[str] | None = None,
     ) -> Sink:

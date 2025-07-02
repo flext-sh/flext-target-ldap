@@ -8,6 +8,7 @@ transformation engine, validation, batch processing, error recovery.
 from __future__ import annotations
 
 import logging
+import operator
 from typing import TYPE_CHECKING, Any
 
 from singer_sdk.sinks import Sink
@@ -550,7 +551,7 @@ class LDAPSink(Sink):
 
         # Sort by DN depth (fewer commas = higher in hierarchy)
         dn_depth_pairs = [(dn, dn.count(",")) for dn in dn_to_record]
-        dn_depth_pairs.sort(key=lambda x: x[1])  # Sort by depth (parents first)
+        dn_depth_pairs.sort(key=operator.itemgetter(1))  # Sort by depth (parents first)
 
         # Add records in dependency order
         for dn, _ in dn_depth_pairs:
