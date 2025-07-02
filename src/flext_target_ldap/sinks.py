@@ -11,6 +11,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from singer_sdk.sinks import Sink
+
 from target_ldap.client import LDAPClient
 from target_ldap.transformation import DataTransformationEngine, MigrationValidator
 
@@ -532,11 +533,11 @@ class LDAPSink(Sink):
             Sorted batch with dependencies resolved
 
         """
-        sorted_records: list = []
+        sorted_records: list[Any] = []
         remaining_records = batch.copy()
 
         # Extract DNs and build dependency map
-        dn_to_record: dict = {}
+        dn_to_record: dict[str, Any] = {}
         for record in batch:
             try:
                 dn = self.get_dn_from_record(record)
@@ -628,7 +629,7 @@ class LDAPSink(Sink):
             return 0
 
         retry_success_count = 0
-        remaining_failures: list = []
+        remaining_failures: list[Any] = []
 
         for failed_entry in self._failed_entries:
             try:

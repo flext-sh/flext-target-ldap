@@ -317,7 +317,7 @@ class DataTransformationEngine:
 
     def _load_transformation_rules(self) -> list[TransformationRule]:
         """Load transformation rules from configuration."""
-        rules: list = []
+        rules: list[Any] = []
 
         # Load default rules
         for rule_config in self.DEFAULT_RULES:
@@ -506,8 +506,8 @@ class DataTransformationEngine:
         if not isinstance(object_classes, list):
             object_classes = [object_classes]
 
-        new_object_classes: list = []
-        conversions: dict = {}
+        new_object_classes: list[Any] = []
+        conversions: dict[str, Any] = {}
 
         for oc in object_classes:
             if oc in mappings:
@@ -533,7 +533,7 @@ class DataTransformationEngine:
     ) -> None:
         """Map Oracle-specific attributes to standard equivalents."""
         mappings = params.get("attribute_mappings", {})
-        conversions: dict = {}
+        conversions: dict[str, Any] = {}
 
         for oracle_attr, standard_attr in mappings.items():
             if oracle_attr in entry:
@@ -563,7 +563,7 @@ class DataTransformationEngine:
                     aci_values = [aci_values]
 
                 # Convert each ACI to ACL format (simplified)
-                acl_values: list = []
+                acl_values: list[Any] = []
                 for aci in aci_values:
                     acl = self._convert_aci_string_to_acl(aci, params)
                     acl_values.append(acl)
@@ -595,7 +595,7 @@ class DataTransformationEngine:
         preserve_required = params.get("preserve_required", True)
         required_attrs = set(params.get("required_attributes", ["cn", "objectClass"]))
 
-        removed_attrs: list = []
+        removed_attrs: list[Any] = []
 
         for attr_name in list(entry.keys()):
             if preserve_required and attr_name in required_attrs:
