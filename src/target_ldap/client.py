@@ -106,7 +106,8 @@ class LDAPClient:
             yield connection
         finally:
             if connection.bound:
-                connection.unbind()                logger.info("Disconnected from LDAP server")
+                connection.unbind()
+                logger.info("Disconnected from LDAP server")
 
     def add_entry(
         self,
