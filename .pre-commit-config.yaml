@@ -40,7 +40,6 @@ repos:
             types-setuptools,
             pydantic,
             pydantic-settings,
-            singer-python,
             singer-sdk,
             ldap3,
             structlog,
