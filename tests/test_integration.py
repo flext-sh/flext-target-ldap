@@ -1,10 +1,12 @@
-"""Integration tests for target-ldap."""
+"""Integration tests for target-ldap.
 
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any
-from unittest.mock import MagicMock, Mock, patch
+from typing import TYPE_CHECKING
+from typing import Any
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
@@ -12,34 +14,33 @@ from click.testing import CliRunner
 from target_ldap.target import TargetLDAP
 
 if TYPE_CHECKING:
-    from pathlib import Path
+            from pathlib import Path
+    from unittest.mock import Mock
 
 
 class TestTargetLDAPIntegration:
-    """Integration tests for target-ldap."""
+         """Integration tests for target-ldap."""
 
     @pytest.fixture
     def runner(self) -> CliRunner:
-        """Create CLI runner."""
-        return CliRunner()
+            return CliRunner()
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, Any]) -> Path:
-        """Create config file."""
+    def config_file(self, tmp_path:
+        Path, mock_ldap_config: dict[str, Any]) -> Path:
         config_path = tmp_path / "config.json"
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
         return config_path
 
     @pytest.fixture
-    def input_file(
-        self,
-        tmp_path: Path,
+    def input_file(self,
+        tmp_path:
+        Path,
         singer_message_schema: str,
         singer_message_record: str,
         singer_message_state: str,
     ) -> Path:
-        """Create input file with Singer messages."""
         input_path = tmp_path / "input.jsonl"
         with open(input_path, "w", encoding="utf-8") as f:
             f.write(singer_message_schema + "\n")
@@ -49,15 +50,14 @@ class TestTargetLDAPIntegration:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_basic_load(
-        self,
-        mock_server: Mock,
+    def test_basic_load(self,
+        mock_server:
+        Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         input_file: Path,
     ) -> None:
-        """Test basic data loading."""
         # Mock connection
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
@@ -85,15 +85,14 @@ class TestTargetLDAPIntegration:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_upsert_behavior(
-        self,
-        mock_server: Mock,
+    def test_upsert_behavior(self,
+        mock_server:
+            Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
     ) -> None:
-        """Test upsert behavior."""
         # Create input with duplicate records
         input_path = tmp_path / "upsert_input.jsonl"
 
@@ -134,11 +133,12 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.add.return_value = True
         mock_conn_instance.modify.return_value = True
 
-        def search_side_effect(*args: Any, **kwargs: Any) -> bool:
-            # First search: no entry
+        def search_side_effect(*args:
+        Any, **kwargs: Any) -> bool:
+        # First search: no entry
             # Second search: entry exists
             if mock_conn_instance.search.call_count <= 1:
-                mock_conn_instance.entries = []
+            mock_conn_instance.entries = {}
                 mock_conn_instance.entries = [MagicMock()]
             return True
 
@@ -162,15 +162,14 @@ class TestTargetLDAPIntegration:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_delete_records(
-        self,
-        mock_server: Mock,
+    def test_delete_records(self,
+        mock_server:
+            Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
     ) -> None:
-        """Test deletion records."""
         # Create input with deletion record
         input_path = tmp_path / "delete_input.jsonl"
 
@@ -218,16 +217,15 @@ class TestTargetLDAPIntegration:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_dn_template_usage(
-        self,
-        mock_server: Mock,
+    def test_dn_template_usage(self,
+        mock_server:
+            Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
         mock_ldap_config: dict[str, Any],
     ) -> None:
-        """Test DN template usage."""
         # Add DN template to config
         mock_ldap_config["dn_templates"] = {
             "users": "uid={uid},ou=people,dc=test,dc=com",
@@ -283,8 +281,8 @@ class TestTargetLDAPIntegration:
         assert len(add_calls) > 0
         assert add_calls[0][0][0] == "uid=testuser,ou=people,dc=test,dc=com"
 
-    def test_error_handling(self, runner: CliRunner, tmp_path: Path) -> None:
-        """Test error handling."""
+    def test_error_handling(self, runner:
+            CliRunner, tmp_path: Path) -> None:
         # Invalid config
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
@@ -301,15 +299,14 @@ class TestTargetLDAPIntegration:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_multi_stream_handling(
-        self,
-        mock_server: Mock,
+    def test_multi_stream_handling(self,
+        mock_server:
+        Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
     ) -> None:
-        """Test handling multiple streams."""
         # Create input with multiple streams
         input_path = tmp_path / "multi_stream.jsonl"
 

@@ -13,8 +13,7 @@ from target_ldap.client import LDAPClient
 
 @pytest.fixture
 def mock_ldap_config() -> dict[str, Any]:
-    """Provide test LDAP configuration."""
-    return {
+            return {
         "host": "test.ldap.com",
         "port": 389,
         "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
@@ -38,8 +37,7 @@ def mock_ldap_config() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_user_record() -> dict[str, Any]:
-    """Provide sample user record."""
-    return {
+        return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
         "uid": "jdoe",
         "cn": "John Doe",
@@ -52,8 +50,7 @@ def sample_user_record() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_group_record() -> dict[str, Any]:
-    """Provide sample group record."""
-    return {
+        return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
         "cn": "developers",
         "description": "Development team",
@@ -67,8 +64,7 @@ def sample_group_record() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_ou_record() -> dict[str, Any]:
-    """Provide sample OU record."""
-    return {
+        return {
         "dn": "ou=engineering,dc=test,dc=com",
         "ou": "engineering",
         "description": "Engineering department",
@@ -77,9 +73,9 @@ def sample_ou_record() -> dict[str, Any]:
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record: dict[str, Any]) -> str:
-    """Provide Singer RECORD message."""
-    message = {
+def singer_message_record(sample_user_record:
+        dict[str, Any]) -> str:
+        message = {
         "type": "RECORD",
         "stream": "users",
         "record": sample_user_record,
@@ -90,8 +86,7 @@ def singer_message_record(sample_user_record: dict[str, Any]) -> str:
 
 @pytest.fixture
 def singer_message_schema() -> str:
-    """Provide Singer SCHEMA message."""
-    message = {
+        message = {
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
@@ -111,8 +106,7 @@ def singer_message_schema() -> str:
 
 @pytest.fixture
 def singer_message_state() -> str:
-    """Provide Singer STATE message."""
-    message = {
+        message = {
         "type": "STATE",
         "value": {
             "bookmarks": {
@@ -128,8 +122,7 @@ def singer_message_state() -> str:
 
 @pytest.fixture
 def mock_ldap_client() -> MagicMock:
-    """Create mock LDAP client."""
-    client = MagicMock(spec=LDAPClient)
+        client = MagicMock(spec=LDAPClient)
     client.validate_dn.return_value = True
     client.entry_exists.return_value = False
     client.add_entry.return_value = True
@@ -140,8 +133,8 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: dict[str, Any]) -> MagicMock:
-    """Create mock target."""
-    target = MagicMock()
+def mock_target(mock_ldap_config:
+        dict[str, Any]) -> MagicMock:
+        target = MagicMock()
     target.config = mock_ldap_config
     return target

@@ -1,4 +1,4 @@
-"""Tests for data transformation engine."""
+"""Tests for data transformation engine.
 
 from __future__ import annotations
 
@@ -11,10 +11,9 @@ from target_ldap.transformation import (
 
 
 class TestOidDataClassifier:
-    """Test Oracle Internet Directory data classifier."""
+             """Test Oracle Internet Directory data classifier."""
 
     def test_classify_internal_oid_data(self) -> None:
-        """Test classification of internal OID data."""
         classifier = OidDataClassifier()
 
         # Test internal OID patterns
@@ -29,7 +28,6 @@ class TestOidDataClassifier:
         assert result.metadata.get("skip_migration") is True
 
     def test_classify_oracle_schema(self) -> None:
-        """Test classification of Oracle schema objects."""
         classifier = OidDataClassifier()
 
         dn = "cn=subschemasubentry,dc=example,dc=com"
@@ -42,7 +40,6 @@ class TestOidDataClassifier:
         assert result.metadata.get("requires_transformation") is True
 
     def test_classify_oracle_acl(self) -> None:
-        """Test classification of Oracle ACL objects."""
         classifier = OidDataClassifier()
 
         dn = "cn=acl,cn=oraclecontext,dc=example,dc=com"
@@ -55,7 +52,6 @@ class TestOidDataClassifier:
         assert result.metadata.get("requires_acl_conversion") is True
 
     def test_classify_oracle_user(self) -> None:
-        """Test classification of Oracle user objects."""
         classifier = OidDataClassifier()
 
         dn = "cn=testuser,ou=people,dc=example,dc=com"
@@ -68,7 +64,6 @@ class TestOidDataClassifier:
         assert "orcluser" in result.metadata.get("oracle_classes", [])
 
     def test_classify_business_data(self) -> None:
-        """Test classification of business data."""
         classifier = OidDataClassifier()
 
         dn = "uid=john.doe,ou=people,dc=example,dc=com"
@@ -81,7 +76,6 @@ class TestOidDataClassifier:
         assert result.metadata.get("migrate_priority") == "high"
 
     def test_classify_standard_user(self) -> None:
-        """Test classification of standard LDAP users."""
         classifier = OidDataClassifier()
 
         dn = "cn=jane.smith,ou=users,dc=example,dc=com"
@@ -93,7 +87,6 @@ class TestOidDataClassifier:
         assert result.confidence > 0.6
 
     def test_classify_standard_group(self) -> None:
-        """Test classification of standard LDAP groups."""
         classifier = OidDataClassifier()
 
         dn = "cn=REDACTED_LDAP_BIND_PASSWORDs,ou=groups,dc=example,dc=com"
@@ -105,7 +98,6 @@ class TestOidDataClassifier:
         assert result.confidence > 0.6
 
     def test_classify_unknown(self) -> None:
-        """Test classification of unknown entries."""
         classifier = OidDataClassifier()
 
         dn = "cn=unknown,dc=example,dc=com"
@@ -118,10 +110,9 @@ class TestOidDataClassifier:
 
 
 class TestDataTransformationEngine:
-    """Test data transformation engine."""
+         """Test data transformation engine."""
 
     def test_initialization(self) -> None:
-        """Test transformation engine initialization."""
         config = {"oracle_migration_mode": True}
         engine = DataTransformationEngine(config)
 
@@ -130,7 +121,6 @@ class TestDataTransformationEngine:
         assert engine.stats["total_processed"] == 0
 
     def test_transform_oracle_dn_structure(self) -> None:
-        """Test Oracle DN structure transformation."""
         config = {"enable_transformation": True}
         engine = DataTransformationEngine(config)
 
@@ -149,7 +139,6 @@ class TestDataTransformationEngine:
         assert "oracle_dn_structure_transform" in result.applied_rules
 
     def test_transform_oracle_objectclasses(self) -> None:
-        """Test Oracle object class conversion."""
         config = {"enable_transformation": True}
         engine = DataTransformationEngine(config)
 
@@ -169,7 +158,6 @@ class TestDataTransformationEngine:
         assert "oracle_objectclass_conversion" in result.applied_rules
 
     def test_transform_oracle_attributes(self) -> None:
-        """Test Oracle attribute mapping."""
         config = {"enable_transformation": True}
         engine = DataTransformationEngine(config)
 
@@ -191,7 +179,6 @@ class TestDataTransformationEngine:
         assert "oracle_attribute_mapping" in result.applied_rules
 
     def test_remove_empty_attributes(self) -> None:
-        """Test removal of empty attributes."""
         config = {"enable_transformation": True}
         engine = DataTransformationEngine(config)
 
@@ -215,7 +202,6 @@ class TestDataTransformationEngine:
         assert "clean_empty_attributes" in result.applied_rules
 
     def test_dry_run_transformation(self) -> None:
-        """Test transformation in dry run mode."""
         config = {"enable_transformation": True, "dry_run_mode": True}
         engine = DataTransformationEngine(config)
 
@@ -233,7 +219,6 @@ class TestDataTransformationEngine:
         assert result.metadata.get("transformation_timestamp") is not None
 
     def test_transformation_statistics(self) -> None:
-        """Test transformation statistics tracking."""
         engine = DataTransformationEngine()
 
         # Process several entries
@@ -253,10 +238,9 @@ class TestDataTransformationEngine:
 
 
 class TestMigrationValidator:
-    """Test migration validator."""
+         """Test migration validator."""
 
     def test_validate_valid_entry(self) -> None:
-        """Test validation of a valid entry."""
         validator = MigrationValidator()
 
         entry = {
@@ -275,7 +259,6 @@ class TestMigrationValidator:
         assert "object_classes" in result["checks_performed"]
 
     def test_validate_missing_dn(self) -> None:
-        """Test validation of entry without DN."""
         validator = MigrationValidator()
 
         entry = {"objectClass": ["person"], "cn": "testuser"}
@@ -286,7 +269,6 @@ class TestMigrationValidator:
         assert "Missing DN" in result["errors"]
 
     def test_validate_invalid_dn_syntax(self) -> None:
-        """Test validation of entry with invalid DN syntax."""
         validator = MigrationValidator()
 
         entry = {"dn": "invalid_dn_format", "objectClass": ["person"], "cn": "testuser"}
@@ -297,8 +279,7 @@ class TestMigrationValidator:
         assert any("Invalid DN syntax" in error for error in result["errors"])
 
     def test_validate_missing_objectclass(self) -> None:
-        """Test validation of entry without object classes."""
-        validator = MigrationValidator()
+            validator = MigrationValidator()
 
         entry = {"dn": "cn=testuser,dc=example,dc=com", "cn": "testuser"}
 
@@ -308,7 +289,6 @@ class TestMigrationValidator:
         assert "Missing objectClass" in result["errors"]
 
     def test_validate_missing_required_attributes(self) -> None:
-        """Test validation of entry missing required attributes."""
         validator = MigrationValidator()
 
         entry = {
@@ -326,8 +306,7 @@ class TestMigrationValidator:
         )
 
     def test_validate_invalid_email(self) -> None:
-        """Test validation of entry with invalid email."""
-        validator = MigrationValidator()
+            validator = MigrationValidator()
 
         entry = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
@@ -343,8 +322,7 @@ class TestMigrationValidator:
         assert any("Invalid email format" in warning for warning in result["warnings"])
 
     def test_validation_statistics(self) -> None:
-        """Test validation statistics tracking."""
-        validator = MigrationValidator()
+            validator = MigrationValidator()
 
         # Process several entries
         entries = [
@@ -369,10 +347,9 @@ class TestMigrationValidator:
 
 
 class TestTransformationRule:
-    """Test transformation rule configuration."""
+         """Test transformation rule configuration."""
 
     def test_transformation_rule_creation(self) -> None:
-        """Test creating transformation rules."""
         rule = TransformationRule(
             name="test_rule",
             condition="entry.get('objectClass') == ['orclUser']",
@@ -389,10 +366,9 @@ class TestTransformationRule:
 
 
 class TestIntegratedTransformation:
-    """Test integrated transformation workflow."""
+         """Test integrated transformation workflow."""
 
     def test_full_oracle_migration_workflow(self) -> None:
-        """Test complete Oracle-to-LDAP migration workflow."""
         config = {
             "enable_transformation": True,
             "oracle_migration_mode": True,
@@ -446,8 +422,7 @@ class TestIntegratedTransformation:
         assert len(validation_result["warnings"]) <= 1
 
     def test_classification_and_transformation_integration(self) -> None:
-        """Test integration of classification and transformation."""
-        config = {"enable_transformation": True}
+            config = {"enable_transformation": True}
         engine = DataTransformationEngine(config)
 
         # Test various entry types
@@ -471,7 +446,7 @@ class TestIntegratedTransformation:
 
         for entry_data in test_entries:
             entry = {
-                k: v for k, v in entry_data.items() if k != "expected_classification"
+                k: v for k, v in entry_data.items() if k != "expected_classification":
             }
 
             result = engine.transform_entry(entry)
