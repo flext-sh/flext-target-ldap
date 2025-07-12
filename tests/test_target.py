@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 from singer_sdk.testing import get_target_test_class
-
 from target_ldap.target import TargetLDAP
 
 # Basic target tests
@@ -27,7 +27,6 @@ class TestTargetLDAPUnit:
 
     @pytest.fixture
     def config(self) -> dict:
-        """Get test configuration."""
         return {
             "host": "test.ldap.com",
             "port": 389,
@@ -39,13 +38,11 @@ class TestTargetLDAPUnit:
         }
 
     def test_target_initialization(self, config: dict) -> None:
-        """Test target initialization."""
         target = TargetLDAP(config=config)
         assert target.name == "target-ldap"
         assert target.config == config
 
     def test_get_sink_users(self, config: dict) -> None:
-        """Test getting users sink."""
         target = TargetLDAP(config=config)
         sink = target.get_sink("users")
 
@@ -54,7 +51,6 @@ class TestTargetLDAPUnit:
         assert "inetOrgPerson" in sink.get_default_object_classes()
 
     def test_get_sink_groups(self, config: dict) -> None:
-        """Test getting groups sink."""
         target = TargetLDAP(config=config)
         sink = target.get_sink("groups")
 
@@ -63,7 +59,6 @@ class TestTargetLDAPUnit:
         assert "groupOfNames" in sink.get_default_object_classes()
 
     def test_get_sink_generic(self, config: dict) -> None:
-        """Test getting generic sink for unknown stream."""
         target = TargetLDAP(config=config)
         sink = target.get_sink("custom_stream")
 
@@ -71,7 +66,6 @@ class TestTargetLDAPUnit:
         assert sink.get_rdn_attribute() == "cn"  # Default
 
     def test_dn_template_configuration(self, config: dict) -> None:
-        """Test DN template configuration."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
 
         target = TargetLDAP(config=config)
@@ -82,7 +76,6 @@ class TestTargetLDAPUnit:
         )
 
     def test_object_class_configuration(self, config: dict) -> None:
-        """Test object class configuration."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
 
         target = TargetLDAP(config=config)
@@ -92,7 +85,6 @@ class TestTargetLDAPUnit:
 
     @patch("target_ldap.sinks.LDAPClient")
     def test_process_record(self, mock_client_class: MagicMock, config: dict) -> None:
-        """Test processing a record."""
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client.upsert_entry.return_value = (True, "add")
@@ -123,7 +115,6 @@ class TestTargetLDAPUnit:
         mock_client_class: MagicMock,
         config: dict,
     ) -> None:
-        """Test processing a delete record."""
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client.entry_exists.return_value = True

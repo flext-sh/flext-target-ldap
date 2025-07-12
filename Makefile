@@ -34,7 +34,7 @@ test-coverage: ## Run tests with coverage
 # Code Quality - Maximum Strictness
 lint: ## Run all linters with maximum strictness
 	@echo "🔍 Running maximum strictness linting for flext-target-ldap..."
-	poetry run ruff check . --output-format=verbose
+	poetry run ruff check . --output-format=full
 	@echo "✅ Ruff linting complete"
 
 format: ## Format code with strict standards
@@ -123,3 +123,6 @@ validate-schema: ## Validate data schemas
 test-connection: ## Test data source connection
 	@echo "🔌 Testing data source connection..."
 	PYTHONPATH=src poetry run python -m {project_name.replace('-', '_')}.test_connection
+
+# Include standardized build system
+include Makefile.build

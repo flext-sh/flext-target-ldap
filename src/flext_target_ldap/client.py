@@ -1,36 +1,59 @@
-"""LDAP client implementation for target-ldap.
+"""LDAP client implementation for target-ldap using flext-core patterns.
 
-This module provides the LDAP client that handles connections and operations
-for loading data into LDAP directories.
+MIGRATED TO FLEXT-CORE:
+Provides enterprise-grade LDAP connectivity with ServiceResult pattern support.
 """
 
 from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
+from typing import Any
 
 import ldap3
-from ldap3 import (
-    ALL,
-    MODIFY_ADD,
-    MODIFY_DELETE,
-    MODIFY_REPLACE,
-    SIMPLE,
-    Connection,
-    Server,
-)
+from ldap3 import ALL
+from ldap3 import MODIFY_ADD
+from ldap3 import MODIFY_DELETE
+from ldap3 import MODIFY_REPLACE
+from ldap3 import SIMPLE
+from ldap3 import Connection
+from ldap3 import Server
 from ldap3.core.exceptions import LDAPException
 
-if TYPE_CHECKING:
-    from collections.abc import Generator, Mapping
+from flext_core.domain.pydantic_base import DomainBaseModel
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from collections.abc import Mapping
 
 logger = logging.getLogger(__name__)
 
 
+# Use centralized ServiceResult from flext-core - ELIMINATE DUPLICATION
+from flext_core.domain.types import ServiceResult
+
+
+class LDAPEntry(DomainBaseModel):
+    """Represents an LDAP entry for target operations using flext-core patterns."""
+
+    dn: str
+    attributes: dict[str, Any]
+    object_classes: list[str]
+
+    def add_attribute(self, name: str, values: list[str] | str) -> None:
+        """Add attribute values to the entry."""
+        if isinstance(values, str):
+            values = [values]
+        self.attributes[name] = values
+
+    def remove_attribute(self, name: str) -> None:
+        """Remove attribute from the entry."""
+        self.attributes.pop(name, None)
+
+
 class LDAPClient:
-    """LDAP client for connecting and modifying LDAP directories."""
+    """LDAP client for connecting and modifying LDAP directories using flext-core patterns."""
 
     def __init__(
         self,
@@ -43,19 +66,6 @@ class LDAPClient:
         timeout: int = 30,
         auto_bind: bool = True,
     ) -> None:
-        """Initialize LDAP client.
-
-        Args:
-        ----
-            host: LDAP server hostname or IP
-            port: LDAP server port
-            bind_dn: Distinguished name for binding
-            password: Password for authentication
-            use_ssl: Whether to use SSL/TLS
-            timeout: Connection timeout in seconds
-            auto_bind: Whether to auto-bind on connection
-
-        """
         self.host = host
         self.port = port
         self.bind_dn = bind_dn
@@ -73,17 +83,7 @@ class LDAPClient:
 
     @contextmanager
     def get_connection(self) -> Generator[Connection]:
-        """Get LDAP connection context manager.
-
-        Yields
-        ------
-            Active LDAP connection
-
-        Raises
-        ------
-            LDAPException: If connection fails
-
-        """
+        """Context manager for LDAP connections."""
         server = Server(
             self.host,
             port=self.port,
@@ -102,7 +102,7 @@ class LDAPClient:
         )
 
         try:
-            logger.info("Connected to LDAP server: %s", self.server_uri)
+            logger.info("Connected to LDAP server %s", self.server_uri)
             yield connection
         finally:
             if connection.bound:
@@ -114,198 +114,176 @@ class LDAPClient:
         dn: str,
         object_class: str | list[str],
         attributes: Mapping[str, Any],
-    ) -> bool:
-        """Add a new entry to LDAP.
+    ) -> ServiceResult[bool]:
+        """Add an entry to LDAP."""
+        try:
+            with self.get_connection() as conn:
+                # Ensure object_class is a list
+                if isinstance(object_class, str):
+                    object_class = [object_class]
 
-        Args:
-        ----
-            dn: Distinguished name of the entry
-            object_class: Object class(es) for the entry
-            attributes: Entry attributes
+                # Build attributes dict
+                attrs = dict(attributes)
+                attrs["objectClass"] = object_class
 
-        Returns:
-        -------
-            True if successful
+                # Perform add operation
+                result = conn.add(dn, attributes=attrs)
+                if not result:
+                    error_msg = f"Failed to add entry {dn}: {conn.result}"
+                    logger.error(error_msg)
+                    return ServiceResult.fail(error_msg)
 
-        Raises:
-        ------
-            LDAPException: If add operation fails
-
-        """
-        with self.get_connection() as conn:
-            # Ensure object_class is a list
-            if isinstance(object_class, str):
-                object_class = [object_class]
-
-            # Build attributes dict
-            attrs = dict(attributes)
-            attrs["objectClass"] = object_class
-
-            # Perform add operation
-            result = conn.add(dn, attributes=attrs)
-            if not result:
-                error_msg = f"Failed to add entry {dn}: {conn.result}"
-                logger.error(error_msg)
-                raise LDAPException(error_msg)
-
-            logger.info("Successfully added entry: %s", dn)
-            return True
+                logger.info("Successfully added entry: %s", dn)
+                return ServiceResult.ok(True)
+        except LDAPException as e:
+            error_msg = f"LDAP error adding entry {dn}: {e}"
+            logger.exception(error_msg)
+            return ServiceResult.fail(error_msg)
 
     def modify_entry(
         self,
         dn: str,
         changes: Mapping[str, Any],
         operation: str = "replace",
-    ) -> bool:
-        """Modify an existing LDAP entry.
+    ) -> ServiceResult[bool]:
+        """Modify an entry in LDAP."""
+        try:
+            with self.get_connection() as conn:
+                # Map operation names to LDAP constants
+                op_map = {
+                    "replace": MODIFY_REPLACE,
+                    "add": MODIFY_ADD,
+                    "delete": MODIFY_DELETE,
+                }
 
-        Args:
-        ----
-            dn: Distinguished name of the entry
-            changes: Dictionary of attribute changes
-            operation: Modification operation (replace, add, delete)
+                mod_op = op_map.get(operation.lower(), MODIFY_REPLACE)
 
-        Returns:
-        -------
-            True if successful
+                # Build modification list
+                mod_list: dict[str, list[Any]] = {}
+                for attr, value in changes.items():
+                    # Skip empty values for delete operations
+                    if operation == "delete" and not value:
+                        mod_list[attr] = [(mod_op, [])]
+                    else:
+                        mod_list[attr] = [(mod_op, value)]
 
-        Raises:
-        ------
-            LDAPException: If modify operation fails
+                # Perform modify operation
+                result = conn.modify(dn, mod_list)
+                if not result:
+                    error_msg = f"Failed to modify entry {dn}: {conn.result}"
+                    logger.error(error_msg)
+                    return ServiceResult.fail(error_msg)
 
-        """
-        with self.get_connection() as conn:
-            # Map operation names to LDAP constants
-            op_map = {
-                "replace": MODIFY_REPLACE,
-                "add": MODIFY_ADD,
-                "delete": MODIFY_DELETE,
-            }
+                logger.info("Successfully modified entry: %s", dn)
+                return ServiceResult.ok(True)
+        except LDAPException as e:
+            error_msg = f"LDAP error modifying entry {dn}: {e}"
+            logger.exception(error_msg)
+            return ServiceResult.fail(error_msg)
 
-            mod_op = op_map.get(operation.lower(), MODIFY_REPLACE)
+    def delete_entry(self, dn: str) -> ServiceResult[bool]:
+        """Delete an entry from LDAP."""
+        try:
+            with self.get_connection() as conn:
+                result = conn.delete(dn)
+                if not result:
+                    error_msg = f"Failed to delete entry {dn}: {conn.result}"
+                    logger.error(error_msg)
+                    return ServiceResult.fail(error_msg)
 
-            # Build modification list
-            mod_list: dict[str, list[Any]] = {}
-            for attr, value in changes.items():
-                # Skip empty values for delete operations
-                if operation == "delete" and not value:
-                    mod_list[attr] = [(mod_op, [])]
-                else:
-                    mod_list[attr] = [(mod_op, value)]
+                logger.info("Successfully deleted entry: %s", dn)
+                return ServiceResult.ok(True)
+        except LDAPException as e:
+            error_msg = f"LDAP error deleting entry {dn}: {e}"
+            logger.exception(error_msg)
+            return ServiceResult.fail(error_msg)
 
-            # Perform modify operation
-            result = conn.modify(dn, mod_list)
-            if not result:
-                error_msg = f"Failed to modify entry {dn}: {conn.result}"
-                logger.error(error_msg)
-                raise LDAPException(error_msg)
-
-            logger.info("Successfully modified entry: %s", dn)
-            return True
-
-    def delete_entry(self, dn: str) -> bool:
-        """Delete an entry from LDAP.
-
-        Args:
-        ----
-            dn: Distinguished name of the entry
-
-        Returns:
-        -------
-            True if successful
-
-        Raises:
-        ------
-            LDAPException: If delete operation fails
-
-        """
-        with self.get_connection() as conn:
-            result = conn.delete(dn)
-            if not result:
-                error_msg = f"Failed to delete entry {dn}: {conn.result}"
-                logger.error(error_msg)
-                raise LDAPException(error_msg)
-
-            logger.info("Successfully deleted entry: %s", dn)
-            return True
-
-    def entry_exists(self, dn: str) -> bool:
-        """Check if an entry exists in LDAP.
-
-        Args:
-        ----
-            dn: Distinguished name of the entry
-
-        Returns:
-        -------
-            True if entry exists, False otherwise
-
-        """
-        with self.get_connection() as conn:
-            result = conn.search(
-                search_base=dn,
-                search_filter="(objectClass=*)",
-                search_scope=ldap3.BASE,
-                attributes=["dn"],
-                size_limit=1,
-            )
-            return bool(result and conn.entries)
+    def entry_exists(self, dn: str) -> ServiceResult[bool]:
+        """Check if an entry exists in LDAP."""
+        try:
+            with self.get_connection() as conn:
+                result = conn.search(
+                    search_base=dn,
+                    search_filter="(objectClass=*)",
+                    search_scope=ldap3.BASE,
+                    attributes=["dn"],
+                    size_limit=1,
+                )
+                exists = bool(result and conn.entries)
+                return ServiceResult.ok(exists)
+        except LDAPException as e:
+            error_msg = f"LDAP error checking entry existence {dn}: {e}"
+            logger.exception(error_msg)
+            return ServiceResult.fail(error_msg)
 
     def upsert_entry(
         self,
         dn: str,
         object_class: str | list[str],
         attributes: Mapping[str, Any],
-    ) -> tuple[bool, str]:
-        """Insert or update an entry (upsert operation).
-
-        Args:
-        ----
-            dn: Distinguished name of the entry
-            object_class: Object class(es) for the entry
-            attributes: Entry attributes
-
-        Returns:
-        -------
-            Tuple of (success, operation) where operation is "add" or "modify"
-
-        Raises:
-        ------
-            LDAPException: If operation fails
-
-        """
+    ) -> ServiceResult[tuple[bool, str]]:
+        """Insert or update an entry (upsert operation)."""
         try:
-            if self.entry_exists(dn):
+            exists_result = self.entry_exists(dn)
+            if not exists_result.success:
+                return ServiceResult.fail(exists_result.error)
+
+            if exists_result.value:
                 # Entry exists, perform modify
-                self.modify_entry(dn, attributes, operation="replace")
-                return (True, "modify")
+                modify_result = self.modify_entry(dn, attributes, operation="replace")
+                if not modify_result.success:
+                    return ServiceResult.fail(modify_result.error)
+                return ServiceResult.ok((True, "modify"))
+
             # Entry doesn't exist, perform add
-            self.add_entry(dn, object_class, attributes)
-            return (True, "add")
-        except LDAPException:
-            raise
+            add_result = self.add_entry(dn, object_class, attributes)
+            if not add_result.success:
+                return ServiceResult.fail(add_result.error)
+            return ServiceResult.ok((True, "add"))
 
-    def validate_dn(self, dn: str) -> bool:
-        """Validate DN syntax.
+        except Exception as e:
+            error_msg = f"Error during upsert operation for {dn}: {e}"
+            logger.exception(error_msg)
+            return ServiceResult.fail(error_msg)
 
-        Args:
-        ----
-            dn: Distinguished name to validate
-
-        Returns:
-        -------
-            True if DN is valid
-
-        """
+    def validate_dn(self, dn: str) -> ServiceResult[bool]:
+        """Validate a distinguished name format."""
         try:
             # Simple DN validation
             parts = dn.split(",")
             for part in parts:
                 if "=" not in part:
-                    return False
+                    return ServiceResult.fail(f"Invalid DN part: {part}")
                 key, value = part.strip().split("=", 1)
                 if not key or not value:
-                    return False
-            return True
-        except Exception:
-            return False
+                    return ServiceResult.fail(f"Empty key or value in DN part: {part}")
+            return ServiceResult.ok(True)
+        except Exception as e:
+            error_msg = f"Error validating DN {dn}: {e}"
+            return ServiceResult.fail(error_msg)
+
+    def test_connection(self) -> ServiceResult[bool]:
+        """Test the LDAP connection."""
+        try:
+            with self.get_connection() as conn:
+                # Perform a simple search to test the connection
+                conn.search(
+                    search_base="",
+                    search_filter="(objectClass=*)",
+                    search_scope=ldap3.BASE,
+                    attributes=["namingContexts"],
+                    size_limit=1,
+                )
+                return ServiceResult.ok(True)
+        except Exception as e:
+            error_msg = f"Connection test failed: {e}"
+            logger.exception(error_msg)
+            return ServiceResult.fail(error_msg)
+
+
+# Export main classes and functions
+__all__ = [
+    "LDAPClient",
+    "LDAPEntry",
+    "ServiceResult",
+]

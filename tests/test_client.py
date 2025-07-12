@@ -1,9 +1,10 @@
-"""Tests for LDAP client."""
+"""Tests for LDAP client.
 
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 from ldap3.core.exceptions import LDAPException
@@ -15,8 +16,8 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: dict[str, Any]) -> LDAPClient:
-        """Create test client."""
+    def client(self, mock_ldap_config:
+        dict[str, Any]) -> LDAPClient:
         return LDAPClient(
             host=mock_ldap_config["host"],
             port=mock_ldap_config["port"],
@@ -26,8 +27,8 @@ class TestLDAPClient:
             timeout=mock_ldap_config["timeout"],
         )
 
-    def test_client_initialization(self, client: LDAPClient) -> None:
-        """Test client initialization."""
+    def test_client_initialization(self, client:
+        LDAPClient) -> None:
         assert client.host == "test.ldap.com"
         assert client.port == 389
         assert client.bind_dn == "cn=admin,dc=test,dc=com"
@@ -36,8 +37,8 @@ class TestLDAPClient:
         assert client.timeout == 30
         assert client.auto_bind
 
-    def test_server_uri(self, client: LDAPClient) -> None:
-        """Test server URI generation."""
+    def test_server_uri(self, client:
+        LDAPClient) -> None:
         assert client.server_uri == "ldap://test.ldap.com:389"
 
         client.use_ssl = True
@@ -45,13 +46,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_get_connection(
-        self,
-        mock_server_class: MagicMock,
+    def test_get_connection(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test connection context manager."""
         mock_server = MagicMock()
         mock_server_class.return_value = mock_server
 
@@ -85,13 +85,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_add_entry(
-        self,
-        mock_server_class: MagicMock,
+    def test_add_entry(self,
+        mock_server_class:
+            MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test adding entry."""
         mock_connection = MagicMock()
         mock_connection.bound = True
         mock_connection.add.return_value = True
@@ -117,13 +116,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_add_entry_failure(
-        self,
-        mock_server_class: MagicMock,
+    def test_add_entry_failure(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test add entry failure."""
         mock_connection = MagicMock()
         mock_connection.bound = True
         mock_connection.add.return_value = False
@@ -141,13 +139,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_modify_entry(
-        self,
-        mock_server_class: MagicMock,
+    def test_modify_entry(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test modifying entry."""
         mock_connection = MagicMock()
         mock_connection.bound = True
         mock_connection.modify.return_value = True
@@ -173,13 +170,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_delete_entry(
-        self,
-        mock_server_class: MagicMock,
+    def test_delete_entry(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test deleting entry."""
         mock_connection = MagicMock()
         mock_connection.bound = True
         mock_connection.delete.return_value = True
@@ -192,13 +188,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_entry_exists(
-        self,
-        mock_server_class: MagicMock,
+    def test_entry_exists(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test checking if entry exists."""
         mock_connection = MagicMock()
         mock_connection.bound = True
         mock_connection.search.return_value = True
@@ -215,13 +210,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_upsert_entry(
-        self,
-        mock_server_class: MagicMock,
+    def test_upsert_entry(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test upsert operation."""
         mock_connection = MagicMock()
         mock_connection.bound = True
 
@@ -242,8 +236,8 @@ class TestLDAPClient:
         assert operation == "add"
         mock_connection.add.assert_called_once()
 
-    def test_validate_dn(self, client: LDAPClient) -> None:
-        """Test DN validation."""
+    def test_validate_dn(self, client:
+        LDAPClient) -> None:
         # Valid DNs
         assert client.validate_dn("uid=test,dc=example,dc=com") is True
         assert client.validate_dn("cn=Test User,ou=users,dc=example,dc=com") is True
@@ -258,13 +252,12 @@ class TestLDAPClient:
 
     @patch("target_ldap.client.Connection")
     @patch("target_ldap.client.Server")
-    def test_connection_error_handling(
-        self,
-        mock_server_class: MagicMock,
+    def test_connection_error_handling(self,
+        mock_server_class:
+        MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
-        """Test connection error handling."""
         # Simulate connection error
         mock_connection_class.side_effect = LDAPException("Connection failed")
 

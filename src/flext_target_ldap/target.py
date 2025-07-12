@@ -1,22 +1,23 @@
-"""target-ldap main target class.
+"""target-ldap main target class using flext-core patterns.
 
-This module implements the main target class for LDAP data loading.
+REFACTORED:
+        Uses flext-core configuration patterns and flext-observability logging.
+Zero tolerance for code duplication.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING
+from typing import Any
 
 from singer_sdk import Target
-from singer_sdk import typing as th
 
-from target_ldap.sinks import (
-    GenericSink,
-    GroupsSink,
-    OrganizationalUnitsSink,
-    UsersSink,
-)
+from flext_target_ldap.config import TargetLDAPConfig
+from flext_target_ldap.sinks import GenericSink
+from flext_target_ldap.sinks import GroupsSink
+from flext_target_ldap.sinks import OrganizationalUnitsSink
+from flext_target_ldap.sinks import UsersSink
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -28,169 +29,12 @@ logger = logging.getLogger(__name__)
 
 
 class TargetLDAP(Target):
-    """Singer target for LDAP data loading."""
+    """Singer target for LDAP data loading using flext-core patterns."""
 
     name = "target-ldap"
 
-    config_jsonschema: ClassVar[dict[str, Any]] = th.PropertiesList(
-        th.Property(
-            "host",
-            th.StringType,
-            required=True,
-            description="LDAP server hostname or IP address",
-        ),
-        th.Property(
-            "port",
-            th.IntegerType,
-            default=389,
-            description="LDAP server port (389 for LDAP, 636 for LDAPS)",
-        ),
-        th.Property(
-            "bind_dn",
-            th.StringType,
-            description="Distinguished name for binding to LDAP",
-        ),
-        th.Property(
-            "password",
-            th.StringType,
-            secret=True,
-            description="Password for LDAP authentication",
-        ),
-        th.Property(
-            "base_dn",
-            th.StringType,
-            required=True,
-            description="Base DN for LDAP operations",
-        ),
-        th.Property(
-            "use_ssl",
-            th.BooleanType,
-            default=False,
-            description="Use SSL/TLS for LDAP connection",
-        ),
-        th.Property(
-            "timeout",
-            th.IntegerType,
-            default=30,
-            description="Connection timeout in seconds",
-        ),
-        th.Property(
-            "validate_records",
-            th.BooleanType,
-            default=True,
-            description="Validate records before loading",
-        ),
-        th.Property(
-            "user_rdn_attribute",
-            th.StringType,
-            default="uid",
-            description="RDN attribute for user entries",
-        ),
-        th.Property(
-            "group_rdn_attribute",
-            th.StringType,
-            default="cn",
-            description="RDN attribute for group entries",
-        ),
-        th.Property(
-            "default_object_classes",
-            th.ObjectType(),
-            description="Default object classes for each stream",
-        ),
-        th.Property(
-            "dn_templates",
-            th.ObjectType(),
-            description="DN templates for each stream",
-        ),
-        th.Property(
-            "stream_maps",
-            th.ObjectType(),
-            description="Configuration for stream maps",
-        ),
-        th.Property(
-            "stream_map_settings",
-            th.ObjectType(),
-            description="Settings for stream maps",
-        ),
-        # Data Transformation Configuration
-        th.Property(
-            "enable_transformation",
-            th.BooleanType,
-            default=False,
-            description="Enable data transformation engine",
-        ),
-        th.Property(
-            "transformation_rules",
-            th.ArrayType(th.ObjectType()),
-            description="Custom transformation rules",
-        ),
-        th.Property(
-            "classification_patterns",
-            th.ObjectType(),
-            description="Custom patterns for data classification",
-        ),
-        th.Property(
-            "oracle_migration_mode",
-            th.BooleanType,
-            default=False,
-            description="Enable Oracle-to-LDAP migration optimizations",
-        ),
-        th.Property(
-            "preserve_original_attributes",
-            th.BooleanType,
-            default=False,
-            description="Preserve original Oracle attributes during transformation",
-        ),
-        # Migration and Validation Configuration
-        th.Property(
-            "enable_validation",
-            th.BooleanType,
-            default=True,
-            description="Enable entry validation before loading",
-        ),
-        th.Property(
-            "validation_strict_mode",
-            th.BooleanType,
-            default=False,
-            description="Fail on validation errors (vs. warnings)",
-        ),
-        th.Property(
-            "migration_batch_id",
-            th.StringType,
-            description="Identifier for migration batch tracking",
-        ),
-        th.Property(
-            "dry_run_mode",
-            th.BooleanType,
-            default=False,
-            description="Validate and transform without actually loading data",
-        ),
-        # Performance and Batch Processing
-        th.Property(
-            "batch_size",
-            th.IntegerType,
-            default=100,
-            description="Number of entries to process in each batch",
-        ),
-        th.Property(
-            "parallel_processing",
-            th.BooleanType,
-            default=False,
-            description="Enable parallel processing for large datasets",
-        ),
-        th.Property(
-            "max_errors",
-            th.IntegerType,
-            default=10,
-            description="Maximum number of errors before stopping processing",
-        ),
-        th.Property(
-            "ignore_transformation_errors",
-            th.BooleanType,
-            default=True,
-            description="Continue processing on transformation errors",
-        ),
-    ).to_dict()
+    # Use flext-core configuration class
+    config_class = TargetLDAPConfig
 
     def get_sink(
         self,
@@ -200,18 +44,16 @@ class TargetLDAP(Target):
         schema: dict[str, Any] | None = None,
         key_properties: Sequence[str] | None = None,
     ) -> Sink:
-        """Get sink for a stream.
+        """Get appropriate sink for the given stream.
 
         Args:
-        ----
-            stream_name: Name of the stream
-            record: Sample record (optional)
-            schema: Stream schema
-            key_properties: Primary key properties
+            stream_name: Name of the data stream to process.
+            record: Optional record for context.
+            schema: Optional schema for validation.
+            key_properties: Optional key properties for the stream.
 
         Returns:
-        -------
-            Appropriate sink instance
+            Sink instance for processing the stream data.
 
         """
         # Map stream names to sink classes
@@ -223,13 +65,13 @@ class TargetLDAP(Target):
 
         sink_class = sink_mapping.get(stream_name, GenericSink)
 
-        # Apply DN template if configured
+        # Apply DN template if configured:
         dn_templates = self.config.get("dn_templates", {})
         config_dict = dict(self.config)
         if stream_name in dn_templates:
             config_dict[f"{stream_name}_dn_template"] = dn_templates[stream_name]
 
-        # Apply default object classes if configured
+        # Apply default object classes if configured:
         default_object_classes = self.config.get("default_object_classes", {})
         if stream_name in default_object_classes:
             config_dict[f"{stream_name}_object_classes"] = default_object_classes[
@@ -239,13 +81,28 @@ class TargetLDAP(Target):
         # Update the target config
         self._config = config_dict
 
+        # Provide a proper default schema if none provided
+        default_schema = {
+            "type": "object",
+            "properties": {
+                "dn": {"type": "string", "description": "Distinguished Name"},
+                "objectClass": {"type": "array", "items": {"type": "string"}, "description": "Object classes"},
+                "cn": {"type": "string", "description": "Common Name"},
+            },
+        }
+
         return sink_class(
             target=self,
             stream_name=stream_name,
-            schema=schema or {},
-            key_properties=list(key_properties) if key_properties else None,
+            schema=schema or default_schema,
+            key_properties=list(key_properties) if key_properties else ["dn"],
         )
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Main CLI entry point."""
     TargetLDAP.cli()
+
+
+if __name__ == "__main__":
+    main()
