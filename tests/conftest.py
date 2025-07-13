@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from target_ldap.client import LDAPClient
+from flext_target_ldap.client import LDAPClient
 
 
 @pytest.fixture

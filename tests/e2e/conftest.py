@@ -16,7 +16,7 @@ from ldap3 import ALL, Connection, Server
 import docker
 
 if TYPE_CHECKING:
-            from collections.abc import Generator
+    from collections.abc import Generator
     from unittest.mock import Mock
 
 logger = logging.getLogger(__name__)

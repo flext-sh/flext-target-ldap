@@ -177,7 +177,7 @@ class LDAPSink(Sink):
         """Process a batch of records."""
         # Convert to list - records is expected to be a dict by the type annotation
         records_list = [records]
-        
+
         for record in records_list:
             try:
                 self.process_record(record, {})
@@ -424,8 +424,7 @@ class GenericSink(LDAPSink):
             obj_classes = record["object_classes"]
             if isinstance(obj_classes, list):
                 return obj_classes
-            else:
-                return [str(obj_classes)]
+            return [str(obj_classes)]
 
         # Use configured default for stream
         stream_key = f"{self.stream_name}_object_classes"
