@@ -90,7 +90,7 @@ class LDAPSink(Sink):
         try:
             # Build DN for the entry
             dn_result = self.build_dn(record)
-            if not dn_result.success:
+            if not dn_result.is_success:
                 self._processing_result.add_failure(f"DN building failed: {dn_result.error}")
                 return
 
@@ -98,7 +98,7 @@ class LDAPSink(Sink):
 
             # Build attributes
             attributes_result = self.build_attributes(record)
-            if not attributes_result.success:
+            if not attributes_result.is_success:
                 self._processing_result.add_failure(f"Attribute building failed: {attributes_result.error}")
                 return
 
@@ -109,8 +109,11 @@ class LDAPSink(Sink):
 
             # Validate if enabled
             if self._enable_validation:
+                if dn is None or attributes is None:
+                    self._processing_result.add_failure("DN or attributes cannot be None")
+                    return
                 validation_result = self.validate_entry(dn, attributes, object_classes)
-                if not validation_result.success:
+                if not validation_result.is_success:
                     self._processing_result.add_failure(f"Validation failed: {validation_result.error}")
                     return
 
@@ -121,9 +124,14 @@ class LDAPSink(Sink):
                 return
 
             # Perform upsert operation
+            if dn is None or attributes is None:
+                self._processing_result.add_failure("DN or attributes cannot be None")
+                return
             upsert_result = self.client.upsert_entry(dn, object_classes, attributes)
-            if upsert_result.success:
-                operation = upsert_result.value[1]  # "add" or "modify"
+            if upsert_result.is_success:
+                if upsert_result.value is not None:
+                    operation = upsert_result.value[1]  # "add" or "modify"
+                    logger.info("Successfully %s entry: %s", operation, dn)
                 logger.info("Successfully %s entry: %s", operation, dn)
                 self._processing_result.add_success()
             else:
@@ -136,11 +144,11 @@ class LDAPSink(Sink):
 
     def build_dn(self, record: dict) -> ServiceResult[str]:
         """Build distinguished name for the record. Override in subclasses."""
-        return ServiceResult.failure_with_error("build_dn method must be implemented in subclass")
+        return ServiceResult.fail("build_dn method must be implemented in subclass")
 
     def build_attributes(self, record: dict) -> ServiceResult[dict[str, Any]]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return ServiceResult.failure_with_error("build_attributes method must be implemented in subclass")
+        return ServiceResult.fail("build_attributes method must be implemented in subclass")
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for the entry. Override in subclasses."""
@@ -150,24 +158,27 @@ class LDAPSink(Sink):
         """Validate entry before processing."""
         # Basic validation - check required attributes
         if not dn:
-            return ServiceResult.failure_with_error("DN cannot be empty")
+            return ServiceResult.fail("DN cannot be empty")
 
         if not attributes:
-            return ServiceResult.failure_with_error("Attributes cannot be empty")
+            return ServiceResult.fail("Attributes cannot be empty")
 
         if not object_classes:
-            return ServiceResult.failure_with_error("Object classes cannot be empty")
+            return ServiceResult.fail("Object classes cannot be empty")
 
         # Validate DN format
         dn_validation = self.client.validate_dn(dn)
-        if not dn_validation.success:
-            return ServiceResult.failure_with_error(f"Invalid DN format: {dn_validation.error}")
+        if not dn_validation.is_success:
+            return ServiceResult.fail(f"Invalid DN format: {dn_validation.error}")
 
-        return ServiceResult.success_with_value(True)
+        return ServiceResult.ok(True)
 
-    def process_batch(self, records: list[dict]) -> None:
+    def process_batch(self, records: dict[Any, Any]) -> None:
         """Process a batch of records."""
-        for record in records:
+        # Convert to list - records is expected to be a dict by the type annotation
+        records_list = [records]
+        
+        for record in records_list:
             try:
                 self.process_record(record, {})
 
@@ -203,14 +214,14 @@ class UsersSink(LDAPSink):
             rdn_value = record.get(rdn_attr) or record.get("id") or record.get("username")
 
             if not rdn_value:
-                return ServiceResult.failure_with_error(f"No value found for RDN attribute '{rdn_attr}'")
+                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'")
 
             base_dn = self.config["base_dn"]
             dn = f"{rdn_attr}={rdn_value},{base_dn}"
 
-            return ServiceResult.success_with_value(dn)
+            return ServiceResult.ok(dn)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building user DN: {e}")
+            return ServiceResult.fail(f"Error building user DN: {e}")
 
     def build_attributes(self, record: dict) -> ServiceResult[dict[str, Any]]:
         """Build LDAP attributes for user entries."""
@@ -249,9 +260,9 @@ class UsersSink(LDAPSink):
             if "phone_numbers" in record:
                 attributes["telephoneNumber"] = record["phone_numbers"] if isinstance(record["phone_numbers"], list) else [record["phone_numbers"]]
 
-            return ServiceResult.success_with_value(attributes)
+            return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building user attributes: {e}")
+            return ServiceResult.fail(f"Error building user attributes: {e}")
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for user entries."""
@@ -269,14 +280,14 @@ class GroupsSink(LDAPSink):
             rdn_value = record.get(rdn_attr) or record.get("id") or record.get("name")
 
             if not rdn_value:
-                return ServiceResult.failure_with_error(f"No value found for RDN attribute '{rdn_attr}'")
+                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'")
 
             base_dn = self.config["base_dn"]
             dn = f"{rdn_attr}={rdn_value},{base_dn}"
 
-            return ServiceResult.success_with_value(dn)
+            return ServiceResult.ok(dn)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building group DN: {e}")
+            return ServiceResult.fail(f"Error building group DN: {e}")
 
     def build_attributes(self, record: dict) -> ServiceResult[dict[str, Any]]:
         """Build LDAP attributes for group entries."""
@@ -301,9 +312,9 @@ class GroupsSink(LDAPSink):
                             attributes[ldap_attr] = [str(value)]
                         break
 
-            return ServiceResult.success_with_value(attributes)
+            return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building group attributes: {e}")
+            return ServiceResult.fail(f"Error building group attributes: {e}")
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for group entries."""
@@ -320,14 +331,14 @@ class OrganizationalUnitsSink(LDAPSink):
             ou_name = record.get("ou") or record.get("name") or record.get("id")
 
             if not ou_name:
-                return ServiceResult.failure_with_error("No OU name found in record")
+                return ServiceResult.fail("No OU name found in record")
 
             base_dn = self.config["base_dn"]
             dn = f"ou={ou_name},{base_dn}"
 
-            return ServiceResult.success_with_value(dn)
+            return ServiceResult.ok(dn)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building OU DN: {e}")
+            return ServiceResult.fail(f"Error building OU DN: {e}")
 
     def build_attributes(self, record: dict) -> ServiceResult[dict[str, Any]]:
         """Build LDAP attributes for OU entries."""
@@ -356,9 +367,9 @@ class OrganizationalUnitsSink(LDAPSink):
                             attributes[ldap_attr] = [str(value)]
                         break
 
-            return ServiceResult.success_with_value(attributes)
+            return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building OU attributes: {e}")
+            return ServiceResult.fail(f"Error building OU attributes: {e}")
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for OU entries."""
@@ -373,19 +384,19 @@ class GenericSink(LDAPSink):
         try:
             # Try to get DN directly from record
             if "dn" in record:
-                return ServiceResult.success_with_value(record["dn"])
+                return ServiceResult.ok(record["dn"])
 
             # Try to build from id and base_dn
             entry_id = record.get("id") or record.get("name")
             if not entry_id:
-                return ServiceResult.failure_with_error("No ID or name found for generic entry")
+                return ServiceResult.fail("No ID or name found for generic entry")
 
             base_dn = self.config["base_dn"]
             dn = f"cn={entry_id},{base_dn}"
 
-            return ServiceResult.success_with_value(dn)
+            return ServiceResult.ok(dn)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building generic DN: {e}")
+            return ServiceResult.fail(f"Error building generic DN: {e}")
 
     def build_attributes(self, record: dict) -> ServiceResult[dict[str, Any]]:
         """Build LDAP attributes for generic entries."""
@@ -402,15 +413,19 @@ class GenericSink(LDAPSink):
                     else:
                         attributes[key] = [str(value)]
 
-            return ServiceResult.success_with_value(attributes)
+            return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.failure_with_error(f"Error building generic attributes: {e}")
+            return ServiceResult.fail(f"Error building generic attributes: {e}")
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for generic entries."""
         # Use object classes from record if available
         if "object_classes" in record:
-            return record["object_classes"]
+            obj_classes = record["object_classes"]
+            if isinstance(obj_classes, list):
+                return obj_classes
+            else:
+                return [str(obj_classes)]
 
         # Use configured default for stream
         stream_key = f"{self.stream_name}_object_classes"

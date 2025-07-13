@@ -29,14 +29,14 @@ class TransformationRule(DomainValueObject):
         """Apply the transformation rule to a value."""
         try:
             if not self.enabled:
-                return ServiceResult.success_with_value(value)
+                return ServiceResult.ok(value)
 
             # Apply regex transformation
             result = re.sub(self.pattern, self.replacement, value)
-            return ServiceResult.success_with_value(result)
+            return ServiceResult.ok(result)
         except Exception as e:
             error_msg = f"Error applying transformation rule '{self.name}': {e}"
-            return ServiceResult.failure_with_error(error_msg)
+            return ServiceResult.fail(error_msg)
 
 
 class TransformationResult(DomainBaseModel):
@@ -104,7 +104,7 @@ class DataTransformationEngine:
                 for key, value in result.transformed_data.items():
                     if isinstance(value, str):
                         transform_result = rule.apply(value)
-                        if transform_result.success:
+                        if transform_result.is_success:
                             if transform_result.value != value:
                                 result.transformed_data[key] = transform_result.value
                                 result.add_applied_rule(rule.name)
@@ -119,7 +119,7 @@ class DataTransformationEngine:
                         for item in value:
                             if isinstance(item, str):
                                 transform_result = rule.apply(item)
-                                if transform_result.success:
+                                if transform_result.is_success:
                                     transformed_list.append(transform_result.value)
                                     if transform_result.value != item:
                                         result.add_applied_rule(rule.name)
@@ -134,12 +134,12 @@ class DataTransformationEngine:
 
                 self._stats["rules_executed"] += 1
 
-            return ServiceResult.success_with_value(result)
+            return ServiceResult.ok(result)
 
         except Exception as e:
             error_msg = f"Data transformation failed: {e}"
             logger.exception(error_msg)
-            return ServiceResult.failure_with_error(error_msg)
+            return ServiceResult.fail(error_msg)
 
     def get_statistics(self) -> dict[str, Any]:
         """Get transformation engine statistics."""
@@ -208,17 +208,17 @@ class MigrationValidator:
 
             if errors:
                 error_msg = "; ".join(errors)
-                return ServiceResult.failure_with_error(f"Validation failed: {error_msg}")
+                return ServiceResult.fail(f"Validation failed: {error_msg}")
 
             if warnings:
                 logger.warning("Validation warnings for %s: %s", dn, "; ".join(warnings))
 
-            return ServiceResult.success_with_value(True)
+            return ServiceResult.ok(True)
 
         except Exception as e:
             error_msg = f"Validation error for {dn}: {e}"
             logger.exception(error_msg)
-            return ServiceResult.failure_with_error(error_msg)
+            return ServiceResult.fail(error_msg)
 
     def get_validation_statistics(self) -> dict[str, Any]:
         """Get validation statistics."""

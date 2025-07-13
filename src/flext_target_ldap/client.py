@@ -225,20 +225,20 @@ class LDAPClient:
         """Insert or update an entry (upsert operation)."""
         try:
             exists_result = self.entry_exists(dn)
-            if not exists_result.success:
-                return ServiceResult.fail(exists_result.error)
+            if not exists_result.is_success:
+                return ServiceResult.fail(exists_result.error or "Entry check failed")
 
             if exists_result.value:
                 # Entry exists, perform modify
                 modify_result = self.modify_entry(dn, attributes, operation="replace")
-                if not modify_result.success:
-                    return ServiceResult.fail(modify_result.error)
+                if not modify_result.is_success:
+                    return ServiceResult.fail(modify_result.error or "Modify operation failed")
                 return ServiceResult.ok((True, "modify"))
 
             # Entry doesn't exist, perform add
             add_result = self.add_entry(dn, object_class, attributes)
-            if not add_result.success:
-                return ServiceResult.fail(add_result.error)
+            if not add_result.is_success:
+                return ServiceResult.fail(add_result.error or "Add operation failed")
             return ServiceResult.ok((True, "add"))
 
         except Exception as e:
