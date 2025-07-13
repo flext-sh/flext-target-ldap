@@ -13,7 +13,7 @@ from target_ldap.client import LDAPClient
 
 @pytest.fixture
 def mock_ldap_config() -> dict[str, Any]:
-            return {
+    return {
         "host": "test.ldap.com",
         "port": 389,
         "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
@@ -73,9 +73,8 @@ def sample_ou_record() -> dict[str, Any]:
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record:
-        dict[str, Any]) -> str:
-        message = {
+def singer_message_record(sample_user_record: dict[str, Any]) -> str:
+    message = {
         "type": "RECORD",
         "stream": "users",
         "record": sample_user_record,
@@ -86,7 +85,7 @@ def singer_message_record(sample_user_record:
 
 @pytest.fixture
 def singer_message_schema() -> str:
-        message = {
+    message = {
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
@@ -106,7 +105,7 @@ def singer_message_schema() -> str:
 
 @pytest.fixture
 def singer_message_state() -> str:
-        message = {
+    message = {
         "type": "STATE",
         "value": {
             "bookmarks": {
@@ -122,7 +121,7 @@ def singer_message_state() -> str:
 
 @pytest.fixture
 def mock_ldap_client() -> MagicMock:
-        client = MagicMock(spec=LDAPClient)
+    client = MagicMock(spec=LDAPClient)
     client.validate_dn.return_value = True
     client.entry_exists.return_value = False
     client.add_entry.return_value = True
@@ -133,8 +132,7 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config:
-        dict[str, Any]) -> MagicMock:
-        target = MagicMock()
+def mock_target(mock_ldap_config: dict[str, Any]) -> MagicMock:
+    target = MagicMock()
     target.config = mock_ldap_config
     return target

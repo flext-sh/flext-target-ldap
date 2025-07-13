@@ -110,7 +110,3 @@ class TargetLDAPConfig(SingerTargetConfig):
     )
 
     # Environment variable support
-    model_config = {
-        "env_prefix": "TARGET_LDAP_",
-        "env_nested_delimiter": "__",
-    }

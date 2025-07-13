@@ -30,10 +30,10 @@ def setup_ldap_target(config: TargetLDAPConfig | None = None) -> ServiceResult[T
         # Validate configuration
         config.model_validate(config.model_dump())
 
-        return ServiceResult.success_with_value(config)
+        return ServiceResult.ok(config)
 
     except Exception as e:
-        return ServiceResult.failure_with_error(f"Failed to setup LDAP target: {e}")
+        return ServiceResult.fail(f"Failed to setup LDAP target: {e}")
 
 
 def create_development_ldap_target_config(**overrides: Any) -> TargetLDAPConfig:
@@ -46,7 +46,7 @@ def create_development_ldap_target_config(**overrides: Any) -> TargetLDAPConfig:
         TargetLDAPConfig for development use.
 
     """
-    defaults = {
+    defaults: dict[str, Any] = {
         "host": "localhost",
         "port": 389,
         "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=example,dc=com",
@@ -80,7 +80,7 @@ def create_production_ldap_target_config(**overrides: Any) -> TargetLDAPConfig:
         TargetLDAPConfig for production use.
 
     """
-    defaults = {
+    defaults: dict[str, Any] = {
         "host": "ldap.company.com",
         "port": 636,
         "use_ssl": True,
@@ -117,7 +117,7 @@ def create_migration_ldap_target_config(
         TargetLDAPConfig optimized for migrations.
 
     """
-    defaults = {
+    defaults: dict[str, Any] = {
         "use_ssl": True,
         "timeout": 120,
         "validate_records": True,
@@ -155,24 +155,24 @@ def validate_ldap_target_config(config: TargetLDAPConfig) -> ServiceResult[bool]
 
         # Additional business rule validations
         if not config.host:
-            return ServiceResult.failure_with_error("Host is required")
+            return ServiceResult.fail("Host is required")
 
         if not config.base_dn:
-            return ServiceResult.failure_with_error("Base DN is required")
+            return ServiceResult.fail("Base DN is required")
 
         if config.port <= 0 or config.port > 65535:
-            return ServiceResult.failure_with_error("Port must be between 1 and 65535")
+            return ServiceResult.fail("Port must be between 1 and 65535")
 
         if config.timeout <= 0:
-            return ServiceResult.failure_with_error("Timeout must be positive")
+            return ServiceResult.fail("Timeout must be positive")
 
         if config.batch_size <= 0:
-            return ServiceResult.failure_with_error("Batch size must be positive")
+            return ServiceResult.fail("Batch size must be positive")
 
-        return ServiceResult.success_with_value(True)
+        return ServiceResult.ok(True)
 
     except Exception as e:
-        return ServiceResult.failure_with_error(f"Configuration validation failed: {e}")
+        return ServiceResult.fail(f"Configuration validation failed: {e}")
 
 
 def create_test_connection_config(**overrides: Any) -> TargetLDAPConfig:
@@ -185,7 +185,7 @@ def create_test_connection_config(**overrides: Any) -> TargetLDAPConfig:
         TargetLDAPConfig optimized for connection testing.
 
     """
-    defaults = {
+    defaults: dict[str, Any] = {
         "host": "localhost",
         "port": 389,
         "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
