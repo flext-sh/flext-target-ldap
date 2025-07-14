@@ -1,8 +1,8 @@
-"""Tests for data transformation engine.
+"""Tests for data transformation engine."""
 
 from __future__ import annotations
 
-from target_ldap.transformation import (
+from flext_target_ldap.transformation import (
     DataTransformationEngine,
     MigrationValidator,
     OidDataClassifier,
@@ -11,7 +11,7 @@ from target_ldap.transformation import (
 
 
 class TestOidDataClassifier:
-             """Test Oracle Internet Directory data classifier."""
+    """Test Oracle Internet Directory data classifier."""
 
     def test_classify_internal_oid_data(self) -> None:
         classifier = OidDataClassifier()
@@ -110,7 +110,7 @@ class TestOidDataClassifier:
 
 
 class TestDataTransformationEngine:
-         """Test data transformation engine."""
+    """Test data transformation engine."""
 
     def test_initialization(self) -> None:
         config = {"oracle_migration_mode": True}
@@ -238,7 +238,7 @@ class TestDataTransformationEngine:
 
 
 class TestMigrationValidator:
-         """Test migration validator."""
+    """Test migration validator."""
 
     def test_validate_valid_entry(self) -> None:
         validator = MigrationValidator()
@@ -279,7 +279,7 @@ class TestMigrationValidator:
         assert any("Invalid DN syntax" in error for error in result["errors"])
 
     def test_validate_missing_objectclass(self) -> None:
-            validator = MigrationValidator()
+        validator = MigrationValidator()
 
         entry = {"dn": "cn=testuser,dc=example,dc=com", "cn": "testuser"}
 
@@ -306,7 +306,7 @@ class TestMigrationValidator:
         )
 
     def test_validate_invalid_email(self) -> None:
-            validator = MigrationValidator()
+        validator = MigrationValidator()
 
         entry = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
@@ -322,7 +322,7 @@ class TestMigrationValidator:
         assert any("Invalid email format" in warning for warning in result["warnings"])
 
     def test_validation_statistics(self) -> None:
-            validator = MigrationValidator()
+        validator = MigrationValidator()
 
         # Process several entries
         entries = [
@@ -347,7 +347,7 @@ class TestMigrationValidator:
 
 
 class TestTransformationRule:
-         """Test transformation rule configuration."""
+    """Test transformation rule configuration."""
 
     def test_transformation_rule_creation(self) -> None:
         rule = TransformationRule(
@@ -366,7 +366,7 @@ class TestTransformationRule:
 
 
 class TestIntegratedTransformation:
-         """Test integrated transformation workflow."""
+    """Test integrated transformation workflow."""
 
     def test_full_oracle_migration_workflow(self) -> None:
         config = {
@@ -422,7 +422,7 @@ class TestIntegratedTransformation:
         assert len(validation_result["warnings"]) <= 1
 
     def test_classification_and_transformation_integration(self) -> None:
-            config = {"enable_transformation": True}
+        config = {"enable_transformation": True}
         engine = DataTransformationEngine(config)
 
         # Test various entry types
@@ -446,7 +446,7 @@ class TestIntegratedTransformation:
 
         for entry_data in test_entries:
             entry = {
-                k: v for k, v in entry_data.items() if k != "expected_classification":
+                k: v for k, v in entry_data.items() if k != "expected_classification"
             }
 
             result = engine.transform_entry(entry)

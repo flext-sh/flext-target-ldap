@@ -1,4 +1,4 @@
-"""Integration tests for target-ldap.
+"""Integration tests for target-ldap."""
 
 from __future__ import annotations
 
@@ -11,32 +11,31 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from target_ldap.target import TargetLDAP
+from flext_target_ldap.target import TargetLDAP
 
 if TYPE_CHECKING:
-            from pathlib import Path
+    from pathlib import Path
     from unittest.mock import Mock
 
 
 class TestTargetLDAPIntegration:
-         """Integration tests for target-ldap."""
+    """Integration tests for target-ldap."""
 
     @pytest.fixture
     def runner(self) -> CliRunner:
-            return CliRunner()
+        return CliRunner()
 
     @pytest.fixture
-    def config_file(self, tmp_path:
-        Path, mock_ldap_config: dict[str, Any]) -> Path:
+    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, Any]) -> Path:
         config_path = tmp_path / "config.json"
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
         return config_path
 
     @pytest.fixture
-    def input_file(self,
-        tmp_path:
-        Path,
+    def input_file(
+        self,
+        tmp_path: Path,
         singer_message_schema: str,
         singer_message_record: str,
         singer_message_state: str,
@@ -48,8 +47,8 @@ class TestTargetLDAPIntegration:
             f.write(singer_message_state + "\n")
         return input_path
 
-    @patch("target_ldap.client.Connection")
-    @patch("target_ldap.client.Server")
+    @patch("flext_target_ldap.client.Connection")
+    @patch("flext_target_ldap.client.Server")
     def test_basic_load(self,
         mock_server:
         Mock,
@@ -83,8 +82,8 @@ class TestTargetLDAPIntegration:
         # Check output contains state message
         assert "STATE" in result.output
 
-    @patch("target_ldap.client.Connection")
-    @patch("target_ldap.client.Server")
+    @patch("flext_target_ldap.client.Connection")
+    @patch("flext_target_ldap.client.Server")
     def test_upsert_behavior(self,
         mock_server:
             Mock,
@@ -133,12 +132,12 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.add.return_value = True
         mock_conn_instance.modify.return_value = True
 
-        def search_side_effect(*args:
-        Any, **kwargs: Any) -> bool:
-        # First search: no entry
+        def search_side_effect(*args: Any, **kwargs: Any) -> bool:
+            # First search: no entry
             # Second search: entry exists
             if mock_conn_instance.search.call_count <= 1:
-            mock_conn_instance.entries = {}
+                mock_conn_instance.entries = []
+            else:
                 mock_conn_instance.entries = [MagicMock()]
             return True
 
@@ -160,8 +159,8 @@ class TestTargetLDAPIntegration:
         assert mock_conn_instance.add.call_count >= 1
         assert mock_conn_instance.modify.call_count >= 1
 
-    @patch("target_ldap.client.Connection")
-    @patch("target_ldap.client.Server")
+    @patch("flext_target_ldap.client.Connection")
+    @patch("flext_target_ldap.client.Server")
     def test_delete_records(self,
         mock_server:
             Mock,
@@ -215,8 +214,8 @@ class TestTargetLDAPIntegration:
         # Verify delete was called
         mock_conn_instance.delete.assert_called_once_with("uid=deleted,dc=test,dc=com")
 
-    @patch("target_ldap.client.Connection")
-    @patch("target_ldap.client.Server")
+    @patch("flext_target_ldap.client.Connection")
+    @patch("flext_target_ldap.client.Server")
     def test_dn_template_usage(self,
         mock_server:
             Mock,
@@ -297,8 +296,8 @@ class TestTargetLDAPIntegration:
 
         assert result.exit_code != 0
 
-    @patch("target_ldap.client.Connection")
-    @patch("target_ldap.client.Server")
+    @patch("flext_target_ldap.client.Connection")
+    @patch("flext_target_ldap.client.Server")
     def test_multi_stream_handling(self,
         mock_server:
         Mock,

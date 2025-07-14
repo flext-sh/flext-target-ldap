@@ -1,4 +1,4 @@
-"""Tests for target-ldap sinks.
+"""Tests for target-ldap sinks."""
 
 from __future__ import annotations
 
@@ -8,11 +8,11 @@ from unittest.mock import patch
 
 import pytest
 
-from target_ldap.sinks import GenericSink
-from target_ldap.sinks import GroupsSink
-from target_ldap.sinks import LDAPSink
-from target_ldap.sinks import OrganizationalUnitsSink
-from target_ldap.sinks import UsersSink
+from flext_target_ldap.sinks import GenericSink
+from flext_target_ldap.sinks import GroupsSink
+from flext_target_ldap.sinks import LDAPSink
+from flext_target_ldap.sinks import OrganizationalUnitsSink
+from flext_target_ldap.sinks import UsersSink
 
 
 class TestLDAPSink:
