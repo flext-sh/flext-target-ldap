@@ -109,4 +109,12 @@ class TargetLDAPConfig(SingerTargetConfig):
         description="Continue processing on transformation errors",
     )
 
-    # Environment variable support
+    @classmethod
+    def config_jsonschema(cls) -> dict[str, Any]:
+        """Return configuration schema in Singer SDK format.
+
+        This method is required by Singer SDK to provide the configuration schema.
+        """
+        from flext_core.config.adapters.singer import singer_config_adapter
+
+        return singer_config_adapter(cls, is_target=True)

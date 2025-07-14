@@ -36,6 +36,8 @@ class TargetLDAP(Target):
     # Use flext-core configuration class
     config_class = TargetLDAPConfig
 
+    config_jsonschema = TargetLDAPConfig.config_jsonschema()
+
     def get_sink(
         self,
         stream_name: str,
@@ -86,7 +88,11 @@ class TargetLDAP(Target):
             "type": "object",
             "properties": {
                 "dn": {"type": "string", "description": "Distinguished Name"},
-                "objectClass": {"type": "array", "items": {"type": "string"}, "description": "Object classes"},
+                "objectClass": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Object classes",
+                },
                 "cn": {"type": "string", "description": "Common Name"},
             },
         }

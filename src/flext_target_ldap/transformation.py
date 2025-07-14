@@ -87,7 +87,9 @@ class DataTransformationEngine:
         """Add a transformation rule."""
         self.rules.append(rule)
 
-    def transform_data(self, data: dict[str, Any]) -> ServiceResult[TransformationResult]:
+    def transform_data(
+        self, data: dict[str, Any]
+    ) -> ServiceResult[TransformationResult]:
         """Transform data using configured rules."""
         try:
             result = TransformationResult(
@@ -110,7 +112,9 @@ class DataTransformationEngine:
                                 result.add_applied_rule(rule.name)
                                 self._stats["transformations_applied"] += 1
                         else:
-                            result.add_error(f"Rule '{rule.name}' failed for key '{key}': {transform_result.error}")
+                            result.add_error(
+                                f"Rule '{rule.name}' failed for key '{key}': {transform_result.error}"
+                            )
                             self._stats["errors_encountered"] += 1
 
                     elif isinstance(value, list):
@@ -125,9 +129,13 @@ class DataTransformationEngine:
                                         result.add_applied_rule(rule.name)
                                         self._stats["transformations_applied"] += 1
                                 else:
-                                    result.add_error(f"Rule '{rule.name}' failed for list item: {transform_result.error}")
+                                    result.add_error(
+                                        f"Rule '{rule.name}' failed for list item: {transform_result.error}"
+                                    )
                                     self._stats["errors_encountered"] += 1
-                                    transformed_list.append(item)  # Keep original on error
+                                    transformed_list.append(
+                                        item
+                                    )  # Keep original on error
                             else:
                                 transformed_list.append(item)
                         result.transformed_data[key] = transformed_list
@@ -166,7 +174,9 @@ class MigrationValidator:
             "validation_warnings": 0,
         }
 
-    def validate_entry(self, dn: str, attributes: dict[str, Any], object_classes: list[str]) -> ServiceResult[bool]:
+    def validate_entry(
+        self, dn: str, attributes: dict[str, Any], object_classes: list[str]
+    ) -> ServiceResult[bool]:
         """Validate an LDAP entry before processing."""
         try:
             errors = []
@@ -191,9 +201,13 @@ class MigrationValidator:
             if "inetOrgPerson" in object_classes:
                 if "cn" not in attributes and "sn" not in attributes:
                     if self.strict_mode:
-                        errors.append("inetOrgPerson requires either 'cn' or 'sn' attribute")
+                        errors.append(
+                            "inetOrgPerson requires either 'cn' or 'sn' attribute"
+                        )
                     else:
-                        warnings.append("inetOrgPerson should have 'cn' or 'sn' attribute")
+                        warnings.append(
+                            "inetOrgPerson should have 'cn' or 'sn' attribute"
+                        )
 
             if "groupOfNames" in object_classes and "cn" not in attributes:
                 if self.strict_mode:
@@ -211,7 +225,9 @@ class MigrationValidator:
                 return ServiceResult.fail(f"Validation failed: {error_msg}")
 
             if warnings:
-                logger.warning("Validation warnings for %s: %s", dn, "; ".join(warnings))
+                logger.warning(
+                    "Validation warnings for %s: %s", dn, "; ".join(warnings)
+                )
 
             return ServiceResult.ok(True)
 
@@ -268,14 +284,16 @@ def create_production_transformation_engine() -> DataTransformationEngine:
     """Create a transformation engine with production-ready rules."""
     rules = create_oracle_to_ldap_transformation_rules()
     # Add more strict rules for production
-    rules.extend([
-        TransformationRule(
-            name="strip_sql_injection",
-            pattern=r"[';\"\\]",
-            replacement="",
-            enabled=True,
-        ),
-    ])
+    rules.extend(
+        [
+            TransformationRule(
+                name="strip_sql_injection",
+                pattern=r"[';\"\\]",
+                replacement="",
+                enabled=True,
+            ),
+        ]
+    )
     return DataTransformationEngine(rules)
 
 

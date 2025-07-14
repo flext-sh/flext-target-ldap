@@ -232,7 +232,9 @@ class LDAPClient:
                 # Entry exists, perform modify
                 modify_result = self.modify_entry(dn, attributes, operation="replace")
                 if not modify_result.is_success:
-                    return ServiceResult.fail(modify_result.error or "Modify operation failed")
+                    return ServiceResult.fail(
+                        modify_result.error or "Modify operation failed"
+                    )
                 return ServiceResult.ok((True, "modify"))
 
             # Entry doesn't exist, perform add

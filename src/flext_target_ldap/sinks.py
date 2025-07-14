@@ -91,7 +91,9 @@ class LDAPSink(Sink):
             # Build DN for the entry
             dn_result = self.build_dn(record)
             if not dn_result.is_success:
-                self._processing_result.add_failure(f"DN building failed: {dn_result.error}")
+                self._processing_result.add_failure(
+                    f"DN building failed: {dn_result.error}"
+                )
                 return
 
             dn = dn_result.value
@@ -99,7 +101,9 @@ class LDAPSink(Sink):
             # Build attributes
             attributes_result = self.build_attributes(record)
             if not attributes_result.is_success:
-                self._processing_result.add_failure(f"Attribute building failed: {attributes_result.error}")
+                self._processing_result.add_failure(
+                    f"Attribute building failed: {attributes_result.error}"
+                )
                 return
 
             attributes = attributes_result.value
@@ -110,16 +114,22 @@ class LDAPSink(Sink):
             # Validate if enabled
             if self._enable_validation:
                 if dn is None or attributes is None:
-                    self._processing_result.add_failure("DN or attributes cannot be None")
+                    self._processing_result.add_failure(
+                        "DN or attributes cannot be None"
+                    )
                     return
                 validation_result = self.validate_entry(dn, attributes, object_classes)
                 if not validation_result.is_success:
-                    self._processing_result.add_failure(f"Validation failed: {validation_result.error}")
+                    self._processing_result.add_failure(
+                        f"Validation failed: {validation_result.error}"
+                    )
                     return
 
             # Skip actual LDAP operations in dry run mode
             if self._dry_run_mode:
-                logger.info("DRY RUN: Would upsert entry %s with attributes: %s", dn, attributes)
+                logger.info(
+                    "DRY RUN: Would upsert entry %s with attributes: %s", dn, attributes
+                )
                 self._processing_result.add_success()
                 return
 
@@ -135,7 +145,9 @@ class LDAPSink(Sink):
                 logger.info("Successfully %s entry: %s", operation, dn)
                 self._processing_result.add_success()
             else:
-                self._processing_result.add_failure(f"Upsert failed: {upsert_result.error}")
+                self._processing_result.add_failure(
+                    f"Upsert failed: {upsert_result.error}"
+                )
 
         except Exception as e:
             error_msg = f"Unexpected error processing record: {e}"
@@ -148,13 +160,17 @@ class LDAPSink(Sink):
 
     def build_attributes(self, record: dict) -> ServiceResult[dict[str, Any]]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return ServiceResult.fail("build_attributes method must be implemented in subclass")
+        return ServiceResult.fail(
+            "build_attributes method must be implemented in subclass"
+        )
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for the entry. Override in subclasses."""
         return ["top"]
 
-    def validate_entry(self, dn: str, attributes: dict[str, Any], object_classes: list[str]) -> ServiceResult[bool]:
+    def validate_entry(
+        self, dn: str, attributes: dict[str, Any], object_classes: list[str]
+    ) -> ServiceResult[bool]:
         """Validate entry before processing."""
         # Basic validation - check required attributes
         if not dn:
@@ -184,7 +200,10 @@ class LDAPSink(Sink):
 
                 # Check error threshold
                 if self._processing_result.failed_count >= self._max_errors:
-                    logger.error("Maximum error count (%d) reached, stopping processing", self._max_errors)
+                    logger.error(
+                        "Maximum error count (%d) reached, stopping processing",
+                        self._max_errors,
+                    )
                     break
 
             except Exception as e:
@@ -211,10 +230,14 @@ class UsersSink(LDAPSink):
         try:
             # Get RDN attribute (usually uid or cn)
             rdn_attr = self.config.get("user_rdn_attribute", "uid")
-            rdn_value = record.get(rdn_attr) or record.get("id") or record.get("username")
+            rdn_value = (
+                record.get(rdn_attr) or record.get("id") or record.get("username")
+            )
 
             if not rdn_value:
-                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'")
+                return ServiceResult.fail(
+                    f"No value found for RDN attribute '{rdn_attr}'"
+                )
 
             base_dn = self.config["base_dn"]
             dn = f"{rdn_attr}={rdn_value},{base_dn}"
@@ -255,10 +278,18 @@ class UsersSink(LDAPSink):
 
             # Handle multi-valued attributes
             if "emails" in record:
-                attributes["mail"] = record["emails"] if isinstance(record["emails"], list) else [record["emails"]]
+                attributes["mail"] = (
+                    record["emails"]
+                    if isinstance(record["emails"], list)
+                    else [record["emails"]]
+                )
 
             if "phone_numbers" in record:
-                attributes["telephoneNumber"] = record["phone_numbers"] if isinstance(record["phone_numbers"], list) else [record["phone_numbers"]]
+                attributes["telephoneNumber"] = (
+                    record["phone_numbers"]
+                    if isinstance(record["phone_numbers"], list)
+                    else [record["phone_numbers"]]
+                )
 
             return ServiceResult.ok(attributes)
         except Exception as e:
@@ -266,7 +297,10 @@ class UsersSink(LDAPSink):
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for user entries."""
-        return self.config.get("users_object_classes", ["inetOrgPerson", "organizationalPerson", "person", "top"])
+        return self.config.get(
+            "users_object_classes",
+            ["inetOrgPerson", "organizationalPerson", "person", "top"],
+        )
 
 
 class GroupsSink(LDAPSink):
@@ -280,7 +314,9 @@ class GroupsSink(LDAPSink):
             rdn_value = record.get(rdn_attr) or record.get("id") or record.get("name")
 
             if not rdn_value:
-                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'")
+                return ServiceResult.fail(
+                    f"No value found for RDN attribute '{rdn_attr}'"
+                )
 
             base_dn = self.config["base_dn"]
             dn = f"{rdn_attr}={rdn_value},{base_dn}"
@@ -373,7 +409,9 @@ class OrganizationalUnitsSink(LDAPSink):
 
     def get_object_classes(self, record: dict) -> list[str]:
         """Get object classes for OU entries."""
-        return self.config.get("organizational_units_object_classes", ["organizationalUnit", "top"])
+        return self.config.get(
+            "organizational_units_object_classes", ["organizationalUnit", "top"]
+        )
 
 
 class GenericSink(LDAPSink):
@@ -404,7 +442,13 @@ class GenericSink(LDAPSink):
             attributes: dict[str, Any] = {}
 
             # Copy all record fields as attributes, excluding special fields
-            exclude_fields = {"dn", "object_classes", "_sdc_table_version", "_sdc_received_at", "_sdc_sequence"}
+            exclude_fields = {
+                "dn",
+                "object_classes",
+                "_sdc_table_version",
+                "_sdc_received_at",
+                "_sdc_sequence",
+            }
 
             for key, value in record.items():
                 if key not in exclude_fields and value is not None:

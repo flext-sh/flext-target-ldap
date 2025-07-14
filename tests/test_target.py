@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 from singer_sdk.testing import get_target_test_class
-from target_ldap.target import TargetLDAP
+from flext_target_ldap.target import TargetLDAP
 
 # Basic target tests
 TestTargetLDAP = get_target_test_class(

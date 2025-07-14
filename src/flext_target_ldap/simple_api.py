@@ -12,7 +12,9 @@ from flext_target_ldap.client import ServiceResult
 from flext_target_ldap.config import TargetLDAPConfig
 
 
-def setup_ldap_target(config: TargetLDAPConfig | None = None) -> ServiceResult[TargetLDAPConfig]:
+def setup_ldap_target(
+    config: TargetLDAPConfig | None = None,
+) -> ServiceResult[TargetLDAPConfig]:
     """Setup LDAP target with configuration.
 
     Args:

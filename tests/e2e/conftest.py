@@ -24,26 +24,25 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture(scope="session")
 def docker_client() -> docker.DockerClient:
-        return docker.from_env()
+    return docker.from_env()
 
 
 @pytest.fixture(scope="session")
 def e2e_dir() -> Path:
-        return Path(__file__).parent
+    return Path(__file__).parent
 
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
-        return Path(__file__).parent.parent.parent
+    return Path(__file__).parent.parent.parent
 
 
 @pytest.fixture(scope="session")
 def ldap_containers(
-    docker_client:
-        docker.DockerClient,
+    docker_client: docker.DockerClient,
     project_root: Path,
 ) -> Generator[Any]:
-        compose_file = project_root / "docker-compose.yml"
+    compose_file = project_root / "docker-compose.yml"
 
     # Start containers
     logger.info("Starting OpenLDAP containers...")
@@ -54,14 +53,14 @@ def ldap_containers(
     )
 
     # Wait for both LDAP servers to be ready
-    for name, port, bind_dn, password in [:
+    for name, port, bind_dn, password in [
         ("source", 20389, "cn=admin,dc=source,dc=com", "source_password"),
         ("target", 21389, "cn=admin,dc=target,dc=com", "target_password"),
     ]:
-            max_retries = 30
+        max_retries = 30
         for i in range(max_retries):
             try:
-            server = Server("localhost", port=port, get_info=ALL)
+                server = Server("localhost", port=port, get_info=ALL)
                 conn = Connection(
                     server,
                     user=bind_dn,
@@ -72,8 +71,8 @@ def ldap_containers(
                 logger.info("OpenLDAP %s is ready", name)
                 break
             except Exception:
-            if i == max_retries - 1:
-            raise
+                if i == max_retries - 1:
+                    raise
                 logger.info(
                     "Waiting for OpenLDAP %s... (%d/%d)",
                     name,
@@ -94,9 +93,8 @@ def ldap_containers(
 
 
 @pytest.fixture
-def source_connection(ldap_containers:
-            Mock) -> Generator[Connection]:
-        server = Server("localhost", port=20389, get_info=ALL)
+def source_connection(ldap_containers: Mock) -> Generator[Connection]:
+    server = Server("localhost", port=20389, get_info=ALL)
     conn = Connection(
         server,
         user="cn=admin,dc=source,dc=com",
@@ -112,9 +110,8 @@ def source_connection(ldap_containers:
 
 
 @pytest.fixture
-def target_connection(ldap_containers:
-        Mock) -> Generator[Connection]:
-        server = Server("localhost", port=21389, get_info=ALL)
+def target_connection(ldap_containers: Mock) -> Generator[Connection]:
+    server = Server("localhost", port=21389, get_info=ALL)
     conn = Connection(
         server,
         user="cn=admin,dc=target,dc=com",
@@ -126,7 +123,7 @@ def target_connection(ldap_containers:
     yield conn
 
     if conn.bound:
-            conn.unbind()
+        conn.unbind()
 
 
 @pytest.fixture
@@ -152,9 +149,8 @@ def target_config(tmp_path:
 
 
 @pytest.fixture
-def target_config_file(target_config:
-        dict[str, Any], tmp_path: Path) -> Path:
-        config_file = tmp_path / "target-config.json"
+def target_config_file(target_config: dict[str, Any], tmp_path: Path) -> Path:
+    config_file = tmp_path / "target-config.json"
     config_file.write_text(json.dumps(target_config))
     return config_file
 
@@ -237,7 +233,7 @@ def verify_user_loaded(
     uid: str,
     base_dn: str = "dc=target,dc=com",
 ) -> bool:
-        conn.search(
+    conn.search(
         search_base=base_dn,
         search_filter=f"(uid={uid})",
         search_scope=ldap3.SUBTREE,
@@ -247,12 +243,11 @@ def verify_user_loaded(
 
 
 def verify_group_loaded(
-    conn:
-        Connection,
+    conn: Connection,
     cn: str,
     base_dn: str = "dc=target,dc=com",
 ) -> bool:
-        conn.search(
+    conn.search(
         search_base=base_dn,
         search_filter=f"(cn={cn})",
         search_scope=ldap3.SUBTREE,
@@ -262,30 +257,28 @@ def verify_group_loaded(
 
 
 def get_user_attributes(
-    conn:
-        Connection,
+    conn: Connection,
     uid: str,
     base_dn: str = "dc=target,dc=com",
 ) -> dict[str, Any]:
-        conn.search(
+    conn.search(
         search_base=base_dn,
         search_filter=f"(uid={uid})",
         search_scope=ldap3.SUBTREE,
         attributes=["*"],
     )
     if conn.entries:
-            entry = conn.entries[0]
+        entry = conn.entries[0]
         return {str(attr.key): attr.values for attr in entry}
     return {}
 
 
 def count_entries(
-    conn:
-            Connection,
+    conn: Connection,
     search_filter: str,
     base_dn: str = "dc=target,dc=com",
 ) -> int:
-        conn.search(
+    conn.search(
         search_base=base_dn,
         search_filter=search_filter,
         search_scope=ldap3.SUBTREE,
