@@ -96,7 +96,7 @@ class LDAPSink(Sink):
                 )
                 return
 
-            dn = dn_result.value
+            dn = dn_result.data
 
             # Build attributes
             attributes_result = self.build_attributes(record)
@@ -106,7 +106,7 @@ class LDAPSink(Sink):
                 )
                 return
 
-            attributes = attributes_result.value
+            attributes = attributes_result.data
 
             # Get object classes
             object_classes = self.get_object_classes(record)
@@ -141,8 +141,8 @@ class LDAPSink(Sink):
                 return
             upsert_result = self.client.upsert_entry(dn, object_classes, attributes)
             if upsert_result.is_success:
-                if upsert_result.value is not None:
-                    operation = upsert_result.value[1]  # "add" or "modify"
+                if upsert_result.data is not None:
+                    operation = upsert_result.data[1]  # "add" or "modify"
                     logger.info("Successfully %s entry: %s", operation, dn)
                 self._processing_result.add_success()
             else:

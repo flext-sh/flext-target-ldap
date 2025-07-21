@@ -12,9 +12,8 @@ import re
 from typing import Any
 
 from flext_core.domain.pydantic_base import DomainBaseModel, DomainValueObject
+from flext_core.domain.types import ServiceResult
 from pydantic import Field
-
-from flext_target_ldap.client import ServiceResult
 
 logger = logging.getLogger(__name__)
 
@@ -110,8 +109,8 @@ class DataTransformationEngine:
                     if isinstance(value, str):
                         transform_result = rule.apply(value)
                         if transform_result.is_success:
-                            if transform_result.value != value:
-                                result.transformed_data[key] = transform_result.value
+                            if transform_result.data != value:
+                                result.transformed_data[key] = transform_result.data
                                 result.add_applied_rule(rule.name)
                                 self._stats["transformations_applied"] += 1
                         else:
@@ -128,8 +127,8 @@ class DataTransformationEngine:
                             if isinstance(item, str):
                                 transform_result = rule.apply(item)
                                 if transform_result.is_success:
-                                    transformed_list.append(transform_result.value)
-                                    if transform_result.value != item:
+                                    transformed_list.append(transform_result.data)
+                                    if transform_result.data != item:
                                         result.add_applied_rule(rule.name)
                                         self._stats["transformations_applied"] += 1
                                 else:

@@ -8,7 +8,7 @@ with support for create, update, and delete operations.
 
 Architecture: Hexagonal Architecture - Port
 Pattern: ETL Pipeline - Load
-Dependencies: singer-sdk, ldap3
+Dependencies: singer-sdk, python-ldap
 """
 
 from __future__ import annotations
