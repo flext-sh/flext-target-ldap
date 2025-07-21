@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from singer_sdk.testing import get_target_test_class
+
 from flext_target_ldap.target import TargetLDAP
 
 # Basic target tests

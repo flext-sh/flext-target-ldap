@@ -3,25 +3,26 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from flext_target_ldap.sinks import GenericSink
-from flext_target_ldap.sinks import GroupsSink
-from flext_target_ldap.sinks import LDAPSink
-from flext_target_ldap.sinks import OrganizationalUnitsSink
-from flext_target_ldap.sinks import UsersSink
+from flext_target_ldap.sinks import (
+    GenericSink,
+    GroupsSink,
+    LDAPSink,
+    OrganizationalUnitsSink,
+    UsersSink,
+)
 
 
 class TestLDAPSink:
     """Test base LDAP sink."""
 
     @pytest.fixture
-    def sink(self,
-        mock_target:
-        MagicMock,
+    def sink(
+        self,
+        mock_target: MagicMock,
         mock_ldap_config: dict[str, Any],
     ) -> LDAPSink:
         schema = {
@@ -37,20 +38,18 @@ class TestLDAPSink:
             key_properties=["dn"],
         )
 
-    def test_sink_initialization(self, sink:
-        LDAPSink) -> None:
+    def test_sink_initialization(self, sink: LDAPSink) -> None:
         assert sink.stream_name == "test_stream"
         assert sink.key_properties == ["dn"]
         assert "dn" in sink.schema["properties"]
 
-    def test_get_dn_from_record_explicit(self, sink:
-        LDAPSink) -> None:
+    def test_get_dn_from_record_explicit(self, sink: LDAPSink) -> None:
         record = {"dn": "cn=test,dc=example,dc=com"}
         assert sink.get_dn_from_record(record) == "cn=test,dc=example,dc=com"
 
-    def test_get_dn_from_record_template(self,
-        sink:
-        LDAPSink,
+    def test_get_dn_from_record_template(
+        self,
+        sink: LDAPSink,
         mock_target: MagicMock,
     ) -> None:
         mock_target.config["test_stream_dn_template"] = (
@@ -61,23 +60,20 @@ class TestLDAPSink:
         dn = sink.get_dn_from_record(record)
         assert dn == "cn=testgroup,ou=test,dc=example,dc=com"
 
-    def test_get_dn_from_record_rdn(self, sink:
-        LDAPSink) -> None:
-        sink.get_rdn_attribute = lambda: "cn"  # type: ignore
+    def test_get_dn_from_record_rdn(self, sink: LDAPSink) -> None:
+        sink.get_rdn_attribute = lambda: "cn"  # type: ignore[method-assign]
 
         record = {"cn": "test"}
         dn = sink.get_dn_from_record(record)
         assert dn == "cn=test,dc=test,dc=com"
 
-    def test_get_dn_from_record_error(self, sink:
-        LDAPSink) -> None:
+    def test_get_dn_from_record_error(self, sink: LDAPSink) -> None:
         record = {"uid": "test"}  # No DN, no matching RDN
 
         with pytest.raises(ValueError, match="Cannot determine DN"):
             sink.get_dn_from_record(record)
 
-    def test_get_object_classes(self, sink:
-        LDAPSink) -> None:
+    def test_get_object_classes(self, sink: LDAPSink) -> None:
         # From record
         record = {"objectClass": ["person", "top"]}
         classes = sink.get_object_classes(record)
@@ -89,13 +85,12 @@ class TestLDAPSink:
         assert classes == ["person"]
 
         # Default
-        sink.get_default_object_classes = lambda: ["defaultClass"]  # type: ignore
+        sink.get_default_object_classes = lambda: ["defaultClass"]  # type: ignore[method-assign]
         record = {}
         classes = sink.get_object_classes(record)
         assert classes == ["defaultClass"]
 
-    def test_prepare_attributes(self, sink:
-        LDAPSink) -> None:
+    def test_prepare_attributes(self, sink: LDAPSink) -> None:
         record = {
             "dn": "cn=test,dc=example,dc=com",
             "cn": "test",
@@ -119,9 +114,9 @@ class TestLDAPSink:
         assert attrs["description"] == "Single item list"
 
     @patch("target_ldap.sinks.LDAPClient")
-    def test_process_record_upsert(self,
-        mock_client_class:
-        MagicMock,
+    def test_process_record_upsert(
+        self,
+        mock_client_class: MagicMock,
         sink: LDAPSink,
         sample_user_record: dict[str, Any],
     ) -> None:
@@ -136,9 +131,9 @@ class TestLDAPSink:
         assert call_args[0][0] == "uid=jdoe,ou=users,dc=test,dc=com"
 
     @patch("target_ldap.sinks.LDAPClient")
-    def test_process_record_delete(self,
-        mock_client_class:
-        MagicMock,
+    def test_process_record_delete(
+        self,
+        mock_client_class: MagicMock,
         sink: LDAPSink,
     ) -> None:
         mock_client = MagicMock()
@@ -161,9 +156,9 @@ class TestUsersSink:
     """Test users sink."""
 
     @pytest.fixture
-    def users_sink(self,
-        mock_target:
-        MagicMock,
+    def users_sink(
+        self,
+        mock_target: MagicMock,
     ) -> UsersSink:
         schema = {"properties": {"dn": {"type": "string"}}}
         return UsersSink(
@@ -173,15 +168,14 @@ class TestUsersSink:
             key_properties=["dn"],
         )
 
-    def test_users_sink_properties(self, users_sink:
-        UsersSink) -> None:
+    def test_users_sink_properties(self, users_sink: UsersSink) -> None:
         assert users_sink.get_rdn_attribute() == "uid"
         assert "inetOrgPerson" in users_sink.get_default_object_classes()
         assert "person" in users_sink.get_default_object_classes()
 
-    def test_custom_rdn_attribute(self,
-        users_sink:
-        UsersSink,
+    def test_custom_rdn_attribute(
+        self,
+        users_sink: UsersSink,
         mock_target: MagicMock,
     ) -> None:
         mock_target.config["user_rdn_attribute"] = "mail"
@@ -192,9 +186,9 @@ class TestGroupsSink:
     """Test groups sink."""
 
     @pytest.fixture
-    def groups_sink(self,
-        mock_target:
-        MagicMock,
+    def groups_sink(
+        self,
+        mock_target: MagicMock,
     ) -> GroupsSink:
         schema = {"properties": {"dn": {"type": "string"}}}
         return GroupsSink(
@@ -204,14 +198,13 @@ class TestGroupsSink:
             key_properties=["dn"],
         )
 
-    def test_groups_sink_properties(self, groups_sink:
-        GroupsSink) -> None:
+    def test_groups_sink_properties(self, groups_sink: GroupsSink) -> None:
         assert groups_sink.get_rdn_attribute() == "cn"
         assert "groupOfNames" in groups_sink.get_default_object_classes()
 
-    def test_prepare_attributes_member_requirement(self,
-        groups_sink:
-        GroupsSink,
+    def test_prepare_attributes_member_requirement(
+        self,
+        groups_sink: GroupsSink,
         mock_target: MagicMock,
     ) -> None:
         # No members - should add placeholder
@@ -235,9 +228,9 @@ class TestOrganizationalUnitsSink:
     """Test organizational units sink."""
 
     @pytest.fixture
-    def ou_sink(self,
-        mock_target:
-        MagicMock,
+    def ou_sink(
+        self,
+        mock_target: MagicMock,
     ) -> OrganizationalUnitsSink:
         schema = {"properties": {"dn": {"type": "string"}}}
         return OrganizationalUnitsSink(
@@ -247,8 +240,7 @@ class TestOrganizationalUnitsSink:
             key_properties=["dn"],
         )
 
-    def test_ou_sink_properties(self, ou_sink:
-        OrganizationalUnitsSink) -> None:
+    def test_ou_sink_properties(self, ou_sink: OrganizationalUnitsSink) -> None:
         assert ou_sink.get_rdn_attribute() == "ou"
         assert "organizationalUnit" in ou_sink.get_default_object_classes()
 
@@ -257,9 +249,9 @@ class TestGenericSink:
     """Test generic sink."""
 
     @pytest.fixture
-    def generic_sink(self,
-        mock_target:
-        MagicMock,
+    def generic_sink(
+        self,
+        mock_target: MagicMock,
     ) -> GenericSink:
         schema = {"properties": {"dn": {"type": "string"}}}
         return GenericSink(
@@ -269,14 +261,13 @@ class TestGenericSink:
             key_properties=["dn"],
         )
 
-    def test_generic_sink_defaults(self, generic_sink:
-        GenericSink) -> None:
+    def test_generic_sink_defaults(self, generic_sink: GenericSink) -> None:
         assert generic_sink.get_rdn_attribute() == "cn"
         assert generic_sink.get_default_object_classes() == ["top"]
 
-    def test_generic_sink_custom_config(self,
-        generic_sink:
-        GenericSink,
+    def test_generic_sink_custom_config(
+        self,
+        generic_sink: GenericSink,
         mock_target: MagicMock,
     ) -> None:
         mock_target.config["custom_stream_rdn_attribute"] = "uid"

@@ -1,7 +1,8 @@
 """Data transformation engine for target-ldap using flext-core patterns.
 
 MIGRATED TO FLEXT-CORE:
-Simplified transformation capabilities for LDAP data processing with enterprise features.
+Simplified transformation capabilities for LDAP data processing with enterprise
+features.
 """
 
 from __future__ import annotations
@@ -10,8 +11,9 @@ import logging
 import re
 from typing import Any
 
-from flext_core.domain.pydantic_base import DomainBaseModel
-from flext_core.domain.pydantic_base import DomainValueObject
+from flext_core.domain.pydantic_base import DomainBaseModel, DomainValueObject
+from pydantic import Field
+
 from flext_target_ldap.client import ServiceResult
 
 logger = logging.getLogger(__name__)
@@ -44,9 +46,9 @@ class TransformationResult(DomainBaseModel):
 
     original_data: dict[str, Any]
     transformed_data: dict[str, Any]
-    applied_rules: list[str] = []
-    warnings: list[str] = []
-    errors: list[str] = []
+    applied_rules: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    errors: list[str] = Field(default_factory=list)
 
     def add_warning(self, message: str) -> None:
         """Add a warning message."""
@@ -88,7 +90,8 @@ class DataTransformationEngine:
         self.rules.append(rule)
 
     def transform_data(
-        self, data: dict[str, Any]
+        self,
+        data: dict[str, Any],
     ) -> ServiceResult[TransformationResult]:
         """Transform data using configured rules."""
         try:
@@ -113,7 +116,8 @@ class DataTransformationEngine:
                                 self._stats["transformations_applied"] += 1
                         else:
                             result.add_error(
-                                f"Rule '{rule.name}' failed for key '{key}': {transform_result.error}"
+                                f"Rule '{rule.name}' failed for key '{key}': "
+                                f"{transform_result.error}",
                             )
                             self._stats["errors_encountered"] += 1
 
@@ -130,11 +134,12 @@ class DataTransformationEngine:
                                         self._stats["transformations_applied"] += 1
                                 else:
                                     result.add_error(
-                                        f"Rule '{rule.name}' failed for list item: {transform_result.error}"
+                                        f"Rule '{rule.name}' failed for list item: "
+                                        f"{transform_result.error}",
                                     )
                                     self._stats["errors_encountered"] += 1
                                     transformed_list.append(
-                                        item
+                                        item,
                                     )  # Keep original on error
                             else:
                                 transformed_list.append(item)
@@ -175,7 +180,10 @@ class MigrationValidator:
         }
 
     def validate_entry(
-        self, dn: str, attributes: dict[str, Any], object_classes: list[str]
+        self,
+        dn: str,
+        attributes: dict[str, Any],
+        object_classes: list[str],
     ) -> ServiceResult[bool]:
         """Validate an LDAP entry before processing."""
         try:
@@ -202,11 +210,11 @@ class MigrationValidator:
                 if "cn" not in attributes and "sn" not in attributes:
                     if self.strict_mode:
                         errors.append(
-                            "inetOrgPerson requires either 'cn' or 'sn' attribute"
+                            "inetOrgPerson requires either 'cn' or 'sn' attribute",
                         )
                     else:
                         warnings.append(
-                            "inetOrgPerson should have 'cn' or 'sn' attribute"
+                            "inetOrgPerson should have 'cn' or 'sn' attribute",
                         )
 
             if "groupOfNames" in object_classes and "cn" not in attributes:
@@ -226,7 +234,9 @@ class MigrationValidator:
 
             if warnings:
                 logger.warning(
-                    "Validation warnings for %s: %s", dn, "; ".join(warnings)
+                    "Validation warnings for %s: %s",
+                    dn,
+                    "; ".join(warnings),
                 )
 
             return ServiceResult.ok(True)
@@ -292,7 +302,7 @@ def create_production_transformation_engine() -> DataTransformationEngine:
                 replacement="",
                 enabled=True,
             ),
-        ]
+        ],
     )
     return DataTransformationEngine(rules)
 

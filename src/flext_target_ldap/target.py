@@ -1,23 +1,25 @@
 """target-ldap main target class using flext-core patterns.
 
 REFACTORED:
-        Uses flext-core configuration patterns and flext-observability logging.
+        Uses flext-core configuration patterns and
+        flext-infrastructure.monitoring.flext-observability logging.
 Zero tolerance for code duplication.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from singer_sdk import Target
 
 from flext_target_ldap.config import TargetLDAPConfig
-from flext_target_ldap.sinks import GenericSink
-from flext_target_ldap.sinks import GroupsSink
-from flext_target_ldap.sinks import OrganizationalUnitsSink
-from flext_target_ldap.sinks import UsersSink
+from flext_target_ldap.sinks import (
+    GenericSink,
+    GroupsSink,
+    OrganizationalUnitsSink,
+    UsersSink,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

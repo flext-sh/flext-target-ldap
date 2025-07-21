@@ -8,30 +8,26 @@ from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import ldap3
-from ldap3 import ALL
-from ldap3 import MODIFY_ADD
-from ldap3 import MODIFY_DELETE
-from ldap3 import MODIFY_REPLACE
-from ldap3 import SIMPLE
-from ldap3 import Connection
-from ldap3 import Server
+from flext_core.domain.pydantic_base import DomainBaseModel
+from flext_core.domain.types import ServiceResult
+from ldap3 import (
+    ALL,
+    MODIFY_ADD,
+    MODIFY_DELETE,
+    MODIFY_REPLACE,
+    SIMPLE,
+    Connection,
+    Server,
+)
 from ldap3.core.exceptions import LDAPException
 
-from flext_core.domain.pydantic_base import DomainBaseModel
-
 if TYPE_CHECKING:
-    from collections.abc import Generator
-    from collections.abc import Mapping
+    from collections.abc import Generator, Mapping
 
 logger = logging.getLogger(__name__)
-
-
-# Use centralized ServiceResult from flext-core - ELIMINATE DUPLICATION
-from flext_core.domain.types import ServiceResult
 
 
 class LDAPEntry(DomainBaseModel):
@@ -53,7 +49,7 @@ class LDAPEntry(DomainBaseModel):
 
 
 class LDAPClient:
-    """LDAP client for connecting and modifying LDAP directories using flext-core patterns."""
+    """LDAP client for connecting and modifying LDAP directories using flext-core."""
 
     def __init__(
         self,
@@ -84,7 +80,7 @@ class LDAPClient:
     @contextmanager
     def get_connection(self) -> Generator[Connection]:
         """Context manager for LDAP connections."""
-        server = Server(
+        Server(
             self.host,
             port=self.port,
             use_ssl=self.use_ssl,
@@ -93,20 +89,17 @@ class LDAPClient:
         )
 
         connection = Connection(
-            server,
-            user=self.bind_dn,
-            password=self.password,
+            self.server_uri,
             authentication=SIMPLE if self.bind_dn else None,
             auto_bind=self.auto_bind,
             raise_exceptions=True,
         )
-
         try:
             logger.info("Connected to LDAP server %s", self.server_uri)
             yield connection
         finally:
             if connection.bound:
-                connection.unbind()
+                connection.unbind()  # type: ignore[no-untyped-call]
                 logger.info("Disconnected from LDAP server")
 
     def add_entry(
@@ -127,7 +120,7 @@ class LDAPClient:
                 attrs["objectClass"] = object_class
 
                 # Perform add operation
-                result = conn.add(dn, attributes=attrs)
+                result = conn.add(dn, attributes=attrs)  # type: ignore[no-untyped-call]
                 if not result:
                     error_msg = f"Failed to add entry {dn}: {conn.result}"
                     logger.error(error_msg)
@@ -168,7 +161,7 @@ class LDAPClient:
                         mod_list[attr] = [(mod_op, value)]
 
                 # Perform modify operation
-                result = conn.modify(dn, mod_list)
+                result = conn.modify(dn, mod_list)  # type: ignore[no-untyped-call]
                 if not result:
                     error_msg = f"Failed to modify entry {dn}: {conn.result}"
                     logger.error(error_msg)
@@ -185,7 +178,7 @@ class LDAPClient:
         """Delete an entry from LDAP."""
         try:
             with self.get_connection() as conn:
-                result = conn.delete(dn)
+                result = conn.delete(dn)  # type: ignore[no-untyped-call]
                 if not result:
                     error_msg = f"Failed to delete entry {dn}: {conn.result}"
                     logger.error(error_msg)
@@ -228,12 +221,12 @@ class LDAPClient:
             if not exists_result.is_success:
                 return ServiceResult.fail(exists_result.error or "Entry check failed")
 
-            if exists_result.value:
+            if exists_result.data:
                 # Entry exists, perform modify
                 modify_result = self.modify_entry(dn, attributes, operation="replace")
                 if not modify_result.is_success:
                     return ServiceResult.fail(
-                        modify_result.error or "Modify operation failed"
+                        modify_result.error or "Modify operation failed",
                     )
                 return ServiceResult.ok((True, "modify"))
 
