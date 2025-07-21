@@ -37,7 +37,7 @@ def mock_ldap_config() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_user_record() -> dict[str, Any]:
-        return {
+    return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
         "uid": "jdoe",
         "cn": "John Doe",
@@ -50,7 +50,7 @@ def sample_user_record() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_group_record() -> dict[str, Any]:
-        return {
+    return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
         "cn": "developers",
         "description": "Development team",
@@ -64,7 +64,7 @@ def sample_group_record() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_ou_record() -> dict[str, Any]:
-        return {
+    return {
         "dn": "ou=engineering,dc=test,dc=com",
         "ou": "engineering",
         "description": "Engineering department",

@@ -11,6 +11,8 @@ Pattern: ETL Pipeline - Load
 Dependencies: singer-sdk, ldap3
 """
 
+from __future__ import annotations
+
 from flext_target_ldap.__version__ import __version__
 from flext_target_ldap.target import TargetLDAP
 

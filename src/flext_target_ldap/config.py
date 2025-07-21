@@ -9,9 +9,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import Field
-
 from flext_core.config.adapters.singer import SingerTargetConfig
+from pydantic import Field
 
 
 class TargetLDAPConfig(SingerTargetConfig):

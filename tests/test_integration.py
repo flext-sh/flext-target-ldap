@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
-from typing import Any
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
@@ -49,9 +47,9 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.client.Connection")
     @patch("flext_target_ldap.client.Server")
-    def test_basic_load(self,
-        mock_server:
-        Mock,
+    def test_basic_load(
+        self,
+        mock_server: Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
@@ -84,9 +82,9 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.client.Connection")
     @patch("flext_target_ldap.client.Server")
-    def test_upsert_behavior(self,
-        mock_server:
-            Mock,
+    def test_upsert_behavior(
+        self,
+        mock_server: Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
@@ -161,9 +159,9 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.client.Connection")
     @patch("flext_target_ldap.client.Server")
-    def test_delete_records(self,
-        mock_server:
-            Mock,
+    def test_delete_records(
+        self,
+        mock_server: Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
@@ -216,9 +214,9 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.client.Connection")
     @patch("flext_target_ldap.client.Server")
-    def test_dn_template_usage(self,
-        mock_server:
-            Mock,
+    def test_dn_template_usage(
+        self,
+        mock_server: Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,
@@ -280,8 +278,7 @@ class TestTargetLDAPIntegration:
         assert len(add_calls) > 0
         assert add_calls[0][0][0] == "uid=testuser,ou=people,dc=test,dc=com"
 
-    def test_error_handling(self, runner:
-            CliRunner, tmp_path: Path) -> None:
+    def test_error_handling(self, runner: CliRunner, tmp_path: Path) -> None:
         # Invalid config
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
@@ -298,9 +295,9 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.client.Connection")
     @patch("flext_target_ldap.client.Server")
-    def test_multi_stream_handling(self,
-        mock_server:
-        Mock,
+    def test_multi_stream_handling(
+        self,
+        mock_server: Mock,
         mock_connection: Mock,
         runner: CliRunner,
         config_file: Path,

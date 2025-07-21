@@ -9,11 +9,10 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import docker
 import ldap3
 import pytest
 from ldap3 import ALL, Connection, Server
-
-import docker
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -67,7 +66,7 @@ def ldap_containers(
                     password=password,
                     auto_bind=True,
                 )
-                conn.unbind()
+                conn.unbind()  # type: ignore[no-untyped-call]
                 logger.info("OpenLDAP %s is ready", name)
                 break
             except Exception:
@@ -106,7 +105,7 @@ def source_connection(ldap_containers: Mock) -> Generator[Connection]:
     yield conn
 
     if conn.bound:
-            conn.unbind()
+        conn.unbind()  # type: ignore[no-untyped-call]
 
 
 @pytest.fixture
@@ -123,13 +122,12 @@ def target_connection(ldap_containers: Mock) -> Generator[Connection]:
     yield conn
 
     if conn.bound:
-        conn.unbind()
+        conn.unbind()  # type: ignore[no-untyped-call]
 
 
 @pytest.fixture
-def target_config(tmp_path:
-        Path) -> dict[str, Any]:
-        return {
+def target_config(tmp_path: Path) -> dict[str, Any]:
+    return {
         "host": "localhost",
         "port": 21389,
         "bind_dn": "cn=admin,dc=target,dc=com",
@@ -157,7 +155,7 @@ def target_config_file(target_config: dict[str, Any], tmp_path: Path) -> Path:
 
 @pytest.fixture
 def sample_user_records() -> list[dict[str, Any]]:
-        return [
+    return [
         {
             "type": "RECORD",
             "stream": "users",
@@ -197,7 +195,7 @@ def sample_user_records() -> list[dict[str, Any]]:
 
 @pytest.fixture
 def sample_group_records() -> list[dict[str, Any]]:
-        return [
+    return [
         {
             "type": "RECORD",
             "stream": "groups",
@@ -228,8 +226,7 @@ def sample_group_records() -> list[dict[str, Any]]:
 
 
 def verify_user_loaded(
-    conn:
-        Connection,
+    conn: Connection,
     uid: str,
     base_dn: str = "dc=target,dc=com",
 ) -> bool:
