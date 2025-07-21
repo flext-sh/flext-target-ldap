@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from flext_target_ldap.client import ServiceResult
+from flext_core.domain.types import ServiceResult
+
 from flext_target_ldap.config import TargetLDAPConfig
 
 
