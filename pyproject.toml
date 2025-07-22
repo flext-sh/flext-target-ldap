@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.13,<3.14"
 keywords = [ "flext", "enterprise", "async", "typed", "singer", "target", "data-loading", "etl",]
 classifiers = [ "Development Status :: 5 - Production/Stable", "Intended Audience :: Developers", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3 :: Only", "Topic :: Software Development :: Libraries :: Python Modules", "Typing :: Typed", "Topic :: Database", "Topic :: System :: Archiving",]
-dependencies = []
+dependencies = ["ldap3 (>=2.9.1,<3.0.0)"]
 [[project.authors]]
 name = "FLEXT Team"
 email = "team@flext.sh"
@@ -119,7 +119,6 @@ output = "reports/coverage.xml"
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
 singer-sdk = ">=0.47.0"
-python-ldap = ">=3.4.3"
 pydantic = ">=2.11.7"
 
 

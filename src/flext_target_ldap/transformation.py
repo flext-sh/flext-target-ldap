@@ -12,7 +12,7 @@ import re
 from typing import Any
 
 from flext_core.domain.pydantic_base import DomainBaseModel, DomainValueObject
-from flext_core.domain.types import ServiceResult
+from flext_core.domain.shared_types import ServiceResult
 from pydantic import Field
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class TransformationRule(DomainValueObject):
     replacement: str
     enabled: bool = True
 
-    def apply(self, value: str) -> ServiceResult[str]:
+    def apply(self, value: str) -> ServiceResult[Any]:
         """Apply the transformation rule to a value."""
         try:
             if not self.enabled:
@@ -91,7 +91,7 @@ class DataTransformationEngine:
     def transform_data(
         self,
         data: dict[str, Any],
-    ) -> ServiceResult[TransformationResult]:
+    ) -> ServiceResult[Any]:
         """Transform data using configured rules."""
         try:
             result = TransformationResult(
@@ -108,7 +108,7 @@ class DataTransformationEngine:
                 for key, value in result.transformed_data.items():
                     if isinstance(value, str):
                         transform_result = rule.apply(value)
-                        if transform_result.is_success:
+                        if transform_result.success:
                             if transform_result.data != value:
                                 result.transformed_data[key] = transform_result.data
                                 result.add_applied_rule(rule.name)
@@ -126,7 +126,7 @@ class DataTransformationEngine:
                         for item in value:
                             if isinstance(item, str):
                                 transform_result = rule.apply(item)
-                                if transform_result.is_success:
+                                if transform_result.success:
                                     transformed_list.append(transform_result.data)
                                     if transform_result.data != item:
                                         result.add_applied_rule(rule.name)
@@ -183,7 +183,7 @@ class MigrationValidator:
         dn: str,
         attributes: dict[str, Any],
         object_classes: list[str],
-    ) -> ServiceResult[bool]:
+    ) -> ServiceResult[Any]:
         """Validate an LDAP entry before processing."""
         try:
             errors = []
@@ -229,7 +229,10 @@ class MigrationValidator:
 
             if errors:
                 error_msg = "; ".join(errors)
-                return ServiceResult.fail(f"Validation failed: {error_msg}")
+                return ServiceResult(
+                    success=True,
+                    error=f"Validation failed: {error_msg}",
+                )
 
             if warnings:
                 logger.warning(

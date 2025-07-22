@@ -8,14 +8,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from flext_core.domain.types import ServiceResult
+from flext_core.domain.shared_types import ServiceResult
 
 from flext_target_ldap.config import TargetLDAPConfig
 
 
 def setup_ldap_target(
     config: TargetLDAPConfig | None = None,
-) -> ServiceResult[TargetLDAPConfig]:
+) -> ServiceResult[Any]:
     """Setup LDAP target with configuration.
 
     Args:
@@ -142,7 +142,7 @@ def create_migration_ldap_target_config(
     return TargetLDAPConfig(**defaults)
 
 
-def validate_ldap_target_config(config: TargetLDAPConfig) -> ServiceResult[bool]:
+def validate_ldap_target_config(config: TargetLDAPConfig) -> ServiceResult[Any]:
     """Validate LDAP target configuration.
 
     Args:
@@ -164,7 +164,8 @@ def validate_ldap_target_config(config: TargetLDAPConfig) -> ServiceResult[bool]
             return ServiceResult.fail("Base DN is required")
 
         if config.port <= 0 or config.port > 65535:
-            return ServiceResult.fail("Port must be between 1 and 65535")
+            return ServiceResult.fail("Port must be between 1 and 65535",
+            )
 
         if config.timeout <= 0:
             return ServiceResult.fail("Timeout must be positive")
@@ -175,7 +176,8 @@ def validate_ldap_target_config(config: TargetLDAPConfig) -> ServiceResult[bool]
         return ServiceResult.ok(True)
 
     except Exception as e:
-        return ServiceResult.fail(f"Configuration validation failed: {e}")
+        return ServiceResult.fail(f"Configuration validation failed: {e}",
+        )
 
 
 def create_test_connection_config(**overrides: Any) -> TargetLDAPConfig:
