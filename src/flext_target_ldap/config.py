@@ -7,13 +7,23 @@ Zero tolerance for code duplication.
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
-from flext_core.config.adapters.singer import SingerTargetConfig
+from flext_core import BaseSettings
 from pydantic import Field
 
+# Compatibility warning for Singer adapters migration
+warnings.warn(
+    "🔄 ARCHITECTURE EVOLUTION: Singer adapters moved from flext-core to flext-meltano.\n"
+    "💡 FUTURE PLAN: Use flext_meltano.config.SingerTargetConfig\n"
+    "⚡ CURRENT: Temporary compatibility using BaseSettings",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-class TargetLDAPConfig(SingerTargetConfig):
+
+class TargetLDAPConfig(BaseSettings):
     """LDAP target configuration using flext-core patterns."""
 
     # Core LDAP connection settings
@@ -114,6 +124,33 @@ class TargetLDAPConfig(SingerTargetConfig):
 
         This method is required by Singer SDK to provide the configuration schema.
         """
-        from flext_core.config.adapters.singer import singer_config_adapter
+        # Temporary implementation until Singer adapters move to flext-meltano
+        schema = cls.model_json_schema()
 
-        return singer_config_adapter(cls, is_target=True)
+        # Convert Pydantic schema to Singer format
+        singer_schema = {"type": "object", "properties": {}, "required": []}
+
+        properties = schema.get("properties", {})
+        required = schema.get("required", [])
+
+        for prop_name, prop_def in properties.items():
+            singer_prop = {
+                "type": prop_def.get("type", "string"),
+                "description": prop_def.get("description", ""),
+            }
+
+            # Handle defaults
+            if "default" in prop_def:
+                singer_prop["default"] = prop_def["default"]
+
+            # Handle secret fields
+            if (
+                prop_def.get("writeOnly")
+                or "secret" in prop_def.get("title", "").lower()
+            ):
+                singer_prop["secret"] = True
+
+            singer_schema["properties"][prop_name] = singer_prop
+
+        singer_schema["required"] = required
+        return singer_schema

@@ -1,12 +1,12 @@
-"""Tests for LDAP client using python-ldap."""
+"""Tests for LDAP client using ldap3."""
 
 from __future__ import annotations
 
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import ldap
 import pytest
+from ldap3.core import exceptions as ldap3_exceptions
 
 from flext_target_ldap.client import LDAPClient
 
@@ -39,46 +39,52 @@ class TestLDAPClient:
         client.use_ssl = True
         assert client.server_uri == "ldaps://test.ldap.com:389"
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_get_connection(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection_class.return_value = mock_connection
+
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         with client.get_connection() as conn:
             assert conn == mock_connection
 
-        # Verify connection setup
-        mock_initialize.assert_called_once_with(client.server_uri)
-
-        # Verify connection options were set
-        mock_connection.set_option.assert_any_call(
-            ldap.OPT_PROTOCOL_VERSION, ldap.VERSION3,
+        # Verify connection was created with server pool
+        mock_connection_class.assert_called_once_with(
+            mock_pool, user=client.bind_dn, password=client.password,
         )
-        mock_connection.set_option.assert_any_call(
-            ldap.OPT_NETWORK_TIMEOUT, 30,
-        )
-        mock_connection.set_option.assert_any_call(ldap.OPT_REFERRALS, 0)
 
         # Verify bind was called
-        mock_connection.simple_bind_s.assert_called_once_with(
-            "cn=admin,dc=test,dc=com", "test_password",
-        )
+        mock_connection.bind.assert_called_once()
 
-        # Verify unbind
-        mock_connection.unbind_s.assert_called_once()
+        # Verify unbind was called
+        mock_connection.unbind.assert_called_once()
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_add_entry(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection.add.return_value = True
+        mock_connection_class.return_value = mock_connection
+
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         result = client.add_entry(
             dn="uid=test,dc=test,dc=com",
@@ -86,21 +92,30 @@ class TestLDAPClient:
             attributes={"cn": "Test User", "sn": "User"},
         )
 
-        assert result.is_success
+        assert result.success
         assert result.unwrap() is True
 
         # Verify add was called correctly
-        mock_connection.add_s.assert_called_once()
+        mock_connection.add.assert_called_once()
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_add_entry_already_exists(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_connection.add_s.side_effect = ldap.ALREADY_EXISTS()
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection.add.side_effect = (
+            ldap3_exceptions.LDAPEntryAlreadyExistsResult()
+        )
+        mock_connection_class.return_value = mock_connection
+
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         result = client.add_entry(
             dn="uid=test,dc=test,dc=com",
@@ -108,127 +123,182 @@ class TestLDAPClient:
             attributes={"cn": "Test"},
         )
 
-        assert not result.is_success
+        assert not result.success
+        assert result.error is not None
         assert "Entry already exists" in result.error
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_modify_entry(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection.modify.return_value = True
+        mock_connection_class.return_value = mock_connection
+
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         result = client.modify_entry(
             dn="uid=test,dc=test,dc=com",
             changes={"mail": "new@test.com", "telephoneNumber": "123-456"},
         )
 
-        assert result.is_success
+        assert result.success
         assert result.unwrap() is True
 
         # Verify modify was called
-        mock_connection.modify_s.assert_called_once()
+        mock_connection.modify.assert_called_once()
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_delete_entry(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection.delete.return_value = True
+        mock_connection_class.return_value = mock_connection
+
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         result = client.delete_entry("uid=test,dc=test,dc=com")
 
-        assert result.is_success
+        assert result.success
         assert result.unwrap() is True
-        mock_connection.delete_s.assert_called_once_with("uid=test,dc=test,dc=com")
+        mock_connection.delete.assert_called_once_with("uid=test,dc=test,dc=com")
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_search_entry(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_connection.search_s.return_value = [
-            ("uid=test,dc=test,dc=com", {
-                "cn": [b"Test User"],
-                "mail": [b"test@example.com"],
-            }),
-        ]
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection.search.return_value = True
+
+        # Mock ldap3 entry objects
+        mock_entry = MagicMock()
+        mock_entry.entry_dn = "uid=test,dc=test,dc=com"
+        mock_entry.entry_attributes = ["cn", "mail"]
+        mock_entry.cn = ["Test User"]
+        mock_entry.mail = ["test@example.com"]
+        mock_connection.entries = [mock_entry]
+
+        mock_connection_class.return_value = mock_connection
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         result = client.search_entry("dc=test,dc=com")
 
-        assert result.is_success
+        assert result.success
         entries = result.unwrap()
         assert len(entries) == 1
         assert entries[0].dn == "uid=test,dc=test,dc=com"
         assert entries[0].attributes["cn"] == ["Test User"]
         assert entries[0].attributes["mail"] == ["test@example.com"]
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_entry_exists(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_connection.search_s.return_value = [
-            ("uid=test,dc=test,dc=com", {"cn": [b"Test User"]}),
-        ]
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection.search.return_value = True
+
+        # Mock entry exists
+        mock_entry = MagicMock()
+        mock_entry.entry_dn = "uid=test,dc=test,dc=com"
+        mock_entry.entry_attributes = ["cn"]
+        mock_entry.cn = ["Test User"]
+        mock_connection.entries = [mock_entry]
+
+        mock_connection_class.return_value = mock_connection
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         result = client.entry_exists("uid=test,dc=test,dc=com")
-        assert result.is_success
+        assert result.success
         assert result.unwrap() is True
 
         # Test entry doesn't exist
-        mock_connection.search_s.return_value = []
+        mock_connection.entries = []
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
-        assert result.is_success
+        assert result.success
         assert result.unwrap() is False
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_get_entry(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         mock_connection = MagicMock()
-        mock_connection.search_s.return_value = [
-            ("uid=test,dc=test,dc=com", {
-                "cn": [b"Test User"],
-                "mail": [b"test@example.com"],
-            }),
-        ]
-        mock_initialize.return_value = mock_connection
+        mock_connection.bind.return_value = True
+        mock_connection.bound = True
+        mock_connection.search.return_value = True
+
+        # Mock entry found
+        mock_entry = MagicMock()
+        mock_entry.entry_dn = "uid=test,dc=test,dc=com"
+        mock_entry.entry_attributes = ["cn", "mail"]
+        mock_entry.cn = ["Test User"]
+        mock_entry.mail = ["test@example.com"]
+        mock_connection.entries = [mock_entry]
+
+        mock_connection_class.return_value = mock_connection
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
         result = client.get_entry("uid=test,dc=test,dc=com")
 
-        assert result.is_success
+        assert result.success
         entry = result.unwrap()
         assert entry is not None
         assert entry.dn == "uid=test,dc=test,dc=com"
         assert entry.attributes["cn"] == ["Test User"]
 
         # Test entry not found
-        mock_connection.search_s.return_value = []
+        mock_connection.entries = []
         result = client.get_entry("uid=notfound,dc=test,dc=com")
-        assert result.is_success
-        assert result.unwrap() is None
+        assert result.success
+        assert result.data is None
 
-    @patch("flext_target_ldap.client.ldap.initialize")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_connection_error_handling(
         self,
-        mock_initialize: MagicMock,
+        mock_pool_class: MagicMock,
+        mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
         # Simulate connection error
-        mock_initialize.side_effect = ldap.LDAPError("Connection failed")
+        mock_connection_class.side_effect = ldap3_exceptions.LDAPException(
+            "Connection failed",
+        )
+        mock_pool = MagicMock()
+        mock_pool_class.return_value = mock_pool
 
-        with pytest.raises(ldap.LDAPError), client.get_connection():
+        with pytest.raises(ldap3_exceptions.LDAPException), client.get_connection():
             pass

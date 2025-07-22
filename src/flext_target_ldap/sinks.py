@@ -12,7 +12,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from flext_core.domain.pydantic_base import DomainBaseModel
-from flext_core.domain.types import ServiceResult
+from flext_core.domain.shared_types import ServiceResult
 from pydantic import Field
 from singer_sdk.sinks import Sink
 
@@ -90,7 +90,7 @@ class LDAPSink(Sink):
         try:
             # Build DN for the entry
             dn_result = self.build_dn(record)
-            if not dn_result.is_success:
+            if not dn_result.success:
                 self._processing_result.add_failure(
                     f"DN building failed: {dn_result.error}",
                 )
@@ -100,7 +100,7 @@ class LDAPSink(Sink):
 
             # Build attributes
             attributes_result = self.build_attributes(record)
-            if not attributes_result.is_success:
+            if not attributes_result.success:
                 self._processing_result.add_failure(
                     f"Attribute building failed: {attributes_result.error}",
                 )
@@ -119,7 +119,7 @@ class LDAPSink(Sink):
                     )
                     return
                 validation_result = self.validate_entry(dn, attributes, object_classes)
-                if not validation_result.is_success:
+                if not validation_result.success:
                     self._processing_result.add_failure(
                         f"Validation failed: {validation_result.error}",
                     )
@@ -140,7 +140,7 @@ class LDAPSink(Sink):
                 self._processing_result.add_failure("DN or attributes cannot be None")
                 return
             upsert_result = self.client.upsert_entry(dn, object_classes, attributes)
-            if upsert_result.is_success:
+            if upsert_result.success:
                 if upsert_result.data is not None:
                     operation = upsert_result.data[1]  # "add" or "modify"
                     logger.info("Successfully %s entry: %s", operation, dn)
@@ -154,14 +154,14 @@ class LDAPSink(Sink):
             logger.exception(error_msg)
             self._processing_result.add_failure(error_msg)
 
-    def build_dn(self, record: dict[str, Any]) -> ServiceResult[str]:
+    def build_dn(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build distinguished name for the record. Override in subclasses."""
-        return ServiceResult.fail("build_dn method must be implemented in subclass")
+        return ServiceResult.fail("build_dn method must be implemented in subclass",
+        )
 
-    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[dict[str, Any]]:
+    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return ServiceResult.fail(
-            "build_attributes method must be implemented in subclass",
+        return ServiceResult.fail("build_attributes method must be implemented in subclass",
         )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
@@ -173,7 +173,7 @@ class LDAPSink(Sink):
         dn: str,
         attributes: dict[str, Any],
         object_classes: list[str],
-    ) -> ServiceResult[bool]:
+    ) -> ServiceResult[Any]:
         """Validate entry before processing."""
         # Basic validation - check required attributes
         if not dn:
@@ -188,7 +188,10 @@ class LDAPSink(Sink):
         # Validate DN format
         dn_validation = self.client.validate_dn(dn)
         if not dn_validation.is_success:
-            return ServiceResult.fail(f"Invalid DN format: {dn_validation.error}")
+            return ServiceResult(
+                success=True,
+                error=f"Invalid DN format: {dn_validation.error}",
+            )
 
         return ServiceResult.ok(True)
 
@@ -226,7 +229,7 @@ class LDAPSink(Sink):
 class UsersSink(LDAPSink):
     """Sink for processing user entries using flext-core patterns."""
 
-    def build_dn(self, record: dict[str, Any]) -> ServiceResult[str]:
+    def build_dn(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build DN for user entries."""
         try:
             # Get RDN attribute (usually uid or cn)
@@ -236,8 +239,7 @@ class UsersSink(LDAPSink):
             )
 
             if not rdn_value:
-                return ServiceResult.fail(
-                    f"No value found for RDN attribute '{rdn_attr}'",
+                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'",
                 )
 
             base_dn = self.config["base_dn"]
@@ -247,7 +249,7 @@ class UsersSink(LDAPSink):
         except Exception as e:
             return ServiceResult.fail(f"Error building user DN: {e}")
 
-    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[dict[str, Any]]:
+    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build LDAP attributes for user entries."""
         try:
             attributes: dict[str, Any] = {}
@@ -294,7 +296,8 @@ class UsersSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building user attributes: {e}")
+            return ServiceResult.fail(f"Error building user attributes: {e}",
+            )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
         """Get object classes for user entries."""
@@ -307,7 +310,7 @@ class UsersSink(LDAPSink):
 class GroupsSink(LDAPSink):
     """Sink for processing group entries using flext-core patterns."""
 
-    def build_dn(self, record: dict[str, Any]) -> ServiceResult[str]:
+    def build_dn(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build DN for group entries."""
         try:
             # Get RDN attribute (usually cn)
@@ -315,8 +318,7 @@ class GroupsSink(LDAPSink):
             rdn_value = record.get(rdn_attr) or record.get("id") or record.get("name")
 
             if not rdn_value:
-                return ServiceResult.fail(
-                    f"No value found for RDN attribute '{rdn_attr}'",
+                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'",
                 )
 
             base_dn = self.config["base_dn"]
@@ -326,7 +328,7 @@ class GroupsSink(LDAPSink):
         except Exception as e:
             return ServiceResult.fail(f"Error building group DN: {e}")
 
-    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[dict[str, Any]]:
+    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build LDAP attributes for group entries."""
         try:
             attributes: dict[str, Any] = {}
@@ -351,7 +353,8 @@ class GroupsSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building group attributes: {e}")
+            return ServiceResult.fail(f"Error building group attributes: {e}",
+            )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
         """Get object classes for group entries."""
@@ -361,7 +364,7 @@ class GroupsSink(LDAPSink):
 class OrganizationalUnitsSink(LDAPSink):
     """Sink for processing organizational unit entries using flext-core patterns."""
 
-    def build_dn(self, record: dict[str, Any]) -> ServiceResult[str]:
+    def build_dn(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build DN for OU entries."""
         try:
             # Get OU name
@@ -377,7 +380,7 @@ class OrganizationalUnitsSink(LDAPSink):
         except Exception as e:
             return ServiceResult.fail(f"Error building OU DN: {e}")
 
-    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[dict[str, Any]]:
+    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build LDAP attributes for OU entries."""
         try:
             attributes: dict[str, Any] = {}
@@ -406,7 +409,8 @@ class OrganizationalUnitsSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building OU attributes: {e}")
+            return ServiceResult.fail(f"Error building OU attributes: {e}",
+            )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
         """Get object classes for OU entries."""
@@ -419,7 +423,7 @@ class OrganizationalUnitsSink(LDAPSink):
 class GenericSink(LDAPSink):
     """Generic sink for processing custom entries using flext-core patterns."""
 
-    def build_dn(self, record: dict[str, Any]) -> ServiceResult[str]:
+    def build_dn(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build DN for generic entries."""
         try:
             # Try to get DN directly from record
@@ -429,7 +433,8 @@ class GenericSink(LDAPSink):
             # Try to build from id and base_dn
             entry_id = record.get("id") or record.get("name")
             if not entry_id:
-                return ServiceResult.fail("No ID or name found for generic entry")
+                return ServiceResult.fail("No ID or name found for generic entry",
+                )
 
             base_dn = self.config["base_dn"]
             dn = f"cn={entry_id},{base_dn}"
@@ -438,7 +443,7 @@ class GenericSink(LDAPSink):
         except Exception as e:
             return ServiceResult.fail(f"Error building generic DN: {e}")
 
-    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[dict[str, Any]]:
+    def build_attributes(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build LDAP attributes for generic entries."""
         try:
             attributes: dict[str, Any] = {}
@@ -461,7 +466,8 @@ class GenericSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building generic attributes: {e}")
+            return ServiceResult.fail(f"Error building generic attributes: {e}",
+            )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
         """Get object classes for generic entries."""

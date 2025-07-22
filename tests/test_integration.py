@@ -45,8 +45,8 @@ class TestTargetLDAPIntegration:
             f.write(singer_message_state + "\n")
         return input_path
 
-    @patch("flext_target_ldap.client.Connection")
-    @patch("flext_target_ldap.client.Server")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.Server")
     def test_basic_load(
         self,
         mock_server: Mock,
@@ -80,8 +80,8 @@ class TestTargetLDAPIntegration:
         # Check output contains state message
         assert "STATE" in result.output
 
-    @patch("flext_target_ldap.client.Connection")
-    @patch("flext_target_ldap.client.Server")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.Server")
     def test_upsert_behavior(
         self,
         mock_server: Mock,
@@ -157,8 +157,8 @@ class TestTargetLDAPIntegration:
         assert mock_conn_instance.add.call_count >= 1
         assert mock_conn_instance.modify.call_count >= 1
 
-    @patch("flext_target_ldap.client.Connection")
-    @patch("flext_target_ldap.client.Server")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.Server")
     def test_delete_records(
         self,
         mock_server: Mock,
@@ -212,8 +212,8 @@ class TestTargetLDAPIntegration:
         # Verify delete was called
         mock_conn_instance.delete.assert_called_once_with("uid=deleted,dc=test,dc=com")
 
-    @patch("flext_target_ldap.client.Connection")
-    @patch("flext_target_ldap.client.Server")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.Server")
     def test_dn_template_usage(
         self,
         mock_server: Mock,
@@ -293,8 +293,8 @@ class TestTargetLDAPIntegration:
 
         assert result.exit_code != 0
 
-    @patch("flext_target_ldap.client.Connection")
-    @patch("flext_target_ldap.client.Server")
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.Server")
     def test_multi_stream_handling(
         self,
         mock_server: Mock,

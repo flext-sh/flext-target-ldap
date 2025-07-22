@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -43,235 +43,378 @@ class TestLDAPSink:
         assert sink.key_properties == ["dn"]
         assert "dn" in sink.schema["properties"]
 
-    def test_get_dn_from_record_explicit(self, sink: LDAPSink) -> None:
-        record = {"dn": "cn=test,dc=example,dc=com"}
-        assert sink.get_dn_from_record(record) == "cn=test,dc=example,dc=com"
-
-    def test_get_dn_from_record_template(
-        self,
-        sink: LDAPSink,
-        mock_target: MagicMock,
-    ) -> None:
-        mock_target.config["test_stream_dn_template"] = (
-            "cn={cn},ou=test,dc=example,dc=com"
-        )
-
-        record = {"cn": "testgroup"}
-        dn = sink.get_dn_from_record(record)
-        assert dn == "cn=testgroup,ou=test,dc=example,dc=com"
-
-    def test_get_dn_from_record_rdn(self, sink: LDAPSink) -> None:
-        sink.get_rdn_attribute = lambda: "cn"  # type: ignore[method-assign]
-
+    def test_build_dn_not_implemented(self, sink: LDAPSink) -> None:
         record = {"cn": "test"}
-        dn = sink.get_dn_from_record(record)
-        assert dn == "cn=test,dc=test,dc=com"
+        result = sink.build_dn(record)
+        assert not result.success
+        assert result.error is not None
+        assert "must be implemented in subclass" in result.error
 
-    def test_get_dn_from_record_error(self, sink: LDAPSink) -> None:
-        record = {"uid": "test"}  # No DN, no matching RDN
+    def test_build_attributes_not_implemented(self, sink: LDAPSink) -> None:
+        record = {"cn": "test"}
+        result = sink.build_attributes(record)
+        assert not result.success
+        assert result.error is not None
+        assert "must be implemented in subclass" in result.error
 
-        with pytest.raises(ValueError, match="Cannot determine DN"):
-            sink.get_dn_from_record(record)
-
-    def test_get_object_classes(self, sink: LDAPSink) -> None:
-        # From record
-        record = {"objectClass": ["person", "top"]}
+    def test_get_object_classes_default(self, sink: LDAPSink) -> None:
+        record: dict[str, Any] = {}
         classes = sink.get_object_classes(record)
-        assert classes == ["person", "top"]
+        assert classes == ["top"]
 
-        # Single value
-        record = {"objectClass": "person"}
-        classes = sink.get_object_classes(record)
-        assert classes == ["person"]
-
-        # Default
-        sink.get_default_object_classes = lambda: ["defaultClass"]  # type: ignore[method-assign]
-        record = {}
-        classes = sink.get_object_classes(record)
-        assert classes == ["defaultClass"]
-
-    def test_prepare_attributes(self, sink: LDAPSink) -> None:
-        record = {
-            "dn": "cn=test,dc=example,dc=com",
-            "cn": "test",
-            "member": ["user1", "user2"],
-            "description": ["Single item list"],
-            "objectClass": ["group"],
-            "_sdc_deleted_at": "2024-01-01",
-        }
-
-        attrs = sink.prepare_attributes(record)
-
-        # Special fields removed
-        assert "dn" not in attrs
-        assert "objectClass" not in attrs
-        assert "_sdc_deleted_at" not in attrs
-
-        # Multi-valued preserved
-        assert attrs["member"] == ["user1", "user2"]
-
-        # Single-valued flattened
-        assert attrs["description"] == "Single item list"
-
-    @patch("target_ldap.sinks.LDAPClient")
-    def test_process_record_upsert(
-        self,
-        mock_client_class: MagicMock,
-        sink: LDAPSink,
-        sample_user_record: dict[str, Any],
-    ) -> None:
+    def test_validate_entry_success(self, sink: LDAPSink) -> None:
+        # Mock the private _client attribute since client is a property
         mock_client = MagicMock()
-        mock_client.upsert_entry.return_value = (True, "add")
+        mock_client.validate_dn.return_value.is_success = True
         sink._client = mock_client
 
-        sink.process_record(sample_user_record, {})
+        result = sink.validate_entry(
+            "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"],
+        )
+        assert result.success
 
-        mock_client.upsert_entry.assert_called_once()
-        call_args = mock_client.upsert_entry.call_args
-        assert call_args[0][0] == "uid=jdoe,ou=users,dc=test,dc=com"
+    def test_validate_entry_empty_dn(self, sink: LDAPSink) -> None:
+        result = sink.validate_entry("", {"cn": ["test"]}, ["person"])
+        assert not result.success
+        assert result.error is not None
+        assert "DN cannot be empty" in result.error
 
-    @patch("target_ldap.sinks.LDAPClient")
-    def test_process_record_delete(
-        self,
-        mock_client_class: MagicMock,
-        sink: LDAPSink,
-    ) -> None:
-        mock_client = MagicMock()
-        mock_client.entry_exists.return_value = True
-        mock_client.delete_entry.return_value = True
-        sink._client = mock_client
+    def test_validate_entry_empty_attributes(self, sink: LDAPSink) -> None:
+        result = sink.validate_entry("cn=test,dc=example,dc=com", {}, ["person"])
+        assert not result.success
+        assert result.error is not None
+        assert "Attributes cannot be empty" in result.error
 
-        record = {
-            "dn": "cn=test,dc=example,dc=com",
-            "_sdc_deleted_at": "2024-01-01T12:00:00Z",
-        }
-
-        sink.process_record(record, {})
-
-        mock_client.entry_exists.assert_called_once_with("cn=test,dc=example,dc=com")
-        mock_client.delete_entry.assert_called_once_with("cn=test,dc=example,dc=com")
+    def test_validate_entry_empty_object_classes(self, sink: LDAPSink) -> None:
+        result = sink.validate_entry("cn=test,dc=example,dc=com", {"cn": ["test"]}, [])
+        assert not result.success
+        assert result.error is not None
+        assert "Object classes cannot be empty" in result.error
 
 
 class TestUsersSink:
-    """Test users sink."""
+    """Test Users sink."""
 
     @pytest.fixture
     def users_sink(
         self,
         mock_target: MagicMock,
+        mock_ldap_config: dict[str, Any],
     ) -> UsersSink:
-        schema = {"properties": {"dn": {"type": "string"}}}
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "user_rdn_attribute": "uid",
+        })
+        schema = {
+            "properties": {
+                "uid": {"type": "string"},
+                "cn": {"type": "string"},
+                "mail": {"type": "string"},
+            },
+        }
         return UsersSink(
             target=mock_target,
             stream_name="users",
             schema=schema,
-            key_properties=["dn"],
+            key_properties=["uid"],
         )
 
-    def test_users_sink_properties(self, users_sink: UsersSink) -> None:
-        assert users_sink.get_rdn_attribute() == "uid"
-        assert "inetOrgPerson" in users_sink.get_default_object_classes()
-        assert "person" in users_sink.get_default_object_classes()
+    def test_build_dn_with_uid(self, users_sink: UsersSink) -> None:
+        record = {"uid": "testuser", "cn": "Test User"}
+        result = users_sink.build_dn(record)
+        assert result.success
+        assert result.data == "uid=testuser,dc=example,dc=com"
 
-    def test_custom_rdn_attribute(
-        self,
-        users_sink: UsersSink,
-        mock_target: MagicMock,
+    def test_build_dn_missing_uid(self, users_sink: UsersSink) -> None:
+        record = {"cn": "Test User"}
+        result = users_sink.build_dn(record)
+        assert not result.success
+        assert result.error is not None
+        assert "No value found for RDN attribute 'uid'" in result.error
+
+    def test_build_attributes_basic(self, users_sink: UsersSink) -> None:
+        record = {
+            "uid": "testuser",
+            "cn": "Test User",
+            "mail": "test@example.com",
+            "sn": "User",
+            "givenName": "Test",
+        }
+        result = users_sink.build_attributes(record)
+        assert result.success
+        assert result.data is not None
+        assert result.data["uid"] == ["testuser"]
+        assert result.data["cn"] == ["Test User"]
+        assert result.data["mail"] == ["test@example.com"]
+        assert result.data["sn"] == ["User"]
+        assert result.data["givenName"] == ["Test"]
+
+    def test_build_attributes_multi_valued(self, users_sink: UsersSink) -> None:
+        record = {
+            "uid": "testuser",
+            "emails": ["test1@example.com", "test2@example.com"],
+            "phone_numbers": ["123-456-7890", "098-765-4321"],
+        }
+        result = users_sink.build_attributes(record)
+        assert result.success
+        assert result.data is not None
+        assert result.data["uid"] == ["testuser"]
+        assert result.data["mail"] == ["test1@example.com", "test2@example.com"]
+        assert result.data["telephoneNumber"] == ["123-456-7890", "098-765-4321"]
+
+    def test_get_object_classes_default(self, users_sink: UsersSink) -> None:
+        record: dict[str, Any] = {}
+        classes = users_sink.get_object_classes(record)
+        assert classes == ["inetOrgPerson", "organizationalPerson", "person", "top"]
+
+    def test_get_object_classes_configured(
+        self, mock_target: MagicMock, mock_ldap_config: dict[str, Any],
     ) -> None:
-        mock_target.config["user_rdn_attribute"] = "mail"
-        assert users_sink.get_rdn_attribute() == "mail"
+        # Create target with custom config
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "user_rdn_attribute": "uid",
+            "users_object_classes": ["customUser", "top"],
+        })
+        schema = {
+            "properties": {
+                "uid": {"type": "string"},
+                "cn": {"type": "string"},
+            },
+        }
+        users_sink = UsersSink(
+            target=mock_target,
+            stream_name="users",
+            schema=schema,
+            key_properties=["uid"],
+        )
+        record: dict[str, Any] = {}
+        classes = users_sink.get_object_classes(record)
+        assert classes == ["customUser", "top"]
 
 
 class TestGroupsSink:
-    """Test groups sink."""
+    """Test Groups sink."""
 
     @pytest.fixture
     def groups_sink(
         self,
         mock_target: MagicMock,
+        mock_ldap_config: dict[str, Any],
     ) -> GroupsSink:
-        schema = {"properties": {"dn": {"type": "string"}}}
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "group_rdn_attribute": "cn",
+        })
+        schema = {
+            "properties": {
+                "cn": {"type": "string"},
+                "member": {"type": "array"},
+            },
+        }
         return GroupsSink(
             target=mock_target,
             stream_name="groups",
             schema=schema,
-            key_properties=["dn"],
+            key_properties=["cn"],
         )
 
-    def test_groups_sink_properties(self, groups_sink: GroupsSink) -> None:
-        assert groups_sink.get_rdn_attribute() == "cn"
-        assert "groupOfNames" in groups_sink.get_default_object_classes()
+    def test_build_dn_with_cn(self, groups_sink: GroupsSink) -> None:
+        record = {"cn": "testgroup", "description": "Test Group"}
+        result = groups_sink.build_dn(record)
+        assert result.success
+        assert result.data == "cn=testgroup,dc=example,dc=com"
 
-    def test_prepare_attributes_member_requirement(
-        self,
-        groups_sink: GroupsSink,
-        mock_target: MagicMock,
-    ) -> None:
-        # No members - should add placeholder
-        record = {"cn": "empty-group"}
-        attrs = groups_sink.prepare_attributes(record)
-        assert "member" in attrs
-        assert attrs["member"][0].endswith("dc=test,dc=com")
+    def test_build_dn_missing_cn(self, groups_sink: GroupsSink) -> None:
+        record = {"description": "Test Group"}
+        result = groups_sink.build_dn(record)
+        assert not result.success
+        assert result.error is not None
+        assert "No value found for RDN attribute 'cn'" in result.error
 
-        # Empty member list - should add placeholder
-        record = {"cn": "empty-group", "member": []}
-        attrs = groups_sink.prepare_attributes(record)
-        assert len(attrs["member"]) > 0
+    def test_build_attributes_basic(self, groups_sink: GroupsSink) -> None:
+        record = {
+            "cn": "testgroup",
+            "description": "Test Group",
+            "members": ["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
+        }
+        result = groups_sink.build_attributes(record)
+        assert result.success
+        assert result.data is not None
+        assert result.data["cn"] == ["testgroup"]
+        assert result.data["description"] == ["Test Group"]
+        assert result.data["member"] == [
+            "uid=user1,dc=example,dc=com",
+            "uid=user2,dc=example,dc=com",
+        ]
 
-        # Has members - should preserve
-        record = {"cn": "group", "member": ["uid=user1,dc=test,dc=com"]}
-        attrs = groups_sink.prepare_attributes(record)
-        assert attrs["member"] == ["uid=user1,dc=test,dc=com"]
+    def test_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
+        record: dict[str, Any] = {}
+        classes = groups_sink.get_object_classes(record)
+        assert classes == ["groupOfNames", "top"]
 
 
 class TestOrganizationalUnitsSink:
-    """Test organizational units sink."""
+    """Test Organizational Units sink."""
 
     @pytest.fixture
     def ou_sink(
         self,
         mock_target: MagicMock,
+        mock_ldap_config: dict[str, Any],
     ) -> OrganizationalUnitsSink:
-        schema = {"properties": {"dn": {"type": "string"}}}
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+        })
+        schema = {
+            "properties": {
+                "ou": {"type": "string"},
+                "description": {"type": "string"},
+            },
+        }
         return OrganizationalUnitsSink(
             target=mock_target,
             stream_name="organizational_units",
             schema=schema,
-            key_properties=["dn"],
+            key_properties=["ou"],
         )
 
-    def test_ou_sink_properties(self, ou_sink: OrganizationalUnitsSink) -> None:
-        assert ou_sink.get_rdn_attribute() == "ou"
-        assert "organizationalUnit" in ou_sink.get_default_object_classes()
+    def test_build_dn_with_ou(self, ou_sink: OrganizationalUnitsSink) -> None:
+        record = {"ou": "testou", "description": "Test OU"}
+        result = ou_sink.build_dn(record)
+        assert result.success
+        assert result.data == "ou=testou,dc=example,dc=com"
+
+    def test_build_dn_missing_ou(self, ou_sink: OrganizationalUnitsSink) -> None:
+        record = {"description": "Test OU"}
+        result = ou_sink.build_dn(record)
+        assert not result.success
+        assert result.error is not None
+        assert "No OU name found in record" in result.error
+
+    def test_build_attributes_basic(self, ou_sink: OrganizationalUnitsSink) -> None:
+        record = {
+            "ou": "testou",
+            "description": "Test OU",
+            "telephoneNumber": "123-456-7890",
+            "street": "123 Test St",
+            "l": "Test City",
+            "st": "Test State",
+            "postalCode": "12345",
+        }
+        result = ou_sink.build_attributes(record)
+        assert result.success
+        assert result.data is not None
+        assert result.data["ou"] == ["testou"]
+        assert result.data["description"] == ["Test OU"]
+        assert result.data["telephoneNumber"] == ["123-456-7890"]
+        assert result.data["street"] == ["123 Test St"]
+        assert result.data["l"] == ["Test City"]
+        assert result.data["st"] == ["Test State"]
+        assert result.data["postalCode"] == ["12345"]
+
+    def test_get_object_classes_default(self, ou_sink: OrganizationalUnitsSink) -> None:
+        record: dict[str, Any] = {}
+        classes = ou_sink.get_object_classes(record)
+        assert classes == ["organizationalUnit", "top"]
 
 
 class TestGenericSink:
-    """Test generic sink."""
+    """Test Generic sink."""
 
     @pytest.fixture
     def generic_sink(
         self,
         mock_target: MagicMock,
+        mock_ldap_config: dict[str, Any],
     ) -> GenericSink:
-        schema = {"properties": {"dn": {"type": "string"}}}
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+        })
+        schema = {
+            "properties": {
+                "dn": {"type": "string"},
+                "cn": {"type": "string"},
+            },
+        }
         return GenericSink(
             target=mock_target,
-            stream_name="custom_stream",
+            stream_name="generic",
             schema=schema,
-            key_properties=["dn"],
+            key_properties=["id"],
         )
 
-    def test_generic_sink_defaults(self, generic_sink: GenericSink) -> None:
-        assert generic_sink.get_rdn_attribute() == "cn"
-        assert generic_sink.get_default_object_classes() == ["top"]
+    def test_build_dn_with_dn_field(self, generic_sink: GenericSink) -> None:
+        record = {"dn": "cn=test,dc=example,dc=com"}
+        result = generic_sink.build_dn(record)
+        assert result.success
+        assert result.data == "cn=test,dc=example,dc=com"
 
-    def test_generic_sink_custom_config(
-        self,
-        generic_sink: GenericSink,
-        mock_target: MagicMock,
+    def test_build_dn_with_id(self, generic_sink: GenericSink) -> None:
+        record = {"id": "testentry", "cn": "Test Entry"}
+        result = generic_sink.build_dn(record)
+        assert result.success
+        assert result.data == "cn=testentry,dc=example,dc=com"
+
+    def test_build_dn_missing_identifier(self, generic_sink: GenericSink) -> None:
+        record = {"description": "Test Entry"}
+        result = generic_sink.build_dn(record)
+        assert not result.success
+        assert result.error is not None
+        assert "No ID or name found for generic entry" in result.error
+
+    def test_build_attributes_basic(self, generic_sink: GenericSink) -> None:
+        record = {
+            "id": "testentry",
+            "cn": "Test Entry",
+            "description": "A test entry",
+            "_sdc_table_version": 1,  # Should be excluded
+            "_sdc_received_at": "2023-01-01T00:00:00Z",  # Should be excluded
+        }
+        result = generic_sink.build_attributes(record)
+        assert result.success
+        assert result.data is not None
+        assert result.data["id"] == ["testentry"]
+        assert result.data["cn"] == ["Test Entry"]
+        assert result.data["description"] == ["A test entry"]
+        assert "_sdc_table_version" not in result.data
+        assert "_sdc_received_at" not in result.data
+
+    def test_get_object_classes_from_record(self, generic_sink: GenericSink) -> None:
+        record = {"object_classes": ["customClass", "top"]}
+        classes = generic_sink.get_object_classes(record)
+        assert classes == ["customClass", "top"]
+
+    def test_get_object_classes_single_value(self, generic_sink: GenericSink) -> None:
+        record = {"object_classes": "customClass"}
+        classes = generic_sink.get_object_classes(record)
+        assert classes == ["customClass"]
+
+    def test_get_object_classes_default(self, generic_sink: GenericSink) -> None:
+        record: dict[str, Any] = {}
+        classes = generic_sink.get_object_classes(record)
+        assert classes == ["top"]
+
+    def test_get_object_classes_configured(
+        self, mock_target: MagicMock, mock_ldap_config: dict[str, Any],
     ) -> None:
-        mock_target.config["custom_stream_rdn_attribute"] = "uid"
-        mock_target.config["custom_stream_object_classes"] = ["account", "top"]
-
-        assert generic_sink.get_rdn_attribute() == "uid"
-        assert generic_sink.get_default_object_classes() == ["account", "top"]
+        # Create target with custom config
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "generic_object_classes": ["customGeneric", "top"],
+        })
+        schema = {
+            "properties": {
+                "dn": {"type": "string"},
+                "cn": {"type": "string"},
+            },
+        }
+        generic_sink = GenericSink(
+            target=mock_target,
+            stream_name="generic",
+            schema=schema,
+            key_properties=["id"],
+        )
+        record: dict[str, Any] = {}
+        classes = generic_sink.get_object_classes(record)
+        assert classes == ["customGeneric", "top"]
