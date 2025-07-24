@@ -10,7 +10,16 @@ from __future__ import annotations
 import warnings
 from typing import Any
 
-from flext_core import BaseSettings
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_ldap.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 from pydantic import Field
 
 # Compatibility warning for Singer adapters migration
