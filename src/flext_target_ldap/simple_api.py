@@ -8,7 +8,16 @@ from __future__ import annotations
 
 from typing import Any
 
-from flext_core.domain.shared_types import ServiceResult
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_ldap.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 
 from flext_target_ldap.config import TargetLDAPConfig
 
@@ -164,7 +173,8 @@ def validate_ldap_target_config(config: TargetLDAPConfig) -> ServiceResult[Any]:
             return ServiceResult.fail("Base DN is required")
 
         if config.port <= 0 or config.port > 65535:
-            return ServiceResult.fail("Port must be between 1 and 65535",
+            return ServiceResult.fail(
+                "Port must be between 1 and 65535",
             )
 
         if config.timeout <= 0:
@@ -176,7 +186,8 @@ def validate_ldap_target_config(config: TargetLDAPConfig) -> ServiceResult[Any]:
         return ServiceResult.ok(True)
 
     except Exception as e:
-        return ServiceResult.fail(f"Configuration validation failed: {e}",
+        return ServiceResult.fail(
+            f"Configuration validation failed: {e}",
         )
 
 

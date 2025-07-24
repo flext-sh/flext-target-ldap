@@ -13,8 +13,17 @@ from contextlib import asynccontextmanager, contextmanager
 from typing import TYPE_CHECKING, Any, Literal
 
 import ldap3
-from flext_core.domain.pydantic_base import DomainBaseModel
-from flext_core.domain.shared_types import ServiceResult
+
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_ldap.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 from ldap3.core import exceptions as ldap3_exceptions
 from pydantic import Field
 
@@ -391,7 +400,8 @@ class LDAPClient:
         # Check if entry exists
         exists_result = self.entry_exists(dn)
         if not exists_result.success:
-            return ServiceResult.fail(f"Failed to check if entry exists: {exists_result.error}",
+            return ServiceResult.fail(
+                f"Failed to check if entry exists: {exists_result.error}",
             )
         if exists_result.data:
             # Entry exists, modify it
@@ -428,7 +438,8 @@ class LDAPClient:
                 return ServiceResult.fail("DN could not be parsed")
             # Check for at least one component
             if len(parsed_dn) == 0:
-                return ServiceResult.fail("DN must contain at least one component",
+                return ServiceResult.fail(
+                    "DN must contain at least one component",
                 )
             # Validate that we have standard LDAP attributes
             valid_attributes = {"cn", "uid", "ou", "dc", "o", "c", "street", "l", "st"}
@@ -436,7 +447,8 @@ class LDAPClient:
                 component[0].lower() in valid_attributes for component in parsed_dn
             )
             if not has_valid_attr:
-                return ServiceResult.fail("DN should contain standard LDAP attributes",
+                return ServiceResult.fail(
+                    "DN should contain standard LDAP attributes",
                 )
             return ServiceResult.ok(True)
         except Exception as e:

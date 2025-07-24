@@ -11,8 +11,16 @@ import logging
 import re
 from typing import Any
 
-from flext_core.domain.pydantic_base import DomainBaseModel, DomainValueObject
-from flext_core.domain.shared_types import ServiceResult
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_ldap.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 from pydantic import Field
 
 logger = logging.getLogger(__name__)

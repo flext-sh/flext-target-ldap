@@ -36,7 +36,7 @@ class TestDataTransformationEngine:
 
         result = engine.transform_data(entry)
 
-        assert result.success is True
+        assert result.success
         transform_result = result.data
         assert transform_result is not None
         assert (
@@ -61,7 +61,7 @@ class TestDataTransformationEngine:
 
         result = engine.transform_data(entry)
 
-        assert result.success is True
+        assert result.success
         transform_result = result.data
         assert transform_result is not None
         # The transformed objectClass list contains the replacement
@@ -90,7 +90,7 @@ class TestDataTransformationEngine:
 
         result = engine.transform_data(entry)
 
-        assert result.success is True
+        assert result.success
         transform_result = result.data
         assert transform_result is not None
         # Check that transformation rules were applied
@@ -122,7 +122,7 @@ class TestDataTransformationEngine:
 
         result = engine.transform_data(entry)
 
-        assert result.success is True
+        assert result.success
         transform_result = result.data
         assert transform_result is not None
         # Entry is copied during transformation
@@ -142,7 +142,7 @@ class TestDataTransformationEngine:
 
         result = engine.transform_data(entry)
 
-        assert result.success is True
+        assert result.success
         transform_result = result.data
         assert transform_result is not None
         # Check that transformation was performed
@@ -183,7 +183,7 @@ class TestMigrationValidator:
 
         result = validator.validate_entry(dn, attributes, object_classes)
 
-        assert result.success is True
+        assert result.success
 
     def test_validate_missing_dn(self) -> None:
         validator = MigrationValidator()
@@ -191,7 +191,7 @@ class TestMigrationValidator:
         # Missing DN test - pass empty DN
         result = validator.validate_entry("", {"cn": "testuser"}, ["person"])
 
-        assert result.success is False
+        assert not result.success
         assert result.error is not None
         assert "DN cannot be empty or whitespace" in result.error
 
@@ -213,7 +213,7 @@ class TestMigrationValidator:
             "cn=testuser,dc=example,dc=com", {"cn": "testuser"}, [],
         )
 
-        assert result.success is False
+        assert not result.success
         assert result.error is not None
         assert "Object classes must be a non-empty list" in result.error
 
@@ -308,7 +308,7 @@ class TestIntegratedTransformation:
         # Transform the entry
         transformation_result = transformation_engine.transform_data(oracle_entry)
 
-        assert transformation_result.success is True
+        assert transformation_result.success
         transform_data = transformation_result.data
         assert transform_data is not None
         assert len(transform_data.applied_rules) > 0
@@ -336,7 +336,7 @@ class TestIntegratedTransformation:
 
         validation_result = validator.validate_entry(dn, attributes, obj_classes)
 
-        assert validation_result.success is True
+        assert validation_result.success
 
     def test_classification_and_transformation_integration(self) -> None:
         rule = TransformationRule(
@@ -363,7 +363,7 @@ class TestIntegratedTransformation:
         for entry in test_entries:
             result = engine.transform_data(entry)
 
-            assert result.success is True
+            assert result.success
             transform_data = result.data
             assert transform_data is not None
             # Check that transformation was processed

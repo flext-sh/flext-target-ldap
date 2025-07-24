@@ -11,8 +11,16 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from flext_core.domain.pydantic_base import DomainBaseModel
-from flext_core.domain.shared_types import ServiceResult
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_ldap.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 from pydantic import Field
 from singer_sdk.sinks import Sink
 
@@ -156,12 +164,14 @@ class LDAPSink(Sink):
 
     def build_dn(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build distinguished name for the record. Override in subclasses."""
-        return ServiceResult.fail("build_dn method must be implemented in subclass",
+        return ServiceResult.fail(
+            "build_dn method must be implemented in subclass",
         )
 
     def build_attributes(self, record: dict[str, Any]) -> ServiceResult[Any]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return ServiceResult.fail("build_attributes method must be implemented in subclass",
+        return ServiceResult.fail(
+            "build_attributes method must be implemented in subclass",
         )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
@@ -239,7 +249,8 @@ class UsersSink(LDAPSink):
             )
 
             if not rdn_value:
-                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'",
+                return ServiceResult.fail(
+                    f"No value found for RDN attribute '{rdn_attr}'",
                 )
 
             base_dn = self.config["base_dn"]
@@ -296,7 +307,8 @@ class UsersSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building user attributes: {e}",
+            return ServiceResult.fail(
+                f"Error building user attributes: {e}",
             )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
@@ -318,7 +330,8 @@ class GroupsSink(LDAPSink):
             rdn_value = record.get(rdn_attr) or record.get("id") or record.get("name")
 
             if not rdn_value:
-                return ServiceResult.fail(f"No value found for RDN attribute '{rdn_attr}'",
+                return ServiceResult.fail(
+                    f"No value found for RDN attribute '{rdn_attr}'",
                 )
 
             base_dn = self.config["base_dn"]
@@ -353,7 +366,8 @@ class GroupsSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building group attributes: {e}",
+            return ServiceResult.fail(
+                f"Error building group attributes: {e}",
             )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
@@ -409,7 +423,8 @@ class OrganizationalUnitsSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building OU attributes: {e}",
+            return ServiceResult.fail(
+                f"Error building OU attributes: {e}",
             )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
@@ -433,7 +448,8 @@ class GenericSink(LDAPSink):
             # Try to build from id and base_dn
             entry_id = record.get("id") or record.get("name")
             if not entry_id:
-                return ServiceResult.fail("No ID or name found for generic entry",
+                return ServiceResult.fail(
+                    "No ID or name found for generic entry",
                 )
 
             base_dn = self.config["base_dn"]
@@ -466,7 +482,8 @@ class GenericSink(LDAPSink):
 
             return ServiceResult.ok(attributes)
         except Exception as e:
-            return ServiceResult.fail(f"Error building generic attributes: {e}",
+            return ServiceResult.fail(
+                f"Error building generic attributes: {e}",
             )
 
     def get_object_classes(self, record: dict[str, Any]) -> list[str]:
