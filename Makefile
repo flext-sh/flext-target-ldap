@@ -3,12 +3,12 @@
 # Enterprise-grade Singer target for LDAP directory data loading
 # Python 3.13 + Singer SDK + LDAP + FLEXT Core + Zero Tolerance Quality Gates
 
-.PHONY: help check validate test lint type-check security format format-check fix
+.PHONY: help info diagnose check validate test lint type-check security format format-check fix
 .PHONY: install dev-install setup pre-commit build clean
 .PHONY: coverage coverage-html test-unit test-integration test-singer
 .PHONY: deps-update deps-audit deps-tree deps-outdated
-.PHONY: target-test target-validate target-schema target-run
-.PHONY: ldap-connect ldap-schema ldap-operations ldap-performance
+.PHONY: sync validate-config target-test target-validate target-schema target-run
+.PHONY: ldap-write-test ldap-schema-check ldap-connection
 
 # ============================================================================
 # 🎯 HELP & INFORMATION
@@ -24,6 +24,38 @@ help: ## Show this help message
 	@echo "🧪 90%+ test coverage requirement with LDAP integration testing"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\\033[36m%-20s\\033[0m %s\\n", $$1, $$2}'
+
+
+info: ## Show project information
+	@echo "📊 Project Information"
+	@echo "======================"
+	@echo "Name: flext-target-ldap"
+	@echo "Type: singer-target"
+	@echo "Title: FLEXT TARGET LDAP"
+	@echo "Version: $(shell poetry version -s 2>/dev/null || echo "0.7.0")"
+	@echo "Python: $(shell python3.13 --version 2>/dev/null || echo "Not found")"
+	@echo "Poetry: $(shell poetry --version 2>/dev/null || echo "Not installed")"
+	@echo "Venv: $(shell poetry env info --path 2>/dev/null || echo "Not activated")"
+	@echo "Directory: $(CURDIR)"
+	@echo "Git Branch: $(shell git branch --show-current 2>/dev/null || echo "Not a git repo")"
+	@echo "Git Status: $(shell git status --porcelain 2>/dev/null | wc -l | xargs echo) files changed"
+
+diagnose: ## Run complete diagnostics
+	@echo "🔍 Running diagnostics for flext-target-ldap..."
+	@echo "System Information:"
+	@echo "OS: $(shell uname -s)"
+	@echo "Architecture: $(shell uname -m)"
+	@echo "Python: $(shell python3.13 --version 2>/dev/null || echo "Not found")"
+	@echo "Poetry: $(shell poetry --version 2>/dev/null || echo "Not installed")"
+	@echo ""
+	@echo "Project Structure:"
+	@ls -la
+	@echo ""
+	@echo "Poetry Configuration:"
+	@poetry config --list 2>/dev/null || echo "Poetry not configured"
+	@echo ""
+	@echo "Dependencies Status:"
+	@poetry show --outdated 2>/dev/null || echo "No outdated dependencies"
 
 # ============================================================================
 # 🎯 CORE QUALITY GATES - ZERO TOLERANCE
@@ -91,16 +123,6 @@ test-singer: ## Run Singer protocol tests
 	@poetry run pytest tests/singer/ -v
 	@echo "✅ Singer tests complete"
 
-test-ldap: ## Run LDAP-specific tests
-	@echo "🧪 Running LDAP-specific tests..."
-	@poetry run pytest tests/ -m "ldap" -v
-	@echo "✅ LDAP tests complete"
-
-test-directory: ## Run directory operation tests
-	@echo "🧪 Running directory operation tests..."
-	@poetry run pytest tests/ -m "directory" -v
-	@echo "✅ Directory tests complete"
-
 coverage: ## Generate detailed coverage report
 	@echo "📊 Generating coverage report..."
 	@poetry run pytest tests/ --cov=src/flext_target_ldap --cov-report=term-missing --cov-report=html
@@ -138,6 +160,16 @@ pre-commit: ## Setup pre-commit hooks
 # 🎯 SINGER TARGET OPERATIONS
 # ============================================================================
 
+sync: ## Sync data to LDAP target
+	@echo "🎯 Running LDAP data sync..."
+	@poetry run target-ldap --config $(TARGET_CONFIG) < $(TARGET_STATE)
+	@echo "✅ LDAP sync complete"
+
+validate-config: ## Validate target configuration
+	@echo "🔍 Validating target configuration..."
+	@poetry run target-ldap --config $(TARGET_CONFIG) --validate-config
+	@echo "✅ Target configuration validated"
+
 target-test: ## Test LDAP target functionality
 	@echo "🎯 Testing LDAP target functionality..."
 	@poetry run target-ldap --about
@@ -169,29 +201,24 @@ target-dry-run: ## Run LDAP target in dry-run mode
 	@poetry run target-ldap --config tests/fixtures/config/target_config.json --dry-run < tests/fixtures/data/sample_input.jsonl
 	@echo "✅ LDAP dry-run complete"
 
-target-users: ## Load user data to LDAP
-	@echo "🎯 Loading user data to LDAP..."
-	@poetry run target-ldap --config tests/fixtures/config/target_config.json < tests/fixtures/data/users.jsonl
-	@echo "✅ User data loading complete"
-
-target-groups: ## Load group data to LDAP
-	@echo "🎯 Loading group data to LDAP..."
-	@poetry run target-ldap --config tests/fixtures/config/target_config.json < tests/fixtures/data/groups.jsonl
-	@echo "✅ Group data loading complete"
-
 # ============================================================================
-# 📁 LDAP OPERATIONS
+# 📁 LDAP-SPECIFIC OPERATIONS
 # ============================================================================
 
-ldap-connect: ## Test LDAP connection
+ldap-write-test: ## Test LDAP write operations
+	@echo "📁 Testing LDAP write operations..."
+	@poetry run python -c "from flext_target_ldap.client import TargetLDAPClient; import asyncio; import json; config = json.load(open('tests/fixtures/config/target_config.json')); client = TargetLDAPClient(config); print('Testing write operations...'); result = asyncio.run(client.test_write()); print('✅ Write test passed!' if result.is_success else f'❌ Write test failed: {result.error}')"
+	@echo "✅ LDAP write test complete"
+
+ldap-schema-check: ## Check LDAP schema compatibility
+	@echo "📁 Checking LDAP schema compatibility..."
+	@poetry run python scripts/validate_ldap_schema.py
+	@echo "✅ LDAP schema check complete"
+
+ldap-connection: ## Test LDAP connection
 	@echo "📁 Testing LDAP connection..."
 	@poetry run python -c "from flext_target_ldap.client import TargetLDAPClient; import asyncio; import json; config = json.load(open('tests/fixtures/config/target_config.json')); client = TargetLDAPClient(config); print('Testing connection...'); result = asyncio.run(client.connect()); print('✅ Connected!' if result.is_success else f'❌ Failed: {result.error}')"
 	@echo "✅ LDAP connection test complete"
-
-ldap-schema: ## Validate LDAP schema
-	@echo "📁 Validating LDAP schema..."
-	@poetry run python scripts/validate_ldap_schema.py
-	@echo "✅ LDAP schema validation complete"
 
 ldap-operations: ## Test LDAP operations
 	@echo "📁 Testing LDAP operations..."
@@ -207,40 +234,6 @@ ldap-diagnostics: ## Run LDAP diagnostics
 	@echo "🔍 Running LDAP diagnostics..."
 	@poetry run python scripts/ldap_diagnostics.py
 	@echo "✅ LDAP diagnostics complete"
-
-ldap-browse: ## Browse LDAP directory structure
-	@echo "📁 Browsing LDAP directory structure..."
-	@poetry run python scripts/browse_ldap_directory.py
-	@echo "✅ LDAP directory browsing complete"
-
-ldap-dn-test: ## Test DN generation
-	@echo "📁 Testing DN generation..."
-	@poetry run python scripts/test_dn_generation.py
-	@echo "✅ DN generation test complete"
-
-# ============================================================================
-# 🔍 DIRECTORY VALIDATION
-# ============================================================================
-
-validate-users: ## Validate user entries
-	@echo "🔍 Validating user entries..."
-	@poetry run python scripts/validate_users.py
-	@echo "✅ User validation complete"
-
-validate-groups: ## Validate group entries
-	@echo "🔍 Validating group entries..."
-	@poetry run python scripts/validate_groups.py
-	@echo "✅ Group validation complete"
-
-validate-ous: ## Validate organizational units
-	@echo "🔍 Validating organizational units..."
-	@poetry run python scripts/validate_ous.py
-	@echo "✅ OU validation complete"
-
-validate-attributes: ## Validate attribute mappings
-	@echo "🔍 Validating attribute mappings..."
-	@poetry run python scripts/validate_attributes.py
-	@echo "✅ Attribute validation complete"
 
 # ============================================================================
 # 📦 BUILD & DISTRIBUTION
@@ -301,16 +294,20 @@ export PYTHONPATH := $(PWD)/src:$(PYTHONPATH)
 export PYTHONDONTWRITEBYTECODE := 1
 export PYTHONUNBUFFERED := 1
 
-# LDAP Target settings
-export TARGET_LDAP_HOST := localhost
-export TARGET_LDAP_PORT := 389
-export TARGET_LDAP_USE_SSL := false
-export TARGET_LDAP_BASE_DN := dc=test,dc=com
+# Target settings
+TARGET_CONFIG := config.json
+TARGET_STATE := state.json
 
 # Singer settings
 export SINGER_LOG_LEVEL := INFO
 export SINGER_BATCH_SIZE := 100
 export SINGER_MAX_BATCH_AGE := 300
+
+# LDAP Target settings
+export TARGET_LDAP_HOST := localhost
+export TARGET_LDAP_PORT := 389
+export TARGET_LDAP_USE_SSL := false
+export TARGET_LDAP_BASE_DN := dc=test,dc=com
 
 # Directory settings
 export TARGET_LDAP_USER_RDN_ATTRIBUTE := uid
@@ -331,6 +328,7 @@ export RUFF_CACHE_DIR := .ruff_cache
 
 # Project information
 PROJECT_NAME := flext-target-ldap
+PROJECT_TYPE := meltano-plugin
 PROJECT_VERSION := $(shell poetry version -s)
 PROJECT_DESCRIPTION := FLEXT Target LDAP - LDAP Directory Singer Target
 
@@ -350,34 +348,10 @@ singer-config-sample: ## Generate Singer config sample
 	@poetry run target-ldap --config-sample > config_sample.json
 	@echo "✅ Config sample generated: config_sample.json"
 
-singer-discover: ## Run Singer discovery (if applicable)
-	@echo "🎵 Running Singer discovery..."
-	@poetry run target-ldap --discover
-	@echo "✅ Discovery complete"
-
 singer-test-streams: ## Test Singer streams
 	@echo "🎵 Testing Singer streams..."
 	@poetry run pytest tests/singer/test_streams.py -v
 	@echo "✅ Singer streams tests complete"
-
-# ============================================================================
-# 🎯 ACTIVE DIRECTORY SUPPORT
-# ============================================================================
-
-ad-test: ## Test Active Directory integration
-	@echo "🏢 Testing Active Directory integration..."
-	@poetry run python scripts/test_active_directory.py
-	@echo "✅ Active Directory test complete"
-
-ad-user-account-control: ## Test userAccountControl management
-	@echo "🏢 Testing userAccountControl management..."
-	@poetry run python scripts/test_user_account_control.py
-	@echo "✅ userAccountControl test complete"
-
-ad-upn-generation: ## Test UPN generation
-	@echo "🏢 Testing UPN generation..."
-	@poetry run python scripts/test_upn_generation.py
-	@echo "✅ UPN generation test complete"
 
 # ============================================================================
 # 🎯 FLEXT ECOSYSTEM INTEGRATION

@@ -73,10 +73,14 @@ class TestDataTransformationEngine:
         # Create rules for Oracle value transformation (not attribute name mapping)
         rules = [
             TransformationRule(
-                name="oracle_user_prefix_removal", pattern="^orcl", replacement="",
+                name="oracle_user_prefix_removal",
+                pattern="^orcl",
+                replacement="",
             ),
             TransformationRule(
-                name="normalize_case", pattern="User$", replacement="user",
+                name="normalize_case",
+                pattern="User$",
+                replacement="user",
             ),
         ]
         engine = DataTransformationEngine(rules)
@@ -130,7 +134,9 @@ class TestDataTransformationEngine:
 
     def test_dry_run_transformation(self) -> None:
         rule = TransformationRule(
-            name="test_rule", pattern="orclUser", replacement="inetOrgPerson",
+            name="test_rule",
+            pattern="orclUser",
+            replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
 
@@ -199,7 +205,9 @@ class TestMigrationValidator:
         validator = MigrationValidator()
 
         result = validator.validate_entry(
-            "invalid_dn_format", {"cn": "testuser"}, ["person"],
+            "invalid_dn_format",
+            {"cn": "testuser"},
+            ["person"],
         )
 
         # This will depend on the actual validation implementation
@@ -210,7 +218,9 @@ class TestMigrationValidator:
         validator = MigrationValidator()
 
         result = validator.validate_entry(
-            "cn=testuser,dc=example,dc=com", {"cn": "testuser"}, [],
+            "cn=testuser,dc=example,dc=com",
+            {"cn": "testuser"},
+            [],
         )
 
         assert not result.success
@@ -221,7 +231,9 @@ class TestMigrationValidator:
         validator = MigrationValidator()
 
         result = validator.validate_entry(
-            "cn=testuser,ou=people,dc=example,dc=com", {"cn": "testuser"}, ["person"],
+            "cn=testuser,ou=people,dc=example,dc=com",
+            {"cn": "testuser"},
+            ["person"],
         )
 
         # This test depends on validation rules which may produce warnings
@@ -263,7 +275,10 @@ class TestTransformationRule:
 
     def test_transformation_rule_creation(self) -> None:
         rule = TransformationRule(
-            name="test_rule", pattern="orclUser", replacement="person", enabled=True,
+            name="test_rule",
+            pattern="orclUser",
+            replacement="person",
+            enabled=True,
         )
 
         assert rule.name == "test_rule"
@@ -340,7 +355,9 @@ class TestIntegratedTransformation:
 
     def test_classification_and_transformation_integration(self) -> None:
         rule = TransformationRule(
-            name="general_transform", pattern="orclUser", replacement="inetOrgPerson",
+            name="general_transform",
+            pattern="orclUser",
+            replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
 

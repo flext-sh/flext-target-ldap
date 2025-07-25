@@ -69,7 +69,9 @@ class TestLDAPSink:
         sink._client = mock_client
 
         result = sink.validate_entry(
-            "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"],
+            "cn=test,dc=example,dc=com",
+            {"cn": ["test"]},
+            ["person", "top"],
         )
         assert result.success
 
@@ -101,10 +103,12 @@ class TestUsersSink:
         mock_target: MagicMock,
         mock_ldap_config: dict[str, Any],
     ) -> UsersSink:
-        mock_target.config.update({
-            "base_dn": "dc=example,dc=com",
-            "user_rdn_attribute": "uid",
-        })
+        mock_target.config.update(
+            {
+                "base_dn": "dc=example,dc=com",
+                "user_rdn_attribute": "uid",
+            },
+        )
         schema = {
             "properties": {
                 "uid": {"type": "string"},
@@ -168,14 +172,18 @@ class TestUsersSink:
         assert classes == ["inetOrgPerson", "organizationalPerson", "person", "top"]
 
     def test_get_object_classes_configured(
-        self, mock_target: MagicMock, mock_ldap_config: dict[str, Any],
+        self,
+        mock_target: MagicMock,
+        mock_ldap_config: dict[str, Any],
     ) -> None:
         # Create target with custom config
-        mock_target.config.update({
-            "base_dn": "dc=example,dc=com",
-            "user_rdn_attribute": "uid",
-            "users_object_classes": ["customUser", "top"],
-        })
+        mock_target.config.update(
+            {
+                "base_dn": "dc=example,dc=com",
+                "user_rdn_attribute": "uid",
+                "users_object_classes": ["customUser", "top"],
+            },
+        )
         schema = {
             "properties": {
                 "uid": {"type": "string"},
@@ -202,10 +210,12 @@ class TestGroupsSink:
         mock_target: MagicMock,
         mock_ldap_config: dict[str, Any],
     ) -> GroupsSink:
-        mock_target.config.update({
-            "base_dn": "dc=example,dc=com",
-            "group_rdn_attribute": "cn",
-        })
+        mock_target.config.update(
+            {
+                "base_dn": "dc=example,dc=com",
+                "group_rdn_attribute": "cn",
+            },
+        )
         schema = {
             "properties": {
                 "cn": {"type": "string"},
@@ -263,9 +273,11 @@ class TestOrganizationalUnitsSink:
         mock_target: MagicMock,
         mock_ldap_config: dict[str, Any],
     ) -> OrganizationalUnitsSink:
-        mock_target.config.update({
-            "base_dn": "dc=example,dc=com",
-        })
+        mock_target.config.update(
+            {
+                "base_dn": "dc=example,dc=com",
+            },
+        )
         schema = {
             "properties": {
                 "ou": {"type": "string"},
@@ -328,9 +340,11 @@ class TestGenericSink:
         mock_target: MagicMock,
         mock_ldap_config: dict[str, Any],
     ) -> GenericSink:
-        mock_target.config.update({
-            "base_dn": "dc=example,dc=com",
-        })
+        mock_target.config.update(
+            {
+                "base_dn": "dc=example,dc=com",
+            },
+        )
         schema = {
             "properties": {
                 "dn": {"type": "string"},
@@ -396,13 +410,17 @@ class TestGenericSink:
         assert classes == ["top"]
 
     def test_get_object_classes_configured(
-        self, mock_target: MagicMock, mock_ldap_config: dict[str, Any],
+        self,
+        mock_target: MagicMock,
+        mock_ldap_config: dict[str, Any],
     ) -> None:
         # Create target with custom config
-        mock_target.config.update({
-            "base_dn": "dc=example,dc=com",
-            "generic_object_classes": ["customGeneric", "top"],
-        })
+        mock_target.config.update(
+            {
+                "base_dn": "dc=example,dc=com",
+                "generic_object_classes": ["customGeneric", "top"],
+            },
+        )
         schema = {
             "properties": {
                 "dn": {"type": "string"},
