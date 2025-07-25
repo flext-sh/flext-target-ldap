@@ -60,7 +60,9 @@ class TestLDAPClient:
 
         # Verify connection was created with server pool
         mock_connection_class.assert_called_once_with(
-            mock_pool, user=client.bind_dn, password=client.password,
+            mock_pool,
+            user=client.bind_dn,
+            password=client.password,
         )
 
         # Verify bind was called

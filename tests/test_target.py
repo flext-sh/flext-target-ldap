@@ -6,7 +6,8 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from singer_sdk.testing import get_target_test_class
+# MIGRATED: from singer_sdk.testing import get_target_test_class -> use flext_meltano
+from flext_meltano import get_target_test_class
 
 from flext_target_ldap.target import TargetLDAP
 
@@ -49,6 +50,7 @@ class TestTargetLDAPUnit:
 
         # Create a sink instance with mock data
         from flext_target_ldap.sinks import UsersSink
+
         assert sink_class == UsersSink
 
     def test_get_sink_groups(self, config: dict[str, Any]) -> None:
@@ -57,6 +59,7 @@ class TestTargetLDAPUnit:
 
         # Create a sink instance with mock data
         from flext_target_ldap.sinks import GroupsSink
+
         assert sink_class == GroupsSink
 
     def test_get_sink_generic(self, config: dict[str, Any]) -> None:
@@ -65,6 +68,7 @@ class TestTargetLDAPUnit:
 
         # Should return the default sink class
         from flext_target_ldap.sinks import GenericSink
+
         assert sink_class == GenericSink
 
     def test_dn_template_configuration(self, config: dict[str, Any]) -> None:
@@ -86,7 +90,9 @@ class TestTargetLDAPUnit:
         assert target.config["users_object_classes"] == ["customPerson", "top"]
 
     @patch("target_ldap.sinks.LDAPClient")
-    def test_process_record(self, mock_client_class: MagicMock, config: dict[str, Any]) -> None:
+    def test_process_record(
+        self, mock_client_class: MagicMock, config: dict[str, Any],
+    ) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client.upsert_entry.return_value = (True, "add")

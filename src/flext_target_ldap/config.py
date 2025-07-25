@@ -1,26 +1,24 @@
 """Configuration for target-ldap using flext-core patterns.
 
 REFACTORED:
-            Uses flext-core SingerTargetConfig for declarative configuration.
+Uses flext-core patterns for declarative configuration.
 Zero tolerance for code duplication.
 """
 
 from __future__ import annotations
 
 import warnings
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-# 🚨 ARCHITECTURAL COMPLIANCE
-from flext_target_ldap.infrastructure.di_container import (
-    get_domain_entity,
-    get_field,
-    get_service_result,
+# Import from flext-core for foundational patterns
+from flext_core import (
+    FlextResult,
+    FlextValueObject as FlextDomainBaseModel,
 )
+from pydantic import BaseSettings, Field
 
-ServiceResult = get_service_result()
-DomainEntity = get_domain_entity()
-Field = get_field()
-from pydantic import Field
+if TYPE_CHECKING:
+    from flext_meltano.common import FlextMeltanoLDAPConnectionConfig
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -33,133 +31,95 @@ warnings.warn(
 
 
 class TargetLDAPConfig(BaseSettings):
-    """LDAP target configuration using flext-core patterns."""
+    """LDAP target configuration using consolidated patterns."""
 
-    # Core LDAP connection settings
-    host: str = Field(..., description="LDAP server hostname or IP address")
-    port: int = Field(389, description="LDAP server port (389 for LDAP, 636 for LDAPS)")
-    bind_dn: str | None = Field(
+    # Use consolidated LDAP connection config - ELIMINATES DUPLICATION
+    connection: FlextMeltanoLDAPConnectionConfig = Field(
+        ..., description="LDAP connection configuration"
+    )
+
+    # Target-specific settings (not duplicated)
+    base_dn: str = Field(
+        ..., description="Base DN for LDAP operations"
+    )  # Keep for compatibility
+    search_filter: str = Field("(objectClass=*)", description="Default search filter")
+    search_scope: str = Field(
+        "SUBTREE",
+        description="Search scope: BASE, LEVEL, or SUBTREE",
+    )
+
+    # Connection timeouts
+    connect_timeout: int = Field(10, description="Connection timeout in seconds")
+    receive_timeout: int = Field(30, description="Receive timeout in seconds")
+
+    # Batch processing settings
+    batch_size: int = Field(1000, description="Batch size for bulk operations")
+    max_records: int | None = Field(
         None,
-        description="Distinguished name for binding to LDAP",
-    )
-    password: str | None = Field(
-        None,
-        description="Password for LDAP authentication",
-        json_schema_extra={"secret": True},
-    )
-    base_dn: str = Field(..., description="Base DN for LDAP operations")
-    use_ssl: bool = Field(False, description="Use SSL/TLS for LDAP connection")
-    timeout: int = Field(30, description="Connection timeout in seconds")
-
-    # Processing settings
-    validate_records: bool = Field(True, description="Validate records before loading")
-    user_rdn_attribute: str = Field("uid", description="RDN attribute for user entries")
-    group_rdn_attribute: str = Field(
-        "cn",
-        description="RDN attribute for group entries",
-    )
-    default_object_classes: dict[str, list[str]] = Field(
-        default_factory=dict,
-        description="Default object classes for each stream",
-    )
-    dn_templates: dict[str, str] = Field(
-        default_factory=dict,
-        description="DN templates for each stream",
+        description="Maximum records to process (None for unlimited)",
     )
 
-    # Data transformation settings
-    enable_transformation: bool = Field(
-        False,
-        description="Enable data transformation engine",
-    )
-    transformation_rules: list[dict[str, Any]] = Field(
-        default_factory=list,
-        description="Custom transformation rules",
-    )
-    classification_patterns: dict[str, str] = Field(
-        default_factory=dict,
-        description="Custom patterns for data classification",
-    )
-    oracle_migration_mode: bool = Field(
-        False,
-        description="Enable Oracle-to-LDAP migration optimizations",
-    )
-    preserve_original_attributes: bool = Field(
-        False,
-        description="Preserve original Oracle attributes during transformation",
-    )
-
-    # Validation settings
-    enable_validation: bool = Field(
+    # Target-specific settings
+    create_missing_entries: bool = Field(
         True,
-        description="Enable entry validation before loading",
+        description="Create entries that don't exist",
     )
-    validation_strict_mode: bool = Field(
+    update_existing_entries: bool = Field(True, description="Update existing entries")
+    delete_removed_entries: bool = Field(
         False,
-        description="Fail on validation errors (vs. warnings)",
-    )
-    migration_batch_id: str | None = Field(
-        None,
-        description="Identifier for migration batch tracking",
-    )
-    dry_run_mode: bool = Field(
-        False,
-        description="Validate and transform without actually loading data",
+        description="Delete entries not in source",
     )
 
-    # Performance settings
-    batch_size: int = Field(
-        100,
-        description="Number of entries to process in each batch",
-        ge=1,
+    # Mapping and transformation
+    attribute_mapping: dict[str, str] = Field(
+        default_factory=dict,
+        description="Mapping from Singer field names to LDAP attributes",
     )
-    parallel_processing: bool = Field(
-        False,
-        description="Enable parallel processing for large datasets",
-    )
-    max_errors: int = Field(
-        10,
-        description="Maximum number of errors before stopping processing",
-        ge=0,
-    )
-    ignore_transformation_errors: bool = Field(
-        True,
-        description="Continue processing on transformation errors",
+    object_classes: list[str] = Field(
+        default_factory=lambda: ["top"],
+        description="Default object classes for new entries",
     )
 
-    @classmethod
-    def config_jsonschema(cls) -> dict[str, Any]:
-        """Return configuration schema in Singer SDK format.
+    class Config:
+        """Pydantic configuration."""
 
-        This method is required by Singer SDK to provide the configuration schema.
-        """
-        # Temporary implementation until Singer adapters move to flext-meltano
-        schema = cls.model_json_schema()
+        env_prefix = "TARGET_LDAP_"
+        case_sensitive = False
 
-        # Convert Pydantic schema to Singer format
-        singer_schema = {"type": "object", "properties": {}, "required": []}
 
-        properties = schema.get("properties", {})
-        required = schema.get("required", [])
+class LDAPConnectionSettings(FlextDomainBaseModel):
+    """LDAP connection settings model."""
 
-        for prop_name, prop_def in properties.items():
-            singer_prop = {
-                "type": prop_def.get("type", "string"),
-                "description": prop_def.get("description", ""),
-            }
+    host: str = Field(..., description="LDAP server host")
+    port: int = Field(389, description="LDAP server port")
+    use_ssl: bool = Field(False, description="Use SSL connection")
+    use_tls: bool = Field(False, description="Use TLS connection")
+    bind_dn: str | None = Field(None, description="Bind DN")
+    bind_password: str | None = Field(None, description="Bind password")
+    base_dn: str = Field(..., description="Base DN")
+    connect_timeout: int = Field(10, description="Connection timeout")
+    receive_timeout: int = Field(30, description="Receive timeout")
 
-            # Handle defaults
-            if "default" in prop_def:
-                singer_prop["default"] = prop_def["default"]
 
-            # Handle secret fields
-            if (
-                prop_def.get("writeOnly")
-                or "secret" in prop_def.get("title", "").lower()
-            ):
-                singer_prop["secret"] = True
+class LDAPOperationSettings(FlextDomainBaseModel):
+    """LDAP operation settings model."""
 
-            singer_schema["properties"][prop_name] = singer_prop
+    batch_size: int = Field(1000, description="Batch size")
+    max_records: int | None = Field(None, description="Maximum records")
+    create_missing_entries: bool = Field(True, description="Create missing entries")
+    update_existing_entries: bool = Field(True, description="Update existing entries")
+    delete_removed_entries: bool = Field(False, description="Delete removed entries")
 
-        singer_schema["required"] = required
-        return singer_schema
+
+def create_ldap_config(**kwargs: object) -> TargetLDAPConfig:
+    """Create LDAP configuration with validation."""
+    return TargetLDAPConfig(**kwargs)
+
+
+def validate_ldap_config(config: dict[str, Any]) -> FlextResult[TargetLDAPConfig]:
+    """Validate LDAP configuration."""
+    try:
+        validated_config = create_ldap_config(**config)
+        return FlextResult.ok(validated_config)
+    except Exception as e:
+        return FlextResult.fail(f"Configuration validation failed: {e}")

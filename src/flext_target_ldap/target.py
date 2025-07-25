@@ -1,115 +1,215 @@
 """target-ldap main target class using flext-core patterns.
 
 REFACTORED:
-        Uses flext-core configuration patterns and
-        flext-infrastructure.monitoring.flext-observability logging.
+Uses flext-core configuration patterns for robust LDAP target implementation.
 Zero tolerance for code duplication.
 """
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any
 
-from singer_sdk import Target
+from flext_core import FlextError as FlextServiceError, get_logger
 
+# CONSOLIDATED: Use centralized Singer SDK from flext-meltano
+# MIGRATED: Singer SDK imports centralized via flext-meltano
+from flext_meltano import Target
+
+# Import from new modular architecture
+from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import TargetLDAPConfig
+from flext_target_ldap.infrastructure import get_target_ldap_container
 from flext_target_ldap.sinks import (
-    GenericSink,
     GroupsSink,
     OrganizationalUnitsSink,
     UsersSink,
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from flext_meltano import Sink
 
-    from singer_sdk.sinks import Sink
-
-
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class TargetLDAP(Target):
-    """Singer target for LDAP data loading using flext-core patterns."""
+    """LDAP target for Singer using flext-core patterns."""
 
     name = "target-ldap"
-
-    # Use flext-core configuration class
     config_class = TargetLDAPConfig
 
-    config_jsonschema = TargetLDAPConfig.config_jsonschema()
-
-    def get_sink(
+    def __init__(
         self,
-        stream_name: str,
-        *,
-        record: dict[str, Any] | None = None,
-        schema: dict[str, Any] | None = None,
-        key_properties: Sequence[str] | None = None,
-    ) -> Sink:
-        """Get appropriate sink for the given stream.
+        config: dict[str, Any] | None = None,
+        validate_config: bool = True,
+    ) -> None:
+        """Initialize LDAP target."""
+        super().__init__(config, validate_config)
+        self.config: TargetLDAPConfig = self.config  # Type hint for IDE support
 
-        Args:
-            stream_name: Name of the data stream to process.
-            record: Optional record for context.
-            schema: Optional schema for validation.
-            key_properties: Optional key properties for the stream.
+        # Initialize orchestrator with new modular architecture
+        self._orchestrator: LDAPTargetOrchestrator | None = None
+        self._container = None
 
-        Returns:
-            Sink instance for processing the stream data.
+    @property
+    def orchestrator(self) -> LDAPTargetOrchestrator:
+        """Get or create orchestrator."""
+        if self._orchestrator is None:
+            self._orchestrator = LDAPTargetOrchestrator(dict(self.config))
+        return self._orchestrator
 
-        """
-        # Map stream names to sink classes
+    @property
+    def singer_catalog(self) -> dict[str, Any]:
+        """Return the Singer catalog for this target."""
+        return {
+            "streams": [
+                {
+                    "tap_stream_id": "users",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "username": {"type": "string"},
+                            "email": {"type": "string"},
+                            "first_name": {"type": "string"},
+                            "last_name": {"type": "string"},
+                            "full_name": {"type": "string"},
+                            "phone": {"type": "string"},
+                            "department": {"type": "string"},
+                            "title": {"type": "string"},
+                        },
+                        "required": ["username"],
+                    },
+                },
+                {
+                    "tap_stream_id": "groups",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                            "members": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                            },
+                        },
+                        "required": ["name"],
+                    },
+                },
+                {
+                    "tap_stream_id": "organizational_units",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                        },
+                        "required": ["name"],
+                    },
+                },
+            ],
+        }
+
+    def get_sink_class(self, stream_name: str) -> type[Sink] | None:
+        """Return the appropriate sink class for the stream."""
         sink_mapping = {
             "users": UsersSink,
             "groups": GroupsSink,
             "organizational_units": OrganizationalUnitsSink,
         }
 
-        sink_class = sink_mapping.get(stream_name, GenericSink)
+        sink_class = sink_mapping.get(stream_name)
+        if not sink_class:
+            logger.warning(
+                f"No specific sink found for stream '{stream_name}', using base sink",
+            )
+            # Return UsersSink as default - could create a GenericSink if needed
+            return UsersSink
 
-        # Apply DN template if configured:
-        dn_templates = self.config.get("dn_templates", {})
-        config_dict = dict(self.config)
-        if stream_name in dn_templates:
-            config_dict[f"{stream_name}_dn_template"] = dn_templates[stream_name]
+        logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
+        return sink_class
 
-        # Apply default object classes if configured:
-        default_object_classes = self.config.get("default_object_classes", {})
-        if stream_name in default_object_classes:
-            config_dict[f"{stream_name}_object_classes"] = default_object_classes[
-                stream_name
-            ]
+    def validate_config(self) -> None:
+        """Validate the target configuration."""
+        super().validate_config()
 
-        # Update the target config
-        self._config = config_dict
+        # Additional LDAP-specific validation
+        if not self.config.host:
+            msg = "LDAP host is required"
+            raise ValueError(msg)
 
-        # Provide a proper default schema if none provided
-        default_schema = {
-            "type": "object",
-            "properties": {
-                "dn": {"type": "string", "description": "Distinguished Name"},
-                "objectClass": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Object classes",
-                },
-                "cn": {"type": "string", "description": "Common Name"},
-            },
-        }
+        if not self.config.base_dn:
+            msg = "LDAP base DN is required"
+            raise ValueError(msg)
 
-        return sink_class(
-            target=self,
-            stream_name=stream_name,
-            schema=schema or default_schema,
-            key_properties=list(key_properties) if key_properties else ["dn"],
-        )
+        if self.config.port <= 0 or self.config.port > 65535:
+            msg = "LDAP port must be between 1 and 65535"
+            raise ValueError(msg)
+
+        if self.config.use_ssl and self.config.use_tls:
+            msg = "Cannot use both SSL and TLS simultaneously"
+            raise ValueError(msg)
+
+        logger.info("LDAP target configuration validated successfully")
+
+    def setup(self) -> None:
+        """Setup the LDAP target."""
+        super().setup()
+
+        # Initialize orchestrator and container
+        init_result = self.orchestrator.initialize()
+        if not init_result.is_success:
+            msg = f"Orchestrator initialization failed: {init_result.error}"
+            raise FlextServiceError(
+                msg,
+            )
+
+        # Initialize DI container
+        container_result = get_target_ldap_container()
+        if container_result.is_success:
+            self._container = container_result.data
+            config_result = self._container.configure_ldap_services(dict(self.config))
+            if not config_result.is_success:
+                self.logger.warning(
+                    f"Container configuration failed: {config_result.error}",
+                )
+
+        logger.info(f"LDAP target setup completed for host: {self.config.host}")
+
+    def teardown(self) -> None:
+        """Teardown the LDAP target."""
+        # Cleanup orchestrator
+        if self._orchestrator:
+            cleanup_result = self._orchestrator.cleanup()
+            if not cleanup_result.is_success:
+                self.logger.warning(
+                    f"Orchestrator cleanup failed: {cleanup_result.error}",
+                )
+            self._orchestrator = None
+
+        # Cleanup container
+        if self._container:
+            clear_result = self._container.clear_services()
+            if not clear_result.is_success:
+                self.logger.warning(f"Container cleanup failed: {clear_result.error}")
+            self._container = None
+
+        super().teardown()
+        logger.info("LDAP target teardown completed")
 
 
 def main() -> None:
-    """Main CLI entry point."""
-    TargetLDAP.cli()
+    """CLI entry point for target-ldap."""
+    import sys
+
+    # from flext_meltano import target_test_runner  # Not available
+
+    # Basic CLI support
+    if len(sys.argv) > 1 and sys.argv[1] == "--help":
+        return
+
+    # Run the target
+    target = TargetLDAP()
+    # target_test_runner(target)  # Not available - use Singer SDK directly
+    target.cli()
 
 
 if __name__ == "__main__":
