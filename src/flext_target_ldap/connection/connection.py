@@ -1,14 +1,12 @@
 """LDAP connection management using flext-core patterns."""
 
-from ldap3 import Connection, Server
-
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
 # Import from flext-core for foundational patterns
 from flext_core import FlextResult, get_logger
+from ldap3 import Connection, Server
 
 if TYPE_CHECKING:
     from flext_target_ldap.connection.config import LDAPConnectionConfig
@@ -27,11 +25,10 @@ class LDAPConnection:
     def connect(self) -> FlextResult[None]:
         """Establish LDAP connection."""
         try:
-            # Import ldap3 only when needed
-            try:
-
-            except ImportError:
-                return FlextResult.fail("ldap3 package not available")
+            # ldap3 already imported at module level
+            # Check if Connection and Server are available
+            if not Connection or not Server:
+                return FlextResult.fail("ldap3 package not properly imported")
 
             if self._connection:
                 return FlextResult.ok(None)

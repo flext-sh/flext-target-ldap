@@ -127,6 +127,7 @@ output = "reports/coverage.xml"
 python = ">=3.13,<3.14"
 # MIGRATED TO flext-meltano: singer-sdk = ">=0.47.0"
 pydantic = ">=2.11.7"
+flext-meltano = {develop = true}
 
 
 [tool.ruff.lint.isort]
