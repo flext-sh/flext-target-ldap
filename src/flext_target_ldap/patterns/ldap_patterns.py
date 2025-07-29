@@ -33,7 +33,7 @@ class LDAPTypeConverter:
                 return FlextResult.ok(json.dumps(value))
             return FlextResult.ok(str(value))
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.warning(f"Type conversion failed for {singer_type}: {e}")
             return FlextResult.ok(str(value))  # Fallback to string
 
@@ -77,7 +77,7 @@ class LDAPDataTransformer:
 
             return FlextResult.ok(transformed)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
             return FlextResult.fail(f"Record transformation failed: {e}")
 
@@ -120,7 +120,7 @@ class LDAPDataTransformer:
 
             return FlextResult.ok(attributes)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
             return FlextResult.fail(f"Attribute preparation failed: {e}")
 
@@ -152,7 +152,7 @@ class LDAPSchemaMapper:
 
             return FlextResult.ok(ldap_attributes)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP schema mapping failed")
             return FlextResult.fail(f"Schema mapping failed: {e}")
 
@@ -189,7 +189,7 @@ class LDAPSchemaMapper:
                 return FlextResult.ok("OctetString")
             return FlextResult.ok("DirectoryString")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.warning(f"LDAP type mapping failed: {e}")
             return FlextResult.ok("DirectoryString")
 
@@ -232,7 +232,7 @@ class LDAPEntryManager:
 
             return FlextResult.ok(dn)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("DN generation failed")
             return FlextResult.fail(f"DN generation failed: {e}")
 
@@ -293,7 +293,7 @@ class LDAPEntryManager:
 
             return FlextResult.ok(object_classes)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
             return FlextResult.fail(f"Object class determination failed: {e}")
 
@@ -322,7 +322,7 @@ class LDAPEntryManager:
 
             return FlextResult.ok(True)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")
             return FlextResult.fail(f"Entry validation failed: {e}")
 
@@ -361,6 +361,6 @@ class LDAPEntryManager:
 
             return FlextResult.ok(changes)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
             return FlextResult.fail(f"Modify changes preparation failed: {e}")

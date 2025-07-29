@@ -12,8 +12,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Any
-
 # 🚨 ARCHITECTURAL COMPLIANCE: Use ONLY official flext-core FlextContainer
 from flext_core import FlextContainer, get_logger
 
@@ -52,7 +50,7 @@ def configure_flext_target_ldap_dependencies() -> None:
         logger.exception(f"Failed to configure FLEXT_TARGET_LDAP dependencies: {e}")
 
 
-def get_flext_target_ldap_service(service_name: str) -> Any:
+def get_flext_target_ldap_service(service_name: str) -> object:
     """Get flext_target_ldap service from container.
 
     Args:
@@ -68,7 +66,9 @@ def get_flext_target_ldap_service(service_name: str) -> Any:
     if result.success:
         return result.data
 
-    logger.warning(f"FLEXT_TARGET_LDAP service '{service_name}' not found: {result.error}")
+    logger.warning(
+        f"FLEXT_TARGET_LDAP service '{service_name}' not found: {result.error}",
+    )
     return None
 
 

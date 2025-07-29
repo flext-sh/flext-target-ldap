@@ -14,15 +14,17 @@ from flext_core import (
     FlextResult,
 )
 
+from flext_target_ldap.client import LDAPClient, LDAPConnectionConfig
+from flext_target_ldap.target import TargetLDAP
+
 
 def create_ldap_target(config: dict[str, Any]) -> FlextResult[Any]:
     """Create LDAP target with configuration."""
     try:
-        from flext_target_ldap.target import TargetLDAP
 
         target = TargetLDAP(config)
         return FlextResult.ok(target)
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to create LDAP target: {e}")
 
 
@@ -46,7 +48,7 @@ def load_users_to_ldap(
         result = sink.get_processing_result()
         return FlextResult.ok(result.success_count)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to load users: {e}")
 
 
@@ -70,14 +72,13 @@ def load_groups_to_ldap(
         result = sink.get_processing_result()
         return FlextResult.ok(result.success_count)
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to load groups: {e}")
 
 
 def test_ldap_connection(config: dict[str, Any]) -> FlextResult[bool]:
     """Test LDAP connection with given configuration."""
     try:
-        from flext_target_ldap.client import LDAPClient, LDAPConnectionConfig
 
         connection_config = LDAPConnectionConfig(
             host=config["host"],
@@ -99,7 +100,7 @@ def test_ldap_connection(config: dict[str, Any]) -> FlextResult[bool]:
             return FlextResult.ok(True)
         return FlextResult.fail(f"Connection test failed: {connect_result.error}")
 
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Connection test error: {e}")
 
 

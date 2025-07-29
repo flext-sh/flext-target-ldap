@@ -72,13 +72,16 @@ class TestTargetLDAPIntegration:
                 catch_exceptions=False,
             )
 
-        assert result.exit_code == 0
+        if result.exit_code != 0:
+
+            raise AssertionError(f"Expected {0}, got {result.exit_code}")
 
         # Verify add was called
         assert mock_conn_instance.add.called
 
         # Check output contains state message
-        assert "STATE" in result.output
+        if "STATE" not in result.output:
+            raise AssertionError(f"Expected {"STATE"} in {result.output}")
 
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.Server")
@@ -151,10 +154,13 @@ class TestTargetLDAPIntegration:
                 catch_exceptions=False,
             )
 
-        assert result.exit_code == 0
+        if result.exit_code != 0:
+
+            raise AssertionError(f"Expected {0}, got {result.exit_code}")
 
         # Should have one add and one modify
-        assert mock_conn_instance.add.call_count >= 1
+        if mock_conn_instance.add.call_count < 1:
+            raise AssertionError(f"Expected {mock_conn_instance.add.call_count} >= {1}")
         assert mock_conn_instance.modify.call_count >= 1
 
     @patch("flext_target_ldap.client.ldap3.Connection")
@@ -207,7 +213,9 @@ class TestTargetLDAPIntegration:
                 catch_exceptions=False,
             )
 
-        assert result.exit_code == 0
+        if result.exit_code != 0:
+
+            raise AssertionError(f"Expected {0}, got {result.exit_code}")
 
         # Verify delete was called
         mock_conn_instance.delete.assert_called_once_with("uid=deleted,dc=test,dc=com")
@@ -271,12 +279,15 @@ class TestTargetLDAPIntegration:
                 catch_exceptions=False,
             )
 
-        assert result.exit_code == 0
+        if result.exit_code != 0:
+
+            raise AssertionError(f"Expected {0}, got {result.exit_code}")
 
         # Verify DN was constructed from template
         add_calls = mock_conn_instance.add.call_args_list
         assert len(add_calls) > 0
-        assert add_calls[0][0][0] == "uid=testuser,ou=people,dc=test,dc=com"
+        if add_calls[0][0][0] != "uid=testuser,ou=people,dc=test,dc=com":
+            raise AssertionError(f"Expected {"uid=testuser,ou=people,dc=test,dc=com"}, got {add_calls[0][0][0]}")
 
     def test_error_handling(self, runner: CliRunner, tmp_path: Path) -> None:
         # Invalid config
@@ -351,7 +362,10 @@ class TestTargetLDAPIntegration:
                 catch_exceptions=False,
             )
 
-        assert result.exit_code == 0
+        if result.exit_code != 0:
+
+            raise AssertionError(f"Expected {0}, got {result.exit_code}")
 
         # Verify both streams were processed
-        assert mock_conn_instance.add.call_count >= 2
+        if mock_conn_instance.add.call_count < 2:
+            raise AssertionError(f"Expected {mock_conn_instance.add.call_count} >= {2}")

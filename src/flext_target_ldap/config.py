@@ -35,12 +35,12 @@ class TargetLDAPConfig(BaseSettings):
 
     # Use consolidated LDAP connection config - ELIMINATES DUPLICATION
     connection: FlextMeltanoLDAPConnectionConfig = Field(
-        ..., description="LDAP connection configuration"
+        ..., description="LDAP connection configuration",
     )
 
     # Target-specific settings (not duplicated)
     base_dn: str = Field(
-        ..., description="Base DN for LDAP operations"
+        ..., description="Base DN for LDAP operations",
     )  # Keep for compatibility
     search_filter: str = Field("(objectClass=*)", description="Default search filter")
     search_scope: str = Field(
@@ -121,5 +121,5 @@ def validate_ldap_config(config: dict[str, Any]) -> FlextResult[TargetLDAPConfig
     try:
         validated_config = create_ldap_config(**config)
         return FlextResult.ok(validated_config)
-    except Exception as e:
+    except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")

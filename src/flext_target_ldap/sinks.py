@@ -20,7 +20,7 @@ from flext_core import (
 from flext_meltano import Sink
 from pydantic import Field
 
-from flext_target_ldap.client import LDAPClient
+from flext_target_ldap.client import LDAPClient, LDAPConnectionConfig
 
 if TYPE_CHECKING:
     from flext_target_ldap.config import TargetLDAPConfig
@@ -63,7 +63,7 @@ class LDAPBaseSink(Sink):
 
     def __init__(
         self,
-        target: Any,
+        target: object,
         stream_name: str,
         schema: dict[str, Any],
         key_properties: list[str],
@@ -77,7 +77,6 @@ class LDAPBaseSink(Sink):
     def setup_client(self) -> FlextResult[LDAPClient]:
         """Setup LDAP client connection."""
         try:
-            from flext_target_ldap.client import LDAPConnectionConfig
 
             connection_config = LDAPConnectionConfig(
                 host=self.config.host,
@@ -102,7 +101,7 @@ class LDAPBaseSink(Sink):
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return FlextResult.ok(self.client)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             error_msg = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
             return FlextResult.fail(error_msg)
@@ -191,7 +190,7 @@ class UsersSink(LDAPBaseSink):
                     f"Failed to add user {user_dn}: {add_result.error}",
                 )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             error_msg = f"Error processing user record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
@@ -275,7 +274,7 @@ class GroupsSink(LDAPBaseSink):
                     f"Failed to add group {group_dn}: {add_result.error}",
                 )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             error_msg = f"Error processing group record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
@@ -358,7 +357,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                     f"Failed to add OU {ou_dn}: {add_result.error}",
                 )
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             error_msg = f"Error processing OU record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
