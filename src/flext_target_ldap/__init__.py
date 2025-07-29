@@ -15,11 +15,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano.orchestration.targets import FlextLDAPTargetOrchestrator
-
-# Import consolidated implementations from flext-meltano
-# MIGRATED: Singer SDK imports centralized via flext-meltano
-from flext_meltano.targets.ldap import TargetLDAP, TargetLDAPConfig
+# Import local implementations (not from flext-meltano yet - fallback imports removed as per CLAUDE.md)
+from flext_target_ldap.application.orchestrator import (
+    LDAPTargetOrchestrator as FlextLDAPTargetOrchestrator,
+)
+from flext_target_ldap.config import TargetLDAPConfig
+from flext_target_ldap.target import TargetLDAP
 
 # Backward compatibility aliases
 FlextTargetLDAP = TargetLDAP

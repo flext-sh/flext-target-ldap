@@ -16,12 +16,14 @@ from flext_core import (
     FlextValueObject as FlextDomainBaseModel,
 )
 
-# Import real LDAP connection config from flext-meltano
+# Import real LDAP connection config from flext-ldap (no fallbacks)
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
 if TYPE_CHECKING:
-    from flext_meltano.common import FlextMeltanoLDAPConnectionConfig
+    from flext_ldap import FlextLdapConnectionConfig
+
+# No TYPE_CHECKING imports needed - FlextLdapConnectionConfig already imported
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -36,8 +38,8 @@ warnings.warn(
 class TargetLDAPConfig(BaseSettings):
     """LDAP target configuration using consolidated patterns."""
 
-    # Use consolidated LDAP connection config - ELIMINATES DUPLICATION
-    connection: FlextMeltanoLDAPConnectionConfig = Field(
+    # Use real LDAP connection config from flext-ldap - no duplications
+    connection: FlextLdapConnectionConfig = Field(
         ..., description="LDAP connection configuration",
     )
 
@@ -114,15 +116,13 @@ class LDAPOperationSettings(FlextDomainBaseModel):
     delete_removed_entries: bool = Field(False, description="Delete removed entries")
 
 
-def create_ldap_config(**kwargs: object) -> TargetLDAPConfig:
-    """Create LDAP configuration with validation."""
-    return TargetLDAPConfig(**kwargs)
+# Function removed - not used anywhere and caused mypy errors due to complex field typing
 
 
 def validate_ldap_config(config: dict[str, Any]) -> FlextResult[TargetLDAPConfig]:
     """Validate LDAP configuration."""
     try:
-        validated_config = create_ldap_config(**config)
+        validated_config = TargetLDAPConfig(**config)
         return FlextResult.ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")
