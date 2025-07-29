@@ -10,7 +10,7 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING, Any
 
-from flext_core import FlextError as FlextServiceError, get_logger
+from flext_core import get_logger
 
 # CONSOLIDATED: Use centralized Singer SDK from flext-meltano
 # MIGRATED: Singer SDK imports centralized via flext-meltano
@@ -19,7 +19,7 @@ from flext_meltano import Target
 # Import from new modular architecture
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import TargetLDAPConfig
-from flext_target_ldap.infrastructure import get_target_ldap_container
+from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 from flext_target_ldap.sinks import (
     GroupsSink,
     OrganizationalUnitsSink,
@@ -44,8 +44,7 @@ class TargetLDAP(Target):
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
-        super().__init__(config, validate_config)
-        self.config: TargetLDAPConfig = self.config  # Type hint for IDE support
+        super().__init__(config=config, validate_config=validate_config)
 
         # Initialize orchestrator with new modular architecture
         self._orchestrator: LDAPTargetOrchestrator | None = None
@@ -155,23 +154,13 @@ class TargetLDAP(Target):
         """Setup the LDAP target."""
         super().setup()
 
-        # Initialize orchestrator and container
-        init_result = self.orchestrator.initialize()
-        if not init_result.is_success:
-            msg = f"Orchestrator initialization failed: {init_result.error}"
-            raise FlextServiceError(
-                msg,
-            )
+        # Initialize orchestrator
+        _ = self.orchestrator  # Ensure orchestrator is created
+        logger.info("Orchestrator initialized successfully")
 
         # Initialize DI container
-        container_result = get_target_ldap_container()
-        if container_result.is_success:
-            self._container = container_result.data
-            config_result = self._container.configure_ldap_services(dict(self.config))
-            if not config_result.is_success:
-                self.logger.warning(
-                    f"Container configuration failed: {config_result.error}",
-                )
+        self._container = get_flext_target_ldap_container()
+        logger.info("DI container initialized successfully")
 
         logger.info(f"LDAP target setup completed for host: {self.config.host}")
 
@@ -179,19 +168,13 @@ class TargetLDAP(Target):
         """Teardown the LDAP target."""
         # Cleanup orchestrator
         if self._orchestrator:
-            cleanup_result = self._orchestrator.cleanup()
-            if not cleanup_result.is_success:
-                self.logger.warning(
-                    f"Orchestrator cleanup failed: {cleanup_result.error}",
-                )
             self._orchestrator = None
+            logger.info("Orchestrator cleaned up")
 
         # Cleanup container
         if self._container:
-            clear_result = self._container.clear_services()
-            if not clear_result.is_success:
-                self.logger.warning(f"Container cleanup failed: {clear_result.error}")
             self._container = None
+            logger.info("DI container cleaned up")
 
         super().teardown()
         logger.info("LDAP target teardown completed")

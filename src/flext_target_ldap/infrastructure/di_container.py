@@ -63,7 +63,7 @@ def get_flext_target_ldap_service(service_name: str) -> object:
     container = get_flext_target_ldap_container()
     result = container.get(service_name)
 
-    if result.success:
+    if result.is_success:
         return result.data
 
     logger.warning(

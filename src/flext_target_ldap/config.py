@@ -15,7 +15,10 @@ from flext_core import (
     FlextResult,
     FlextValueObject as FlextDomainBaseModel,
 )
-from pydantic import BaseSettings, Field
+
+# Import real LDAP connection config from flext-meltano
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 if TYPE_CHECKING:
     from flext_meltano.common import FlextMeltanoLDAPConnectionConfig
