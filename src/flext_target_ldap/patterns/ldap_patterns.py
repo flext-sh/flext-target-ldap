@@ -138,7 +138,7 @@ class LDAPSchemaMapper:
     ) -> FlextResult[dict[str, str]]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
-            ldap_attributes = {}
+            ldap_attributes: dict[str, str] = {}
             properties = schema.get("properties", {})
 
             for prop_name, prop_def in properties.items():
@@ -146,7 +146,8 @@ class LDAPSchemaMapper:
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
 
                 if ldap_type_result.is_success:
-                    ldap_attributes[ldap_name] = ldap_type_result.data
+                    # ldap_type_result.data is guaranteed to be str when is_success is True
+                    ldap_attributes[ldap_name] = ldap_type_result.data or "DirectoryString"
                 else:
                     ldap_attributes[ldap_name] = "DirectoryString"  # Fallback
 
@@ -333,7 +334,7 @@ class LDAPEntryManager:
     ) -> FlextResult[dict[str, Any]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes = {}
+            changes: dict[str, Any] = {}
 
             # Find attributes to add, modify, or delete
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())

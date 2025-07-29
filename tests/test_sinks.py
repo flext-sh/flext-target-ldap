@@ -273,11 +273,12 @@ class TestGroupsSink:
         if result.data["cn"] != ["testgroup"]:
             raise AssertionError(f"Expected {["testgroup"]}, got {result.data["cn"]}")
         assert result.data["description"] == ["Test Group"]
-        if result.data["member"] != [:
-            raise AssertionError(f"Expected {[}, got {result.data["member"]}")
+        expected_members = [
             "uid=user1,dc=example,dc=com",
             "uid=user2,dc=example,dc=com",
         ]
+        if result.data["member"] != expected_members:
+            raise AssertionError(f"Expected {expected_members}, got {result.data['member']}")
 
     def test_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
         record: dict[str, Any] = {}
@@ -425,8 +426,8 @@ class TestGenericSink:
         assert result.data["cn"] == ["Test Entry"]
         if result.data["description"] != ["A test entry"]:
             raise AssertionError(f"Expected {["A test entry"]}, got {result.data["description"]}")
-        if "_sdc_table_version" not not in result.data:
-            raise AssertionError(f"Expected {"_sdc_table_version" not} in {result.data}")
+        if "_sdc_table_version" in result.data:
+            raise AssertionError(f"Expected '_sdc_table_version' not in {result.data}")
         assert "_sdc_received_at" not in result.data
 
     def test_get_object_classes_from_record(self, generic_sink: GenericSink) -> None:

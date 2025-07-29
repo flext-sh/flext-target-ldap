@@ -263,7 +263,7 @@ class TestLDAPClient:
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
         assert result.success
         if result.unwrap():
-            raise AssertionError(f"Expected False, got {result.unwrap()}")\ n
+            raise AssertionError(f"Expected False, got {result.unwrap()}")
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_get_entry(

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 # Import from flext-core for foundational patterns
 from flext_core import FlextResult, get_logger
@@ -20,17 +20,13 @@ class LDAPConnection:
     def __init__(self, config: LDAPConnectionConfig) -> None:
         """Initialize LDAP connection."""
         self.config = config
-        self._connection = None
+        self._connection: Connection | None = None
 
     def connect(self) -> FlextResult[None]:
         """Establish LDAP connection."""
         try:
-            # ldap3 already imported at module level
-            # Check if Connection and Server are available
-            if not Connection or not Server:
-                return FlextResult.fail("ldap3 package not properly imported")
-
-            if self._connection:
+            # Check if already connected
+            if self._connection is not None:
                 return FlextResult.ok(None)
 
             # Create server and connection
@@ -60,7 +56,7 @@ class LDAPConnection:
         """Close LDAP connection."""
         try:
             if self._connection:
-                self._connection.unbind()
+                self._connection.unbind()  # type: ignore[no-untyped-call]
                 self._connection = None
                 logger.info("LDAP connection closed")
 
@@ -73,12 +69,14 @@ class LDAPConnection:
     def test_connection(self) -> FlextResult[bool]:
         """Test LDAP connection."""
         try:
-            if not self._connection:
+            if self._connection is None:
                 connect_result = self.connect()
                 if not connect_result.is_success:
-                    return FlextResult.fail(connect_result.error)
+                    error_msg = connect_result.error or "Connection failed"
+                    return FlextResult.fail(error_msg)
 
-            # Test with simple search
+            # Test with simple search (connection is guaranteed to be not None after successful connect)
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
             search_result = self._connection.search(
                 self.config.base_dn,
                 "(objectClass=*)",
@@ -99,15 +97,18 @@ class LDAPConnection:
         search_base: str,
         search_filter: str,
         attributes: list[str] | None = None,
-        search_scope: str = "SUBTREE",
+        search_scope: Literal["BASE", "LEVEL", "SUBTREE"] = "SUBTREE",
     ) -> FlextResult[list[dict[str, Any]]]:
         """Execute LDAP search and return results."""
         try:
-            if not self._connection:
+            if self._connection is None:
                 connect_result = self.connect()
                 if not connect_result.is_success:
-                    return FlextResult.fail(connect_result.error)
+                    error_msg = connect_result.error or "Connection failed"
+                    return FlextResult.fail(error_msg)
 
+            # Connection is guaranteed to be not None after successful connect
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
             search_result = self._connection.search(
                 search_base,
                 search_filter,
@@ -121,6 +122,7 @@ class LDAPConnection:
                 return FlextResult.ok([])
 
             # Convert entries to dictionaries
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful search"
             results = []
             for entry in self._connection.entries:
                 entry_dict = {"dn": str(entry.entry_dn)}
@@ -137,17 +139,21 @@ class LDAPConnection:
     def add_entry(self, dn: str, attributes: dict[str, Any]) -> FlextResult[bool]:
         """Add new LDAP entry."""
         try:
-            if not self._connection:
+            if self._connection is None:
                 connect_result = self.connect()
                 if not connect_result.is_success:
-                    return FlextResult.fail(connect_result.error)
+                    error_msg = connect_result.error or "Connection failed"
+                    return FlextResult.fail(error_msg)
 
-            add_result = self._connection.add(dn, attributes=attributes)
+            # Connection is guaranteed to be not None after successful connect
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            add_result = self._connection.add(dn, attributes=attributes)  # type: ignore[no-untyped-call]
 
             if add_result:
                 logger.info(f"Added LDAP entry: {dn}")
                 return FlextResult.ok(True)
 
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
             error_msg = f"Add failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
@@ -158,17 +164,21 @@ class LDAPConnection:
     def modify_entry(self, dn: str, changes: dict[str, Any]) -> FlextResult[bool]:
         """Modify existing LDAP entry."""
         try:
-            if not self._connection:
+            if self._connection is None:
                 connect_result = self.connect()
                 if not connect_result.is_success:
-                    return FlextResult.fail(connect_result.error)
+                    error_msg = connect_result.error or "Connection failed"
+                    return FlextResult.fail(error_msg)
 
-            modify_result = self._connection.modify(dn, changes)
+            # Connection is guaranteed to be not None after successful connect
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            modify_result = self._connection.modify(dn, changes)  # type: ignore[no-untyped-call]
 
             if modify_result:
                 logger.info(f"Modified LDAP entry: {dn}")
                 return FlextResult.ok(True)
 
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
             error_msg = f"Modify failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
@@ -179,17 +189,21 @@ class LDAPConnection:
     def delete_entry(self, dn: str) -> FlextResult[bool]:
         """Delete LDAP entry."""
         try:
-            if not self._connection:
+            if self._connection is None:
                 connect_result = self.connect()
                 if not connect_result.is_success:
-                    return FlextResult.fail(connect_result.error)
+                    error_msg = connect_result.error or "Connection failed"
+                    return FlextResult.fail(error_msg)
 
-            delete_result = self._connection.delete(dn)
+            # Connection is guaranteed to be not None after successful connect
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            delete_result = self._connection.delete(dn)  # type: ignore[no-untyped-call]
 
             if delete_result:
                 logger.info(f"Deleted LDAP entry: {dn}")
                 return FlextResult.ok(True)
 
+            assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
             error_msg = f"Delete failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
