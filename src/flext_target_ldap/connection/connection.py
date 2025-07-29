@@ -1,5 +1,8 @@
 """LDAP connection management using flext-core patterns."""
 
+from ldap3 import Connection, Server
+
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -26,7 +29,7 @@ class LDAPConnection:
         try:
             # Import ldap3 only when needed
             try:
-                from ldap3 import Connection, Server
+
             except ImportError:
                 return FlextResult.fail("ldap3 package not available")
 
@@ -52,7 +55,7 @@ class LDAPConnection:
 
             return FlextResult.ok(None)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP connection failed")
             return FlextResult.fail(f"Connection failed: {e}")
 
@@ -66,7 +69,7 @@ class LDAPConnection:
 
             return FlextResult.ok(None)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP disconnect failed")
             return FlextResult.fail(f"Disconnect failed: {e}")
 
@@ -90,7 +93,7 @@ class LDAPConnection:
                 return FlextResult.ok(True)
             return FlextResult.fail("Connection test search failed")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP connection test failed")
             return FlextResult.fail(f"Connection test failed: {e}")
 
@@ -130,7 +133,7 @@ class LDAPConnection:
 
             return FlextResult.ok(results)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception(f"LDAP search failed: {search_filter}")
             return FlextResult.fail(f"Search failed: {e}")
 
@@ -151,7 +154,7 @@ class LDAPConnection:
             error_msg = f"Add failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception(f"LDAP add entry failed: {dn}")
             return FlextResult.fail(f"Add entry failed: {e}")
 
@@ -172,7 +175,7 @@ class LDAPConnection:
             error_msg = f"Modify failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception(f"LDAP modify entry failed: {dn}")
             return FlextResult.fail(f"Modify entry failed: {e}")
 
@@ -193,7 +196,7 @@ class LDAPConnection:
             error_msg = f"Delete failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception(f"LDAP delete entry failed: {dn}")
             return FlextResult.fail(f"Delete entry failed: {e}")
 

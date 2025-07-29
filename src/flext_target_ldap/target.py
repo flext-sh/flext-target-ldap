@@ -7,6 +7,7 @@ Zero tolerance for code duplication.
 
 from __future__ import annotations
 
+import sys
 from typing import TYPE_CHECKING, Any
 
 from flext_core import FlextError as FlextServiceError, get_logger
@@ -198,8 +199,6 @@ class TargetLDAP(Target):
 
 def main() -> None:
     """CLI entry point for target-ldap."""
-    import sys
-
     # from flext_meltano import target_test_runner  # Not available
 
     # Basic CLI support
