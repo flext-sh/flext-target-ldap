@@ -39,10 +39,12 @@ class TestLDAPBaseSink:
 
     def test_sink_initialization(self, sink: LDAPBaseSink) -> None:
         if sink.stream_name != "test_stream":
-            raise AssertionError(f"Expected {"test_stream"}, got {sink.stream_name}")
+            msg = f"Expected {'test_stream'}, got {sink.stream_name}"
+            raise AssertionError(msg)
         assert sink.key_properties == ["dn"]
         if "dn" not in sink.schema["properties"]:
-            raise AssertionError(f"Expected {"dn"} in {sink.schema["properties"]}")
+            msg = f"Expected {'dn'} in {sink.schema['properties']}"
+            raise AssertionError(msg)
 
     def test_build_dn_not_implemented(self, sink: LDAPBaseSink) -> None:
         record = {"cn": "test"}
@@ -50,7 +52,8 @@ class TestLDAPBaseSink:
         assert not result.success
         assert result.error is not None
         if "must be implemented in subclass" not in result.error:
-            raise AssertionError(f"Expected {"must be implemented in subclass"} in {result.error}")
+            msg = f"Expected {'must be implemented in subclass'} in {result.error}"
+            raise AssertionError(msg)
 
     def test_build_attributes_not_implemented(self, sink: LDAPBaseSink) -> None:
         record = {"cn": "test"}
@@ -58,13 +61,15 @@ class TestLDAPBaseSink:
         assert not result.success
         assert result.error is not None
         if "must be implemented in subclass" not in result.error:
-            raise AssertionError(f"Expected {"must be implemented in subclass"} in {result.error}")
+            msg = f"Expected {'must be implemented in subclass'} in {result.error}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
         record: dict[str, Any] = {}
         classes = sink.get_object_classes(record)
         if classes != ["top"]:
-            raise AssertionError(f"Expected {["top"]}, got {classes}")
+            msg = f"Expected {['top']}, got {classes}"
+            raise AssertionError(msg)
 
     def test_validate_entry_success(self, sink: LDAPBaseSink) -> None:
         # Mock the private _client attribute since client is a property
@@ -84,21 +89,24 @@ class TestLDAPBaseSink:
         assert not result.success
         assert result.error is not None
         if "DN cannot be empty" not in result.error:
-            raise AssertionError(f"Expected {"DN cannot be empty"} in {result.error}")
+            msg = f"Expected {'DN cannot be empty'} in {result.error}"
+            raise AssertionError(msg)
 
     def test_validate_entry_empty_attributes(self, sink: LDAPBaseSink) -> None:
         result = sink.validate_entry("cn=test,dc=example,dc=com", {}, ["person"])
         assert not result.success
         assert result.error is not None
         if "Attributes cannot be empty" not in result.error:
-            raise AssertionError(f"Expected {"Attributes cannot be empty"} in {result.error}")
+            msg = f"Expected {'Attributes cannot be empty'} in {result.error}"
+            raise AssertionError(msg)
 
     def test_validate_entry_empty_object_classes(self, sink: LDAPBaseSink) -> None:
         result = sink.validate_entry("cn=test,dc=example,dc=com", {"cn": ["test"]}, [])
         assert not result.success
         assert result.error is not None
         if "Object classes cannot be empty" not in result.error:
-            raise AssertionError(f"Expected {"Object classes cannot be empty"} in {result.error}")
+            msg = f"Expected {'Object classes cannot be empty'} in {result.error}"
+            raise AssertionError(msg)
 
 
 class TestUsersSink:
@@ -135,7 +143,8 @@ class TestUsersSink:
         result = users_sink.build_dn(record)
         assert result.success
         if result.data != "uid=testuser,dc=example,dc=com":
-            raise AssertionError(f"Expected {"uid=testuser,dc=example,dc=com"}, got {result.data}")
+            msg = f"Expected {'uid=testuser,dc=example,dc=com'}, got {result.data}"
+            raise AssertionError(msg)
 
     def test_build_dn_missing_uid(self, users_sink: UsersSink) -> None:
         record = {"cn": "Test User"}
@@ -143,7 +152,10 @@ class TestUsersSink:
         assert not result.success
         assert result.error is not None
         if "No value found for RDN attribute 'uid'" not in result.error:
-            raise AssertionError(f"Expected {"No value found for RDN attribute 'uid'"} in {result.error}")
+            msg = (
+                f"Expected {"No value found for RDN attribute 'uid'"} in {result.error}"
+            )
+            raise AssertionError(msg)
 
     def test_build_attributes_basic(self, users_sink: UsersSink) -> None:
         record = {
@@ -157,13 +169,16 @@ class TestUsersSink:
         assert result.success
         assert result.data is not None
         if result.data["uid"] != ["testuser"]:
-            raise AssertionError(f"Expected {["testuser"]}, got {result.data["uid"]}")
+            msg = f"Expected {['testuser']}, got {result.data['uid']}"
+            raise AssertionError(msg)
         assert result.data["cn"] == ["Test User"]
         if result.data["mail"] != ["test@example.com"]:
-            raise AssertionError(f"Expected {["test@example.com"]}, got {result.data["mail"]}")
+            msg = f"Expected {['test@example.com']}, got {result.data['mail']}"
+            raise AssertionError(msg)
         assert result.data["sn"] == ["User"]
         if result.data["givenName"] != ["Test"]:
-            raise AssertionError(f"Expected {["Test"]}, got {result.data["givenName"]}")
+            msg = f"Expected {['Test']}, got {result.data['givenName']}"
+            raise AssertionError(msg)
 
     def test_build_attributes_multi_valued(self, users_sink: UsersSink) -> None:
         record = {
@@ -175,16 +190,19 @@ class TestUsersSink:
         assert result.success
         assert result.data is not None
         if result.data["uid"] != ["testuser"]:
-            raise AssertionError(f"Expected {["testuser"]}, got {result.data["uid"]}")
+            msg = f"Expected {['testuser']}, got {result.data['uid']}"
+            raise AssertionError(msg)
         assert result.data["mail"] == ["test1@example.com", "test2@example.com"]
         if result.data["telephoneNumber"] != ["123-456-7890", "098-765-4321"]:
-            raise AssertionError(f"Expected {["123-456-7890", "098-765-4321"]}, got {result.data["telephoneNumber"]}")
+            msg = f"Expected {['123-456-7890', '098-765-4321']}, got {result.data['telephoneNumber']}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_default(self, users_sink: UsersSink) -> None:
         record: dict[str, Any] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["inetOrgPerson", "organizationalPerson", "person", "top"]:
-            raise AssertionError(f"Expected {["inetOrgPerson", "organizationalPerson", "person", "top"]}, got {classes}")
+            msg = f"Expected {['inetOrgPerson', 'organizationalPerson', 'person', 'top']}, got {classes}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_configured(
         self,
@@ -214,7 +232,8 @@ class TestUsersSink:
         record: dict[str, Any] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["customUser", "top"]:
-            raise AssertionError(f"Expected {["customUser", "top"]}, got {classes}")
+            msg = f"Expected {['customUser', 'top']}, got {classes}"
+            raise AssertionError(msg)
 
 
 class TestGroupsSink:
@@ -250,7 +269,8 @@ class TestGroupsSink:
         result = groups_sink.build_dn(record)
         assert result.success
         if result.data != "cn=testgroup,dc=example,dc=com":
-            raise AssertionError(f"Expected {"cn=testgroup,dc=example,dc=com"}, got {result.data}")
+            msg = f"Expected {'cn=testgroup,dc=example,dc=com'}, got {result.data}"
+            raise AssertionError(msg)
 
     def test_build_dn_missing_cn(self, groups_sink: GroupsSink) -> None:
         record = {"description": "Test Group"}
@@ -258,7 +278,10 @@ class TestGroupsSink:
         assert not result.success
         assert result.error is not None
         if "No value found for RDN attribute 'cn'" not in result.error:
-            raise AssertionError(f"Expected {"No value found for RDN attribute 'cn'"} in {result.error}")
+            msg = (
+                f"Expected {"No value found for RDN attribute 'cn'"} in {result.error}"
+            )
+            raise AssertionError(msg)
 
     def test_build_attributes_basic(self, groups_sink: GroupsSink) -> None:
         record = {
@@ -270,20 +293,23 @@ class TestGroupsSink:
         assert result.success
         assert result.data is not None
         if result.data["cn"] != ["testgroup"]:
-            raise AssertionError(f"Expected {["testgroup"]}, got {result.data["cn"]}")
+            msg = f"Expected {['testgroup']}, got {result.data['cn']}"
+            raise AssertionError(msg)
         assert result.data["description"] == ["Test Group"]
         expected_members = [
             "uid=user1,dc=example,dc=com",
             "uid=user2,dc=example,dc=com",
         ]
         if result.data["member"] != expected_members:
-            raise AssertionError(f"Expected {expected_members}, got {result.data['member']}")
+            msg = f"Expected {expected_members}, got {result.data['member']}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
         record: dict[str, Any] = {}
         classes = groups_sink.get_object_classes(record)
         if classes != ["groupOfNames", "top"]:
-            raise AssertionError(f"Expected {["groupOfNames", "top"]}, got {classes}")
+            msg = f"Expected {['groupOfNames', 'top']}, got {classes}"
+            raise AssertionError(msg)
 
 
 class TestOrganizationalUnitsSink:
@@ -318,7 +344,8 @@ class TestOrganizationalUnitsSink:
         result = ou_sink.build_dn(record)
         assert result.success
         if result.data != "ou=testou,dc=example,dc=com":
-            raise AssertionError(f"Expected {"ou=testou,dc=example,dc=com"}, got {result.data}")
+            msg = f"Expected {'ou=testou,dc=example,dc=com'}, got {result.data}"
+            raise AssertionError(msg)
 
     def test_build_dn_missing_ou(self, ou_sink: OrganizationalUnitsSink) -> None:
         record = {"description": "Test OU"}
@@ -326,7 +353,8 @@ class TestOrganizationalUnitsSink:
         assert not result.success
         assert result.error is not None
         if "No OU name found in record" not in result.error:
-            raise AssertionError(f"Expected {"No OU name found in record"} in {result.error}")
+            msg = f"Expected {'No OU name found in record'} in {result.error}"
+            raise AssertionError(msg)
 
     def test_build_attributes_basic(self, ou_sink: OrganizationalUnitsSink) -> None:
         record = {
@@ -342,22 +370,27 @@ class TestOrganizationalUnitsSink:
         assert result.success
         assert result.data is not None
         if result.data["ou"] != ["testou"]:
-            raise AssertionError(f"Expected {["testou"]}, got {result.data["ou"]}")
+            msg = f"Expected {['testou']}, got {result.data['ou']}"
+            raise AssertionError(msg)
         assert result.data["description"] == ["Test OU"]
         if result.data["telephoneNumber"] != ["123-456-7890"]:
-            raise AssertionError(f"Expected {["123-456-7890"]}, got {result.data["telephoneNumber"]}")
+            msg = f"Expected {['123-456-7890']}, got {result.data['telephoneNumber']}"
+            raise AssertionError(msg)
         assert result.data["street"] == ["123 Test St"]
         if result.data["l"] != ["Test City"]:
-            raise AssertionError(f"Expected {["Test City"]}, got {result.data["l"]}")
+            msg = f"Expected {['Test City']}, got {result.data['l']}"
+            raise AssertionError(msg)
         assert result.data["st"] == ["Test State"]
         if result.data["postalCode"] != ["12345"]:
-            raise AssertionError(f"Expected {["12345"]}, got {result.data["postalCode"]}")
+            msg = f"Expected {['12345']}, got {result.data['postalCode']}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_default(self, ou_sink: OrganizationalUnitsSink) -> None:
         record: dict[str, Any] = {}
         classes = ou_sink.get_object_classes(record)
         if classes != ["organizationalUnit", "top"]:
-            raise AssertionError(f"Expected {["organizationalUnit", "top"]}, got {classes}")
+            msg = f"Expected {['organizationalUnit', 'top']}, got {classes}"
+            raise AssertionError(msg)
 
 
 class TestLDAPBaseSink:
@@ -392,14 +425,16 @@ class TestLDAPBaseSink:
         result = generic_sink.build_dn(record)
         assert result.success
         if result.data != "cn=test,dc=example,dc=com":
-            raise AssertionError(f"Expected {"cn=test,dc=example,dc=com"}, got {result.data}")
+            msg = f"Expected {'cn=test,dc=example,dc=com'}, got {result.data}"
+            raise AssertionError(msg)
 
     def test_build_dn_with_id(self, generic_sink: LDAPBaseSink) -> None:
         record = {"id": "testentry", "cn": "Test Entry"}
         result = generic_sink.build_dn(record)
         assert result.success
         if result.data != "cn=testentry,dc=example,dc=com":
-            raise AssertionError(f"Expected {"cn=testentry,dc=example,dc=com"}, got {result.data}")
+            msg = f"Expected {'cn=testentry,dc=example,dc=com'}, got {result.data}"
+            raise AssertionError(msg)
 
     def test_build_dn_missing_identifier(self, generic_sink: LDAPBaseSink) -> None:
         record = {"description": "Test Entry"}
@@ -407,7 +442,10 @@ class TestLDAPBaseSink:
         assert not result.success
         assert result.error is not None
         if "No ID or name found for generic entry" not in result.error:
-            raise AssertionError(f"Expected {"No ID or name found for generic entry"} in {result.error}")
+            msg = (
+                f"Expected {'No ID or name found for generic entry'} in {result.error}"
+            )
+            raise AssertionError(msg)
 
     def test_build_attributes_basic(self, generic_sink: LDAPBaseSink) -> None:
         record = {
@@ -421,31 +459,37 @@ class TestLDAPBaseSink:
         assert result.success
         assert result.data is not None
         if result.data["id"] != ["testentry"]:
-            raise AssertionError(f"Expected {["testentry"]}, got {result.data["id"]}")
+            msg = f"Expected {['testentry']}, got {result.data['id']}"
+            raise AssertionError(msg)
         assert result.data["cn"] == ["Test Entry"]
         if result.data["description"] != ["A test entry"]:
-            raise AssertionError(f"Expected {["A test entry"]}, got {result.data["description"]}")
+            msg = f"Expected {['A test entry']}, got {result.data['description']}"
+            raise AssertionError(msg)
         if "_sdc_table_version" in result.data:
-            raise AssertionError(f"Expected '_sdc_table_version' not in {result.data}")
+            msg = f"Expected '_sdc_table_version' not in {result.data}"
+            raise AssertionError(msg)
         assert "_sdc_received_at" not in result.data
 
     def test_get_object_classes_from_record(self, generic_sink: LDAPBaseSink) -> None:
         record = {"object_classes": ["customClass", "top"]}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass", "top"]:
-            raise AssertionError(f"Expected {["customClass", "top"]}, got {classes}")
+            msg = f"Expected {['customClass', 'top']}, got {classes}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_single_value(self, generic_sink: LDAPBaseSink) -> None:
         record = {"object_classes": "customClass"}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass"]:
-            raise AssertionError(f"Expected {["customClass"]}, got {classes}")
+            msg = f"Expected {['customClass']}, got {classes}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_default(self, generic_sink: LDAPBaseSink) -> None:
         record: dict[str, Any] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
-            raise AssertionError(f"Expected {["top"]}, got {classes}")
+            msg = f"Expected {['top']}, got {classes}"
+            raise AssertionError(msg)
 
     def test_get_object_classes_configured(
         self,
@@ -474,4 +518,5 @@ class TestLDAPBaseSink:
         record: dict[str, Any] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customGeneric", "top"]:
-            raise AssertionError(f"Expected {["customGeneric", "top"]}, got {classes}")
+            msg = f"Expected {['customGeneric', 'top']}, got {classes}"
+            raise AssertionError(msg)

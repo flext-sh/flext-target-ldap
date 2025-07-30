@@ -72,7 +72,6 @@ class LDAPBaseSink(Sink):
     def setup_client(self) -> FlextResult[LDAPClient]:
         """Setup LDAP client connection."""
         try:
-
             # Create dict configuration for LDAPClient compatibility
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
@@ -205,8 +204,14 @@ class UsersSink(LDAPBaseSink):
 
     def _build_user_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for user entry."""
-        object_classes = self._target.config.get("object_classes", ["inetOrgPerson", "person"])
-        attributes = {"objectClass": object_classes.copy() if isinstance(object_classes, list) else ["inetOrgPerson", "person"]}
+        object_classes = self._target.config.get(
+            "object_classes", ["inetOrgPerson", "person"],
+        )
+        attributes = {
+            "objectClass": object_classes.copy()
+            if isinstance(object_classes, list)
+            else ["inetOrgPerson", "person"],
+        }
 
         # Add person-specific object classes
         if "person" not in attributes["objectClass"]:
@@ -232,7 +237,9 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self._target.config.get("attribute_mapping", {}).items():
+        for singer_field, ldap_attr in self._target.config.get(
+            "attribute_mapping", {},
+        ).items():
             value = record.get(singer_field)
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
@@ -257,7 +264,7 @@ class GroupsSink(LDAPBaseSink):
                 return
 
             # Build DN for group
-            group_dn = f"cn={group_name},{self._target.config.get("base_dn", "dc=example,dc=com")}"
+            group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
 
             # Build LDAP attributes from record
             attributes = self._build_group_attributes(record)
@@ -293,8 +300,14 @@ class GroupsSink(LDAPBaseSink):
 
     def _build_group_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for group entry."""
-        object_classes = self._target.config.get("group_object_classes", ["groupOfNames"])
-        attributes = {"objectClass": object_classes.copy() if isinstance(object_classes, list) else ["groupOfNames"]}
+        object_classes = self._target.config.get(
+            "group_object_classes", ["groupOfNames"],
+        )
+        attributes = {
+            "objectClass": object_classes.copy()
+            if isinstance(object_classes, list)
+            else ["groupOfNames"],
+        }
 
         # Add group-specific object classes
         if "groupOfNames" not in attributes["objectClass"]:
@@ -316,7 +329,9 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self._target.config.get("attribute_mapping", {}).items():
+        for singer_field, ldap_attr in self._target.config.get(
+            "attribute_mapping", {},
+        ).items():
             value = record.get(singer_field)
             if value is not None:
                 if isinstance(value, list):
@@ -344,7 +359,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 return
 
             # Build DN for OU
-            ou_dn = f"ou={ou_name},{self._target.config.get("base_dn", "dc=example,dc=com")}"
+            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
 
             # Build LDAP attributes from record
             attributes = self._build_ou_attributes(record)
@@ -377,7 +392,11 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def _build_ou_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for OU entry."""
-        attributes = {"objectClass": self._target.config.get("object_classes", ["inetOrgPerson", "person"]).copy()}
+        attributes = {
+            "objectClass": self._target.config.get(
+                "object_classes", ["inetOrgPerson", "person"],
+            ).copy(),
+        }
 
         # Add OU-specific object classes
         if "organizationalUnit" not in attributes["objectClass"]:
@@ -395,7 +414,9 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self._target.config.get("attribute_mapping", {}).items():
+        for singer_field, ldap_attr in self._target.config.get(
+            "attribute_mapping", {},
+        ).items():
             value = record.get(singer_field)
             if value is not None:
                 attributes[ldap_attr] = [str(value)]

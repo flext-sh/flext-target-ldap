@@ -62,7 +62,9 @@ class LDAPClient:
 
         # Create API instance
         self._api = get_ldap_api()
-        logger.info(f"Initialized LDAP client for {self.config.server}:{self.config.port}")
+        logger.info(
+            f"Initialized LDAP client for {self.config.server}:{self.config.port}",
+        )
 
     # Compatibility properties for old API
     @property
@@ -106,13 +108,16 @@ class LDAPClient:
         # Use flext-ldap connection validation
         validation_result = self.config.validate_domain_rules()
         if not validation_result.is_success:
-            return FlextResult.fail(f"Connection config invalid: {validation_result.error}")
+            return FlextResult.fail(
+                f"Connection config invalid: {validation_result.error}",
+            )
 
         logger.info(f"Connected to LDAP server {self.config.server}:{self.config.port}")
         return FlextResult.ok(None)
 
     def get_connection(self) -> _GeneratorContextManager[MagicMock]:
         """Get LDAP connection context manager (compatibility method)."""
+
         @contextmanager
         def connection_context() -> Generator[MagicMock]:
             # Mock connection for tests
@@ -127,7 +132,12 @@ class LDAPClient:
 
         return connection_context()
 
-    def add_entry(self, dn: str, attributes: dict[str, Any], object_classes: list[str] | None = None) -> FlextResult[bool]:
+    def add_entry(
+        self,
+        dn: str,
+        attributes: dict[str, Any],
+        object_classes: list[str] | None = None,
+    ) -> FlextResult[bool]:
         """Add LDAP entry using real flext-ldap API."""
         try:
             # Ensure connection is valid
@@ -183,14 +193,21 @@ class LDAPClient:
             logger.exception(f"Failed to delete entry {dn}")
             return FlextResult.fail(f"Delete entry failed: {e}")
 
-    def search_entry(self, base_dn: str, search_filter: str = "(objectClass=*)", attributes: list[str] | None = None) -> FlextResult[list[LDAPSearchEntry]]:
+    def search_entry(
+        self,
+        base_dn: str,
+        search_filter: str = "(objectClass=*)",
+        attributes: list[str] | None = None,
+    ) -> FlextResult[list[LDAPSearchEntry]]:
         """Search LDAP entries using real flext-ldap API."""
         try:
             connect_result = self.connect()
             if not connect_result.is_success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
-            logger.info(f"Searching LDAP entries: {base_dn} with filter {search_filter}")
+            logger.info(
+                f"Searching LDAP entries: {base_dn} with filter {search_filter}",
+            )
             if not base_dn:
                 return FlextResult.fail("Base DN required")
 
@@ -219,7 +236,9 @@ class LDAPClient:
             logger.exception(f"Failed to check entry existence: {dn}")
             return FlextResult.fail(f"Entry exists check failed: {e}")
 
-    def get_entry(self, dn: str, attributes: list[str] | None = None) -> FlextResult[LDAPSearchEntry | None]:
+    def get_entry(
+        self, dn: str, attributes: list[str] | None = None,
+    ) -> FlextResult[LDAPSearchEntry | None]:
         """Get LDAP entry using real flext-ldap API."""
         try:
             connect_result = self.connect()
