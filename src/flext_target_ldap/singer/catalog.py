@@ -10,6 +10,7 @@ from pydantic import Field
 
 logger = get_logger(__name__)
 
+
 # Local LDAP catalog classes (no fallbacks - real implementation)
 class SingerLDAPCatalogEntry(FlextValueObject):
     """Singer LDAP catalog entry using flext-core patterns."""
@@ -62,6 +63,7 @@ class SingerLDAPCatalogManager:
         if stream_name not in self._catalog_entries:
             return FlextResult.fail(f"LDAP stream not found: {stream_name}")
         return FlextResult.ok(self._catalog_entries[stream_name])
+
 
 # Re-export for backward compatibility
 __all__ = [

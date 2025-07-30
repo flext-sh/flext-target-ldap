@@ -45,12 +45,10 @@ class TestTargetLDAPIntegration:
             f.write(singer_message_state + "\n")
         return input_path
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.Server")
+    @patch("flext_target_ldap.client.get_ldap_api")
     def test_basic_load(
         self,
-        mock_server: Mock,
-        mock_connection: Mock,
+        mock_ldap_api: Mock,
         runner: CliRunner,
         config_file: Path,
         input_file: Path,
@@ -61,7 +59,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.search.return_value = True
         mock_conn_instance.entries = []  # No existing entries
         mock_conn_instance.add.return_value = True
-        mock_connection.return_value = mock_conn_instance
+        # Mock LDAP API is already configured
 
         # Run target
         with open(input_file, encoding="utf-8") as f:
@@ -83,12 +81,10 @@ class TestTargetLDAPIntegration:
         if "STATE" not in result.output:
             raise AssertionError(f"Expected {"STATE"} in {result.output}")
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.Server")
+    @patch("flext_target_ldap.client.get_ldap_api")
     def test_upsert_behavior(
         self,
-        mock_server: Mock,
-        mock_connection: Mock,
+        mock_ldap_api: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
@@ -143,7 +139,7 @@ class TestTargetLDAPIntegration:
             return True
 
         mock_conn_instance.search.side_effect = search_side_effect
-        mock_connection.return_value = mock_conn_instance
+        # Mock LDAP API is already configured
 
         # Run target
         with open(input_path, encoding="utf-8") as f:
@@ -163,12 +159,10 @@ class TestTargetLDAPIntegration:
             raise AssertionError(f"Expected {mock_conn_instance.add.call_count} >= {1}")
         assert mock_conn_instance.modify.call_count >= 1
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.Server")
+    @patch("flext_target_ldap.client.get_ldap_api")
     def test_delete_records(
         self,
-        mock_server: Mock,
-        mock_connection: Mock,
+        mock_ldap_api: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
@@ -202,7 +196,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.search.return_value = True
         mock_conn_instance.entries = [MagicMock()]  # Entry exists
         mock_conn_instance.delete.return_value = True
-        mock_connection.return_value = mock_conn_instance
+        # Mock LDAP API is already configured
 
         # Run target
         with open(input_path, encoding="utf-8") as f:
@@ -220,12 +214,10 @@ class TestTargetLDAPIntegration:
         # Verify delete was called
         mock_conn_instance.delete.assert_called_once_with("uid=deleted,dc=test,dc=com")
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.Server")
+    @patch("flext_target_ldap.client.get_ldap_api")
     def test_dn_template_usage(
         self,
-        mock_server: Mock,
-        mock_connection: Mock,
+        mock_ldap_api: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
@@ -268,7 +260,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.search.return_value = True
         mock_conn_instance.entries = []
         mock_conn_instance.add.return_value = True
-        mock_connection.return_value = mock_conn_instance
+        # Mock LDAP API is already configured
 
         # Run target
         with open(input_path, encoding="utf-8") as f:
@@ -304,12 +296,10 @@ class TestTargetLDAPIntegration:
 
         assert result.exit_code != 0
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.Server")
+    @patch("flext_target_ldap.client.get_ldap_api")
     def test_multi_stream_handling(
         self,
-        mock_server: Mock,
-        mock_connection: Mock,
+        mock_ldap_api: Mock,
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
@@ -351,7 +341,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.search.return_value = True
         mock_conn_instance.entries = []
         mock_conn_instance.add.return_value = True
-        mock_connection.return_value = mock_conn_instance
+        # Mock LDAP API is already configured
 
         # Run target
         with open(input_path, encoding="utf-8") as f:

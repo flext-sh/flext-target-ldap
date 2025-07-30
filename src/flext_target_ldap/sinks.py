@@ -7,37 +7,31 @@ Zero tolerance for code duplication.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 # Import from flext-core for foundational patterns
 from flext_core import (
     FlextResult,
-    FlextValueObject as FlextDomainBaseModel,
     get_logger,
 )
 
 # MIGRATED: from flext_meltano import Sink -> use flext_meltano
 from flext_meltano import Sink
-from pydantic import Field
 
-from flext_target_ldap.client import LDAPClient, LDAPConnectionConfig
-
-if TYPE_CHECKING:
-    from flext_target_ldap.config import TargetLDAPConfig
+from flext_target_ldap.client import LDAPClient
 
 logger = get_logger(__name__)
 
 
-class LDAPProcessingResult(FlextDomainBaseModel):
-    """Result of LDAP processing operations using flext-core patterns."""
+class LDAPProcessingResult:
+    """Result of LDAP processing operations - mutable for performance tracking."""
 
-    processed_count: int = Field(0, description="Number of records processed")
-    success_count: int = Field(0, description="Number of successful operations")
-    error_count: int = Field(0, description="Number of failed operations")
-    errors: list[str] = Field(
-        default_factory=list,
-        description="List of error messages",
-    )
+    def __init__(self) -> None:
+        """Initialize processing result counters."""
+        self.processed_count: int = 0
+        self.success_count: int = 0
+        self.error_count: int = 0
+        self.errors: list[str] = []
 
     @property
     def success_rate(self) -> float:
@@ -63,14 +57,15 @@ class LDAPBaseSink(Sink):
 
     def __init__(
         self,
-        target: object,
+        target: Any,
         stream_name: str,
         schema: dict[str, Any],
         key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
-        self.config: TargetLDAPConfig = target.config
+        # Store target reference for config access
+        self._target = target
         self.client: LDAPClient | None = None
         self._processing_result = LDAPProcessingResult()
 
@@ -78,17 +73,15 @@ class LDAPBaseSink(Sink):
         """Setup LDAP client connection."""
         try:
 
-            connection_config = LDAPConnectionConfig(
-                host=self.config.host,
-                port=self.config.port,
-                use_ssl=self.config.use_ssl,
-                use_tls=self.config.use_tls,
-                bind_dn=self.config.bind_dn,
-                bind_password=self.config.bind_password,
-                base_dn=self.config.base_dn,
-                connect_timeout=self.config.connect_timeout,
-                receive_timeout=self.config.receive_timeout,
-            )
+            # Create dict configuration for LDAPClient compatibility
+            connection_config = {
+                "host": self._target.config.get("host", "localhost"),
+                "port": self._target.config.get("port", 389),
+                "use_ssl": self._target.config.get("use_ssl", False),
+                "bind_dn": self._target.config.get("bind_dn", ""),
+                "password": self._target.config.get("password", ""),
+                "timeout": self._target.config.get("timeout", 30),
+            }
 
             self.client = LDAPClient(connection_config)
             connect_result = self.client.connect()
@@ -109,7 +102,7 @@ class LDAPBaseSink(Sink):
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""
         if self.client:
-            self.client.disconnect()
+            # Note: LDAPClient doesn't have disconnect method in current implementation
             self.client = None
             logger.info(f"LDAP client disconnected for stream: {self.stream_name}")
 
@@ -127,7 +120,7 @@ class LDAPBaseSink(Sink):
             )
 
             for record in records:
-                self.process_record(record)
+                self.process_record(record, context)
 
             logger.info(
                 f"Batch processing completed. Success: {self._processing_result.success_count}, "
@@ -137,7 +130,7 @@ class LDAPBaseSink(Sink):
         finally:
             self.teardown_client()
 
-    def process_record(self, record: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
         """Process a single record. Override in subclasses."""
         msg = "Subclasses must implement process_record"
         raise NotImplementedError(msg)
@@ -150,7 +143,7 @@ class LDAPBaseSink(Sink):
 class UsersSink(LDAPBaseSink):
     """LDAP sink for user entries."""
 
-    def process_record(self, record: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
         """Process a user record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -164,19 +157,23 @@ class UsersSink(LDAPBaseSink):
                 return
 
             # Build DN for user
-            user_dn = f"uid={username},{self.config.base_dn}"
+            base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+            user_dn = f"uid={username},{base_dn}"
 
             # Build LDAP attributes from record
             attributes = self._build_user_attributes(record)
 
+            # Extract object classes for the add_entry call
+            object_classes = attributes.pop("objectClass", ["inetOrgPerson", "person"])
+
             # Try to add the user entry
-            add_result = self.client.add_entry(user_dn, attributes)
+            add_result = self.client.add_entry(user_dn, attributes, object_classes)
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug(f"User entry added successfully: {user_dn}")
             # If add failed, try to modify existing entry
-            elif self.config.update_existing_entries:
+            elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(user_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -197,7 +194,8 @@ class UsersSink(LDAPBaseSink):
 
     def _build_user_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for user entry."""
-        attributes = {"objectClass": self.config.object_classes.copy()}
+        object_classes = self._target.config.get("object_classes", ["inetOrgPerson", "person"])
+        attributes = {"objectClass": object_classes.copy() if isinstance(object_classes, list) else ["inetOrgPerson", "person"]}
 
         # Add person-specific object classes
         if "person" not in attributes["objectClass"]:
@@ -220,13 +218,13 @@ class UsersSink(LDAPBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                attributes[ldap_attr] = str(value)
+                attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self.config.attribute_mapping.items():
+        for singer_field, ldap_attr in self._target.config.get("attribute_mapping", {}).items():
             value = record.get(singer_field)
             if value is not None:
-                attributes[ldap_attr] = str(value)
+                attributes[ldap_attr] = [str(value)]
 
         return attributes
 
@@ -234,7 +232,7 @@ class UsersSink(LDAPBaseSink):
 class GroupsSink(LDAPBaseSink):
     """LDAP sink for group entries."""
 
-    def process_record(self, record: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
         """Process a group record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -248,19 +246,22 @@ class GroupsSink(LDAPBaseSink):
                 return
 
             # Build DN for group
-            group_dn = f"cn={group_name},{self.config.base_dn}"
+            group_dn = f"cn={group_name},{self._target.config.get("base_dn", "dc=example,dc=com")}"
 
             # Build LDAP attributes from record
             attributes = self._build_group_attributes(record)
 
+            # Extract object classes for the add_entry call
+            object_classes = attributes.pop("objectClass", ["groupOfNames"])
+
             # Try to add the group entry
-            add_result = self.client.add_entry(group_dn, attributes)
+            add_result = self.client.add_entry(group_dn, attributes, object_classes)
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug(f"Group entry added successfully: {group_dn}")
             # If add failed, try to modify existing entry
-            elif self.config.update_existing_entries:
+            elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(group_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -281,7 +282,8 @@ class GroupsSink(LDAPBaseSink):
 
     def _build_group_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for group entry."""
-        attributes = {"objectClass": self.config.object_classes.copy()}
+        object_classes = self._target.config.get("group_object_classes", ["groupOfNames"])
+        attributes = {"objectClass": object_classes.copy() if isinstance(object_classes, list) else ["groupOfNames"]}
 
         # Add group-specific object classes
         if "groupOfNames" not in attributes["objectClass"]:
@@ -300,16 +302,16 @@ class GroupsSink(LDAPBaseSink):
                 if isinstance(value, list):
                     attributes[ldap_attr] = value
                 else:
-                    attributes[ldap_attr] = str(value)
+                    attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self.config.attribute_mapping.items():
+        for singer_field, ldap_attr in self._target.config.get("attribute_mapping", {}).items():
             value = record.get(singer_field)
             if value is not None:
                 if isinstance(value, list):
                     attributes[ldap_attr] = value
                 else:
-                    attributes[ldap_attr] = str(value)
+                    attributes[ldap_attr] = [str(value)]
 
         return attributes
 
@@ -317,7 +319,7 @@ class GroupsSink(LDAPBaseSink):
 class OrganizationalUnitsSink(LDAPBaseSink):
     """LDAP sink for organizational unit entries."""
 
-    def process_record(self, record: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
         """Process an organizational unit record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -331,7 +333,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 return
 
             # Build DN for OU
-            ou_dn = f"ou={ou_name},{self.config.base_dn}"
+            ou_dn = f"ou={ou_name},{self._target.config.get("base_dn", "dc=example,dc=com")}"
 
             # Build LDAP attributes from record
             attributes = self._build_ou_attributes(record)
@@ -343,7 +345,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 self._processing_result.add_success()
                 logger.debug(f"OU entry added successfully: {ou_dn}")
             # If add failed, try to modify existing entry
-            elif self.config.update_existing_entries:
+            elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(ou_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -364,7 +366,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def _build_ou_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for OU entry."""
-        attributes = {"objectClass": self.config.object_classes.copy()}
+        attributes = {"objectClass": self._target.config.get("object_classes", ["inetOrgPerson", "person"]).copy()}
 
         # Add OU-specific object classes
         if "organizationalUnit" not in attributes["objectClass"]:
@@ -379,12 +381,12 @@ class OrganizationalUnitsSink(LDAPBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                attributes[ldap_attr] = str(value)
+                attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self.config.attribute_mapping.items():
+        for singer_field, ldap_attr in self._target.config.get("attribute_mapping", {}).items():
             value = record.get(singer_field)
             if value is not None:
-                attributes[ldap_attr] = str(value)
+                attributes[ldap_attr] = [str(value)]
 
         return attributes

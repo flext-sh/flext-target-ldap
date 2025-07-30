@@ -8,15 +8,14 @@ from unittest.mock import MagicMock
 import pytest
 
 from flext_target_ldap.sinks import (
-    GenericSink,
     GroupsSink,
-    LDAPSink,
+    LDAPBaseSink,
     OrganizationalUnitsSink,
     UsersSink,
 )
 
 
-class TestLDAPSink:
+class TestLDAPBaseSink:
     """Test base LDAP sink."""
 
     @pytest.fixture
@@ -24,28 +23,28 @@ class TestLDAPSink:
         self,
         mock_target: MagicMock,
         mock_ldap_config: dict[str, Any],
-    ) -> LDAPSink:
+    ) -> LDAPBaseSink:
         schema = {
             "properties": {
                 "dn": {"type": "string"},
                 "cn": {"type": "string"},
             },
         }
-        return LDAPSink(
+        return LDAPBaseSink(
             target=mock_target,
             stream_name="test_stream",
             schema=schema,
             key_properties=["dn"],
         )
 
-    def test_sink_initialization(self, sink: LDAPSink) -> None:
+    def test_sink_initialization(self, sink: LDAPBaseSink) -> None:
         if sink.stream_name != "test_stream":
             raise AssertionError(f"Expected {"test_stream"}, got {sink.stream_name}")
         assert sink.key_properties == ["dn"]
         if "dn" not in sink.schema["properties"]:
             raise AssertionError(f"Expected {"dn"} in {sink.schema["properties"]}")
 
-    def test_build_dn_not_implemented(self, sink: LDAPSink) -> None:
+    def test_build_dn_not_implemented(self, sink: LDAPBaseSink) -> None:
         record = {"cn": "test"}
         result = sink.build_dn(record)
         assert not result.success
@@ -53,7 +52,7 @@ class TestLDAPSink:
         if "must be implemented in subclass" not in result.error:
             raise AssertionError(f"Expected {"must be implemented in subclass"} in {result.error}")
 
-    def test_build_attributes_not_implemented(self, sink: LDAPSink) -> None:
+    def test_build_attributes_not_implemented(self, sink: LDAPBaseSink) -> None:
         record = {"cn": "test"}
         result = sink.build_attributes(record)
         assert not result.success
@@ -61,13 +60,13 @@ class TestLDAPSink:
         if "must be implemented in subclass" not in result.error:
             raise AssertionError(f"Expected {"must be implemented in subclass"} in {result.error}")
 
-    def test_get_object_classes_default(self, sink: LDAPSink) -> None:
+    def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
         record: dict[str, Any] = {}
         classes = sink.get_object_classes(record)
         if classes != ["top"]:
             raise AssertionError(f"Expected {["top"]}, got {classes}")
 
-    def test_validate_entry_success(self, sink: LDAPSink) -> None:
+    def test_validate_entry_success(self, sink: LDAPBaseSink) -> None:
         # Mock the private _client attribute since client is a property
         mock_client = MagicMock()
         mock_client.validate_dn.return_value.is_success = True
@@ -80,21 +79,21 @@ class TestLDAPSink:
         )
         assert result.success
 
-    def test_validate_entry_empty_dn(self, sink: LDAPSink) -> None:
+    def test_validate_entry_empty_dn(self, sink: LDAPBaseSink) -> None:
         result = sink.validate_entry("", {"cn": ["test"]}, ["person"])
         assert not result.success
         assert result.error is not None
         if "DN cannot be empty" not in result.error:
             raise AssertionError(f"Expected {"DN cannot be empty"} in {result.error}")
 
-    def test_validate_entry_empty_attributes(self, sink: LDAPSink) -> None:
+    def test_validate_entry_empty_attributes(self, sink: LDAPBaseSink) -> None:
         result = sink.validate_entry("cn=test,dc=example,dc=com", {}, ["person"])
         assert not result.success
         assert result.error is not None
         if "Attributes cannot be empty" not in result.error:
             raise AssertionError(f"Expected {"Attributes cannot be empty"} in {result.error}")
 
-    def test_validate_entry_empty_object_classes(self, sink: LDAPSink) -> None:
+    def test_validate_entry_empty_object_classes(self, sink: LDAPBaseSink) -> None:
         result = sink.validate_entry("cn=test,dc=example,dc=com", {"cn": ["test"]}, [])
         assert not result.success
         assert result.error is not None
@@ -361,7 +360,7 @@ class TestOrganizationalUnitsSink:
             raise AssertionError(f"Expected {["organizationalUnit", "top"]}, got {classes}")
 
 
-class TestGenericSink:
+class TestLDAPBaseSink:
     """Test Generic sink."""
 
     @pytest.fixture
@@ -369,7 +368,7 @@ class TestGenericSink:
         self,
         mock_target: MagicMock,
         mock_ldap_config: dict[str, Any],
-    ) -> GenericSink:
+    ) -> LDAPBaseSink:
         mock_target.config.update(
             {
                 "base_dn": "dc=example,dc=com",
@@ -381,28 +380,28 @@ class TestGenericSink:
                 "cn": {"type": "string"},
             },
         }
-        return GenericSink(
+        return LDAPBaseSink(
             target=mock_target,
             stream_name="generic",
             schema=schema,
             key_properties=["id"],
         )
 
-    def test_build_dn_with_dn_field(self, generic_sink: GenericSink) -> None:
+    def test_build_dn_with_dn_field(self, generic_sink: LDAPBaseSink) -> None:
         record = {"dn": "cn=test,dc=example,dc=com"}
         result = generic_sink.build_dn(record)
         assert result.success
         if result.data != "cn=test,dc=example,dc=com":
             raise AssertionError(f"Expected {"cn=test,dc=example,dc=com"}, got {result.data}")
 
-    def test_build_dn_with_id(self, generic_sink: GenericSink) -> None:
+    def test_build_dn_with_id(self, generic_sink: LDAPBaseSink) -> None:
         record = {"id": "testentry", "cn": "Test Entry"}
         result = generic_sink.build_dn(record)
         assert result.success
         if result.data != "cn=testentry,dc=example,dc=com":
             raise AssertionError(f"Expected {"cn=testentry,dc=example,dc=com"}, got {result.data}")
 
-    def test_build_dn_missing_identifier(self, generic_sink: GenericSink) -> None:
+    def test_build_dn_missing_identifier(self, generic_sink: LDAPBaseSink) -> None:
         record = {"description": "Test Entry"}
         result = generic_sink.build_dn(record)
         assert not result.success
@@ -410,7 +409,7 @@ class TestGenericSink:
         if "No ID or name found for generic entry" not in result.error:
             raise AssertionError(f"Expected {"No ID or name found for generic entry"} in {result.error}")
 
-    def test_build_attributes_basic(self, generic_sink: GenericSink) -> None:
+    def test_build_attributes_basic(self, generic_sink: LDAPBaseSink) -> None:
         record = {
             "id": "testentry",
             "cn": "Test Entry",
@@ -430,19 +429,19 @@ class TestGenericSink:
             raise AssertionError(f"Expected '_sdc_table_version' not in {result.data}")
         assert "_sdc_received_at" not in result.data
 
-    def test_get_object_classes_from_record(self, generic_sink: GenericSink) -> None:
+    def test_get_object_classes_from_record(self, generic_sink: LDAPBaseSink) -> None:
         record = {"object_classes": ["customClass", "top"]}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass", "top"]:
             raise AssertionError(f"Expected {["customClass", "top"]}, got {classes}")
 
-    def test_get_object_classes_single_value(self, generic_sink: GenericSink) -> None:
+    def test_get_object_classes_single_value(self, generic_sink: LDAPBaseSink) -> None:
         record = {"object_classes": "customClass"}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass"]:
             raise AssertionError(f"Expected {["customClass"]}, got {classes}")
 
-    def test_get_object_classes_default(self, generic_sink: GenericSink) -> None:
+    def test_get_object_classes_default(self, generic_sink: LDAPBaseSink) -> None:
         record: dict[str, Any] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
@@ -466,7 +465,7 @@ class TestGenericSink:
                 "cn": {"type": "string"},
             },
         }
-        generic_sink = GenericSink(
+        generic_sink = LDAPBaseSink(
             target=mock_target,
             stream_name="generic",
             schema=schema,

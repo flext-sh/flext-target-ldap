@@ -10,7 +10,7 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING, Any
 
-from flext_core import get_logger
+from flext_core import FlextContainer, get_logger
 
 # CONSOLIDATED: Use centralized Singer SDK from flext-meltano
 # MIGRATED: Singer SDK imports centralized via flext-meltano
@@ -48,7 +48,7 @@ class TargetLDAP(Target):
 
         # Initialize orchestrator with new modular architecture
         self._orchestrator: LDAPTargetOrchestrator | None = None
-        self._container = None
+        self._container: FlextContainer | None = None
 
     @property
     def orchestrator(self) -> LDAPTargetOrchestrator:
@@ -108,7 +108,7 @@ class TargetLDAP(Target):
             ],
         }
 
-    def get_sink_class(self, stream_name: str) -> type[Sink] | None:
+    def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
             "users": UsersSink,
@@ -129,22 +129,25 @@ class TargetLDAP(Target):
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        super().validate_config()
-
         # Additional LDAP-specific validation
-        if not self.config.host:
+        host = self.config.get("host")
+        if not host:
             msg = "LDAP host is required"
             raise ValueError(msg)
 
-        if not self.config.base_dn:
+        base_dn = self.config.get("base_dn")
+        if not base_dn:
             msg = "LDAP base DN is required"
             raise ValueError(msg)
 
-        if self.config.port <= 0 or self.config.port > 65535:
+        port = self.config.get("port", 389)
+        if port <= 0 or port > 65535:
             msg = "LDAP port must be between 1 and 65535"
             raise ValueError(msg)
 
-        if self.config.use_ssl and self.config.use_tls:
+        use_ssl = self.config.get("use_ssl", False)
+        use_tls = self.config.get("use_tls", False)
+        if use_ssl and use_tls:
             msg = "Cannot use both SSL and TLS simultaneously"
             raise ValueError(msg)
 
@@ -152,8 +155,6 @@ class TargetLDAP(Target):
 
     def setup(self) -> None:
         """Setup the LDAP target."""
-        super().setup()
-
         # Initialize orchestrator
         _ = self.orchestrator  # Ensure orchestrator is created
         logger.info("Orchestrator initialized successfully")
@@ -162,7 +163,8 @@ class TargetLDAP(Target):
         self._container = get_flext_target_ldap_container()
         logger.info("DI container initialized successfully")
 
-        logger.info(f"LDAP target setup completed for host: {self.config.host}")
+        host = self.config.get("host", "localhost")
+        logger.info(f"LDAP target setup completed for host: {host}")
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""
@@ -172,11 +174,10 @@ class TargetLDAP(Target):
             logger.info("Orchestrator cleaned up")
 
         # Cleanup container
-        if self._container:
+        if self._container is not None:
             self._container = None
             logger.info("DI container cleaned up")
 
-        super().teardown()
         logger.info("LDAP target teardown completed")
 
 

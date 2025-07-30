@@ -13,7 +13,7 @@ from typing import Any
 from flext_core import (
     FlextResult,
 )
-from flext_ldap import FlextLdapApi, FlextLdapConnectionConfig, get_ldap_api
+from flext_ldap import FlextLdapConnectionConfig, get_ldap_api
 
 from flext_target_ldap.target import TargetLDAP
 
@@ -39,11 +39,13 @@ def load_users_to_ldap(
 
     try:
         target = target_result.data
+        if target is None:
+            return FlextResult.fail("Target creation failed")
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
 
         # Process records
         for user in users:
-            sink.process_record(user)
+            sink.process_record(user, {})
 
         result = sink.get_processing_result()
         return FlextResult.ok(result.success_count)
@@ -63,11 +65,13 @@ def load_groups_to_ldap(
 
     try:
         target = target_result.data
+        if target is None:
+            return FlextResult.fail("Target creation failed")
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
 
         # Process records
         for group in groups:
-            sink.process_record(group)
+            sink.process_record(group, {})
 
         result = sink.get_processing_result()
         return FlextResult.ok(result.success_count)
