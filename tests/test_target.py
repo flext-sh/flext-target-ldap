@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from flext_target_ldap.sinks import GroupsSink, LDAPBaseSink, UsersSink
-
 from flext_target_ldap.target import TargetLDAP
 
 # Alias for backward compatibility
@@ -35,7 +34,8 @@ class TestTargetLDAPUnit:
     def test_target_initialization(self, config: dict[str, Any]) -> None:
         target = TargetLDAP(config=config)
         if target.name != "target-ldap":
-            raise AssertionError(f"Expected {"target-ldap"}, got {target.name}")
+            msg = f"Expected {'target-ldap'}, got {target.name}"
+            raise AssertionError(msg)
         assert target.config == config
 
     def test_get_sink_users(self, config: dict[str, Any]) -> None:
@@ -44,10 +44,9 @@ class TestTargetLDAPUnit:
 
         # Create a sink instance with mock data
 
-
         if sink_class != UsersSink:
-
-            raise AssertionError(f"Expected {UsersSink}, got {sink_class}")
+            msg = f"Expected {UsersSink}, got {sink_class}"
+            raise AssertionError(msg)
 
     def test_get_sink_groups(self, config: dict[str, Any]) -> None:
         target = TargetLDAP(config=config)
@@ -55,10 +54,9 @@ class TestTargetLDAPUnit:
 
         # Create a sink instance with mock data
 
-
         if sink_class != GroupsSink:
-
-            raise AssertionError(f"Expected {GroupsSink}, got {sink_class}")
+            msg = f"Expected {GroupsSink}, got {sink_class}"
+            raise AssertionError(msg)
 
     def test_get_sink_generic(self, config: dict[str, Any]) -> None:
         target = TargetLDAP(config=config)
@@ -66,10 +64,9 @@ class TestTargetLDAPUnit:
 
         # Should return the default sink class
 
-
         if sink_class != GenericSink:
-
-            raise AssertionError(f"Expected {GenericSink}, got {sink_class}")
+            msg = f"Expected {GenericSink}, got {sink_class}"
+            raise AssertionError(msg)
 
     def test_dn_template_configuration(self, config: dict[str, Any]) -> None:
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
@@ -88,12 +85,14 @@ class TestTargetLDAPUnit:
         target.get_sink("users")
 
         if target.config["users_object_classes"] != ["customPerson", "top"]:
-
-            raise AssertionError(f"Expected {["customPerson", "top"]}, got {target.config["users_object_classes"]}")
+            msg = f"Expected {['customPerson', 'top']}, got {target.config['users_object_classes']}"
+            raise AssertionError(msg)
 
     @patch("target_ldap.sinks.LDAPClient")
     def test_process_record(
-        self, mock_client_class: MagicMock, config: dict[str, Any],
+        self,
+        mock_client_class: MagicMock,
+        config: dict[str, Any],
     ) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
@@ -117,9 +116,13 @@ class TestTargetLDAPUnit:
         mock_client.upsert_entry.assert_called_once()
         call_args = mock_client.upsert_entry.call_args
         if call_args[0][0] != "uid=jdoe,ou=users,dc=test,dc=com":
-            raise AssertionError(f"Expected {"uid=jdoe,ou=users,dc=test,dc=com"}, got {call_args[0][0]}")
+            msg = (
+                f"Expected {'uid=jdoe,ou=users,dc=test,dc=com'}, got {call_args[0][0]}"
+            )
+            raise AssertionError(msg)
         if "inetOrgPerson" not in call_args[0][1]:
-            raise AssertionError(f"Expected {"inetOrgPerson"} in {call_args[0][1]}")
+            msg = f"Expected {'inetOrgPerson'} in {call_args[0][1]}"
+            raise AssertionError(msg)
 
     @patch("target_ldap.sinks.LDAPClient")
     def test_process_delete_record(

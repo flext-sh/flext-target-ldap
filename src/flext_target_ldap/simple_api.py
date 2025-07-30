@@ -21,7 +21,6 @@ from flext_target_ldap.target import TargetLDAP
 def create_ldap_target(config: dict[str, Any]) -> FlextResult[Any]:
     """Create LDAP target with configuration."""
     try:
-
         target = TargetLDAP(config)
         return FlextResult.ok(target)
     except (RuntimeError, ValueError, TypeError) as e:
@@ -83,7 +82,6 @@ def load_groups_to_ldap(
 def test_ldap_connection(config: dict[str, Any]) -> FlextResult[bool]:
     """Test LDAP connection with given configuration."""
     try:
-
         connection_config = FlextLdapConnectionConfig(
             server=config["host"],
             port=config.get("port", 389),
@@ -97,7 +95,9 @@ def test_ldap_connection(config: dict[str, Any]) -> FlextResult[bool]:
         validation_result = connection_config.validate_domain_rules()
         if validation_result.is_success:
             return FlextResult.ok(True)
-        return FlextResult.fail(f"Connection config validation failed: {validation_result.error}")
+        return FlextResult.fail(
+            f"Connection config validation failed: {validation_result.error}",
+        )
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Connection test error: {e}")

@@ -26,7 +26,9 @@ class LDAPTargetOrchestrator:
         self.config = config or {}
         logger.debug("Initialized LDAP target orchestrator")
 
-    def orchestrate_data_loading(self, records: list[dict[str, Any]]) -> FlextResult[dict[str, Any]]:
+    def orchestrate_data_loading(
+        self, records: list[dict[str, Any]],
+    ) -> FlextResult[dict[str, Any]]:
         """Orchestrate data loading to LDAP target.
 
         Args:

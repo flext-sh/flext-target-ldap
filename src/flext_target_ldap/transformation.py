@@ -67,7 +67,9 @@ class DataTransformationEngine:
                 # Simple string replacement in values
                 for key, value in transformed_data.items():
                     if isinstance(value, str) and rule.pattern in value:
-                        transformed_data[key] = value.replace(rule.pattern, rule.replacement)
+                        transformed_data[key] = value.replace(
+                            rule.pattern, rule.replacement,
+                        )
                         applied_rules.append(rule.name)
 
             result = TransformationResult(
@@ -98,7 +100,12 @@ class MigrationValidator:
             "validation_warnings": 0,
         }
 
-    def validate(self, data: dict[str, Any] | str, attributes: dict[str, Any] | None = None, object_classes: list[str] | None = None) -> FlextResult[bool]:
+    def validate(
+        self,
+        data: dict[str, Any] | str,
+        attributes: dict[str, Any] | None = None,
+        object_classes: list[str] | None = None,
+    ) -> FlextResult[bool]:
         """Validate migration data."""
         try:
             self._stats["entries_validated"] += 1
@@ -121,12 +128,13 @@ class MigrationValidator:
                     return FlextResult.fail("Object classes must be a non-empty list")
 
                 # Basic attribute validation for person object class
-                if "person" in obj_classes:
-                    if "sn" not in attrs:
-                        self._stats["validation_warnings"] += 1
-                        if self.strict_mode:
-                            self._stats["validation_errors"] += 1
-                            return FlextResult.fail("person object class requires 'sn' attribute")
+                if "person" in obj_classes and "sn" not in attrs:
+                    self._stats["validation_warnings"] += 1
+                    if self.strict_mode:
+                        self._stats["validation_errors"] += 1
+                        return FlextResult.fail(
+                            "person object class requires 'sn' attribute",
+                        )
 
                 return FlextResult.ok(True)
             # Called with validate(data_dict)
@@ -139,7 +147,9 @@ class MigrationValidator:
             self._stats["validation_errors"] += 1
             return FlextResult.fail(f"Validation failed: {e}")
 
-    def validate_entry(self, dn: str, attributes: dict[str, Any], object_classes: list[str]) -> FlextResult[bool]:
+    def validate_entry(
+        self, dn: str, attributes: dict[str, Any], object_classes: list[str],
+    ) -> FlextResult[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
 

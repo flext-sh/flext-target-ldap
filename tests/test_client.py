@@ -10,9 +10,9 @@ from ldap3.core import exceptions as ldap3_exceptions
 
 from flext_target_ldap.client import LDAPClient
 
-
 # Constants
 EXPECTED_DATA_COUNT = 3
+
 
 class TestLDAPClient:
     """Test LDAP client functionality."""
@@ -23,22 +23,27 @@ class TestLDAPClient:
 
     def test_client_initialization(self, client: LDAPClient) -> None:
         if client.host != "test.ldap.com":
-            raise AssertionError(f"Expected {"test.ldap.com"}, got {client.host}")
+            msg = f"Expected {'test.ldap.com'}, got {client.host}"
+            raise AssertionError(msg)
         assert client.port == 389
         if client.bind_dn != "cn=admin,dc=test,dc=com":
-            raise AssertionError(f"Expected {"cn=admin,dc=test,dc=com"}, got {client.bind_dn}")
+            msg = f"Expected {'cn=admin,dc=test,dc=com'}, got {client.bind_dn}"
+            raise AssertionError(msg)
         assert client.password == "test_password"
         assert not client.use_ssl
         if client.timeout != 30:
-            raise AssertionError(f"Expected {30}, got {client.timeout}")
+            msg = f"Expected {30}, got {client.timeout}"
+            raise AssertionError(msg)
 
     def test_server_uri(self, client: LDAPClient) -> None:
         if client.server_uri != "ldap://test.ldap.com:389":
-            raise AssertionError(f"Expected {"ldap://test.ldap.com:389"}, got {client.server_uri}")
+            msg = f"Expected {'ldap://test.ldap.com:389'}, got {client.server_uri}"
+            raise AssertionError(msg)
 
         client.use_ssl = True
         if client.server_uri != "ldaps://test.ldap.com:389":
-            raise AssertionError(f"Expected {"ldaps://test.ldap.com:389"}, got {client.server_uri}")
+            msg = f"Expected {'ldaps://test.ldap.com:389'}, got {client.server_uri}"
+            raise AssertionError(msg)
 
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.ServerPool")
@@ -58,7 +63,8 @@ class TestLDAPClient:
 
         with client.get_connection() as conn:
             if conn != mock_connection:
-                raise AssertionError(f"Expected {mock_connection}, got {conn}")
+                msg = f"Expected {mock_connection}, got {conn}"
+                raise AssertionError(msg)
 
         # Verify connection was created with server pool
         mock_connection_class.assert_called_once_with(
@@ -98,7 +104,8 @@ class TestLDAPClient:
 
         assert result.is_success
         if not (result.data):
-            raise AssertionError(f"Expected True, got {result.data}")
+            msg = f"Expected True, got {result.data}"
+            raise AssertionError(msg)
 
         # Verify add was called correctly
         mock_connection.add.assert_called_once()
@@ -131,7 +138,8 @@ class TestLDAPClient:
         assert not result.is_success
         assert result.error is not None
         if "Entry already exists" not in result.error:
-            raise AssertionError(f"Expected {"Entry already exists"} in {result.error}")
+            msg = f"Expected {'Entry already exists'} in {result.error}"
+            raise AssertionError(msg)
 
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.ServerPool")
@@ -157,7 +165,8 @@ class TestLDAPClient:
 
         assert result.is_success
         if not (result.data):
-            raise AssertionError(f"Expected True, got {result.data}")
+            msg = f"Expected True, got {result.data}"
+            raise AssertionError(msg)
 
         # Verify modify was called
         mock_connection.modify.assert_called_once()
@@ -183,7 +192,8 @@ class TestLDAPClient:
 
         assert result.is_success
         if not (result.data):
-            raise AssertionError(f"Expected True, got {result.data}")
+            msg = f"Expected True, got {result.data}"
+            raise AssertionError(msg)
         mock_connection.delete.assert_called_once_with("uid=test,dc=test,dc=com")
 
     @patch("flext_target_ldap.client.ldap3.Connection")
@@ -216,10 +226,12 @@ class TestLDAPClient:
         assert result.is_success
         entries = result.data
         if len(entries) != 1:
-            raise AssertionError(f"Expected {1}, got {len(entries)}")
+            msg = f"Expected {1}, got {len(entries)}"
+            raise AssertionError(msg)
         assert entries[0].dn == "uid=test,dc=test,dc=com"
         if entries[0].attributes["cn"] != ["Test User"]:
-            raise AssertionError(f"Expected {["Test User"]}, got {entries[0].attributes["cn"]}")
+            msg = f"Expected {['Test User']}, got {entries[0].attributes['cn']}"
+            raise AssertionError(msg)
         assert entries[0].attributes["mail"] == ["test@example.com"]
 
     @patch("flext_target_ldap.client.ldap3.Connection")
@@ -249,14 +261,17 @@ class TestLDAPClient:
         result = client.entry_exists("uid=test,dc=test,dc=com")
         assert result.is_success
         if not (result.data):
-            raise AssertionError(f"Expected True, got {result.data}")
+            msg = f"Expected True, got {result.data}"
+            raise AssertionError(msg)
 
         # Test entry doesn't exist
         mock_connection.entries = []
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
         assert result.is_success
         if result.data:
-            raise AssertionError(f"Expected False, got {result.data}")
+            msg = f"Expected False, got {result.data}"
+            raise AssertionError(msg)
+
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_get_entry(
@@ -288,7 +303,8 @@ class TestLDAPClient:
         entry = result.data
         assert entry is not None
         if entry.dn != "uid=test,dc=test,dc=com":
-            raise AssertionError(f"Expected {"uid=test,dc=test,dc=com"}, got {entry.dn}")
+            msg = f"Expected {'uid=test,dc=test,dc=com'}, got {entry.dn}"
+            raise AssertionError(msg)
         assert entry.attributes["cn"] == ["Test User"]
 
         # Test entry not found

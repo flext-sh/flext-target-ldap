@@ -147,7 +147,9 @@ class LDAPSchemaMapper:
 
                 if ldap_type_result.is_success:
                     # ldap_type_result.data is guaranteed to be str when is_success is True
-                    ldap_attributes[ldap_name] = ldap_type_result.data or "DirectoryString"
+                    ldap_attributes[ldap_name] = (
+                        ldap_type_result.data or "DirectoryString"
+                    )
                 else:
                     ldap_attributes[ldap_name] = "DirectoryString"  # Fallback
 
