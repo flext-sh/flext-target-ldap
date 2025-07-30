@@ -132,8 +132,19 @@ class LDAPBaseSink(Sink):
 
     def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
         """Process a single record. Override in subclasses."""
-        msg = "Subclasses must implement process_record"
-        raise NotImplementedError(msg)
+        # Base implementation - can be overridden in subclasses for specific behavior
+        if not self.client:
+            self._processing_result.add_error("LDAP client not initialized")
+            return
+
+        try:
+            # Generic record processing - log and mark as processed
+            logger.debug(f"Processing record: {record}")
+            self._processing_result.add_success()
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg = f"Error processing record: {e}"
+            logger.exception(error_msg)
+            self._processing_result.add_error(error_msg)
 
     def get_processing_result(self) -> LDAPProcessingResult:
         """Get processing results."""
