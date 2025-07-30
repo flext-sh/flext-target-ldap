@@ -46,7 +46,8 @@ class SingerLDAPStreamProcessor:
             return FlextResult.fail(f"Stream initialization failed: {e}")
 
     def get_stream_stats(
-        self, stream_name: str,
+        self,
+        stream_name: str,
     ) -> FlextResult[LDAPStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:

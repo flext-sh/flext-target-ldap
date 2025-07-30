@@ -237,7 +237,9 @@ class LDAPClient:
             return FlextResult.fail(f"Entry exists check failed: {e}")
 
     def get_entry(
-        self, dn: str, attributes: list[str] | None = None,
+        self,
+        dn: str,
+        attributes: list[str] | None = None,
     ) -> FlextResult[LDAPSearchEntry | None]:
         """Get LDAP entry using real flext-ldap API."""
         try:

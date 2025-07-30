@@ -205,7 +205,8 @@ class UsersSink(LDAPBaseSink):
     def _build_user_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
-            "object_classes", ["inetOrgPerson", "person"],
+            "object_classes",
+            ["inetOrgPerson", "person"],
         )
         attributes = {
             "objectClass": object_classes.copy()
@@ -238,7 +239,8 @@ class UsersSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         for singer_field, ldap_attr in self._target.config.get(
-            "attribute_mapping", {},
+            "attribute_mapping",
+            {},
         ).items():
             value = record.get(singer_field)
             if value is not None:
@@ -301,7 +303,8 @@ class GroupsSink(LDAPBaseSink):
     def _build_group_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
-            "group_object_classes", ["groupOfNames"],
+            "group_object_classes",
+            ["groupOfNames"],
         )
         attributes = {
             "objectClass": object_classes.copy()
@@ -330,7 +333,8 @@ class GroupsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         for singer_field, ldap_attr in self._target.config.get(
-            "attribute_mapping", {},
+            "attribute_mapping",
+            {},
         ).items():
             value = record.get(singer_field)
             if value is not None:
@@ -394,7 +398,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
         """Build LDAP attributes for OU entry."""
         attributes = {
             "objectClass": self._target.config.get(
-                "object_classes", ["inetOrgPerson", "person"],
+                "object_classes",
+                ["inetOrgPerson", "person"],
             ).copy(),
         }
 
@@ -415,7 +420,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         for singer_field, ldap_attr in self._target.config.get(
-            "attribute_mapping", {},
+            "attribute_mapping",
+            {},
         ).items():
             value = record.get(singer_field)
             if value is not None:

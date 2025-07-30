@@ -68,7 +68,8 @@ class DataTransformationEngine:
                 for key, value in transformed_data.items():
                     if isinstance(value, str) and rule.pattern in value:
                         transformed_data[key] = value.replace(
-                            rule.pattern, rule.replacement,
+                            rule.pattern,
+                            rule.replacement,
                         )
                         applied_rules.append(rule.name)
 
@@ -148,7 +149,10 @@ class MigrationValidator:
             return FlextResult.fail(f"Validation failed: {e}")
 
     def validate_entry(
-        self, dn: str, attributes: dict[str, Any], object_classes: list[str],
+        self,
+        dn: str,
+        attributes: dict[str, Any],
+        object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)

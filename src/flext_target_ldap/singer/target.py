@@ -27,7 +27,8 @@ class SingerTargetLDAP:
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
-        self, messages: list[dict[str, Any]],
+        self,
+        messages: list[dict[str, Any]],
     ) -> FlextResult[dict[str, Any]]:
         """Process Singer messages for LDAP target.
 
@@ -53,7 +54,8 @@ class SingerTargetLDAP:
             }
 
             logger.info(
-                "Singer message processing completed: %d messages", processed_count,
+                "Singer message processing completed: %d messages",
+                processed_count,
             )
             return FlextResult.ok(result)
 
