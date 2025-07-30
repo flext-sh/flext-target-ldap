@@ -7,6 +7,7 @@ from flext_core import FlextResult, get_logger
 
 logger = get_logger(__name__)
 
+
 # Local LDAP stream processing classes (no fallbacks - real implementation)
 class LDAPStreamProcessingStats:
     """LDAP stream processing statistics - mutable for performance."""
@@ -49,6 +50,7 @@ class SingerLDAPStreamProcessor:
         if stream_name not in self._stream_stats:
             return FlextResult.fail(f"LDAP stream not found: {stream_name}")
         return FlextResult.ok(self._stream_stats[stream_name])
+
 
 # Re-export for backward compatibility
 __all__ = [
