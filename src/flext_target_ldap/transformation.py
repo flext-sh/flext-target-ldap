@@ -35,7 +35,7 @@ class TransformationRule(FlextValueObject):
 class TransformationResult(FlextValueObject):
     """Result of data transformation."""
 
-    transformed_data: dict[str, Any]
+    transformed_data: dict[str, object]
     applied_rules: list[str] = Field(default_factory=list)
 
     def validate_domain_rules(self) -> FlextResult[None]:
@@ -57,7 +57,7 @@ class DataTransformationEngine:
         """Initialize transformation engine."""
         self.rules = rules
 
-    def transform(self, data: dict[str, Any]) -> FlextResult[TransformationResult]:
+    def transform(self, data: dict[str, object]) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:
             transformed_data = data.copy()
@@ -103,8 +103,8 @@ class MigrationValidator:
 
     def validate(
         self,
-        data: dict[str, Any] | str,
-        attributes: dict[str, Any] | None = None,
+        data: dict[str, object] | str,
+        attributes: dict[str, object] | None = None,
         object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Validate migration data."""
@@ -151,7 +151,7 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: dict[str, Any],
+        attributes: dict[str, object],
         object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate individual LDAP entry - alias for validate method."""

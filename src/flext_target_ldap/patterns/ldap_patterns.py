@@ -47,9 +47,9 @@ class LDAPDataTransformer:
 
     def transform_record(
         self,
-        record: dict[str, Any],
-        schema: dict[str, Any] | None = None,
-    ) -> FlextResult[dict[str, Any]]:
+        record: dict[str, object],
+        schema: dict[str, object] | None = None,
+    ) -> FlextResult[dict[str, object]]:
         """Transform Singer record for LDAP storage."""
         try:
             transformed = {}
@@ -99,9 +99,9 @@ class LDAPDataTransformer:
 
     def prepare_ldap_attributes(
         self,
-        record: dict[str, Any],
+        record: dict[str, object],
         object_classes: list[str],
-    ) -> FlextResult[dict[str, Any]]:
+    ) -> FlextResult[dict[str, object]]:
         """Prepare attributes for LDAP entry creation."""
         try:
             attributes = {}
@@ -133,7 +133,7 @@ class LDAPSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: dict[str, Any],
+        schema: dict[str, object],
         object_class: str = "inetOrgPerson",
     ) -> FlextResult[dict[str, str]]:
         """Map Singer schema to LDAP attribute definitions."""
@@ -174,7 +174,7 @@ class LDAPSchemaMapper:
 
     def _map_singer_type_to_ldap(
         self,
-        prop_def: dict[str, Any],
+        prop_def: dict[str, object],
         object_class: str,
     ) -> FlextResult[str]:
         """Map Singer property definition to LDAP attribute syntax."""
@@ -205,7 +205,7 @@ class LDAPEntryManager:
 
     def generate_dn(
         self,
-        record: dict[str, Any],
+        record: dict[str, object],
         base_dn: str,
         rdn_attribute: str = "cn",
     ) -> FlextResult[str]:
@@ -267,7 +267,7 @@ class LDAPEntryManager:
 
     def determine_object_classes(
         self,
-        record: dict[str, Any],
+        record: dict[str, object],
         stream_name: str,
     ) -> FlextResult[list[str]]:
         """Determine appropriate object classes for LDAP entry."""
@@ -302,7 +302,7 @@ class LDAPEntryManager:
 
     def validate_entry_attributes(
         self,
-        attributes: dict[str, Any],
+        attributes: dict[str, object],
         object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate LDAP entry attributes against object class requirements."""
@@ -331,12 +331,12 @@ class LDAPEntryManager:
 
     def prepare_modify_changes(
         self,
-        current_attrs: dict[str, Any],
-        new_attrs: dict[str, Any],
-    ) -> FlextResult[dict[str, Any]]:
+        current_attrs: dict[str, object],
+        new_attrs: dict[str, object],
+    ) -> FlextResult[dict[str, object]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: dict[str, Any] = {}
+            changes: dict[str, object] = {}
 
             # Find attributes to add, modify, or delete
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())

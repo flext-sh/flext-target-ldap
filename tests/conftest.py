@@ -12,7 +12,7 @@ from flext_target_ldap.client import LDAPClient
 
 
 @pytest.fixture
-def mock_ldap_config() -> dict[str, Any]:
+def mock_ldap_config() -> dict[str, object]:
     return {
         "host": "test.ldap.com",
         "port": 389,
@@ -36,7 +36,7 @@ def mock_ldap_config() -> dict[str, Any]:
 
 
 @pytest.fixture
-def sample_user_record() -> dict[str, Any]:
+def sample_user_record() -> dict[str, object]:
     return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
         "uid": "jdoe",
@@ -49,7 +49,7 @@ def sample_user_record() -> dict[str, Any]:
 
 
 @pytest.fixture
-def sample_group_record() -> dict[str, Any]:
+def sample_group_record() -> dict[str, object]:
     return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
         "cn": "developers",
@@ -63,7 +63,7 @@ def sample_group_record() -> dict[str, Any]:
 
 
 @pytest.fixture
-def sample_ou_record() -> dict[str, Any]:
+def sample_ou_record() -> dict[str, object]:
     return {
         "dn": "ou=engineering,dc=test,dc=com",
         "ou": "engineering",
@@ -73,7 +73,7 @@ def sample_ou_record() -> dict[str, Any]:
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record: dict[str, Any]) -> str:
+def singer_message_record(sample_user_record: dict[str, object]) -> str:
     message = {
         "type": "RECORD",
         "stream": "users",
@@ -132,7 +132,7 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: dict[str, Any]) -> MagicMock:
+def mock_target(mock_ldap_config: dict[str, object]) -> MagicMock:
     target = MagicMock()
     target.config = mock_ldap_config
     return target

@@ -30,7 +30,7 @@ logger = get_logger(__name__)
 class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
-    def __init__(self, dn: str, attributes: dict[str, Any]) -> None:
+    def __init__(self, dn: str, attributes: dict[str, object]) -> None:
         self.dn = dn
         self.attributes = attributes
 
@@ -40,7 +40,7 @@ class LDAPClient:
 
     def __init__(
         self,
-        config: FlextLdapConnectionConfig | dict[str, Any],
+        config: FlextLdapConnectionConfig | dict[str, object],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
@@ -135,7 +135,7 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, Any],
+        attributes: dict[str, object],
         object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using real flext-ldap API."""
@@ -161,7 +161,7 @@ class LDAPClient:
             logger.exception(f"Failed to add entry {dn}")
             return FlextResult.fail(f"Add entry failed: {e}")
 
-    def modify_entry(self, dn: str, changes: dict[str, Any]) -> FlextResult[bool]:
+    def modify_entry(self, dn: str, changes: dict[str, object]) -> FlextResult[bool]:
         """Modify LDAP entry using real flext-ldap API."""
         try:
             connect_result = self.connect()

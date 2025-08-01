@@ -22,7 +22,7 @@ class TestLDAPBaseSink:
     def sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> LDAPBaseSink:
         schema = {
             "properties": {
@@ -65,7 +65,7 @@ class TestLDAPBaseSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
-        record: dict[str, Any] = {}
+        record: dict[str, object] = {}
         classes = sink.get_object_classes(record)
         if classes != ["top"]:
             msg = f"Expected {['top']}, got {classes}"
@@ -116,7 +116,7 @@ class TestUsersSink:
     def users_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> UsersSink:
         mock_target.config.update(
             {
@@ -198,7 +198,7 @@ class TestUsersSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, users_sink: UsersSink) -> None:
-        record: dict[str, Any] = {}
+        record: dict[str, object] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["inetOrgPerson", "organizationalPerson", "person", "top"]:
             msg = f"Expected {['inetOrgPerson', 'organizationalPerson', 'person', 'top']}, got {classes}"
@@ -207,7 +207,7 @@ class TestUsersSink:
     def test_get_object_classes_configured(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> None:
         # Create target with custom config
         mock_target.config.update(
@@ -229,7 +229,7 @@ class TestUsersSink:
             schema=schema,
             key_properties=["uid"],
         )
-        record: dict[str, Any] = {}
+        record: dict[str, object] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["customUser", "top"]:
             msg = f"Expected {['customUser', 'top']}, got {classes}"
@@ -243,7 +243,7 @@ class TestGroupsSink:
     def groups_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> GroupsSink:
         mock_target.config.update(
             {
@@ -305,7 +305,7 @@ class TestGroupsSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
-        record: dict[str, Any] = {}
+        record: dict[str, object] = {}
         classes = groups_sink.get_object_classes(record)
         if classes != ["groupOfNames", "top"]:
             msg = f"Expected {['groupOfNames', 'top']}, got {classes}"
@@ -319,7 +319,7 @@ class TestOrganizationalUnitsSink:
     def ou_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> OrganizationalUnitsSink:
         mock_target.config.update(
             {
@@ -386,7 +386,7 @@ class TestOrganizationalUnitsSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, ou_sink: OrganizationalUnitsSink) -> None:
-        record: dict[str, Any] = {}
+        record: dict[str, object] = {}
         classes = ou_sink.get_object_classes(record)
         if classes != ["organizationalUnit", "top"]:
             msg = f"Expected {['organizationalUnit', 'top']}, got {classes}"
@@ -400,7 +400,7 @@ class TestLDAPBaseSink:
     def generic_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> LDAPBaseSink:
         mock_target.config.update(
             {
@@ -485,7 +485,7 @@ class TestLDAPBaseSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, generic_sink: LDAPBaseSink) -> None:
-        record: dict[str, Any] = {}
+        record: dict[str, object] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
             msg = f"Expected {['top']}, got {classes}"
@@ -494,7 +494,7 @@ class TestLDAPBaseSink:
     def test_get_object_classes_configured(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> None:
         # Create target with custom config
         mock_target.config.update(
@@ -515,7 +515,7 @@ class TestLDAPBaseSink:
             schema=schema,
             key_properties=["id"],
         )
-        record: dict[str, Any] = {}
+        record: dict[str, object] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customGeneric", "top"]:
             msg = f"Expected {['customGeneric', 'top']}, got {classes}"

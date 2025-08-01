@@ -17,8 +17,8 @@ class SingerLDAPCatalogEntry(FlextValueObject):
 
     tap_stream_id: str
     stream: str
-    stream_schema: dict[str, Any] = Field(..., description="Singer stream schema")
-    metadata: list[dict[str, Any]] = Field(default_factory=list)
+    stream_schema: dict[str, object] = Field(..., description="Singer stream schema")
+    metadata: list[dict[str, object]] = Field(default_factory=list)
     key_properties: ClassVar[list[str]] = []
     bookmark_properties: ClassVar[list[str]] = []
 
@@ -43,7 +43,7 @@ class SingerLDAPCatalogManager:
         """Initialize Singer LDAP catalog manager."""
         self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
 
-    def add_stream(self, stream_name: str, schema: dict[str, Any]) -> FlextResult[None]:
+    def add_stream(self, stream_name: str, schema: dict[str, object]) -> FlextResult[None]:
         """Add LDAP stream to catalog."""
         try:
             entry = SingerLDAPCatalogEntry(

@@ -20,7 +20,7 @@ class TestTargetLDAPUnit:
     """Unit tests for TargetLDAP."""
 
     @pytest.fixture
-    def config(self) -> dict[str, Any]:
+    def config(self) -> dict[str, object]:
         return {
             "host": "test.ldap.com",
             "port": 389,
@@ -31,14 +31,14 @@ class TestTargetLDAPUnit:
             "timeout": 30,
         }
 
-    def test_target_initialization(self, config: dict[str, Any]) -> None:
+    def test_target_initialization(self, config: dict[str, object]) -> None:
         target = TargetLDAP(config=config)
         if target.name != "target-ldap":
             msg = f"Expected {'target-ldap'}, got {target.name}"
             raise AssertionError(msg)
         assert target.config == config
 
-    def test_get_sink_users(self, config: dict[str, Any]) -> None:
+    def test_get_sink_users(self, config: dict[str, object]) -> None:
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("users")
 
@@ -48,7 +48,7 @@ class TestTargetLDAPUnit:
             msg = f"Expected {UsersSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_groups(self, config: dict[str, Any]) -> None:
+    def test_get_sink_groups(self, config: dict[str, object]) -> None:
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("groups")
 
@@ -58,7 +58,7 @@ class TestTargetLDAPUnit:
             msg = f"Expected {GroupsSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_generic(self, config: dict[str, Any]) -> None:
+    def test_get_sink_generic(self, config: dict[str, object]) -> None:
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("custom_stream")
 
@@ -68,7 +68,7 @@ class TestTargetLDAPUnit:
             msg = f"Expected {GenericSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_dn_template_configuration(self, config: dict[str, Any]) -> None:
+    def test_dn_template_configuration(self, config: dict[str, object]) -> None:
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
 
         target = TargetLDAP(config=config)
@@ -78,7 +78,7 @@ class TestTargetLDAPUnit:
             target.config["users_dn_template"] == "uid={uid},ou=people,dc=test,dc=com"
         )
 
-    def test_object_class_configuration(self, config: dict[str, Any]) -> None:
+    def test_object_class_configuration(self, config: dict[str, object]) -> None:
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
 
         target = TargetLDAP(config=config)
@@ -92,7 +92,7 @@ class TestTargetLDAPUnit:
     def test_process_record(
         self,
         mock_client_class: MagicMock,
-        config: dict[str, Any],
+        config: dict[str, object],
     ) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
@@ -128,7 +128,7 @@ class TestTargetLDAPUnit:
     def test_process_delete_record(
         self,
         mock_client_class: MagicMock,
-        config: dict[str, Any],
+        config: dict[str, object],
     ) -> None:
         # Mock LDAP client
         mock_client = MagicMock()
