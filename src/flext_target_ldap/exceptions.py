@@ -1,30 +1,33 @@
-"""LDAP target exception hierarchy using flext-core patterns.
+"""LDAP target exception hierarchy using flext-core Singer base patterns.
 
 Copyright (c) 2025 FLEXT Contributors
 SPDX-License-Identifier: MIT
 
-Domain-specific exceptions for LDAP target operations inheriting from flext-core.
+Domain-specific exceptions for LDAP target operations inheriting from Singer base classes.
+Eliminates duplication by using centralized Singer exception patterns from flext-core.
 """
 
 from __future__ import annotations
 
-from flext_core.exceptions import (
-    FlextAuthenticationError,
-    FlextConfigurationError,
-    FlextConnectionError,
-    FlextError,
-    FlextProcessingError,
-    FlextValidationError,
+# 🚨 ARCHITECTURAL COMPLIANCE: Use Singer base exceptions to eliminate duplication
+from flext_core import (
+    FlextSingerAuthenticationError,
+    FlextSingerConfigurationError,
+    FlextSingerConnectionError,
+    FlextSingerProcessingError,
+    FlextSingerValidationError,
+    FlextTargetError,
 )
 
 
-class FlextTargetLdapError(FlextError):
+class FlextTargetLdapError(FlextTargetError):
     """Base exception for LDAP target operations."""
 
     def __init__(
         self,
         message: str = "LDAP target error",
         ldap_server: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP target error with context."""
@@ -32,10 +35,15 @@ class FlextTargetLdapError(FlextError):
         if ldap_server is not None:
             context["ldap_server"] = ldap_server
 
-        super().__init__(message, error_code="LDAP_TARGET_ERROR", context=context)
+        super().__init__(
+            message,
+            component_type="target",
+            stream_name=stream_name,
+            **context,
+        )
 
 
-class FlextTargetLdapConnectionError(FlextConnectionError):
+class FlextTargetLdapConnectionError(FlextSingerConnectionError):
     """LDAP target connection errors."""
 
     def __init__(
@@ -43,6 +51,7 @@ class FlextTargetLdapConnectionError(FlextConnectionError):
         message: str = "LDAP target connection failed",
         ldap_server: str | None = None,
         port: int | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP target connection error with context."""
@@ -52,16 +61,22 @@ class FlextTargetLdapConnectionError(FlextConnectionError):
         if port is not None:
             context["port"] = port
 
-        super().__init__(f"LDAP target connection: {message}", **context)
+        super().__init__(
+            f"LDAP target connection: {message}",
+            component_type="target",
+            stream_name=stream_name,
+            **context,
+        )
 
 
-class FlextTargetLdapAuthenticationError(FlextAuthenticationError):
+class FlextTargetLdapAuthenticationError(FlextSingerAuthenticationError):
     """LDAP target authentication errors."""
 
     def __init__(
         self,
         message: str = "LDAP target authentication failed",
         bind_dn: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP target authentication error with context."""
@@ -69,10 +84,15 @@ class FlextTargetLdapAuthenticationError(FlextAuthenticationError):
         if bind_dn is not None:
             context["bind_dn"] = bind_dn
 
-        super().__init__(f"LDAP target auth: {message}", **context)
+        super().__init__(
+            f"LDAP target auth: {message}",
+            component_type="target",
+            stream_name=stream_name,
+            **context,
+        )
 
 
-class FlextTargetLdapValidationError(FlextValidationError):
+class FlextTargetLdapValidationError(FlextSingerValidationError):
     """LDAP target validation errors."""
 
     def __init__(
@@ -81,6 +101,7 @@ class FlextTargetLdapValidationError(FlextValidationError):
         field: str | None = None,
         value: object = None,
         entry_dn: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP target validation error with context."""
@@ -96,18 +117,21 @@ class FlextTargetLdapValidationError(FlextValidationError):
 
         super().__init__(
             f"LDAP target validation: {message}",
+            component_type="target",
+            stream_name=stream_name,
             validation_details=validation_details,
-            context=context,
+            **context,
         )
 
 
-class FlextTargetLdapConfigurationError(FlextConfigurationError):
+class FlextTargetLdapConfigurationError(FlextSingerConfigurationError):
     """LDAP target configuration errors."""
 
     def __init__(
         self,
         message: str = "LDAP target configuration error",
         config_key: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP target configuration error with context."""
@@ -115,10 +139,15 @@ class FlextTargetLdapConfigurationError(FlextConfigurationError):
         if config_key is not None:
             context["config_key"] = config_key
 
-        super().__init__(f"LDAP target config: {message}", **context)
+        super().__init__(
+            f"LDAP target config: {message}",
+            component_type="target",
+            stream_name=stream_name,
+            **context,
+        )
 
 
-class FlextTargetLdapProcessingError(FlextProcessingError):
+class FlextTargetLdapProcessingError(FlextSingerProcessingError):
     """LDAP target processing errors."""
 
     def __init__(
@@ -126,6 +155,7 @@ class FlextTargetLdapProcessingError(FlextProcessingError):
         message: str = "LDAP target processing failed",
         operation: str | None = None,
         entry_dn: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP target processing error with context."""
@@ -135,7 +165,12 @@ class FlextTargetLdapProcessingError(FlextProcessingError):
         if entry_dn is not None:
             context["entry_dn"] = entry_dn
 
-        super().__init__(f"LDAP target processing: {message}", **context)
+        super().__init__(
+            f"LDAP target processing: {message}",
+            component_type="target",
+            stream_name=stream_name,
+            **context,
+        )
 
 
 class FlextTargetLdapOperationError(FlextTargetLdapError):
@@ -178,7 +213,7 @@ class FlextTargetLdapBindError(FlextTargetLdapError):
         super().__init__(f"LDAP target bind: {message}", **context)
 
 
-class FlextTargetLdapSchemaError(FlextValidationError):
+class FlextTargetLdapSchemaError(FlextSingerValidationError):
     """LDAP target schema validation errors."""
 
     def __init__(
@@ -186,6 +221,7 @@ class FlextTargetLdapSchemaError(FlextValidationError):
         message: str = "LDAP target schema error",
         attribute_name: str | None = None,
         object_class: str | None = None,
+        stream_name: str | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize LDAP target schema error with context."""
@@ -199,8 +235,10 @@ class FlextTargetLdapSchemaError(FlextValidationError):
 
         super().__init__(
             f"LDAP target schema: {message}",
+            component_type="target",
+            stream_name=stream_name,
             validation_details=validation_details,
-            context=context,
+            **context,
         )
 
 

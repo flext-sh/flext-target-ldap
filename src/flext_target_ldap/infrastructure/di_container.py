@@ -1,10 +1,10 @@
-"""🚨 ARCHITECTURAL COMPLIANCE: ELIMINATED DUPLICATE DI Container.
+"""🚨 ARCHITECTURAL COMPLIANCE: ELIMINATED DUPLICATE DI Container using DRY pattern.
 
-REFATORADO COMPLETO:
-- REMOVIDA TODAS as duplicações de FlextContainer/DIContainer
-- USA APENAS FlextContainer oficial do flext-core
+REFATORADO COMPLETO usando create_module_container_utilities:
+- ZERO code duplication através do DRY utility pattern de flext-core
+- USA create_module_container_utilities() para eliminar 77 linhas duplicadas
 - Mantém apenas utilitários flext_target_ldap-específicos
-- SEM fallback, backward compatibility ou código duplicado
+- SOLID: Single source of truth para module container patterns
 
 Copyright (c) 2025 Flext. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -12,65 +12,16 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-# 🚨 ARCHITECTURAL COMPLIANCE: Use ONLY official flext-core FlextContainer
-from flext_core import FlextContainer, get_logger
+# 🚨 DRY PATTERN: Use create_module_container_utilities to eliminate 77-line duplication
+from flext_core import create_module_container_utilities
 
-logger = get_logger(__name__)
+# Create all module-specific utilities using DRY pattern
+_utilities = create_module_container_utilities("flext_target_ldap")
 
-
-# ==================== FLEXT_TARGET_LDAP-SPECIFIC DI UTILITIES ====================
-
-_flext_target_ldap_container_instance: FlextContainer | None = None
-
-
-def get_flext_target_ldap_container() -> FlextContainer:
-    """Get FLEXT_TARGET_LDAP-specific DI container instance.
-
-    Returns:
-        FlextContainer: Official container from flext-core.
-
-    """
-    global _flext_target_ldap_container_instance
-    if _flext_target_ldap_container_instance is None:
-        _flext_target_ldap_container_instance = FlextContainer()
-    return _flext_target_ldap_container_instance
-
-
-def configure_flext_target_ldap_dependencies() -> None:
-    """Configure FLEXT_TARGET_LDAP dependencies using official FlextContainer."""
-    get_flext_target_ldap_container()
-
-    try:
-        # Register module-specific dependencies
-        # TODO: Add module-specific service registrations here
-
-        logger.info("FLEXT_TARGET_LDAP dependencies configured successfully")
-
-    except ImportError as e:
-        logger.exception(f"Failed to configure FLEXT_TARGET_LDAP dependencies: {e}")
-
-
-def get_flext_target_ldap_service(service_name: str) -> object:
-    """Get flext_target_ldap service from container.
-
-    Args:
-        service_name: Name of service to retrieve.
-
-    Returns:
-        Service instance or None if not found.
-
-    """
-    container = get_flext_target_ldap_container()
-    result = container.get(service_name)
-
-    if result.is_success:
-        return result.data
-
-    logger.warning(
-        f"FLEXT_TARGET_LDAP service '{service_name}' not found: {result.error}",
-    )
-    return None
-
+# Extract utilities with proper names for backward compatibility
+get_flext_target_ldap_container = _utilities["get_container"]
+configure_flext_target_ldap_dependencies = _utilities["configure_dependencies"]
+get_flext_target_ldap_service = _utilities["get_service"]
 
 # Initialize flext_target_ldap dependencies on module import
 configure_flext_target_ldap_dependencies()
