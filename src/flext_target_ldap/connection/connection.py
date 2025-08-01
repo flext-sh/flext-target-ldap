@@ -98,7 +98,7 @@ class LDAPConnection:
         search_filter: str,
         attributes: list[str] | None = None,
         search_scope: Literal["BASE", "LEVEL", "SUBTREE"] = "SUBTREE",
-    ) -> FlextResult[list[dict[str, Any]]]:
+    ) -> FlextResult[list[dict[str, object]]]:
         """Execute LDAP search and return results."""
         try:
             if self._connection is None:
@@ -136,7 +136,7 @@ class LDAPConnection:
             logger.exception(f"LDAP search failed: {search_filter}")
             return FlextResult.fail(f"Search failed: {e}")
 
-    def add_entry(self, dn: str, attributes: dict[str, Any]) -> FlextResult[bool]:
+    def add_entry(self, dn: str, attributes: dict[str, object]) -> FlextResult[bool]:
         """Add new LDAP entry."""
         try:
             if self._connection is None:
@@ -161,7 +161,7 @@ class LDAPConnection:
             logger.exception(f"LDAP add entry failed: {dn}")
             return FlextResult.fail(f"Add entry failed: {e}")
 
-    def modify_entry(self, dn: str, changes: dict[str, Any]) -> FlextResult[bool]:
+    def modify_entry(self, dn: str, changes: dict[str, object]) -> FlextResult[bool]:
         """Modify existing LDAP entry."""
         try:
             if self._connection is None:

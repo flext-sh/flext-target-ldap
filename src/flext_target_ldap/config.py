@@ -121,7 +121,7 @@ class LDAPOperationSettings(FlextDomainBaseModel):
 # Function removed - not used anywhere and caused mypy errors due to complex field typing
 
 
-def validate_ldap_config(config: dict[str, Any]) -> FlextResult[TargetLDAPConfig]:
+def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPConfig]:
     """Validate LDAP configuration."""
     try:
         validated_config = TargetLDAPConfig(**config)

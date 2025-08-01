@@ -59,7 +59,7 @@ class LDAPBaseSink(Sink):
         self,
         target: Any,
         stream_name: str,
-        schema: dict[str, Any],
+        schema: dict[str, object],
         key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
@@ -105,7 +105,7 @@ class LDAPBaseSink(Sink):
             self.client = None
             logger.info(f"LDAP client disconnected for stream: {self.stream_name}")
 
-    def process_batch(self, context: dict[str, Any]) -> None:
+    def process_batch(self, context: dict[str, object]) -> None:
         """Process a batch of records."""
         setup_result = self.setup_client()
         if not setup_result.is_success:
@@ -129,7 +129,7 @@ class LDAPBaseSink(Sink):
         finally:
             self.teardown_client()
 
-    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
         if not self.client:
@@ -153,7 +153,7 @@ class LDAPBaseSink(Sink):
 class UsersSink(LDAPBaseSink):
     """LDAP sink for user entries."""
 
-    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
         """Process a user record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -202,7 +202,7 @@ class UsersSink(LDAPBaseSink):
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
-    def _build_user_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
+    def _build_user_attributes(self, record: dict[str, object]) -> dict[str, object]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
@@ -252,7 +252,7 @@ class UsersSink(LDAPBaseSink):
 class GroupsSink(LDAPBaseSink):
     """LDAP sink for group entries."""
 
-    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
         """Process a group record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -300,7 +300,7 @@ class GroupsSink(LDAPBaseSink):
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
-    def _build_group_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
+    def _build_group_attributes(self, record: dict[str, object]) -> dict[str, object]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
@@ -349,7 +349,7 @@ class GroupsSink(LDAPBaseSink):
 class OrganizationalUnitsSink(LDAPBaseSink):
     """LDAP sink for organizational unit entries."""
 
-    def process_record(self, record: dict[str, Any], context: dict[str, Any]) -> None:
+    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
         """Process an organizational unit record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -394,7 +394,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
-    def _build_ou_attributes(self, record: dict[str, Any]) -> dict[str, Any]:
+    def _build_ou_attributes(self, record: dict[str, object]) -> dict[str, object]:
         """Build LDAP attributes for OU entry."""
         attributes = {
             "objectClass": self._target.config.get(

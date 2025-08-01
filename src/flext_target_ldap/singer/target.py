@@ -16,7 +16,7 @@ logger: FlextLogger = get_logger(__name__)
 class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: dict[str, object] | None = None) -> None:
         """Initialize Singer LDAP target.
 
         Args:
@@ -28,8 +28,8 @@ class SingerTargetLDAP:
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, Any]],
-    ) -> FlextResult[dict[str, Any]]:
+        messages: list[dict[str, object]],
+    ) -> FlextResult[dict[str, object]]:
         """Process Singer messages for LDAP target.
 
         Args:

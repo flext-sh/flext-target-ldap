@@ -16,7 +16,7 @@ logger: FlextLogger = get_logger(__name__)
 class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: dict[str, object] | None = None) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
@@ -28,8 +28,8 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[dict[str, Any]],
-    ) -> FlextResult[dict[str, Any]]:
+        records: list[dict[str, object]],
+    ) -> FlextResult[dict[str, object]]:
         """Orchestrate data loading to LDAP target.
 
         Args:

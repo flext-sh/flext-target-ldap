@@ -40,7 +40,7 @@ class TargetLDAP(Target):
 
     def __init__(
         self,
-        config: dict[str, Any] | None = None,
+        config: dict[str, object] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -58,7 +58,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> dict[str, Any]:
+    def singer_catalog(self) -> dict[str, object]:
         """Return the Singer catalog for this target."""
         return {
             "streams": [

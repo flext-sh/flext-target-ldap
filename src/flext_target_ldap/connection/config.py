@@ -28,7 +28,7 @@ class LDAPConnectionConfig(FlextDomainBaseModel):
             return f"{protocol}://{self.server_url}"
         return self.server_url
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, object]:
         """Convert to dictionary for ldap3 connection."""
         return {
             "server": self.build_connection_string(),

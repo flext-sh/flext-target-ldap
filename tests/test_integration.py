@@ -24,7 +24,7 @@ class TestTargetLDAPIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, Any]) -> Path:
+    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         config_path = tmp_path / "config.json"
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
@@ -223,7 +223,7 @@ class TestTargetLDAPIntegration:
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
-        mock_ldap_config: dict[str, Any],
+        mock_ldap_config: dict[str, object],
     ) -> None:
         # Add DN template to config
         mock_ldap_config["dn_templates"] = {

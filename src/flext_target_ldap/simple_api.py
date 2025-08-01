@@ -18,7 +18,7 @@ from flext_ldap import FlextLdapConnectionConfig, get_ldap_api
 from flext_target_ldap.target import TargetLDAP
 
 
-def create_ldap_target(config: dict[str, Any]) -> FlextResult[Any]:
+def create_ldap_target(config: dict[str, object]) -> FlextResult[Any]:
     """Create LDAP target with configuration."""
     try:
         target = TargetLDAP(config)
@@ -28,8 +28,8 @@ def create_ldap_target(config: dict[str, Any]) -> FlextResult[Any]:
 
 
 def load_users_to_ldap(
-    users: list[dict[str, Any]],
-    config: dict[str, Any],
+    users: list[dict[str, object]],
+    config: dict[str, object],
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
     target_result = create_ldap_target(config)
@@ -54,8 +54,8 @@ def load_users_to_ldap(
 
 
 def load_groups_to_ldap(
-    groups: list[dict[str, Any]],
-    config: dict[str, Any],
+    groups: list[dict[str, object]],
+    config: dict[str, object],
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
     target_result = create_ldap_target(config)
@@ -79,7 +79,7 @@ def load_groups_to_ldap(
         return FlextResult.fail(f"Failed to load groups: {e}")
 
 
-def test_ldap_connection(config: dict[str, Any]) -> FlextResult[bool]:
+def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
     """Test LDAP connection with given configuration."""
     try:
         connection_config = FlextLdapConnectionConfig(
