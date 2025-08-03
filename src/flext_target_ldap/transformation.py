@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from flext_core import FlextResult, FlextValueObject, get_logger
 from pydantic import Field
 
@@ -137,12 +135,12 @@ class MigrationValidator:
                             "person object class requires 'sn' attribute",
                         )
 
-                return FlextResult.ok(True)
+                return FlextResult.ok(data=True)
             # Called with validate(data_dict)
             if not data:
                 self._stats["validation_errors"] += 1
                 return FlextResult.fail("Data is empty")
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
 
         except Exception as e:
             self._stats["validation_errors"] += 1

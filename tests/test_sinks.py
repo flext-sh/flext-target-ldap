@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -393,7 +392,7 @@ class TestOrganizationalUnitsSink:
             raise AssertionError(msg)
 
 
-class TestLDAPBaseSink:
+class TestLDAPGenericSink:
     """Test Generic sink."""
 
     @pytest.fixture

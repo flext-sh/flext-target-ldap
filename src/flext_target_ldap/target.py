@@ -8,7 +8,7 @@ Zero tolerance for code duplication.
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from flext_core import FlextContainer, get_logger
 
@@ -160,7 +160,7 @@ class TargetLDAP(Target):
         logger.info("Orchestrator initialized successfully")
 
         # Initialize DI container
-        self._container = get_flext_target_ldap_container()
+        self._container = get_flext_target_ldap_container()  # type: ignore[operator]
         logger.info("DI container initialized successfully")
 
         host = self.config.get("host", "localhost")

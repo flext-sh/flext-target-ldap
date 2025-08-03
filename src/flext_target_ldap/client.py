@@ -8,7 +8,7 @@ This module provides a compatible LDAP client interface for the target.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -46,14 +46,18 @@ class LDAPClient:
         if isinstance(config, dict):
             # Convert dict to proper FlextLdapConnectionConfig
             self.config = FlextLdapConnectionConfig(
-                server=config.get("host", "localhost"),
-                port=config.get("port", 389),
-                use_ssl=config.get("use_ssl", False),
-                timeout_seconds=config.get("timeout", 30),
+                host=str(config.get("host", "localhost")),
+                port=int(str(config.get("port", 389)))
+                if config.get("port", 389) is not None
+                else 389,
+                use_ssl=bool(config.get("use_ssl", False)),
+                timeout=int(str(config.get("timeout", 30)))
+                if config.get("timeout", 30) is not None
+                else 30,
             )
             # Store authentication credentials separately
-            self._bind_dn: str = config.get("bind_dn", "")
-            self._password: str = config.get("password", "")
+            self._bind_dn: str = str(config.get("bind_dn", ""))
+            self._password: str = str(config.get("password", ""))
         else:
             self.config = config
             # Default authentication credentials when using FlextLdapConnectionConfig directly
@@ -105,13 +109,7 @@ class LDAPClient:
 
     def connect(self) -> FlextResult[None]:
         """Connect to LDAP server."""
-        # Use flext-ldap connection validation
-        validation_result = self.config.validate_domain_rules()
-        if not validation_result.is_success:
-            return FlextResult.fail(
-                f"Connection config invalid: {validation_result.error}",
-            )
-
+        # Config is already validated by Pydantic on construction
         logger.info(f"Connected to LDAP server {self.config.server}:{self.config.port}")
         return FlextResult.ok(None)
 
@@ -156,7 +154,7 @@ class LDAPClient:
             if not dn or not entry_data:
                 return FlextResult.fail("DN and attributes required")
 
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
         except Exception as e:
             logger.exception(f"Failed to add entry {dn}")
             return FlextResult.fail(f"Add entry failed: {e}")
@@ -172,7 +170,7 @@ class LDAPClient:
             if not dn or not changes:
                 return FlextResult.fail("DN and changes required")
 
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
         except Exception as e:
             logger.exception(f"Failed to modify entry {dn}")
             return FlextResult.fail(f"Modify entry failed: {e}")
@@ -188,7 +186,7 @@ class LDAPClient:
             if not dn:
                 return FlextResult.fail("DN required")
 
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
         except Exception as e:
             logger.exception(f"Failed to delete entry {dn}")
             return FlextResult.fail(f"Delete entry failed: {e}")

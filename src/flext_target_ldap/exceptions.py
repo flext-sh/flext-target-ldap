@@ -190,7 +190,15 @@ class FlextTargetLdapOperationError(FlextTargetLdapError):
         if entry_dn is not None:
             context["entry_dn"] = entry_dn
 
-        super().__init__(f"LDAP target operation: {message}", **context)
+        super().__init__(
+            f"LDAP target operation: {message}",
+            ldap_server=str(context.get("ldap_server"))
+            if context.get("ldap_server") is not None
+            else None,
+            stream_name=str(context.get("stream_name"))
+            if context.get("stream_name") is not None
+            else None,
+        )
 
 
 class FlextTargetLdapBindError(FlextTargetLdapError):
@@ -210,7 +218,15 @@ class FlextTargetLdapBindError(FlextTargetLdapError):
         if bind_type is not None:
             context["bind_type"] = bind_type
 
-        super().__init__(f"LDAP target bind: {message}", **context)
+        super().__init__(
+            f"LDAP target bind: {message}",
+            ldap_server=str(context.get("ldap_server"))
+            if context.get("ldap_server") is not None
+            else None,
+            stream_name=str(context.get("stream_name"))
+            if context.get("stream_name") is not None
+            else None,
+        )
 
 
 class FlextTargetLdapSchemaError(FlextSingerValidationError):
@@ -259,7 +275,15 @@ class FlextTargetLdapWriteError(FlextTargetLdapError):
         if entry_dn is not None:
             context["entry_dn"] = entry_dn
 
-        super().__init__(f"LDAP target write: {message}", **context)
+        super().__init__(
+            f"LDAP target write: {message}",
+            ldap_server=str(context.get("ldap_server"))
+            if context.get("ldap_server") is not None
+            else None,
+            stream_name=str(context.get("stream_name"))
+            if context.get("stream_name") is not None
+            else None,
+        )
 
 
 __all__ = [

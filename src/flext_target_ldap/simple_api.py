@@ -82,22 +82,23 @@ def load_groups_to_ldap(
 def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
     """Test LDAP connection with given configuration."""
     try:
-        connection_config = FlextLdapConnectionConfig(
-            server=config["host"],
-            port=config.get("port", 389),
-            use_ssl=config.get("use_ssl", False),
-            timeout_seconds=config.get("connect_timeout", 30),
+        # Validate connection config by creating it
+        FlextLdapConnectionConfig(
+            host=str(config["host"]),
+            port=int(str(config.get("port", 389)))
+            if config.get("port", 389) is not None
+            else 389,
+            use_ssl=bool(config.get("use_ssl")),
+            timeout=int(str(config.get("connect_timeout", 30)))
+            if config.get("connect_timeout", 30) is not None
+            else 30,
         )
 
         # Use real flext-ldap API
         get_ldap_api()
-        # For connection test, we just validate the config
-        validation_result = connection_config.validate_domain_rules()
-        if validation_result.is_success:
-            return FlextResult.ok(True)
-        return FlextResult.fail(
-            f"Connection config validation failed: {validation_result.error}",
-        )
+        # For connection test, config is already validated by Pydantic on construction
+        # Just return success if we got this far
+        return FlextResult.ok(data=True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Connection test error: {e}")

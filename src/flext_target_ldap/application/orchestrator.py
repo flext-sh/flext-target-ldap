@@ -6,8 +6,6 @@ using flext-core patterns.
 
 from __future__ import annotations
 
-from typing import Any
-
 from flext_core import FlextLogger, FlextResult, get_logger
 
 logger: FlextLogger = get_logger(__name__)
@@ -74,7 +72,7 @@ class LDAPTargetOrchestrator:
                 if field not in self.config:
                     return FlextResult.fail(f"Missing required field: {field}")
 
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
         except Exception as e:
             return FlextResult.fail(f"Configuration validation failed: {e}")
 

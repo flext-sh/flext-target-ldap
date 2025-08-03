@@ -8,7 +8,6 @@ Zero tolerance for code duplication.
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Any
 
 # Import from flext-core for foundational patterns
 from flext_core import (
@@ -17,11 +16,9 @@ from flext_core import (
 )
 
 # Import real LDAP connection config from flext-ldap (no fallbacks)
+from flext_ldap import FlextLdapConnectionConfig
 from pydantic import Field
 from pydantic_settings import BaseSettings
-
-if TYPE_CHECKING:
-    from flext_ldap import FlextLdapConnectionConfig
 
 # No TYPE_CHECKING imports needed - FlextLdapConnectionConfig already imported
 
@@ -124,7 +121,24 @@ class LDAPOperationSettings(FlextDomainBaseModel):
 def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPConfig]:
     """Validate LDAP configuration."""
     try:
-        validated_config = TargetLDAPConfig(**config)
+        # Extract connection parameters
+        connection_params = {
+            key: value
+            for key, value in config.items()
+            if key
+            in {"host", "port", "use_ssl", "bind_dn", "password", "timeout_seconds"}
+        }
+
+        # Create connection config
+        connection_config = FlextLdapConnectionConfig(**connection_params)  # type: ignore[arg-type]
+
+        # Create target config with connection
+        target_params = {
+            key: value for key, value in config.items() if key not in connection_params
+        }
+        target_params["connection"] = connection_config
+
+        validated_config = TargetLDAPConfig(**target_params)  # type: ignore[arg-type]
         return FlextResult.ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")

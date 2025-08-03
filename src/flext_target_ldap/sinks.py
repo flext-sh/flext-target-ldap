@@ -113,7 +113,9 @@ class LDAPBaseSink(Sink):
             return
 
         try:
-            records = context.get("records", [])
+            records_raw = context.get("records", [])
+            # Type assertion for records - should be a list of dicts from Singer protocol
+            records = records_raw if isinstance(records_raw, list) else []
             logger.info(
                 f"Processing batch of {len(records)} records for stream: {self.stream_name}",
             )
@@ -129,7 +131,11 @@ class LDAPBaseSink(Sink):
         finally:
             self.teardown_client()
 
-    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
+    def process_record(
+        self,
+        record: dict[str, object],
+        context: dict[str, object],
+    ) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
         if not self.client:
@@ -153,7 +159,11 @@ class LDAPBaseSink(Sink):
 class UsersSink(LDAPBaseSink):
     """LDAP sink for user entries."""
 
-    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
+    def process_record(
+        self,
+        record: dict[str, object],
+        context: dict[str, object],
+    ) -> None:
         """Process a user record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -174,7 +184,15 @@ class UsersSink(LDAPBaseSink):
             attributes = self._build_user_attributes(record)
 
             # Extract object classes for the add_entry call
-            object_classes = attributes.pop("objectClass", ["inetOrgPerson", "person"])
+            object_classes_raw = attributes.pop(
+                "objectClass",
+                ["inetOrgPerson", "person"],
+            )
+            object_classes = (
+                object_classes_raw
+                if isinstance(object_classes_raw, list)
+                else ["inetOrgPerson", "person"]
+            )
 
             # Try to add the user entry
             add_result = self.client.add_entry(user_dn, attributes, object_classes)
@@ -246,13 +264,17 @@ class UsersSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
 
-        return attributes
+        return attributes  # type: ignore[return-value]
 
 
 class GroupsSink(LDAPBaseSink):
     """LDAP sink for group entries."""
 
-    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
+    def process_record(
+        self,
+        record: dict[str, object],
+        context: dict[str, object],
+    ) -> None:
         """Process a group record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -272,7 +294,12 @@ class GroupsSink(LDAPBaseSink):
             attributes = self._build_group_attributes(record)
 
             # Extract object classes for the add_entry call
-            object_classes = attributes.pop("objectClass", ["groupOfNames"])
+            object_classes_raw = attributes.pop("objectClass", ["groupOfNames"])
+            object_classes = (
+                object_classes_raw
+                if isinstance(object_classes_raw, list)
+                else ["groupOfNames"]
+            )
 
             # Try to add the group entry
             add_result = self.client.add_entry(group_dn, attributes, object_classes)
@@ -343,13 +370,17 @@ class GroupsSink(LDAPBaseSink):
                 else:
                     attributes[ldap_attr] = [str(value)]
 
-        return attributes
+        return attributes  # type: ignore[return-value]
 
 
 class OrganizationalUnitsSink(LDAPBaseSink):
     """LDAP sink for organizational unit entries."""
 
-    def process_record(self, record: dict[str, object], context: dict[str, object]) -> None:
+    def process_record(
+        self,
+        record: dict[str, object],
+        context: dict[str, object],
+    ) -> None:
         """Process an organizational unit record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
