@@ -12,16 +12,28 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 # 🚨 DRY PATTERN: Use create_module_container_utilities to eliminate 77-line duplication
 from flext_core import create_module_container_utilities
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Create all module-specific utilities using DRY pattern
 _utilities = create_module_container_utilities("flext_target_ldap")
 
 # Extract utilities with proper names for backward compatibility
 get_flext_target_ldap_container = _utilities["get_container"]
-configure_flext_target_ldap_dependencies = _utilities["configure_dependencies"]
+_configure_func = _utilities["configure_dependencies"]
 get_flext_target_ldap_service = _utilities["get_service"]
 
+# Type assertion for the configuration function
+if TYPE_CHECKING:
+    configure_flext_target_ldap_dependencies: Callable[[], None] = _configure_func  # type: ignore[assignment]
+else:
+    configure_flext_target_ldap_dependencies = _configure_func
+
 # Initialize flext_target_ldap dependencies on module import
-configure_flext_target_ldap_dependencies()
+if callable(configure_flext_target_ldap_dependencies):
+    configure_flext_target_ldap_dependencies()

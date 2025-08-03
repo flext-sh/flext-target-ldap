@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import TYPE_CHECKING
 
 # Import from flext-core for foundational patterns
 from flext_core import FlextResult, get_logger
+
+if TYPE_CHECKING:
+    from flext_core.flext_types import TAnyDict
+else:
+    # Runtime alias
+    TAnyDict = dict[str, object]
 
 logger = get_logger(__name__)
 
@@ -17,7 +23,11 @@ class LDAPTypeConverter:
     def __init__(self) -> None:
         """Initialize LDAP type converter."""
 
-    def convert_singer_to_ldap(self, singer_type: str, value: Any) -> FlextResult[Any]:
+    def convert_singer_to_ldap(
+        self,
+        singer_type: str,
+        value: object,
+    ) -> FlextResult[object]:
         """Convert Singer type to LDAP-compatible type."""
         try:
             if value is None:
@@ -47,9 +57,9 @@ class LDAPDataTransformer:
 
     def transform_record(
         self,
-        record: dict[str, object],
-        schema: dict[str, object] | None = None,
-    ) -> FlextResult[dict[str, object]]:
+        record: TAnyDict,
+        schema: TAnyDict | None = None,
+    ) -> FlextResult[TAnyDict]:
         """Transform Singer record for LDAP storage."""
         try:
             transformed = {}
@@ -61,8 +71,14 @@ class LDAPDataTransformer:
                 # Type conversion
                 if schema:
                     properties = schema.get("properties", {})
-                    prop_def = properties.get(key, {})
-                    singer_type = prop_def.get("type", "string")
+                    if isinstance(properties, dict):
+                        prop_def = properties.get(key, {})
+                        if isinstance(prop_def, dict):
+                            singer_type = prop_def.get("type", "string")
+                        else:
+                            singer_type = "string"
+                    else:
+                        singer_type = "string"
 
                     convert_result = self.type_converter.convert_singer_to_ldap(
                         singer_type,
@@ -99,9 +115,9 @@ class LDAPDataTransformer:
 
     def prepare_ldap_attributes(
         self,
-        record: dict[str, object],
+        record: TAnyDict,
         object_classes: list[str],
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[dict[str, list[str]]]:
         """Prepare attributes for LDAP entry creation."""
         try:
             attributes = {}
@@ -133,7 +149,7 @@ class LDAPSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: dict[str, object],
+        schema: TAnyDict,
         object_class: str = "inetOrgPerson",
     ) -> FlextResult[dict[str, str]]:
         """Map Singer schema to LDAP attribute definitions."""
@@ -141,17 +157,25 @@ class LDAPSchemaMapper:
             ldap_attributes: dict[str, str] = {}
             properties = schema.get("properties", {})
 
-            for prop_name, prop_def in properties.items():
-                ldap_name = self._normalize_attribute_name(prop_name)
-                ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
+            if isinstance(properties, dict):
+                for prop_name, prop_def in properties.items():
+                    if isinstance(prop_def, dict):
+                        ldap_name = self._normalize_attribute_name(prop_name)
+                        ldap_type_result = self._map_singer_type_to_ldap(
+                            prop_def,
+                            object_class,
+                        )
 
-                if ldap_type_result.is_success:
-                    # ldap_type_result.data is guaranteed to be str when is_success is True
-                    ldap_attributes[ldap_name] = (
-                        ldap_type_result.data or "DirectoryString"
-                    )
-                else:
-                    ldap_attributes[ldap_name] = "DirectoryString"  # Fallback
+                        if ldap_type_result.is_success:
+                            # ldap_type_result.data is guaranteed to be str when is_success is True
+                            ldap_attributes[ldap_name] = (
+                                ldap_type_result.data or "DirectoryString"
+                            )
+                        else:
+                            ldap_attributes[ldap_name] = "DirectoryString"  # Fallback
+            else:
+                # If properties is not a dict, return empty attributes
+                pass  # Already handled in the above block
 
             return FlextResult.ok(ldap_attributes)
 
@@ -174,7 +198,7 @@ class LDAPSchemaMapper:
 
     def _map_singer_type_to_ldap(
         self,
-        prop_def: dict[str, object],
+        prop_def: TAnyDict,
         object_class: str,
     ) -> FlextResult[str]:
         """Map Singer property definition to LDAP attribute syntax."""
@@ -205,7 +229,7 @@ class LDAPEntryManager:
 
     def generate_dn(
         self,
-        record: dict[str, object],
+        record: TAnyDict,
         base_dn: str,
         rdn_attribute: str = "cn",
     ) -> FlextResult[str]:
@@ -267,7 +291,7 @@ class LDAPEntryManager:
 
     def determine_object_classes(
         self,
-        record: dict[str, object],
+        record: TAnyDict,
         stream_name: str,
     ) -> FlextResult[list[str]]:
         """Determine appropriate object classes for LDAP entry."""
@@ -302,7 +326,7 @@ class LDAPEntryManager:
 
     def validate_entry_attributes(
         self,
-        attributes: dict[str, object],
+        attributes: TAnyDict,
         object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate LDAP entry attributes against object class requirements."""
@@ -323,7 +347,7 @@ class LDAPEntryManager:
             if missing_attrs:
                 return FlextResult.fail(f"Missing required attributes: {missing_attrs}")
 
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")
@@ -331,12 +355,12 @@ class LDAPEntryManager:
 
     def prepare_modify_changes(
         self,
-        current_attrs: dict[str, object],
-        new_attrs: dict[str, object],
-    ) -> FlextResult[dict[str, object]]:
+        current_attrs: TAnyDict,
+        new_attrs: TAnyDict,
+    ) -> FlextResult[TAnyDict]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: dict[str, object] = {}
+            changes: TAnyDict = {}
 
             # Find attributes to add, modify, or delete
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())

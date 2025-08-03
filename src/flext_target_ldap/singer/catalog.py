@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # Import from flext-core for foundational patterns
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from flext_core import FlextResult, FlextValueObject, get_logger
 from pydantic import Field
@@ -43,7 +43,11 @@ class SingerLDAPCatalogManager:
         """Initialize Singer LDAP catalog manager."""
         self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
 
-    def add_stream(self, stream_name: str, schema: dict[str, object]) -> FlextResult[None]:
+    def add_stream(
+        self,
+        stream_name: str,
+        schema: dict[str, object],
+    ) -> FlextResult[None]:
         """Add LDAP stream to catalog."""
         try:
             entry = SingerLDAPCatalogEntry(

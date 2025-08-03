@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 # Import from flext-core for foundational patterns
 from flext_core import FlextValueObject as FlextDomainBaseModel
 
