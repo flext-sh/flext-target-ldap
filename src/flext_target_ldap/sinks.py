@@ -85,7 +85,7 @@ class LDAPBaseSink(Sink):
             self.client = LDAPClient(connection_config)
             connect_result = self.client.connect()
 
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return FlextResult.fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
@@ -94,7 +94,7 @@ class LDAPBaseSink(Sink):
             return FlextResult.ok(self.client)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            error_msg = f"LDAP client setup failed: {e}"
+            error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
             return FlextResult.fail(error_msg)
 
@@ -108,7 +108,7 @@ class LDAPBaseSink(Sink):
     def process_batch(self, context: dict[str, object]) -> None:
         """Process a batch of records."""
         setup_result = self.setup_client()
-        if not setup_result.is_success:
+        if not setup_result.success:
             logger.error(f"Cannot process batch: {setup_result.error}")
             return
 
@@ -147,7 +147,7 @@ class LDAPBaseSink(Sink):
             logger.debug(f"Processing record: {record}")
             self._processing_result.add_success()
         except (RuntimeError, ValueError, TypeError) as e:
-            error_msg = f"Error processing record: {e}"
+            error_msg: str = f"Error processing record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
@@ -197,13 +197,13 @@ class UsersSink(LDAPBaseSink):
             # Try to add the user entry
             add_result = self.client.add_entry(user_dn, attributes, object_classes)
 
-            if add_result.is_success:
+            if add_result.success:
                 self._processing_result.add_success()
                 logger.debug(f"User entry added successfully: {user_dn}")
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(user_dn, attributes)
-                if modify_result.is_success:
+                if modify_result.success:
                     self._processing_result.add_success()
                     logger.debug(f"User entry modified successfully: {user_dn}")
                 else:
@@ -216,7 +216,7 @@ class UsersSink(LDAPBaseSink):
                 )
 
         except (RuntimeError, ValueError, TypeError) as e:
-            error_msg = f"Error processing user record: {e}"
+            error_msg: str = f"Error processing user record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
@@ -304,13 +304,13 @@ class GroupsSink(LDAPBaseSink):
             # Try to add the group entry
             add_result = self.client.add_entry(group_dn, attributes, object_classes)
 
-            if add_result.is_success:
+            if add_result.success:
                 self._processing_result.add_success()
                 logger.debug(f"Group entry added successfully: {group_dn}")
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(group_dn, attributes)
-                if modify_result.is_success:
+                if modify_result.success:
                     self._processing_result.add_success()
                     logger.debug(f"Group entry modified successfully: {group_dn}")
                 else:
@@ -323,7 +323,7 @@ class GroupsSink(LDAPBaseSink):
                 )
 
         except (RuntimeError, ValueError, TypeError) as e:
-            error_msg = f"Error processing group record: {e}"
+            error_msg: str = f"Error processing group record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
@@ -402,13 +402,13 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             # Try to add the OU entry
             add_result = self.client.add_entry(ou_dn, attributes)
 
-            if add_result.is_success:
+            if add_result.success:
                 self._processing_result.add_success()
                 logger.debug(f"OU entry added successfully: {ou_dn}")
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(ou_dn, attributes)
-                if modify_result.is_success:
+                if modify_result.success:
                     self._processing_result.add_success()
                     logger.debug(f"OU entry modified successfully: {ou_dn}")
                 else:
@@ -421,7 +421,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 )
 
         except (RuntimeError, ValueError, TypeError) as e:
-            error_msg = f"Error processing OU record: {e}"
+            error_msg: str = f"Error processing OU record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 

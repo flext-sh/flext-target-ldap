@@ -80,4 +80,4 @@ class SingerTargetLDAP:
             return FlextResult.fail(f"Configuration validation failed: {e}")
 
 
-__all__ = ["SingerTargetLDAP"]
+__all__: list[str] = ["SingerTargetLDAP"]

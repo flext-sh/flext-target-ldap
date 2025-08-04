@@ -9,7 +9,7 @@ from flext_target_ldap.infrastructure.di_container import (
     get_flext_target_ldap_service,
 )
 
-__all__ = [
+__all__: list[str] = [
     "configure_flext_target_ldap_dependencies",
     "get_flext_target_ldap_container",
     "get_flext_target_ldap_service",

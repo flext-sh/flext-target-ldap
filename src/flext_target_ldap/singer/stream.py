@@ -56,7 +56,7 @@ class SingerLDAPStreamProcessor:
 
 
 # Re-export for backward compatibility
-__all__ = [
+__all__: list[str] = [
     "LDAPStreamProcessingStats",
     "SingerLDAPStreamProcessor",
 ]

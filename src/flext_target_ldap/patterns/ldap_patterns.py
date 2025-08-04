@@ -84,7 +84,7 @@ class LDAPDataTransformer:
                         singer_type,
                         value,
                     )
-                    if convert_result.is_success:
+                    if convert_result.success:
                         transformed[ldap_key] = convert_result.data
                     else:
                         transformed[ldap_key] = str(value)
@@ -166,8 +166,8 @@ class LDAPSchemaMapper:
                             object_class,
                         )
 
-                        if ldap_type_result.is_success:
-                            # ldap_type_result.data is guaranteed to be str when is_success is True
+                        if ldap_type_result.success:
+                            # ldap_type_result.data is guaranteed to be str when success is True
                             ldap_attributes[ldap_name] = (
                                 ldap_type_result.data or "DirectoryString"
                             )
