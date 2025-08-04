@@ -33,7 +33,7 @@ class TestTargetLDAPUnit:
     def test_target_initialization(self, config: dict[str, object]) -> None:
         target = TargetLDAP(config=config)
         if target.name != "target-ldap":
-            msg = f"Expected {'target-ldap'}, got {target.name}"
+            msg: str = f"Expected {'target-ldap'}, got {target.name}"
             raise AssertionError(msg)
         assert target.config == config
 
@@ -44,7 +44,7 @@ class TestTargetLDAPUnit:
         # Create a sink instance with mock data
 
         if sink_class != UsersSink:
-            msg = f"Expected {UsersSink}, got {sink_class}"
+            msg: str = f"Expected {UsersSink}, got {sink_class}"
             raise AssertionError(msg)
 
     def test_get_sink_groups(self, config: dict[str, object]) -> None:
@@ -54,7 +54,7 @@ class TestTargetLDAPUnit:
         # Create a sink instance with mock data
 
         if sink_class != GroupsSink:
-            msg = f"Expected {GroupsSink}, got {sink_class}"
+            msg: str = f"Expected {GroupsSink}, got {sink_class}"
             raise AssertionError(msg)
 
     def test_get_sink_generic(self, config: dict[str, object]) -> None:
@@ -64,7 +64,7 @@ class TestTargetLDAPUnit:
         # Should return the default sink class
 
         if sink_class != GenericSink:
-            msg = f"Expected {GenericSink}, got {sink_class}"
+            msg: str = f"Expected {GenericSink}, got {sink_class}"
             raise AssertionError(msg)
 
     def test_dn_template_configuration(self, config: dict[str, object]) -> None:
@@ -84,7 +84,7 @@ class TestTargetLDAPUnit:
         target.get_sink("users")
 
         if target.config["users_object_classes"] != ["customPerson", "top"]:
-            msg = f"Expected {['customPerson', 'top']}, got {target.config['users_object_classes']}"
+            msg: str = f"Expected {['customPerson', 'top']}, got {target.config['users_object_classes']}"
             raise AssertionError(msg)
 
     @patch("target_ldap.sinks.LDAPClient")
@@ -120,7 +120,7 @@ class TestTargetLDAPUnit:
             )
             raise AssertionError(msg)
         if "inetOrgPerson" not in call_args[0][1]:
-            msg = f"Expected {'inetOrgPerson'} in {call_args[0][1]}"
+            msg: str = f"Expected {'inetOrgPerson'} in {call_args[0][1]}"
             raise AssertionError(msg)
 
     @patch("target_ldap.sinks.LDAPClient")

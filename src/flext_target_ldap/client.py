@@ -140,7 +140,7 @@ class LDAPClient:
         try:
             # Ensure connection is valid
             connect_result = self.connect()
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
             # Prepare entry data
@@ -163,7 +163,7 @@ class LDAPClient:
         """Modify LDAP entry using real flext-ldap API."""
         try:
             connect_result = self.connect()
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
             logger.info(f"Modifying LDAP entry: {dn}")
@@ -179,7 +179,7 @@ class LDAPClient:
         """Delete LDAP entry using real flext-ldap API."""
         try:
             connect_result = self.connect()
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
             logger.info(f"Deleting LDAP entry: {dn}")
@@ -200,7 +200,7 @@ class LDAPClient:
         """Search LDAP entries using real flext-ldap API."""
         try:
             connect_result = self.connect()
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
             logger.info(
@@ -221,7 +221,7 @@ class LDAPClient:
         """Check if LDAP entry exists using real flext-ldap API."""
         try:
             connect_result = self.connect()
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
             logger.info(f"Checking if LDAP entry exists: {dn}")
@@ -242,7 +242,7 @@ class LDAPClient:
         """Get LDAP entry using real flext-ldap API."""
         try:
             connect_result = self.connect()
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
             logger.info(f"Getting LDAP entry: {dn}")
@@ -260,7 +260,7 @@ class LDAPClient:
 LDAPConnectionConfig = FlextLdapConnectionConfig
 LDAPEntry = FlextLdapEntry
 
-__all__ = [
+__all__: list[str] = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",

@@ -71,7 +71,7 @@ class LDAPConnection:
         try:
             if self._connection is None:
                 connect_result = self.connect()
-                if not connect_result.is_success:
+                if not connect_result.success:
                     error_msg = connect_result.error or "Connection failed"
                     return FlextResult.fail(error_msg)
 
@@ -103,7 +103,7 @@ class LDAPConnection:
         try:
             if self._connection is None:
                 connect_result = self.connect()
-                if not connect_result.is_success:
+                if not connect_result.success:
                     error_msg = connect_result.error or "Connection failed"
                     return FlextResult.fail(error_msg)
 
@@ -141,7 +141,7 @@ class LDAPConnection:
         try:
             if self._connection is None:
                 connect_result = self.connect()
-                if not connect_result.is_success:
+                if not connect_result.success:
                     error_msg = connect_result.error or "Connection failed"
                     return FlextResult.fail(error_msg)
 
@@ -154,7 +154,7 @@ class LDAPConnection:
                 return FlextResult.ok(data=True)
 
             assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
-            error_msg = f"Add failed: {self._connection.result}"
+            error_msg: str = f"Add failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -166,7 +166,7 @@ class LDAPConnection:
         try:
             if self._connection is None:
                 connect_result = self.connect()
-                if not connect_result.is_success:
+                if not connect_result.success:
                     error_msg = connect_result.error or "Connection failed"
                     return FlextResult.fail(error_msg)
 
@@ -179,7 +179,7 @@ class LDAPConnection:
                 return FlextResult.ok(data=True)
 
             assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
-            error_msg = f"Modify failed: {self._connection.result}"
+            error_msg: str = f"Modify failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -191,7 +191,7 @@ class LDAPConnection:
         try:
             if self._connection is None:
                 connect_result = self.connect()
-                if not connect_result.is_success:
+                if not connect_result.success:
                     error_msg = connect_result.error or "Connection failed"
                     return FlextResult.fail(error_msg)
 
@@ -204,7 +204,7 @@ class LDAPConnection:
                 return FlextResult.ok(data=True)
 
             assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
-            error_msg = f"Delete failed: {self._connection.result}"
+            error_msg: str = f"Delete failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:

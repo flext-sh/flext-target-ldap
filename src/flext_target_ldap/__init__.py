@@ -30,7 +30,7 @@ TargetConfig = TargetLDAPConfig
 
 __version__ = "0.9.0-wrapper"
 
-__all__ = [
+__all__: list[str] = [
     # Consolidated Orchestrator
     "FlextLDAPTargetOrchestrator",
     # Backward compatibility

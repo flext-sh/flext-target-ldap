@@ -286,7 +286,7 @@ class FlextTargetLdapWriteError(FlextTargetLdapError):
         )
 
 
-__all__ = [
+__all__: list[str] = [
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapBindError",
     "FlextTargetLdapConfigurationError",

@@ -10,7 +10,7 @@ from flext_target_ldap.patterns.ldap_patterns import (
     LDAPTypeConverter,
 )
 
-__all__ = [
+__all__: list[str] = [
     "LDAPDataTransformer",
     "LDAPEntryManager",
     "LDAPSchemaMapper",

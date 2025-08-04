@@ -33,7 +33,7 @@ def load_users_to_ldap(
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
     target_result = create_ldap_target(config)
-    if not target_result.is_success:
+    if not target_result.success:
         return FlextResult.fail(f"Target creation failed: {target_result.error}")
 
     try:
@@ -59,7 +59,7 @@ def load_groups_to_ldap(
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
     target_result = create_ldap_target(config)
-    if not target_result.is_success:
+    if not target_result.success:
         return FlextResult.fail(f"Target creation failed: {target_result.error}")
 
     try:

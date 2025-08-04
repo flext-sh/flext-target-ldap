@@ -77,4 +77,4 @@ class LDAPTargetOrchestrator:
             return FlextResult.fail(f"Configuration validation failed: {e}")
 
 
-__all__ = ["LDAPTargetOrchestrator"]
+__all__: list[str] = ["LDAPTargetOrchestrator"]
