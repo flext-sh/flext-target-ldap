@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from flext_target_ldap.sinks import GroupsSink, LDAPBaseSink, UsersSink
 from flext_target_ldap.target import TargetLDAP
 

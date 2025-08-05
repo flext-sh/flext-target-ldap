@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
+
 from flext_target_ldap.target import TargetLDAP
 
 if TYPE_CHECKING:
@@ -129,7 +130,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.add.return_value = True
         mock_conn_instance.modify.return_value = True
 
-        def search_side_effect(*args: Any, **kwargs: Any) -> bool:
+        def search_side_effect(*args: Any, **kwargs: object) -> bool:
             # First search: no entry
             # Second search: entry exists
             if mock_conn_instance.search.call_count <= 1:

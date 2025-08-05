@@ -1429,7 +1429,7 @@ optional = false
 python-versions = ">=3.13,<3.14"
 groups = ["main"]
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 click = ">=8.2.1"
@@ -5402,4 +5402,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "bfca84b11aaff8a3537d6489bee96ed4257f1596028cc4497a0fec630013043e"
+content-hash = "e2777d89c36d765974fc9f1cc37ddfb3c3cf9a7954b24995dafacd6c75108380"
