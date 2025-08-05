@@ -5,9 +5,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from ldap3.core import exceptions as ldap3_exceptions
-
 from flext_target_ldap.client import LDAPClient
+from ldap3.core import exceptions as ldap3_exceptions
 
 # Constants
 EXPECTED_DATA_COUNT = 3

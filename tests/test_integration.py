@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
-
 from flext_target_ldap.target import TargetLDAP
 
 if TYPE_CHECKING:
