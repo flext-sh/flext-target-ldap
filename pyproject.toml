@@ -57,8 +57,11 @@ Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
 target-ldap = "flext_target_ldap.target:TargetLDAP.cli"
 flext-target-ldap = "flext_target_ldap.target:TargetLDAP.cli"
 
+[tool.ruff]
 extend = "../.ruff-shared.toml"
-lint.isort.known-first-party = ["flext_target_ldap"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["flext_target_ldap"]
 
 [tool.mypy]
 python_version = "3.13"
