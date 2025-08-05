@@ -7,8 +7,7 @@ Uses flext-core patterns for consistent error handling.
 
 from __future__ import annotations
 
-from typing import Any
-
+# Remove Any import - use specific types
 # Import from flext-core for foundational patterns
 from flext_core import (
     FlextResult,
@@ -18,7 +17,7 @@ from flext_ldap import FlextLdapConnectionConfig, get_ldap_api
 from flext_target_ldap.target import TargetLDAP
 
 
-def create_ldap_target(config: dict[str, object]) -> FlextResult[Any]:
+def create_ldap_target(config: dict[str, object]) -> FlextResult[object]:
     """Create LDAP target with configuration."""
     try:
         target = TargetLDAP(config)

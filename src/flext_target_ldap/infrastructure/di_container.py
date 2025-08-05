@@ -30,7 +30,7 @@ get_flext_target_ldap_service = _utilities["get_service"]
 
 # Type assertion for the configuration function
 if TYPE_CHECKING:
-    configure_flext_target_ldap_dependencies: Callable[[], None] = _configure_func  # type: ignore[assignment]
+    configure_flext_target_ldap_dependencies: Callable[[], None] = _configure_func
 else:
     configure_flext_target_ldap_dependencies = _configure_func
 
