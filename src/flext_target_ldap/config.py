@@ -130,7 +130,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         }
 
         # Create connection config
-        connection_config = FlextLdapConnectionConfig(**connection_params)  # type: ignore[arg-type]
+        connection_config = FlextLdapConnectionConfig(**connection_params)
 
         # Create target config with connection
         target_params = {
@@ -138,7 +138,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         }
         target_params["connection"] = connection_config
 
-        validated_config = TargetLDAPConfig(**target_params)  # type: ignore[arg-type]
+        validated_config = TargetLDAPConfig(**target_params)
         return FlextResult.ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")

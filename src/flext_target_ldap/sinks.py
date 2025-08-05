@@ -7,8 +7,7 @@ Zero tolerance for code duplication.
 
 from __future__ import annotations
 
-from typing import Any
-
+# Remove Any import - use specific types
 # Import from flext-core for foundational patterns
 from flext_core import (
     FlextResult,
@@ -57,7 +56,7 @@ class LDAPBaseSink(Sink):
 
     def __init__(
         self,
-        target: Any,
+        target,  # Target type from Singer SDK
         stream_name: str,
         schema: dict[str, object],
         key_properties: list[str],
@@ -264,7 +263,7 @@ class UsersSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
 
-        return attributes  # type: ignore[return-value]
+        return attributes
 
 
 class GroupsSink(LDAPBaseSink):
@@ -370,7 +369,7 @@ class GroupsSink(LDAPBaseSink):
                 else:
                     attributes[ldap_attr] = [str(value)]
 
-        return attributes  # type: ignore[return-value]
+        return attributes
 
 
 class OrganizationalUnitsSink(LDAPBaseSink):

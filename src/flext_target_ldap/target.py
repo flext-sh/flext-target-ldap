@@ -160,7 +160,7 @@ class TargetLDAP(Target):
         logger.info("Orchestrator initialized successfully")
 
         # Initialize DI container
-        self._container = get_flext_target_ldap_container()  # type: ignore[operator]
+        self._container = get_flext_target_ldap_container()
         logger.info("DI container initialized successfully")
 
         host = self.config.get("host", "localhost")
