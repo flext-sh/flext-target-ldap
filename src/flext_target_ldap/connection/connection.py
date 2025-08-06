@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal
 
-# Import from flext-core for foundational patterns
 from flext_core import FlextResult, get_logger
 from ldap3 import Connection, Server
 
@@ -76,7 +75,7 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Test with simple search (connection is guaranteed to be not None after successful connect)
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            assert self._connection is not None
             search_result = self._connection.search(
                 self.config.base_dn,
                 "(objectClass=*)",
@@ -108,7 +107,7 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            assert self._connection is not None
             search_result = self._connection.search(
                 search_base,
                 search_filter,
@@ -122,7 +121,7 @@ class LDAPConnection:
                 return FlextResult.ok([])
 
             # Convert entries to dictionaries
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful search"
+            assert self._connection is not None
             results = []
             for entry in self._connection.entries:
                 entry_dict = {"dn": str(entry.entry_dn)}
@@ -146,14 +145,14 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            assert self._connection is not None
             add_result = self._connection.add(dn, attributes=attributes)
 
             if add_result:
                 logger.info(f"Added LDAP entry: {dn}")
                 return FlextResult.ok(data=True)
 
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
+            assert self._connection is not None
             error_msg: str = f"Add failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
@@ -171,14 +170,14 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            assert self._connection is not None
             modify_result = self._connection.modify(dn, changes)
 
             if modify_result:
                 logger.info(f"Modified LDAP entry: {dn}")
                 return FlextResult.ok(data=True)
 
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
+            assert self._connection is not None
             error_msg: str = f"Modify failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 
@@ -196,14 +195,14 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after successful connect"
+            assert self._connection is not None
             delete_result = self._connection.delete(dn)
 
             if delete_result:
                 logger.info(f"Deleted LDAP entry: {dn}")
                 return FlextResult.ok(data=True)
 
-            assert self._connection is not None  # noqa: S101, "Connection should not be None after operation"
+            assert self._connection is not None
             error_msg: str = f"Delete failed: {self._connection.result}"
             return FlextResult.fail(error_msg)
 

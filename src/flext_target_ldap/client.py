@@ -195,7 +195,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: list[str] | None = None,
+        _attributes: list[str] | None = None,
     ) -> FlextResult[list[LDAPSearchEntry]]:
         """Search LDAP entries using real flext-ldap API."""
         try:
@@ -229,7 +229,7 @@ class LDAPClient:
                 return FlextResult.fail("DN required")
 
             # In real implementation, would use self._api.search() to check existence
-            return FlextResult.ok(False)
+            return FlextResult.ok(data=False)
         except Exception as e:
             logger.exception(f"Failed to check entry existence: {dn}")
             return FlextResult.fail(f"Entry exists check failed: {e}")
@@ -237,7 +237,7 @@ class LDAPClient:
     def get_entry(
         self,
         dn: str,
-        attributes: list[str] | None = None,
+        _attributes: list[str] | None = None,
     ) -> FlextResult[LDAPSearchEntry | None]:
         """Get LDAP entry using real flext-ldap API."""
         try:

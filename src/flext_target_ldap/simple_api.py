@@ -7,8 +7,6 @@ Uses flext-core patterns for consistent error handling.
 
 from __future__ import annotations
 
-# Remove Any import - use specific types
-# Import from flext-core for foundational patterns
 from flext_core import (
     FlextResult,
 )

@@ -9,7 +9,6 @@ Eliminates duplication by using centralized Singer exception patterns from flext
 
 from __future__ import annotations
 
-# 🚨 ARCHITECTURAL COMPLIANCE: Use Singer base exceptions to eliminate duplication
 from flext_core import (
     FlextSingerAuthenticationError,
     FlextSingerConfigurationError,

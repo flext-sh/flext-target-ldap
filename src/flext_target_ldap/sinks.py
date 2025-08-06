@@ -7,15 +7,11 @@ Zero tolerance for code duplication.
 
 from __future__ import annotations
 
-# Remove Any import - use specific types
-# Import from flext-core for foundational patterns
 from flext_core import (
     FlextResult,
     get_logger,
 )
-
-# MIGRATED: from flext_meltano import Sink -> use flext_meltano
-from flext_meltano import Sink
+from flext_meltano import Sink, Target
 
 from flext_target_ldap.client import LDAPClient
 
@@ -56,7 +52,7 @@ class LDAPBaseSink(Sink):
 
     def __init__(
         self,
-        target,  # Target type from Singer SDK
+        target: Target,
         stream_name: str,
         schema: dict[str, object],
         key_properties: list[str],
@@ -133,7 +129,7 @@ class LDAPBaseSink(Sink):
     def process_record(
         self,
         record: dict[str, object],
-        context: dict[str, object],
+        _context: dict[str, object],
     ) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
@@ -161,7 +157,7 @@ class UsersSink(LDAPBaseSink):
     def process_record(
         self,
         record: dict[str, object],
-        context: dict[str, object],
+        _context: dict[str, object],
     ) -> None:
         """Process a user record."""
         if not self.client:
@@ -272,7 +268,7 @@ class GroupsSink(LDAPBaseSink):
     def process_record(
         self,
         record: dict[str, object],
-        context: dict[str, object],
+        _context: dict[str, object],
     ) -> None:
         """Process a group record."""
         if not self.client:
@@ -378,7 +374,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
     def process_record(
         self,
         record: dict[str, object],
-        context: dict[str, object],
+        _context: dict[str, object],
     ) -> None:
         """Process an organizational unit record."""
         if not self.client:

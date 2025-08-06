@@ -9,18 +9,13 @@ from __future__ import annotations
 
 import warnings
 
-# Import from flext-core for foundational patterns
 from flext_core import (
     FlextResult,
     FlextValueObject as FlextDomainBaseModel,
 )
-
-# Import real LDAP connection config from flext-ldap (no fallbacks)
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import Field
 from pydantic_settings import BaseSettings
-
-# No TYPE_CHECKING imports needed - FlextLdapConnectionConfig already imported
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(

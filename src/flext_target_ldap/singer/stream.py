@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-# Import from flext-core for foundational patterns
 from flext_core import FlextResult, get_logger
 
 logger = get_logger(__name__)

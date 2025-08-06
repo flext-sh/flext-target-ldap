@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-# 🚨 DRY PATTERN: Use create_module_container_utilities to eliminate 77-line duplication
 from flext_core import create_module_container_utilities
 
 if TYPE_CHECKING:

@@ -11,12 +11,8 @@ import sys
 from typing import TYPE_CHECKING
 
 from flext_core import FlextContainer, get_logger
-
-# CONSOLIDATED: Use centralized Singer SDK from flext-meltano
-# MIGRATED: Singer SDK imports centralized via flext-meltano
 from flext_meltano import Target
 
-# Import from new modular architecture
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import TargetLDAPConfig
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
@@ -40,6 +36,7 @@ class TargetLDAP(Target):
 
     def __init__(
         self,
+        *,
         config: dict[str, object] | None = None,
         validate_config: bool = True,
     ) -> None:
