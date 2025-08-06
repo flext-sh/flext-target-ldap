@@ -16,8 +16,8 @@ class TransformationRule(FlextValueObject):
     replacement: str
     enabled: bool = True
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate transformation rule domain rules."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate transformation rule business rules."""
         try:
             if not self.name.strip():
                 return FlextResult.fail("Rule name cannot be empty")
@@ -36,8 +36,8 @@ class TransformationResult(FlextValueObject):
     transformed_data: dict[str, object]
     applied_rules: list[str] = Field(default_factory=list)
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate transformation result domain rules."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate transformation result business rules."""
         try:
             if not self.transformed_data:
                 return FlextResult.fail("transformed_data cannot be empty")

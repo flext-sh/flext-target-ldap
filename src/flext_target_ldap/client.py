@@ -67,7 +67,8 @@ class LDAPClient:
         # Create API instance
         self._api = get_ldap_api()
         logger.info(
-            f"Initialized LDAP client for {self.config.server}:{self.config.port}",
+            "Initialized LDAP client for %s:%d",
+            self.config.server, self.config.port,
         )
 
     # Compatibility properties for old API
@@ -110,7 +111,7 @@ class LDAPClient:
     def connect(self) -> FlextResult[None]:
         """Connect to LDAP server."""
         # Config is already validated by Pydantic on construction
-        logger.info(f"Connected to LDAP server {self.config.server}:{self.config.port}")
+        logger.info("Connected to LDAP server %s:%d", self.config.server, self.config.port)
         return FlextResult.ok(None)
 
     def get_connection(self) -> _GeneratorContextManager[MagicMock]:
@@ -148,7 +149,7 @@ class LDAPClient:
             if object_classes:
                 entry_data["objectClass"] = object_classes
 
-            logger.info(f"Adding LDAP entry: {dn}")
+            logger.info("Adding LDAP entry: %s", dn)
             # In real implementation, would use self._api to add entry
             # For now, validate the entry format
             if not dn or not entry_data:
@@ -156,7 +157,7 @@ class LDAPClient:
 
             return FlextResult.ok(data=True)
         except Exception as e:
-            logger.exception(f"Failed to add entry {dn}")
+            logger.exception("Failed to add entry %s", dn)
             return FlextResult.fail(f"Add entry failed: {e}")
 
     def modify_entry(self, dn: str, changes: dict[str, object]) -> FlextResult[bool]:
@@ -166,13 +167,13 @@ class LDAPClient:
             if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
-            logger.info(f"Modifying LDAP entry: {dn}")
+            logger.info("Modifying LDAP entry: %s", dn)
             if not dn or not changes:
                 return FlextResult.fail("DN and changes required")
 
             return FlextResult.ok(data=True)
         except Exception as e:
-            logger.exception(f"Failed to modify entry {dn}")
+            logger.exception("Failed to modify entry %s", dn)
             return FlextResult.fail(f"Modify entry failed: {e}")
 
     def delete_entry(self, dn: str) -> FlextResult[bool]:
@@ -182,13 +183,13 @@ class LDAPClient:
             if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
-            logger.info(f"Deleting LDAP entry: {dn}")
+            logger.info("Deleting LDAP entry: %s", dn)
             if not dn:
                 return FlextResult.fail("DN required")
 
             return FlextResult.ok(data=True)
         except Exception as e:
-            logger.exception(f"Failed to delete entry {dn}")
+            logger.exception("Failed to delete entry %s", dn)
             return FlextResult.fail(f"Delete entry failed: {e}")
 
     def search_entry(
@@ -204,7 +205,9 @@ class LDAPClient:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
             logger.info(
-                f"Searching LDAP entries: {base_dn} with filter {search_filter}",
+                "Searching LDAP entries: %s with filter %s",
+                base_dn,
+                search_filter,
             )
             if not base_dn:
                 return FlextResult.fail("Base DN required")
@@ -214,7 +217,7 @@ class LDAPClient:
             mock_entries: list[LDAPSearchEntry] = []
             return FlextResult.ok(mock_entries)
         except Exception as e:
-            logger.exception(f"Failed to search entries in {base_dn}")
+            logger.exception("Failed to search entries in %s", base_dn)
             return FlextResult.fail(f"Search failed: {e}")
 
     def entry_exists(self, dn: str) -> FlextResult[bool]:
@@ -224,14 +227,14 @@ class LDAPClient:
             if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
-            logger.info(f"Checking if LDAP entry exists: {dn}")
+            logger.info("Checking if LDAP entry exists: %s", dn)
             if not dn:
                 return FlextResult.fail("DN required")
 
             # In real implementation, would use self._api.search() to check existence
             return FlextResult.ok(data=False)
         except Exception as e:
-            logger.exception(f"Failed to check entry existence: {dn}")
+            logger.exception("Failed to check entry existence: %s", dn)
             return FlextResult.fail(f"Entry exists check failed: {e}")
 
     def get_entry(
@@ -245,14 +248,14 @@ class LDAPClient:
             if not connect_result.success:
                 return FlextResult.fail(f"Connection failed: {connect_result.error}")
 
-            logger.info(f"Getting LDAP entry: {dn}")
+            logger.info("Getting LDAP entry: %s", dn)
             if not dn:
                 return FlextResult.fail("DN required")
 
             # In real implementation, would use self._api.get()
             return FlextResult.ok(None)
         except Exception as e:
-            logger.exception(f"Failed to get entry: {dn}")
+            logger.exception("Failed to get entry: %s", dn)
             return FlextResult.fail(f"Get entry failed: {e}")
 
 

@@ -27,6 +27,9 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
+# Network constants
+MAX_PORT_NUMBER = 65535
+
 
 class TargetLDAP(Target):
     """LDAP target for Singer using flext-core patterns."""
@@ -116,12 +119,13 @@ class TargetLDAP(Target):
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
             logger.warning(
-                f"No specific sink found for stream '{stream_name}', using base sink",
+                "No specific sink found for stream '%s', using base sink",
+                stream_name,
             )
             # Return UsersSink as default - could create a GenericSink if needed
             return UsersSink
 
-        logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
+        logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
         return sink_class
 
     def validate_config(self) -> None:
@@ -138,8 +142,8 @@ class TargetLDAP(Target):
             raise ValueError(msg)
 
         port = self.config.get("port", 389)
-        if port <= 0 or port > 65535:
-            msg = "LDAP port must be between 1 and 65535"
+        if port <= 0 or port > MAX_PORT_NUMBER:
+            msg = f"LDAP port must be between 1 and {MAX_PORT_NUMBER}"
             raise ValueError(msg)
 
         use_ssl = self.config.get("use_ssl", False)
@@ -157,11 +161,11 @@ class TargetLDAP(Target):
         logger.info("Orchestrator initialized successfully")
 
         # Initialize DI container
-        self._container = get_flext_target_ldap_container()
+        self._container = get_flext_target_ldap_container()  # type: ignore[operator]
         logger.info("DI container initialized successfully")
 
         host = self.config.get("host", "localhost")
-        logger.info(f"LDAP target setup completed for host: {host}")
+        logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""

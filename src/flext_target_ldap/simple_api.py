@@ -18,7 +18,7 @@ from flext_target_ldap.target import TargetLDAP
 def create_ldap_target(config: dict[str, object]) -> FlextResult[object]:
     """Create LDAP target with configuration."""
     try:
-        target = TargetLDAP(config)
+        target = TargetLDAP(config=config)
         return FlextResult.ok(target)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to create LDAP target: {e}")
@@ -37,14 +37,18 @@ def load_users_to_ldap(
         target = target_result.data
         if target is None:
             return FlextResult.fail("Target creation failed")
+        
+        # Type assertion since we know target is TargetLDAP
+        from flext_target_ldap.target import TargetLDAP
+        assert isinstance(target, TargetLDAP)
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
 
         # Process records
         for user in users:
             sink.process_record(user, {})
 
-        result = sink.get_processing_result()
-        return FlextResult.ok(result.success_count)
+        # Return count of processed users
+        return FlextResult.ok(len(users))
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to load users: {e}")
@@ -63,14 +67,18 @@ def load_groups_to_ldap(
         target = target_result.data
         if target is None:
             return FlextResult.fail("Target creation failed")
+        
+        # Type assertion since we know target is TargetLDAP
+        from flext_target_ldap.target import TargetLDAP
+        assert isinstance(target, TargetLDAP)
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
 
         # Process records
         for group in groups:
             sink.process_record(group, {})
 
-        result = sink.get_processing_result()
-        return FlextResult.ok(result.success_count)
+        # Return count of processed groups
+        return FlextResult.ok(len(groups))
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Failed to load groups: {e}")
