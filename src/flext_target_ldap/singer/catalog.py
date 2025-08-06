@@ -21,8 +21,8 @@ class SingerLDAPCatalogEntry(FlextValueObject):
     key_properties: ClassVar[list[str]] = []
     bookmark_properties: ClassVar[list[str]] = []
 
-    def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate catalog entry domain rules."""
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate catalog entry business rules."""
         try:
             if not self.tap_stream_id.strip():
                 return FlextResult.fail("tap_stream_id cannot be empty")
@@ -55,10 +55,10 @@ class SingerLDAPCatalogManager:
                 stream_schema=schema,
             )
             self._catalog_entries[stream_name] = entry
-            logger.info(f"Added LDAP stream to catalog: {stream_name}")
+            logger.info("Added LDAP stream to catalog: %s", stream_name)
             return FlextResult.ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(f"Failed to add LDAP stream to catalog: {stream_name}")
+            logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
             return FlextResult.fail(f"Stream addition failed: {e}")
 
     def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:

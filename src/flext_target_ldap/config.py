@@ -10,12 +10,12 @@ from __future__ import annotations
 import warnings
 
 from flext_core import (
+    FlextBaseSettings as BaseSettings,
     FlextResult,
     FlextValueObject as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import Field
-from pydantic_settings import BaseSettings
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -125,7 +125,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         }
 
         # Create connection config
-        connection_config = FlextLdapConnectionConfig(**connection_params)
+        connection_config = FlextLdapConnectionConfig(**connection_params)  # type: ignore[arg-type]
 
         # Create target config with connection
         target_params = {
@@ -133,7 +133,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         }
         target_params["connection"] = connection_config
 
-        validated_config = TargetLDAPConfig(**target_params)
+        validated_config = TargetLDAPConfig(**target_params)  # type: ignore[arg-type]
         return FlextResult.ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")

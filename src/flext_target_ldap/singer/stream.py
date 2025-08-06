@@ -38,10 +38,10 @@ class SingerLDAPStreamProcessor:
         """Initialize LDAP stream processing."""
         try:
             self._stream_stats[stream_name] = LDAPStreamProcessingStats(stream_name)
-            logger.info(f"Initialized LDAP stream processing: {stream_name}")
+            logger.info("Initialized LDAP stream processing: %s", stream_name)
             return FlextResult.ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(f"LDAP stream initialization failed: {stream_name}")
+            logger.exception("LDAP stream initialization failed: %s", stream_name)
             return FlextResult.fail(f"Stream initialization failed: {e}")
 
     def get_stream_stats(

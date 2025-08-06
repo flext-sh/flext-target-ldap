@@ -28,10 +28,7 @@ _configure_func = _utilities["configure_dependencies"]
 get_flext_target_ldap_service = _utilities["get_service"]
 
 # Type assertion for the configuration function
-if TYPE_CHECKING:
-    configure_flext_target_ldap_dependencies: Callable[[], None] = _configure_func
-else:
-    configure_flext_target_ldap_dependencies = _configure_func
+configure_flext_target_ldap_dependencies: Callable[[], None] = _configure_func  # type: ignore[assignment]
 
 # Initialize flext_target_ldap dependencies on module import
 if callable(configure_flext_target_ldap_dependencies):

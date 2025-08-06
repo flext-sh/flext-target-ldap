@@ -43,7 +43,7 @@ class LDAPConnection:
                 raise_exceptions=True,
             )
 
-            logger.info(f"Connected to LDAP server: {self.config.server_url}")
+            logger.info("Connected to LDAP server: %s", self.config.server_url)
 
             return FlextResult.ok(None)
 
@@ -55,7 +55,7 @@ class LDAPConnection:
         """Close LDAP connection."""
         try:
             if self._connection:
-                self._connection.unbind()
+                self._connection.unbind()  # type: ignore[no-untyped-call]
                 self._connection = None
                 logger.info("LDAP connection closed")
 
@@ -75,7 +75,7 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Test with simple search (connection is guaranteed to be not None after successful connect)
-            assert self._connection is not None
+            assert self._connection is not None  # for mypy
             search_result = self._connection.search(
                 self.config.base_dn,
                 "(objectClass=*)",
@@ -107,7 +107,7 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None
+            assert self._connection is not None  # for mypy
             search_result = self._connection.search(
                 search_base,
                 search_filter,
@@ -121,7 +121,6 @@ class LDAPConnection:
                 return FlextResult.ok([])
 
             # Convert entries to dictionaries
-            assert self._connection is not None
             results = []
             for entry in self._connection.entries:
                 entry_dict = {"dn": str(entry.entry_dn)}
@@ -129,10 +128,10 @@ class LDAPConnection:
                     entry_dict[attr_name] = entry[attr_name].values
                 results.append(entry_dict)
 
-            return FlextResult.ok(results)
+            return FlextResult.ok(results)  # type: ignore[arg-type]
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(f"LDAP search failed: {search_filter}")
+            logger.exception("LDAP search failed: %s", search_filter)
             return FlextResult.fail(f"Search failed: {e}")
 
     def add_entry(self, dn: str, attributes: dict[str, object]) -> FlextResult[bool]:
@@ -145,19 +144,18 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None
-            add_result = self._connection.add(dn, attributes=attributes)
+            assert self._connection is not None  # for mypy
+            add_result = self._connection.add(dn, attributes=attributes)  # type: ignore[no-untyped-call]
 
             if add_result:
-                logger.info(f"Added LDAP entry: {dn}")
+                logger.info("Added LDAP entry: %s", dn)
                 return FlextResult.ok(data=True)
 
-            assert self._connection is not None
-            error_msg: str = f"Add failed: {self._connection.result}"
-            return FlextResult.fail(error_msg)
+            add_error_msg: str = f"Add failed: {self._connection.result}"
+            return FlextResult.fail(add_error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(f"LDAP add entry failed: {dn}")
+            logger.exception("LDAP add entry failed: %s", dn)
             return FlextResult.fail(f"Add entry failed: {e}")
 
     def modify_entry(self, dn: str, changes: dict[str, object]) -> FlextResult[bool]:
@@ -170,19 +168,18 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None
-            modify_result = self._connection.modify(dn, changes)
+            assert self._connection is not None  # for mypy
+            modify_result = self._connection.modify(dn, changes)  # type: ignore[no-untyped-call]
 
             if modify_result:
-                logger.info(f"Modified LDAP entry: {dn}")
+                logger.info("Modified LDAP entry: %s", dn)
                 return FlextResult.ok(data=True)
 
-            assert self._connection is not None
-            error_msg: str = f"Modify failed: {self._connection.result}"
-            return FlextResult.fail(error_msg)
+            modify_error_msg: str = f"Modify failed: {self._connection.result}"
+            return FlextResult.fail(modify_error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(f"LDAP modify entry failed: {dn}")
+            logger.exception("LDAP modify entry failed: %s", dn)
             return FlextResult.fail(f"Modify entry failed: {e}")
 
     def delete_entry(self, dn: str) -> FlextResult[bool]:
@@ -195,19 +192,18 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None
-            delete_result = self._connection.delete(dn)
+            assert self._connection is not None  # for mypy
+            delete_result = self._connection.delete(dn)  # type: ignore[no-untyped-call]
 
             if delete_result:
-                logger.info(f"Deleted LDAP entry: {dn}")
+                logger.info("Deleted LDAP entry: %s", dn)
                 return FlextResult.ok(data=True)
 
-            assert self._connection is not None
-            error_msg: str = f"Delete failed: {self._connection.result}"
-            return FlextResult.fail(error_msg)
+            delete_error_msg: str = f"Delete failed: {self._connection.result}"
+            return FlextResult.fail(delete_error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(f"LDAP delete entry failed: {dn}")
+            logger.exception("LDAP delete entry failed: %s", dn)
             return FlextResult.fail(f"Delete entry failed: {e}")
 
     @property
