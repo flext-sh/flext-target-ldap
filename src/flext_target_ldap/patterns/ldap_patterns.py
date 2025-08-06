@@ -5,14 +5,10 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-# Import from flext-core for foundational patterns
 from flext_core import FlextResult, get_logger
 
 if TYPE_CHECKING:
     from flext_core.flext_types import TAnyDict
-else:
-    # Runtime alias
-    TAnyDict = dict[str, object]
 
 logger = get_logger(__name__)
 

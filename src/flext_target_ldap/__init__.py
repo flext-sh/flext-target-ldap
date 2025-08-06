@@ -15,7 +15,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-# Import local implementations (not from flext-meltano yet - fallback imports removed as per CLAUDE.md)
 from flext_target_ldap.application.orchestrator import (
     LDAPTargetOrchestrator as FlextLDAPTargetOrchestrator,
 )

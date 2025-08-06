@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-# Direct imports from infrastructure modules
 from flext_target_ldap.infrastructure.di_container import (
     configure_flext_target_ldap_dependencies,
     get_flext_target_ldap_container,
