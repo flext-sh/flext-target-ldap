@@ -90,7 +90,7 @@ class DataTransformationEngine:
 class MigrationValidator:
     """Validator for migration data."""
 
-    def __init__(self, strict_mode: bool = True) -> None:
+    def __init__(self, *, strict_mode: bool = True) -> None:
         """Initialize migration validator."""
         self.strict_mode = strict_mode
         self._stats = {
@@ -108,6 +108,7 @@ class MigrationValidator:
         """Validate migration data."""
         try:
             self._stats["entries_validated"] += 1
+            error_msg = None
 
             # Handle different call patterns
             if isinstance(data, str):
@@ -118,28 +119,24 @@ class MigrationValidator:
 
                 # Validate DN
                 if not dn or not dn.strip():
-                    self._stats["validation_errors"] += 1
-                    return FlextResult.fail("DN cannot be empty or whitespace")
-
+                    error_msg = "DN cannot be empty or whitespace"
                 # Validate object classes
-                if not obj_classes:
-                    self._stats["validation_errors"] += 1
-                    return FlextResult.fail("Object classes must be a non-empty list")
-
+                elif not obj_classes:
+                    error_msg = "Object classes must be a non-empty list"
                 # Basic attribute validation for person object class
-                if "person" in obj_classes and "sn" not in attrs:
+                elif "person" in obj_classes and "sn" not in attrs:
                     self._stats["validation_warnings"] += 1
                     if self.strict_mode:
-                        self._stats["validation_errors"] += 1
-                        return FlextResult.fail(
-                            "person object class requires 'sn' attribute",
-                        )
+                        error_msg = "person object class requires 'sn' attribute"
 
-                return FlextResult.ok(data=True)
             # Called with validate(data_dict)
-            if not data:
+            elif not data:
+                error_msg = "Data is empty"
+
+            if error_msg:
                 self._stats["validation_errors"] += 1
-                return FlextResult.fail("Data is empty")
+                return FlextResult.fail(error_msg)
+
             return FlextResult.ok(data=True)
 
         except Exception as e:

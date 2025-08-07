@@ -60,12 +60,12 @@ class TargetLDAPConfig(BaseSettings):
 
     # Target-specific settings
     create_missing_entries: bool = Field(
-        True,
+        default=True,
         description="Create entries that don't exist",
     )
-    update_existing_entries: bool = Field(True, description="Update existing entries")
+    update_existing_entries: bool = Field(default=True, description="Update existing entries")
     delete_removed_entries: bool = Field(
-        False,
+        default=False,
         description="Delete entries not in source",
     )
 
@@ -91,8 +91,8 @@ class LDAPConnectionSettings(FlextDomainBaseModel):
 
     host: str = Field(..., description="LDAP server host")
     port: int = Field(389, description="LDAP server port")
-    use_ssl: bool = Field(False, description="Use SSL connection")
-    use_tls: bool = Field(False, description="Use TLS connection")
+    use_ssl: bool = Field(default=False, description="Use SSL connection")
+    use_tls: bool = Field(default=False, description="Use TLS connection")
     bind_dn: str | None = Field(None, description="Bind DN")
     bind_password: str | None = Field(None, description="Bind password")
     base_dn: str = Field(..., description="Base DN")
@@ -105,9 +105,9 @@ class LDAPOperationSettings(FlextDomainBaseModel):
 
     batch_size: int = Field(1000, description="Batch size")
     max_records: int | None = Field(None, description="Maximum records")
-    create_missing_entries: bool = Field(True, description="Create missing entries")
-    update_existing_entries: bool = Field(True, description="Update existing entries")
-    delete_removed_entries: bool = Field(False, description="Delete removed entries")
+    create_missing_entries: bool = Field(default=True, description="Create missing entries")
+    update_existing_entries: bool = Field(default=True, description="Update existing entries")
+    delete_removed_entries: bool = Field(default=False, description="Delete removed entries")
 
 
 # Function removed - not used anywhere and caused mypy errors due to complex field typing
