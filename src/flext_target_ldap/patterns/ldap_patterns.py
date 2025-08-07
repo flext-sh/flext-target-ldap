@@ -27,17 +27,19 @@ class LDAPTypeConverter:
         """Convert Singer type to LDAP-compatible type."""
         try:
             if value is None:
-                return FlextResult.ok(None)
+                result = None
+            elif singer_type in {"string", "text"}:
+                result = str(value)
+            elif singer_type in {"integer", "number"}:
+                result = str(value)  # LDAP stores numbers as strings
+            elif singer_type == "boolean":
+                result = "TRUE" if value else "FALSE"
+            elif singer_type in {"object", "array"}:
+                result = json.dumps(value)
+            else:
+                result = str(value)
 
-            if singer_type in {"string", "text"}:
-                return FlextResult.ok(str(value))
-            if singer_type in {"integer", "number"}:
-                return FlextResult.ok(str(value))  # LDAP stores numbers as strings
-            if singer_type == "boolean":
-                return FlextResult.ok("TRUE" if value else "FALSE")
-            if singer_type in {"object", "array"}:
-                return FlextResult.ok(json.dumps(value))
-            return FlextResult.ok(str(value))
+            return FlextResult.ok(result)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.warning("Type conversion failed for %s: %s", singer_type, e)
@@ -195,7 +197,7 @@ class LDAPSchemaMapper:
     def _map_singer_type_to_ldap(
         self,
         prop_def: TAnyDict,
-        object_class: str,
+        _object_class: str,
     ) -> FlextResult[str]:
         """Map Singer property definition to LDAP attribute syntax."""
         try:

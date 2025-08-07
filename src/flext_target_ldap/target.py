@@ -18,6 +18,7 @@ from flext_target_ldap.config import TargetLDAPConfig
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 from flext_target_ldap.sinks import (
     GroupsSink,
+    LDAPBaseSink,
     OrganizationalUnitsSink,
     UsersSink,
 )
@@ -122,8 +123,8 @@ class TargetLDAP(Target):
                 "No specific sink found for stream '%s', using base sink",
                 stream_name,
             )
-            # Return UsersSink as default - could create a GenericSink if needed
-            return UsersSink
+            # Return LDAPBaseSink as default for generic streams
+            return LDAPBaseSink
 
         logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
         return sink_class

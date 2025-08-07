@@ -1,7 +1,7 @@
 """FLEXT Target LDAP - Enterprise Singer Target for LDAP Directory Services.
 
 **Architecture**: Production-ready Singer target implementing Clean Architecture, DDD, and enterprise patterns
-**Integration**: Complete flext-meltano ecosystem integration with ALL facilities utilized  
+**Integration**: Complete flext-meltano ecosystem integration with ALL facilities utilized
 **Quality**: 100% type safety, 90%+ test coverage, zero-tolerance quality standards
 
 ## Enterprise Integration Features:
@@ -37,47 +37,39 @@ from __future__ import annotations
 
 import importlib.metadata
 
+# flext-core imports
+from flext_core import FlextResult, FlextValueObject, get_logger
+
 # === FLEXT-MELTANO COMPLETE INTEGRATION ===
 # Re-export ALL flext-meltano facilities for full ecosystem integration
 from flext_meltano import (
+    BatchSink,
+    FlextMeltanoBaseService,
+    # Bridge integration
+    FlextMeltanoBridge,
+    # Configuration and validation
+    FlextMeltanoConfig,
+    FlextMeltanoEvent,
+    # RESTStream,  # Not in flext_meltano yet
+    # Enterprise services from flext-meltano.base
+    FlextMeltanoTargetService,
+    # Authentication patterns
+    OAuthAuthenticator,
+    # Typing definitions
+    PropertiesList,
+    Property,
+    Sink,
+    SQLSink,
     # Core Singer SDK classes (centralized from flext-meltano)
     Stream,
     Tap,
     Target,
-    Sink,
-    BatchSink,
-    SQLSink,
-    # RESTStream,  # Not in flext_meltano yet
-    
-    # Enterprise services from flext-meltano.base  
-    FlextMeltanoTargetService,
-    FlextMeltanoBaseService,
     create_meltano_target_service,
-    
-    # Configuration and validation
-    FlextMeltanoConfig,
-    FlextMeltanoEvent,
-    
-    # Singer typing utilities (centralized)
-    singer_typing,
-    
-    
-    # Bridge integration
-    FlextMeltanoBridge,
-    
     # Testing utilities
     get_tap_test_class,  # Using tap test class for targets too
-    
-    # Authentication patterns
-    OAuthAuthenticator,
-    
-    # Typing definitions
-    PropertiesList,
-    Property,
+    # Singer typing utilities (centralized)
+    singer_typing,
 )
-
-# flext-core imports
-from flext_core import FlextResult, FlextValueObject, get_logger
 
 # Local implementations with complete flext-meltano integration
 from flext_target_ldap.application.orchestrator import (
@@ -102,62 +94,50 @@ __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 # Complete public API exports
 __all__: list[str] = [
-    # === PRIMARY TARGET CLASSES ===
-    "TargetLDAP",
-    "TargetLDAPConfig",
+    "BatchSink",
     "FlextLDAPTargetOrchestrator",
-    
+    "FlextMeltanoBaseService",
+    "FlextMeltanoBaseService",
+    # Bridge integration
+    "FlextMeltanoBridge",
+    # Configuration patterns
+    "FlextMeltanoConfig",
+    "FlextMeltanoEvent",
+    # "RESTStream",  # Not available yet
+    # Enterprise services
+    "FlextMeltanoTargetService",
+    # Enterprise services (missing)
+    "FlextMeltanoTargetService",
+    # === FLEXT-CORE RE-EXPORTS ===
+    "FlextResult",
+    # === BACKWARD COMPATIBILITY ===
+    "FlextTargetLDAP",
+    "FlextTargetLDAPConfig",
+    "FlextValueObject",
+    "LDAPTarget",
+    # Authentication
+    "OAuthAuthenticator",
+    "PropertiesList",
+    "Property",
+    "SQLSink",
+    "Sink",
     # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
     # Singer SDK core classes
     "Stream",
     "Tap",
     "Target",
-    "Sink",
-    "BatchSink",
-    "SQLSink",
-    # "RESTStream",  # Not available yet
-    
-    # Enterprise services
-    "FlextMeltanoTargetService",
-    "FlextMeltanoBaseService",
-    "create_meltano_target_service",
-    
-    # Configuration patterns
-    "FlextMeltanoConfig",
-    "FlextMeltanoEvent",
-    
-    # Singer typing
-    "singer_typing",
-    "PropertiesList",
-    "Property",
-    
-    
-    # Bridge integration
-    "FlextMeltanoBridge",
-    
-    # Testing
-    "get_tap_test_class",
-    
-    # Enterprise services (missing)
-    "FlextMeltanoTargetService",
-    "FlextMeltanoBaseService", 
-    "create_meltano_target_service",
-    
-    # Authentication
-    "OAuthAuthenticator",
-    
-    # === FLEXT-CORE RE-EXPORTS ===
-    "FlextResult",
-    "FlextValueObject",
-    "get_logger",
-    
-    # === BACKWARD COMPATIBILITY ===
-    "FlextTargetLDAP",
-    "FlextTargetLDAPConfig",
-    "LDAPTarget",
     "TargetConfig",
-    
+    # === PRIMARY TARGET CLASSES ===
+    "TargetLDAP",
+    "TargetLDAPConfig",
     # === METADATA ===
     "__version__",
     "__version_info__",
+    "create_meltano_target_service",
+    "create_meltano_target_service",
+    "get_logger",
+    # Testing
+    "get_tap_test_class",
+    # Singer typing
+    "singer_typing",
 ]

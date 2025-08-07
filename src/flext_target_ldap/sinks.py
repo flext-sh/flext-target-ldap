@@ -7,6 +7,8 @@ Zero tolerance for code duplication.
 
 from __future__ import annotations
 
+import asyncio
+
 from flext_core import (
     FlextResult,
     get_logger,
@@ -64,7 +66,7 @@ class LDAPBaseSink(Sink):
         self.client: LDAPClient | None = None
         self._processing_result = LDAPProcessingResult()
 
-    def setup_client(self) -> FlextResult[LDAPClient]:
+    async def setup_client(self) -> FlextResult[LDAPClient]:
         """Setup LDAP client connection."""
         try:
             # Create dict configuration for LDAPClient compatibility
@@ -78,9 +80,9 @@ class LDAPBaseSink(Sink):
             }
 
             self.client = LDAPClient(connection_config)
-            connect_result = self.client.connect()
+            connect_result = await self.client.connect()
 
-            if not connect_result.success:
+            if not connect_result.is_success:
                 return FlextResult.fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
@@ -102,8 +104,8 @@ class LDAPBaseSink(Sink):
 
     def process_batch(self, context: dict[str, object]) -> None:
         """Process a batch of records."""
-        setup_result = self.setup_client()
-        if not setup_result.success:
+        setup_result = asyncio.run(self.setup_client())
+        if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
 
@@ -191,15 +193,15 @@ class UsersSink(LDAPBaseSink):
             )
 
             # Try to add the user entry
-            add_result = self.client.add_entry(user_dn, attributes, object_classes)
+            add_result = asyncio.run(self.client.add_entry(user_dn, attributes, object_classes))
 
-            if add_result.success:
+            if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("User entry added successfully: %s", user_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = self.client.modify_entry(user_dn, attributes)
-                if modify_result.success:
+                modify_result = asyncio.run(self.client.modify_entry(user_dn, attributes))
+                if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
                 else:
@@ -298,15 +300,15 @@ class GroupsSink(LDAPBaseSink):
             )
 
             # Try to add the group entry
-            add_result = self.client.add_entry(group_dn, attributes, object_classes)
+            add_result = asyncio.run(self.client.add_entry(group_dn, attributes, object_classes))
 
-            if add_result.success:
+            if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = self.client.modify_entry(group_dn, attributes)
-                if modify_result.success:
+                modify_result = asyncio.run(self.client.modify_entry(group_dn, attributes))
+                if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("Group entry modified successfully: %s", group_dn)
                 else:
@@ -396,15 +398,15 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             attributes = self._build_ou_attributes(record)
 
             # Try to add the OU entry
-            add_result = self.client.add_entry(ou_dn, attributes)
+            add_result = asyncio.run(self.client.add_entry(ou_dn, attributes))
 
-            if add_result.success:
+            if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = self.client.modify_entry(ou_dn, attributes)
-                if modify_result.success:
+                modify_result = asyncio.run(self.client.modify_entry(ou_dn, attributes))
+                if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("OU entry modified successfully: %s", ou_dn)
                 else:

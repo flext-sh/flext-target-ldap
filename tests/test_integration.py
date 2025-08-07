@@ -26,7 +26,7 @@ class TestTargetLDAPIntegration:
     @pytest.fixture
     def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         config_path = tmp_path / "config.json"
-        with open(config_path, "w", encoding="utf-8") as f:
+        with config_path.open("w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
         return config_path
 
@@ -39,7 +39,7 @@ class TestTargetLDAPIntegration:
         singer_message_state: str,
     ) -> Path:
         input_path = tmp_path / "input.jsonl"
-        with open(input_path, "w", encoding="utf-8") as f:
+        with input_path.open("w", encoding="utf-8") as f:
             f.write(singer_message_schema + "\n")
             f.write(singer_message_record + "\n")
             f.write(singer_message_state + "\n")
@@ -62,7 +62,7 @@ class TestTargetLDAPIntegration:
         # Mock LDAP API is already configured
 
         # Run target
-        with open(input_file, encoding="utf-8") as f:
+        with input_file.open(encoding="utf-8") as f:
             result = runner.invoke(
                 TargetLDAP.cli,
                 ["--config", str(config_file)],
@@ -114,7 +114,7 @@ class TestTargetLDAPIntegration:
             "record": {"dn": "uid=test,dc=test,dc=com", "cn": "Updated Test User"},
         }
 
-        with open(input_path, "w", encoding="utf-8") as f:
+        with input_path.open("w", encoding="utf-8") as f:
             f.write(json.dumps(schema_msg) + "\n")
             f.write(json.dumps(record1) + "\n")
             f.write(json.dumps(record2) + "\n")
@@ -143,7 +143,7 @@ class TestTargetLDAPIntegration:
         # Mock LDAP API is already configured
 
         # Run target
-        with open(input_path, encoding="utf-8") as f:
+        with input_path.open(encoding="utf-8") as f:
             result = runner.invoke(
                 TargetLDAP.cli,
                 ["--config", str(config_file)],
@@ -188,7 +188,7 @@ class TestTargetLDAPIntegration:
             },
         }
 
-        with open(input_path, "w", encoding="utf-8") as f:
+        with input_path.open("w", encoding="utf-8") as f:
             f.write(json.dumps(schema_msg) + "\n")
             f.write(json.dumps(delete_record) + "\n")
 
@@ -201,7 +201,7 @@ class TestTargetLDAPIntegration:
         # Mock LDAP API is already configured
 
         # Run target
-        with open(input_path, encoding="utf-8") as f:
+        with input_path.open(encoding="utf-8") as f:
             result = runner.invoke(
                 TargetLDAP.cli,
                 ["--config", str(config_file)],
@@ -231,7 +231,7 @@ class TestTargetLDAPIntegration:
         }
 
         config_path = tmp_path / "template_config.json"
-        with open(config_path, "w", encoding="utf-8") as f:
+        with config_path.open("w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
 
         # Create input without DN
@@ -252,7 +252,7 @@ class TestTargetLDAPIntegration:
             "record": {"uid": "testuser", "cn": "Test User"},
         }
 
-        with open(input_path, "w", encoding="utf-8") as f:
+        with input_path.open("w", encoding="utf-8") as f:
             f.write(json.dumps(schema_msg) + "\n")
             f.write(json.dumps(record) + "\n")
 
@@ -265,7 +265,7 @@ class TestTargetLDAPIntegration:
         # Mock LDAP API is already configured
 
         # Run target
-        with open(input_path, encoding="utf-8") as f:
+        with input_path.open(encoding="utf-8") as f:
             result = runner.invoke(
                 TargetLDAP.cli,
                 ["--config", str(config_path)],
@@ -288,7 +288,7 @@ class TestTargetLDAPIntegration:
         # Invalid config
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
-        with open(config_path, "w", encoding="utf-8") as f:
+        with config_path.open("w", encoding="utf-8") as f:
             json.dump(bad_config, f)
 
         result = runner.invoke(
@@ -335,7 +335,7 @@ class TestTargetLDAPIntegration:
             },
         ]
 
-        with open(input_path, "w", encoding="utf-8") as f:
+        with input_path.open("w", encoding="utf-8") as f:
             f.writelines(json.dumps(msg) + "\n" for msg in messages)
 
         # Mock connection
@@ -347,7 +347,7 @@ class TestTargetLDAPIntegration:
         # Mock LDAP API is already configured
 
         # Run target
-        with open(input_path, encoding="utf-8") as f:
+        with input_path.open(encoding="utf-8") as f:
             result = runner.invoke(
                 TargetLDAP.cli,
                 ["--config", str(config_file)],

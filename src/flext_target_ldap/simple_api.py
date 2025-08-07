@@ -37,10 +37,10 @@ def load_users_to_ldap(
         target = target_result.data
         if target is None:
             return FlextResult.fail("Target creation failed")
-        
+
         # Type assertion since we know target is TargetLDAP
-        from flext_target_ldap.target import TargetLDAP
-        assert isinstance(target, TargetLDAP)
+        if not isinstance(target, TargetLDAP):
+            return FlextResult.fail("Target is not a TargetLDAP instance")
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
 
         # Process records
@@ -67,10 +67,10 @@ def load_groups_to_ldap(
         target = target_result.data
         if target is None:
             return FlextResult.fail("Target creation failed")
-        
+
         # Type assertion since we know target is TargetLDAP
-        from flext_target_ldap.target import TargetLDAP
-        assert isinstance(target, TargetLDAP)
+        if not isinstance(target, TargetLDAP):
+            return FlextResult.fail("Target is not a TargetLDAP instance")
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
 
         # Process records

@@ -75,7 +75,8 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Test with simple search (connection is guaranteed to be not None after successful connect)
-            assert self._connection is not None  # for mypy
+            if self._connection is None:
+                return FlextResult.fail("Connection is None after successful connect")
             search_result = self._connection.search(
                 self.config.base_dn,
                 "(objectClass=*)",
@@ -107,7 +108,8 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # for mypy
+            if self._connection is None:
+                return FlextResult.fail("Connection is None")
             search_result = self._connection.search(
                 search_base,
                 search_filter,
@@ -144,7 +146,8 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # for mypy
+            if self._connection is None:
+                return FlextResult.fail("Connection is None")
             add_result = self._connection.add(dn, attributes=attributes)  # type: ignore[no-untyped-call]
 
             if add_result:
@@ -168,7 +171,8 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # for mypy
+            if self._connection is None:
+                return FlextResult.fail("Connection is None")
             modify_result = self._connection.modify(dn, changes)  # type: ignore[no-untyped-call]
 
             if modify_result:
@@ -192,7 +196,8 @@ class LDAPConnection:
                     return FlextResult.fail(error_msg)
 
             # Connection is guaranteed to be not None after successful connect
-            assert self._connection is not None  # for mypy
+            if self._connection is None:
+                return FlextResult.fail("Connection is None")
             delete_result = self._connection.delete(dn)  # type: ignore[no-untyped-call]
 
             if delete_result:
