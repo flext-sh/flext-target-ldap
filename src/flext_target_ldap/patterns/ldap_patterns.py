@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from flext_core import FlextResult, get_logger
 
 if TYPE_CHECKING:
-    from flext_core.flext_types import TAnyDict
+    from flext_core.typings import TAnyDict
 
 logger = get_logger(__name__)
 
