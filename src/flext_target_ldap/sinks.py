@@ -115,7 +115,8 @@ class LDAPBaseSink(Sink):
             records = records_raw if isinstance(records_raw, list) else []
             logger.info(
                 "Processing batch of %d records for stream: %s",
-                len(records), self.stream_name,
+                len(records),
+                self.stream_name,
             )
 
             for record in records:
@@ -123,7 +124,8 @@ class LDAPBaseSink(Sink):
 
             logger.info(
                 "Batch processing completed. Success: %d, Errors: %d",
-                self._processing_result.success_count, self._processing_result.error_count,
+                self._processing_result.success_count,
+                self._processing_result.error_count,
             )
 
         finally:
@@ -193,14 +195,18 @@ class UsersSink(LDAPBaseSink):
             )
 
             # Try to add the user entry
-            add_result = asyncio.run(self.client.add_entry(user_dn, attributes, object_classes))
+            add_result = asyncio.run(
+                self.client.add_entry(user_dn, attributes, object_classes)
+            )
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("User entry added successfully: %s", user_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(self.client.modify_entry(user_dn, attributes))
+                modify_result = asyncio.run(
+                    self.client.modify_entry(user_dn, attributes)
+                )
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
@@ -262,7 +268,7 @@ class UsersSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
 
-        return attributes  # type: ignore[return-value]
+        return attributes
 
 
 class GroupsSink(LDAPBaseSink):
@@ -300,14 +306,18 @@ class GroupsSink(LDAPBaseSink):
             )
 
             # Try to add the group entry
-            add_result = asyncio.run(self.client.add_entry(group_dn, attributes, object_classes))
+            add_result = asyncio.run(
+                self.client.add_entry(group_dn, attributes, object_classes)
+            )
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(self.client.modify_entry(group_dn, attributes))
+                modify_result = asyncio.run(
+                    self.client.modify_entry(group_dn, attributes)
+                )
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("Group entry modified successfully: %s", group_dn)
@@ -368,7 +378,7 @@ class GroupsSink(LDAPBaseSink):
                 else:
                     attributes[ldap_attr] = [str(value)]
 
-        return attributes  # type: ignore[return-value]
+        return attributes
 
 
 class OrganizationalUnitsSink(LDAPBaseSink):

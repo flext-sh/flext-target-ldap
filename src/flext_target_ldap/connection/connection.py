@@ -55,7 +55,7 @@ class LDAPConnection:
         """Close LDAP connection."""
         try:
             if self._connection:
-                self._connection.unbind()  # type: ignore[no-untyped-call]
+                self._connection.unbind()
                 self._connection = None
                 logger.info("LDAP connection closed")
 
@@ -130,7 +130,7 @@ class LDAPConnection:
                     entry_dict[attr_name] = entry[attr_name].values
                 results.append(entry_dict)
 
-            return FlextResult.ok(results)  # type: ignore[arg-type]
+            return FlextResult.ok(results)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP search failed: %s", search_filter)
@@ -148,7 +148,7 @@ class LDAPConnection:
             # Connection is guaranteed to be not None after successful connect
             if self._connection is None:
                 return FlextResult.fail("Connection is None")
-            add_result = self._connection.add(dn, attributes=attributes)  # type: ignore[no-untyped-call]
+            add_result = self._connection.add(dn, attributes=attributes)
 
             if add_result:
                 logger.info("Added LDAP entry: %s", dn)
@@ -173,7 +173,7 @@ class LDAPConnection:
             # Connection is guaranteed to be not None after successful connect
             if self._connection is None:
                 return FlextResult.fail("Connection is None")
-            modify_result = self._connection.modify(dn, changes)  # type: ignore[no-untyped-call]
+            modify_result = self._connection.modify(dn, changes)
 
             if modify_result:
                 logger.info("Modified LDAP entry: %s", dn)
@@ -198,7 +198,7 @@ class LDAPConnection:
             # Connection is guaranteed to be not None after successful connect
             if self._connection is None:
                 return FlextResult.fail("Connection is None")
-            delete_result = self._connection.delete(dn)  # type: ignore[no-untyped-call]
+            delete_result = self._connection.delete(dn)
 
             if delete_result:
                 logger.info("Deleted LDAP entry: %s", dn)

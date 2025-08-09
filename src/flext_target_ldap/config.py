@@ -10,8 +10,8 @@ from __future__ import annotations
 import warnings
 
 from flext_core import (
-    FlextBaseSettings as BaseSettings,
     FlextResult,
+    FlextSettings as BaseSettings,
     FlextValueObject as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
@@ -63,7 +63,9 @@ class TargetLDAPConfig(BaseSettings):
         default=True,
         description="Create entries that don't exist",
     )
-    update_existing_entries: bool = Field(default=True, description="Update existing entries")
+    update_existing_entries: bool = Field(
+        default=True, description="Update existing entries"
+    )
     delete_removed_entries: bool = Field(
         default=False,
         description="Delete entries not in source",
@@ -105,9 +107,15 @@ class LDAPOperationSettings(FlextDomainBaseModel):
 
     batch_size: int = Field(1000, description="Batch size")
     max_records: int | None = Field(None, description="Maximum records")
-    create_missing_entries: bool = Field(default=True, description="Create missing entries")
-    update_existing_entries: bool = Field(default=True, description="Update existing entries")
-    delete_removed_entries: bool = Field(default=False, description="Delete removed entries")
+    create_missing_entries: bool = Field(
+        default=True, description="Create missing entries"
+    )
+    update_existing_entries: bool = Field(
+        default=True, description="Update existing entries"
+    )
+    delete_removed_entries: bool = Field(
+        default=False, description="Delete removed entries"
+    )
 
 
 # Function removed - not used anywhere and caused mypy errors due to complex field typing
@@ -125,7 +133,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         }
 
         # Create connection config
-        connection_config = FlextLdapConnectionConfig(**connection_params)  # type: ignore[arg-type]
+        connection_config = FlextLdapConnectionConfig(**connection_params)
 
         # Create target config with connection
         target_params = {
@@ -133,7 +141,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         }
         target_params["connection"] = connection_config
 
-        validated_config = TargetLDAPConfig(**target_params)  # type: ignore[arg-type]
+        validated_config = TargetLDAPConfig(**target_params)
         return FlextResult.ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")
