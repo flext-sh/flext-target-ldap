@@ -345,7 +345,7 @@ class LDAPEntryManager:
             if missing_attrs:
                 return FlextResult.fail(f"Missing required attributes: {missing_attrs}")
 
-            return FlextResult.ok(data=True)
+            return FlextResult.ok(True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")

@@ -85,7 +85,7 @@ class LDAPConnection:
             )
 
             if search_result:
-                return FlextResult.ok(data=True)
+                return FlextResult.ok(True)
             return FlextResult.fail("Connection test search failed")
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -152,7 +152,7 @@ class LDAPConnection:
 
             if add_result:
                 logger.info("Added LDAP entry: %s", dn)
-                return FlextResult.ok(data=True)
+                return FlextResult.ok(True)
 
             add_error_msg: str = f"Add failed: {self._connection.result}"
             return FlextResult.fail(add_error_msg)
@@ -177,7 +177,7 @@ class LDAPConnection:
 
             if modify_result:
                 logger.info("Modified LDAP entry: %s", dn)
-                return FlextResult.ok(data=True)
+                return FlextResult.ok(True)
 
             modify_error_msg: str = f"Modify failed: {self._connection.result}"
             return FlextResult.fail(modify_error_msg)
@@ -202,7 +202,7 @@ class LDAPConnection:
 
             if delete_result:
                 logger.info("Deleted LDAP entry: %s", dn)
-                return FlextResult.ok(data=True)
+                return FlextResult.ok(True)
 
             delete_error_msg: str = f"Delete failed: {self._connection.result}"
             return FlextResult.fail(delete_error_msg)
