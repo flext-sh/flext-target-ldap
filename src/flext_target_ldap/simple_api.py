@@ -103,7 +103,7 @@ def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
         get_ldap_api()
         # For connection test, config is already validated by Pydantic on construction
         # Just return success if we got this far
-        return FlextResult.ok(data=True)
+        return FlextResult.ok(True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Connection test error: {e}")

@@ -211,7 +211,7 @@ class LDAPClient:
 
             if result.is_success:
                 logger.debug("Successfully added LDAP entry: %s", dn)
-                return FlextResult.ok(data=True)
+                return FlextResult.ok(True)
             error_msg = f"Failed to add entry {dn}: {result.error}"
             logger.error(error_msg)
             return FlextResult.fail(error_msg)
@@ -253,7 +253,7 @@ class LDAPClient:
 
             if result.is_success:
                 logger.debug("Successfully modified LDAP entry: %s", dn)
-                return FlextResult.ok(data=True)
+                return FlextResult.ok(True)
             error_msg = f"Failed to modify entry {dn}: {result.error}"
             logger.error(error_msg)
             return FlextResult.fail(error_msg)
@@ -284,7 +284,7 @@ class LDAPClient:
 
                 if result.is_success:
                     logger.debug("Successfully deleted LDAP entry: %s", dn)
-                    return FlextResult.ok(data=True)
+                    return FlextResult.ok(True)
                 error_msg = f"Failed to delete entry {dn}: {result.error}"
                 logger.error(error_msg)
                 return FlextResult.fail(error_msg)
@@ -373,10 +373,10 @@ class LDAPClient:
             if search_result.is_success:
                 exists = len(search_result.data or []) > 0
                 logger.debug("Entry exists check for %s: %s", dn, exists)
-                return FlextResult.ok(data=exists)
+                return FlextResult.ok(exists)
             # If search failed, assume entry doesn't exist
             logger.debug("Entry exists check failed for %s, assuming doesn't exist", dn)
-            return FlextResult.ok(data=False)
+            return FlextResult.ok(False)
 
         except Exception as e:
             logger.exception("Failed to check entry existence: %s", dn)
@@ -425,11 +425,11 @@ class LDAPClient:
 
                 if result.is_success:
                     logger.info("Disconnected from LDAP server")
-                    return FlextResult.ok(data=True)
+                    return FlextResult.ok(True)
                 logger.error("Failed to disconnect: %s", result.error)
                 return result
             logger.debug("No active session to disconnect")
-            return FlextResult.ok(data=True)
+            return FlextResult.ok(True)
 
         except Exception as e:
             logger.exception("Failed to disconnect from LDAP server")
