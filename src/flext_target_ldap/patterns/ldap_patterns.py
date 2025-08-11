@@ -3,12 +3,8 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
 
 from flext_core import FlextResult, get_logger
-
-if TYPE_CHECKING:
-    from flext_core.typings import TAnyDict
 
 logger = get_logger(__name__)
 
@@ -55,9 +51,9 @@ class LDAPDataTransformer:
 
     def transform_record(
         self,
-        record: TAnyDict,
-        schema: TAnyDict | None = None,
-    ) -> FlextResult[TAnyDict]:
+        record: dict[str, object],
+        schema: dict[str, object] | None = None,
+    ) -> FlextResult[dict[str, object]]:
         """Transform Singer record for LDAP storage."""
         try:
             transformed = {}
@@ -113,7 +109,7 @@ class LDAPDataTransformer:
 
     def prepare_ldap_attributes(
         self,
-        record: TAnyDict,
+        record: dict[str, object],
         object_classes: list[str],
     ) -> FlextResult[dict[str, list[str]]]:
         """Prepare attributes for LDAP entry creation."""
@@ -147,7 +143,7 @@ class LDAPSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: TAnyDict,
+        schema: dict[str, object],
         object_class: str = "inetOrgPerson",
     ) -> FlextResult[dict[str, str]]:
         """Map Singer schema to LDAP attribute definitions."""
@@ -196,7 +192,7 @@ class LDAPSchemaMapper:
 
     def _map_singer_type_to_ldap(
         self,
-        prop_def: TAnyDict,
+        prop_def: dict[str, object],
         _object_class: str,
     ) -> FlextResult[str]:
         """Map Singer property definition to LDAP attribute syntax."""
@@ -227,7 +223,7 @@ class LDAPEntryManager:
 
     def generate_dn(
         self,
-        record: TAnyDict,
+        record: dict[str, object],
         base_dn: str,
         rdn_attribute: str = "cn",
     ) -> FlextResult[str]:
@@ -289,7 +285,7 @@ class LDAPEntryManager:
 
     def determine_object_classes(
         self,
-        record: TAnyDict,
+        record: dict[str, object],
         stream_name: str,
     ) -> FlextResult[list[str]]:
         """Determine appropriate object classes for LDAP entry."""
@@ -324,7 +320,7 @@ class LDAPEntryManager:
 
     def validate_entry_attributes(
         self,
-        attributes: TAnyDict,
+        attributes: dict[str, object],
         object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate LDAP entry attributes against object class requirements."""
@@ -345,7 +341,7 @@ class LDAPEntryManager:
             if missing_attrs:
                 return FlextResult.fail(f"Missing required attributes: {missing_attrs}")
 
-            return FlextResult.ok(True)
+            return FlextResult.ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")
@@ -353,12 +349,12 @@ class LDAPEntryManager:
 
     def prepare_modify_changes(
         self,
-        current_attrs: TAnyDict,
-        new_attrs: TAnyDict,
-    ) -> FlextResult[TAnyDict]:
+        current_attrs: dict[str, object],
+        new_attrs: dict[str, object],
+    ) -> FlextResult[dict[str, object]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: TAnyDict = {}
+            changes: dict[str, object] = {}
 
             # Find attributes to add, modify, or delete
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
