@@ -211,7 +211,7 @@ class LDAPClient:
 
             if result.is_success:
                 logger.debug("Successfully added LDAP entry: %s", dn)
-                return FlextResult.ok(True)
+                return FlextResult.ok(data=True)
             error_msg = f"Failed to add entry {dn}: {result.error}"
             logger.error(error_msg)
             return FlextResult.fail(error_msg)
@@ -253,7 +253,7 @@ class LDAPClient:
 
             if result.is_success:
                 logger.debug("Successfully modified LDAP entry: %s", dn)
-                return FlextResult.ok(True)
+                return FlextResult.ok(data=True)
             error_msg = f"Failed to modify entry {dn}: {result.error}"
             logger.error(error_msg)
             return FlextResult.fail(error_msg)
