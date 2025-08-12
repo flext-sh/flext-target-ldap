@@ -64,7 +64,7 @@ class TargetLDAPConfig(BaseSettings):
         description="Create entries that don't exist",
     )
     update_existing_entries: bool = Field(
-        default=True, description="Update existing entries"
+        default=True, description="Update existing entries",
     )
     delete_removed_entries: bool = Field(
         default=False,
@@ -108,13 +108,13 @@ class LDAPOperationSettings(FlextDomainBaseModel):
     batch_size: int = Field(1000, description="Batch size")
     max_records: int | None = Field(None, description="Maximum records")
     create_missing_entries: bool = Field(
-        default=True, description="Create missing entries"
+        default=True, description="Create missing entries",
     )
     update_existing_entries: bool = Field(
-        default=True, description="Update existing entries"
+        default=True, description="Update existing entries",
     )
     delete_removed_entries: bool = Field(
-        default=False, description="Delete removed entries"
+        default=False, description="Delete removed entries",
     )
 
 
@@ -124,24 +124,87 @@ class LDAPOperationSettings(FlextDomainBaseModel):
 def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPConfig]:
     """Validate LDAP configuration."""
     try:
+        def _to_int(value: object, default: int) -> int:
+            if isinstance(value, bool):
+                return default
+            if isinstance(value, int):
+                return value
+            if isinstance(value, str):
+                try:
+                    return int(value)
+                except ValueError:
+                    return default
+            return default
+
+        def _to_bool(value: object, *, default: bool) -> bool:
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, int):
+                return value != 0
+            if isinstance(value, str):
+                return value.strip().lower() in {"1", "true", "yes", "on"}
+            return default
+
+        def _to_str(value: object, default: str = "") -> str:
+            return str(value) if value is not None else default
+
         # Extract connection parameters
         connection_params = {
-            key: value
-            for key, value in config.items()
-            if key
-            in {"host", "port", "use_ssl", "bind_dn", "password", "timeout_seconds"}
+            "server": config.get("host", "localhost"),
+            "port": config.get("port", 389),
+            "use_ssl": config.get("use_ssl", False),
+            "bind_dn": config.get("bind_dn", ""),
+            "bind_password": config.get("password", ""),
+            "timeout": config.get("timeout", 30),
         }
 
         # Create connection config
-        connection_config = FlextLdapConnectionConfig(**connection_params)
+        server = _to_str(connection_params["server"], "localhost")
+        port = _to_int(connection_params["port"], 389)
+        use_ssl = _to_bool(connection_params["use_ssl"], default=False)
+        bind_dn = _to_str(connection_params["bind_dn"], "")
+        bind_password = _to_str(connection_params["bind_password"], "")
+        timeout = _to_int(connection_params["timeout"], 30)
 
-        # Create target config with connection
-        target_params = {
-            key: value for key, value in config.items() if key not in connection_params
-        }
-        target_params["connection"] = connection_config
+        connection_config = FlextLdapConnectionConfig(
+            server=server,
+            port=port,
+            use_ssl=use_ssl,
+            bind_dn=bind_dn,
+            bind_password=bind_password,
+            timeout=timeout,
+        )
 
-        validated_config = TargetLDAPConfig(**target_params)
+        # Build TargetLDAPConfig explicitly
+        raw_attr_map = config.get("attribute_mapping")
+        if isinstance(raw_attr_map, dict):
+            attribute_mapping: dict[str, str] = {str(k): str(v) for k, v in raw_attr_map.items()}
+        else:
+            attribute_mapping = {}
+
+        raw_object_classes = config.get("object_classes")
+        if isinstance(raw_object_classes, list):
+            object_classes: list[str] = [str(v) for v in raw_object_classes]
+        else:
+            object_classes = ["top"]
+
+        validated_config = TargetLDAPConfig(
+            connection=connection_config,
+            base_dn=_to_str(config.get("base_dn", "")),
+            search_filter=_to_str(config.get("search_filter", "(objectClass=*)")),
+            search_scope=_to_str(config.get("search_scope", "SUBTREE")),
+            connect_timeout=_to_int(config.get("connect_timeout", 10), 10),
+            receive_timeout=_to_int(config.get("receive_timeout", 30), 30),
+            batch_size=_to_int(config.get("batch_size", 1000), 1000),
+            max_records=(
+                _to_int(config.get("max_records"), 0) if config.get("max_records") is not None else None
+            ),
+            create_missing_entries=_to_bool(config.get("create_missing_entries", True), default=True),
+            update_existing_entries=_to_bool(config.get("update_existing_entries", True), default=True),
+            delete_removed_entries=_to_bool(config.get("delete_removed_entries", False), default=False),
+            attribute_mapping=attribute_mapping,
+            object_classes=object_classes,
+        )
         return FlextResult.ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult.fail(f"Configuration validation failed: {e}")
