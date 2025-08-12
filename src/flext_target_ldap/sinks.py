@@ -196,7 +196,7 @@ class UsersSink(LDAPBaseSink):
 
             # Try to add the user entry
             add_result = asyncio.run(
-                self.client.add_entry(user_dn, attributes, object_classes)
+                self.client.add_entry(user_dn, attributes, object_classes),
             )
 
             if add_result.is_success:
@@ -205,7 +205,7 @@ class UsersSink(LDAPBaseSink):
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = asyncio.run(
-                    self.client.modify_entry(user_dn, attributes)
+                    self.client.modify_entry(user_dn, attributes),
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -230,17 +230,19 @@ class UsersSink(LDAPBaseSink):
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes = {
+        attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
             if isinstance(object_classes, list)
             else ["inetOrgPerson", "person"],
         }
 
         # Add person-specific object classes
-        if "person" not in attributes["objectClass"]:
-            attributes["objectClass"].append("person")
-        if "inetOrgPerson" not in attributes["objectClass"]:
-            attributes["objectClass"].append("inetOrgPerson")
+        obj_classes = attributes.get("objectClass")
+        if isinstance(obj_classes, list):
+            if "person" not in obj_classes:
+                obj_classes.append("person")
+            if "inetOrgPerson" not in obj_classes:
+                obj_classes.append("inetOrgPerson")
 
         # Map Singer fields to LDAP attributes
         field_mapping = {
@@ -307,7 +309,7 @@ class GroupsSink(LDAPBaseSink):
 
             # Try to add the group entry
             add_result = asyncio.run(
-                self.client.add_entry(group_dn, attributes, object_classes)
+                self.client.add_entry(group_dn, attributes, object_classes),
             )
 
             if add_result.is_success:
@@ -316,7 +318,7 @@ class GroupsSink(LDAPBaseSink):
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = asyncio.run(
-                    self.client.modify_entry(group_dn, attributes)
+                    self.client.modify_entry(group_dn, attributes),
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -341,15 +343,16 @@ class GroupsSink(LDAPBaseSink):
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes = {
+        attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
             if isinstance(object_classes, list)
             else ["groupOfNames"],
         }
 
         # Add group-specific object classes
-        if "groupOfNames" not in attributes["objectClass"]:
-            attributes["objectClass"].append("groupOfNames")
+        obj_classes = attributes.get("objectClass")
+        if isinstance(obj_classes, list) and "groupOfNames" not in obj_classes:
+            obj_classes.append("groupOfNames")
 
         # Map Singer fields to LDAP attributes
         field_mapping = {
@@ -435,7 +438,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def _build_ou_attributes(self, record: dict[str, object]) -> dict[str, object]:
         """Build LDAP attributes for OU entry."""
-        attributes = {
+        attributes: dict[str, object] = {
             "objectClass": self._target.config.get(
                 "object_classes",
                 ["inetOrgPerson", "person"],
@@ -443,8 +446,9 @@ class OrganizationalUnitsSink(LDAPBaseSink):
         }
 
         # Add OU-specific object classes
-        if "organizationalUnit" not in attributes["objectClass"]:
-            attributes["objectClass"].append("organizationalUnit")
+        obj_classes = attributes.get("objectClass")
+        if isinstance(obj_classes, list) and "organizationalUnit" not in obj_classes:
+            obj_classes.append("organizationalUnit")
 
         # Map Singer fields to LDAP attributes
         field_mapping = {
