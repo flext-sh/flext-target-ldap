@@ -421,7 +421,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
-                    ou_dn, attributes,
+                    ou_dn,
+                    attributes,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()

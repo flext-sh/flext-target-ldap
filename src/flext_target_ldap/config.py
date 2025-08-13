@@ -209,13 +209,16 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
                 else None
             ),
             create_missing_entries=_to_bool(
-                config.get("create_missing_entries", True), default=True,
+                config.get("create_missing_entries", True),
+                default=True,
             ),
             update_existing_entries=_to_bool(
-                config.get("update_existing_entries", True), default=True,
+                config.get("update_existing_entries", True),
+                default=True,
             ),
             delete_removed_entries=_to_bool(
-                config.get("delete_removed_entries", False), default=False,
+                config.get("delete_removed_entries", False),
+                default=False,
             ),
             attribute_mapping=attribute_mapping,
             object_classes=object_classes,

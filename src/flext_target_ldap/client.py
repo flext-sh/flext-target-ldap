@@ -156,7 +156,9 @@ class LDAPClient:
 
             async def _validate() -> FlextResult[str]:
                 async with api.connection(
-                    server_url, self._bind_dn or None, self._password or None,
+                    server_url,
+                    self._bind_dn or None,
+                    self._password or None,
                 ):
                     return FlextResult.ok("validated")
 
@@ -308,7 +310,9 @@ class LDAPClient:
                 return FlextResult.fail("DN required")
             logger.info("Checking if LDAP entry exists: %s", dn)
             search_result = self.search_entry(
-                base_dn=dn, search_filter="(objectClass=*)", attributes=["dn"],
+                base_dn=dn,
+                search_filter="(objectClass=*)",
+                attributes=["dn"],
             )
             if search_result.is_success and search_result.data is not None:
                 return FlextResult.ok(data=len(search_result.data) > 0)
