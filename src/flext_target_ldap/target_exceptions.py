@@ -26,13 +26,19 @@ from flext_core.exceptions import create_module_exception_classes
 _target_ldap_exceptions = create_module_exception_classes("flext_target_ldap")
 
 # Export factory-created exception classes (using actual factory keys)
-FlextTargetLdapError = _target_ldap_exceptions["FlextTargetLdapError"]
-FlextTargetLdapValidationError = _target_ldap_exceptions["FlextTargetLdapValidationError"]
-FlextTargetLdapConfigurationError = _target_ldap_exceptions["FlextTargetLdapConfigurationError"]
-FlextTargetLdapProcessingError = _target_ldap_exceptions["FlextTargetLdapProcessingError"]
-FlextTargetLdapConnectionError = _target_ldap_exceptions["FlextTargetLdapConnectionError"]
-FlextTargetLdapAuthenticationError = _target_ldap_exceptions["FlextTargetLdapAuthenticationError"]
-FlextTargetLdapTimeoutError = _target_ldap_exceptions["FlextTargetLdapTimeoutError"]
+# create_module_exception_classes uses UPPER_SNAKE keys: MODULEPREFIXError, etc.
+_PREFIX = "FLEXT_TARGET_LDAP"
+FlextTargetLdapError = _target_ldap_exceptions[f"{_PREFIX}Error"]
+FlextTargetLdapValidationError = _target_ldap_exceptions[f"{_PREFIX}ValidationError"]
+FlextTargetLdapConfigurationError = _target_ldap_exceptions[
+    f"{_PREFIX}ConfigurationError"
+]
+FlextTargetLdapProcessingError = _target_ldap_exceptions[f"{_PREFIX}ProcessingError"]
+FlextTargetLdapConnectionError = _target_ldap_exceptions[f"{_PREFIX}ConnectionError"]
+FlextTargetLdapAuthenticationError = _target_ldap_exceptions[
+    f"{_PREFIX}AuthenticationError"
+]
+FlextTargetLdapTimeoutError = _target_ldap_exceptions[f"{_PREFIX}TimeoutError"]
 
 # Create backward-compatible aliases for existing code
 FlextTargetLdapLoadError = FlextTargetLdapProcessingError  # Load errors are processing

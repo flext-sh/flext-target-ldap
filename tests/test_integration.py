@@ -59,7 +59,8 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.search.return_value = True
         mock_conn_instance.entries = []  # No existing entries
         mock_conn_instance.add.return_value = True
-        # Mock LDAP API is already configured
+        # Wire patched API to use our mock connection instance
+        mock_ldap_api.return_value = mock_conn_instance
 
         # Run target
         with input_file.open(encoding="utf-8") as f:
@@ -74,7 +75,7 @@ class TestTargetLDAPIntegration:
             msg: str = f"Expected {0}, got {result.exit_code}"
             raise AssertionError(msg)
 
-        # Verify add was called
+        # Verify add was called on the API connection mock
         assert mock_conn_instance.add.called
 
         # Check output contains state message
@@ -140,7 +141,8 @@ class TestTargetLDAPIntegration:
             return True
 
         mock_conn_instance.search.side_effect = search_side_effect
-        # Mock LDAP API is already configured
+        # Wire patched API to use our mock connection instance
+        mock_ldap_api.return_value = mock_conn_instance
 
         # Run target
         with input_path.open(encoding="utf-8") as f:

@@ -55,7 +55,9 @@ class LdapTargetConnectionSettings(FlextDomainBaseModel):
 
             # Authentication validation
             if self.bind_dn and not self.bind_password:
-                return FlextResult.fail("Bind password required when bind DN is provided")
+                return FlextResult.fail(
+                    "Bind password required when bind DN is provided",
+                )
 
             # Port validation for protocol
             ldap_standard_port = 389
@@ -63,7 +65,11 @@ class LdapTargetConnectionSettings(FlextDomainBaseModel):
 
             if self.use_ssl and self.port == ldap_standard_port:
                 return FlextResult.fail("SSL typically uses port 636, not 389")
-            if not self.use_ssl and not self.use_tls and self.port == ldaps_standard_port:
+            if (
+                not self.use_ssl
+                and not self.use_tls
+                and self.port == ldaps_standard_port
+            ):
                 return FlextResult.fail("Port 636 typically requires SSL")
 
             return FlextResult.ok(None)
@@ -98,7 +104,9 @@ class LdapTargetOperationSettings(FlextDomainBaseModel):
         try:
             # Logical consistency validation
             if not self.create_missing_entries and not self.update_existing_entries:
-                return FlextResult.fail("At least one of create_missing_entries or update_existing_entries must be True")
+                return FlextResult.fail(
+                    "At least one of create_missing_entries or update_existing_entries must be True",
+                )
 
             # Safety validation for destructive operations
             if self.delete_removed_entries:
@@ -223,7 +231,9 @@ class TargetLdapConfig(BaseSettings):
         try:
             # Validate operation consistency
             if not self.create_missing_entries and not self.update_existing_entries:
-                return FlextResult.fail("At least one of create_missing_entries or update_existing_entries must be True")
+                return FlextResult.fail(
+                    "At least one of create_missing_entries or update_existing_entries must be True",
+                )
 
             # Validate object classes
             if not self.object_classes:
@@ -241,7 +251,9 @@ class TargetLdapConfig(BaseSettings):
             return FlextResult.fail(f"Target configuration validation failed: {e}")
 
 
-def validate_ldap_target_config(config: dict[str, object]) -> FlextResult[TargetLdapConfig]:
+def validate_ldap_target_config(
+    config: dict[str, object],
+) -> FlextResult[TargetLdapConfig]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
         # Helpers to safely coerce basic types from object

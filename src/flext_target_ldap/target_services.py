@@ -125,7 +125,7 @@ class LdapConnectionService:
             logger.error(error_msg)
             return FlextResult.fail(error_msg)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Connection test failed")
             return FlextResult.fail(f"Connection test error: {e}")
 
@@ -202,7 +202,7 @@ class LdapTransformationService:
 
                     applied_mappings.append(mapping)
 
-                except Exception as e:
+                except (RuntimeError, ValueError, TypeError) as e:
                     transformation_errors.append(
                         f"Error transforming '{mapping.singer_field_name}': {e}",
                     )
@@ -218,7 +218,7 @@ class LdapTransformationService:
                     attributes=ldap_attributes,
                     entry_type=self._determine_entry_type(object_classes),
                 )
-            except Exception as e:
+            except (RuntimeError, ValueError, TypeError) as e:
                 transformation_errors.append(f"Error creating LDAP entry: {e}")
                 # Create minimal entry for error reporting
                 ldap_entry = LdapEntryModel(
@@ -244,7 +244,7 @@ class LdapTransformationService:
 
             return FlextResult.ok(result)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Record transformation failed")
             return FlextResult.fail(f"Transformation failed: {e}")
 
@@ -263,7 +263,7 @@ class LdapTransformationService:
                 case _:
                     logger.warning("Unknown transformation rule: %s", rule)
                     return value
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.warning("Failed to apply transformation rule %s: %s", rule, e)
             return value
 
@@ -322,7 +322,7 @@ class LdapTransformationService:
         try:
             # Use the entry's own validation
             return entry.validate_business_rules()
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult.fail(f"Entry validation failed: {e}")
 
     def get_default_mappings(self, entry_type: str) -> list[LdapAttributeMappingModel]:
@@ -381,7 +381,7 @@ class LdapTransformationService:
 
             return mappings
 
-        except Exception:
+        except (RuntimeError, ValueError, TypeError):
             logger.exception("Failed to create default mappings")
             return []
 
@@ -395,7 +395,8 @@ class LdapTargetOrchestrator:
     """Application orchestrator for LDAP target operations using enterprise patterns."""
 
     def __init__(
-        self, config: dict[str, object] | TargetLdapConfig | None = None,
+        self,
+        config: dict[str, object] | TargetLdapConfig | None = None,
     ) -> None:
         """Initialize LDAP target orchestrator."""
         if isinstance(config, dict):
@@ -498,7 +499,7 @@ class LdapTargetOrchestrator:
             )
             return FlextResult.ok(result)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP data loading orchestration failed")
             return FlextResult.fail(f"Data loading orchestration failed: {e}")
 
@@ -530,7 +531,7 @@ class LdapTargetOrchestrator:
 
             return FlextResult.ok(data=True)
 
-        except Exception as e:
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Configuration validation failed")
             return FlextResult.fail(f"Configuration validation failed: {e}")
 
@@ -548,7 +549,8 @@ class LdapTargetApiService:
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
 
     async def create_ldap_target(
-        self, config: dict[str, object],
+        self,
+        config: dict[str, object],
     ) -> FlextResult[object]:
         """Create LDAP target with configuration."""
         try:
@@ -620,7 +622,8 @@ class LdapTargetApiService:
             return FlextResult.fail(f"Failed to load groups: {e}")
 
     async def test_ldap_connection(
-        self, config: dict[str, object],
+        self,
+        config: dict[str, object],
     ) -> FlextResult[bool]:
         """Test LDAP connection with given configuration."""
         try:

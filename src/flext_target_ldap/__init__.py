@@ -45,39 +45,14 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import importlib.metadata
+from typing import TYPE_CHECKING
 
 # === FLEXT-CORE IMPORTS ===
 from flext_core import FlextResult, FlextValueObject, get_logger
 
-# === FLEXT-MELTANO COMPLETE INTEGRATION ===
-# Re-export ALL flext-meltano facilities for full ecosystem integration
-from flext_meltano import (
-    BatchSink,
-    FlextMeltanoBaseService,
-    # Bridge integration
-    FlextMeltanoBridge,
-    # Configuration and validation
-    FlextMeltanoConfig,
-    FlextMeltanoEvent,
-    # Enterprise services from flext-meltano.base
-    FlextMeltanoTargetService,
-    # Authentication patterns
-    OAuthAuthenticator,
-    # Typing definitions
-    PropertiesList,
-    Property,
-    Sink,
-    SQLSink,
-    # Core Singer SDK classes (centralized from flext-meltano)
-    Stream,
-    Tap,
-    Target,
-    create_meltano_target_service,
-    # Testing utilities
-    get_tap_test_class,  # Using tap test class for targets too
-    # Singer typing utilities (centralized)
-    singer_typing,
-)
+# Note: We intentionally avoid importing flext-meltano here to keep this
+# package import-light and free of optional runtime dependencies. Type-only
+# usages may be guarded under TYPE_CHECKING in modules that need them.
 
 # === NEW PEP8 REORGANIZED IMPORTS ===
 # Configuration (consolidated and descriptive)
@@ -182,28 +157,6 @@ __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 # Complete public API exports (organized by category)
 __all__: list[str] = [
-    "annotations", "FlextResult", "FlextValueObject", "get_logger", "BatchSink",
-    "FlextMeltanoBaseService", "FlextMeltanoBridge", "FlextMeltanoConfig", "FlextMeltanoEvent",
-    "FlextMeltanoTargetService", "OAuthAuthenticator", "PropertiesList", "Property", "Sink", "SQLSink",
-    "Stream", "Tap", "Target", "create_meltano_target_service", "get_tap_test_class", "singer_typing",
-    "LdapTargetConnectionSettings", "LdapTargetMappingSettings", "LdapTargetOperationSettings",
-    "TargetLdapConfig", "create_default_ldap_target_config", "validate_ldap_target_config",
-    "LdapBaseSink", "LdapGroupsSink", "LdapOrganizationalUnitsSink", "LdapProcessingResult",
-    "LdapSearchEntry", "LdapTargetClient", "LdapUsersSink", "TargetLdap", "main",
-    "LdapAttributeMappingModel", "LdapBatchProcessingModel", "LdapEntryModel", "LdapObjectClassModel",
-    "LdapOperationStatisticsModel", "LdapTransformationResultModel",
-    "FlextTargetLdapAuthenticationError", "FlextTargetLdapConfigurationError",
-    "FlextTargetLdapConnectionError", "FlextTargetLdapError", "FlextTargetLdapLoadError",
-    "FlextTargetLdapProcessingError", "FlextTargetLdapSchemaError", "FlextTargetLdapTimeoutError",
-    "FlextTargetLdapValidationError", "FlextTargetLdapWriteError", "LdapConnectionService",
-    "LdapTargetApiService", "LdapTargetOrchestrator", "LdapTransformationService", "create_ldap_target",
-    "load_groups_to_ldap", "load_users_to_ldap", "test_ldap_connection", "FlextLDAPTargetOrchestrator",
-    "FlextTargetLDAP", "FlextTargetLDAPConfig", "LDAPTarget", "TargetConfig", "TargetLDAP",
-    "TargetLDAPConfig", "LDAPClient", "LDAPSearchEntry", "LDAPProcessingResult", "LDAPBaseSink",
-    "UsersSink", "GroupsSink", "OrganizationalUnitsSink", "TransformationRule", "TransformationResult",
-    "LDAPConnectionSettings", "LDAPOperationSettings", "create_target", "test_connection",
-    "__version_info__",
-] = [
     # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
     "BatchSink",
     "FlextMeltanoBaseService",
@@ -229,12 +182,10 @@ __all__: list[str] = [
     "get_tap_test_class",
     # Singer typing
     "singer_typing",
-
     # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
     "FlextValueObject",
     "get_logger",
-
     # === NEW PEP8 REORGANIZED CLASSES ===
     # Configuration
     "LdapTargetConnectionSettings",
@@ -243,7 +194,6 @@ __all__: list[str] = [
     "TargetLdapConfig",
     "create_default_ldap_target_config",
     "validate_ldap_target_config",
-
     # Client and target
     "LdapBaseSink",
     "LdapGroupsSink",
@@ -254,7 +204,6 @@ __all__: list[str] = [
     "LdapUsersSink",
     "TargetLdap",
     "main",
-
     # Domain models
     "LdapAttributeMappingModel",
     "LdapBatchProcessingModel",
@@ -262,7 +211,6 @@ __all__: list[str] = [
     "LdapObjectClassModel",
     "LdapOperationStatisticsModel",
     "LdapTransformationResultModel",
-
     # Exceptions
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapConfigurationError",
@@ -274,7 +222,6 @@ __all__: list[str] = [
     "FlextTargetLdapTimeoutError",
     "FlextTargetLdapValidationError",
     "FlextTargetLdapWriteError",
-
     # Services
     "LdapConnectionService",
     "LdapTargetApiService",
@@ -284,7 +231,6 @@ __all__: list[str] = [
     "load_groups_to_ldap",
     "load_users_to_ldap",
     "test_ldap_connection",
-
     # === BACKWARD COMPATIBILITY ALIASES ===
     "FlextLDAPTargetOrchestrator",
     "FlextTargetLDAP",
@@ -293,28 +239,23 @@ __all__: list[str] = [
     "TargetConfig",
     "TargetLDAP",
     "TargetLDAPConfig",
-
     # Client aliases
     "LDAPClient",
     "LDAPSearchEntry",
     "LDAPProcessingResult",
-
     # Sink aliases
     "LDAPBaseSink",
     "UsersSink",
     "GroupsSink",
     "OrganizationalUnitsSink",
-
     # Model aliases
     "TransformationRule",
     "TransformationResult",
     "LDAPConnectionSettings",
     "LDAPOperationSettings",
-
     # Function aliases
     "create_target",
     "test_connection",
-
     # === METADATA ===
     "__version__",
     "__version_info__",
