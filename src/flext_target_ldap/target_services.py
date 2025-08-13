@@ -20,14 +20,14 @@ from flext_core import FlextResult, get_logger
 from flext_ldap import get_ldap_api
 
 from flext_target_ldap import target_client as target_client_module
-from flext_target_ldap.target_config import (
-    TargetLdapConfig,
-    validate_ldap_target_config,
-)
-from flext_target_ldap.target_models import (
+from flext_target_ldap.models import (
     LdapAttributeMappingModel,
     LdapEntryModel,
     LdapTransformationResultModel,
+)
+from flext_target_ldap.target_config import (
+    TargetLdapConfig,
+    validate_ldap_target_config,
 )
 
 logger = get_logger(__name__)
@@ -110,12 +110,10 @@ class LdapConnectionService:
             protocol = "ldaps" if self._config.connection.use_ssl else "ldap"
             server_url = f"{protocol}://{self._config.connection.server}:{self._config.connection.port}"
 
-            # Use test_connection helper from API
-            result = await self._ldap_api.test_connection(
-                server_uri=server_url,
-                bind_dn=None,
-                bind_password=None,
-            )
+            # Establish and close a simple connection to validate
+            async with self._ldap_api.connection(server_url, None, None) as _session:
+                pass
+            result = FlextResult.ok(True)
 
             if result.is_success:
                 logger.info("LDAP connection test successful")
