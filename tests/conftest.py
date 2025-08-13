@@ -12,6 +12,7 @@ from flext_target_ldap.client import LDAPClient
 
 @pytest.fixture
 def mock_ldap_config() -> dict[str, object]:
+    """Create mock LDAP configuration for testing."""
     return {
         "host": "test.ldap.com",
         "port": 389,
@@ -36,6 +37,7 @@ def mock_ldap_config() -> dict[str, object]:
 
 @pytest.fixture
 def sample_user_record() -> dict[str, object]:
+    """Create sample user record for testing."""
     return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
         "uid": "jdoe",
@@ -49,6 +51,7 @@ def sample_user_record() -> dict[str, object]:
 
 @pytest.fixture
 def sample_group_record() -> dict[str, object]:
+    """Create sample group record for testing."""
     return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
         "cn": "developers",
@@ -63,6 +66,7 @@ def sample_group_record() -> dict[str, object]:
 
 @pytest.fixture
 def sample_ou_record() -> dict[str, object]:
+    """Create sample organizational unit record for testing."""
     return {
         "dn": "ou=engineering,dc=test,dc=com",
         "ou": "engineering",
@@ -73,6 +77,7 @@ def sample_ou_record() -> dict[str, object]:
 
 @pytest.fixture
 def singer_message_record(sample_user_record: dict[str, object]) -> str:
+    """Create Singer RECORD message for testing."""
     message = {
         "type": "RECORD",
         "stream": "users",
@@ -84,6 +89,7 @@ def singer_message_record(sample_user_record: dict[str, object]) -> str:
 
 @pytest.fixture
 def singer_message_schema() -> str:
+    """Create Singer SCHEMA message for testing."""
     message = {
         "type": "SCHEMA",
         "stream": "users",
@@ -104,6 +110,7 @@ def singer_message_schema() -> str:
 
 @pytest.fixture
 def singer_message_state() -> str:
+    """Create Singer STATE message for testing."""
     message = {
         "type": "STATE",
         "value": {
@@ -120,6 +127,7 @@ def singer_message_state() -> str:
 
 @pytest.fixture
 def mock_ldap_client() -> MagicMock:
+    """Create mock LDAP client for testing."""
     client = MagicMock(spec=LDAPClient)
     client.validate_dn.return_value = True
     client.entry_exists.return_value = False
@@ -132,6 +140,7 @@ def mock_ldap_client() -> MagicMock:
 
 @pytest.fixture
 def mock_target(mock_ldap_config: dict[str, object]) -> MagicMock:
+    """Create mock target for testing."""
     target = MagicMock()
     target.config = mock_ldap_config
     return target

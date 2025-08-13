@@ -64,7 +64,8 @@ class TargetLDAPConfig(BaseSettings):
         description="Create entries that don't exist",
     )
     update_existing_entries: bool = Field(
-        default=True, description="Update existing entries",
+        default=True,
+        description="Update existing entries",
     )
     delete_removed_entries: bool = Field(
         default=False,
@@ -108,22 +109,26 @@ class LDAPOperationSettings(FlextDomainBaseModel):
     batch_size: int = Field(1000, description="Batch size")
     max_records: int | None = Field(None, description="Maximum records")
     create_missing_entries: bool = Field(
-        default=True, description="Create missing entries",
+        default=True,
+        description="Create missing entries",
     )
     update_existing_entries: bool = Field(
-        default=True, description="Update existing entries",
+        default=True,
+        description="Update existing entries",
     )
     delete_removed_entries: bool = Field(
-        default=False, description="Delete removed entries",
+        default=False,
+        description="Delete removed entries",
     )
 
 
 # Function removed - not used anywhere and caused mypy errors due to complex field typing
 
 
-def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPConfig]:
+def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPConfig]:  # noqa: C901
     """Validate LDAP configuration."""
     try:
+
         def _to_int(value: object, default: int) -> int:
             if isinstance(value, bool):
                 return default
@@ -178,7 +183,9 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         # Build TargetLDAPConfig explicitly
         raw_attr_map = config.get("attribute_mapping")
         if isinstance(raw_attr_map, dict):
-            attribute_mapping: dict[str, str] = {str(k): str(v) for k, v in raw_attr_map.items()}
+            attribute_mapping: dict[str, str] = {
+                str(k): str(v) for k, v in raw_attr_map.items()
+            }
         else:
             attribute_mapping = {}
 
@@ -197,11 +204,19 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
             receive_timeout=_to_int(config.get("receive_timeout", 30), 30),
             batch_size=_to_int(config.get("batch_size", 1000), 1000),
             max_records=(
-                _to_int(config.get("max_records"), 0) if config.get("max_records") is not None else None
+                _to_int(config.get("max_records"), 0)
+                if config.get("max_records") is not None
+                else None
             ),
-            create_missing_entries=_to_bool(config.get("create_missing_entries", True), default=True),
-            update_existing_entries=_to_bool(config.get("update_existing_entries", True), default=True),
-            delete_removed_entries=_to_bool(config.get("delete_removed_entries", False), default=False),
+            create_missing_entries=_to_bool(
+                config.get("create_missing_entries", True), default=True,
+            ),
+            update_existing_entries=_to_bool(
+                config.get("update_existing_entries", True), default=True,
+            ),
+            delete_removed_entries=_to_bool(
+                config.get("delete_removed_entries", False), default=False,
+            ),
             attribute_mapping=attribute_mapping,
             object_classes=object_classes,
         )

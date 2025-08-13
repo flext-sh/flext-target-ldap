@@ -9,10 +9,7 @@ from __future__ import annotations
 
 import asyncio
 
-from flext_core import (
-    FlextResult,
-    get_logger,
-)
+from flext_core import FlextResult, get_logger
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.client import LDAPClient
@@ -67,7 +64,7 @@ class LDAPBaseSink(Sink):
         self._processing_result = LDAPProcessingResult()
 
     async def setup_client(self) -> FlextResult[LDAPClient]:
-        """Setup LDAP client connection."""
+        """Set up LDAP client connection."""
         try:
             # Create dict configuration for LDAPClient compatibility
             connection_config = {
@@ -80,7 +77,7 @@ class LDAPBaseSink(Sink):
             }
 
             self.client = LDAPClient(connection_config)
-            connect_result = await self.client.connect()
+            connect_result = self.client.connect()
 
             if not connect_result.is_success:
                 return FlextResult.fail(
@@ -98,7 +95,8 @@ class LDAPBaseSink(Sink):
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""
         if self.client:
-            # Note: LDAPClient doesn't have disconnect method in current implementation
+            # Disconnect using client API (sync)
+            _ = self.client.disconnect()
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
@@ -195,8 +193,10 @@ class UsersSink(LDAPBaseSink):
             )
 
             # Try to add the user entry
-            add_result = asyncio.run(
-                self.client.add_entry(user_dn, attributes, object_classes),
+            add_result: FlextResult[bool] = self.client.add_entry(
+                user_dn,
+                attributes,
+                object_classes,
             )
 
             if add_result.is_success:
@@ -204,8 +204,9 @@ class UsersSink(LDAPBaseSink):
                 logger.debug("User entry added successfully: %s", user_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(
-                    self.client.modify_entry(user_dn, attributes),
+                modify_result: FlextResult[bool] = self.client.modify_entry(
+                    user_dn,
+                    attributes,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -262,13 +263,12 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self._target.config.get(
-            "attribute_mapping",
-            {},
-        ).items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = [str(value)]
+        mapping_obj = self._target.config.get("attribute_mapping", {})
+        if isinstance(mapping_obj, dict):
+            for singer_field, ldap_attr in mapping_obj.items():
+                value = record.get(singer_field)
+                if value is not None:
+                    attributes[ldap_attr] = [str(value)]
 
         return attributes
 
@@ -308,8 +308,10 @@ class GroupsSink(LDAPBaseSink):
             )
 
             # Try to add the group entry
-            add_result = asyncio.run(
-                self.client.add_entry(group_dn, attributes, object_classes),
+            add_result: FlextResult[bool] = self.client.add_entry(
+                group_dn,
+                attributes,
+                object_classes,
             )
 
             if add_result.is_success:
@@ -317,8 +319,9 @@ class GroupsSink(LDAPBaseSink):
                 logger.debug("Group entry added successfully: %s", group_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(
-                    self.client.modify_entry(group_dn, attributes),
+                modify_result: FlextResult[bool] = self.client.modify_entry(
+                    group_dn,
+                    attributes,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -370,16 +373,15 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self._target.config.get(
-            "attribute_mapping",
-            {},
-        ).items():
-            value = record.get(singer_field)
-            if value is not None:
-                if isinstance(value, list):
-                    attributes[ldap_attr] = value
-                else:
-                    attributes[ldap_attr] = [str(value)]
+        mapping_obj = self._target.config.get("attribute_mapping", {})
+        if isinstance(mapping_obj, dict):
+            for singer_field, ldap_attr in mapping_obj.items():
+                value = record.get(singer_field)
+                if value is not None:
+                    if isinstance(value, list):
+                        attributes[ldap_attr] = value
+                    else:
+                        attributes[ldap_attr] = [str(value)]
 
         return attributes
 
@@ -411,14 +413,16 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             attributes = self._build_ou_attributes(record)
 
             # Try to add the OU entry
-            add_result = asyncio.run(self.client.add_entry(ou_dn, attributes))
+            add_result: FlextResult[bool] = self.client.add_entry(ou_dn, attributes)
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(self.client.modify_entry(ou_dn, attributes))
+                modify_result: FlextResult[bool] = self.client.modify_entry(
+                    ou_dn, attributes,
+                )
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("OU entry modified successfully: %s", ou_dn)
@@ -438,11 +442,14 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def _build_ou_attributes(self, record: dict[str, object]) -> dict[str, object]:
         """Build LDAP attributes for OU entry."""
+        default_classes = self._target.config.get(
+            "object_classes",
+            ["organizationalUnit"],
+        )
         attributes: dict[str, object] = {
-            "objectClass": self._target.config.get(
-                "object_classes",
-                ["inetOrgPerson", "person"],
-            ).copy(),
+            "objectClass": default_classes.copy()
+            if isinstance(default_classes, list)
+            else ["organizationalUnit"],
         }
 
         # Add OU-specific object classes
@@ -462,12 +469,11 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        for singer_field, ldap_attr in self._target.config.get(
-            "attribute_mapping",
-            {},
-        ).items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = [str(value)]
+        mapping_obj = self._target.config.get("attribute_mapping", {})
+        if isinstance(mapping_obj, dict):
+            for singer_field, ldap_attr in mapping_obj.items():
+                value = record.get(singer_field)
+                if value is not None:
+                    attributes[ldap_attr] = [str(value)]
 
         return attributes
