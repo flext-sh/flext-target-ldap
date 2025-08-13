@@ -25,11 +25,8 @@ from flext_core import FlextResult, get_logger
 from flext_ldap import FlextLdapConnectionConfig, FlextLdapEntry
 from flext_ldap.api import FlextLdapApi, get_ldap_api
 
-# Optional ldap3 compatibility for legacy test expectations
-try:  # pragma: no cover - import guarded for environments without ldap3
-    ldap3 = cast("object", import_module("ldap3"))
-except Exception:  # pragma: no cover - make attribute available for monkeypatch
-    ldap3 = None
+# Optional ldap3 exposure for legacy tests; not a fallback implementation
+ldap3 = cast("object", import_module("ldap3"))  # may raise if not installed
 
 logger = get_logger(__name__)
 
