@@ -31,10 +31,6 @@ classifiers = [
     "Topic :: System :: Archiving",
 ]
 dependencies = [
-    "flext-core @ file:///home/marlonsc/flext/flext-core",
-    "flext-meltano @ file:///home/marlonsc/flext/flext-meltano",
-    "flext-ldap @ file:///home/marlonsc/flext/flext-ldap",
-    "flext-observability @ file:///home/marlonsc/flext/flext-observability",
     "pydantic>=2.11.0",
 ]
 [[project.authors]]
@@ -161,6 +157,8 @@ warn_required_dynamic_aliases = true
 include = "flext_target_ldap"
 from = "src"
 
+# Local workspace dependencies are defined under [tool.poetry.dependencies]
+
 [tool.deptry]
 known_first_party = ["flext_target_ldap"]
 
@@ -211,12 +209,10 @@ output = "reports/coverage.xml"
 
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
-# MIGRATED TO flext-meltano: singer-sdk = ">=0.47.0"
-pydantic = ">=2.11.7"
-
-[tool.poetry.dependencies.flext-core]
-path = "../flext-core"
-develop = true
+flext-core = { path = "../flext-core", develop = true }
+flext-ldap = { path = "../flext-ldap", develop = true }
+flext-meltano = { path = "../flext-meltano", develop = true }
+flext-observability = { path = "../flext-observability", develop = true }
 
 [tool.poetry.group.dev.dependencies]
 ruff = ">=0.12.3"
