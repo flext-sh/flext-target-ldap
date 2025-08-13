@@ -231,7 +231,9 @@ class LdapTargetClient:
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
             async with self._api.connection(
-                server_url, self._bind_dn or None, self._password or None,
+                server_url,
+                self._bind_dn or None,
+                self._password or None,
             ) as session:
                 # Use create_group when objectClass indicates group, else create_user
                 is_group = "groupOfNames" in ldap_attributes.get("objectClass", [])
@@ -282,7 +284,9 @@ class LdapTargetClient:
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
             async with self._api.connection(
-                server_url, self._bind_dn or None, self._password or None,
+                server_url,
+                self._bind_dn or None,
+                self._password or None,
             ) as _session:
                 # No modify_entry in API; assume success in dry-run mode
                 result = FlextResult.ok(True)
@@ -320,7 +324,9 @@ class LdapTargetClient:
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
             async with self._api.connection(
-                server_url, self._bind_dn or None, self._password or None,
+                server_url,
+                self._bind_dn or None,
+                self._password or None,
             ) as session:
                 result = await self._api.search(
                     session_id=session,
