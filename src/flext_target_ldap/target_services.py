@@ -20,14 +20,14 @@ from flext_core import FlextResult, get_logger
 from flext_ldap import get_ldap_api
 
 from flext_target_ldap import target_client as target_client_module
-from flext_target_ldap.models import (
-    LdapAttributeMappingModel,
-    LdapEntryModel,
-    LdapTransformationResultModel,
-)
 from flext_target_ldap.target_config import (
     TargetLdapConfig,
     validate_ldap_target_config,
+)
+from flext_target_ldap.target_models import (
+    LdapAttributeMappingModel,
+    LdapEntryModel,
+    LdapTransformationResultModel,
 )
 
 logger = get_logger(__name__)
@@ -111,17 +111,11 @@ class LdapConnectionService:
             server_url = f"{protocol}://{self._config.connection.server}:{self._config.connection.port}"
 
             # Establish and close a simple connection to validate
-            async with self._ldap_api.connection(server_url, None, None) as _session:
-                pass
-            result = FlextResult.ok(True)
-
-            if result.is_success:
-                logger.info("LDAP connection test successful")
-                return FlextResult.ok(data=True)
-
-            error_msg = f"Connection test failed: {result.error}"
-            logger.error(error_msg)
-            return FlextResult.fail(error_msg)
+            async with self._ldap_api.connection(server_url, None, None) as session:
+                # Optionally perform a NOOP or simple bind check if available
+                _ = session  # ensure variable is used for static checkers
+            logger.info("LDAP connection test successful")
+            return FlextResult.ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Connection test failed")

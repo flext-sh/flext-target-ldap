@@ -289,7 +289,7 @@ class LdapTargetClient:
                 self._password or None,
             ) as _session:
                 # No modify_entry in API; assume success in dry-run mode
-                result = FlextResult.ok(True)
+                result = FlextResult.ok(data=True)
 
             if result.is_success:
                 logger.debug("Successfully modified LDAP entry: %s", dn)
