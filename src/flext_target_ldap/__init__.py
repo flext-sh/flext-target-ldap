@@ -79,7 +79,7 @@ from flext_target_ldap.target_client import (
 )
 
 # Domain models (LDAP-specific)
-from flext_target_ldap.models import (
+from flext_target_ldap.target_models import (
     LdapAttributeMappingModel,
     LdapBatchProcessingModel,
     LdapEntryModel,
