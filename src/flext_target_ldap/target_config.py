@@ -13,24 +13,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import warnings
-
 from flext_core import (
     FlextResult,
-    FlextSettings as BaseSettings,
+    FlextBaseConfigModel,
     FlextValueObject as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import Field
 
-# Compatibility warning for Singer adapters migration
-warnings.warn(
-    "🔄 ARCHITECTURE EVOLUTION: Singer adapters moved from flext-core to flext-meltano.\n"
-    "💡 FUTURE PLAN: Use flext_meltano.config.SingerTargetConfig\n"
-    "⚡ CURRENT: Temporary compatibility using BaseSettings",
-    DeprecationWarning,
-    stacklevel=2,
-)
+# Modernized to use FlextBaseConfigModel from flext-core for consistent patterns
 
 
 class LdapTargetConnectionSettings(FlextDomainBaseModel):
@@ -158,11 +149,12 @@ class LdapTargetMappingSettings(FlextDomainBaseModel):
             return FlextResult.fail(f"Mapping settings validation failed: {e}")
 
 
-class TargetLdapConfig(BaseSettings):
-    """Consolidated LDAP target configuration using enterprise patterns.
+class TargetLdapConfig(FlextBaseConfigModel):
+    """Consolidated LDAP target configuration using FlextBaseConfigModel patterns.
 
     This configuration class consolidates all LDAP target settings while
     leveraging flext-ldap for connection configuration to eliminate duplication.
+    Uses FlextBaseConfigModel for modern Pydantic validation and business rules.
     """
 
     # Use real LDAP connection config from flext-ldap - no duplications
