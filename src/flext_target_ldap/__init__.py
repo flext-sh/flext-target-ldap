@@ -1,46 +1,4 @@
-"""FLEXT Target LDAP - Enterprise Singer Target for LDAP Directory Services (PEP8 Reorganized).
-
-**Architecture**: Production-ready Singer target implementing Clean Architecture, DDD, and enterprise patterns
-**Integration**: Complete flext-meltano ecosystem integration with ALL facilities utilized
-**Quality**: 100% type safety, 90%+ test coverage, zero-tolerance quality standards
-**Organization**: PEP8 descriptive names, consolidated modules, eliminated duplication
-
-## Enterprise Integration Features:
-
-1. **Complete flext-meltano Integration**: Uses ALL flext-meltano facilities
-   - FlextMeltanoTargetService base class for enterprise patterns
-   - Centralized Singer SDK imports and typing
-   - Common schema definitions from flext-meltano.common_schemas
-   - Enterprise bridge integration for Go ↔ Python communication
-
-2. **Foundation Library Integration**: Full flext-core pattern adoption
-   - FlextResult railway-oriented programming throughout
-   - Enterprise logging with FlextLogger
-   - Dependency injection with flext-core container
-   - FlextConfig for configuration management
-
-3. **LDAP Infrastructure Integration**: Complete flext-ldap utilization
-   - Uses real LDAP operations from flext-ldap infrastructure
-   - Leverages flext-ldap connection management and pooling
-   - Enterprise-grade directory modification strategies
-
-4. **Production Readiness**: Zero-tolerance quality standards
-   - 100% type safety with strict MyPy compliance
-   - 90%+ test coverage with comprehensive test suite
-   - All lint rules passing with Ruff
-   - Security scanning with Bandit and pip-audit
-
-## PEP8 Reorganized Architecture:
-
-- **target_config.py**: All configuration with descriptive names
-- **target_client.py**: Target + client + sinks consolidated
-- **target_models.py**: LDAP-specific domain models
-- **target_exceptions.py**: Factory-pattern exceptions (zero duplication)
-- **target_services.py**: Orchestration + API + transformation services
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
+"""Enterprise Singer Target for LDAP directory data loading."""
 
 from __future__ import annotations
 
