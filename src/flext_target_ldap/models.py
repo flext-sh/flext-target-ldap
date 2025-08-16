@@ -5,4 +5,4 @@ Standardizes imports to use flext_target_ldap.models across the codebase.
 
 from __future__ import annotations
 
-from .target_models import *  # noqa: F403
+from flext_target_ldap.target_models import *  # noqa: F403

@@ -12,14 +12,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-# from flext_core import create_module_container_utilities  # Function doesn't exist in flext-core
-# Create all module-specific utilities using DRY pattern
-# _utilities = create_module_container_utilities("flext_target_ldap")
-# # Extract utilities with proper names for backward compatibility
-# get_flext_target_ldap_container = _utilities["get_container"]
-# _configure_func = _utilities["configure_dependencies"]
-# get_flext_target_ldap_service = _utilities["get_service"]
-# Fallback implementations when factory function is not available
 from flext_core import get_flext_container
 
 get_flext_target_ldap_container = get_flext_container
