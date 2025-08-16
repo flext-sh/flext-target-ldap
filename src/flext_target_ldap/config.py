@@ -15,7 +15,8 @@ from flext_core import (
     FlextValueObject as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
-from pydantic import ConfigDict, Field
+from pydantic import Field
+from pydantic_settings import SettingsConfigDict
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -82,7 +83,11 @@ class TargetLDAPConfig(BaseSettings):
         description="Default object classes for new entries",
     )
 
-    model_config = ConfigDict(env_prefix="TARGET_LDAP_", case_sensitive=False)
+    # Use SettingsConfigDict for BaseSettings subclasses (mypy expectation)
+    model_config: SettingsConfigDict = SettingsConfigDict(
+        env_prefix="TARGET_LDAP_",
+        case_sensitive=False,
+    )
 
 
 class LDAPConnectionSettings(FlextDomainBaseModel):
@@ -167,12 +172,17 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(connection_params["timeout"], 30)
 
+        # For static typing, wrap password as SecretStr; compat layer still accepts str
+        from pydantic import (
+            SecretStr as _SecretStr,  # local import to avoid top-level optional dep issues
+        )
+
         connection_config = FlextLdapConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,
             bind_dn=bind_dn,
-            bind_password=bind_password,
+            bind_password=_SecretStr(bind_password) if isinstance(bind_password, str) else bind_password,
             timeout=timeout,
         )
 

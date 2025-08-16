@@ -212,7 +212,8 @@ class TargetLdapConfig(FlextBaseConfigModel):
         description="Search scope: BASE, LEVEL, or SUBTREE",
     )
 
-    model_config = ConfigDict(env_prefix="TARGET_LDAP_", case_sensitive=False)
+    # For compatibility with BaseSettings-style configs, annotate accordingly
+    model_config: ConfigDict = ConfigDict(env_prefix="TARGET_LDAP_", case_sensitive=False)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate complete LDAP target configuration business rules."""
