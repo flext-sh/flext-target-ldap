@@ -15,7 +15,7 @@ from flext_core import (
     FlextValueObject as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -82,11 +82,7 @@ class TargetLDAPConfig(BaseSettings):
         description="Default object classes for new entries",
     )
 
-    class Config:
-        """Pydantic configuration."""
-
-        env_prefix = "TARGET_LDAP_"
-        case_sensitive = False
+    model_config = ConfigDict(env_prefix="TARGET_LDAP_", case_sensitive=False)
 
 
 class LDAPConnectionSettings(FlextDomainBaseModel):

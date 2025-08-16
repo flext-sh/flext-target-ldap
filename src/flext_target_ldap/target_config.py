@@ -14,12 +14,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import (
-    FlextResult,
     FlextBaseConfigModel,
+    FlextResult,
     FlextValueObject as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
-from pydantic import Field
+from pydantic import ConfigDict, Field
 
 # Modernized to use FlextBaseConfigModel from flext-core for consistent patterns
 
@@ -212,11 +212,7 @@ class TargetLdapConfig(FlextBaseConfigModel):
         description="Search scope: BASE, LEVEL, or SUBTREE",
     )
 
-    class Config:
-        """Pydantic configuration."""
-
-        env_prefix = "TARGET_LDAP_"
-        case_sensitive = False
+    model_config = ConfigDict(env_prefix="TARGET_LDAP_", case_sensitive=False)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate complete LDAP target configuration business rules."""

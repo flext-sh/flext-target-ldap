@@ -10,8 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from importlib import import_module
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -21,12 +20,14 @@ import asyncio
 from contextlib import contextmanager, suppress
 from unittest.mock import MagicMock
 
+import ldap3
 from flext_core import FlextResult, get_logger
-from flext_ldap import FlextLdapConnectionConfig, FlextLdapEntry
-from flext_ldap.api import FlextLdapApi, get_ldap_api
-
-# Optional ldap3 exposure for legacy tests; not a fallback implementation
-ldap3 = cast("object", import_module("ldap3"))  # may raise if not installed
+from flext_ldap import (
+    FlextLdapApi,
+    FlextLdapConnectionConfig,
+    FlextLdapEntry,
+    get_ldap_api,
+)
 
 logger = get_logger(__name__)
 

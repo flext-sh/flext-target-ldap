@@ -16,6 +16,7 @@ class TestDataTransformationEngine:
     """Test data transformation engine."""
 
     def test_initialization(self) -> None:
+        """Test initialization function."""
         rules = [TransformationRule(name="test", pattern="test", replacement="test")]
         engine = DataTransformationEngine(rules)
 
@@ -26,6 +27,7 @@ class TestDataTransformationEngine:
         assert hasattr(engine, "transform")
 
     def test_transform_oracle_dn_structure(self) -> None:
+        """Test transform oracle dn structure function."""
         rule = TransformationRule(
             name="oracle_dn_structure_transform",
             pattern="dc=ctbc",
@@ -53,6 +55,7 @@ class TestDataTransformationEngine:
             raise AssertionError(msg)
 
     def test_transform_oracle_objectclasses(self) -> None:
+        """Test transform oracle objectclasses function."""
         rule = TransformationRule(
             name="oracle_objectclass_conversion",
             pattern="orclUser",
@@ -79,6 +82,7 @@ class TestDataTransformationEngine:
         assert "oracle_objectclass_conversion" in transform_result.applied_rules
 
     def test_transform_oracle_attributes(self) -> None:
+        """Test transform oracle attributes function."""
         # Create rules for Oracle value transformation (not attribute name mapping)
         rules = [
             TransformationRule(
@@ -118,6 +122,7 @@ class TestDataTransformationEngine:
             raise AssertionError(msg)
 
     def test_remove_empty_attributes(self) -> None:
+        """Test remove empty attributes function."""
         # Create rule to clean empty attributes (simulated)
         rule = TransformationRule(
             name="clean_empty_attributes",
@@ -146,6 +151,7 @@ class TestDataTransformationEngine:
             raise AssertionError(msg)
 
     def test_dry_run_transformation(self) -> None:
+        """Test dry run transformation function."""
         rule = TransformationRule(
             name="test_rule",
             pattern="orclUser",
@@ -170,6 +176,7 @@ class TestDataTransformationEngine:
             raise AssertionError(msg)
 
     def test_transformation_statistics(self) -> None:
+        """Test transformation statistics function."""
         # Create engine with empty rules list
         engine = DataTransformationEngine([])
 
@@ -193,6 +200,7 @@ class TestMigrationValidator:
     """Test migration validator."""
 
     def test_validate_valid_entry(self) -> None:
+        """Test validate valid entry function."""
         validator = MigrationValidator()
 
         data = {
@@ -208,6 +216,7 @@ class TestMigrationValidator:
         assert result.success
 
     def test_validate_missing_dn(self) -> None:
+        """Test validate missing dn function."""
         validator = MigrationValidator()
 
         # Missing DN test - pass empty DN
@@ -222,6 +231,7 @@ class TestMigrationValidator:
             raise AssertionError(msg)
 
     def test_validate_invalid_dn_syntax(self) -> None:
+        """Test validate invalid dn syntax function."""
         validator = MigrationValidator()
 
         result = validator.validate(
@@ -235,6 +245,7 @@ class TestMigrationValidator:
         assert result is not None
 
     def test_validate_missing_objectclass(self) -> None:
+        """Test validate missing objectclass function."""
         validator = MigrationValidator()
 
         result = validator.validate(
@@ -250,6 +261,7 @@ class TestMigrationValidator:
             raise AssertionError(msg)
 
     def test_validate_missing_required_attributes(self) -> None:
+        """Test validate missing required attributes function."""
         validator = MigrationValidator()
 
         result = validator.validate(
@@ -262,6 +274,7 @@ class TestMigrationValidator:
         assert result is not None
 
     def test_validate_invalid_email(self) -> None:
+        """Test validate invalid email function."""
         validator = MigrationValidator()
 
         result = validator.validate(
@@ -274,6 +287,7 @@ class TestMigrationValidator:
         assert result is not None
 
     def test_validation_statistics(self) -> None:
+        """Test validation statistics function."""
         validator = MigrationValidator()
 
         # Convert entries to proper format for validation
@@ -300,6 +314,7 @@ class TestTransformationRule:
     """Test transformation rule configuration."""
 
     def test_transformation_rule_creation(self) -> None:
+        """Test transformation rule creation function."""
         rule = TransformationRule(
             name="test_rule",
             pattern="orclUser",
@@ -323,6 +338,7 @@ class TestIntegratedTransformation:
     """Test integrated transformation workflow."""
 
     def test_full_oracle_migration_workflow(self) -> None:
+        """Test full oracle migration workflow function."""
         # Create transformation rules for Oracle migration
         rules = [
             TransformationRule(
@@ -390,6 +406,7 @@ class TestIntegratedTransformation:
         assert validation_result.success
 
     def test_classification_and_transformation_integration(self) -> None:
+        """Test classification and transformation integration function."""
         rule = TransformationRule(
             name="general_transform",
             pattern="orclUser",

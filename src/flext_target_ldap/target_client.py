@@ -25,8 +25,7 @@ from flext_core import (
     get_flext_container,
     get_logger,
 )
-from flext_ldap import FlextLdapConnectionConfig
-from flext_ldap.api import FlextLdapApi, get_ldap_api
+from flext_ldap import FlextLdapApi, FlextLdapConnectionConfig, get_ldap_api
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.target_config import TargetLdapConfig
