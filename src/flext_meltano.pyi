@@ -4,7 +4,10 @@ class Target:
     config: dict[str, object]
 
     def __init__(
-        self, *, config: dict[str, object] | None = ..., validate_config: bool = ...,
+        self,
+        *,
+        config: dict[str, object] | None = ...,
+        validate_config: bool = ...,
     ) -> None: ...
     @property
     def singer_catalog(self) -> dict[str, object]: ...
@@ -25,5 +28,7 @@ class Sink:
     ) -> None: ...
     def process_batch(self, context: dict[str, object]) -> None: ...
     def process_record(
-        self, record: dict[str, object], context: dict[str, object],
+        self,
+        record: dict[str, object],
+        context: dict[str, object],
     ) -> None: ...
