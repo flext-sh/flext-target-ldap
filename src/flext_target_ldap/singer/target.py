@@ -15,69 +15,69 @@ class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
     def __init__(self, config: dict[str, object] | None = None) -> None:
-        """Initialize Singer LDAP target.
+      """Initialize Singer LDAP target.
 
-        Args:
-            config: Configuration dictionary
+      Args:
+          config: Configuration dictionary
 
-        """
-        self.config = config or {}
-        logger.debug("Initialized Singer LDAP target")
+      """
+      self.config = config or {}
+      logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
-        self,
-        messages: list[dict[str, object]],
+      self,
+      messages: list[dict[str, object]],
     ) -> FlextResult[dict[str, object]]:
-        """Process Singer messages for LDAP target.
+      """Process Singer messages for LDAP target.
 
-        Args:
-            messages: Singer messages to process
+      Args:
+          messages: Singer messages to process
 
-        Returns:
-            FlextResult with processing status
+      Returns:
+          FlextResult with processing status
 
-        """
-        try:
-            logger.info("Processing Singer messages for LDAP target")
+      """
+      try:
+          logger.info("Processing Singer messages for LDAP target")
 
-            # Process Singer messages
-            processed_count = 0
-            for _message in messages:
-                # Process individual Singer message
-                processed_count += 1
+          # Process Singer messages
+          processed_count = 0
+          for _message in messages:
+              # Process individual Singer message
+              processed_count += 1
 
-            result = {
-                "processed_messages": processed_count,
-                "status": "completed",
-            }
+          result = {
+              "processed_messages": processed_count,
+              "status": "completed",
+          }
 
-            logger.info(
-                "Singer message processing completed: %d messages",
-                processed_count,
-            )
-            return FlextResult.ok(result)
+          logger.info(
+              "Singer message processing completed: %d messages",
+              processed_count,
+          )
+          return FlextResult.ok(result)
 
-        except Exception as e:
-            logger.exception("Singer message processing failed")
-            return FlextResult.fail(f"Message processing failed: {e}")
+      except Exception as e:
+          logger.exception("Singer message processing failed")
+          return FlextResult.fail(f"Message processing failed: {e}")
 
     def validate_singer_config(self) -> FlextResult[bool]:
-        """Validate Singer LDAP target configuration.
+      """Validate Singer LDAP target configuration.
 
-        Returns:
-            FlextResult indicating validation success
+      Returns:
+          FlextResult indicating validation success
 
-        """
-        try:
-            # Basic validation
-            required_fields = ["host", "base_dn"]
-            for field in required_fields:
-                if field not in self.config:
-                    return FlextResult.fail(f"Missing required field: {field}")
+      """
+      try:
+          # Basic validation
+          required_fields = ["host", "base_dn"]
+          for field in required_fields:
+              if field not in self.config:
+                  return FlextResult.fail(f"Missing required field: {field}")
 
-            return FlextResult.ok(data=True)
-        except Exception as e:
-            return FlextResult.fail(f"Configuration validation failed: {e}")
+          return FlextResult.ok(data=True)
+      except Exception as e:
+          return FlextResult.fail(f"Configuration validation failed: {e}")
 
 
 __all__: list[str] = ["SingerTargetLDAP"]

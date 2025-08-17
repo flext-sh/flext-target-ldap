@@ -12,11 +12,12 @@ This project follows Clean Architecture and Domain-Driven Design patterns using 
 
 ### Core Components
 
-- **Target Class**: `TargetLDAP` in `src/flext_target_ldap/target.py` - Main Singer target implementation
+- **Target Class**: `TargetLDAP` in `src/flext_target_ldap/target.py` - Main Singer target implementation with Click CLI
 - **Application Layer**: `LDAPTargetOrchestrator` in `src/flext_target_ldap/application/orchestrator.py` - Business logic orchestration
-- **Infrastructure Layer**: Dependency injection container in `src/flext_target_ldap/infrastructure/di_container.py`
-- **Connection Layer**: LDAP connection management in `src/flext_target_ldap/connection/`
-- **Singer Layer**: Singer SDK integration in `src/flext_target_ldap/singer/`
+- **Infrastructure Layer**: Dependency injection container in `src/flext_target_ldap/infrastructure/di_container.py` (uses flext-core DRY patterns)
+- **Sinks Layer**: Stream-specific sinks in `src/flext_target_ldap/sinks.py` - UsersSink, GroupsSink, OrganizationalUnitsSink
+- **Client Layer**: LDAP client in `src/flext_target_ldap/client.py` - Connection and operation management
+- **Singer Layer**: Singer SDK integration in `src/flext_target_ldap/singer/` - catalog, stream, and target abstractions
 
 ### Key Dependencies
 
@@ -31,115 +32,59 @@ This project follows Clean Architecture and Domain-Driven Design patterns using 
 - Uses Pydantic settings with type validation
 - LDAP connection settings integrated with flext-ldap patterns
 
-## TODO: GAPS DE ARQUITETURA IDENTIFICADOS - PRIORIDADE ALTA
-
-### 🚨 GAP 1: LDAP Integration Library Dependency
-
-**Status**: ALTO - Integration com flext-ldap precisa optimization
-**Problema**:
-
-- Connection layer pode duplicate flext-ldap functionality
-- LDAP operations patterns podem not be fully aligned
-- Directory modification strategies podem be incomplete
-
-**TODO**:
-
-- [ ] Optimize integration com flext-ldap para eliminate duplication
-- [ ] Align LDAP operations patterns com library
-- [ ] Implement comprehensive directory modification strategies
-- [ ] Document LDAP integration best practices
-
-### 🚨 GAP 2: Clean Architecture Implementation Complexity
-
-**Status**: ALTO - Application orchestrator pode indicate over-engineering
-**Problema**:
-
-- LDAPTargetOrchestrator suggests complex orchestration layer
-- DI container para LDAP target pode be overkill
-- Architecture layers podem be too granular para Singer target
-
-**TODO**:
-
-- [ ] Review orchestration complexity vs benefits
-- [ ] Simplify architecture se appropriate
-- [ ] Optimize DI container usage
-- [ ] Document architecture decisions
-
-### 🚨 GAP 3: LDAP Data Loading Patterns
-
-**Status**: ALTO - LDAP directory loading patterns podem be suboptimal
-**Problema**:
-
-- Bulk LDAP operations strategies não documented
-- LDAP schema validation patterns podem be missing
-- Error handling para LDAP failures pode be incomplete
-
-**TODO**:
-
-- [ ] Implement LDAP bulk operations onde appropriate
-- [ ] Add LDAP schema validation
-- [ ] Enhance error handling para LDAP-specific failures
-- [ ] Document LDAP loading patterns
-
 ## Development Commands
 
 ### Essential Quality Gates (Run Before Committing)
 
 ```bash
 make validate    # Complete validation: lint + type + security + test (MUST PASS)
-make check       # Essential checks: lint + type + test
-make test        # Run tests with 90% coverage requirement
+make check       # Essential checks: lint + type only
+make test        # Run tests with 90% coverage requirement  
 make lint        # Ruff linting with ALL rules enabled
 make type-check  # Strict MyPy type checking
-make security    # Security scans: bandit + pip-audit + secrets
+make security    # Security scans: bandit + pip-audit
 ```
 
 ### Development Setup
 
 ```bash
-make setup       # Complete development setup
+make setup       # Complete development setup (install + pre-commit hooks)
 make install     # Install dependencies with Poetry
-make dev-install # Development environment + pre-commit hooks
+make install-dev # Install with dev dependencies
 ```
 
 ### Testing Commands
 
 ```bash
 make test                 # All tests with coverage (90% minimum)
-make test-unit           # Unit tests only
-make test-integration    # Integration tests only
-make test-singer         # Singer protocol tests
-make coverage            # Generate detailed coverage report
-make coverage-html       # Open HTML coverage report
+make test-unit           # Unit tests only (pytest -m "not integration")
+make test-integration    # Integration tests only (pytest -m integration)  
+make test-singer         # Singer protocol tests (pytest -m singer)
+make test-fast           # Run tests without coverage
+make coverage-html       # Generate HTML coverage report
 ```
 
 ### Singer Target Operations
 
 ```bash
-make target-test         # Test basic target functionality
-make target-validate     # Validate target configuration
-make target-schema       # Validate LDAP schema compatibility
-make target-run          # Run with sample data
-make target-run-debug    # Run with debug logging
-make target-dry-run      # Run in dry-run mode
+make test-target         # Test basic target functionality (--about, --version)
+make validate-target-config # Validate target configuration JSON
+make dry-run             # Run target in dry-run mode
+make load                # Run target data loading with config/state files
 ```
 
 ### LDAP-Specific Operations
 
 ```bash
-make ldap-connection     # Test LDAP connection
-make ldap-write-test     # Test LDAP write operations
-make ldap-schema-check   # Check LDAP schema compatibility
-make ldap-operations     # Test LDAP operations
-make ldap-performance    # Run performance benchmarks
-make ldap-diagnostics    # Run LDAP diagnostics
+make ldap-connect        # Test LDAP connection
+make ldap-write-test     # Test LDAP write operations  
+make ldap-schema         # Validate LDAP schema
 ```
 
 ### Code Quality
 
 ```bash
 make format      # Format code with ruff
-make format-check # Check formatting without fixing
 make fix         # Auto-fix all issues (format + lint)
 ```
 
@@ -149,8 +94,7 @@ make fix         # Auto-fix all issues (format + lint)
 # Start LDAP test servers
 docker-compose up -d
 
-# Access LDAP REDACTED_LDAP_BIND_PASSWORD interface
-# http://localhost:20080 (phpLDAPREDACTED_LDAP_BIND_PASSWORD)
+# Access LDAP REDACTED_LDAP_BIND_PASSWORD interface at http://localhost:20080 (phpLDAPREDACTED_LDAP_BIND_PASSWORD)
 
 # LDAP test servers:
 # Source: localhost:20389 (dc=source,dc=com)
@@ -164,24 +108,24 @@ docker-compose up -d
 - **Unit Tests**: Business logic and component testing
 - **Integration Tests**: LDAP server integration with Docker
 - **Singer Tests**: Singer protocol compliance testing
-- **Performance Tests**: LDAP operation benchmarks
 
 ### Test Requirements
 
-- Minimum 90% test coverage enforced
+- Minimum 90% test coverage enforced (configurable in pyproject.toml)
 - All tests must pass before commits
 - Integration tests use Docker containers for LDAP servers
-- Performance benchmarks for LDAP operations
+- Tests use pytest with asyncio mode enabled
 
 ### Running Specific Tests
 
 ```bash
-pytest tests/unit/                    # Unit tests only
-pytest tests/integration/             # Integration tests
-pytest tests/singer/                  # Singer protocol tests
-pytest tests/performance/             # Performance benchmarks
-pytest -m "not slow"                  # Exclude slow tests
-pytest --benchmark-only               # Benchmarks only
+pytest tests/ -v                      # All tests with verbose output
+pytest tests/ -m unit                 # Unit tests only
+pytest tests/ -m integration          # Integration tests only  
+pytest tests/ -m singer               # Singer protocol tests only
+pytest tests/ -m "not slow"           # Exclude slow tests
+pytest tests/ --lf                    # Last failed tests only
+pytest tests/ -x                      # Stop on first failure
 ```
 
 ## Singer Protocol Integration
@@ -189,25 +133,28 @@ pytest --benchmark-only               # Benchmarks only
 ### CLI Usage
 
 ```bash
-# Basic usage
+# Basic usage (reads JSONL from stdin)
 target-ldap --config config.json < input.jsonl
-
-# Configuration sample
-target-ldap --config-sample > config_sample.json
 
 # Target information
 target-ldap --about
 target-ldap --version
 ```
 
+### Stream Processing
+
+The target supports three main stream types:
+- **users**: Maps to LDAP user entries (uid-based DNs)
+- **groups**: Maps to LDAP group entries (cn-based DNs)  
+- **organizational_units**: Maps to LDAP OU entries
+
 ### Configuration
 
-The target accepts standard Singer configuration format with LDAP-specific settings:
-
-- LDAP connection parameters (host, port, credentials)
-- Base DN configuration
-- Schema mapping settings
-- Batch processing options
+Configuration expects standard Singer format with LDAP-specific settings:
+- `host`: LDAP server hostname (required)
+- `base_dn`: Base DN for operations (required)
+- `port`: LDAP server port (default: 389)
+- `use_ssl`, `use_tls`: Security options (mutually exclusive)
 
 ## Code Patterns
 
@@ -218,93 +165,106 @@ All operations return `FlextResult[T]` for consistent error handling:
 ```python
 from flext_core import FlextResult
 
-def load_data(records: list[dict]) -> FlextResult[dict]:
+def orchestrate_data_loading(records: list[dict]) -> FlextResult[dict]:
     try:
-        # Processing logic
-        return FlextResult.success({"processed": len(records)})
+        # Processing logic  
+        return FlextResult.ok({"processed": len(records)})
     except Exception as e:
-        return FlextResult.failure(f"Load failed: {e}")
+        return FlextResult.fail(f"Loading failed: {e}")
 ```
 
 ### Dependency Injection
 
-Uses flext-core DI container for dependency management:
+Uses flext-core DI container patterns (DRY implementation):
 
 ```python
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 
+# Container uses flext-core patterns to eliminate code duplication
 container = get_flext_target_ldap_container()
-orchestrator = container.get(LDAPTargetOrchestrator)
 ```
 
-### Configuration Pattern
+### Singer Sink Architecture
 
-Configuration follows Pydantic BaseSettings pattern:
+Stream-specific sinks inherit from base classes:
 
 ```python
-class TargetLDAPConfig(BaseSettings):
-    # LDAP connection settings
-    # Processing options
-    # Schema configuration
+from flext_target_ldap.sinks import LDAPBaseSink
+
+class UsersSink(LDAPBaseSink):
+    # Stream: "users" 
+    # DN pattern: uid={username},{base_dn}
+    
+class GroupsSink(LDAPBaseSink):
+    # Stream: "groups"
+    # DN pattern: cn={name},{base_dn}
 ```
 
 ## Quality Standards
 
 ### Zero Tolerance Enforcement
 
-- **100% Type Coverage**: Strict MyPy with no untyped code
-- **90% Test Coverage**: Enforced minimum coverage
-- **All Lint Rules**: Ruff with ALL rules enabled
-- **Security Scanning**: Bandit + pip-audit + secrets detection
-- **Pre-commit Hooks**: Automated quality gates
+- **Strict Type Checking**: MyPy strict mode with comprehensive type annotations
+- **90% Test Coverage**: Enforced minimum coverage with pytest-cov
+- **Comprehensive Linting**: Ruff with extensive rule set
+- **Security Scanning**: Bandit + pip-audit for vulnerability detection
+- **Pre-commit Hooks**: Automated quality gates on commits
 
-### Code Quality Tools
+### Code Quality Tools Configuration
 
-- **Ruff**: Linting and formatting (ALL rules enabled)
-- **MyPy**: Strict type checking
-- **Bandit**: Security vulnerability scanning
-- **Pytest**: Testing with coverage reporting
-- **Pre-commit**: Automated quality enforcement
+- **Ruff**: Python 3.13, extends `../.ruff-shared.toml` 
+- **MyPy**: Strict mode with Pydantic plugin, covers `src/` and `tests/`
+- **Pytest**: Asyncio mode, strict markers, 8.0+ minimum version
+- **Coverage**: Branch coverage, 90% minimum threshold
 
-## Troubleshooting
+## Important File Locations
 
-### Common Issues
+### Core Implementation Files
 
-**LDAP Connection Issues:**
+- `src/flext_target_ldap/target.py` - Main TargetLDAP class with Click CLI
+- `src/flext_target_ldap/sinks.py` - Stream-specific sink implementations
+- `src/flext_target_ldap/application/orchestrator.py` - Business logic orchestration
+- `src/flext_target_ldap/client.py` - LDAP client and connection management
+- `src/flext_target_ldap/config.py` - Pydantic configuration classes
 
-```bash
-make ldap-connection    # Test LDAP connectivity
-docker-compose logs openldap-target  # Check LDAP server logs
-```
+### Test Organization
 
-**Test Failures:**
-
-```bash
-make test-unit          # Run unit tests only
-pytest -x tests/        # Stop on first failure
-pytest --lf             # Run last failed tests
-```
-
-**Type Checking Issues:**
-
-```bash
-make type-check         # Full MyPy checking
-mypy src/ --show-error-codes  # Show specific error codes
-```
-
-**Performance Issues:**
-
-```bash
-make ldap-performance   # Run performance benchmarks
-make ldap-diagnostics   # LDAP-specific diagnostics
-```
+- `tests/conftest.py` - Pytest configuration and shared fixtures
+- `tests/test_*.py` - Main test files (unit, integration, target functionality)
 
 ### Docker Environment
 
-The project includes Docker Compose setup for LDAP testing:
+- `docker-compose.yml` - LDAP test servers (source:20389, target:21389) and phpLDAPREDACTED_LDAP_BIND_PASSWORD:20080
+- Uses `osixia/openldap:1.5.0` and `osixia/phpldapREDACTED_LDAP_BIND_PASSWORD:0.9.0` images
 
-- Source LDAP server: `localhost:20389`
-- Target LDAP server: `localhost:21389`
-- Admin interface: `localhost:20080`
+## Troubleshooting
 
-Use `docker-compose up -d` to start the test environment.
+### Common Development Issues
+
+**LDAP Connection Testing:**
+```bash
+make ldap-connect       # Test basic LDAP connectivity
+docker-compose logs openldap-target  # Check target server logs
+docker-compose logs openldap-source  # Check source server logs
+```
+
+**Test Failures:**
+```bash
+make test-fast          # Quick test run without coverage
+pytest tests/ -x -vvs   # Stop on first failure with detailed output
+pytest tests/ --lf      # Re-run only last failed tests
+```
+
+**Type Checking Issues:**
+```bash
+make type-check         # Run MyPy with strict configuration
+poetry run mypy src/ --show-error-codes  # Show specific error codes
+```
+
+**Build and Dependency Issues:**
+```bash
+make clean              # Clean build artifacts and caches
+make reset              # Deep clean including virtual environment
+make diagnose           # Show environment diagnostics
+make doctor             # Run health check + diagnostics
+```
