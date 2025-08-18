@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 import importlib.metadata
-from typing import TYPE_CHECKING
 
 # === FLEXT-CORE IMPORTS ===
 from flext_core import FlextResult, FlextValueObject, get_logger
 
-# Note: We intentionally avoid importing flext-meltano here to keep this
-# package import-light and free of optional runtime dependencies. Type-only
-# usages may be guarded under TYPE_CHECKING in modules that need them.
+from flext_meltano import Sink, Target
 
 # === NEW PEP8 REORGANIZED IMPORTS ===
 # Configuration (consolidated and descriptive)
@@ -115,35 +112,13 @@ __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 # Complete public API exports (organized by category)
 __all__: list[str] = [
-    # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
-    "BatchSink",
-    "FlextMeltanoBaseService",
-    # Bridge integration
-    "FlextMeltanoBridge",
-    # Configuration patterns
-    "FlextMeltanoConfig",
-    "FlextMeltanoEvent",
-    # Enterprise services
-    "FlextMeltanoTargetService",
-    # Authentication
-    "OAuthAuthenticator",
-    "PropertiesList",
-    "Property",
-    "SQLSink",
-    "Sink",
-    # Singer SDK core classes
-    "Stream",
-    "Tap",
-    "Target",
-    "create_meltano_target_service",
-    # Testing
-    "get_tap_test_class",
-    # Singer typing
-    "singer_typing",
     # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
     "FlextValueObject",
     "get_logger",
+    # === FLEXT-MELTANO RE-EXPORTS ===
+    "Sink",
+    "Target",
     # === NEW PEP8 REORGANIZED CLASSES ===
     # Configuration
     "LdapTargetConnectionSettings",
