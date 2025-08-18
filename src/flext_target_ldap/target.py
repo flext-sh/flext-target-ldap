@@ -28,6 +28,7 @@ from flext_target_ldap.sinks import (
 )
 
 logger = get_logger(__name__)
+
 # Network constants
 MAX_PORT_NUMBER = 65535
 
@@ -286,4 +287,4 @@ def _target_ldap_click(config: str | None = None) -> None:  # noqa: C901, PLR091
 
 
 # Expose Click command via class attribute for tests expecting TargetLDAP.cli
-TargetLDAP.cli = _target_ldap_click  # type: ignore[method-assign]
+TargetLDAP.cli = _target_ldap_click
