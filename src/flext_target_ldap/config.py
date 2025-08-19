@@ -226,6 +226,6 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
             attribute_mapping=attribute_mapping,
             object_classes=object_classes,
         )
-        return FlextResult.ok(validated_config)
+        return FlextResult[None].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult.fail(f"Configuration validation failed: {e}")
+        return FlextResult[None].fail(f"Configuration validation failed: {e}")

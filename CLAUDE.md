@@ -168,9 +168,9 @@ from flext_core import FlextResult
 def orchestrate_data_loading(records: list[dict]) -> FlextResult[dict]:
     try:
         # Processing logic  
-        return FlextResult.ok({"processed": len(records)})
+        return FlextResult[None].ok({"processed": len(records)})
     except Exception as e:
-        return FlextResult.fail(f"Loading failed: {e}")
+        return FlextResult[None].fail(f"Loading failed: {e}")
 ```
 
 ### Dependency Injection

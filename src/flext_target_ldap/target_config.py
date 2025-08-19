@@ -42,11 +42,11 @@ class LdapTargetConnectionSettings(FlextDomainBaseModel):
         try:
             # Mutual exclusivity validation
             if self.use_ssl and self.use_tls:
-                return FlextResult.fail("Cannot use both SSL and TLS simultaneously")
+                return FlextResult[None].fail("Cannot use both SSL and TLS simultaneously")
 
             # Authentication validation
             if self.bind_dn and not self.bind_password:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     "Bind password required when bind DN is provided",
                 )
 
@@ -55,17 +55,17 @@ class LdapTargetConnectionSettings(FlextDomainBaseModel):
             ldaps_standard_port = 636
 
             if self.use_ssl and self.port == ldap_standard_port:
-                return FlextResult.fail("SSL typically uses port 636, not 389")
+                return FlextResult[None].fail("SSL typically uses port 636, not 389")
             if (
                 not self.use_ssl
                 and not self.use_tls
                 and self.port == ldaps_standard_port
             ):
-                return FlextResult.fail("Port 636 typically requires SSL")
+                return FlextResult[None].fail("Port 636 typically requires SSL")
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Connection settings validation failed: {e}")
+            return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
 class LdapTargetOperationSettings(FlextDomainBaseModel):
@@ -95,7 +95,7 @@ class LdapTargetOperationSettings(FlextDomainBaseModel):
         try:
             # Logical consistency validation
             if not self.create_missing_entries and not self.update_existing_entries:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     "At least one of create_missing_entries or update_existing_entries must be True",
                 )
 
@@ -104,9 +104,9 @@ class LdapTargetOperationSettings(FlextDomainBaseModel):
                 # This is a destructive operation - could add additional validation
                 pass
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Operation settings validation failed: {e}")
+            return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
 class LdapTargetMappingSettings(FlextDomainBaseModel):
@@ -134,7 +134,7 @@ class LdapTargetMappingSettings(FlextDomainBaseModel):
         try:
             # Object class validation
             if not self.object_classes:
-                return FlextResult.fail("Object classes cannot be empty")
+                return FlextResult[None].fail("Object classes cannot be empty")
             if "top" not in self.object_classes:
                 # Add 'top' as it's required for all LDAP entries
                 self.object_classes.append("top")
@@ -142,11 +142,11 @@ class LdapTargetMappingSettings(FlextDomainBaseModel):
             # Search scope validation
             valid_scopes = {"BASE", "LEVEL", "SUBTREE"}
             if self.search_scope.upper() not in valid_scopes:
-                return FlextResult.fail(f"Search scope must be one of {valid_scopes}")
+                return FlextResult[None].fail(f"Search scope must be one of {valid_scopes}")
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Mapping settings validation failed: {e}")
+            return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
 class TargetLdapConfig(FlextBaseConfigModel):
@@ -222,24 +222,24 @@ class TargetLdapConfig(FlextBaseConfigModel):
         try:
             # Validate operation consistency
             if not self.create_missing_entries and not self.update_existing_entries:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     "At least one of create_missing_entries or update_existing_entries must be True",
                 )
 
             # Validate object classes
             if not self.object_classes:
-                return FlextResult.fail("Object classes cannot be empty")
+                return FlextResult[None].fail("Object classes cannot be empty")
             if "top" not in self.object_classes:
                 self.object_classes.append("top")
 
             # Validate search scope
             valid_scopes = {"BASE", "LEVEL", "SUBTREE"}
             if self.search_scope.upper() not in valid_scopes:
-                return FlextResult.fail(f"Search scope must be one of {valid_scopes}")
+                return FlextResult[None].fail(f"Search scope must be one of {valid_scopes}")
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Target configuration validation failed: {e}")
+            return FlextResult[None].fail(f"Target configuration validation failed: {e}")
 
 
 def validate_ldap_target_config(
@@ -365,12 +365,12 @@ def validate_ldap_target_config(
         # Run business rules validation
         validation_result = validated_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextResult.fail(validation_result.error or "Invalid configuration")
+            return FlextResult[None].fail(validation_result.error or "Invalid configuration")
 
-        return FlextResult.ok(validated_config)
+        return FlextResult[None].ok(validated_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult.fail(f"Configuration validation failed: {e}")
+        return FlextResult[None].fail(f"Configuration validation failed: {e}")
 
 
 def create_default_ldap_target_config(
@@ -399,12 +399,12 @@ def create_default_ldap_target_config(
         # Validate business rules
         validation_result = target_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextResult.fail(validation_result.error or "Invalid configuration")
+            return FlextResult[None].fail(validation_result.error or "Invalid configuration")
 
-        return FlextResult.ok(target_config)
+        return FlextResult[None].ok(target_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult.fail(f"Default configuration creation failed: {e}")
+        return FlextResult[None].fail(f"Default configuration creation failed: {e}")
 
 
 # Backward compatibility aliases

@@ -20,14 +20,14 @@ class TransformationRule(FlextValueObject):
         """Validate transformation rule business rules."""
         try:
             if not self.name.strip():
-                return FlextResult.fail("Rule name cannot be empty")
+                return FlextResult[None].fail("Rule name cannot be empty")
             if not self.pattern:
-                return FlextResult.fail("Pattern cannot be empty")
+                return FlextResult[None].fail("Pattern cannot be empty")
             # replacement is guaranteed to be str by Pydantic typing
             # Using a domain-specific validation instead
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Transformation rule validation failed: {e}")
+            return FlextResult[None].fail(f"Transformation rule validation failed: {e}")
 
 
 class TransformationResult(FlextValueObject):
@@ -40,12 +40,12 @@ class TransformationResult(FlextValueObject):
         """Validate transformation result business rules."""
         try:
             if not self.transformed_data:
-                return FlextResult.fail("transformed_data cannot be empty")
+                return FlextResult[None].fail("transformed_data cannot be empty")
             if len(self.applied_rules) < 0:  # This check makes sense for business logic
-                return FlextResult.fail("applied_rules cannot be negative length")
-            return FlextResult.ok(None)
+                return FlextResult[None].fail("applied_rules cannot be negative length")
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Transformation result validation failed: {e}")
+            return FlextResult[None].fail(f"Transformation result validation failed: {e}")
 
 
 class DataTransformationEngine:
@@ -75,9 +75,9 @@ class DataTransformationEngine:
                 transformed_data=transformed_data,
                 applied_rules=applied_rules,
             )
-            return FlextResult.ok(result)
+            return FlextResult[None].ok(result)
         except Exception as e:
-            return FlextResult.fail(f"Transformation failed: {e}")
+            return FlextResult[None].fail(f"Transformation failed: {e}")
 
     def get_statistics(self) -> dict[str, int]:
         """Get transformation statistics."""
@@ -135,13 +135,13 @@ class MigrationValidator:
 
             if error_msg:
                 self._stats["validation_errors"] += 1
-                return FlextResult.fail(error_msg)
+                return FlextResult[None].fail(error_msg)
 
-            return FlextResult.ok(data=True)
+            return FlextResult[None].ok(True)
 
         except Exception as e:
             self._stats["validation_errors"] += 1
-            return FlextResult.fail(f"Validation failed: {e}")
+            return FlextResult[None].fail(f"Validation failed: {e}")
 
     def validate_entry(
         self,

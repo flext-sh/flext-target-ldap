@@ -89,13 +89,13 @@ class LdapAttributeMappingModel(FlextValueObject):
         try:
             # Validate field name format
             if not self.singer_field_name.replace("_", "").replace("-", "").isalnum():
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     "Singer field name must be alphanumeric with underscores/hyphens",
                 )
 
             # Validate LDAP attribute format
             if not self.ldap_attribute_name.replace("-", "").isalnum():
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     "LDAP attribute name must be alphanumeric with hyphens",
                 )
 
@@ -103,13 +103,13 @@ class LdapAttributeMappingModel(FlextValueObject):
             if self.transformation_rule:
                 valid_transformations = {"lowercase", "uppercase", "trim", "normalize"}
                 if self.transformation_rule not in valid_transformations:
-                    return FlextResult.fail(
+                    return FlextResult[None].fail(
                         f"Invalid transformation rule. Must be one of {valid_transformations}",
                     )
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Attribute mapping validation failed: {e}")
+            return FlextResult[None].fail(f"Attribute mapping validation failed: {e}")
 
 
 class LdapEntryModel(FlextValueObject):
@@ -185,10 +185,10 @@ class LdapEntryModel(FlextValueObject):
                     )
 
             if errors:
-                return FlextResult.fail("; ".join(errors))
-            return FlextResult.ok(None)
+                return FlextResult[None].fail("; ".join(errors))
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"LDAP entry validation failed: {e}")
+            return FlextResult[None].fail(f"LDAP entry validation failed: {e}")
 
     def get_rdn(self) -> str:
         """Get the Relative Distinguished Name (RDN) from the DN."""
@@ -246,18 +246,18 @@ class LdapTransformationResultModel(FlextValueObject):
         try:
             # Validate we have meaningful data
             if not self.original_record:
-                return FlextResult.fail("Original record cannot be empty")
+                return FlextResult[None].fail("Original record cannot be empty")
 
             # Validate transformed entry is valid
             entry_validation = self.transformed_entry.validate_business_rules()
             if not entry_validation.is_success:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"Transformed entry is invalid: {entry_validation.error}",
                 )
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Transformation result validation failed: {e}")
+            return FlextResult[None].fail(f"Transformation result validation failed: {e}")
 
     @property
     def success_rate(self) -> float:
@@ -322,7 +322,7 @@ class LdapBatchProcessingModel(FlextValueObject):
         try:
             # Validate batch size doesn't exceed current batch
             if len(self.current_batch) > self.batch_size:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"Current batch size ({len(self.current_batch)}) exceeds maximum ({self.batch_size})",
                 )
 
@@ -331,13 +331,13 @@ class LdapBatchProcessingModel(FlextValueObject):
                 self.successful_operations + self.failed_operations
                 > self.total_processed
             ):
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     "Operation counters exceed total processed count",
                 )
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Batch processing validation failed: {e}")
+            return FlextResult[None].fail(f"Batch processing validation failed: {e}")
 
     @property
     def is_batch_full(self) -> bool:
@@ -454,7 +454,7 @@ class LdapOperationStatisticsModel(FlextValueObject):
                 self.successful_operations + self.failed_operations
                 != self.total_operations
             ):
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     "Success + failed operations must equal total operations",
                 )
 
@@ -466,13 +466,13 @@ class LdapOperationStatisticsModel(FlextValueObject):
             ):
                 # Recalculate average if missing
                 calculated_avg = self.total_duration_ms / self.total_operations
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"Average duration mismatch. Should be {calculated_avg:.2f}ms",
                 )
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Statistics validation failed: {e}")
+            return FlextResult[None].fail(f"Statistics validation failed: {e}")
 
     @property
     def success_rate(self) -> float:

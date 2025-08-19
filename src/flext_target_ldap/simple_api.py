@@ -19,9 +19,9 @@ def create_ldap_target(config: dict[str, object]) -> FlextResult[object]:
     """Create LDAP target with configuration."""
     try:
         target = TargetLDAP(config=config)
-        return FlextResult.ok(target)
+        return FlextResult[None].ok(target)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult.fail(f"Failed to create LDAP target: {e}")
+        return FlextResult[None].fail(f"Failed to create LDAP target: {e}")
 
 
 def load_users_to_ldap(
@@ -31,16 +31,16 @@ def load_users_to_ldap(
     """Load user records to LDAP."""
     target_result = create_ldap_target(config)
     if not target_result.success:
-        return FlextResult.fail(f"Target creation failed: {target_result.error}")
+        return FlextResult[None].fail(f"Target creation failed: {target_result.error}")
 
     try:
         target = target_result.data
         if target is None:
-            return FlextResult.fail("Target creation failed")
+            return FlextResult[None].fail("Target creation failed")
 
         # Type assertion since we know target is TargetLDAP
         if not isinstance(target, TargetLDAP):
-            return FlextResult.fail("Target is not a TargetLDAP instance")
+            return FlextResult[None].fail("Target is not a TargetLDAP instance")
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
 
         # Process records
@@ -48,10 +48,10 @@ def load_users_to_ldap(
             sink.process_record(user, {})
 
         # Return count of processed users
-        return FlextResult.ok(len(users))
+        return FlextResult[None].ok(len(users))
 
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult.fail(f"Failed to load users: {e}")
+        return FlextResult[None].fail(f"Failed to load users: {e}")
 
 
 def load_groups_to_ldap(
@@ -61,16 +61,16 @@ def load_groups_to_ldap(
     """Load group records to LDAP."""
     target_result = create_ldap_target(config)
     if not target_result.success:
-        return FlextResult.fail(f"Target creation failed: {target_result.error}")
+        return FlextResult[None].fail(f"Target creation failed: {target_result.error}")
 
     try:
         target = target_result.data
         if target is None:
-            return FlextResult.fail("Target creation failed")
+            return FlextResult[None].fail("Target creation failed")
 
         # Type assertion since we know target is TargetLDAP
         if not isinstance(target, TargetLDAP):
-            return FlextResult.fail("Target is not a TargetLDAP instance")
+            return FlextResult[None].fail("Target is not a TargetLDAP instance")
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
 
         # Process records
@@ -78,10 +78,10 @@ def load_groups_to_ldap(
             sink.process_record(group, {})
 
         # Return count of processed groups
-        return FlextResult.ok(len(groups))
+        return FlextResult[None].ok(len(groups))
 
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult.fail(f"Failed to load groups: {e}")
+        return FlextResult[None].fail(f"Failed to load groups: {e}")
 
 
 def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
@@ -104,10 +104,10 @@ def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
         # Intentionally not constructing URL or awaiting here to avoid blocking in sync path.
         # This method only validates config structure.
         _ = api  # keep reference to avoid unused warning in some linters
-        return FlextResult.ok(data=True)
+        return FlextResult[None].ok(True)
 
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult.fail(f"Connection test error: {e}")
+        return FlextResult[None].fail(f"Connection test error: {e}")
 
 
 # Convenience function aliases

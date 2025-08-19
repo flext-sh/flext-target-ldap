@@ -55,11 +55,11 @@ class SingerTargetLDAP:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return FlextResult.ok(result)
+            return FlextResult[None].ok(result)
 
         except Exception as e:
             logger.exception("Singer message processing failed")
-            return FlextResult.fail(f"Message processing failed: {e}")
+            return FlextResult[None].fail(f"Message processing failed: {e}")
 
     def validate_singer_config(self) -> FlextResult[bool]:
         """Validate Singer LDAP target configuration.
@@ -73,11 +73,11 @@ class SingerTargetLDAP:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
-                    return FlextResult.fail(f"Missing required field: {field}")
+                    return FlextResult[None].fail(f"Missing required field: {field}")
 
-            return FlextResult.ok(data=True)
+            return FlextResult[None].ok(True)
         except Exception as e:
-            return FlextResult.fail(f"Configuration validation failed: {e}")
+            return FlextResult[None].fail(f"Configuration validation failed: {e}")
 
 
 __all__: list[str] = ["SingerTargetLDAP"]
