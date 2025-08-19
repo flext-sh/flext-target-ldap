@@ -173,12 +173,12 @@ class LdapTargetClient:
                 self.config.server,
                 self.config.port,
             )
-            return FlextResult.ok("validated")
+            return FlextResult[None].ok("validated")
 
         except Exception as e:
             error_msg = f"Connection error: {e}"
             logger.exception(error_msg)
-            return FlextResult.fail(error_msg)
+            return FlextResult[None].fail(error_msg)
 
     def get_connection(self) -> _GeneratorContextManager[MagicMock]:
         """Get LDAP connection context manager (compatibility method)."""
@@ -245,16 +245,16 @@ class LdapTargetClient:
                     )
                     # Convert to boolean FlextResult
                     if result.is_success:
-                        return FlextResult.ok(data=True)
-                    return FlextResult.fail(result.error or "Group creation failed")
+                        return FlextResult[None].ok(True)
+                    return FlextResult[None].fail(result.error or "Group creation failed")
                 # Fallback: create generic entry via modify flow (unsupported path)
                 # Emulate success by returning ok; real implementation would add support if needed
-                return FlextResult.ok(data=True)
+                return FlextResult[None].ok(True)
             # Should not reach here; context ensures return inside branches
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add entry %s", dn)
-            return FlextResult.fail(f"Add entry failed: {e}")
+            return FlextResult[None].fail(f"Add entry failed: {e}")
 
     async def modify_entry(
         self,
@@ -283,19 +283,19 @@ class LdapTargetClient:
                 self._password or None,
             ) as _session:
                 # No modify_entry in API; assume success in dry-run mode
-                result = FlextResult.ok(data=True)
+                result = FlextResult[None].ok(True)
 
             if result.is_success:
                 logger.debug("Successfully modified LDAP entry: %s", dn)
-                return FlextResult.ok(data=True)
+                return FlextResult[None].ok(True)
 
             error_msg = f"Failed to modify entry {dn}: {result.error}"
             logger.error(error_msg)
-            return FlextResult.fail(error_msg)
+            return FlextResult[None].fail(error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to modify entry %s", dn)
-            return FlextResult.fail(f"Modify entry failed: {e}")
+            return FlextResult[None].fail(f"Modify entry failed: {e}")
 
     async def search_entry(
         self,
@@ -306,7 +306,7 @@ class LdapTargetClient:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:
-                return FlextResult.fail("Base DN required")
+                return FlextResult[None].fail("Base DN required")
 
             logger.info(
                 "Searching LDAP entries using flext-ldap API: %s with filter %s",
@@ -341,20 +341,20 @@ class LdapTargetClient:
                     entries.append(compat_entry)
 
                 logger.debug("Successfully found %d LDAP entries", len(entries))
-                return FlextResult.ok(entries)
+                return FlextResult[None].ok(entries)
 
             # Return empty list rather than error for no results
             logger.debug("No LDAP entries found")
-            return FlextResult.ok([])
+            return FlextResult[None].ok([])
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
-            return FlextResult.fail(f"Search failed: {e}")
+            return FlextResult[None].fail(f"Search failed: {e}")
 
     async def disconnect(self) -> FlextResult[bool]:
         """Disconnect noop (connection is context-managed per operation)."""
         logger.debug("No persistent session to disconnect")
-        return FlextResult.ok(data=True)
+        return FlextResult[None].ok(True)
 
 
 class LdapBaseSink(Sink):
@@ -391,17 +391,17 @@ class LdapBaseSink(Sink):
             connect_result = await self.client.connect()
 
             if not connect_result.is_success:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
 
             logger.info("LDAP client setup successful for stream: %s", self.stream_name)
-            return FlextResult.ok(self.client)
+            return FlextResult[None].ok(self.client)
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
-            return FlextResult.fail(error_msg)
+            return FlextResult[None].fail(error_msg)
 
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""

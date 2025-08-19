@@ -25,14 +25,14 @@ class SingerLDAPCatalogEntry(FlextValueObject):
         """Validate catalog entry business rules."""
         try:
             if not self.tap_stream_id.strip():
-                return FlextResult.fail("tap_stream_id cannot be empty")
+                return FlextResult[None].fail("tap_stream_id cannot be empty")
             if not self.stream.strip():
-                return FlextResult.fail("stream cannot be empty")
+                return FlextResult[None].fail("stream cannot be empty")
             if not self.stream_schema:
-                return FlextResult.fail("stream_schema cannot be empty")
-            return FlextResult.ok(None)
+                return FlextResult[None].fail("stream_schema cannot be empty")
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult.fail(f"Catalog entry validation failed: {e}")
+            return FlextResult[None].fail(f"Catalog entry validation failed: {e}")
 
 
 class SingerLDAPCatalogManager:
@@ -56,16 +56,16 @@ class SingerLDAPCatalogManager:
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
-            return FlextResult.fail(f"Stream addition failed: {e}")
+            return FlextResult[None].fail(f"Stream addition failed: {e}")
 
     def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
-            return FlextResult.fail(f"LDAP stream not found: {stream_name}")
-        return FlextResult.ok(self._catalog_entries[stream_name])
+            return FlextResult[None].fail(f"LDAP stream not found: {stream_name}")
+        return FlextResult[None].ok(self._catalog_entries[stream_name])
 
 
 # Re-export for backward compatibility
