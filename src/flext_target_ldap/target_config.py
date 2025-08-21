@@ -42,7 +42,9 @@ class LdapTargetConnectionSettings(FlextDomainBaseModel):
         try:
             # Mutual exclusivity validation
             if self.use_ssl and self.use_tls:
-                return FlextResult[None].fail("Cannot use both SSL and TLS simultaneously")
+                return FlextResult[None].fail(
+                    "Cannot use both SSL and TLS simultaneously"
+                )
 
             # Authentication validation
             if self.bind_dn and not self.bind_password:
@@ -142,7 +144,9 @@ class LdapTargetMappingSettings(FlextDomainBaseModel):
             # Search scope validation
             valid_scopes = {"BASE", "LEVEL", "SUBTREE"}
             if self.search_scope.upper() not in valid_scopes:
-                return FlextResult[None].fail(f"Search scope must be one of {valid_scopes}")
+                return FlextResult[None].fail(
+                    f"Search scope must be one of {valid_scopes}"
+                )
 
             return FlextResult[None].ok(None)
         except Exception as e:
@@ -235,11 +239,15 @@ class TargetLdapConfig(FlextBaseConfigModel):
             # Validate search scope
             valid_scopes = {"BASE", "LEVEL", "SUBTREE"}
             if self.search_scope.upper() not in valid_scopes:
-                return FlextResult[None].fail(f"Search scope must be one of {valid_scopes}")
+                return FlextResult[None].fail(
+                    f"Search scope must be one of {valid_scopes}"
+                )
 
             return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult[None].fail(f"Target configuration validation failed: {e}")
+            return FlextResult[None].fail(
+                f"Target configuration validation failed: {e}"
+            )
 
 
 def validate_ldap_target_config(
@@ -365,7 +373,9 @@ def validate_ldap_target_config(
         # Run business rules validation
         validation_result = validated_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextResult[None].fail(validation_result.error or "Invalid configuration")
+            return FlextResult[None].fail(
+                validation_result.error or "Invalid configuration"
+            )
 
         return FlextResult[None].ok(validated_config)
 
@@ -399,7 +409,9 @@ def create_default_ldap_target_config(
         # Validate business rules
         validation_result = target_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextResult[None].fail(validation_result.error or "Invalid configuration")
+            return FlextResult[None].fail(
+                validation_result.error or "Invalid configuration"
+            )
 
         return FlextResult[None].ok(target_config)
 

@@ -435,7 +435,9 @@ class LdapTargetOrchestrator:
             # Use provided config or stored config
             working_config = config or self._typed_config
             if not working_config:
-                return FlextResult[None].fail("No configuration available for orchestration")
+                return FlextResult[None].fail(
+                    "No configuration available for orchestration"
+                )
 
             # Initialize services
             transformation_service = LdapTransformationService(working_config)
@@ -504,7 +506,9 @@ class LdapTargetOrchestrator:
             # Use provided config or stored config
             working_config = config or self._typed_config
             if not working_config:
-                return FlextResult[None].fail("No configuration available for validation")
+                return FlextResult[None].fail(
+                    "No configuration available for validation"
+                )
 
             # Validate business rules
             validation_result = working_config.validate_business_rules()
@@ -559,7 +563,9 @@ class LdapTargetApiService:
         """Load user records to LDAP."""
         target_result = await self.create_ldap_target(config)
         if not target_result.is_success:
-            return FlextResult[None].fail(f"Target creation failed: {target_result.error}")
+            return FlextResult[None].fail(
+                f"Target creation failed: {target_result.error}"
+            )
 
         try:
             target = target_result.data
@@ -590,7 +596,9 @@ class LdapTargetApiService:
         """Load group records to LDAP."""
         target_result = await self.create_ldap_target(config)
         if not target_result.is_success:
-            return FlextResult[None].fail(f"Target creation failed: {target_result.error}")
+            return FlextResult[None].fail(
+                f"Target creation failed: {target_result.error}"
+            )
 
         try:
             target = target_result.data
@@ -628,7 +636,9 @@ class LdapTargetApiService:
 
             # Test connection
             if config_result.data is None:
-                return FlextResult[None].fail("Configuration validation returned no data")
+                return FlextResult[None].fail(
+                    "Configuration validation returned no data"
+                )
             connection_service = LdapConnectionService(config_result.data)
             return await connection_service.test_connection()
 

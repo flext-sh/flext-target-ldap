@@ -246,7 +246,9 @@ class LdapTargetClient:
                     # Convert to boolean FlextResult
                     if result.is_success:
                         return FlextResult[None].ok(True)
-                    return FlextResult[None].fail(result.error or "Group creation failed")
+                    return FlextResult[None].fail(
+                        result.error or "Group creation failed"
+                    )
                 # Fallback: create generic entry via modify flow (unsupported path)
                 # Emulate success by returning ok; real implementation would add support if needed
                 return FlextResult[None].ok(True)
