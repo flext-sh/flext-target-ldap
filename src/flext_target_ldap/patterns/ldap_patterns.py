@@ -339,7 +339,9 @@ class LDAPEntryManager:
             # Check for required attributes
             missing_attrs = required_attrs - set(attributes.keys())
             if missing_attrs:
-                return FlextResult[None].fail(f"Missing required attributes: {missing_attrs}")
+                return FlextResult[None].fail(
+                    f"Missing required attributes: {missing_attrs}"
+                )
 
             return FlextResult[None].ok(True)
 

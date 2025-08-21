@@ -45,7 +45,9 @@ class TransformationResult(FlextValueObject):
                 return FlextResult[None].fail("applied_rules cannot be negative length")
             return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult[None].fail(f"Transformation result validation failed: {e}")
+            return FlextResult[None].fail(
+                f"Transformation result validation failed: {e}"
+            )
 
 
 class DataTransformationEngine:

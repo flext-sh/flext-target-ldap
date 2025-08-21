@@ -257,7 +257,9 @@ class LdapTransformationResultModel(FlextValueObject):
 
             return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextResult[None].fail(f"Transformation result validation failed: {e}")
+            return FlextResult[None].fail(
+                f"Transformation result validation failed: {e}"
+            )
 
     @property
     def success_rate(self) -> float:
