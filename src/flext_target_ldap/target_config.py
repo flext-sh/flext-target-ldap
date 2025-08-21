@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 **Architecture**: Clean Architecture configuration layer
-**Patterns**: FlextSettings, FlextValueObject, FlextResult validation
+**Patterns**: FlextSettings, FlextValue, FlextResult validation
 **Integration**: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -16,7 +16,7 @@ from __future__ import annotations
 from flext_core import (
     FlextBaseConfigModel,
     FlextResult,
-    FlextValueObject as FlextDomainBaseModel,
+    FlextValue as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import ConfigDict, Field
