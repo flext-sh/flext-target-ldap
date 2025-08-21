@@ -12,7 +12,7 @@ import warnings
 from flext_core import (
     FlextResult,
     FlextSettings as BaseSettings,
-    FlextValueObject as FlextDomainBaseModel,
+    FlextValue as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import Field, SecretStr

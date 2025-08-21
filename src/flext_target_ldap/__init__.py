@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.metadata
 
 # === FLEXT-CORE IMPORTS ===
-from flext_core import FlextResult, FlextValueObject, get_logger
+from flext_core import FlextResult, FlextValue, get_logger
 
 from flext_meltano import Sink, Target
 
@@ -114,7 +114,7 @@ __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 __all__: list[str] = [
     # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
-    "FlextValueObject",
+    "FlextValue",
     "get_logger",
     # === FLEXT-MELTANO RE-EXPORTS ===
     "Sink",

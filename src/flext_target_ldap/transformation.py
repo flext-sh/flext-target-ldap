@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from flext_core import FlextResult, FlextValueObject, get_logger
+from flext_core import FlextResult, FlextValue, get_logger
 from pydantic import Field
 
 logger = get_logger(__name__)
 
 
-class TransformationRule(FlextValueObject):
+class TransformationRule(FlextValue):
     """Transformation rule for data transformation."""
 
     name: str
@@ -30,7 +30,7 @@ class TransformationRule(FlextValueObject):
             return FlextResult[None].fail(f"Transformation rule validation failed: {e}")
 
 
-class TransformationResult(FlextValueObject):
+class TransformationResult(FlextValue):
     """Result of data transformation."""
 
     transformed_data: dict[str, object]
