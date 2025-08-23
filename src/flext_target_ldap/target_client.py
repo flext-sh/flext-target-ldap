@@ -245,13 +245,13 @@ class LdapTargetClient:
                     )
                     # Convert to boolean FlextResult
                     if result.is_success:
-                        return FlextResult[None].ok(True)
+                        return FlextResult[None].ok(data=True)
                     return FlextResult[None].fail(
                         result.error or "Group creation failed"
                     )
                 # Fallback: create generic entry via modify flow (unsupported path)
                 # Emulate success by returning ok; real implementation would add support if needed
-                return FlextResult[None].ok(True)
+                return FlextResult[None].ok(data=True)
             # Should not reach here; context ensures return inside branches
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -285,11 +285,11 @@ class LdapTargetClient:
                 self._password or None,
             ) as _session:
                 # No modify_entry in API; assume success in dry-run mode
-                result = FlextResult[None].ok(True)
+                result = FlextResult[None].ok(data=True)
 
             if result.is_success:
                 logger.debug("Successfully modified LDAP entry: %s", dn)
-                return FlextResult[None].ok(True)
+                return FlextResult[None].ok(data=True)
 
             error_msg = f"Failed to modify entry {dn}: {result.error}"
             logger.error(error_msg)
@@ -356,7 +356,7 @@ class LdapTargetClient:
     async def disconnect(self) -> FlextResult[bool]:
         """Disconnect noop (connection is context-managed per operation)."""
         logger.debug("No persistent session to disconnect")
-        return FlextResult[None].ok(True)
+        return FlextResult[None].ok(data=True)
 
 
 class LdapBaseSink(Sink):

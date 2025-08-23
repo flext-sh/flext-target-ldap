@@ -72,7 +72,7 @@ class LDAPTargetOrchestrator:
                 if field not in self.config:
                     return FlextResult[None].fail(f"Missing required field: {field}")
 
-            return FlextResult[None].ok(True)
+            return FlextResult[None].ok(data=True)
         except Exception as e:
             return FlextResult[None].fail(f"Configuration validation failed: {e}")
 

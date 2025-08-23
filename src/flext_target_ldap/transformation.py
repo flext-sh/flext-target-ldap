@@ -139,7 +139,7 @@ class MigrationValidator:
                 self._stats["validation_errors"] += 1
                 return FlextResult[None].fail(error_msg)
 
-            return FlextResult[None].ok(True)
+            return FlextResult[None].ok(data=True)
 
         except Exception as e:
             self._stats["validation_errors"] += 1

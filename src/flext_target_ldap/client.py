@@ -234,7 +234,7 @@ class LDAPClient:
                     if e.__class__.__name__ == "LDAPEntryAlreadyExistsResult":
                         return FlextResult[None].fail("Entry already exists")
                     return FlextResult[None].fail(str(e))
-                return FlextResult[None].ok(True)
+                return FlextResult[None].ok(data=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add entry %s", dn)
             return FlextResult[None].fail(f"Add entry failed: {e}")
@@ -244,7 +244,7 @@ class LDAPClient:
         try:
             with self.get_connection() as conn:
                 _ = conn.modify(dn, changes)
-                return FlextResult[None].ok(True)
+                return FlextResult[None].ok(data=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to modify entry %s", dn)
             return FlextResult[None].fail(f"Modify entry failed: {e}")
@@ -258,7 +258,7 @@ class LDAPClient:
             logger.info("Deleting LDAP entry using ldap3: %s", dn)
             with self.get_connection() as conn:
                 _ = conn.delete(dn)
-                return FlextResult[None].ok(True)
+                return FlextResult[None].ok(data=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to delete entry %s", dn)
             return FlextResult[None].fail(f"Delete entry failed: {e}")
@@ -342,7 +342,7 @@ class LDAPClient:
         try:
             # No persistent session maintained; nothing to do
             logger.debug("No persistent session to disconnect")
-            return FlextResult[None].ok(True)
+            return FlextResult[None].ok(data=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to cleanup LDAP client")
             return FlextResult[None].fail(f"Disconnect failed: {e}")
