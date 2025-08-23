@@ -104,7 +104,7 @@ def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
         # Intentionally not constructing URL or awaiting here to avoid blocking in sync path.
         # This method only validates config structure.
         _ = api  # keep reference to avoid unused warning in some linters
-        return FlextResult[None].ok(True)
+        return FlextResult[None].ok(data=True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[None].fail(f"Connection test error: {e}")

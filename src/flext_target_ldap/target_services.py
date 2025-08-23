@@ -115,7 +115,7 @@ class LdapConnectionService:
                 # Optionally perform a NOOP or simple bind check if available
                 _ = session  # ensure variable is used for static checkers
             logger.info("LDAP connection test successful")
-            return FlextResult[None].ok(True)
+            return FlextResult[None].ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Connection test failed")
@@ -525,7 +525,7 @@ class LdapTargetOrchestrator:
                 # Don't fail validation just because connection test fails
                 # The server might not be available during configuration validation
 
-            return FlextResult[None].ok(True)
+            return FlextResult[None].ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Configuration validation failed")
