@@ -77,9 +77,9 @@ class DataTransformationEngine:
                 transformed_data=transformed_data,
                 applied_rules=applied_rules,
             )
-            return FlextResult[None].ok(result)
+            return FlextResult[TransformationResult].ok(result)
         except Exception as e:
-            return FlextResult[None].fail(f"Transformation failed: {e}")
+            return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
 
     def get_statistics(self) -> dict[str, int]:
         """Get transformation statistics."""
@@ -137,13 +137,13 @@ class MigrationValidator:
 
             if error_msg:
                 self._stats["validation_errors"] += 1
-                return FlextResult[None].fail(error_msg)
+                return FlextResult[bool].fail(error_msg)
 
-            return FlextResult[None].ok(data=True)
+            return FlextResult[bool].ok(data=True)
 
         except Exception as e:
             self._stats["validation_errors"] += 1
-            return FlextResult[None].fail(f"Validation failed: {e}")
+            return FlextResult[bool].fail(f"Validation failed: {e}")
 
     def validate_entry(
         self,

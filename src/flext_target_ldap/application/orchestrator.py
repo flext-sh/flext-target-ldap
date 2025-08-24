@@ -52,11 +52,11 @@ class LDAPTargetOrchestrator:
             }
 
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return FlextResult[None].ok(result)
+            return FlextResult[dict[str, object]].ok(result)
 
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[None].fail(f"Data loading orchestration failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Data loading orchestration failed: {e}")
 
     def validate_target_configuration(self) -> FlextResult[bool]:
         """Validate LDAP target configuration.
@@ -70,11 +70,11 @@ class LDAPTargetOrchestrator:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
-                    return FlextResult[None].fail(f"Missing required field: {field}")
+                    return FlextResult[bool].fail(f"Missing required field: {field}")
 
-            return FlextResult[None].ok(data=True)
+            return FlextResult[bool].ok(data=True)
         except Exception as e:
-            return FlextResult[None].fail(f"Configuration validation failed: {e}")
+            return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 
 __all__: list[str] = ["LDAPTargetOrchestrator"]

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import click
 from flext_core import FlextContainer, get_logger
-from flext_meltano import Target
+from flext_meltano import Sink, Target
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import TargetLDAPConfig
@@ -208,7 +208,7 @@ if __name__ == "__main__":
 # Minimal Click CLI for tests (echoes STATE lines)
 @click.command(name="target-ldap", context_settings={"ignore_unknown_options": True})
 @click.option("--config", type=click.Path(exists=False), required=False)
-def _target_ldap_click(config: str | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
+def _target_ldap_click(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
         # Load minimal config if provided

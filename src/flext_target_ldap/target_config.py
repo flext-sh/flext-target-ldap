@@ -373,14 +373,14 @@ def validate_ldap_target_config(
         # Run business rules validation
         validation_result = validated_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextResult[None].fail(
+            return FlextResult[TargetLdapConfig].fail(
                 validation_result.error or "Invalid configuration"
             )
 
-        return FlextResult[None].ok(validated_config)
+        return FlextResult[TargetLdapConfig].ok(validated_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[None].fail(f"Configuration validation failed: {e}")
+        return FlextResult[TargetLdapConfig].fail(f"Configuration validation failed: {e}")
 
 
 def create_default_ldap_target_config(
@@ -409,14 +409,14 @@ def create_default_ldap_target_config(
         # Validate business rules
         validation_result = target_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextResult[None].fail(
+            return FlextResult[TargetLdapConfig].fail(
                 validation_result.error or "Invalid configuration"
             )
 
-        return FlextResult[None].ok(target_config)
+        return FlextResult[TargetLdapConfig].ok(target_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[None].fail(f"Default configuration creation failed: {e}")
+        return FlextResult[TargetLdapConfig].fail(f"Default configuration creation failed: {e}")
 
 
 # Backward compatibility aliases

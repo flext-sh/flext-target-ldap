@@ -80,17 +80,17 @@ class LDAPBaseSink(Sink):
             connect_result = self.client.connect()
 
             if not connect_result.is_success:
-                return FlextResult[None].fail(
+                return FlextResult[LDAPClient].fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
 
             logger.info("LDAP client setup successful for stream: %s", self.stream_name)
-            return FlextResult[None].ok(self.client)
+            return FlextResult[LDAPClient].ok(self.client)
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
-            return FlextResult[None].fail(error_msg)
+            return FlextResult[LDAPClient].fail(error_msg)
 
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""

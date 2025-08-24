@@ -35,11 +35,11 @@ class LDAPTypeConverter:
             else:
                 result = str(value)
 
-            return FlextResult[None].ok(result)
+            return FlextResult[object].ok(result)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.warning("Type conversion failed for %s: %s", singer_type, e)
-            return FlextResult[None].ok(str(value))  # Fallback to string
+            return FlextResult[object].ok(str(value))  # Fallback to string
 
 
 class LDAPDataTransformer:
@@ -85,11 +85,11 @@ class LDAPDataTransformer:
                 else:
                     transformed[ldap_key] = value
 
-            return FlextResult[None].ok(transformed)
+            return FlextResult[dict[str, object]].ok(transformed)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
-            return FlextResult[None].fail(f"Record transformation failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Record transformation failed: {e}")
 
     def _normalize_ldap_attribute_name(self, name: str) -> str:
         """Normalize attribute name for LDAP conventions."""
@@ -128,11 +128,11 @@ class LDAPDataTransformer:
                     else:
                         attributes[key] = [str(value)]
 
-            return FlextResult[None].ok(attributes)
+            return FlextResult[dict[str, list[str]]].ok(attributes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return FlextResult[None].fail(f"Attribute preparation failed: {e}")
+            return FlextResult[dict[str, list[str]]].fail(f"Attribute preparation failed: {e}")
 
 
 class LDAPSchemaMapper:
@@ -171,11 +171,11 @@ class LDAPSchemaMapper:
                 # If properties is not a dict, return empty attributes
                 pass  # Already handled in the above block
 
-            return FlextResult[None].ok(ldap_attributes)
+            return FlextResult[dict[str, str]].ok(ldap_attributes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP schema mapping failed")
-            return FlextResult[None].fail(f"Schema mapping failed: {e}")
+            return FlextResult[dict[str, str]].fail(f"Schema mapping failed: {e}")
 
     def _normalize_attribute_name(self, name: str) -> str:
         """Normalize attribute name for LDAP."""
@@ -201,18 +201,18 @@ class LDAPSchemaMapper:
             prop_format = prop_def.get("format")
 
             if prop_format in {"date-time", "date"}:
-                return FlextResult[None].ok("GeneralizedTime")
+                return FlextResult[str].ok("GeneralizedTime")
             if prop_type in {"integer", "number"}:
-                return FlextResult[None].ok("Integer")
+                return FlextResult[str].ok("Integer")
             if prop_type == "boolean":
-                return FlextResult[None].ok("Boolean")
+                return FlextResult[str].ok("Boolean")
             if prop_type in {"object", "array"}:
-                return FlextResult[None].ok("OctetString")
-            return FlextResult[None].ok("DirectoryString")
+                return FlextResult[str].ok("OctetString")
+            return FlextResult[str].ok("DirectoryString")
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.warning("LDAP type mapping failed: %s", e)
-            return FlextResult[None].ok("DirectoryString")
+            return FlextResult[str].ok("DirectoryString")
 
 
 class LDAPEntryManager:
@@ -241,7 +241,7 @@ class LDAPEntryManager:
                         break
 
                 if not rdn_value:
-                    return FlextResult[None].fail(
+                    return FlextResult[str].fail(
                         f"No value found for RDN attribute: {rdn_attribute}",
                     )
 
@@ -251,11 +251,11 @@ class LDAPEntryManager:
             # Construct DN
             dn = f"{rdn_attribute}={escaped_value},{base_dn}"
 
-            return FlextResult[None].ok(dn)
+            return FlextResult[str].ok(dn)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("DN generation failed")
-            return FlextResult[None].fail(f"DN generation failed: {e}")
+            return FlextResult[str].fail(f"DN generation failed: {e}")
 
     def _escape_dn_value(self, value: str) -> str:
         """Escape special characters in DN values."""
@@ -312,11 +312,11 @@ class LDAPEntryManager:
                     ["person", "organizationalPerson", "inetOrgPerson"],
                 )
 
-            return FlextResult[None].ok(object_classes)
+            return FlextResult[list[str]].ok(object_classes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
-            return FlextResult[None].fail(f"Object class determination failed: {e}")
+            return FlextResult[list[str]].fail(f"Object class determination failed: {e}")
 
     def validate_entry_attributes(
         self,
@@ -339,15 +339,15 @@ class LDAPEntryManager:
             # Check for required attributes
             missing_attrs = required_attrs - set(attributes.keys())
             if missing_attrs:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     f"Missing required attributes: {missing_attrs}"
                 )
 
-            return FlextResult[None].ok(data=True)
+            return FlextResult[bool].ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")
-            return FlextResult[None].fail(f"Entry validation failed: {e}")
+            return FlextResult[bool].fail(f"Entry validation failed: {e}")
 
     def prepare_modify_changes(
         self,
@@ -382,8 +382,8 @@ class LDAPEntryManager:
                         )
                         changes[attr] = [("MODIFY_REPLACE", values)]
 
-            return FlextResult[None].ok(changes)
+            return FlextResult[dict[str, object]].ok(changes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return FlextResult[None].fail(f"Modify changes preparation failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Modify changes preparation failed: {e}")
