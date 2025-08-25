@@ -54,7 +54,7 @@ target-ldap = "flext_target_ldap.target:TargetLDAP.cli"
 flext-target-ldap = "flext_target_ldap.target:TargetLDAP.cli"
 
 [tool.ruff]
-extend = "../.config/tools/.ruff-shared.toml"
+extend = "../ruff-shared.toml"
 lint.isort.known-first-party = ["flext_target_ldap"]
 
 [tool.mypy]
