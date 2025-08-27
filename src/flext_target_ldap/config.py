@@ -10,8 +10,8 @@ from __future__ import annotations
 import warnings
 
 from flext_core import (
+    FlextConfig as BaseSettings,
     FlextResult,
-    FlextSettings as BaseSettings,
     FlextValue as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
@@ -228,4 +228,6 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         )
         return FlextResult[TargetLDAPConfig].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[TargetLDAPConfig].fail(f"Configuration validation failed: {e}")
+        return FlextResult[TargetLDAPConfig].fail(
+            f"Configuration validation failed: {e}"
+        )

@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 **Architecture**: Clean Architecture configuration layer
-**Patterns**: FlextSettings, FlextValue, FlextResult validation
+**Patterns**: FlextConfig, FlextValue, FlextResult validation
 **Integration**: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -380,7 +380,9 @@ def validate_ldap_target_config(
         return FlextResult[TargetLdapConfig].ok(validated_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[TargetLdapConfig].fail(f"Configuration validation failed: {e}")
+        return FlextResult[TargetLdapConfig].fail(
+            f"Configuration validation failed: {e}"
+        )
 
 
 def create_default_ldap_target_config(
@@ -416,7 +418,9 @@ def create_default_ldap_target_config(
         return FlextResult[TargetLdapConfig].ok(target_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[TargetLdapConfig].fail(f"Default configuration creation failed: {e}")
+        return FlextResult[TargetLdapConfig].fail(
+            f"Default configuration creation failed: {e}"
+        )
 
 
 # Backward compatibility aliases

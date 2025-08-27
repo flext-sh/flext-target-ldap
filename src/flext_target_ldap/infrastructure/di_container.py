@@ -19,7 +19,7 @@ get_flext_target_ldap_container = get_flext_container
 
 def get_flext_target_ldap_service(service_name: str) -> object:
     """Get service from FLEXT DI container."""
-    return get_flext_container().get(service_name)
+    return FlextContainer.get_global().get(service_name)
 
 
 # Type assertion for the configuration function
