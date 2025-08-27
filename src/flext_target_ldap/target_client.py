@@ -21,8 +21,8 @@ from unittest.mock import MagicMock
 
 from flext_core import (
     FlextContainer,
+    FlextConstants,
     FlextResult,
-    get_flext_container,
     get_logger,
 )
 from flext_ldap import FlextLdapApi, FlextLdapConnectionConfig, get_ldap_api
@@ -88,14 +88,14 @@ class LdapTargetClient:
         if isinstance(config, dict):
             # Convert dict to proper FlextLdapConnectionConfig
             self.config = FlextLdapConnectionConfig(
-                server=str(config.get("host", "localhost")),
-                port=int(str(config.get("port", 389)))
-                if config.get("port", 389) is not None
-                else 389,
+                server=str(config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)),
+                port=int(str(config.get("port", FlextConstants.Platform.LDAP_PORT)))
+                if config.get("port", FlextConstants.Platform.LDAP_PORT) is not None
+                else FlextConstants.Platform.LDAP_PORT,
                 use_ssl=bool(config.get("use_ssl", False)),
-                timeout=int(str(config.get("timeout", 30)))
-                if config.get("timeout", 30) is not None
-                else 30,
+                timeout=int(str(config.get("timeout", FlextConstants.Defaults.TIMEOUT)))
+                if config.get("timeout", FlextConstants.Defaults.TIMEOUT) is not None
+                else FlextConstants.Defaults.TIMEOUT,
             )
             # Store authentication credentials separately
             self._bind_dn: str = str(config.get("bind_dn", ""))
@@ -381,12 +381,12 @@ class LdapBaseSink(Sink):
         try:
             # Create dict configuration for LdapTargetClient compatibility
             connection_config = {
-                "host": self._target.config.get("host", "localhost"),
-                "port": self._target.config.get("port", 389),
+                "host": self._target.config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST),
+                "port": self._target.config.get("port", FlextConstants.Platform.LDAP_PORT),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),
-                "timeout": self._target.config.get("timeout", 30),
+                "timeout": self._target.config.get("timeout", FlextConstants.Defaults.TIMEOUT),
             }
 
             self.client = LdapTargetClient(connection_config)
@@ -488,7 +488,7 @@ class LdapUsersSink(LdapBaseSink):
                 return
 
             # Build DN for user
-            base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+            base_dn = self._target.config.get("base_dn", FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)
             user_dn = f"uid={username},{base_dn}"
 
             # Build LDAP attributes from record
@@ -604,7 +604,7 @@ class LdapGroupsSink(LdapBaseSink):
                 return
 
             # Build DN for group
-            group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
+            group_dn = f"cn={group_name},{self._target.config.get('base_dn', FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)}"
 
             # Build LDAP attributes from record
             attributes = self._build_group_attributes(record)
@@ -714,7 +714,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
                 return
 
             # Build DN for OU
-            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
+            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)}"
 
             # Build LDAP attributes from record
             attributes = self._build_ou_attributes(record)
@@ -881,18 +881,18 @@ class TargetLdap(Target):
             msg = "LDAP base DN is required"
             raise ValueError(msg)
 
-        port_obj = self.config.get("port", 389)
+        port_obj = self.config.get("port", FlextConstants.Platform.LDAP_PORT)
         if isinstance(port_obj, bool):
-            port = 389
+            port = FlextConstants.Platform.LDAP_PORT
         elif isinstance(port_obj, int):
             port = port_obj
         elif isinstance(port_obj, str):
             try:
                 port = int(port_obj)
             except ValueError:
-                port = 389
+                port = FlextConstants.Platform.LDAP_PORT
         else:
-            port = 389
+            port = FlextConstants.Platform.LDAP_PORT
         if port <= 0 or port > MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {MAX_PORT_NUMBER}"
             raise ValueError(msg)
@@ -908,10 +908,10 @@ class TargetLdap(Target):
     def setup(self) -> None:
         """Set up the LDAP target."""
         # Initialize DI container
-        self._container = get_flext_container()
+        self._container = FlextContainer.get_global()
         logger.info("DI container initialized successfully")
 
-        host = self.config.get("host", "localhost")
+        host = self.config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
         logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:
