@@ -20,8 +20,8 @@ from contextlib import _GeneratorContextManager, contextmanager
 from unittest.mock import MagicMock
 
 from flext_core import (
-    FlextContainer,
     FlextConstants,
+    FlextContainer,
     FlextResult,
     get_logger,
 )
