@@ -229,7 +229,7 @@ class LdapTransformationResultModel(FlextValue):
     )
     transformation_errors: list[str] = Field(
         default_factory=list,
-        description="Any errors encountered during transformation",
+        description="object errors encountered during transformation",
     )
     processing_time_ms: int = Field(
         default=0,
