@@ -16,7 +16,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Protocol
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import get_ldap_api
 
 from flext_target_ldap import target_client as target_client_module
@@ -30,7 +30,7 @@ from flext_target_ldap.target_models import (
     LdapTransformationResultModel,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class LdapTargetServiceProtocol(Protocol):
@@ -238,7 +238,9 @@ class LdapTransformationService:
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Record transformation failed")
-            return FlextResult[LdapTransformationResultModel].fail(f"Transformation failed: {e}")
+            return FlextResult[LdapTransformationResultModel].fail(
+                f"Transformation failed: {e}"
+            )
 
     def _apply_transformation_rule(self, value: str, rule: str) -> str:
         """Apply transformation rule to a value."""
@@ -495,7 +497,9 @@ class LdapTargetOrchestrator:
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[dict[str, object]].fail(f"Data loading orchestration failed: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Data loading orchestration failed: {e}"
+            )
 
     async def validate_target_configuration(
         self,

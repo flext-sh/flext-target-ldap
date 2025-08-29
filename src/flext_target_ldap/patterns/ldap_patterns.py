@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class LDAPTypeConverter:
@@ -89,7 +89,9 @@ class LDAPDataTransformer:
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
-            return FlextResult[dict[str, object]].fail(f"Record transformation failed: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Record transformation failed: {e}"
+            )
 
     def _normalize_ldap_attribute_name(self, name: str) -> str:
         """Normalize attribute name for LDAP conventions."""
@@ -132,7 +134,9 @@ class LDAPDataTransformer:
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return FlextResult[dict[str, list[str]]].fail(f"Attribute preparation failed: {e}")
+            return FlextResult[dict[str, list[str]]].fail(
+                f"Attribute preparation failed: {e}"
+            )
 
 
 class LDAPSchemaMapper:
@@ -316,7 +320,9 @@ class LDAPEntryManager:
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
-            return FlextResult[list[str]].fail(f"Object class determination failed: {e}")
+            return FlextResult[list[str]].fail(
+                f"Object class determination failed: {e}"
+            )
 
     def validate_entry_attributes(
         self,
@@ -386,4 +392,6 @@ class LDAPEntryManager:
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return FlextResult[dict[str, object]].fail(f"Modify changes preparation failed: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Modify changes preparation failed: {e}"
+            )

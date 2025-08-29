@@ -14,7 +14,7 @@ from importlib import import_module
 from pathlib import Path
 
 import click
-from flext_core import FlextContainer, get_logger
+from flext_core import FlextContainer, FlextLogger
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
@@ -27,7 +27,7 @@ from flext_target_ldap.sinks import (
     UsersSink,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 # Network constants
 MAX_PORT_NUMBER = 65535

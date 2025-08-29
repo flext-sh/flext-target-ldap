@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 **Architecture**: Clean Architecture configuration layer
-**Patterns**: FlextConfig, FlextValue, FlextResult validation
+**Patterns**: FlextConfig, FlextModels.Value, FlextResult validation
 **Integration**: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -14,14 +14,14 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import (
-    FlextBaseConfigModel,
+    FlextConfig.BaseConfigModel,
     FlextResult,
-    FlextValue as FlextDomainBaseModel,
+    FlextModels.Value as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import ConfigDict, Field
 
-# Modernized to use FlextBaseConfigModel from flext-core for consistent patterns
+# Modernized to use FlextConfig.BaseConfigModel from flext-core for consistent patterns
 
 
 class LdapTargetConnectionSettings(FlextDomainBaseModel):
@@ -153,12 +153,12 @@ class LdapTargetMappingSettings(FlextDomainBaseModel):
             return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
-class TargetLdapConfig(FlextBaseConfigModel):
-    """Consolidated LDAP target configuration using FlextBaseConfigModel patterns.
+class TargetLdapConfig(FlextConfig.BaseConfigModel):
+    """Consolidated LDAP target configuration using FlextConfig.BaseConfigModel patterns.
 
     This configuration class consolidates all LDAP target settings while
     leveraging flext-ldap for connection configuration to eliminate duplication.
-    Uses FlextBaseConfigModel for modern Pydantic validation and business rules.
+    Uses FlextConfig.BaseConfigModel for modern Pydantic validation and business rules.
     """
 
     # Use real LDAP connection config from flext-ldap - no duplications

@@ -22,15 +22,15 @@ from unittest.mock import MagicMock
 from flext_core import (
     FlextConstants,
     FlextContainer,
+    FlextLogger,
     FlextResult,
-    get_logger,
 )
 from flext_ldap import FlextLdapApi, FlextLdapConnectionConfig, get_ldap_api
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.target_config import TargetLdapConfig
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 # Network constants
 MAX_PORT_NUMBER = 65535
 
@@ -88,7 +88,9 @@ class LdapTargetClient:
         if isinstance(config, dict):
             # Convert dict to proper FlextLdapConnectionConfig
             self.config = FlextLdapConnectionConfig(
-                server=str(config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)),
+                server=str(
+                    config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
+                ),
                 port=int(str(config.get("port", FlextConstants.Platform.LDAP_PORT)))
                 if config.get("port", FlextConstants.Platform.LDAP_PORT) is not None
                 else FlextConstants.Platform.LDAP_PORT,
@@ -381,12 +383,18 @@ class LdapBaseSink(Sink):
         try:
             # Create dict configuration for LdapTargetClient compatibility
             connection_config = {
-                "host": self._target.config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST),
-                "port": self._target.config.get("port", FlextConstants.Platform.LDAP_PORT),
+                "host": self._target.config.get(
+                    "host", FlextConstants.Infrastructure.DEFAULT_HOST
+                ),
+                "port": self._target.config.get(
+                    "port", FlextConstants.Platform.LDAP_PORT
+                ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),
-                "timeout": self._target.config.get("timeout", FlextConstants.Defaults.TIMEOUT),
+                "timeout": self._target.config.get(
+                    "timeout", FlextConstants.Defaults.TIMEOUT
+                ),
             }
 
             self.client = LdapTargetClient(connection_config)
@@ -488,7 +496,9 @@ class LdapUsersSink(LdapBaseSink):
                 return
 
             # Build DN for user
-            base_dn = self._target.config.get("base_dn", FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)
+            base_dn = self._target.config.get(
+                "base_dn", FlextConstants.Platform.DEFAULT_LDAP_BASE_DN
+            )
             user_dn = f"uid={username},{base_dn}"
 
             # Build LDAP attributes from record

@@ -6,9 +6,9 @@ using flext-core patterns.
 
 from __future__ import annotations
 
-from flext_core import FlextLogger, FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 
-logger: FlextLogger = get_logger(__name__)
+logger: FlextLogger = FlextLogger(__name__)
 
 
 class LDAPTargetOrchestrator:
@@ -56,7 +56,9 @@ class LDAPTargetOrchestrator:
 
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[dict[str, object]].fail(f"Data loading orchestration failed: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Data loading orchestration failed: {e}"
+            )
 
     def validate_target_configuration(self) -> FlextResult[bool]:
         """Validate LDAP target configuration.

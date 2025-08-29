@@ -9,12 +9,12 @@ from __future__ import annotations
 
 import asyncio
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.client import LDAPClient
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class LDAPProcessingResult:
