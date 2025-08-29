@@ -10,25 +10,25 @@ from __future__ import annotations
 import warnings
 
 from flext_core import (
-    FlextConfig as BaseSettings,
+    FlextConfig,
     FlextResult,
     FlextValue as FlextDomainBaseModel,
 )
 from flext_ldap import FlextLdapConnectionConfig
-from pydantic import Field, SecretStr
+from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
     "🔄 ARCHITECTURE EVOLUTION: Singer adapters moved from flext-core to flext-meltano.\n"
     "💡 FUTURE PLAN: Use flext_meltano.config.SingerTargetConfig\n"
-    "⚡ CURRENT: Temporary compatibility using BaseSettings",
+    "⚡ CURRENT: Updated to use FlextConfig.Settings from flext-core",
     DeprecationWarning,
     stacklevel=2,
 )
 
 
-class TargetLDAPConfig(BaseSettings):
+class TargetLDAPConfig(FlextConfig.Settings):
     """LDAP target configuration using consolidated patterns."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
@@ -83,8 +83,8 @@ class TargetLDAPConfig(BaseSettings):
         description="Default object classes for new entries",
     )
 
-    # Use SettingsConfigDict for BaseSettings subclasses (mypy expectation)
-    model_config: SettingsConfigDict = SettingsConfigDict(
+    # Use SettingsConfigDict for Settings configuration
+    model_config = SettingsConfigDict(
         env_prefix="TARGET_LDAP_",
         case_sensitive=False,
     )
@@ -177,9 +177,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
             port=port,
             use_ssl=use_ssl,
             bind_dn=bind_dn,
-            bind_password=SecretStr(bind_password)
-            if isinstance(bind_password, str)
-            else bind_password,
+            bind_password=bind_password,
             timeout=timeout,
         )
 
