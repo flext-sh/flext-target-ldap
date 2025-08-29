@@ -6,9 +6,9 @@ using flext-core patterns.
 
 from __future__ import annotations
 
-from flext_core import FlextLogger, FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 
-logger: FlextLogger = get_logger(__name__)
+logger: FlextLogger = FlextLogger(__name__)
 
 
 class SingerTargetLDAP:
@@ -59,7 +59,9 @@ class SingerTargetLDAP:
 
         except Exception as e:
             logger.exception("Singer message processing failed")
-            return FlextResult[dict[str, object]].fail(f"Message processing failed: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Message processing failed: {e}"
+            )
 
     def validate_singer_config(self) -> FlextResult[bool]:
         """Validate Singer LDAP target configuration.

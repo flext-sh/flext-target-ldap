@@ -4,7 +4,7 @@ This module consolidates LDAP target domain models with descriptive PEP8 names,
 providing enterprise-grade data models for LDAP operations and transformations.
 
 **Architecture**: Clean Architecture domain layer
-**Patterns**: FlextValue, business rule validation
+**Patterns**: FlextModels.Value, business rule validation
 **Integration**: Complete LDAP-specific transformations and processing models
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -16,7 +16,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from flext_core import FlextResult, FlextValue
+from flext_core import FlextResult, FlextModels.Value
 from pydantic import Field, validator
 
 
@@ -50,7 +50,7 @@ class LdapObjectClassModel(StrEnum):
     DOMAIN_COMPONENT = "dcObject"
 
 
-class LdapAttributeMappingModel(FlextValue):
+class LdapAttributeMappingModel(FlextModels.Value):
     """LDAP attribute mapping configuration with validation.
 
     Immutable value object defining how Singer fields map to LDAP attributes
@@ -112,7 +112,7 @@ class LdapAttributeMappingModel(FlextValue):
             return FlextResult[None].fail(f"Attribute mapping validation failed: {e}")
 
 
-class LdapEntryModel(FlextValue):
+class LdapEntryModel(FlextModels.Value):
     """LDAP entry representation with validation and business rules.
 
     Immutable value object representing a complete LDAP entry with
@@ -208,7 +208,7 @@ class LdapEntryModel(FlextValue):
         return self.attributes.get(attribute_name, [])
 
 
-class LdapTransformationResultModel(FlextValue):
+class LdapTransformationResultModel(FlextModels.Value):
     """Result of LDAP data transformation operations.
 
     Tracks transformation statistics, applied rules, and processing metrics
@@ -276,7 +276,7 @@ class LdapTransformationResultModel(FlextValue):
         return bool(self.transformation_errors)
 
 
-class LdapBatchProcessingModel(FlextValue):
+class LdapBatchProcessingModel(FlextModels.Value):
     """LDAP batch processing configuration and state tracking.
 
     Manages batching of LDAP operations for optimal performance,
@@ -397,7 +397,7 @@ class LdapBatchProcessingModel(FlextValue):
         )
 
 
-class LdapOperationStatisticsModel(FlextValue):
+class LdapOperationStatisticsModel(FlextModels.Value):
     """Statistics tracking for LDAP target operations.
 
     Comprehensive metrics and performance data for LDAP operations,

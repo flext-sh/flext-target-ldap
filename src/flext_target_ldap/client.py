@@ -16,7 +16,7 @@ from contextlib import _GeneratorContextManager, contextmanager, suppress
 from unittest.mock import MagicMock
 
 import ldap3
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdapApi,
     FlextLdapConnectionConfig,
@@ -24,7 +24,7 @@ from flext_ldap import (
     get_ldap_api,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class LDAPSearchEntry:

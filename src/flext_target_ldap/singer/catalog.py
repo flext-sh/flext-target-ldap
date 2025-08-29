@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextResult, FlextValue, get_logger
+from flext_core import FlextResult, FlextModels.Value, FlextLogger
 from pydantic import Field
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 # Local LDAP catalog classes (no fallbacks - real implementation)
-class SingerLDAPCatalogEntry(FlextValue):
+class SingerLDAPCatalogEntry(FlextModels.Value):
     """Singer LDAP catalog entry using flext-core patterns."""
 
     tap_stream_id: str
