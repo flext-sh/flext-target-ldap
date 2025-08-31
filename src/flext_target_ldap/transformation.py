@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import FlextResult, FlextModels.Value, FlextLogger
+from flext_core import FlextLogger, FlextModels, FlextResult
 from pydantic import Field
 
 logger = FlextLogger(__name__)

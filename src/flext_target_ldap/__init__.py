@@ -5,7 +5,7 @@ from __future__ import annotations
 import importlib.metadata
 
 # === FLEXT-CORE IMPORTS ===
-from flext_core import FlextResult, FlextModels.Value, FlextLogger
+from flext_core import FlextResult, FlextModels, FlextLogger
 
 from flext_meltano import Sink, Target
 

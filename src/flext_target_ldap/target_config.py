@@ -14,17 +14,17 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import (
-    FlextConfig.BaseConfigModel,
+    FlextConfig.BaseModel,
     FlextResult,
-    FlextModels.Value as FlextDomainBaseModel,
+    FlextModels.Value as FlextModels.Entity,
 )
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import ConfigDict, Field
 
-# Modernized to use FlextConfig.BaseConfigModel from flext-core for consistent patterns
+# Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
 
-class LdapTargetConnectionSettings(FlextDomainBaseModel):
+class LdapTargetConnectionSettings(FlextModels.Entity):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -70,7 +70,7 @@ class LdapTargetConnectionSettings(FlextDomainBaseModel):
             return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextDomainBaseModel):
+class LdapTargetOperationSettings(FlextModels.Entity):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -111,7 +111,7 @@ class LdapTargetOperationSettings(FlextDomainBaseModel):
             return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextDomainBaseModel):
+class LdapTargetMappingSettings(FlextModels.Entity):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: dict[str, str] = Field(
@@ -153,12 +153,12 @@ class LdapTargetMappingSettings(FlextDomainBaseModel):
             return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
-class TargetLdapConfig(FlextConfig.BaseConfigModel):
-    """Consolidated LDAP target configuration using FlextConfig.BaseConfigModel patterns.
+class TargetLdapConfig(FlextConfig.BaseModel):
+    """Consolidated LDAP target configuration using FlextConfig.BaseModel patterns.
 
     This configuration class consolidates all LDAP target settings while
     leveraging flext-ldap for connection configuration to eliminate duplication.
-    Uses FlextConfig.BaseConfigModel for modern Pydantic validation and business rules.
+    Uses FlextConfig.BaseModel for modern Pydantic validation and business rules.
     """
 
     # Use real LDAP connection config from flext-ldap - no duplications
