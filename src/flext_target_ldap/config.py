@@ -12,7 +12,7 @@ import warnings
 from flext_core import (
     FlextConfig,
     FlextResult,
-    FlextModels.Value as FlextDomainBaseModel,
+    FlextModels.Value as FlextModels.Entity,
 )
 from flext_ldap import FlextLdapConnectionConfig
 from pydantic import Field
@@ -90,7 +90,7 @@ class TargetLDAPConfig(FlextConfig.Settings):
     )
 
 
-class LDAPConnectionSettings(FlextDomainBaseModel):
+class LDAPConnectionSettings(FlextModels.Entity):
     """LDAP connection settings model."""
 
     host: str = Field(..., description="LDAP server host")
@@ -104,7 +104,7 @@ class LDAPConnectionSettings(FlextDomainBaseModel):
     receive_timeout: int = Field(30, description="Receive timeout")
 
 
-class LDAPOperationSettings(FlextDomainBaseModel):
+class LDAPOperationSettings(FlextModels.Entity):
     """LDAP operation settings model."""
 
     batch_size: int = Field(1000, description="Batch size")
