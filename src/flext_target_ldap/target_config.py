@@ -23,7 +23,7 @@ from pydantic import ConfigDict, Field
 # Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
 
-class LdapTargetConnectionSettings(FlextModels):
+class LdapTargetConnectionSettings(FlextModels.BaseConfig):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -69,7 +69,7 @@ class LdapTargetConnectionSettings(FlextModels):
             return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextModels):
+class LdapTargetOperationSettings(FlextModels.BaseConfig):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -110,7 +110,7 @@ class LdapTargetOperationSettings(FlextModels):
             return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextModels):
+class LdapTargetMappingSettings(FlextModels.BaseConfig):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: dict[str, str] = Field(
