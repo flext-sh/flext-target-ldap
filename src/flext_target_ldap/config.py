@@ -11,10 +11,10 @@ import warnings
 
 from flext_core import (
     FlextConfig,
+    FlextModels,
     FlextResult,
-    FlextModels.Value as FlextModels.Entity,
 )
-from flext_ldap import FlextLdapConnectionConfig
+from flext_ldap import FlextLDAPConnectionConfig
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
@@ -32,7 +32,7 @@ class TargetLDAPConfig(FlextConfig.Settings):
     """LDAP target configuration using consolidated patterns."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLdapConnectionConfig = Field(
+    connection: FlextLDAPConnectionConfig = Field(
         ...,
         description="LDAP connection configuration",
     )
@@ -90,7 +90,7 @@ class TargetLDAPConfig(FlextConfig.Settings):
     )
 
 
-class LDAPConnectionSettings(FlextModels.Entity):
+class LDAPConnectionSettings(FlextModels):
     """LDAP connection settings model."""
 
     host: str = Field(..., description="LDAP server host")
@@ -104,7 +104,7 @@ class LDAPConnectionSettings(FlextModels.Entity):
     receive_timeout: int = Field(30, description="Receive timeout")
 
 
-class LDAPOperationSettings(FlextModels.Entity):
+class LDAPOperationSettings(FlextModels):
     """LDAP operation settings model."""
 
     batch_size: int = Field(1000, description="Batch size")
@@ -172,7 +172,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(connection_params["timeout"], 30)
 
-        connection_config = FlextLdapConnectionConfig(
+        connection_config = FlextLDAPConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,

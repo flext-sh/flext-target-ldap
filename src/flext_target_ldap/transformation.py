@@ -8,7 +8,7 @@ from pydantic import Field
 logger = FlextLogger(__name__)
 
 
-class TransformationRule(FlextModels.Value):
+class TransformationRule(FlextModels):
     """Transformation rule for data transformation."""
 
     name: str
@@ -30,7 +30,7 @@ class TransformationRule(FlextModels.Value):
             return FlextResult[None].fail(f"Transformation rule validation failed: {e}")
 
 
-class TransformationResult(FlextModels.Value):
+class TransformationResult(FlextModels):
     """Result of data transformation."""
 
     transformed_data: dict[str, object]

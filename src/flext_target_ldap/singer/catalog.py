@@ -11,7 +11,7 @@ logger = FlextLogger(__name__)
 
 
 # Local LDAP catalog classes (no fallbacks - real implementation)
-class SingerLDAPCatalogEntry(FlextModels.Value):
+class SingerLDAPCatalogEntry(FlextModels):
     """Singer LDAP catalog entry using flext-core patterns."""
 
     tap_stream_id: str
@@ -64,8 +64,12 @@ class SingerLDAPCatalogManager:
     def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
-            return FlextResult[SingerLDAPCatalogEntry].fail(f"LDAP stream not found: {stream_name}")
-        return FlextResult[SingerLDAPCatalogEntry].ok(self._catalog_entries[stream_name])
+            return FlextResult[SingerLDAPCatalogEntry].fail(
+                f"LDAP stream not found: {stream_name}"
+            )
+        return FlextResult[SingerLDAPCatalogEntry].ok(
+            self._catalog_entries[stream_name]
+        )
 
 
 # Re-export for backward compatibility
