@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 **Architecture**: Clean Architecture configuration layer
-**Patterns**: FlextConfig, FlextModels.Value, FlextResult validation
+**Patterns**: FlextConfig, FlextModels, FlextResult validation
 **Integration**: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -14,17 +14,16 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import (
-    FlextConfig.BaseModel,
+    FlextModels,
     FlextResult,
-    FlextModels.Value as FlextModels.Entity,
 )
-from flext_ldap import FlextLdapConnectionConfig
+from flext_ldap import FlextLDAPConnectionConfig
 from pydantic import ConfigDict, Field
 
 # Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
 
-class LdapTargetConnectionSettings(FlextModels.Entity):
+class LdapTargetConnectionSettings(FlextModels):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -70,7 +69,7 @@ class LdapTargetConnectionSettings(FlextModels.Entity):
             return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextModels.Entity):
+class LdapTargetOperationSettings(FlextModels):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -111,7 +110,7 @@ class LdapTargetOperationSettings(FlextModels.Entity):
             return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextModels.Entity):
+class LdapTargetMappingSettings(FlextModels):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: dict[str, str] = Field(
@@ -153,7 +152,7 @@ class LdapTargetMappingSettings(FlextModels.Entity):
             return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
-class TargetLdapConfig(FlextConfig.BaseModel):
+class TargetLdapConfig(FlextModels.BaseConfig):
     """Consolidated LDAP target configuration using FlextConfig.BaseModel patterns.
 
     This configuration class consolidates all LDAP target settings while
@@ -162,7 +161,7 @@ class TargetLdapConfig(FlextConfig.BaseModel):
     """
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLdapConnectionConfig = Field(
+    connection: FlextLDAPConnectionConfig = Field(
         ...,
         description="LDAP connection configuration from flext-ldap",
     )
@@ -285,9 +284,9 @@ def validate_ldap_target_config(
                 return [str(v) for v in value]
             return default
 
-        # Extract connection parameters for FlextLdapConnectionConfig
+        # Extract connection parameters for FlextLDAPConnectionConfig
         connection_params = {
-            # Map external dict keys to FlextLdapConnectionConfig fields
+            # Map external dict keys to FlextLDAPConnectionConfig fields
             "server": config.get("host", "localhost"),
             "port": config.get("port", 389),
             "use_ssl": config.get("use_ssl", False),
@@ -304,7 +303,7 @@ def validate_ldap_target_config(
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(connection_params["timeout"], 30)
 
-        connection_config = FlextLdapConnectionConfig(
+        connection_config = FlextLDAPConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,
@@ -395,7 +394,7 @@ def create_default_ldap_target_config(
     """Create default LDAP target configuration with minimal parameters."""
     try:
         # Create connection config
-        connection_config = FlextLdapConnectionConfig(
+        connection_config = FlextLDAPConnectionConfig(
             server=host,
             port=port,
             use_ssl=use_ssl,

@@ -114,7 +114,7 @@ __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 __all__: list[str] = [
     # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
-    "FlextModels.Value",
+    "FlextModels",
     "FlextLogger",
     # === FLEXT-MELTANO RE-EXPORTS ===
     "Sink",

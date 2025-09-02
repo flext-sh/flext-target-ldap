@@ -25,7 +25,7 @@ from flext_core import (
     FlextLogger,
     FlextResult,
 )
-from flext_ldap import FlextLdapApi, FlextLdapConnectionConfig, get_ldap_api
+from flext_ldap import FlextLDAPApi, FlextLDAPConnectionConfig, get_ldap_api
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.target_config import TargetLdapConfig
@@ -82,12 +82,12 @@ class LdapTargetClient:
 
     def __init__(
         self,
-        config: FlextLdapConnectionConfig | dict[str, object],
+        config: FlextLDAPConnectionConfig | dict[str, object],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLdapConnectionConfig
-            self.config = FlextLdapConnectionConfig(
+            # Convert dict to proper FlextLDAPConnectionConfig
+            self.config = FlextLDAPConnectionConfig(
                 server=str(
                     config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
                 ),
@@ -104,12 +104,12 @@ class LdapTargetClient:
             self._password: str = str(config.get("password", ""))
         else:
             self.config = config
-            # Default authentication credentials when using FlextLdapConnectionConfig directly
+            # Default authentication credentials when using FlextLDAPConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
 
         # Create API instance using flext-ldap
-        self._api: FlextLdapApi = get_ldap_api()
+        self._api: FlextLDAPApi = get_ldap_api()
         self._current_session_id: str | None = None
 
         logger.info(
@@ -335,7 +335,7 @@ class LdapTargetClient:
                 )
 
             if result.is_success and result.data:
-                # Convert FlextLdapEntry to LdapSearchEntry for backward compatibility
+                # Convert FlextLDAPEntry to LdapSearchEntry for backward compatibility
                 entries = []
                 for flext_entry in result.data:
                     compat_entry = LdapSearchEntry(
