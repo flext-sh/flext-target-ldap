@@ -23,7 +23,7 @@ from pydantic import ConfigDict, Field
 # Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
 
-class LdapTargetConnectionSettings(FlextModels.BaseConfig):
+class LdapTargetConnectionSettings(FlextModels.Config):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -69,7 +69,7 @@ class LdapTargetConnectionSettings(FlextModels.BaseConfig):
             return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextModels.BaseConfig):
+class LdapTargetOperationSettings(FlextModels.Config):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -110,7 +110,7 @@ class LdapTargetOperationSettings(FlextModels.BaseConfig):
             return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextModels.BaseConfig):
+class LdapTargetMappingSettings(FlextModels.Config):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: dict[str, str] = Field(
@@ -152,7 +152,7 @@ class LdapTargetMappingSettings(FlextModels.BaseConfig):
             return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
-class TargetLdapConfig(FlextModels.BaseConfig):
+class TargetLdapConfig(FlextModels.Config):
     """Consolidated LDAP target configuration using FlextConfig.BaseModel patterns.
 
     This configuration class consolidates all LDAP target settings while
