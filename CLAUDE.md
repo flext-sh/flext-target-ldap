@@ -39,7 +39,7 @@ This project follows Clean Architecture and Domain-Driven Design patterns using 
 ```bash
 make validate    # Complete validation: lint + type + security + test (MUST PASS)
 make check       # Essential checks: lint + type only
-make test        # Run tests with 90% coverage requirement  
+make test        # Run tests with 90% coverage requirement
 make lint        # Ruff linting with ALL rules enabled
 make type-check  # Strict MyPy type checking
 make security    # Security scans: bandit + pip-audit
@@ -58,7 +58,7 @@ make install-dev # Install with dev dependencies
 ```bash
 make test                 # All tests with coverage (90% minimum)
 make test-unit           # Unit tests only (pytest -m "not integration")
-make test-integration    # Integration tests only (pytest -m integration)  
+make test-integration    # Integration tests only (pytest -m integration)
 make test-singer         # Singer protocol tests (pytest -m singer)
 make test-fast           # Run tests without coverage
 make coverage-html       # Generate HTML coverage report
@@ -77,7 +77,7 @@ make load                # Run target data loading with config/state files
 
 ```bash
 make ldap-connect        # Test LDAP connection
-make ldap-write-test     # Test LDAP write operations  
+make ldap-write-test     # Test LDAP write operations
 make ldap-schema         # Validate LDAP schema
 ```
 
@@ -121,7 +121,7 @@ docker-compose up -d
 ```bash
 pytest tests/ -v                      # All tests with verbose output
 pytest tests/ -m unit                 # Unit tests only
-pytest tests/ -m integration          # Integration tests only  
+pytest tests/ -m integration          # Integration tests only
 pytest tests/ -m singer               # Singer protocol tests only
 pytest tests/ -m "not slow"           # Exclude slow tests
 pytest tests/ --lf                    # Last failed tests only
@@ -144,13 +144,15 @@ target-ldap --version
 ### Stream Processing
 
 The target supports three main stream types:
+
 - **users**: Maps to LDAP user entries (uid-based DNs)
-- **groups**: Maps to LDAP group entries (cn-based DNs)  
+- **groups**: Maps to LDAP group entries (cn-based DNs)
 - **organizational_units**: Maps to LDAP OU entries
 
 ### Configuration
 
 Configuration expects standard Singer format with LDAP-specific settings:
+
 - `host`: LDAP server hostname (required)
 - `base_dn`: Base DN for operations (required)
 - `port`: LDAP server port (default: 389)
@@ -167,7 +169,7 @@ from flext_core import FlextResult
 
 def orchestrate_data_loading(records: list[dict]) -> FlextResult[dict]:
     try:
-        # Processing logic  
+        # Processing logic
         return FlextResult[None].ok({"processed": len(records)})
     except Exception as e:
         return FlextResult[None].fail(f"Loading failed: {e}")
@@ -192,9 +194,9 @@ Stream-specific sinks inherit from base classes:
 from flext_target_ldap.sinks import LDAPBaseSink
 
 class UsersSink(LDAPBaseSink):
-    # Stream: "users" 
+    # Stream: "users"
     # DN pattern: uid={username},{base_dn}
-    
+
 class GroupsSink(LDAPBaseSink):
     # Stream: "groups"
     # DN pattern: cn={name},{base_dn}
@@ -212,7 +214,7 @@ class GroupsSink(LDAPBaseSink):
 
 ### Code Quality Tools Configuration
 
-- **Ruff**: Python 3.13, extends `../.ruff-shared.toml` 
+- **Ruff**: Python 3.13, extends `../.ruff-shared.toml`
 - **MyPy**: Strict mode with Pydantic plugin, covers `src/` and `tests/`
 - **Pytest**: Asyncio mode, strict markers, 8.0+ minimum version
 - **Coverage**: Branch coverage, 90% minimum threshold
@@ -242,6 +244,7 @@ class GroupsSink(LDAPBaseSink):
 ### Common Development Issues
 
 **LDAP Connection Testing:**
+
 ```bash
 make ldap-connect       # Test basic LDAP connectivity
 docker-compose logs openldap-target  # Check target server logs
@@ -249,6 +252,7 @@ docker-compose logs openldap-source  # Check source server logs
 ```
 
 **Test Failures:**
+
 ```bash
 make test-fast          # Quick test run without coverage
 pytest tests/ -x -vvs   # Stop on first failure with detailed output
@@ -256,12 +260,14 @@ pytest tests/ --lf      # Re-run only last failed tests
 ```
 
 **Type Checking Issues:**
+
 ```bash
 make type-check         # Run MyPy with strict configuration
 poetry run mypy src/ --show-error-codes  # Show specific error codes
 ```
 
 **Build and Dependency Issues:**
+
 ```bash
 make clean              # Clean build artifacts and caches
 make reset              # Deep clean including virtual environment
