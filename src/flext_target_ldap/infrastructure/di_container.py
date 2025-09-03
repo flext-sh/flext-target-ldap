@@ -12,14 +12,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextContainer, get_flext_container
+from flext_core import FlextContainer
 
-get_flext_target_ldap_container = get_flext_container
+get_flext_target_ldap_container = FlextContainer.get_global()
 
 
 def get_flext_target_ldap_service(service_name: str) -> object:
     """Get service from FLEXT DI container."""
-    return FlextContainer.get_global().get(service_name)
+    return get_flext_target_ldap_container.get(service_name)
 
 
 # Type assertion for the configuration function
