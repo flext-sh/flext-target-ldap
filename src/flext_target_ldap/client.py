@@ -312,7 +312,7 @@ class LDAPClient:
             )
             if search_result.is_success and search_result.data is not None:
                 return FlextResult[bool].ok(len(search_result.data) > 0)
-            return FlextResult[bool].ok(False)
+            return FlextResult[bool].ok(data=False)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to check entry existence: %s", dn)
