@@ -1,6 +1,18 @@
-"""Singer LDAP catalog management - consolidated in flext-meltano."""
+"""Singer LDAP catalog management - consolidated in flext-meltano.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 from typing import ClassVar
 
@@ -14,12 +26,22 @@ logger = FlextLogger(__name__)
 class SingerLDAPCatalogEntry(FlextModels):
     """Singer LDAP catalog entry using flext-core patterns."""
 
+
+from flext_core import FlextLogger, FlextModels
+
+logger = FlextLogger(__name__)
+
+
+# Local LDAP catalog classes (no fallbacks - real implementation)
+class SingerLDAPCatalogEntry(FlextModels):
+    """Singer LDAP catalog entry using flext-core patterns."""
+
     tap_stream_id: str
     stream: str
-    stream_schema: dict[str, object] = Field(..., description="Singer stream schema")
-    metadata: list[dict[str, object]] = Field(default_factory=list)
-    key_properties: ClassVar[list[str]] = []
-    bookmark_properties: ClassVar[list[str]] = []
+    stream_schema: FlextTypes.Core.Dict = Field(..., description="Singer stream schema")
+    metadata: list[FlextTypes.Core.Dict] = Field(default_factory=list)
+    key_properties: ClassVar[FlextTypes.Core.StringList] = []
+    bookmark_properties: ClassVar[FlextTypes.Core.StringList] = []
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate catalog entry business rules."""
@@ -45,7 +67,7 @@ class SingerLDAPCatalogManager:
     def add_stream(
         self,
         stream_name: str,
-        schema: dict[str, object],
+        schema: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Add LDAP stream to catalog."""
         try:
@@ -73,7 +95,7 @@ class SingerLDAPCatalogManager:
 
 
 # Re-export for backward compatibility
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "SingerLDAPCatalogEntry",
     "SingerLDAPCatalogManager",
 ]

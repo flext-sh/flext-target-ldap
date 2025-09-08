@@ -1,4 +1,8 @@
-"""Pytest configuration and fixtures for target-ldap tests."""
+"""Pytest configuration and fixtures for target-ldap tests.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -6,12 +10,13 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
+from flext_core import FlextTypes
 
 from flext_target_ldap import LDAPClient
 
 
 @pytest.fixture
-def mock_ldap_config() -> dict[str, object]:
+def mock_ldap_config() -> FlextTypes.Core.Dict:
     """Create mock LDAP configuration for testing."""
     return {
         "host": "test.ldap.com",
@@ -36,7 +41,7 @@ def mock_ldap_config() -> dict[str, object]:
 
 
 @pytest.fixture
-def sample_user_record() -> dict[str, object]:
+def sample_user_record() -> FlextTypes.Core.Dict:
     """Create sample user record for testing."""
     return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -50,7 +55,7 @@ def sample_user_record() -> dict[str, object]:
 
 
 @pytest.fixture
-def sample_group_record() -> dict[str, object]:
+def sample_group_record() -> FlextTypes.Core.Dict:
     """Create sample group record for testing."""
     return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -65,7 +70,7 @@ def sample_group_record() -> dict[str, object]:
 
 
 @pytest.fixture
-def sample_ou_record() -> dict[str, object]:
+def sample_ou_record() -> FlextTypes.Core.Dict:
     """Create sample organizational unit record for testing."""
     return {
         "dn": "ou=engineering,dc=test,dc=com",
@@ -76,7 +81,7 @@ def sample_ou_record() -> dict[str, object]:
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record: dict[str, object]) -> str:
+def singer_message_record(sample_user_record: FlextTypes.Core.Dict) -> str:
     """Create Singer RECORD message for testing."""
     message = {
         "type": "RECORD",
@@ -139,7 +144,7 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: dict[str, object]) -> MagicMock:
+def mock_target(mock_ldap_config: FlextTypes.Core.Dict) -> MagicMock:
     """Create mock target for testing."""
     target = MagicMock()
     target.config = mock_ldap_config

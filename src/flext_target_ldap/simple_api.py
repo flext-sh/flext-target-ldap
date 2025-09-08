@@ -3,9 +3,21 @@
 REFACTORED:
 Provides convenient functions for common LDAP operations.
 Uses flext-core patterns for consistent error handling.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 from flext_core import (
     FlextResult,
@@ -15,7 +27,7 @@ from flext_ldap import FlextLDAPConnectionConfig, get_ldap_api
 from flext_target_ldap.target import TargetLDAP
 
 
-def create_ldap_target(config: dict[str, object]) -> FlextResult[object]:
+def create_ldap_target(config: FlextTypes.Core.Dict) -> FlextResult[object]:
     """Create LDAP target with configuration."""
     try:
         target = TargetLDAP(config=config)
@@ -25,8 +37,8 @@ def create_ldap_target(config: dict[str, object]) -> FlextResult[object]:
 
 
 def load_users_to_ldap(
-    users: list[dict[str, object]],
-    config: dict[str, object],
+    users: list[FlextTypes.Core.Dict],
+    config: FlextTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
     target_result = create_ldap_target(config)
@@ -55,8 +67,8 @@ def load_users_to_ldap(
 
 
 def load_groups_to_ldap(
-    groups: list[dict[str, object]],
-    config: dict[str, object],
+    groups: list[FlextTypes.Core.Dict],
+    config: FlextTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
     target_result = create_ldap_target(config)
@@ -84,7 +96,7 @@ def load_groups_to_ldap(
         return FlextResult[int].fail(f"Failed to load groups: {e}")
 
 
-def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
+def test_ldap_connection(config: FlextTypes.Core.Dict) -> FlextResult[bool]:
     """Test LDAP connection with given configuration."""
     try:
         # Validate connection config by creating it

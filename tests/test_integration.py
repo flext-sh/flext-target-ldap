@@ -1,9 +1,15 @@
-"""Integration tests for target-ldap."""
+"""Integration tests for target-ldap.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
+
+from flext_core import FlextTypes
 
 object
 from unittest.mock import MagicMock, Mock, patch
@@ -22,7 +28,9 @@ class TestTargetLDAPIntegration:
         return CliRunner()
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
+    def config_file(
+        self, tmp_path: Path, mock_ldap_config: FlextTypes.Core.Dict
+    ) -> Path:
         config_path = tmp_path / "config.json"
         with config_path.open("w", encoding="utf-8") as f:
             json.dump(mock_ldap_config, f)
@@ -203,7 +211,7 @@ class TestTargetLDAPIntegration:
         runner: CliRunner,
         config_file: Path,
         tmp_path: Path,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> None:
         # Add DN template to config
         mock_ldap_config["dn_templates"] = {

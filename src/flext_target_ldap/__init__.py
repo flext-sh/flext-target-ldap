@@ -1,6 +1,17 @@
-"""Enterprise Singer Target for LDAP directory data loading."""
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
 
 from __future__ import annotations
+from flext_core import FlextTypes
+
+
+"""Enterprise Singer Target for LDAP directory data loading."""
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 import importlib.metadata
 
@@ -111,7 +122,7 @@ except importlib.metadata.PackageNotFoundError:
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 # Complete public API exports (organized by category)
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
     "FlextModels",

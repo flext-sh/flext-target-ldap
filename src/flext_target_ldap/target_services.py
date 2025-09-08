@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """LDAP Target Services - PEP8 Consolidation.
 
 This module consolidates LDAP target application services with descriptive PEP8 names,
@@ -11,7 +19,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Protocol
@@ -36,14 +43,14 @@ logger = FlextLogger(__name__)
 class LdapTargetServiceProtocol(Protocol):
     """Protocol for LDAP target services."""
 
-    async def create_target(self, config: dict[str, object]) -> FlextResult[object]:
+    async def create_target(self, config: FlextTypes.Core.Dict) -> FlextResult[object]:
         """Create LDAP target instance."""
         ...
 
     async def load_records(
         self,
-        records: list[dict[str, object]],
-        config: dict[str, object],
+        records: list[FlextTypes.Core.Dict],
+        config: FlextTypes.Core.Dict,
         stream_type: str = "users",
     ) -> FlextResult[int]:
         """Load records to LDAP."""
@@ -55,9 +62,9 @@ class LdapTransformationServiceProtocol(Protocol):
 
     def transform_record(
         self,
-        record: dict[str, object],
+        record: FlextTypes.Core.Dict,
         mappings: list[LdapAttributeMappingModel],
-        object_classes: list[str],
+        object_classes: FlextTypes.Core.StringList,
         base_dn: str,
     ) -> FlextResult[LdapTransformationResultModel]:
         """Transform Singer record to LDAP entry."""
@@ -76,9 +83,9 @@ class LdapOrchestrationServiceProtocol(Protocol):
 
     async def orchestrate_data_loading(
         self,
-        records: list[dict[str, object]],
+        records: list[FlextTypes.Core.Dict],
         config: TargetLdapConfig,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Orchestrate batch data loading."""
         ...
 
@@ -121,7 +128,7 @@ class LdapConnectionService:
             logger.exception("Connection test failed")
             return FlextResult[bool].fail(f"Connection test error: {e}")
 
-    def get_connection_info(self) -> dict[str, object]:
+    def get_connection_info(self) -> FlextTypes.Core.Dict:
         """Get connection information for logging/monitoring."""
         return {
             "host": self._config.connection.server,
@@ -146,19 +153,19 @@ class LdapTransformationService:
 
     def transform_record(
         self,
-        record: dict[str, object],
+        record: FlextTypes.Core.Dict,
         mappings: list[LdapAttributeMappingModel],
-        object_classes: list[str],
+        object_classes: FlextTypes.Core.StringList,
         base_dn: str,
     ) -> FlextResult[LdapTransformationResultModel]:
         """Transform Singer record to LDAP entry."""
         try:
             start_time = datetime.now(UTC)
-            transformation_errors: list[str] = []
+            transformation_errors: FlextTypes.Core.StringList = []
             applied_mappings: list[LdapAttributeMappingModel] = []
 
             # Build LDAP attributes from mappings
-            ldap_attributes: dict[str, list[str]] = {}
+            ldap_attributes: dict[str, FlextTypes.Core.StringList] = {}
 
             for mapping in mappings:
                 try:
@@ -263,8 +270,8 @@ class LdapTransformationService:
 
     def _build_distinguished_name(
         self,
-        record: dict[str, object],
-        object_classes: list[str],
+        record: FlextTypes.Core.Dict,
+        object_classes: FlextTypes.Core.StringList,
         base_dn: str,
     ) -> str:
         """Build DN based on record and object classes."""
@@ -297,7 +304,7 @@ class LdapTransformationService:
         timestamp = int(datetime.now(UTC).timestamp())
         return f"cn=entry-{timestamp},{base_dn}"
 
-    def _determine_entry_type(self, object_classes: list[str]) -> str:
+    def _determine_entry_type(self, object_classes: FlextTypes.Core.StringList) -> str:
         """Determine entry type from object classes."""
         oc_lower = [oc.lower() for oc in object_classes]
 
@@ -390,7 +397,7 @@ class LdapTargetOrchestrator:
 
     def __init__(
         self,
-        config: dict[str, object] | TargetLdapConfig | None = None,
+        config: FlextTypes.Core.Dict | TargetLdapConfig | None = None,
     ) -> None:
         """Initialize LDAP target orchestrator."""
         if isinstance(config, dict):
@@ -427,9 +434,9 @@ class LdapTargetOrchestrator:
 
     async def orchestrate_data_loading(
         self,
-        records: list[dict[str, object]],
+        records: list[FlextTypes.Core.Dict],
         config: TargetLdapConfig | None = None,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Orchestrate data loading to LDAP target."""
         try:
             logger.info("Starting LDAP data loading orchestration")
@@ -437,7 +444,7 @@ class LdapTargetOrchestrator:
             # Use provided config or stored config
             working_config = config or self._typed_config
             if not working_config:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[FlextTypes.Core.Dict].fail(
                     "No configuration available for orchestration"
                 )
 
@@ -447,7 +454,7 @@ class LdapTargetOrchestrator:
             # Process records in batches
             batch_size = working_config.batch_size
             processed_count = 0
-            transformation_errors: list[str] = []
+            transformation_errors: FlextTypes.Core.StringList = []
 
             for i in range(0, len(records), batch_size):
                 batch = records[i : i + batch_size]
@@ -493,11 +500,11 @@ class LdapTargetOrchestrator:
                 processed_count,
                 len(records),
             )
-            return FlextResult[dict[str, object]].ok(result)
+            return FlextResult[FlextTypes.Core.Dict].ok(result)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Data loading orchestration failed: {e}"
             )
 
@@ -550,7 +557,7 @@ class LdapTargetApiService:
 
     async def create_ldap_target(
         self,
-        config: dict[str, object],
+        config: FlextTypes.Core.Dict,
     ) -> FlextResult[object]:
         """Create LDAP target with configuration."""
         try:
@@ -561,8 +568,8 @@ class LdapTargetApiService:
 
     async def load_users_to_ldap(
         self,
-        users: list[dict[str, object]],
-        config: dict[str, object],
+        users: list[FlextTypes.Core.Dict],
+        config: FlextTypes.Core.Dict,
     ) -> FlextResult[int]:
         """Load user records to LDAP."""
         target_result = await self.create_ldap_target(config)
@@ -594,8 +601,8 @@ class LdapTargetApiService:
 
     async def load_groups_to_ldap(
         self,
-        groups: list[dict[str, object]],
-        config: dict[str, object],
+        groups: list[FlextTypes.Core.Dict],
+        config: FlextTypes.Core.Dict,
     ) -> FlextResult[int]:
         """Load group records to LDAP."""
         target_result = await self.create_ldap_target(config)
@@ -627,7 +634,7 @@ class LdapTargetApiService:
 
     async def test_ldap_connection(
         self,
-        config: dict[str, object],
+        config: FlextTypes.Core.Dict,
     ) -> FlextResult[bool]:
         """Test LDAP connection with given configuration."""
         try:
@@ -655,28 +662,28 @@ _default_api_service = LdapTargetApiService()
 
 
 # Convenience function aliases for backward compatibility
-async def create_ldap_target(config: dict[str, object]) -> FlextResult[object]:
+async def create_ldap_target(config: FlextTypes.Core.Dict) -> FlextResult[object]:
     """Create LDAP target with configuration."""
     return await _default_api_service.create_ldap_target(config)
 
 
 async def load_users_to_ldap(
-    users: list[dict[str, object]],
-    config: dict[str, object],
+    users: list[FlextTypes.Core.Dict],
+    config: FlextTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
     return await _default_api_service.load_users_to_ldap(users, config)
 
 
 async def load_groups_to_ldap(
-    groups: list[dict[str, object]],
-    config: dict[str, object],
+    groups: list[FlextTypes.Core.Dict],
+    config: FlextTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
     return await _default_api_service.load_groups_to_ldap(groups, config)
 
 
-async def test_ldap_connection(config: dict[str, object]) -> FlextResult[bool]:
+async def test_ldap_connection(config: FlextTypes.Core.Dict) -> FlextResult[bool]:
     """Test LDAP connection with given configuration."""
     return await _default_api_service.test_ldap_connection(config)
 

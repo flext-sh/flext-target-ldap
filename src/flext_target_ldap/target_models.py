@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """LDAP Target Models - PEP8 Consolidation.
 
 This module consolidates LDAP target domain models with descriptive PEP8 names,
@@ -11,7 +19,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -125,11 +132,11 @@ class LdapEntryModel(FlextModels):
         min_length=1,
         max_length=1000,
     )
-    object_classes: list[str] = Field(
+    object_classes: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="LDAP object classes",
     )
-    attributes: dict[str, list[str]] = Field(
+    attributes: dict[str, FlextTypes.Core.StringList] = Field(
         default_factory=dict,
         description="LDAP attributes with values",
     )
@@ -145,7 +152,9 @@ class LdapEntryModel(FlextModels):
 
     @validator("object_classes")
     @classmethod
-    def validate_object_classes(cls, v: list[str]) -> list[str]:
+    def validate_object_classes(
+        cls, v: FlextTypes.Core.StringList
+    ) -> FlextTypes.Core.StringList:
         """Validate object classes contain 'top'."""
         if "top" not in v:
             v.append("top")
@@ -154,7 +163,7 @@ class LdapEntryModel(FlextModels):
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate LDAP entry business rules."""
         try:
-            errors: list[str] = []
+            errors: FlextTypes.Core.StringList = []
 
             # Validate DN format
             if "=" not in self.distinguished_name or "," not in self.distinguished_name:
@@ -203,7 +212,7 @@ class LdapEntryModel(FlextModels):
         """Check if entry has a specific object class."""
         return object_class.lower() in [oc.lower() for oc in self.object_classes]
 
-    def get_attribute_values(self, attribute_name: str) -> list[str]:
+    def get_attribute_values(self, attribute_name: str) -> FlextTypes.Core.StringList:
         """Get values for a specific attribute."""
         return self.attributes.get(attribute_name, [])
 
@@ -215,7 +224,7 @@ class LdapTransformationResultModel(FlextModels):
     for LDAP target operations.
     """
 
-    original_record: dict[str, object] = Field(
+    original_record: FlextTypes.Core.Dict = Field(
         ...,
         description="Original Singer record before transformation",
     )
@@ -227,7 +236,7 @@ class LdapTransformationResultModel(FlextModels):
         default_factory=list,
         description="Attribute mappings that were applied",
     )
-    transformation_errors: list[str] = Field(
+    transformation_errors: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="object errors encountered during transformation",
     )
@@ -435,7 +444,7 @@ class LdapOperationStatisticsModel(FlextModels):
         description="Total duration of all operations in milliseconds",
         ge=0.0,
     )
-    error_messages: list[str] = Field(
+    error_messages: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="Collected error messages",
     )
@@ -525,7 +534,7 @@ class LdapOperationStatisticsModel(FlextModels):
 
         return self.model_copy(update=updates)
 
-    def get_recent_errors(self, limit: int = 10) -> list[str]:
+    def get_recent_errors(self, limit: int = 10) -> FlextTypes.Core.StringList:
         """Get most recent error messages."""
         return self.error_messages[-limit:] if self.error_messages else []
 

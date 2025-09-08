@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """LDAP client for flext-target-ldap using flext-ldap infrastructure.
 
 This module provides a backward-compatible LDAP client interface that delegates
@@ -8,7 +16,6 @@ Copyright (c) 2025 Flext. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 import asyncio
 from collections.abc import Generator
@@ -30,7 +37,7 @@ logger = FlextLogger(__name__)
 class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
-    def __init__(self, dn: str, attributes: dict[str, object]) -> None:
+    def __init__(self, dn: str, attributes: FlextTypes.Core.Dict) -> None:
         self.dn = dn
         self.attributes = attributes
 
@@ -40,11 +47,15 @@ class LDAPClient:
 
     This class provides compatibility with existing flext-target-ldap code while
     delegating all LDAP operations to the enterprise-grade flext-ldap library.
+
+    Returns:
+            object: Description of return value.
+
     """
 
     def __init__(
         self,
-        config: FlextLDAPConnectionConfig | dict[str, object],
+        config: FlextLDAPConnectionConfig | FlextTypes.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
@@ -123,6 +134,10 @@ class LDAPClient:
         """Test connectivity via ldap3 if available; otherwise use flext-ldap API.
 
         This method is synchronous to match legacy tests.
+
+        Returns:
+            FlextResult[str]:: Description of return value.
+
         """
         try:
             protocol = "ldaps" if self.config.use_ssl else "ldap"
@@ -179,6 +194,10 @@ class LDAPClient:
         """Get LDAP connection context manager using ldap3 if available.
 
         Falls back to a MagicMock-compatible connection to satisfy tests.
+
+        Returns:
+            _GeneratorContextManager[MagicMock]:: Description of return value.
+
         """
 
         @contextmanager
@@ -217,8 +236,8 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, object],
-        object_classes: list[str] | None = None,
+        attributes: FlextTypes.Core.Dict,
+        object_classes: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -240,7 +259,7 @@ class LDAPClient:
             logger.exception("Failed to add entry %s", dn)
             return FlextResult[bool].fail(f"Add entry failed: {e}")
 
-    def modify_entry(self, dn: str, changes: dict[str, object]) -> FlextResult[bool]:
+    def modify_entry(self, dn: str, changes: FlextTypes.Core.Dict) -> FlextResult[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
@@ -268,7 +287,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: list[str] | None = None,
+        attributes: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[list[LDAPSearchEntry]]:
         """Search LDAP entries using ldap3-compatible connection for tests."""
         try:
@@ -286,7 +305,7 @@ class LDAPClient:
                 for raw in raw_entries:
                     dn = getattr(raw, "entry_dn", "")
                     attr_names = getattr(raw, "entry_attributes", []) or []
-                    attrs: dict[str, object] = {}
+                    attrs: FlextTypes.Core.Dict = {}
                     for name in attr_names:
                         try:
                             attrs[name] = list(getattr(raw, name))
@@ -321,7 +340,7 @@ class LDAPClient:
     def get_entry(
         self,
         dn: str,
-        attributes: list[str] | None = None,
+        attributes: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[LDAPSearchEntry | None]:
         """Get LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -353,7 +372,7 @@ class LDAPClient:
 LDAPConnectionConfig = FlextLDAPConnectionConfig
 LDAPEntry = FlextLDAPEntry
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",

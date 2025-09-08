@@ -3,9 +3,21 @@
 REFACTORED:
 Uses flext-core patterns for declarative configuration.
 Zero tolerance for code duplication.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 import warnings
 
@@ -74,11 +86,11 @@ class TargetLDAPConfig(FlextConfig.Settings):
     )
 
     # Mapping and transformation
-    attribute_mapping: dict[str, str] = Field(
+    attribute_mapping: FlextTypes.Core.Headers = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: list[str] = Field(
+    object_classes: FlextTypes.Core.StringList = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -126,7 +138,7 @@ class LDAPOperationSettings(FlextModels):
 # Function removed - not used anywhere and caused mypy errors due to complex field typing
 
 
-def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPConfig]:
+def validate_ldap_config(config: FlextTypes.Core.Dict) -> FlextResult[TargetLDAPConfig]:
     """Validate LDAP configuration."""
     try:
 
@@ -184,7 +196,7 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
         # Build TargetLDAPConfig explicitly
         raw_attr_map = config.get("attribute_mapping")
         if isinstance(raw_attr_map, dict):
-            attribute_mapping: dict[str, str] = {
+            attribute_mapping: FlextTypes.Core.Headers = {
                 str(k): str(v) for k, v in raw_attr_map.items()
             }
         else:
@@ -192,7 +204,9 @@ def validate_ldap_config(config: dict[str, object]) -> FlextResult[TargetLDAPCon
 
         raw_object_classes = config.get("object_classes")
         if isinstance(raw_object_classes, list):
-            object_classes: list[str] = [str(v) for v in raw_object_classes]
+            object_classes: FlextTypes.Core.StringList = [
+                str(v) for v in raw_object_classes
+            ]
         else:
             object_classes = ["top"]
 

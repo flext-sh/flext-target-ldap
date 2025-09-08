@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """LDAP Target Configuration - PEP8 Consolidation.
 
 This module consolidates all LDAP target configuration classes with descriptive PEP8 names,
@@ -11,7 +19,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 from flext_core import (
     FlextModels,
@@ -113,11 +120,11 @@ class LdapTargetOperationSettings(FlextModels.Config):
 class LdapTargetMappingSettings(FlextModels.Config):
     """LDAP attribute mapping and transformation settings."""
 
-    attribute_mapping: dict[str, str] = Field(
+    attribute_mapping: FlextTypes.Core.Headers = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: list[str] = Field(
+    object_classes: FlextTypes.Core.StringList = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -196,11 +203,11 @@ class TargetLdapConfig(FlextModels.Config):
     )
 
     # Mapping and transformation
-    attribute_mapping: dict[str, str] = Field(
+    attribute_mapping: FlextTypes.Core.Headers = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: list[str] = Field(
+    object_classes: FlextTypes.Core.StringList = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -250,7 +257,7 @@ class TargetLdapConfig(FlextModels.Config):
 
 
 def validate_ldap_target_config(
-    config: dict[str, object],
+    config: FlextTypes.Core.Dict,
 ) -> FlextResult[TargetLdapConfig]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
@@ -279,7 +286,9 @@ def validate_ldap_target_config(
         def _to_str(value: object, default: str = "") -> str:
             return str(value) if value is not None else default
 
-        def _to_str_list(value: object, default: list[str]) -> list[str]:
+        def _to_str_list(
+            value: object, default: FlextTypes.Core.StringList
+        ) -> FlextTypes.Core.StringList:
             if isinstance(value, list):
                 return [str(v) for v in value]
             return default
@@ -342,7 +351,7 @@ def validate_ldap_target_config(
         )
 
         raw_attr_map = config.get("attribute_mapping", {})
-        attribute_mapping: dict[str, str] = (
+        attribute_mapping: FlextTypes.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map.items()}
             if isinstance(raw_attr_map, dict)
             else {}
