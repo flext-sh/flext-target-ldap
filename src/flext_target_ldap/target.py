@@ -3,9 +3,21 @@
 REFACTORED:
 Uses flext-core configuration patterns for robust LDAP target implementation.
 Zero tolerance for code duplication.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 import json
 import sys
@@ -42,7 +54,7 @@ class TargetLDAP(Target):
     def __init__(
         self,
         *,
-        config: dict[str, object] | None = None,
+        config: FlextTypes.Core.Dict | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -60,7 +72,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> dict[str, object]:
+    def singer_catalog(self) -> FlextTypes.Core.Dict:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -212,7 +224,7 @@ def _target_ldap_click(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
         # Load minimal config if provided
-        cfg: dict[str, object] = {}
+        cfg: FlextTypes.Core.Dict = {}
         if config:
             try:
                 with Path(config).open(encoding="utf-8") as f:

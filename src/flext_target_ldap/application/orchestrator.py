@@ -2,9 +2,21 @@
 
 This module provides application-level orchestration for LDAP target operations
 using flext-core patterns.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 from flext_core import FlextLogger, FlextResult
 
@@ -14,11 +26,14 @@ logger: FlextLogger = FlextLogger(__name__)
 class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    def __init__(self, config: dict[str, object] | None = None) -> None:
+    def __init__(self, config: FlextTypes.Core.Dict | None = None) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
             config: Configuration dictionary
+
+        Returns:
+            object: Description of return value.
 
         """
         self.config = config or {}
@@ -26,8 +41,8 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[dict[str, object]],
-    ) -> FlextResult[dict[str, object]]:
+        records: list[FlextTypes.Core.Dict],
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Orchestrate data loading to LDAP target.
 
         Args:
@@ -52,11 +67,11 @@ class LDAPTargetOrchestrator:
             }
 
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return FlextResult[dict[str, object]].ok(result)
+            return FlextResult[FlextTypes.Core.Dict].ok(result)
 
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Data loading orchestration failed: {e}"
             )
 
@@ -79,4 +94,4 @@ class LDAPTargetOrchestrator:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: list[str] = ["LDAPTargetOrchestrator"]
+__all__: FlextTypes.Core.StringList = ["LDAPTargetOrchestrator"]

@@ -1,9 +1,30 @@
-"""Data transformation engine for LDAP target."""
+"""Data transformation engine for LDAP target.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
+
 from flext_core import FlextLogger, FlextModels, FlextResult
 from pydantic import Field
+
+logger = FlextLogger(__name__)
+
+
+class TransformationRule(FlextModels):
+    """Transformation rule for data transformation."""
+
+
+from flext_core import FlextLogger, FlextModels
 
 logger = FlextLogger(__name__)
 
@@ -33,8 +54,8 @@ class TransformationRule(FlextModels):
 class TransformationResult(FlextModels):
     """Result of data transformation."""
 
-    transformed_data: dict[str, object]
-    applied_rules: list[str] = Field(default_factory=list)
+    transformed_data: FlextTypes.Core.Dict
+    applied_rules: FlextTypes.Core.StringList = Field(default_factory=list)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate transformation result business rules."""
@@ -57,11 +78,13 @@ class DataTransformationEngine:
         """Initialize transformation engine."""
         self.rules = rules
 
-    def transform(self, data: dict[str, object]) -> FlextResult[TransformationResult]:
+    def transform(
+        self, data: FlextTypes.Core.Dict
+    ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:
             transformed_data = data.copy()
-            applied_rules: list[str] = []
+            applied_rules: FlextTypes.Core.StringList = []
 
             for rule in self.rules:
                 # Simple string replacement in values
@@ -103,9 +126,9 @@ class MigrationValidator:
 
     def validate(
         self,
-        data: dict[str, object] | str,
-        attributes: dict[str, object] | None = None,
-        object_classes: list[str] | None = None,
+        data: FlextTypes.Core.Dict | str,
+        attributes: FlextTypes.Core.Dict | None = None,
+        object_classes: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[bool]:
         """Validate migration data."""
         try:
@@ -148,8 +171,8 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: dict[str, object],
-        object_classes: list[str],
+        attributes: FlextTypes.Core.Dict,
+        object_classes: FlextTypes.Core.StringList,
     ) -> FlextResult[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)

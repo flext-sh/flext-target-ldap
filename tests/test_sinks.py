@@ -1,10 +1,15 @@
-"""Tests for target-ldap sinks."""
+"""Tests for target-ldap sinks.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from unittest.mock import MagicMock
 
 import pytest
+from flext_core import FlextTypes
 
 from flext_target_ldap import (
     GroupsSink,
@@ -21,7 +26,7 @@ class TestLDAPBaseSink:
     def sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> LDAPBaseSink:
         schema = {
             "properties": {
@@ -64,7 +69,7 @@ class TestLDAPBaseSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
-        record: dict[str, object] = {}
+        record: FlextTypes.Core.Dict = {}
         classes = sink.get_object_classes(record)
         if classes != ["top"]:
             msg: str = f"Expected {['top']}, got {classes}"
@@ -115,7 +120,7 @@ class TestUsersSink:
     def users_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> UsersSink:
         mock_target.config.update(
             {
@@ -197,7 +202,7 @@ class TestUsersSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, users_sink: UsersSink) -> None:
-        record: dict[str, object] = {}
+        record: FlextTypes.Core.Dict = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["inetOrgPerson", "organizationalPerson", "person", "top"]:
             msg: str = f"Expected {['inetOrgPerson', 'organizationalPerson', 'person', 'top']}, got {classes}"
@@ -206,7 +211,7 @@ class TestUsersSink:
     def test_get_object_classes_configured(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> None:
         # Create target with custom config
         mock_target.config.update(
@@ -228,7 +233,7 @@ class TestUsersSink:
             schema=schema,
             key_properties=["uid"],
         )
-        record: dict[str, object] = {}
+        record: FlextTypes.Core.Dict = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["customUser", "top"]:
             msg: str = f"Expected {['customUser', 'top']}, got {classes}"
@@ -242,7 +247,7 @@ class TestGroupsSink:
     def groups_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> GroupsSink:
         mock_target.config.update(
             {
@@ -304,7 +309,7 @@ class TestGroupsSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
-        record: dict[str, object] = {}
+        record: FlextTypes.Core.Dict = {}
         classes = groups_sink.get_object_classes(record)
         if classes != ["groupOfNames", "top"]:
             msg: str = f"Expected {['groupOfNames', 'top']}, got {classes}"
@@ -318,7 +323,7 @@ class TestOrganizationalUnitsSink:
     def ou_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> OrganizationalUnitsSink:
         mock_target.config.update(
             {
@@ -387,7 +392,7 @@ class TestOrganizationalUnitsSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, ou_sink: OrganizationalUnitsSink) -> None:
-        record: dict[str, object] = {}
+        record: FlextTypes.Core.Dict = {}
         classes = ou_sink.get_object_classes(record)
         if classes != ["organizationalUnit", "top"]:
             msg: str = f"Expected {['organizationalUnit', 'top']}, got {classes}"
@@ -401,7 +406,7 @@ class TestLDAPGenericSink:
     def generic_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> LDAPBaseSink:
         mock_target.config.update(
             {
@@ -486,7 +491,7 @@ class TestLDAPGenericSink:
             raise AssertionError(msg)
 
     def test_get_object_classes_default(self, generic_sink: LDAPBaseSink) -> None:
-        record: dict[str, object] = {}
+        record: FlextTypes.Core.Dict = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
             msg: str = f"Expected {['top']}, got {classes}"
@@ -495,7 +500,7 @@ class TestLDAPGenericSink:
     def test_get_object_classes_configured(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> None:
         # Create target with custom config
         mock_target.config.update(
@@ -516,7 +521,7 @@ class TestLDAPGenericSink:
             schema=schema,
             key_properties=["id"],
         )
-        record: dict[str, object] = {}
+        record: FlextTypes.Core.Dict = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customGeneric", "top"]:
             msg: str = f"Expected {['customGeneric', 'top']}, got {classes}"

@@ -1,8 +1,30 @@
-"""Singer LDAP stream processing - consolidated in flext-meltano."""
+"""Singer LDAP stream processing - consolidated in flext-meltano.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
+
 from flext_core import FlextLogger, FlextResult
+
+logger = FlextLogger(__name__)
+
+
+# Local LDAP stream processing classes (no fallbacks - real implementation)
+class LDAPStreamProcessingStats:
+    """LDAP stream processing statistics - mutable for performance."""
+
+
+from flext_core import FlextLogger
 
 logger = FlextLogger(__name__)
 
@@ -17,7 +39,7 @@ class LDAPStreamProcessingStats:
         self.records_processed = 0
         self.records_success = 0
         self.records_failed = 0
-        self.errors: list[str] = []
+        self.errors: FlextTypes.Core.StringList = []
 
     @property
     def success_rate(self) -> float:
@@ -59,7 +81,7 @@ class SingerLDAPStreamProcessor:
 
 
 # Re-export for backward compatibility
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "LDAPStreamProcessingStats",
     "SingerLDAPStreamProcessor",
 ]

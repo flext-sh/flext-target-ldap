@@ -2,9 +2,21 @@
 
 This module provides Singer target implementation for LDAP
 using flext-core patterns.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
+
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 from flext_core import FlextLogger, FlextResult
 
@@ -14,11 +26,14 @@ logger: FlextLogger = FlextLogger(__name__)
 class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
-    def __init__(self, config: dict[str, object] | None = None) -> None:
+    def __init__(self, config: FlextTypes.Core.Dict | None = None) -> None:
         """Initialize Singer LDAP target.
 
         Args:
             config: Configuration dictionary
+
+        Returns:
+            object: Description of return value.
 
         """
         self.config = config or {}
@@ -26,8 +41,8 @@ class SingerTargetLDAP:
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, object]],
-    ) -> FlextResult[dict[str, object]]:
+        messages: list[FlextTypes.Core.Dict],
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Process Singer messages for LDAP target.
 
         Args:
@@ -55,11 +70,11 @@ class SingerTargetLDAP:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return FlextResult[dict[str, object]].ok(result)
+            return FlextResult[FlextTypes.Core.Dict].ok(result)
 
         except Exception as e:
             logger.exception("Singer message processing failed")
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Message processing failed: {e}"
             )
 
@@ -82,4 +97,4 @@ class SingerTargetLDAP:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: list[str] = ["SingerTargetLDAP"]
+__all__: FlextTypes.Core.StringList = ["SingerTargetLDAP"]

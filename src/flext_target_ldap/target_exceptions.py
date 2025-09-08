@@ -1,3 +1,9 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
 """🚨 ARCHITECTURAL COMPLIANCE: ZERO EXCEPTION DUPLICATION using flext-core Factory.
 
 ✅ REFATORAÇÃO COMPLETA: 250+ linhas de código duplicado ELIMINADAS.
@@ -16,8 +22,11 @@ SPDX-License-Identifier: MIT
 
 Domain-specific exceptions for LDAP target operations using factory pattern to eliminate duplication.
 """
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
-from __future__ import annotations
 
 from flext_core import create_module_exception_classes
 

@@ -1,9 +1,20 @@
-"""LDAP application module using flext-core patterns."""
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
 
 from __future__ import annotations
+from flext_core import FlextTypes
+
+
+"""LDAP application module using flext-core patterns."""
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 from flext_target_ldap.application.orchestrator import LDAPTargetOrchestrator
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "LDAPTargetOrchestrator",
 ]
