@@ -83,7 +83,6 @@ class LDAPDataTransformer:
                 # LDAP-specific attribute naming
                 ldap_key = self._normalize_ldap_attribute_name(key)
 
-                # Type conversion
                 if schema:
                     properties = schema.get("properties", {})
                     if isinstance(properties, dict):

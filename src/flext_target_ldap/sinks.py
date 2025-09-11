@@ -121,7 +121,7 @@ class LDAPBaseSink(Sink):
 
         try:
             records_raw = context.get("records", [])
-            # Type assertion for records - should be a list of dicts from Singer protocol
+
             records = records_raw if isinstance(records_raw, list) else []
             logger.info(
                 "Processing batch of %d records for stream: %s",
