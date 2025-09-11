@@ -97,11 +97,6 @@ class LdapOrchestrationServiceProtocol(Protocol):
         ...
 
 
-# =============================================================================
-# LDAP CONNECTION SERVICE
-# =============================================================================
-
-
 class LdapConnectionService:
     """Service for managing LDAP connections and basic operations."""
 
@@ -137,11 +132,6 @@ class LdapConnectionService:
             "base_dn": self._config.base_dn,
             "timeout": self._config.connection.timeout,
         }
-
-
-# =============================================================================
-# LDAP TRANSFORMATION SERVICE
-# =============================================================================
 
 
 class LdapTransformationService:
@@ -387,11 +377,6 @@ class LdapTransformationService:
             return []
 
 
-# =============================================================================
-# LDAP ORCHESTRATION SERVICE
-# =============================================================================
-
-
 class LdapTargetOrchestrator:
     """Application orchestrator for LDAP target operations using enterprise patterns."""
 
@@ -543,11 +528,6 @@ class LdapTargetOrchestrator:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 
-# =============================================================================
-# SIMPLE API SERVICE
-# =============================================================================
-
-
 class LdapTargetApiService:
     """Simple API service for LDAP target operations."""
 
@@ -583,7 +563,6 @@ class LdapTargetApiService:
             if target is None:
                 return FlextResult[int].fail("Target creation failed")
 
-            # Type assertion since we know target is TargetLdap
             if not isinstance(target, target_client_module.TargetLdap):
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 
@@ -616,7 +595,6 @@ class LdapTargetApiService:
             if target is None:
                 return FlextResult[int].fail("Target creation failed")
 
-            # Type assertion since we know target is TargetLdap
             if not isinstance(target, target_client_module.TargetLdap):
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 

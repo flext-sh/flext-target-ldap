@@ -278,7 +278,6 @@ def _target_ldap_click(config: str | None = None) -> None:
                         with suppress(Exception):
                             api.delete(dn)
                     else:
-                        # Simple duplicate handling: first time add, subsequent modifies
                         try:
                             if dn in seen_dns:
                                 api.modify(dn, record)

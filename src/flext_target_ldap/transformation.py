@@ -87,7 +87,6 @@ class DataTransformationEngine:
             applied_rules: FlextTypes.Core.StringList = []
 
             for rule in self.rules:
-                # Simple string replacement in values
                 for key, value in transformed_data.items():
                     if isinstance(value, str) and rule.pattern in value:
                         transformed_data[key] = value.replace(
