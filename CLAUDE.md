@@ -13,6 +13,7 @@
 **OBJECTIVE**: Achieve 100% professional quality compliance across flext-target-ldap with zero regressions, following Singer protocol standards, LDAP enterprise patterns, Python 3.13+ standards, Pydantic best practices, and flext-core foundation patterns.
 
 **CRITICAL REQUIREMENTS**:
+
 - ✅ **95%+ pytest pass rate** with **75%+ coverage** (flext-core proven achievable at 79%)
 - ✅ **Zero errors** in ruff, mypy (strict mode), and pyright across ALL source code
 - ✅ **Unified classes per module** - single responsibility, no aliases, no wrappers, no helpers
@@ -28,8 +29,9 @@
 - ✅ **LDAP enterprise patterns** - connection pooling, authentication, schema validation
 
 **CURRENT ECOSYSTEM STATUS** (Evidence-based):
+
 - 🔴 **Ruff Issues**: TBD - needs assessment
-- 🟡 **MyPy Issues**: TBD - needs assessment  
+- 🟡 **MyPy Issues**: TBD - needs assessment
 - 🟡 **Pyright Issues**: TBD - needs assessment
 - 🔴 **Pytest Status**: TBD - needs assessment
 - 🟢 **flext-core Foundation**: 79% coverage, fully functional API
@@ -61,7 +63,7 @@
    - **FORBIDDEN**: Insecure authentication over plain connections
    - **FORBIDDEN**: DN injection vulnerabilities in template processing
    - **FORBIDDEN**: Ignoring LDAP schema constraints and validation
-   - **FORBIDDEN**: Direct python-ldap usage without flext-ldap integration
+   - **FORBIDDEN**: Direct Python-ldap usage without flext-ldap integration
    - **FORBIDDEN**: Connection pooling bypasses for performance
 
 4. **SINGER PROTOCOL VIOLATIONS** (ABSOLUTE ZERO TOLERANCE):
@@ -155,7 +157,7 @@ from flext_meltano import (
 # ✅ CORRECT - Unified class per module pattern (LDAP TARGET DOMAIN)
 class UnifiedFlextLdapTargetService(FlextDomainService):
     """Single unified LDAP target service class following flext-core patterns.
-    
+
     This class consolidates all LDAP target operations:
     - Singer protocol implementation with stream processing
     - LDAP directory data loading with enterprise authentication
@@ -163,7 +165,7 @@ class UnifiedFlextLdapTargetService(FlextDomainService):
     - Comprehensive error handling with FlextResult patterns
     - Enterprise observability and monitoring integration
     """
-    
+
     def __init__(self, **data) -> None:
         """Initialize service with proper dependency injection."""
         super().__init__(**data)
@@ -172,10 +174,10 @@ class UnifiedFlextLdapTargetService(FlextDomainService):
         self._logger = FlextLogger(__name__)
         self._ldap_api = FlextLdapApi()
         self._cli_api = FlextCliApi()
-    
+
     def orchestrate_ldap_data_loading(
-        self, 
-        singer_messages: list[dict], 
+        self,
+        singer_messages: list[dict],
         ldap_config: dict
     ) -> FlextResult[LdapLoadingResult]:
         """Orchestrate complete Singer-to-LDAP data loading pipeline."""
@@ -189,7 +191,7 @@ class UnifiedFlextLdapTargetService(FlextDomainService):
             .map(lambda state: self._create_loading_result(state))
             .map_error(lambda e: f"LDAP data loading failed: {e}")
         )
-    
+
     def validate_ldap_connectivity(self, config: dict) -> FlextResult[LdapConnectionValidation]:
         """Validate LDAP connection with comprehensive authentication testing."""
         return (
@@ -200,10 +202,10 @@ class UnifiedFlextLdapTargetService(FlextDomainService):
             .map(lambda ops: self._create_connectivity_validation(ops))
             .map_error(lambda e: f"LDAP connectivity validation failed: {e}")
         )
-    
+
     def optimize_ldap_performance(
-        self, 
-        connection_config: dict, 
+        self,
+        connection_config: dict,
         operation_metrics: dict
     ) -> FlextResult[LdapPerformanceOptimization]:
         """Optimize LDAP operations based on performance metrics."""
@@ -229,14 +231,14 @@ from flext_core import FlextModels, FlextResult
 # LDAP domain models - inherit from verified FlextModels classes
 class LdapConnectionConfig(FlextModels.Entity):
     """LDAP connection configuration with business rules validation."""
-    
+
     host: str
     port: int
     bind_dn: str
     bind_password: str
     base_dn: str
     use_ssl: bool = False
-    
+
     def validate_business_rules(self) -> FlextResult[None]:
         """Required abstract method implementation for LDAP config."""
         if not self.host.strip():
@@ -249,11 +251,11 @@ class LdapConnectionConfig(FlextModels.Entity):
 
 class LdapEntry(FlextModels.Value):
     """LDAP entry value object with validation."""
-    
+
     dn: str
     attributes: dict[str, list[str]]
     object_classes: list[str]
-    
+
     def validate_business_rules(self) -> FlextResult[None]:
         """Required abstract method implementation for LDAP entries."""
         if not self.dn.strip():
@@ -265,13 +267,13 @@ class LdapEntry(FlextModels.Value):
 # Singer integration with LDAP domain
 class SingerToLdapTransformer:
     """Transform Singer messages to LDAP entries."""
-    
+
     def __init__(self) -> None:
         self._container = FlextContainer.get_global()
-        
+
     def transform_record_to_ldap_entry(
-        self, 
-        singer_record: dict, 
+        self,
+        singer_record: dict,
         stream_config: dict
     ) -> FlextResult[LdapEntry]:
         """Transform Singer record to LDAP entry with validation."""
@@ -281,30 +283,30 @@ class SingerToLdapTransformer:
             dn = self._build_dn_from_template(dn_template, singer_record)
             if not dn:
                 return FlextResult[LdapEntry].fail("Failed to build DN from template")
-            
+
             # Map attributes
             attribute_mapping = stream_config.get("attribute_mapping", {})
             ldap_attributes = self._map_singer_to_ldap_attributes(singer_record, attribute_mapping)
-            
+
             # Get object classes
             object_classes = stream_config.get("object_classes", [])
             if not object_classes:
                 return FlextResult[LdapEntry].fail("No object classes specified")
-            
+
             # Create LDAP entry
             ldap_entry = LdapEntry(
                 dn=dn,
                 attributes=ldap_attributes,
                 object_classes=object_classes
             )
-            
+
             # Validate business rules
             validation_result = ldap_entry.validate_business_rules()
             if validation_result.is_failure:
                 return FlextResult[LdapEntry].fail(f"LDAP entry validation failed: {validation_result.error}")
-            
+
             return FlextResult[LdapEntry].ok(ldap_entry)
-            
+
         except Exception as e:
             return FlextResult[LdapEntry].fail(f"Singer to LDAP transformation failed: {e}")
 ```
@@ -319,20 +321,20 @@ from flext_cli import FlextCliApi, FlextCliMain, FlextCliConfig
 
 class LdapTargetCliService:
     """CLI service using flext-cli foundation - NO Click imports allowed.
-    
+
     LDAP TARGET SPECIALIZATION:
     - flext-cli automatically loads .env from execution root
     - flext-core provides configuration infrastructure
     - Project ONLY describes LDAP-specific configuration schema
     """
-    
+
     def __init__(self) -> None:
         """Initialize LDAP target CLI service with automatic configuration loading."""
         # ✅ AUTOMATIC: Configuration loaded transparently by flext-cli/flext-core
         self._cli_api = FlextCliApi()
         self._config = FlextCliConfig()  # Automatically includes .env + defaults + CLI params
         self._ldap_api = FlextLdapApi()
-        
+
     def define_ldap_target_configuration_schema(self) -> FlextResult[dict]:
         """Define LDAP target configuration schema extending universal patterns."""
         # ✅ CORRECT: LDAP-specific schema extending universal patterns
@@ -340,13 +342,13 @@ class LdapTargetCliService:
             # LDAP connection configuration (LDAP target specific)
             "ldap": {
                 "host": {
-                    "default": "localhost",              # Level 3: DEFAULT CONSTANTS  
+                    "default": "localhost",              # Level 3: DEFAULT CONSTANTS
                     "env_var": "LDAP_HOST",              # Levels 1&2: ENV VARS → CONFIG FILE
                     "cli_param": "--ldap-host",          # Level 4: CLI PARAMETERS
                     "config_formats": {                  # Multi-format support
                         "env": "LDAP_HOST",
                         "toml": "ldap.host",
-                        "yaml": "ldap.host", 
+                        "yaml": "ldap.host",
                         "json": "ldap.host"
                     },
                     "type": str,
@@ -459,14 +461,14 @@ class LdapTargetCliService:
                 }
             }
         }
-        
+
         # Register LDAP target schema with flext-cli
         schema_result = self._config.register_universal_schema(ldap_target_config_schema)
         if schema_result.is_failure:
             return FlextResult[dict].fail(f"LDAP target schema registration failed: {schema_result.error}")
-            
+
         return FlextResult[dict].ok(ldap_target_config_schema)
-    
+
     def create_ldap_target_cli_interface(self) -> FlextResult[FlextCliMain]:
         """Create LDAP target CLI interface using flext-cli patterns."""
         # Initialize main CLI handler
@@ -474,18 +476,18 @@ class LdapTargetCliService:
             name="target-ldap",
             description="FLEXT Target LDAP - Enterprise LDAP data loading with Singer protocol"
         )
-        
+
         # Register LDAP target command groups
         ldap_result = main_cli.register_command_group("ldap", self._create_ldap_commands)
         if ldap_result.is_failure:
             return FlextResult[FlextCliMain].fail(f"LDAP commands registration failed: {ldap_result.error}")
-            
-        singer_result = main_cli.register_command_group("singer", self._create_singer_commands)  
+
+        singer_result = main_cli.register_command_group("singer", self._create_singer_commands)
         if singer_result.is_failure:
             return FlextResult[FlextCliMain].fail(f"Singer commands registration failed: {singer_result.error}")
-            
+
         return FlextResult[FlextCliMain].ok(main_cli)
-    
+
     def _create_ldap_commands(self) -> FlextResult[dict]:
         """Create LDAP-specific commands using flext-cli patterns."""
         commands = {
@@ -497,28 +499,28 @@ class LdapTargetCliService:
                 output_format="table"
             ),
             "validate-schema": self._cli_api.create_command(
-                name="validate-schema", 
+                name="validate-schema",
                 description="Validate LDAP schema compatibility",
                 handler=self._handle_ldap_validate_schema,
                 output_format="json"
             )
         }
         return FlextResult[dict].ok(commands)
-    
+
     def _handle_ldap_test_connection(self, args: dict) -> FlextResult[str]:
         """Handle LDAP connection testing - proper error handling, no fallbacks."""
         # Get LDAP configuration
         ldap_config_result = self._get_ldap_configuration_from_args(args)
         if ldap_config_result.is_failure:
             return FlextResult[str].fail(f"LDAP config error: {ldap_config_result.error}")
-        
+
         ldap_config = ldap_config_result.unwrap()
-        
+
         # Test connection through flext-ldap API
         connection_result = self._ldap_api.test_connection(ldap_config)
         if connection_result.is_failure:
             return FlextResult[str].fail(f"LDAP connection failed: {connection_result.error}")
-        
+
         connection_info = connection_result.unwrap()
         return FlextResult[str].ok(f"LDAP connection successful: {connection_info}")
 
@@ -527,7 +529,7 @@ def main() -> None:
     """Main CLI entry point for LDAP target - uses flext-cli, never Click directly."""
     cli_service = LdapTargetCliService()
     cli_result = cli_service.create_ldap_target_cli_interface()
-    
+
     if cli_result.is_failure:
         # Use flext-cli for error output
         cli_api = FlextCliApi()
@@ -535,14 +537,14 @@ def main() -> None:
             message=f"LDAP target CLI initialization failed: {cli_result.error}",
             error_type="initialization",
             suggestions=[
-                "Check flext-cli installation", 
+                "Check flext-cli installation",
                 "Verify LDAP configuration",
                 "Ensure flext-ldap dependencies"
             ]
         )
         cli_api.display_error(error_output.unwrap() if error_output.is_success else cli_result.error)
         exit(1)
-        
+
     cli = cli_result.unwrap()
     cli.run()
 
@@ -566,7 +568,7 @@ echo "============================================="
 echo "=== RUFF ISSUES ==="
 ruff check . --output-format=github | wc -l
 
-echo "=== MYPY ISSUES ==="  
+echo "=== MYPY ISSUES ==="
 mypy src/flext_target_ldap/ --show-error-codes --no-error-summary 2>&1 | grep -E "error:|note:" | wc -l
 
 echo "=== PYRIGHT ISSUES ==="
@@ -630,7 +632,7 @@ class LdapConnectionManager:
 
 class LdapOperations:
     def add_entry(self): pass
-    
+
 class SingerProcessor:
     def process_messages(self): pass
 
@@ -640,19 +642,19 @@ def build_dn_from_template(): pass
 # AFTER - Single unified class (incremental improvement)
 class UnifiedFlextLdapTargetService(FlextDomainService):
     """Consolidated LDAP target service following single responsibility principle."""
-    
+
     def orchestrate_ldap_data_loading(
-        self, 
-        singer_messages: list[dict], 
+        self,
+        singer_messages: list[dict],
         ldap_config: dict
     ) -> FlextResult[LdapLoadingResult]:
         """Former multiple services now unified with proper error handling."""
         # Implementation using flext-core patterns with LDAP specialization
-        
+
     def validate_ldap_connectivity(self, config: dict) -> FlextResult[LdapConnectionValidation]:
         """Former LdapConnectionManager functionality with proper error handling."""
         # Implementation using flext-ldap integration
-        
+
     def _build_dn_from_template(self, template: str, data: dict) -> str:
         """Former helper function now as private method."""
         # Implementation as part of unified class
@@ -670,21 +672,21 @@ def process_singer_schema_message(self, message: dict) -> FlextResult[LdapSchema
     """Process Singer SCHEMA messages with full type safety and error handling."""
     if not isinstance(message, dict):
         return FlextResult[LdapSchemaProcessing].fail("Invalid message type")
-    
+
     if message.get("type") != "SCHEMA":
         return FlextResult[LdapSchemaProcessing].fail("Expected SCHEMA message")
-    
+
     try:
         schema_validation = self._validate_singer_schema(message)
         if schema_validation.is_failure:
             return FlextResult[LdapSchemaProcessing].fail(f"Schema validation failed: {schema_validation.error}")
-        
+
         ldap_mapping = self._map_schema_to_ldap_objectclasses(schema_validation.unwrap())
         if ldap_mapping.is_failure:
             return FlextResult[LdapSchemaProcessing].fail(f"LDAP mapping failed: {ldap_mapping.error}")
-        
+
         return FlextResult[LdapSchemaProcessing].ok(ldap_mapping.unwrap())
-        
+
     except Exception as e:
         return FlextResult[LdapSchemaProcessing].fail(f"Singer schema processing failed: {e}")
 ```
@@ -695,7 +697,7 @@ def process_singer_schema_message(self, message: dict) -> FlextResult[LdapSchema
 # NEW - Comprehensive functional tests with real LDAP servers
 class TestUnifiedLdapTargetServiceComplete:
     """Complete test coverage for unified LDAP target service."""
-    
+
     @pytest.fixture(scope="session")
     def ldap_test_environment(self):
         """Real LDAP test environment with Docker containers."""
@@ -704,7 +706,7 @@ class TestUnifiedLdapTargetServiceComplete:
             env.setup_test_schemas()
             env.load_test_data()
             yield env.get_connection_config()
-    
+
     @pytest.mark.parametrize("singer_message_type,expected_result", [
         ({"type": "SCHEMA", "stream": "users", "schema": USER_SCHEMA}, "success"),
         ({"type": "RECORD", "stream": "users", "record": {"uid": "testuser"}}, "success"),
@@ -713,47 +715,47 @@ class TestUnifiedLdapTargetServiceComplete:
         ({"type": "INVALID"}, "failure"),  # Invalid type
     ])
     def test_singer_message_processing_scenarios(
-        self, 
-        ldap_test_environment, 
-        singer_message_type, 
+        self,
+        ldap_test_environment,
+        singer_message_type,
         expected_result
     ):
         """Test all Singer message processing scenarios comprehensively."""
         service = UnifiedFlextLdapTargetService()
         result = service.process_singer_message(singer_message_type, ldap_test_environment)
-        
+
         if expected_result == "success":
             assert result.is_success
         else:
             assert result.is_failure
-    
+
     def test_ldap_error_handling_comprehensive(self, ldap_test_environment):
         """Test all LDAP error handling paths."""
         service = UnifiedFlextLdapTargetService()
-        
+
         # Test all LDAP failure modes
         error_cases = [
             {"host": "invalid-host", "port": 389},     # Connection failure
             {"host": "localhost", "bind_dn": "invalid"}, # Authentication failure
             {"valid_config": True, "invalid_dn": "malformed"}, # DN format error
         ]
-        
+
         for case in error_cases:
             result = service.validate_ldap_connectivity(case)
             assert result.is_failure, f"Should fail for case: {case}"
             assert result.error, "Error message should be present"
-    
+
     def test_integration_with_flext_core_and_ldap(self, ldap_test_environment):
         """Test integration with flext-core and flext-ldap components."""
         service = UnifiedFlextLdapTargetService()
-        
+
         # Test flext-core container integration
         container_result = service._container.get("ldap_service")
-        
+
         # Test flext-ldap integration
         ldap_api_result = service._ldap_api.test_connection(ldap_test_environment)
         assert ldap_api_result.is_success or ldap_api_result.is_failure  # Either is valid
-        
+
         # Test flext-cli integration for CLI commands
         cli_result = service._cli_api.format_output({"test": "data"}, "table")
         assert cli_result.is_success or cli_result.is_failure  # Either is valid
@@ -768,7 +770,7 @@ class TestUnifiedLdapTargetServiceComplete:
 ```bash
 # LDAP target specific ruff analysis
 ruff check src/flext_target_ldap/ --select F    # Pyflakes errors (critical)
-ruff check src/flext_target_ldap/ --select E9   # Syntax errors (critical) 
+ruff check src/flext_target_ldap/ --select E9   # Syntax errors (critical)
 ruff check src/flext_target_ldap/ --select F821 # Undefined name (critical)
 
 # LDAP-specific import issues
@@ -786,20 +788,20 @@ ruff check src/flext_target_ldap/ --fix-only --select I,F401,E,W
 # BEFORE
 if timeout > 30:  # Magic number for LDAP timeout
 
-# AFTER  
+# AFTER
 class LdapTargetConstants:
     DEFAULT_CONNECTION_TIMEOUT = 30
     DEFAULT_BIND_TIMEOUT = 15
     DEFAULT_BATCH_SIZE = 100
     MAX_RETRY_ATTEMPTS = 3
-    
+
 if timeout > LdapTargetConstants.DEFAULT_CONNECTION_TIMEOUT:
 
 # ✅ CORRECT - Fix complex LDAP functions
 # BEFORE
 def process_singer_to_ldap(data):
     # 50+ lines of mixed LDAP and Singer logic
-    
+
 # AFTER
 class LdapSingerProcessor:
     def process(self, singer_data: SingerMessage) -> FlextResult[LdapProcessingResult]:
@@ -811,13 +813,13 @@ class LdapSingerProcessor:
             .flat_map(self._execute_ldap_operations)
             .map(self._create_processing_result)
         )
-    
+
     def _validate_singer_message(self, message: SingerMessage) -> FlextResult[SingerMessage]:
         """Focused Singer message validation logic."""
-        
+
     def _transform_to_ldap_format(self, message: SingerMessage) -> FlextResult[LdapEntry]:
         """Focused LDAP transformation logic."""
-        
+
     def _execute_ldap_operations(self, entry: LdapEntry) -> FlextResult[LdapOperationResult]:
         """Focused LDAP operation execution logic."""
 ```
@@ -834,7 +836,7 @@ LdapEntryType = TypeVar('LdapEntryType', bound='LdapEntry')
 
 class LdapTargetProcessor(Generic[LdapEntryType]):
     """Generic LDAP target processor with proper type constraints."""
-    
+
     def process_ldap_entry(self, entry: LdapEntryType) -> FlextResult[LdapEntryType]:
         """Process LDAP entry maintaining type safety."""
         return FlextResult[LdapEntryType].ok(entry)
@@ -842,7 +844,7 @@ class LdapTargetProcessor(Generic[LdapEntryType]):
 # ✅ CORRECT - LDAP Protocol usage instead of Any
 class LdapProcessable(Protocol):
     """Protocol defining LDAP processable interface."""
-    
+
     def get_dn(self) -> str: ...
     def get_attributes(self) -> dict[str, list[str]]: ...
     def get_object_classes(self) -> list[str]: ...
@@ -853,7 +855,7 @@ def process_ldap_entry(entry: LdapProcessable) -> FlextResult[dict]:
         dn = entry.get_dn()
         attributes = entry.get_attributes()
         object_classes = entry.get_object_classes()
-        
+
         return FlextResult[dict].ok({
             "dn": dn,
             "attributes": attributes,
@@ -872,6 +874,7 @@ def process_ldap_entry(entry: LdapProcessable) -> FlextResult[dict]:
 **LDAP TARGET SPECIALIZATION**: Configuration follows strict priority hierarchy with ENVIRONMENT VARIABLES taking precedence over .env files. The .env file is automatically detected from CURRENT execution directory. All LDAP testing and debugging MUST use FLEXT ecosystem exclusively.
 
 **CORRECT PRIORITY ORDER**:
+
 ```
 1. ENVIRONMENT VARIABLES  (export LDAP_HOST=prod-ldap-server - HIGHEST PRIORITY)
 2. .env FILE             (LDAP_HOST=localhost from execution directory)
@@ -926,7 +929,7 @@ python -m target_ldap test-ldap-integration \
 
 # ❌ FORBIDDEN - Custom LDAP testing scripts bypassing FLEXT
 # python custom_test_ldap_connection.py     # FORBIDDEN
-# python manual_ldap_operations.py          # FORBIDDEN  
+# python manual_ldap_operations.py          # FORBIDDEN
 # python direct_ldap_integration.py         # FORBIDDEN
 
 # ❌ FORBIDDEN - Manual .env loading for LDAP
@@ -950,7 +953,7 @@ from flext_meltano import FlextSingerTarget
 
 class LdapTargetCliTestingService:
     """LDAP target CLI testing service using FLEXT ecosystem - .env automatically loaded."""
-    
+
     def __init__(self) -> None:
         """Initialize LDAP target CLI testing with automatic .env configuration loading."""
         # ✅ AUTOMATIC: .env loaded transparently by FLEXT ecosystem
@@ -958,50 +961,50 @@ class LdapTargetCliTestingService:
         self._cli_api = FlextCliApi()
         self._config = FlextCliConfig()  # Automatically loads .env + defaults + CLI params
         self._ldap_api = FlextLdapApi()
-        
+
     def debug_ldap_target_configuration(self) -> FlextResult[dict]:
         """Debug LDAP target configuration using FLEXT patterns - .env as source of truth."""
         self._logger.debug("Starting LDAP target configuration debugging")
-        
+
         # ✅ CORRECT: Access configuration through FLEXT API (includes .env automatically)
         config_result = self._config.get_all_configuration()
         if config_result.is_failure:
             return FlextResult[dict].fail(f"Configuration access failed: {config_result.error}")
-            
+
         config_data = config_result.unwrap()
-        
+
         # Debug output through FLEXT CLI API
         debug_display_result = self._cli_api.display_debug_information(
             title="LDAP Target Configuration Debug (ENV → .env → DEFAULT → CLI)",
             data=config_data,
             format_type="tree"  # flext-cli handles formatted output
         )
-        
+
         if debug_display_result.is_failure:
             return FlextResult[dict].fail(f"Debug display failed: {debug_display_result.error}")
-            
+
         return FlextResult[dict].ok(config_data)
-    
+
     def test_ldap_connectivity_debug(self) -> FlextResult[dict]:
         """Test LDAP connectivity with debug logging - FLEXT-LDAP exclusively."""
         self._logger.debug("Starting LDAP connectivity testing")
-        
+
         # ✅ CORRECT: Get LDAP configuration from .env through FLEXT config
         ldap_config_result = self._config.get_ldap_configuration()
         if ldap_config_result.is_failure:
             return FlextResult[dict].fail(f"LDAP config access failed: {ldap_config_result.error}")
-            
+
         ldap_config = ldap_config_result.unwrap()
-        
+
         # ✅ CORRECT: Test connection through FLEXT-LDAP API (NO external tools)
         connection_result = self._ldap_api.test_connection_with_debug(
             host=ldap_config["host"],
-            port=ldap_config["port"], 
+            port=ldap_config["port"],
             bind_dn=ldap_config["bind_dn"],
             bind_password=ldap_config["bind_password"],
             debug_mode=True
         )
-        
+
         if connection_result.is_failure:
             # Display debug information through FLEXT CLI
             self._cli_api.display_error_with_debug(
@@ -1009,13 +1012,13 @@ class LdapTargetCliTestingService:
                 debug_data=ldap_config,
                 suggestions=[
                     "Check .env file LDAP configuration",
-                    "Verify LDAP server is running", 
+                    "Verify LDAP server is running",
                     "Validate network connectivity",
                     "Check LDAP credentials and permissions"
                 ]
             )
             return FlextResult[dict].fail(connection_result.error)
-            
+
         # Display success with debug information
         connection_info = connection_result.unwrap()
         self._cli_api.display_success_with_debug(
@@ -1023,13 +1026,13 @@ class LdapTargetCliTestingService:
             debug_data=connection_info,
             format_type="table"
         )
-        
+
         return FlextResult[dict].ok(connection_info)
-        
+
     def test_singer_protocol_compliance_debug(self, test_messages: list[dict]) -> FlextResult[dict]:
         """Test Singer protocol compliance with debug traces - FLEXT-MELTANO exclusively."""
         self._logger.debug("Starting Singer protocol compliance testing")
-        
+
         # ✅ CORRECT: Process Singer messages through FLEXT-MELTANO API with debug mode
         compliance_result = self._process_singer_messages_with_debug(
             messages=test_messages,
@@ -1037,7 +1040,7 @@ class LdapTargetCliTestingService:
             trace_mode=True,
             validation_level="strict"
         )
-        
+
         if compliance_result.is_failure:
             # Display debug information through FLEXT CLI
             self._cli_api.display_error_with_debug(
@@ -1051,7 +1054,7 @@ class LdapTargetCliTestingService:
                 ]
             )
             return FlextResult[dict].fail(compliance_result.error)
-            
+
         # Display compliance results with debug information
         compliance_info = compliance_result.unwrap()
         self._cli_api.display_success_with_debug(
@@ -1059,27 +1062,27 @@ class LdapTargetCliTestingService:
             debug_data=compliance_info,
             format_type="summary"
         )
-        
+
         return FlextResult[dict].ok(compliance_info)
-        
+
     def validate_ldap_target_environment_debug(self) -> FlextResult[dict]:
         """Validate complete LDAP target environment using FLEXT ecosystem - .env as truth source."""
         validation_results = {}
-        
+
         # Phase 1: Configuration validation (.env + defaults + CLI)
         config_result = self.debug_ldap_target_configuration()
         if config_result.is_success:
             validation_results["configuration"] = "✅ PASSED"
         else:
             validation_results["configuration"] = f"❌ FAILED: {config_result.error}"
-            
+
         # Phase 2: LDAP connectivity validation (flext-ldap)
         ldap_result = self.test_ldap_connectivity_debug()
         if ldap_result.is_success:
             validation_results["ldap_connectivity"] = "✅ PASSED"
         else:
             validation_results["ldap_connectivity"] = f"❌ FAILED: {ldap_result.error}"
-            
+
         # Phase 3: Singer protocol compliance validation (flext-meltano)
         singer_test_messages = self._generate_test_singer_messages()
         singer_result = self.test_singer_protocol_compliance_debug(singer_test_messages)
@@ -1087,21 +1090,21 @@ class LdapTargetCliTestingService:
             validation_results["singer_compliance"] = "✅ PASSED"
         else:
             validation_results["singer_compliance"] = f"❌ FAILED: {singer_result.error}"
-            
+
         # Phase 4: FLEXT ecosystem integration validation
         ecosystem_result = self._validate_flext_ecosystem_integration()
         if ecosystem_result.is_success:
             validation_results["flext_ecosystem"] = "✅ PASSED"
         else:
             validation_results["flext_ecosystem"] = f"❌ FAILED: {ecosystem_result.error}"
-            
+
         # Display complete validation results through FLEXT CLI
         self._cli_api.display_validation_results(
             title="Complete LDAP Target Environment Validation (ENV → .env → DEFAULT → CLI)",
             results=validation_results,
             format_type="detailed_table"
         )
-        
+
         return FlextResult[dict].ok(validation_results)
 ```
 
@@ -1120,7 +1123,7 @@ export LDAP_PORT=636
 python -m target_ldap debug-config --debug
 # This shows environment variable takes precedence over .env file
 
-# ✅ CORRECT - Test CLI parameters for LDAP-specific overrides  
+# ✅ CORRECT - Test CLI parameters for LDAP-specific overrides
 python -m target_ldap debug-config --debug --ldap-host cli-override-host --ldap-port 9999
 # This shows CLI parameter overrides for specific execution
 ```
@@ -1144,7 +1147,7 @@ python -m target_ldap debug-config --debug              # Test configuration loa
 # Step 1: Verify configuration loading
 python -m target_ldap debug-config --debug
 
-# Step 2: Test LDAP connectivity 
+# Step 2: Test LDAP connectivity
 python -m target_ldap test-ldap-connection --debug --trace
 
 # Step 3: Test Singer protocol compliance
@@ -1174,7 +1177,7 @@ echo "1. Ruff Check (Code Quality)..."
 ruff check src/flext_target_ldap/ tests/ examples/ scripts/
 echo "✅ Ruff passed"
 
-echo "2. MyPy Check (Type Safety)..."  
+echo "2. MyPy Check (Type Safety)..."
 mypy src/flext_target_ldap/ --strict --no-error-summary
 echo "✅ MyPy passed"
 
@@ -1217,8 +1220,9 @@ echo "Singer Compliance Tests: $(pytest tests/singer/ --tb=no -q 2>&1 | grep -E 
 ```
 
 **TARGET ACHIEVEMENTS** (Evidence-based, realistic goals):
+
 - 🎯 **Ruff Issues**: From TBD to 0 (Systematic reduction by category)
-- 🎯 **MyPy Issues**: Maintain 0 in src/ (Achieve and validate continuously)  
+- 🎯 **MyPy Issues**: Maintain 0 in src/ (Achieve and validate continuously)
 - 🎯 **Pyright Issues**: From TBD to 0 (LDAP-specific type corrections)
 - 🎯 **Test Coverage**: Achieve 75%+ (Match flext-core proven success at 79%)
 - 🎯 **Pytest Pass Rate**: Achieve 100% pass rate for all test categories
@@ -1234,24 +1238,24 @@ echo "Singer Compliance Tests: $(pytest tests/singer/ --tb=no -q 2>&1 | grep -E 
 ```python
 class FlextLdapTargetService(FlextDomainService[FlextResult[LdapTargetResult]]):
     """Professional LDAP target service following SOLID principles and Singer protocol.
-    
+
     This service handles Singer-to-LDAP data loading operations with comprehensive
     error handling, type safety, and integration with the flext-core foundation and
     flext-ldap infrastructure. It demonstrates proper separation of concerns,
     dependency injection patterns, and enterprise LDAP authentication.
-    
+
     LDAP Domain Specialization:
     - Enterprise LDAP directory integration with connection pooling
     - Singer protocol implementation with stream-to-LDAP mapping
     - Comprehensive schema validation and constraint checking
     - Performance optimization with batch processing and caching
-    
+
     Attributes:
         _container: Dependency injection container from flext-core
         _logger: Structured logger for operational observability
         _ldap_api: LDAP operations API from flext-ldap
         _singer_api: Singer protocol API from flext-meltano
-        
+
     Example:
         >>> service = FlextLdapTargetService()
         >>> config = {"host": "ldap.company.com", "port": 389, "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD"}
@@ -1260,7 +1264,7 @@ class FlextLdapTargetService(FlextDomainService[FlextResult[LdapTargetResult]]):
         >>> assert result.is_success
         >>> data = result.unwrap()
     """
-    
+
     def __init__(self) -> None:
         """Initialize LDAP target service with proper dependency injection."""
         super().__init__()
@@ -1268,19 +1272,19 @@ class FlextLdapTargetService(FlextDomainService[FlextResult[LdapTargetResult]]):
         self._logger = get_logger(__name__)
         self._ldap_api = FlextLdapApi()
         self._singer_api = FlextSingerTarget()
-        
+
     def orchestrate_ldap_data_loading(
-        self, 
-        singer_messages: list[dict], 
+        self,
+        singer_messages: list[dict],
         ldap_config: dict
     ) -> FlextResult[LdapTargetResult]:
         """Orchestrate complete Singer-to-LDAP data loading pipeline with error handling.
-        
+
         This method implements the railway pattern for error handling across the complete
         Singer protocol to LDAP directory loading pipeline. It ensures that failures are
         properly captured and propagated without raising exceptions, maintaining data
         integrity throughout the entire process.
-        
+
         LDAP Pipeline Stages:
         1. Singer message validation and parsing
         2. LDAP connection establishment with authentication
@@ -1288,14 +1292,14 @@ class FlextLdapTargetService(FlextDomainService[FlextResult[LdapTargetResult]]):
         4. Record message transformation to LDAP entry format
         5. LDAP directory entry creation/modification operations
         6. Singer state management and checkpoint persistence
-        
+
         Args:
             singer_messages: List of Singer protocol messages (SCHEMA, RECORD, STATE)
             ldap_config: LDAP connection and operation configuration
-            
+
         Returns:
             FlextResult containing either successful LdapTargetResult or error message
-            
+
         Example:
             >>> singer_messages = [
             ...     {"type": "SCHEMA", "stream": "users", "schema": {...}},
@@ -1327,43 +1331,43 @@ class FlextLdapTargetService(FlextDomainService[FlextResult[LdapTargetResult]]):
 ```python
 # ✅ PROFESSIONAL - Proper LDAP error handling WITHOUT try/except fallbacks
 def robust_ldap_operation(
-    ldap_config: LdapConnectionConfig, 
+    ldap_config: LdapConnectionConfig,
     ldap_entry: LdapEntry
 ) -> FlextResult[LdapOperationResult]:
     """Robust LDAP operation with proper error boundary handling - NO FALLBACKS.
-    
+
     This demonstrates the correct approach for LDAP operations: validate inputs,
     handle LDAP-specific errors explicitly, and return meaningful error messages.
     NO try/except blocks used as fallback mechanisms.
     """
-    
+
     # Step 1: Comprehensive LDAP configuration validation - fail fast and clearly
     if ldap_config.host is None:
         return FlextResult[LdapOperationResult].fail("LDAP host cannot be None")
-        
+
     if not isinstance(ldap_config, LdapConnectionConfig):
         return FlextResult[LdapOperationResult].fail(f"Expected LdapConnectionConfig, got {type(ldap_config)}")
-    
+
     # Step 2: LDAP business rule validation - explicit error checking
     config_validation_result = ldap_config.validate_business_rules()
     if config_validation_result.is_failure:
         return FlextResult[LdapOperationResult].fail(f"LDAP config validation failed: {config_validation_result.error}")
-        
+
     # Step 3: LDAP connection establishment - check result, no exception catching
     connection_result = establish_ldap_connection(ldap_config)
     if connection_result.is_failure:
         return FlextResult[LdapOperationResult].fail(f"LDAP connection failed: {connection_result.error}")
-        
+
     # Step 4: LDAP entry validation - explicit success/failure handling
     entry_validation_result = validate_ldap_entry(ldap_entry)
     if entry_validation_result.is_failure:
         return FlextResult[LdapOperationResult].fail(f"LDAP entry validation failed: {entry_validation_result.error}")
-        
+
     # Step 5: LDAP operation execution - explicit error handling
     operation_result = execute_ldap_add_operation(connection_result.unwrap(), entry_validation_result.unwrap())
     if operation_result.is_failure:
         return FlextResult[LdapOperationResult].fail(f"LDAP add operation failed: {operation_result.error}")
-        
+
     return FlextResult[LdapOperationResult].ok(operation_result.unwrap())
 
 # ❌ FORBIDDEN - Try/except as fallback mechanism for LDAP operations
@@ -1376,55 +1380,55 @@ def bad_ldap_operation_with_fallbacks(ldap_config: dict, ldap_entry: dict) -> di
     except LDAPException:
         # FORBIDDEN: Silent fallback that masks real LDAP problems
         return {"status": "success", "entries": []}  # This hides the real LDAP issue!
-        
+
     try:
         # FORBIDDEN: Multiple LDAP fallback attempts
-        return alternative_ldap_operation(ldap_config, ldap_entry)  
+        return alternative_ldap_operation(ldap_config, ldap_entry)
     except Exception:
         # FORBIDDEN: Final fallback that gives false success for LDAP
         return {"status": "partial_success", "entries": []}  # User thinks LDAP worked!
 
-# ✅ CORRECT - Explicit LDAP error handling without fallbacks  
+# ✅ CORRECT - Explicit LDAP error handling without fallbacks
 def correct_ldap_operation(
-    ldap_config: LdapConnectionConfig, 
+    ldap_config: LdapConnectionConfig,
     ldap_entry: LdapEntry
 ) -> FlextResult[LdapOperationResult]:
     """Correct approach - explicit LDAP error handling, no hidden fallbacks."""
-    
+
     # Attempt primary LDAP operation
     primary_result = execute_primary_ldap_operation(ldap_config, ldap_entry)
     if primary_result.is_failure:
         # Log the specific LDAP failure, don't hide it
         logger.error(f"Primary LDAP operation failed: {primary_result.error}")
         return FlextResult[LdapOperationResult].fail(f"LDAP operation failed: {primary_result.error}")
-    
+
     # If LDAP operation succeeded, validate the result
     validation_result = validate_ldap_operation_result(primary_result.unwrap())
     if validation_result.is_failure:
         return FlextResult[LdapOperationResult].fail(f"LDAP result validation failed: {validation_result.error}")
-        
+
     return FlextResult[LdapOperationResult].ok(validation_result.unwrap())
 
 # ✅ CORRECT - LDAP service unavailability handling without fallbacks
 def ldap_directory_operation(query: str, ldap_config: LdapConnectionConfig) -> FlextResult[LdapQueryResult]:
     """LDAP directory operation with proper error handling - no silent fallbacks."""
-    
+
     # Get LDAP service from container
     container = FlextContainer.get_global()
     ldap_service_result = container.get("ldap_service")
-    
+
     # If LDAP service unavailable, FAIL EXPLICITLY - don't hide the problem
     if ldap_service_result.is_failure:
         return FlextResult[LdapQueryResult].fail("LDAP service is unavailable - system configuration error")
-    
+
     ldap_service = ldap_service_result.unwrap()
-    
+
     # Execute LDAP query and handle results explicitly
     query_result = ldap_service.execute_ldap_query(query, ldap_config)
     if query_result.is_failure:
         # Return specific LDAP error, don't try alternative approaches silently
         return FlextResult[LdapQueryResult].fail(f"LDAP query execution failed: {query_result.error}")
-        
+
     return FlextResult[LdapQueryResult].ok(query_result.unwrap())
 ```
 
@@ -1442,7 +1446,7 @@ def ldap_directory_operation(query: str, ldap_config: LdapConnectionConfig) -> F
 - [ ] Set up LDAP test environment (Docker compose with OpenLDAP)
 - [ ] Verify Singer protocol compliance test data
 
-### During Each Development Cycle  
+### During Each Development Cycle
 
 - [ ] Make minimal, focused changes (single aspect per change)
 - [ ] Validate after every modification using quality gates
@@ -1457,7 +1461,7 @@ def ldap_directory_operation(query: str, ldap_config: LdapConnectionConfig) -> F
 - [ ] Full quality gate validation (ruff + mypy + pyright + pytest)
 - [ ] LDAP integration testing with real LDAP server
 - [ ] Singer protocol compliance validation
-- [ ] Coverage measurement and improvement tracking  
+- [ ] Coverage measurement and improvement tracking
 - [ ] Integration testing with flext-core dependencies
 - [ ] Update documentation reflecting current reality
 - [ ] Commit with descriptive messages explaining improvements
@@ -1486,18 +1490,18 @@ echo "=== FLEXT TARGET LDAP FINAL VALIDATION ==="
 
 # Quality Gates
 ruff check src/flext_target_ldap/ --statistics
-mypy src/flext_target_ldap/ --strict --show-error-codes  
+mypy src/flext_target_ldap/ --strict --show-error-codes
 pyright src/flext_target_ldap/ --stats
 pytest tests/ --cov=src/flext_target_ldap --cov-report=term-missing --cov-fail-under=75
 
-# LDAP-Specific Validation  
+# LDAP-Specific Validation
 echo "Testing LDAP integration..."
 pytest tests/integration/test_ldap_operations.py -v
 
 echo "Testing Singer protocol compliance..."
 pytest tests/singer/ -v
 
-# Functional Validation  
+# Functional Validation
 python -c "
 import sys
 sys.path.insert(0, 'src')
@@ -1506,26 +1510,26 @@ try:
     # Test flext-core integration
     from flext_core import FlextResult, get_flext_container, FlextModels
     print('✅ flext-core integration: SUCCESS')
-    
+
     # Test flext-ldap integration
     from flext_ldap import FlextLdapApi, FlextLdapConnection
     print('✅ flext-ldap integration: SUCCESS')
-    
+
     # Test flext-meltano integration
     from flext_meltano import FlextSingerTarget
     print('✅ flext-meltano integration: SUCCESS')
-    
+
     # Test LDAP target functionality
     from flext_target_ldap import UnifiedFlextLdapTargetService
     print('✅ LDAP target import: SUCCESS')
-    
+
     # Test CLI functionality
     from flext_target_ldap.cli import LdapTargetCliService
     print('✅ LDAP target CLI: SUCCESS')
-    
+
     print('✅ All imports: SUCCESS')
     print('✅ FINAL VALIDATION: PASSED')
-    
+
 except Exception as e:
     print(f'❌ VALIDATION FAILED: {e}')
     sys.exit(1)

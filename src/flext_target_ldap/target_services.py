@@ -1,29 +1,15 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """LDAP Target Services - PEP8 Consolidation.
-
-This module consolidates LDAP target application services with descriptive PEP8 names,
-providing enterprise-grade orchestration, transformation, and API services.
-
-**Architecture**: Clean Architecture application layer services
-**Patterns**: Service layer, orchestration, simple API
-**Integration**: Complete flext-core + flext-ldap + target models integration
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Protocol
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import get_ldap_api
 
 from flext_target_ldap import target_client as target_client_module

@@ -8,15 +8,6 @@ from __future__ import annotations
 
 from flext_core import FlextTypes
 
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
-from flext_core import FlextLogger, FlextModels, FlextResult
-from pydantic import Field
-
 logger = FlextLogger(__name__)
 
 

@@ -4,6 +4,8 @@ SPDX-License-Identifier: MIT.
 
 from __future__ import annotations
 
+from flext_core import FlextContainer
+
 """🚨 ARCHITECTURAL COMPLIANCE: ELIMINATED DUPLICATE DI Container using DRY pattern.
 
 REFATORADO COMPLETO usando create_module_container_utilities:
@@ -16,8 +18,6 @@ Copyright (c) 2025 Flext. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-
-from flext_core import FlextContainer
 
 get_flext_target_ldap_container = FlextContainer.get_global()
 

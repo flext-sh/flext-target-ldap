@@ -1,27 +1,14 @@
 """LDAP sinks for Singer target using flext-core patterns.
 
-REFACTORED:
-Uses flext-core patterns for type-safe LDAP operations.
-Zero tolerance for code duplication.
-
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 import asyncio
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.client import LDAPClient

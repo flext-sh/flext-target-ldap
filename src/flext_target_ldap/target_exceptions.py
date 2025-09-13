@@ -1,32 +1,10 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
+"""Domain-specific exceptions for LDAP target operations using factory pattern to eliminate duplication.
 
-from __future__ import annotations
-
-"""🚨 ARCHITECTURAL COMPLIANCE: ZERO EXCEPTION DUPLICATION using flext-core Factory.
-
-✅ REFATORAÇÃO COMPLETA: 250+ linhas de código duplicado ELIMINADAS.
-
-- ANTES: 299 linhas com 10 classes manuais de exceptions
-- DEPOIS: <60 linhas usando factory pattern limpo e DRY
-- REDUÇÃO: 250+ linhas eliminadas = ~84% redução
-- PADRÃO: Usa create_module_exception_classes() de flext-core
-- ARQUITETURA: Funcionalidades genéricas permanecem nas bibliotecas abstratas
-- EXPOSIÇÃO: API pública correta através do factory pattern
-
-LDAP Target Exception Hierarchy - ZERO DUPLICATION.
-
-Copyright (c) 2025 FLEXT Contributors
-SPDX-License-Identifier: MIT
-
-Domain-specific exceptions for LDAP target operations using factory pattern to eliminate duplication.
-"""
-"""
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 from flext_core import create_module_exception_classes
 

@@ -6,18 +6,17 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
+from typing import ClassVar
+
+from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+from pydantic import Field
 
 """
+
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-
-from typing import ClassVar
-
-from flext_core import FlextLogger, FlextModels, FlextResult
-from pydantic import Field
 
 logger = FlextLogger(__name__)
 

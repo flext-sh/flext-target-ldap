@@ -1,23 +1,10 @@
 """target-ldap main target class using flext-core patterns.
 
-REFACTORED:
-Uses flext-core configuration patterns for robust LDAP target implementation.
-Zero tolerance for code duplication.
-
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-
-from flext_core import FlextTypes
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
 
 import json
 import sys
@@ -26,7 +13,7 @@ from importlib import import_module
 from pathlib import Path
 
 import click
-from flext_core import FlextContainer, FlextLogger
+from flext_core import FlextContainer, FlextLogger, FlextTypes
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.application import LDAPTargetOrchestrator

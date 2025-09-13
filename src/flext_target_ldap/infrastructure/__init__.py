@@ -1,17 +1,11 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
 from __future__ import annotations
 
-from flext_core import FlextTypes
-
 """LDAP infrastructure module using flext-core patterns."""
+
 """
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
-
 
 from flext_target_ldap.infrastructure.di_container import (
     configure_flext_target_ldap_dependencies,

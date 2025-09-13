@@ -8,16 +8,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-
-from flext_core import FlextTypes
-
-object
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from click.testing import CliRunner
+from flext_core import FlextTypes
 
 from flext_target_ldap import TargetLDAP
+
+object
 
 
 class TestTargetLDAPIntegration:
