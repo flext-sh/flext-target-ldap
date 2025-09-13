@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """LDAP client for flext-target-ldap using flext-ldap infrastructure.
 
 This module provides a backward-compatible LDAP client interface that delegates
@@ -16,6 +8,7 @@ Copyright (c) 2025 Flext. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 import asyncio
 from collections.abc import Generator
@@ -23,11 +16,11 @@ from contextlib import _GeneratorContextManager, contextmanager, suppress
 from unittest.mock import MagicMock
 
 import ldap3
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLDAPApi,
     FlextLDAPConnectionConfig,
-    FlextLDAPEntry,
+    FlextLDAPEntities,
     get_ldap_api,
 )
 
@@ -38,6 +31,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     def __init__(self, dn: str, attributes: FlextTypes.Core.Dict) -> None:
+        """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
 
@@ -370,7 +364,7 @@ class LDAPClient:
 
 # Backward compatibility aliases
 LDAPConnectionConfig = FlextLDAPConnectionConfig
-LDAPEntry = FlextLDAPEntry
+LDAPEntry = FlextLDAPEntities
 
 __all__: FlextTypes.Core.StringList = [
     "LDAPClient",

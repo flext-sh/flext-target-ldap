@@ -1,30 +1,16 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """LDAP Target Models - PEP8 Consolidation.
-
-This module consolidates LDAP target domain models with descriptive PEP8 names,
-providing enterprise-grade data models for LDAP operations and transformations.
-
-**Architecture**: Clean Architecture domain layer
-**Patterns**: FlextModels, business rule validation
-**Integration**: Complete LDAP-specific transformations and processing models
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from flext_core import FlextModels, FlextResult
-from pydantic import Field, validator
+from flext_core import FlextModels, FlextResult, FlextTypes
+from pydantic import Field, field_validator
 
 
 class LdapObjectClassModel(StrEnum):
@@ -150,7 +136,7 @@ class LdapEntryModel(FlextModels):
         description="Entry creation timestamp",
     )
 
-    @validator("object_classes")
+    @field_validator("object_classes")
     @classmethod
     def validate_object_classes(
         cls, v: FlextTypes.Core.StringList

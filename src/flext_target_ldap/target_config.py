@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """LDAP Target Configuration - PEP8 Consolidation.
 
 This module consolidates all LDAP target configuration classes with descriptive PEP8 names,
@@ -19,10 +11,12 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 from flext_core import (
     FlextModels,
     FlextResult,
+    FlextTypes,
 )
 from flext_ldap import FlextLDAPConnectionConfig
 from pydantic import ConfigDict, Field

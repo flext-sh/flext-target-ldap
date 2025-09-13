@@ -1,24 +1,10 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+"""LDAP Target Client - PEP8 Consolidation.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT.
 """
 
 from __future__ import annotations
-
-from flext_core import FlextTypes
-
-"""LDAP Target Client - PEP8 Consolidation.
-
-This module consolidates the LDAP target implementation, client, and sinks with descriptive PEP8 names,
-providing a complete enterprise-grade Singer target using flext-core + flext-ldap integration.
-
-**Architecture**: Clean Architecture application + infrastructure layers
-**Patterns**: Target, Sink, Client delegation to flext-ldap
-**Integration**: Complete flext-meltano Target + flext-ldap API
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
 
 import asyncio
 import sys
@@ -31,6 +17,7 @@ from flext_core import (
     FlextContainer,
     FlextLogger,
     FlextResult,
+    FlextTypes,
 )
 from flext_ldap import FlextLDAPApi, FlextLDAPConnectionConfig, get_ldap_api
 from flext_meltano import Sink, Target
@@ -342,7 +329,7 @@ class LdapTargetClient:
                 )
 
             if result.is_success and result.data:
-                # Convert FlextLDAPEntry to LdapSearchEntry for backward compatibility
+                # Convert FlextLDAPEntities to LdapSearchEntry for backward compatibility
                 entries = []
                 for flext_entry in result.data:
                     compat_entry = LdapSearchEntry(
