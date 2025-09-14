@@ -15,7 +15,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLDAPConnectionConfig, get_ldap_api
+from flext_ldap import FlextLDAPConnectionConfig, get_flext_ldap_api
 
 from flext_target_ldap.target import TargetLDAP
 
@@ -103,7 +103,7 @@ def test_ldap_connection(config: FlextTypes.Core.Dict) -> FlextResult[bool]:
         )
 
         # Use real flext-ldap API and perform a lightweight test
-        api = get_ldap_api()
+        api = get_flext_ldap_api()
         # Intentionally not constructing URL or awaiting here to avoid blocking in sync path.
         # This method only validates config structure.
         _ = api  # keep reference to avoid unused warning in some linters

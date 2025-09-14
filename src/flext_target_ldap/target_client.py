@@ -18,9 +18,10 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLDAPApi, FlextLDAPConnectionConfig, get_ldap_api
-from flext_meltano import Sink, Target
+from flext_ldap import FlextLDAPApi, FlextLDAPConnectionConfig, get_flext_ldap_api
 
+# Import placeholder classes from sinks module
+from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target_config import TargetLdapConfig
 
 logger = FlextLogger(__name__)
@@ -102,7 +103,7 @@ class LdapTargetClient:
             self._password = ""
 
         # Create API instance using flext-ldap
-        self._api: FlextLDAPApi = get_ldap_api()
+        self._api: FlextLDAPApi = get_flext_ldap_api()
         self._current_session_id: str | None = None
 
         logger.info(
@@ -189,7 +190,13 @@ class LdapTargetClient:
         def connection_context() -> Generator[object]:
             # Create a real connection wrapper that delegates to flext-ldap API
             class LdapConnectionWrapper:
-                def __init__(self, api: FlextLDAPApi, server_url: str, bind_dn: str | None, password: str | None) -> None:
+                def __init__(
+                    self,
+                    api: FlextLDAPApi,
+                    server_url: str,
+                    bind_dn: str | None,
+                    password: str | None,
+                ) -> None:
                     self.api = api
                     self.server_url = server_url
                     self.bind_dn = bind_dn
@@ -202,13 +209,19 @@ class LdapTargetClient:
                 def unbind(self) -> None:
                     pass
 
-                def add(self, _dn: str, _object_classes: list[str], _attributes: dict) -> bool:
+                def add(
+                    self, _dn: str, _object_classes: list[str], _attributes: dict
+                ) -> bool:
                     # Delegate to async flext-ldap API
                     try:
+
                         async def _add() -> bool:
-                            async with self.api.connection(self.server_url, self.bind_dn, self.password):
+                            async with self.api.connection(
+                                self.server_url, self.bind_dn, self.password
+                            ):
                                 # Use flext-ldap API for adding entries
                                 return True
+
                         asyncio.run(_add())
                         return True
                     except Exception:
@@ -217,10 +230,14 @@ class LdapTargetClient:
                 def modify(self, _dn: str, _changes: dict) -> bool:
                     # Delegate to async flext-ldap API
                     try:
+
                         async def _modify() -> bool:
-                            async with self.api.connection(self.server_url, self.bind_dn, self.password):
+                            async with self.api.connection(
+                                self.server_url, self.bind_dn, self.password
+                            ):
                                 # Use flext-ldap API for modifying entries
                                 return True
+
                         asyncio.run(_modify())
                         return True
                     except Exception:
@@ -229,26 +246,38 @@ class LdapTargetClient:
                 def delete(self, _dn: str) -> bool:
                     # Delegate to async flext-ldap API
                     try:
+
                         async def _delete() -> bool:
-                            async with self.api.connection(self.server_url, self.bind_dn, self.password):
+                            async with self.api.connection(
+                                self.server_url, self.bind_dn, self.password
+                            ):
                                 # Use flext-ldap API for deleting entries
                                 return True
+
                         asyncio.run(_delete())
                         return True
                     except Exception:
                         return False
 
-                def search(self, base_dn: str, search_filter: str, attributes: list | None = None) -> bool:
+                def search(
+                    self,
+                    base_dn: str,
+                    search_filter: str,
+                    attributes: list | None = None,
+                ) -> bool:
                     # Delegate to async flext-ldap API
                     try:
-                        async def _search():
-                            async with self.api.connection(self.server_url, self.bind_dn, self.password) as session:
+
+                        async def _search() -> dict:
+                            async with self.api.connection(
+                                self.server_url, self.bind_dn, self.password
+                            ) as session:
                                 return await self.api.search(
                                     session_id=session,
                                     base_dn=base_dn,
                                     search_filter=search_filter,
                                     scope="subtree",
-                                    attributes=attributes
+                                    attributes=attributes,
                                 )
 
                         search_result = asyncio.run(_search())
@@ -264,7 +293,9 @@ class LdapTargetClient:
                                         for key, values in attrs.items():
                                             setattr(self, key, values)
 
-                                compat_entry = CompatibleEntry(entry.dn, dict(entry.attributes))
+                                compat_entry = CompatibleEntry(
+                                    entry.dn, dict(entry.attributes)
+                                )
                                 self.entries.append(compat_entry)
                         else:
                             self.entries = []
@@ -276,7 +307,9 @@ class LdapTargetClient:
             # Create wrapper instance using the existing API
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
-            wrapper = LdapConnectionWrapper(self._api, server_url, self._bind_dn or None, self._password or None)
+            wrapper = LdapConnectionWrapper(
+                self._api, server_url, self._bind_dn or None, self._password or None
+            )
 
             try:
                 yield wrapper

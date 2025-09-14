@@ -10,9 +10,17 @@ from __future__ import annotations
 import importlib.metadata
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
-from flext_meltano import Sink, Target
 
-from flext_target_ldap.target_client import FlextTargetLDAP, LDAPTargetClient
+from flext_target_ldap.sinks import (
+    GroupsSink,
+    LDAPBaseSink,
+    LDAPProcessingResult,
+    OrganizationalUnitsSink,
+    Sink,
+    Target,
+    UsersSink,
+)
+from flext_target_ldap.target_client import LDAPTargetClient, TargetLdap
 from flext_target_ldap.target_config import FlextTargetLDAPConfig, LDAPTargetConstants
 from flext_target_ldap.target_exceptions import (
     FlextTargetLDAPConnectionError,
@@ -30,29 +38,27 @@ except importlib.metadata.PackageNotFoundError:
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 __all__: FlextTypes.Core.StringList = [
-    # FLEXT ecosystem integration
     "FlextLogger",
     "FlextModels",
     "FlextResult",
-    # Core target functionality
-    "FlextTargetLDAP",
-    # Configuration
     "FlextTargetLDAPConfig",
-    # Exceptions
     "FlextTargetLDAPConnectionError",
     "FlextTargetLDAPError",
     "FlextTargetLDAPService",
     "FlextTargetLDAPValidationError",
     "FlextTypes",
+    "GroupsSink",
+    "LDAPBaseSink",
+    "LDAPProcessingResult",
     "LDAPTargetClient",
     "LDAPTargetConstants",
-    # Models
     "LDAPTargetModel",
     "LDAPTargetRecord",
-    # Meltano integration
+    "OrganizationalUnitsSink",
     "Sink",
     "Target",
-    # Version info
+    "TargetLdap",
+    "UsersSink",
     "__version__",
     "__version_info__",
 ]

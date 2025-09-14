@@ -223,7 +223,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         # Optional API (patched in tests)
         try:
             client_mod = import_module("flext_target_ldap.client")
-            api = client_mod.get_ldap_api()
+            api = client_mod.get_flext_ldap_api()
         except Exception:
             api = None
 
