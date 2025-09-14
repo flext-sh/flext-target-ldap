@@ -22,16 +22,6 @@ logger = FlextLogger(__name__)
 class LDAPStreamProcessingStats:
     """LDAP stream processing statistics - mutable for performance."""
 
-
-from flext_core import FlextLogger
-
-logger = FlextLogger(__name__)
-
-
-# Local LDAP stream processing classes (no fallbacks - real implementation)
-class LDAPStreamProcessingStats:
-    """LDAP stream processing statistics - mutable for performance."""
-
     def __init__(self, stream_name: str) -> None:
         """Initialize LDAP stream processing statistics."""
         self.stream_name = stream_name

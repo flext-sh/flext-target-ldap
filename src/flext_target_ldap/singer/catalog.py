@@ -25,16 +25,6 @@ logger = FlextLogger(__name__)
 class SingerLDAPCatalogEntry(FlextModels):
     """Singer LDAP catalog entry using flext-core patterns."""
 
-
-from flext_core import FlextLogger, FlextModels
-
-logger = FlextLogger(__name__)
-
-
-# Local LDAP catalog classes (no fallbacks - real implementation)
-class SingerLDAPCatalogEntry(FlextModels):
-    """Singer LDAP catalog entry using flext-core patterns."""
-
     tap_stream_id: str
     stream: str
     stream_schema: FlextTypes.Core.Dict = Field(..., description="Singer stream schema")

@@ -11,7 +11,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from click.testing import CliRunner
+
+# CLI testing will be replaced with flext-cli patterns
 from flext_core import FlextTypes
 
 from flext_target_ldap import TargetLDAP
@@ -23,8 +24,10 @@ class TestTargetLDAPIntegration:
     """Integration tests for target-ldap."""
 
     @pytest.fixture
-    def runner(self) -> CliRunner:
-        return CliRunner()
+    def runner(self) -> None:
+        # TODO(@flext-team): Replace with flext-cli patterns
+        # Issue: https://github.com/flext-team/flext-cli/issues/1
+        return None
 
     @pytest.fixture
     def config_file(
@@ -53,8 +56,8 @@ class TestTargetLDAPIntegration:
     @patch("flext_target_ldap.client.get_ldap_api")
     def test_basic_load(
         self,
-        mock_ldap_api: Mock,
-        runner: CliRunner,
+        _mock_ldap_api: Mock,
+        runner: None,
         config_file: Path,
         input_file: Path,
     ) -> None:
@@ -65,7 +68,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.entries = []  # No existing entries
         mock_conn_instance.add.return_value = True
         # Wire patched API to use our mock connection instance
-        mock_ldap_api.return_value = mock_conn_instance
+        _mock_ldap_api.return_value = mock_conn_instance
         # Run target
         with input_file.open(encoding="utf-8") as f:
             result = runner.invoke(
@@ -87,8 +90,8 @@ class TestTargetLDAPIntegration:
     @patch("flext_target_ldap.client.get_ldap_api")
     def test_upsert_behavior(
         self,
-        mock_ldap_api: Mock,
-        runner: CliRunner,
+        _mock_ldap_api: Mock,
+        runner: None,
         config_file: Path,
         tmp_path: Path,
     ) -> None:
@@ -137,7 +140,7 @@ class TestTargetLDAPIntegration:
 
         mock_conn_instance.search.side_effect = search_side_effect
         # Wire patched API to use our mock connection instance
-        mock_ldap_api.return_value = mock_conn_instance
+        _mock_ldap_api.return_value = mock_conn_instance
         # Run target
         with input_path.open(encoding="utf-8") as f:
             result = runner.invoke(
@@ -158,8 +161,8 @@ class TestTargetLDAPIntegration:
     @patch("flext_target_ldap.client.get_ldap_api")
     def test_delete_records(
         self,
-        mock_ldap_api: Mock,
-        runner: CliRunner,
+        _mock_ldap_api: Mock,
+        runner: None,
         config_file: Path,
         tmp_path: Path,
     ) -> None:
@@ -206,9 +209,9 @@ class TestTargetLDAPIntegration:
     @patch("flext_target_ldap.client.get_ldap_api")
     def test_dn_template_usage(
         self,
-        mock_ldap_api: Mock,
-        runner: CliRunner,
-        config_file: Path,
+        _mock_ldap_api: Mock,
+        runner: None,
+        _config_file: Path,
         tmp_path: Path,
         mock_ldap_config: FlextTypes.Core.Dict,
     ) -> None:
@@ -262,7 +265,7 @@ class TestTargetLDAPIntegration:
             msg: str = f"Expected {'uid=testuser,ou=people,dc=test,dc=com'}, got {add_calls[0][0][0]}"
             raise AssertionError(msg)
 
-    def test_error_handling(self, runner: CliRunner, tmp_path: Path) -> None:
+    def test_error_handling(self, runner: None, tmp_path: Path) -> None:
         # Invalid config
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
@@ -278,8 +281,8 @@ class TestTargetLDAPIntegration:
     @patch("flext_target_ldap.client.get_ldap_api")
     def test_multi_stream_handling(
         self,
-        mock_ldap_api: Mock,
-        runner: CliRunner,
+        _mock_ldap_api: Mock,
+        runner: None,
         config_file: Path,
         tmp_path: Path,
     ) -> None:

@@ -6,21 +6,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
+from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+from pydantic import Field
 
 logger = FlextLogger(__name__)
 
 
-class TransformationRule(FlextModels):
-    """Transformation rule for data transformation."""
-
-
-from flext_core import FlextLogger, FlextModels
-
-logger = FlextLogger(__name__)
-
-
-class TransformationRule(FlextModels):
+class TransformationRule(FlextModels.Entity):
     """Transformation rule for data transformation."""
 
     name: str
@@ -42,7 +34,7 @@ class TransformationRule(FlextModels):
             return FlextResult[None].fail(f"Transformation rule validation failed: {e}")
 
 
-class TransformationResult(FlextModels):
+class TransformationResult(FlextModels.Entity):
     """Result of data transformation."""
 
     transformed_data: FlextTypes.Core.Dict

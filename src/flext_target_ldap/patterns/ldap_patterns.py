@@ -23,15 +23,6 @@ logger = FlextLogger(__name__)
 class LDAPTypeConverter:
     """Convert data types for LDAP storage using flext-core patterns."""
 
-
-from flext_core import FlextLogger
-
-logger = FlextLogger(__name__)
-
-
-class LDAPTypeConverter:
-    """Convert data types for LDAP storage using flext-core patterns."""
-
     def __init__(self) -> None:
         """Initialize LDAP type converter."""
 
