@@ -20,7 +20,7 @@ from flext_ldap import (
     FlextLDAPApi,
     FlextLDAPConnectionConfig,
     FlextLDAPEntities,
-    get_ldap_api,
+    get_flext_ldap_api,
 )
 
 logger = FlextLogger(__name__)
@@ -173,7 +173,7 @@ class LDAPClient:
     def _get_api(self) -> FlextLDAPApi:
         """Instantiate and cache FlextLDAPApi lazily."""
         if self._api is None:
-            self._api = get_ldap_api()
+            self._api = get_flext_ldap_api()
         return self._api
 
     def connect_sync(self) -> FlextResult[None]:
@@ -231,7 +231,9 @@ class LDAPClient:
                 def unbind(self) -> None:
                     pass
 
-                def add(self, _dn: str, _object_classes: list[str], _attributes: dict) -> bool:
+                def add(
+                    self, _dn: str, _object_classes: list[str], _attributes: dict
+                ) -> bool:
                     # Delegate to flext-ldap API
                     return True
 
@@ -243,13 +245,18 @@ class LDAPClient:
                     # Delegate to flext-ldap API
                     return True
 
-                def search(self, _base_dn: str, _search_filter: str, _attributes: list | None = None) -> bool:
+                def search(
+                    self,
+                    _base_dn: str,
+                    _search_filter: str,
+                    _attributes: list | None = None,
+                ) -> bool:
                     # Delegate to flext-ldap API
                     self.entries = []  # Empty results for compatibility
                     return True
 
             # Create async context and extract session
-            async def _get_session():
+            async def _get_session() -> None:
                 async with api.connection(
                     server_url,
                     self._bind_dn or None,
@@ -411,5 +418,5 @@ __all__: FlextTypes.Core.StringList = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",
-    "get_ldap_api",
+    "get_flext_ldap_api",
 ]

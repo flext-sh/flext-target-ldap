@@ -9,9 +9,35 @@ from __future__ import annotations
 import asyncio
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_meltano import Sink, Target
 
 from flext_target_ldap.client import LDAPClient
+
+
+# Placeholder classes until flext-meltano provides proper Singer protocol classes
+class Sink:
+    """Placeholder Sink base class for Singer protocol compatibility."""
+
+    def __init__(
+        self,
+        target: Target,
+        stream_name: str,
+        schema: FlextTypes.Core.Dict,
+        key_properties: FlextTypes.Core.StringList,
+    ) -> None:
+        """Initialize sink with Singer protocol parameters."""
+        self.target = target
+        self.stream_name = stream_name
+        self.schema = schema
+        self.key_properties = key_properties
+
+
+class Target:
+    """Placeholder Target base class for Singer protocol compatibility."""
+
+    def __init__(self, config: FlextTypes.Core.Dict) -> None:
+        """Initialize target with configuration."""
+        self.config = config
+
 
 logger = FlextLogger(__name__)
 

@@ -1,11 +1,12 @@
-from __future__ import annotations
+"""FLEXT Target LDAP - Infrastructure layer components.
 
-"""LDAP infrastructure module using flext-core patterns."""
+LDAP infrastructure module using flext-core patterns.
 
-"""
 Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: MIT.
 """
+
+from __future__ import annotations
 
 from flext_core import FlextTypes
 

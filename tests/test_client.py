@@ -23,9 +23,11 @@ class TestLDAPClient:
 
     @pytest.fixture
     def client(self, mock_ldap_config: FlextTypes.Core.Dict) -> LDAPClient:
+        """Create test LDAP client instance."""
         return LDAPClient(config=mock_ldap_config)
 
     def test_client_initialization(self, client: LDAPClient) -> None:
+        """Test method."""
         if client.host != "test.ldap.com":
             msg: str = f"Expected {'test.ldap.com'}, got {client.host}"
             raise AssertionError(msg)
@@ -40,6 +42,7 @@ class TestLDAPClient:
             raise AssertionError(msg)
 
     def test_server_uri(self, client: LDAPClient) -> None:
+        """Test method."""
         if client.server_uri != "ldap://test.ldap.com:389":
             msg: str = f"Expected {'ldap://test.ldap.com:389'}, got {client.server_uri}"
             raise AssertionError(msg)
@@ -59,6 +62,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test getting LDAP connection with proper binding and cleanup."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -93,6 +97,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test adding a new LDAP entry."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -124,6 +129,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test adding an LDAP entry that already exists."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -155,6 +161,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test modifying an existing LDAP entry."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -185,6 +192,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test deleting an LDAP entry."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -210,6 +218,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test searching for LDAP entries."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -248,6 +257,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test checking if an LDAP entry exists."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -286,6 +296,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test getting a specific LDAP entry."""
         mock_connection = MagicMock()
         mock_connection.bind.return_value = True
         mock_connection.bound = True
@@ -327,6 +338,7 @@ class TestLDAPClient:
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
+        """Test handling of LDAP connection errors."""
         # Simulate connection error
         mock_connection_class.side_effect = ldap3_exceptions.LDAPException(
             "Connection failed",

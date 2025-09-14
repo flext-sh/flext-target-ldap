@@ -43,7 +43,7 @@ class LdapObjectClassModel(StrEnum):
     DOMAIN_COMPONENT = "dcObject"
 
 
-class LdapAttributeMappingModel(FlextModels):
+class LdapAttributeMappingModel(FlextModels.Entity):
     """LDAP attribute mapping configuration with validation.
 
     Immutable value object defining how Singer fields map to LDAP attributes
@@ -105,7 +105,7 @@ class LdapAttributeMappingModel(FlextModels):
             return FlextResult[None].fail(f"Attribute mapping validation failed: {e}")
 
 
-class LdapEntryModel(FlextModels):
+class LdapEntryModel(FlextModels.Entity):
     """LDAP entry representation with validation and business rules.
 
     Immutable value object representing a complete LDAP entry with
@@ -203,7 +203,7 @@ class LdapEntryModel(FlextModels):
         return self.attributes.get(attribute_name, [])
 
 
-class LdapTransformationResultModel(FlextModels):
+class LdapTransformationResultModel(FlextModels.Entity):
     """Result of LDAP data transformation operations.
 
     Tracks transformation statistics, applied rules, and processing metrics
@@ -271,7 +271,7 @@ class LdapTransformationResultModel(FlextModels):
         return bool(self.transformation_errors)
 
 
-class LdapBatchProcessingModel(FlextModels):
+class LdapBatchProcessingModel(FlextModels.Entity):
     """LDAP batch processing configuration and state tracking.
 
     Manages batching of LDAP operations for optimal performance,
@@ -392,7 +392,7 @@ class LdapBatchProcessingModel(FlextModels):
         )
 
 
-class LdapOperationStatisticsModel(FlextModels):
+class LdapOperationStatisticsModel(FlextModels.Entity):
     """Statistics tracking for LDAP target operations.
 
     Comprehensive metrics and performance data for LDAP operations,

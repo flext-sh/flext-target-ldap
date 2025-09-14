@@ -24,6 +24,7 @@ class TestTargetLDAPUnit:
 
     @pytest.fixture
     def config(self) -> FlextTypes.Core.Dict:
+        """Create test configuration for LDAP target."""
         return {
             "host": "test.ldap.com",
             "port": 389,
@@ -35,6 +36,7 @@ class TestTargetLDAPUnit:
         }
 
     def test_target_initialization(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         target = TargetLDAP(config=config)
         if target.name != "target-ldap":
             msg: str = f"Expected {'target-ldap'}, got {target.name}"
@@ -42,6 +44,7 @@ class TestTargetLDAPUnit:
         assert target.config == config
 
     def test_get_sink_users(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("users")
 
@@ -52,6 +55,7 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_get_sink_groups(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("groups")
 
@@ -62,6 +66,7 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_get_sink_generic(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("custom_stream")
 
@@ -72,6 +77,7 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_dn_template_configuration(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
 
         target = TargetLDAP(config=config)
@@ -82,6 +88,7 @@ class TestTargetLDAPUnit:
         )
 
     def test_object_class_configuration(self, config: FlextTypes.Core.Dict) -> None:
+        """Test method."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
 
         target = TargetLDAP(config=config)
@@ -97,6 +104,7 @@ class TestTargetLDAPUnit:
         mock_client_class: MagicMock,
         config: FlextTypes.Core.Dict,
     ) -> None:
+        """Test processing a record through the LDAP target."""
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client.upsert_entry.return_value = (True, "add")
@@ -133,6 +141,7 @@ class TestTargetLDAPUnit:
         mock_client_class: MagicMock,
         config: FlextTypes.Core.Dict,
     ) -> None:
+        """Test processing a delete record through the LDAP target."""
         # Mock LDAP client
         mock_client = MagicMock()
         mock_client.entry_exists.return_value = True
