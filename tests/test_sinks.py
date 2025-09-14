@@ -26,7 +26,7 @@ class TestLDAPBaseSink:
     def sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextTypes.Core.Dict,
+        _mock_ldap_config: FlextTypes.Core.Dict,
     ) -> LDAPBaseSink:
         schema = {
             "properties": {
@@ -120,7 +120,7 @@ class TestUsersSink:
     def users_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextTypes.Core.Dict,
+        _mock_ldap_config: FlextTypes.Core.Dict,
     ) -> UsersSink:
         mock_target.config.update(
             {
@@ -211,7 +211,7 @@ class TestUsersSink:
     def test_get_object_classes_configured(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextTypes.Core.Dict,
+        _mock_ldap_config: FlextTypes.Core.Dict,
     ) -> None:
         # Create target with custom config
         mock_target.config.update(
@@ -247,7 +247,7 @@ class TestGroupsSink:
     def groups_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextTypes.Core.Dict,
+        _mock_ldap_config: FlextTypes.Core.Dict,
     ) -> GroupsSink:
         mock_target.config.update(
             {
@@ -323,7 +323,7 @@ class TestOrganizationalUnitsSink:
     def ou_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextTypes.Core.Dict,
+        _mock_ldap_config: FlextTypes.Core.Dict,
     ) -> OrganizationalUnitsSink:
         mock_target.config.update(
             {
@@ -406,7 +406,7 @@ class TestLDAPGenericSink:
     def generic_sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextTypes.Core.Dict,
+        _mock_ldap_config: FlextTypes.Core.Dict,
     ) -> LDAPBaseSink:
         mock_target.config.update(
             {
@@ -500,7 +500,7 @@ class TestLDAPGenericSink:
     def test_get_object_classes_configured(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextTypes.Core.Dict,
+        _mock_ldap_config: FlextTypes.Core.Dict,
     ) -> None:
         # Create target with custom config
         mock_target.config.update(

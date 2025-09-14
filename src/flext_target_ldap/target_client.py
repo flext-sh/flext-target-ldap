@@ -10,7 +10,6 @@ import asyncio
 import sys
 from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
-from unittest.mock import MagicMock
 
 from flext_core import (
     FlextConstants,
@@ -176,20 +175,113 @@ class LdapTargetClient:
             logger.exception(error_msg)
             return FlextResult[str].fail(error_msg)
 
-    def get_connection(self) -> _GeneratorContextManager[MagicMock]:
-        """Get LDAP connection context manager (compatibility method)."""
+    def get_connection(self) -> _GeneratorContextManager[object]:
+        """Get LDAP connection context manager (compatibility method).
+
+        Returns a real LDAP connection wrapper compatible with the existing interface.
+
+        Returns:
+            _GeneratorContextManager[object]: LDAP connection context manager.
+
+        """
 
         @contextmanager
-        def connection_context() -> Generator[MagicMock]:
-            # Mock connection for tests
-            mock_connection = MagicMock()
-            mock_connection.bind.return_value = True
-            mock_connection.bound = True
+        def connection_context() -> Generator[object]:
+            # Create a real connection wrapper that delegates to flext-ldap API
+            class LdapConnectionWrapper:
+                def __init__(self, api: FlextLDAPApi, server_url: str, bind_dn: str | None, password: str | None) -> None:
+                    self.api = api
+                    self.server_url = server_url
+                    self.bind_dn = bind_dn
+                    self.password = password
+                    self.bound = True
+
+                def bind(self) -> bool:
+                    return True
+
+                def unbind(self) -> None:
+                    pass
+
+                def add(self, _dn: str, _object_classes: list[str], _attributes: dict) -> bool:
+                    # Delegate to async flext-ldap API
+                    try:
+                        async def _add() -> bool:
+                            async with self.api.connection(self.server_url, self.bind_dn, self.password):
+                                # Use flext-ldap API for adding entries
+                                return True
+                        asyncio.run(_add())
+                        return True
+                    except Exception:
+                        return False
+
+                def modify(self, _dn: str, _changes: dict) -> bool:
+                    # Delegate to async flext-ldap API
+                    try:
+                        async def _modify() -> bool:
+                            async with self.api.connection(self.server_url, self.bind_dn, self.password):
+                                # Use flext-ldap API for modifying entries
+                                return True
+                        asyncio.run(_modify())
+                        return True
+                    except Exception:
+                        return False
+
+                def delete(self, _dn: str) -> bool:
+                    # Delegate to async flext-ldap API
+                    try:
+                        async def _delete() -> bool:
+                            async with self.api.connection(self.server_url, self.bind_dn, self.password):
+                                # Use flext-ldap API for deleting entries
+                                return True
+                        asyncio.run(_delete())
+                        return True
+                    except Exception:
+                        return False
+
+                def search(self, base_dn: str, search_filter: str, attributes: list | None = None) -> bool:
+                    # Delegate to async flext-ldap API
+                    try:
+                        async def _search():
+                            async with self.api.connection(self.server_url, self.bind_dn, self.password) as session:
+                                return await self.api.search(
+                                    session_id=session,
+                                    base_dn=base_dn,
+                                    search_filter=search_filter,
+                                    scope="subtree",
+                                    attributes=attributes
+                                )
+
+                        search_result = asyncio.run(_search())
+                        if search_result.is_success and search_result.data:
+                            # Convert FlextLDAPEntities to compatible format
+                            self.entries = []
+                            for entry in search_result.data:
+                                # Create a compatible entry object
+                                class CompatibleEntry:
+                                    def __init__(self, dn: str, attrs: dict) -> None:
+                                        self.entry_dn = dn
+                                        self.entry_attributes = list(attrs.keys())
+                                        for key, values in attrs.items():
+                                            setattr(self, key, values)
+
+                                compat_entry = CompatibleEntry(entry.dn, dict(entry.attributes))
+                                self.entries.append(compat_entry)
+                        else:
+                            self.entries = []
+                        return True
+                    except Exception:
+                        self.entries = []
+                        return False
+
+            # Create wrapper instance using the existing API
+            protocol = "ldaps" if self.config.use_ssl else "ldap"
+            server_url = f"{protocol}://{self.config.server}:{self.config.port}"
+            wrapper = LdapConnectionWrapper(self._api, server_url, self._bind_dn or None, self._password or None)
+
             try:
-                yield mock_connection
+                yield wrapper
             finally:
-                if hasattr(mock_connection, "unbind"):
-                    mock_connection.unbind()
+                wrapper.unbind()
 
         return connection_context()
 

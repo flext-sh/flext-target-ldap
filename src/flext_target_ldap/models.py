@@ -8,4 +8,3 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap.target_models import *

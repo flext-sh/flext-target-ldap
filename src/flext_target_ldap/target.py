@@ -12,7 +12,7 @@ from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
 
-import click
+from flext_cli import flext_cli_create_helper
 from flext_core import FlextContainer, FlextLogger, FlextTypes
 from flext_meltano import Sink, Target
 
@@ -196,18 +196,16 @@ class TargetLDAP(Target):
 
 def main() -> None:
     """CLI entry point for target-ldap."""
-    # Delegate to Click command for tests
-    _target_ldap_click()
+    # Delegate to FLEXT-CLI command for tests
+    _target_ldap_flext_cli()
 
 
 if __name__ == "__main__":
     main()
 
 
-# Minimal Click CLI for tests (echoes STATE lines)
-@click.command(name="target-ldap", context_settings={"ignore_unknown_options": True})
-@click.option("--config", type=click.Path(exists=False), required=False)
-def _target_ldap_click(config: str | None = None) -> None:
+# FLEXT-CLI implementation for tests (echoes STATE lines)
+def _target_ldap_flext_cli(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
         # Load minimal config if provided
@@ -237,7 +235,9 @@ def _target_ldap_click(config: str | None = None) -> None:
                 obj = json.loads(line)
                 msg_type = obj.get("type")
                 if msg_type == "STATE":
-                    click.echo(line.strip())
+                    # Use flext-cli for output instead of click.echo
+                    cli_helper = flext_cli_create_helper(quiet=True)
+                    cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
                     obj.get("schema") or {}
                     current_stream = obj.get("stream")
@@ -284,5 +284,5 @@ def _target_ldap_click(config: str | None = None) -> None:
         logger.debug("Unexpected error in CLI suppressed", exc_info=True)
 
 
-# Expose Click command via class attribute for tests expecting TargetLDAP.cli
-TargetLDAP.cli = _target_ldap_click
+# Expose CLI command via class attribute for tests expecting TargetLDAP.cli
+TargetLDAP.cli = _target_ldap_flext_cli

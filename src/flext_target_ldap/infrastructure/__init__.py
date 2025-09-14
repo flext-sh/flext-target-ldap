@@ -7,6 +7,8 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
+from flext_core import FlextTypes
+
 from flext_target_ldap.infrastructure.di_container import (
     configure_flext_target_ldap_dependencies,
     get_flext_target_ldap_container,
