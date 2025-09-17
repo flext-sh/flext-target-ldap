@@ -13,13 +13,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from pydantic import ConfigDict, Field
+
 from flext_core import (
     FlextModels,
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLDAPConnectionConfig
-from pydantic import ConfigDict, Field
+from flext_ldap import FlextLdapConnectionConfig
 
 # Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
@@ -162,7 +163,7 @@ class TargetLdapConfig(FlextModels.Config):
     """
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLDAPConnectionConfig = Field(
+    connection: FlextLdapConnectionConfig = Field(
         ...,
         description="LDAP connection configuration from flext-ldap",
     )
@@ -217,9 +218,7 @@ class TargetLdapConfig(FlextModels.Config):
     )
 
     # For compatibility with BaseSettings-style configs, annotate accordingly
-    model_config: ConfigDict = ConfigDict(
-        env_prefix="TARGET_LDAP_", case_sensitive=False
-    )
+    model_config = ConfigDict()
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate complete LDAP target configuration business rules."""
@@ -287,9 +286,9 @@ def validate_ldap_target_config(
                 return [str(v) for v in value]
             return default
 
-        # Extract connection parameters for FlextLDAPConnectionConfig
+        # Extract connection parameters for FlextLdapConnectionConfig
         connection_params = {
-            # Map external dict keys to FlextLDAPConnectionConfig fields
+            # Map external dict keys to FlextLdapConnectionConfig fields
             "server": config.get("host", "localhost"),
             "port": config.get("port", 389),
             "use_ssl": config.get("use_ssl", False),
@@ -306,7 +305,7 @@ def validate_ldap_target_config(
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(connection_params["timeout"], 30)
 
-        connection_config = FlextLDAPConnectionConfig(
+        connection_config = FlextLdapConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,
@@ -397,7 +396,7 @@ def create_default_ldap_target_config(
     """Create default LDAP target configuration with minimal parameters."""
     try:
         # Create connection config
-        connection_config = FlextLDAPConnectionConfig(
+        connection_config = FlextLdapConnectionConfig(
             server=host,
             port=port,
             use_ssl=use_ssl,
@@ -408,6 +407,10 @@ def create_default_ldap_target_config(
         target_config = TargetLdapConfig(
             connection=connection_config,
             base_dn=base_dn,
+            batch_size=1000,
+            max_records=None,
+            search_filter="(objectClass=*)",
+            search_scope="SUBTREE",
         )
 
         # Validate business rules

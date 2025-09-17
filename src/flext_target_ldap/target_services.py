@@ -11,7 +11,6 @@ from typing import Protocol
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import get_flext_ldap_api
-
 from flext_target_ldap import target_client as target_client_module
 from flext_target_ldap.target_config import (
     TargetLdapConfig,

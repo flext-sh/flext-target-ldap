@@ -9,9 +9,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import FlextTypes
 from ldap3.core import exceptions as ldap3_exceptions
 
+from flext_core import FlextTypes
 from flext_target_ldap import LDAPClient
 
 # Constants
@@ -330,8 +330,6 @@ class TestLDAPClient:
         assert result.success
         assert result.data is None
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_connection_error_handling(
         self,
         mock_pool_class: MagicMock,
@@ -340,11 +338,11 @@ class TestLDAPClient:
     ) -> None:
         """Test handling of LDAP connection errors."""
         # Simulate connection error
-        mock_connection_class.side_effect = ldap3_exceptions.LDAPException(
+        mock_connection_class.side_effect = ldap3_exceptions.LDAPError(
             "Connection failed",
         )
         mock_pool = MagicMock()
         mock_pool_class.return_value = mock_pool
 
-        with pytest.raises(ldap3_exceptions.LDAPException), client.get_connection():
+        with pytest.raises(ldap3_exceptions.LDAPError), client.get_connection():
             pass

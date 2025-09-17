@@ -8,8 +8,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
 from pydantic import Field
+
+from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
 
 """
 
@@ -22,7 +23,7 @@ logger = FlextLogger(__name__)
 
 
 # Local LDAP catalog classes (no fallbacks - real implementation)
-class SingerLDAPCatalogEntry(FlextModels):
+class SingerLDAPCatalogEntry(FlextModels.Entity):
     """Singer LDAP catalog entry using flext-core patterns."""
 
     tap_stream_id: str

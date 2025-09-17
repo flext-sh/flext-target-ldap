@@ -10,7 +10,6 @@ from __future__ import annotations
 import importlib.metadata
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
-
 from flext_target_ldap.sinks import (
     GroupsSink,
     LDAPBaseSink,
@@ -20,15 +19,23 @@ from flext_target_ldap.sinks import (
     Target,
     UsersSink,
 )
-from flext_target_ldap.target_client import LDAPTargetClient, TargetLdap
-from flext_target_ldap.target_config import FlextTargetLDAPConfig, LDAPTargetConstants
-from flext_target_ldap.target_exceptions import (
-    FlextTargetLDAPConnectionError,
-    FlextTargetLDAPError,
-    FlextTargetLDAPValidationError,
+from flext_target_ldap.target_client import (
+    LdapTargetClient as LDAPTargetClient,
+    TargetLdap,
 )
-from flext_target_ldap.target_models import LDAPTargetModel, LDAPTargetRecord
-from flext_target_ldap.target_services import FlextTargetLDAPService
+from flext_target_ldap.target_config import TargetLdapConfig as FlextTargetLDAPConfig
+from flext_target_ldap.target_exceptions import (
+    FlextTargetLdapConnectionError as FlextTargetLDAPConnectionError,
+    FlextTargetLdapError as FlextTargetLDAPError,
+    FlextTargetLdapValidationError as FlextTargetLDAPValidationError,
+)
+from flext_target_ldap.target_models import (
+    LdapBatchProcessingModel as LDAPTargetRecord,
+    LdapEntryModel as LDAPTargetModel,
+)
+from flext_target_ldap.target_services import (
+    LdapTargetApiService as FlextTargetLDAPService,
+)
 
 try:
     __version__ = importlib.metadata.version("flext-target-ldap")

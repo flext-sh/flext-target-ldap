@@ -18,7 +18,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLDAPApi, FlextLDAPConnectionConfig, get_flext_ldap_api
+from flext_ldap import FlextLdapApi, FlextLdapConnectionConfig, get_flext_ldap_api
 
 # Import placeholder classes from sinks module
 from flext_target_ldap.sinks import Sink, Target
@@ -76,12 +76,12 @@ class LdapTargetClient:
 
     def __init__(
         self,
-        config: FlextLDAPConnectionConfig | FlextTypes.Core.Dict,
+        config: FlextLdapConnectionConfig | FlextTypes.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLDAPConnectionConfig
-            self.config = FlextLDAPConnectionConfig(
+            # Convert dict to proper FlextLdapConnectionConfig
+            self.config = FlextLdapConnectionConfig(
                 server=str(
                     config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
                 ),
@@ -98,12 +98,12 @@ class LdapTargetClient:
             self._password: str = str(config.get("password", ""))
         else:
             self.config = config
-            # Default authentication credentials when using FlextLDAPConnectionConfig directly
+            # Default authentication credentials when using FlextLdapConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
 
         # Create API instance using flext-ldap
-        self._api: FlextLDAPApi = get_flext_ldap_api()
+        self._api: FlextLdapApi = get_flext_ldap_api()
         self._current_session_id: str | None = None
 
         logger.info(
@@ -192,7 +192,7 @@ class LdapTargetClient:
             class LdapConnectionWrapper:
                 def __init__(
                     self,
-                    api: FlextLDAPApi,
+                    api: FlextLdapApi,
                     server_url: str,
                     bind_dn: str | None,
                     password: str | None,
@@ -282,7 +282,7 @@ class LdapTargetClient:
 
                         search_result = asyncio.run(_search())
                         if search_result.is_success and search_result.data:
-                            # Convert FlextLDAPEntities to compatible format
+                            # Convert FlextLdapEntities to compatible format
                             self.entries = []
                             for entry in search_result.data:
                                 # Create a compatible entry object
@@ -454,7 +454,7 @@ class LdapTargetClient:
                 )
 
             if result.is_success and result.data:
-                # Convert FlextLDAPEntities to LdapSearchEntry for backward compatibility
+                # Convert FlextLdapEntities to LdapSearchEntry for backward compatibility
                 entries = []
                 for flext_entry in result.data:
                     compat_entry = LdapSearchEntry(

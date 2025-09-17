@@ -13,15 +13,15 @@ from __future__ import annotations
 
 import warnings
 
+from pydantic import Field
+from pydantic_settings import SettingsConfigDict
+
 from flext_core import (
-    FlextConfig,
     FlextModels,
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLDAPConnectionConfig
-from pydantic import Field
-from pydantic_settings import SettingsConfigDict
+from flext_ldap import FlextLdapConnectionConfig
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -33,11 +33,11 @@ warnings.warn(
 )
 
 
-class TargetLDAPConfig(FlextConfig.Settings):
+class TargetLDAPConfig(FlextModels.Config):
     """LDAP target configuration using consolidated patterns."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLDAPConnectionConfig = Field(
+    connection: FlextLdapConnectionConfig = Field(
         ...,
         description="LDAP connection configuration",
     )
@@ -177,7 +177,7 @@ def validate_ldap_config(config: FlextTypes.Core.Dict) -> FlextResult[TargetLDAP
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(connection_params["timeout"], 30)
 
-        connection_config = FlextLDAPConnectionConfig(
+        connection_config = FlextLdapConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,
