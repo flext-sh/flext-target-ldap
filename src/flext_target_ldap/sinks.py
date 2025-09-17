@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-
 from flext_target_ldap.client import LDAPClient
 
 

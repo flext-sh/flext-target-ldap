@@ -15,11 +15,12 @@ from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager, suppress
 
 import ldap3
+
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
-    FlextLDAPApi,
-    FlextLDAPConnectionConfig,
-    FlextLDAPEntities,
+    FlextLdapApi,
+    FlextLdapConnectionConfig,
+    FlextLdapEntities,
     get_flext_ldap_api,
 )
 
@@ -48,12 +49,12 @@ class LDAPClient:
 
     def __init__(
         self,
-        config: FlextLDAPConnectionConfig | FlextTypes.Core.Dict,
+        config: FlextLdapConnectionConfig | FlextTypes.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLDAPConnectionConfig
-            self.config = FlextLDAPConnectionConfig(
+            # Convert dict to proper FlextLdapConnectionConfig
+            self.config = FlextLdapConnectionConfig(
                 server=str(config.get("host", "localhost")),
                 port=int(str(config.get("port", 389)))
                 if config.get("port", 389) is not None
@@ -68,12 +69,12 @@ class LDAPClient:
             self._password: str = str(config.get("password", ""))
         else:
             self.config = config
-            # Default authentication credentials when using FlextLDAPConnectionConfig directly
+            # Default authentication credentials when using FlextLdapConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
 
         # Defer API instantiation to avoid heavy config requirements in unit tests
-        self._api: FlextLDAPApi | None = None
+        self._api: FlextLdapApi | None = None
 
         logger.info(
             "Initialized LDAP client using flext-ldap API for %s:%d",
@@ -170,8 +171,8 @@ class LDAPClient:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[str].fail(f"Connection test error: {e}")
 
-    def _get_api(self) -> FlextLDAPApi:
-        """Instantiate and cache FlextLDAPApi lazily."""
+    def _get_api(self) -> FlextLdapApi:
+        """Instantiate and cache FlextLdapApi lazily."""
         if self._api is None:
             self._api = get_flext_ldap_api()
         return self._api
@@ -411,8 +412,8 @@ class LDAPClient:
 
 
 # Backward compatibility aliases
-LDAPConnectionConfig = FlextLDAPConnectionConfig
-LDAPEntry = FlextLDAPEntities
+LDAPConnectionConfig = FlextLdapConnectionConfig
+LDAPEntry = FlextLdapEntities
 
 __all__: FlextTypes.Core.StringList = [
     "LDAPClient",

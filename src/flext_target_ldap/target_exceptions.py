@@ -6,10 +6,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import create_module_exception_classes
+from flext_core import FlextExceptions
 
 # Generate all standard exceptions using factory pattern
-_target_ldap_exceptions = create_module_exception_classes("flext_target_ldap")
+_target_ldap_exceptions = FlextExceptions.create_module_exception_classes(
+    "flext_target_ldap"
+)
 
 # Export factory-created exception classes (using actual factory keys)
 # create_module_exception_classes uses UPPER_SNAKE keys: MODULEPREFIXError, etc.

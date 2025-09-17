@@ -15,7 +15,6 @@ from pathlib import Path
 from flext_cli import flext_cli_create_helper
 from flext_core import FlextContainer, FlextLogger, FlextTypes
 from flext_meltano import Sink, Target
-
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import TargetLDAPConfig
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
