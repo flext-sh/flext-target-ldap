@@ -58,7 +58,6 @@ __all__: FlextTypes.Core.StringList = [
     "LDAPBaseSink",
     "LDAPProcessingResult",
     "LDAPTargetClient",
-    "LDAPTargetConstants",
     "LDAPTargetModel",
     "LDAPTargetRecord",
     "OrganizationalUnitsSink",
