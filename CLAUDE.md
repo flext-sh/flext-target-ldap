@@ -4,17 +4,17 @@
 **Version**: 2.1.0 | **Authority**: PROJECT | **Updated**: 2025-01-08  
 **Environment**: `/home/marlonsc/flext/.venv/bin/python` (No PYTHONPATH required)  
 **Parent**: [FLEXT Workspace CLAUDE.md](../CLAUDE.md)
-**Based on**: flext-core 0.9.0 with 75%+ test coverage (PROVEN FOUNDATION)
+**Based on**: flext-core 0.9.9 with 75%+ test coverage (PROVEN FOUNDATION)
 
 **Hierarchy**: This document provides project-specific standards based on workspace-level patterns defined in [../CLAUDE.md](../CLAUDE.md). For architectural principles, quality gates, and MCP server usage, reference the main workspace standards.
 
 ## 🔗 MCP SERVER INTEGRATION
 
-| MCP Server | Purpose | Status |
-|------------|---------|--------|
-| **serena** | Singer target codebase analysis and LDAP loading patterns | **ACTIVE** |
-| **sequential-thinking** | LDAP data loading and Singer protocol architecture | **ACTIVE** |
-| **github** | Singer ecosystem integration and target PRs | **ACTIVE** |
+| MCP Server              | Purpose                                                   | Status     |
+| ----------------------- | --------------------------------------------------------- | ---------- |
+| **serena**              | Singer target codebase analysis and LDAP loading patterns | **ACTIVE** |
+| **sequential-thinking** | LDAP data loading and Singer protocol architecture        | **ACTIVE** |
+| **github**              | Singer ecosystem integration and target PRs               | **ACTIVE** |
 
 **Usage**: `claude mcp list` for available servers, leverage for Singer-specific development patterns and LDAP loading analysis.
 

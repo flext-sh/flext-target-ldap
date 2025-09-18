@@ -29,6 +29,18 @@ class Sink:
         self.schema = schema
         self.key_properties = key_properties
 
+    def process_record(
+        self, record: FlextTypes.Core.Dict, context: FlextTypes.Core.Dict
+    ) -> FlextResult[None]:
+        """Process a record using the target."""
+        # Implementation will delegate to target's process method
+        try:
+            # Basic processing - this is a placeholder implementation
+            # Real implementation would transform and load the record to LDAP
+            return FlextResult[None].ok(None)
+        except Exception as e:
+            return FlextResult[None].fail(f"Record processing failed: {e}")
+
 
 class Target:
     """Placeholder Target base class for Singer protocol compatibility."""

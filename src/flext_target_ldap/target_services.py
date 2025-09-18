@@ -97,8 +97,18 @@ class LdapConnectionService:
             protocol = "ldaps" if self._config.connection.use_ssl else "ldap"
             server_url = f"{protocol}://{self._config.connection.server}:{self._config.connection.port}"
 
+            # Use proper credentials for connection test
+            bind_dn = (
+                self._config.connection.bind_dn or ""
+            )  # Empty string for anonymous bind
+            bind_password = (
+                self._config.connection.bind_password or ""
+            )  # Empty string for anonymous bind
+
             # Establish and close a simple connection to validate
-            async with self._ldap_api.connection(server_url, None, None) as session:
+            async with self._ldap_api.connection(
+                server_url, bind_dn, bind_password
+            ) as session:
                 # Optionally perform a NOOP or simple bind check if available
                 _ = session  # ensure variable is used for static checkers
             logger.info("LDAP connection test successful")
@@ -610,7 +620,9 @@ class LdapTargetApiService:
 
             # Test connection
             if config_result.data is None:
-                return FlextResult[None].fail(
+                return FlextResult[
+                    bool
+                ].fail(  # Fixed: FlextResult[None] -> FlextResult[bool]
                     "Configuration validation returned no data"
                 )
             connection_service = LdapConnectionService(config_result.data)
