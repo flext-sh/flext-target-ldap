@@ -34,7 +34,9 @@ class TestTargetLDAPIntegration:
 
     @pytest.fixture
     def config_file(
-        self, tmp_path: Path, mock_ldap_config: FlextTypes.Core.Dict,
+        self,
+        tmp_path: Path,
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
