@@ -13,18 +13,57 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager, suppress
+from typing import Protocol
 
 import ldap3
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
     FlextLdapApi,
-    FlextLdapConnectionConfig,
     FlextLdapEntities,
+    FlextLdapModels,
     get_flext_ldap_api,
 )
 
 logger = FlextLogger(__name__)
+
+
+class LDAPConnectionProtocol(Protocol):
+    """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
+
+    bound: bool
+    entries: list[object]
+
+    def bind(self) -> bool:
+        """Bind to LDAP server."""
+        ...
+
+    def unbind(self) -> None:
+        """Unbind from LDAP server."""
+        ...
+
+    def add(
+        self, dn: str, object_classes: list[str], attributes: dict[str, object]
+    ) -> bool:
+        """Add LDAP entry."""
+        ...
+
+    def modify(self, dn: str, changes: dict[str, object]) -> bool:
+        """Modify LDAP entry."""
+        ...
+
+    def delete(self, dn: str) -> bool:
+        """Delete LDAP entry."""
+        ...
+
+    def search(
+        self,
+        base_dn: str,
+        search_filter: str,
+        attributes: list[str] | None = None,
+    ) -> bool:
+        """Search LDAP entries."""
+        ...
 
 
 class LDAPSearchEntry:
@@ -49,12 +88,12 @@ class LDAPClient:
 
     def __init__(
         self,
-        config: FlextLdapConnectionConfig | FlextTypes.Core.Dict,
+        config: FlextLdapModels.ConnectionConfig | FlextTypes.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLdapConnectionConfig
-            self.config = FlextLdapConnectionConfig(
+            # Convert dict to proper FlextLdapModels.ConnectionConfig
+            self.config = FlextLdapModels.ConnectionConfig(
                 server=str(config.get("host", "localhost")),
                 port=int(str(config.get("port", 389)))
                 if config.get("port", 389) is not None
@@ -69,7 +108,7 @@ class LDAPClient:
             self._password: str = str(config.get("password", ""))
         else:
             self.config = config
-            # Default authentication credentials when using FlextLdapConnectionConfig directly
+            # Default authentication credentials when using FlextLdapModels.ConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
 
@@ -162,8 +201,8 @@ class LDAPClient:
             async def _validate() -> FlextResult[str]:
                 async with api.connection(
                     server_url,
-                    self._bind_dn or None,
-                    self._password or None,
+                    self._bind_dn or "",
+                    self._password or "",
                 ):
                     return FlextResult[str].ok("validated")
 
@@ -184,18 +223,18 @@ class LDAPClient:
         logger.info("Sync connect called - using flext-ldap infrastructure")
         return FlextResult[None].ok(None)
 
-    def get_connection(self) -> _GeneratorContextManager[object]:
+    def get_connection(self) -> _GeneratorContextManager[LDAPConnectionProtocol]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
 
         Returns a real LDAP connection for production use.
 
         Returns:
-            _GeneratorContextManager[object]: LDAP connection context manager.
+            _GeneratorContextManager[LDAPConnectionProtocol]: LDAP connection context manager.
 
         """
 
         @contextmanager
-        def connection_context() -> Generator[object]:
+        def connection_context() -> Generator[LDAPConnectionProtocol]:
             # Primary path: Use ldap3 directly if available
             server_pool_cls = getattr(ldap3, "ServerPool", None)
             connection_cls = getattr(ldap3, "Connection", None)
@@ -225,6 +264,7 @@ class LDAPClient:
                 def __init__(self, session_id: str) -> None:
                     self.session_id = session_id
                     self.bound = True
+                    self.entries: list[object] = []
 
                 def bind(self) -> bool:
                     return True
@@ -233,12 +273,15 @@ class LDAPClient:
                     pass
 
                 def add(
-                    self, _dn: str, _object_classes: list[str], _attributes: dict
+                    self,
+                    _dn: str,
+                    _object_classes: list[str],
+                    _attributes: dict[str, object],
                 ) -> bool:
                     # Delegate to flext-ldap API
                     return True
 
-                def modify(self, _dn: str, _changes: dict) -> bool:
+                def modify(self, _dn: str, _changes: dict[str, object]) -> bool:
                     # Delegate to flext-ldap API
                     return True
 
@@ -250,20 +293,21 @@ class LDAPClient:
                     self,
                     _base_dn: str,
                     _search_filter: str,
-                    _attributes: list | None = None,
+                    _attributes: list[str] | None = None,
                 ) -> bool:
                     # Delegate to flext-ldap API
                     self.entries = []  # Empty results for compatibility
                     return True
 
             # Create async context and extract session
-            async def _get_session() -> None:
+            async def _get_session() -> str:
                 async with api.connection(
                     server_url,
-                    self._bind_dn or None,
-                    self._password or None,
+                    self._bind_dn or "",
+                    self._password or "",
                 ) as session:
-                    return session
+                    # Convert session to string identifier
+                    return str(session) if session else "default_session"
 
             try:
                 session_id = asyncio.run(_get_session())
@@ -289,6 +333,7 @@ class LDAPClient:
                 if object_classes is None:
                     object_classes = []
                 try:
+                    # conn is now properly typed as LDAPConnectionProtocol
                     _ = conn.add(dn, object_classes, attributes)
                 except (
                     Exception
@@ -306,6 +351,7 @@ class LDAPClient:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
+                # conn is now properly typed as LDAPConnectionProtocol
                 _ = conn.modify(dn, changes)
                 return FlextResult[bool].ok(data=True)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -320,6 +366,7 @@ class LDAPClient:
 
             logger.info("Deleting LDAP entry using ldap3: %s", dn)
             with self.get_connection() as conn:
+                # conn is now properly typed as LDAPConnectionProtocol
                 _ = conn.delete(dn)
                 return FlextResult[bool].ok(data=True)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -342,6 +389,7 @@ class LDAPClient:
                 search_filter,
             )
             with self.get_connection() as conn:
+                # conn is now properly typed as LDAPConnectionProtocol
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
                 raw_entries = getattr(conn, "entries", [])
                 entries: list[LDAPSearchEntry] = []
@@ -412,7 +460,7 @@ class LDAPClient:
 
 
 # Backward compatibility aliases
-LDAPConnectionConfig = FlextLdapConnectionConfig
+LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
 LDAPEntry = FlextLdapEntities
 
 __all__: FlextTypes.Core.StringList = [

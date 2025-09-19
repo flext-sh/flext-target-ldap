@@ -18,7 +18,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLdapApi, FlextLdapConnectionConfig, get_flext_ldap_api
+from flext_ldap import FlextLdapApi, FlextLdapModels, get_flext_ldap_api
 
 # Import placeholder classes from sinks module
 from flext_target_ldap.sinks import Sink, Target
@@ -76,12 +76,12 @@ class LdapTargetClient:
 
     def __init__(
         self,
-        config: FlextLdapConnectionConfig | FlextTypes.Core.Dict,
+        config: FlextLdapModels.ConnectionConfig | FlextTypes.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLdapConnectionConfig
-            self.config = FlextLdapConnectionConfig(
+            # Convert dict to proper FlextLdapModels.ConnectionConfig
+            self.config = FlextLdapModels.ConnectionConfig(
                 server=str(
                     config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
                 ),
@@ -98,7 +98,7 @@ class LdapTargetClient:
             self._password: str = str(config.get("password", ""))
         else:
             self.config = config
-            # Default authentication credentials when using FlextLdapConnectionConfig directly
+            # Default authentication credentials when using FlextLdapModels.ConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
 

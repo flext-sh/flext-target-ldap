@@ -30,7 +30,7 @@ class Sink:
         self.key_properties = key_properties
 
     def process_record(
-        self, record: FlextTypes.Core.Dict, context: FlextTypes.Core.Dict
+        self, _record: FlextTypes.Core.Dict, _context: FlextTypes.Core.Dict
     ) -> FlextResult[None]:
         """Process a record using the target."""
         # Implementation will delegate to target's process method
