@@ -140,7 +140,7 @@ class LdapEntryModel(FlextModels.Entity):
     @field_validator("object_classes")
     @classmethod
     def validate_object_classes(
-        cls, v: FlextTypes.Core.StringList
+        cls, v: FlextTypes.Core.StringList,
     ) -> FlextTypes.Core.StringList:
         """Validate object classes contain 'top'."""
         if "top" not in v:
@@ -254,7 +254,7 @@ class LdapTransformationResultModel(FlextModels.Entity):
             return FlextResult[None].ok(None)
         except Exception as e:
             return FlextResult[None].fail(
-                f"Transformation result validation failed: {e}"
+                f"Transformation result validation failed: {e}",
             )
 
     @property

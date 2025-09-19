@@ -10,7 +10,7 @@ from flext_core import FlextExceptions
 
 # Generate all standard exceptions using factory pattern
 _target_ldap_exceptions = FlextExceptions.create_module_exception_classes(
-    "flext_target_ldap"
+    "flext_target_ldap",
 )
 
 # Export factory-created exception classes (using actual factory keys)

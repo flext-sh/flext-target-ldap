@@ -83,7 +83,7 @@ class LdapTargetClient:
             # Convert dict to proper FlextLdapModels.ConnectionConfig
             self.config = FlextLdapModels.ConnectionConfig(
                 server=str(
-                    config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
+                    config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST),
                 ),
                 port=int(str(config.get("port", FlextConstants.Platform.LDAP_PORT)))
                 if config.get("port", FlextConstants.Platform.LDAP_PORT) is not None
@@ -210,14 +210,14 @@ class LdapTargetClient:
                     pass
 
                 def add(
-                    self, _dn: str, _object_classes: list[str], _attributes: dict
+                    self, _dn: str, _object_classes: list[str], _attributes: dict,
                 ) -> bool:
                     # Delegate to async flext-ldap API
                     try:
 
                         async def _add() -> bool:
                             async with self.api.connection(
-                                self.server_url, self.bind_dn, self.password
+                                self.server_url, self.bind_dn, self.password,
                             ):
                                 # Use flext-ldap API for adding entries
                                 return True
@@ -233,7 +233,7 @@ class LdapTargetClient:
 
                         async def _modify() -> bool:
                             async with self.api.connection(
-                                self.server_url, self.bind_dn, self.password
+                                self.server_url, self.bind_dn, self.password,
                             ):
                                 # Use flext-ldap API for modifying entries
                                 return True
@@ -249,7 +249,7 @@ class LdapTargetClient:
 
                         async def _delete() -> bool:
                             async with self.api.connection(
-                                self.server_url, self.bind_dn, self.password
+                                self.server_url, self.bind_dn, self.password,
                             ):
                                 # Use flext-ldap API for deleting entries
                                 return True
@@ -270,7 +270,7 @@ class LdapTargetClient:
 
                         async def _search() -> dict:
                             async with self.api.connection(
-                                self.server_url, self.bind_dn, self.password
+                                self.server_url, self.bind_dn, self.password,
                             ) as session:
                                 return await self.api.search(
                                     session_id=session,
@@ -294,7 +294,7 @@ class LdapTargetClient:
                                             setattr(self, key, values)
 
                                 compat_entry = CompatibleEntry(
-                                    entry.dn, dict(entry.attributes)
+                                    entry.dn, dict(entry.attributes),
                                 )
                                 self.entries.append(compat_entry)
                         else:
@@ -308,7 +308,7 @@ class LdapTargetClient:
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
             wrapper = LdapConnectionWrapper(
-                self._api, server_url, self._bind_dn or None, self._password or None
+                self._api, server_url, self._bind_dn or None, self._password or None,
             )
 
             try:
@@ -368,7 +368,7 @@ class LdapTargetClient:
                     if result.is_success:
                         return FlextResult[bool].ok(data=True)
                     return FlextResult[bool].fail(
-                        result.error or "Group creation failed"
+                        result.error or "Group creation failed",
                     )
                 # Fallback: create generic entry via modify flow (unsupported path)
                 # Emulate success by returning ok; real implementation would add support if needed
@@ -503,16 +503,16 @@ class LdapBaseSink(Sink):
             # Create dict configuration for LdapTargetClient compatibility
             connection_config = {
                 "host": self._target.config.get(
-                    "host", FlextConstants.Infrastructure.DEFAULT_HOST
+                    "host", FlextConstants.Infrastructure.DEFAULT_HOST,
                 ),
                 "port": self._target.config.get(
-                    "port", FlextConstants.Platform.LDAP_PORT
+                    "port", FlextConstants.Platform.LDAP_PORT,
                 ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),
                 "timeout": self._target.config.get(
-                    "timeout", FlextConstants.Defaults.TIMEOUT
+                    "timeout", FlextConstants.Defaults.TIMEOUT,
                 ),
             }
 
@@ -616,7 +616,7 @@ class LdapUsersSink(LdapBaseSink):
 
             # Build DN for user
             base_dn = self._target.config.get(
-                "base_dn", FlextConstants.Platform.DEFAULT_LDAP_BASE_DN
+                "base_dn", FlextConstants.Platform.DEFAULT_LDAP_BASE_DN,
             )
             user_dn = f"uid={username},{base_dn}"
 
@@ -665,7 +665,7 @@ class LdapUsersSink(LdapBaseSink):
             self._processing_result.add_error(error_msg)
 
     def _build_user_attributes(
-        self, record: FlextTypes.Core.Dict
+        self, record: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
@@ -779,7 +779,7 @@ class LdapGroupsSink(LdapBaseSink):
             self._processing_result.add_error(error_msg)
 
     def _build_group_attributes(
-        self, record: FlextTypes.Core.Dict
+        self, record: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
@@ -881,7 +881,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             self._processing_result.add_error(error_msg)
 
     def _build_ou_attributes(
-        self, record: FlextTypes.Core.Dict
+        self, record: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Build LDAP attributes for OU entry."""
         attributes: FlextTypes.Core.Dict = {

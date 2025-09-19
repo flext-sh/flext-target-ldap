@@ -77,10 +77,10 @@ class SingerLDAPCatalogManager:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
             return FlextResult[SingerLDAPCatalogEntry].fail(
-                f"LDAP stream not found: {stream_name}"
+                f"LDAP stream not found: {stream_name}",
             )
         return FlextResult[SingerLDAPCatalogEntry].ok(
-            self._catalog_entries[stream_name]
+            self._catalog_entries[stream_name],
         )
 
 

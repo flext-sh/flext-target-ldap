@@ -30,7 +30,7 @@ class Sink:
         self.key_properties = key_properties
 
     def process_record(
-        self, _record: FlextTypes.Core.Dict, _context: FlextTypes.Core.Dict
+        self, _record: FlextTypes.Core.Dict, _context: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Process a record using the target."""
         # Implementation will delegate to target's process method
@@ -262,7 +262,7 @@ class UsersSink(LDAPBaseSink):
             self._processing_result.add_error(error_msg)
 
     def _build_user_attributes(
-        self, record: FlextTypes.Core.Dict
+        self, record: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
@@ -379,7 +379,7 @@ class GroupsSink(LDAPBaseSink):
             self._processing_result.add_error(error_msg)
 
     def _build_group_attributes(
-        self, record: FlextTypes.Core.Dict
+        self, record: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
@@ -482,7 +482,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             self._processing_result.add_error(error_msg)
 
     def _build_ou_attributes(
-        self, record: FlextTypes.Core.Dict
+        self, record: FlextTypes.Core.Dict,
     ) -> FlextTypes.Core.Dict:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(
