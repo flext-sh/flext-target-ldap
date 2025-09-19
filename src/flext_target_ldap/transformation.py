@@ -51,7 +51,7 @@ class TransformationResult(FlextModels.Entity):
             return FlextResult[None].ok(None)
         except Exception as e:
             return FlextResult[None].fail(
-                f"Transformation result validation failed: {e}"
+                f"Transformation result validation failed: {e}",
             )
 
 
@@ -63,7 +63,7 @@ class DataTransformationEngine:
         self.rules = rules
 
     def transform(
-        self, data: FlextTypes.Core.Dict
+        self, data: FlextTypes.Core.Dict,
     ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:

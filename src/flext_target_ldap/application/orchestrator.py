@@ -63,7 +63,7 @@ class LDAPTargetOrchestrator:
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Data loading orchestration failed: {e}"
+                f"Data loading orchestration failed: {e}",
             )
 
     def validate_target_configuration(self) -> FlextResult[bool]:

@@ -107,7 +107,7 @@ class LdapConnectionService:
 
             # Establish and close a simple connection to validate
             async with self._ldap_api.connection(
-                server_url, bind_dn, bind_password
+                server_url, bind_dn, bind_password,
             ) as session:
                 # Optionally perform a NOOP or simple bind check if available
                 _ = session  # ensure variable is used for static checkers
@@ -231,7 +231,7 @@ class LdapTransformationService:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Record transformation failed")
             return FlextResult[LdapTransformationResultModel].fail(
-                f"Transformation failed: {e}"
+                f"Transformation failed: {e}",
             )
 
     def _apply_transformation_rule(self, value: str, rule: str) -> str:
@@ -425,7 +425,7 @@ class LdapTargetOrchestrator:
             working_config = config or self._typed_config
             if not working_config:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    "No configuration available for orchestration"
+                    "No configuration available for orchestration",
                 )
 
             # Initialize services
@@ -485,7 +485,7 @@ class LdapTargetOrchestrator:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP data loading orchestration failed")
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Data loading orchestration failed: {e}"
+                f"Data loading orchestration failed: {e}",
             )
 
     async def validate_target_configuration(
@@ -498,7 +498,7 @@ class LdapTargetOrchestrator:
             working_config = config or self._typed_config
             if not working_config:
                 return FlextResult[bool].fail(
-                    "No configuration available for validation"
+                    "No configuration available for validation",
                 )
 
             # Validate business rules
@@ -550,7 +550,7 @@ class LdapTargetApiService:
         target_result = await self.create_ldap_target(config)
         if not target_result.is_success:
             return FlextResult[int].fail(
-                f"Target creation failed: {target_result.error}"
+                f"Target creation failed: {target_result.error}",
             )
 
         try:
@@ -582,7 +582,7 @@ class LdapTargetApiService:
         target_result = await self.create_ldap_target(config)
         if not target_result.is_success:
             return FlextResult[int].fail(
-                f"Target creation failed: {target_result.error}"
+                f"Target creation failed: {target_result.error}",
             )
 
         try:
@@ -623,7 +623,7 @@ class LdapTargetApiService:
                 return FlextResult[
                     bool
                 ].fail(  # Fixed: FlextResult[None] -> FlextResult[bool]
-                    "Configuration validation returned no data"
+                    "Configuration validation returned no data",
                 )
             connection_service = LdapConnectionService(config_result.data)
             return await connection_service.test_connection()

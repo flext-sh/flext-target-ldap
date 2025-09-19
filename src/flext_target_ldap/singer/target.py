@@ -67,7 +67,7 @@ class SingerTargetLDAP:
         except Exception as e:
             logger.exception("Singer message processing failed")
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Message processing failed: {e}"
+                f"Message processing failed: {e}",
             )
 
     def validate_singer_config(self) -> FlextResult[bool]:

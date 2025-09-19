@@ -100,7 +100,7 @@ class LDAPDataTransformer:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Record transformation failed: {e}"
+                f"Record transformation failed: {e}",
             )
 
     def _normalize_ldap_attribute_name(self, name: str) -> str:
@@ -145,7 +145,7 @@ class LDAPDataTransformer:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
             return FlextResult[dict[str, FlextTypes.Core.StringList]].fail(
-                f"Attribute preparation failed: {e}"
+                f"Attribute preparation failed: {e}",
             )
 
 
@@ -190,7 +190,7 @@ class LDAPSchemaMapper:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP schema mapping failed")
             return FlextResult[FlextTypes.Core.Headers].fail(
-                f"Schema mapping failed: {e}"
+                f"Schema mapping failed: {e}",
             )
 
     def _normalize_attribute_name(self, name: str) -> str:
@@ -333,7 +333,7 @@ class LDAPEntryManager:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
             return FlextResult[FlextTypes.Core.StringList].fail(
-                f"Object class determination failed: {e}"
+                f"Object class determination failed: {e}",
             )
 
     def validate_entry_attributes(
@@ -358,7 +358,7 @@ class LDAPEntryManager:
             missing_attrs = required_attrs - set(attributes.keys())
             if missing_attrs:
                 return FlextResult[bool].fail(
-                    f"Missing required attributes: {missing_attrs}"
+                    f"Missing required attributes: {missing_attrs}",
                 )
 
             return FlextResult[bool].ok(data=True)
@@ -405,5 +405,5 @@ class LDAPEntryManager:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Modify changes preparation failed: {e}"
+                f"Modify changes preparation failed: {e}",
             )

@@ -138,7 +138,7 @@ from flext_core import (
 from flext_cli import (
     FlextCliApi,           # High-level CLI API for programmatic access
     FlextCliMain,          # Main CLI entry point and command registration
-    FlextCliConfig,        # Configuration management for CLI
+    FlextCliConfigs,        # Configuration management for CLI
     FlextCliConstants,     # CLI-specific constants
     # NEVER import click or rich directly - ALL CLI + OUTPUT through flext-cli
 )
@@ -327,7 +327,7 @@ class SingerToLdapTransformer:
 
 ```python
 # ✅ CORRECT - ALL CLI projects MUST use flext-cli exclusively
-from flext_cli import FlextCliApi, FlextCliMain, FlextCliConfig
+from flext_cli import FlextCliApi, FlextCliMain, FlextCliConfigs
 # ❌ FORBIDDEN - NEVER import click directly
 # import click  # THIS IS ABSOLUTELY FORBIDDEN
 
@@ -344,7 +344,7 @@ class LdapTargetCliService:
         """Initialize LDAP target CLI service with automatic configuration loading."""
         # ✅ AUTOMATIC: Configuration loaded transparently by flext-cli/flext-core
         self._cli_api = FlextCliApi()
-        self._config = FlextCliConfig()  # Automatically includes .env + defaults + CLI params
+        self._config = FlextCliConfigs()  # Automatically includes .env + defaults + CLI params
         self._ldap_api = FlextLdapApi()
 
     def define_ldap_target_configuration_schema(self) -> FlextResult[dict]:
@@ -959,7 +959,7 @@ python -m target_ldap test-ldap-integration \
 ```python
 # ✅ CORRECT - LDAP target testing through FLEXT ecosystem exclusively
 from flext_core import FlextResult, get_logger
-from flext_cli import FlextCliApi, FlextCliConfig
+from flext_cli import FlextCliApi, FlextCliConfigs
 from flext_ldap import FlextLdapApi, FlextLdapConnection
 from flext_meltano import FlextSingerTarget
 
@@ -971,7 +971,7 @@ class LdapTargetCliTestingService:
         # ✅ AUTOMATIC: .env loaded transparently by FLEXT ecosystem
         self._logger = get_logger("ldap_target_testing")
         self._cli_api = FlextCliApi()
-        self._config = FlextCliConfig()  # Automatically loads .env + defaults + CLI params
+        self._config = FlextCliConfigs()  # Automatically loads .env + defaults + CLI params
         self._ldap_api = FlextLdapApi()
 
     def debug_ldap_target_configuration(self) -> FlextResult[dict]:

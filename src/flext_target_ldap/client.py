@@ -43,7 +43,7 @@ class LDAPConnectionProtocol(Protocol):
         ...
 
     def add(
-        self, dn: str, object_classes: list[str], attributes: dict[str, object]
+        self, dn: str, object_classes: list[str], attributes: dict[str, object],
     ) -> bool:
         """Add LDAP entry."""
         ...
