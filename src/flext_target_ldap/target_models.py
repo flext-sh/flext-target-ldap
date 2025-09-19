@@ -140,7 +140,8 @@ class LdapEntryModel(FlextModels.Entity):
     @field_validator("object_classes")
     @classmethod
     def validate_object_classes(
-        cls, v: FlextTypes.Core.StringList,
+        cls,
+        v: FlextTypes.Core.StringList,
     ) -> FlextTypes.Core.StringList:
         """Validate object classes contain 'top'."""
         if "top" not in v:

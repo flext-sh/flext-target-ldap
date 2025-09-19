@@ -63,7 +63,8 @@ class DataTransformationEngine:
         self.rules = rules
 
     def transform(
-        self, data: FlextTypes.Core.Dict,
+        self,
+        data: FlextTypes.Core.Dict,
     ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:

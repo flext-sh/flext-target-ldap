@@ -107,7 +107,9 @@ class LdapConnectionService:
 
             # Establish and close a simple connection to validate
             async with self._ldap_api.connection(
-                server_url, bind_dn, bind_password,
+                server_url,
+                bind_dn,
+                bind_password,
             ) as session:
                 # Optionally perform a NOOP or simple bind check if available
                 _ = session  # ensure variable is used for static checkers

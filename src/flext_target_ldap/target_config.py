@@ -280,7 +280,8 @@ def validate_ldap_target_config(
             return str(value) if value is not None else default
 
         def _to_str_list(
-            value: object, default: FlextTypes.Core.StringList,
+            value: object,
+            default: FlextTypes.Core.StringList,
         ) -> FlextTypes.Core.StringList:
             if isinstance(value, list):
                 return [str(v) for v in value]
