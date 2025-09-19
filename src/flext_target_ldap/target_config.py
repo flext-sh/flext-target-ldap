@@ -20,7 +20,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLdapConnectionConfig
+from flext_ldap import FlextLdapModels
 
 # Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
@@ -163,7 +163,7 @@ class TargetLdapConfig(FlextModels.Config):
     """
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLdapConnectionConfig = Field(
+    connection: FlextLdapModels.ConnectionConfig = Field(
         ...,
         description="LDAP connection configuration from flext-ldap",
     )
@@ -286,9 +286,9 @@ def validate_ldap_target_config(
                 return [str(v) for v in value]
             return default
 
-        # Extract connection parameters for FlextLdapConnectionConfig
+        # Extract connection parameters for FlextLdapModels.ConnectionConfig
         connection_params = {
-            # Map external dict keys to FlextLdapConnectionConfig fields
+            # Map external dict keys to FlextLdapModels.ConnectionConfig fields
             "server": config.get("host", "localhost"),
             "port": config.get("port", 389),
             "use_ssl": config.get("use_ssl", False),
@@ -305,7 +305,7 @@ def validate_ldap_target_config(
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(connection_params["timeout"], 30)
 
-        connection_config = FlextLdapConnectionConfig(
+        connection_config = FlextLdapModels.ConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,
@@ -396,7 +396,7 @@ def create_default_ldap_target_config(
     """Create default LDAP target configuration with minimal parameters."""
     try:
         # Create connection config
-        connection_config = FlextLdapConnectionConfig(
+        connection_config = FlextLdapModels.ConnectionConfig(
             server=host,
             port=port,
             use_ssl=use_ssl,

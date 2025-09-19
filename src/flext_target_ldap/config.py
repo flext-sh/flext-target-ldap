@@ -21,7 +21,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLdapConnectionConfig
+from flext_ldap import FlextLdapModels
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -37,7 +37,7 @@ class TargetLDAPConfig(FlextModels.Config):
     """LDAP target configuration using consolidated patterns."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLdapConnectionConfig = Field(
+    connection: FlextLdapModels.ConnectionConfig = Field(
         ...,
         description="LDAP connection configuration",
     )
@@ -177,7 +177,7 @@ def validate_ldap_config(config: FlextTypes.Core.Dict) -> FlextResult[TargetLDAP
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(connection_params["timeout"], 30)
 
-        connection_config = FlextLdapConnectionConfig(
+        connection_config = FlextLdapModels.ConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,
