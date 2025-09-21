@@ -8,25 +8,35 @@ from __future__ import annotations
 
 from flext_core import FlextExceptions
 
-# Generate all standard exceptions using factory pattern
-_target_ldap_exceptions = FlextExceptions.create_module_exception_classes(
-    "flext_target_ldap",
-)
 
-# Export factory-created exception classes (using actual factory keys)
-# create_module_exception_classes uses UPPER_SNAKE keys: MODULEPREFIXError, etc.
-_PREFIX = "FLEXT_TARGET_LDAP"
-FlextTargetLdapError = _target_ldap_exceptions[f"{_PREFIX}Error"]
-FlextTargetLdapValidationError = _target_ldap_exceptions[f"{_PREFIX}ValidationError"]
-FlextTargetLdapConfigurationError = _target_ldap_exceptions[
-    f"{_PREFIX}ConfigurationError"
-]
-FlextTargetLdapProcessingError = _target_ldap_exceptions[f"{_PREFIX}ProcessingError"]
-FlextTargetLdapConnectionError = _target_ldap_exceptions[f"{_PREFIX}ConnectionError"]
-FlextTargetLdapAuthenticationError = _target_ldap_exceptions[
-    f"{_PREFIX}AuthenticationError"
-]
-FlextTargetLdapTimeoutError = _target_ldap_exceptions[f"{_PREFIX}TimeoutError"]
+# ✅ DIRECT EXCEPTION CLASSES: Use direct inheritance instead of factory pattern
+class FlextTargetLdapError(FlextExceptions.Error):
+    """Generic LDAP target errors."""
+
+
+class FlextTargetLdapValidationError(FlextExceptions.ValidationError):
+    """LDAP target validation-specific errors."""
+
+
+class FlextTargetLdapConfigurationError(FlextExceptions.ConfigurationError):
+    """LDAP target configuration-specific errors."""
+
+
+class FlextTargetLdapProcessingError(FlextExceptions.ProcessingError):
+    """LDAP target processing-specific errors."""
+
+
+class FlextTargetLdapConnectionError(FlextExceptions.ConnectionError):
+    """LDAP target connection-specific errors."""
+
+
+class FlextTargetLdapAuthenticationError(FlextExceptions.AuthenticationError):
+    """LDAP target authentication-specific errors."""
+
+
+class FlextTargetLdapTimeoutError(FlextExceptions.TimeoutError):
+    """LDAP target timeout-specific errors."""
+
 
 # Create backward-compatible aliases for existing code
 FlextTargetLdapLoadError = FlextTargetLdapProcessingError  # Load errors are processing
