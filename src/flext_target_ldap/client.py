@@ -19,7 +19,7 @@ import ldap3
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
-    FlextLdapApi,
+    FlextLdapClient,
     FlextLdapEntities,
     FlextLdapModels,
     get_flext_ldap_api,
@@ -116,7 +116,7 @@ class LDAPClient:
             self._password = ""
 
         # Defer API instantiation to avoid heavy config requirements in unit tests
-        self._api: FlextLdapApi | None = None
+        self._api: FlextLdapClient | None = None
 
         logger.info(
             "Initialized LDAP client using flext-ldap API for %s:%d",
@@ -213,8 +213,8 @@ class LDAPClient:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[str].fail(f"Connection test error: {e}")
 
-    def _get_api(self) -> FlextLdapApi:
-        """Instantiate and cache FlextLdapApi lazily."""
+    def _get_api(self) -> FlextLdapClient:
+        """Instantiate and cache FlextLdapClient lazily."""
         if self._api is None:
             self._api = get_flext_ldap_api()
         return self._api
