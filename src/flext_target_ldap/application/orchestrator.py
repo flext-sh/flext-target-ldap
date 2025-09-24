@@ -27,7 +27,7 @@ class LDAPTargetOrchestrator:
             object: Description of return value.
 
         """
-        self.config = config or {}
+        self.config: dict[str, object] = config or {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
@@ -66,7 +66,7 @@ class LDAPTargetOrchestrator:
                 f"Data loading orchestration failed: {e}",
             )
 
-    def validate_target_configuration(self) -> FlextResult[bool]:
+    def validate_target_configuration(self: object) -> FlextResult[bool]:
         """Validate LDAP target configuration.
 
         Returns:

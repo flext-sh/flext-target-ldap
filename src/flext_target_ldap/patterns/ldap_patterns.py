@@ -23,7 +23,7 @@ logger = FlextLogger(__name__)
 class LDAPTypeConverter:
     """Convert data types for LDAP storage using flext-core patterns."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize LDAP type converter."""
 
     def convert_singer_to_ldap(
@@ -36,15 +36,17 @@ class LDAPTypeConverter:
             if value is None:
                 result = None
             elif singer_type in {"string", "text"}:
-                result = str(value)
+                result: FlextResult[object] = str(value)
             elif singer_type in {"integer", "number"}:
-                result = str(value)  # LDAP stores numbers as strings
+                result: FlextResult[object] = str(
+                    value
+                )  # LDAP stores numbers as strings
             elif singer_type == "boolean":
                 result = "TRUE" if value else "FALSE"
             elif singer_type in {"object", "array"}:
-                result = json.dumps(value)
+                result: FlextResult[object] = json.dumps(value)
             else:
-                result = str(value)
+                result: FlextResult[object] = str(value)
 
             return FlextResult[object].ok(result)
 
@@ -74,9 +76,9 @@ class LDAPDataTransformer:
                 ldap_key = self._normalize_ldap_attribute_name(key)
 
                 if schema:
-                    properties = schema.get("properties", {})
+                    properties: dict[str, object] = schema.get("properties", {})
                     if isinstance(properties, dict):
-                        prop_def = properties.get(key, {})
+                        prop_def: dict[str, object] = properties.get(key, {})
                         if isinstance(prop_def, dict):
                             singer_type = prop_def.get("type", "string")
                         else:
@@ -152,7 +154,7 @@ class LDAPDataTransformer:
 class LDAPSchemaMapper:
     """Map Singer schemas to LDAP schemas using flext-core patterns."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize LDAP schema mapper."""
 
     def map_singer_schema_to_ldap(
@@ -163,7 +165,7 @@ class LDAPSchemaMapper:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: FlextTypes.Core.Headers = {}
-            properties = schema.get("properties", {})
+            properties: dict[str, object] = schema.get("properties", {})
 
             if isinstance(properties, dict):
                 for prop_name, prop_def in properties.items():
@@ -234,7 +236,7 @@ class LDAPSchemaMapper:
 class LDAPEntryManager:
     """Manage LDAP entries using flext-core patterns."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize LDAP entry manager."""
 
     def generate_dn(

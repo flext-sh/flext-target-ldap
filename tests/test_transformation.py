@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import (
+from flext_target_ldap.transformation import (
     DataTransformationEngine,
     MigrationValidator,
     TransformationRule,
@@ -211,7 +211,6 @@ class TestMigrationValidator:
     """Test migration validator."""
 
     def test_validate_valid_entry(self) -> None:
-        """Test method."""
         """Test validate valid entry function."""
         validator = MigrationValidator()
 
@@ -225,10 +224,9 @@ class TestMigrationValidator:
 
         result = validator.validate(data)
 
-        assert result.success
+        assert result.is_success
 
     def test_validate_missing_dn(self) -> None:
-        """Test method."""
         """Test validate missing dn function."""
         validator = MigrationValidator()
 
@@ -244,7 +242,6 @@ class TestMigrationValidator:
             raise AssertionError(msg)
 
     def test_validate_invalid_dn_syntax(self) -> None:
-        """Test method."""
         """Test validate invalid dn syntax function."""
         validator = MigrationValidator()
 

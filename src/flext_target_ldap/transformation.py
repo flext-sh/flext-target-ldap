@@ -21,7 +21,7 @@ class TransformationRule(FlextModels.Entity):
     replacement: str
     enabled: bool = True
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate transformation rule business rules."""
         try:
             if not self.name.strip():
@@ -41,7 +41,7 @@ class TransformationResult(FlextModels.Entity):
     transformed_data: FlextTypes.Core.Dict
     applied_rules: FlextTypes.Core.StringList = Field(default_factory=list)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate transformation result business rules."""
         try:
             if not self.transformed_data:
@@ -68,7 +68,7 @@ class DataTransformationEngine:
     ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data = data.copy()
+            transformed_data: dict[str, object] = data.copy()
             applied_rules: FlextTypes.Core.StringList = []
 
             for rule in self.rules:
@@ -88,7 +88,7 @@ class DataTransformationEngine:
         except Exception as e:
             return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
 
-    def get_statistics(self) -> dict[str, int]:
+    def get_statistics(self: object) -> dict[str, int]:
         """Get transformation statistics."""
         return {
             "total_rules": len(self.rules),
@@ -161,6 +161,6 @@ class MigrationValidator:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
 
-    def get_validation_statistics(self) -> dict[str, int]:
+    def get_validation_statistics(self: object) -> dict[str, int]:
         """Get validation statistics."""
         return self._stats.copy()

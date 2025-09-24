@@ -37,6 +37,8 @@ from flext_target_ldap.target_models import (
 )
 from flext_target_ldap.target_services import (
     LdapTargetApiService as FlextTargetLDAPService,
+    LdapTransformationService,
+    LdapTransformationServiceProtocol,
 )
 
 try:
@@ -63,6 +65,8 @@ __all__: FlextTypes.Core.StringList = [
     "LDAPTargetClient",
     "LDAPTargetModel",
     "LDAPTargetRecord",
+    "LdapTransformationService",
+    "LdapTransformationServiceProtocol",
     "OrganizationalUnitsSink",
     "Sink",
     "Target",
