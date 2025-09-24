@@ -33,7 +33,7 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
     key_properties: ClassVar[FlextTypes.Core.StringList] = []
     bookmark_properties: ClassVar[FlextTypes.Core.StringList] = []
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate catalog entry business rules."""
         try:
             if not self.tap_stream_id.strip():
@@ -50,7 +50,7 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
 class SingerLDAPCatalogManager:
     """Manage Singer LDAP catalog operations using flext-core patterns."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize Singer LDAP catalog manager."""
         self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
 

@@ -123,7 +123,7 @@ class TestLDAPClient:
 
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_add_entry_already_exists(
+    async def test_add_entry_already_exists(
         self,
         mock_pool_class: MagicMock,
         mock_connection_class: MagicMock,
@@ -141,13 +141,13 @@ class TestLDAPClient:
         mock_pool = MagicMock()
         mock_pool_class.return_value = mock_pool
 
-        result = client.add_entry(
+        result = await client.add_entry(
             dn="uid=test,dc=test,dc=com",
             object_classes=["person"],
             attributes={"cn": "Test"},
         )
 
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "Entry already exists" not in result.error:
             msg: str = f"Expected {'Entry already exists'} in {result.error}"

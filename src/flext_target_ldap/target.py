@@ -51,14 +51,14 @@ class TargetLDAP(Target):
         self._container: FlextContainer | None = None
 
     @property
-    def orchestrator(self) -> LDAPTargetOrchestrator:
+    def orchestrator(self: object) -> LDAPTargetOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
             self._orchestrator = LDAPTargetOrchestrator(dict(self.config))
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> FlextTypes.Core.Dict:
+    def singer_catalog(self: object) -> FlextTypes.Core.Dict:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -128,7 +128,7 @@ class TargetLDAP(Target):
         logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
         return sink_class
 
-    def validate_config(self) -> None:
+    def validate_config(self: object) -> None:
         """Validate the target configuration."""
         # Additional LDAP-specific validation
         host = self.config.get("host")
@@ -165,7 +165,7 @@ class TargetLDAP(Target):
 
         logger.info("LDAP target configuration validated successfully")
 
-    def setup(self) -> None:
+    def setup(self: object) -> None:
         """Set up the LDAP target."""
         # Initialize orchestrator
         _ = self.orchestrator  # Ensure orchestrator is created
@@ -178,7 +178,7 @@ class TargetLDAP(Target):
         host = self.config.get("host", "localhost")
         logger.info("LDAP target setup completed for host: %s", host)
 
-    def teardown(self) -> None:
+    def teardown(self: object) -> None:
         """Teardown the LDAP target."""
         # Cleanup orchestrator
         if self._orchestrator:
@@ -242,7 +242,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     current_stream = obj.get("stream")
                 elif msg_type == "RECORD" and api is not None:
                     # Perform minimal add/modify/delete via patched API for tests
-                    record = obj.get("record") or {}
+                    record: dict[str, object] = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
                     dn = record.get("dn")
 

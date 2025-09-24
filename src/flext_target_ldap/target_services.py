@@ -87,7 +87,7 @@ class LdapConnectionService:
 
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize connection service."""
-        self._config = config
+        self._config: dict[str, object] = config
         api = FlextLdapAPI()
         self._ldap_api = api.client
 
@@ -121,7 +121,7 @@ class LdapConnectionService:
             logger.exception("Connection test failed")
             return FlextResult[bool].fail(f"Connection test error: {e}")
 
-    def get_connection_info(self) -> FlextTypes.Core.Dict:
+    def get_connection_info(self: object) -> FlextTypes.Core.Dict:
         """Get connection information for logging/monitoring."""
         return {
             "host": self._config.connection.server,
@@ -137,7 +137,7 @@ class LdapTransformationService:
 
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize transformation service."""
-        self._config = config
+        self._config: dict[str, object] = config
 
     def transform_record(
         self,
@@ -317,7 +317,7 @@ class LdapTransformationService:
     def get_default_mappings(self, entry_type: str) -> list[LdapAttributeMappingModel]:
         """Get default attribute mappings for entry type."""
         try:
-            mappings = []
+            mappings: list[LdapAttributeMappingModel] = []
 
             if entry_type == "user":
                 user_mappings = [
@@ -384,13 +384,13 @@ class LdapTargetOrchestrator:
     ) -> None:
         """Initialize LDAP target orchestrator."""
         if isinstance(config, dict):
-            self.config = config
+            self.config: dict[str, object] = config
             self._typed_config: TargetLdapConfig | None = None
         elif isinstance(config, TargetLdapConfig):
-            self._typed_config = config
-            self.config = {}  # For backward compatibility
+            self._typed_config: dict[str, object] = config
+            self.config: dict[str, object] = {}  # For backward compatibility
         else:
-            self.config = {}
+            self.config: dict[str, object] = {}
             self._typed_config = None
 
         # Initialize services
@@ -399,17 +399,17 @@ class LdapTargetOrchestrator:
 
         logger.debug("Initialized LDAP target orchestrator")
 
-    def get_typed_config(self) -> TargetLdapConfig | None:
+    def get_typed_config(self: object) -> TargetLdapConfig | None:
         """Get typed configuration if available."""
         return self._typed_config
 
-    def get_connection_service(self) -> LdapConnectionService | None:
+    def get_connection_service(self: object) -> LdapConnectionService | None:
         """Get connection service if config is available."""
         if self._typed_config and not self._connection_service:
             self._connection_service = LdapConnectionService(self._typed_config)
         return self._connection_service
 
-    def get_transformation_service(self) -> LdapTransformationService | None:
+    def get_transformation_service(self: object) -> LdapTransformationService | None:
         """Get transformation service if config is available."""
         if self._typed_config and not self._transformation_service:
             self._transformation_service = LdapTransformationService(self._typed_config)
@@ -425,7 +425,7 @@ class LdapTargetOrchestrator:
             logger.info("Starting LDAP data loading orchestration")
 
             # Use provided config or stored config
-            working_config = config or self._typed_config
+            working_config: dict[str, object] = config or self._typed_config
             if not working_config:
                 return FlextResult[FlextTypes.Core.Dict].fail(
                     "No configuration available for orchestration",
@@ -498,14 +498,16 @@ class LdapTargetOrchestrator:
         """Validate LDAP target configuration."""
         try:
             # Use provided config or stored config
-            working_config = config or self._typed_config
+            working_config: dict[str, object] = config or self._typed_config
             if not working_config:
                 return FlextResult[bool].fail(
                     "No configuration available for validation",
                 )
 
             # Validate business rules
-            validation_result = working_config.validate_business_rules()
+            validation_result: FlextResult[object] = (
+                working_config.validate_business_rules()
+            )
             if not validation_result.is_success:
                 return FlextResult[bool].fail(
                     f"Configuration validation failed: {validation_result.error}",
@@ -529,7 +531,7 @@ class LdapTargetOrchestrator:
 class LdapTargetApiService:
     """Simple API service for LDAP target operations."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize API service."""
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
 
@@ -550,7 +552,7 @@ class LdapTargetApiService:
         config: FlextTypes.Core.Dict,
     ) -> FlextResult[int]:
         """Load user records to LDAP."""
-        target_result = await self.create_ldap_target(config)
+        target_result: FlextResult[object] = await self.create_ldap_target(config)
         if not target_result.is_success:
             return FlextResult[int].fail(
                 f"Target creation failed: {target_result.error}",
@@ -564,7 +566,9 @@ class LdapTargetApiService:
             if not isinstance(target, target_client_module.TargetLdap):
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 
-            sink = target.get_sink_class("users")(target, "users", {}, ["username"])
+            sink: dict[str, object] = target.get_sink_class("users")(
+                target, "users", {}, ["username"]
+            )
 
             # Process records
             for user in users:
@@ -582,7 +586,7 @@ class LdapTargetApiService:
         config: FlextTypes.Core.Dict,
     ) -> FlextResult[int]:
         """Load group records to LDAP."""
-        target_result = await self.create_ldap_target(config)
+        target_result: FlextResult[object] = await self.create_ldap_target(config)
         if not target_result.is_success:
             return FlextResult[int].fail(
                 f"Target creation failed: {target_result.error}",
@@ -596,7 +600,9 @@ class LdapTargetApiService:
             if not isinstance(target, target_client_module.TargetLdap):
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 
-            sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
+            sink: dict[str, object] = target.get_sink_class("groups")(
+                target, "groups", {}, ["name"]
+            )
 
             # Process records
             for group in groups:
@@ -615,7 +621,7 @@ class LdapTargetApiService:
         """Test LDAP connection with given configuration."""
         try:
             # Create LDAP connection config
-            config_result = validate_ldap_target_config(config)
+            config_result: dict[str, object] = validate_ldap_target_config(config)
             if not config_result.is_success:
                 return FlextResult[bool].fail(
                     f"Configuration validation failed: {config_result.error}",

@@ -28,7 +28,7 @@ class SingerTargetLDAP:
             object: Description of return value.
 
         """
-        self.config = config or {}
+        self.config: dict[str, object] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
@@ -70,7 +70,7 @@ class SingerTargetLDAP:
                 f"Message processing failed: {e}",
             )
 
-    def validate_singer_config(self) -> FlextResult[bool]:
+    def validate_singer_config(self: object) -> FlextResult[bool]:
         """Validate Singer LDAP target configuration.
 
         Returns:

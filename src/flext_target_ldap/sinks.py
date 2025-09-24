@@ -49,7 +49,7 @@ class Target:
 
     def __init__(self, config: FlextTypes.Core.Dict) -> None:
         """Initialize target with configuration."""
-        self.config = config
+        self.config: dict[str, object] = config
 
 
 logger = FlextLogger(__name__)
@@ -58,7 +58,7 @@ logger = FlextLogger(__name__)
 class LDAPProcessingResult:
     """Result of LDAP processing operations - mutable for performance tracking."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize processing result counters."""
         self.processed_count: int = 0
         self.success_count: int = 0
@@ -66,13 +66,13 @@ class LDAPProcessingResult:
         self.errors: FlextTypes.Core.StringList = []
 
     @property
-    def success_rate(self) -> float:
+    def success_rate(self: object) -> float:
         """Calculate success rate as percentage."""
         if self.processed_count == 0:
             return 0.0
         return (self.success_count / self.processed_count) * 100.0
 
-    def add_success(self) -> None:
+    def add_success(self: object) -> None:
         """Record a successful operation."""
         self.processed_count += 1
         self.success_count += 1
@@ -99,7 +99,7 @@ class LDAPBaseSink(Sink):
         # Store target reference for config access
         self._target = target
         self.client: LDAPClient | None = None
-        self._processing_result = LDAPProcessingResult()
+        self._processing_result: FlextResult[object] = LDAPProcessingResult()
 
     async def setup_client(self) -> FlextResult[LDAPClient]:
         """Set up LDAP client connection."""
@@ -115,7 +115,7 @@ class LDAPBaseSink(Sink):
             }
 
             self.client = LDAPClient(connection_config)
-            connect_result = self.client.connect()
+            connect_result: FlextResult[object] = self.client.connect()
 
             if not connect_result.is_success:
                 return FlextResult[LDAPClient].fail(
@@ -130,7 +130,7 @@ class LDAPBaseSink(Sink):
             logger.exception(error_msg)
             return FlextResult[LDAPClient].fail(error_msg)
 
-    def teardown_client(self) -> None:
+    def teardown_client(self: object) -> None:
         """Teardown LDAP client connection."""
         if self.client:
             # Disconnect using client API (sync)
@@ -140,15 +140,15 @@ class LDAPBaseSink(Sink):
 
     def process_batch(self, context: FlextTypes.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result = asyncio.run(self.setup_client())
+        setup_result: FlextResult[object] = asyncio.run(self.setup_client())
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
 
         try:
-            records_raw = context.get("records", [])
+            records_raw: list[object] = context.get("records", [])
 
-            records = records_raw if isinstance(records_raw, list) else []
+            records: list[object] = records_raw if isinstance(records_raw, list) else []
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -187,7 +187,7 @@ class LDAPBaseSink(Sink):
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
-    def get_processing_result(self) -> LDAPProcessingResult:
+    def get_processing_result(self: object) -> LDAPProcessingResult:
         """Get processing results."""
         return self._processing_result
 
@@ -304,7 +304,9 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj = self._target.config.get("attribute_mapping", {})
+        mapping_obj: dict[str, object] = self._target.config.get(
+            "attribute_mapping", {}
+        )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)
@@ -417,7 +419,9 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj = self._target.config.get("attribute_mapping", {})
+        mapping_obj: dict[str, object] = self._target.config.get(
+            "attribute_mapping", {}
+        )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)
@@ -517,7 +521,9 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj = self._target.config.get("attribute_mapping", {})
+        mapping_obj: dict[str, object] = self._target.config.get(
+            "attribute_mapping", {}
+        )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)

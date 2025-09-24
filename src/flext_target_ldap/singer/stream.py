@@ -31,7 +31,7 @@ class LDAPStreamProcessingStats:
         self.errors: FlextTypes.Core.StringList = []
 
     @property
-    def success_rate(self) -> float:
+    def success_rate(self: object) -> float:
         """Calculate success rate percentage."""
         if self.records_processed == 0:
             return 0.0
@@ -41,7 +41,7 @@ class LDAPStreamProcessingStats:
 class SingerLDAPStreamProcessor:
     """Process Singer LDAP streams using flext-core patterns."""
 
-    def __init__(self) -> None:
+    def __init__(self: object) -> None:
         """Initialize Singer LDAP stream processor."""
         self._stream_stats: dict[str, LDAPStreamProcessingStats] = {}
 

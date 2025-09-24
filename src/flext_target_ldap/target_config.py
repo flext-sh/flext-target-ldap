@@ -38,7 +38,7 @@ class LdapTargetConnectionSettings(FlextModels.ArbitraryTypesModel):
     connect_timeout: int = Field(10, description="Connection timeout in seconds", ge=1)
     receive_timeout: int = Field(30, description="Receive timeout in seconds", ge=1)
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate LDAP connection business rules."""
         try:
             # Mutual exclusivity validation
@@ -93,7 +93,7 @@ class LdapTargetOperationSettings(FlextModels.ArbitraryTypesModel):
         description="Delete entries not in source",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate operation settings business rules."""
         try:
             # Logical consistency validation
@@ -132,7 +132,7 @@ class LdapTargetMappingSettings(FlextModels.ArbitraryTypesModel):
         description="Search scope: BASE, LEVEL, or SUBTREE",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate mapping settings business rules."""
         try:
             # Object class validation
@@ -218,9 +218,9 @@ class TargetLdapConfig(FlextModels.ArbitraryTypesModel):
     )
 
     # For compatibility with BaseSettings-style configs, annotate accordingly
-    model_config = ConfigDict()
+    model_config: dict[str, object] = ConfigDict()
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate complete LDAP target configuration business rules."""
         try:
             # Validate operation consistency
@@ -344,7 +344,7 @@ def validate_ldap_target_config(
             default=False,
         )
 
-        raw_attr_map = config.get("attribute_mapping", {})
+        raw_attr_map: dict[str, object] = config.get("attribute_mapping", {})
         attribute_mapping: FlextTypes.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map.items()}
             if isinstance(raw_attr_map, dict)
@@ -373,7 +373,9 @@ def validate_ldap_target_config(
         )
 
         # Run business rules validation
-        validation_result = validated_config.validate_business_rules()
+        validation_result: FlextResult[object] = (
+            validated_config.validate_business_rules()
+        )
         if not validation_result.is_success:
             return FlextResult[TargetLdapConfig].fail(
                 validation_result.error or "Invalid configuration",
@@ -415,7 +417,7 @@ def create_default_ldap_target_config(
         )
 
         # Validate business rules
-        validation_result = target_config.validate_business_rules()
+        validation_result: FlextResult[object] = target_config.validate_business_rules()
         if not validation_result.is_success:
             return FlextResult[TargetLdapConfig].fail(
                 validation_result.error or "Invalid configuration",

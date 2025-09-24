@@ -33,7 +33,7 @@ def load_users_to_ldap(
     config: FlextTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
-    target_result = create_ldap_target(config)
+    target_result: FlextResult[object] = create_ldap_target(config)
     if not target_result.success:
         return FlextResult[int].fail(f"Target creation failed: {target_result.error}")
 
@@ -44,7 +44,9 @@ def load_users_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink = target.get_sink_class("users")(target, "users", {}, ["username"])
+        sink: dict[str, object] = target.get_sink_class("users")(
+            target, "users", {}, ["username"]
+        )
 
         # Process records
         for user in users:
@@ -62,7 +64,7 @@ def load_groups_to_ldap(
     config: FlextTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
-    target_result = create_ldap_target(config)
+    target_result: FlextResult[object] = create_ldap_target(config)
     if not target_result.success:
         return FlextResult[int].fail(f"Target creation failed: {target_result.error}")
 
@@ -73,7 +75,9 @@ def load_groups_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
+        sink: dict[str, object] = target.get_sink_class("groups")(
+            target, "groups", {}, ["name"]
+        )
 
         # Process records
         for group in groups:

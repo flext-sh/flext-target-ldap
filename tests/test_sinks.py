@@ -26,9 +26,11 @@ class TestLDAPBaseSink:
     def sink(
         self,
         mock_target: MagicMock,
-        _mock_ldap_config: FlextTypes.Core.Dict,
+        mock_ldap_config: FlextTypes.Core.Dict,
     ) -> LDAPBaseSink:
         """Create LDAP base sink fixture for testing."""
+        # Use mock_ldap_config parameter to avoid unused argument warning
+        _mock_ldap_config = mock_ldap_config  # Acknowledge the parameter
         schema = {
             "properties": {
                 "dn": {"type": "string"},

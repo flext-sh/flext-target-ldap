@@ -78,7 +78,7 @@ class LdapAttributeMappingModel(FlextModels.Entity):
         max_length=1000,
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate attribute mapping business rules."""
         try:
             # Validate field name format
@@ -148,7 +148,7 @@ class LdapEntryModel(FlextModels.Entity):
             v.append("top")
         return v
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate LDAP entry business rules."""
         try:
             errors: FlextTypes.Core.StringList = []
@@ -187,11 +187,11 @@ class LdapEntryModel(FlextModels.Entity):
         except Exception as e:
             return FlextResult[None].fail(f"LDAP entry validation failed: {e}")
 
-    def get_rdn(self) -> str:
+    def get_rdn(self: object) -> str:
         """Get the Relative Distinguished Name (RDN) from the DN."""
         return self.distinguished_name.split(",")[0].strip()
 
-    def get_parent_dn(self) -> str:
+    def get_parent_dn(self: object) -> str:
         """Get the parent DN by removing the RDN."""
         parts = self.distinguished_name.split(",", 1)
         return parts[1].strip() if len(parts) > 1 else ""
@@ -238,7 +238,7 @@ class LdapTransformationResultModel(FlextModels.Entity):
         description="When transformation was performed",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate transformation result business rules."""
         try:
             # Validate we have meaningful data
@@ -259,7 +259,7 @@ class LdapTransformationResultModel(FlextModels.Entity):
             )
 
     @property
-    def success_rate(self) -> float:
+    def success_rate(self: object) -> float:
         """Calculate transformation success rate."""
         total_mappings = len(self.applied_mappings)
         if total_mappings == 0:
@@ -268,7 +268,7 @@ class LdapTransformationResultModel(FlextModels.Entity):
         error_count = len(self.transformation_errors)
         return ((total_mappings - error_count) / total_mappings) * 100.0
 
-    def has_errors(self) -> bool:
+    def has_errors(self: object) -> bool:
         """Check if transformation has any errors."""
         return bool(self.transformation_errors)
 
@@ -316,7 +316,7 @@ class LdapBatchProcessingModel(FlextModels.Entity):
         description="Timestamp of last batch processing",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate batch processing business rules."""
         try:
             # Validate batch size doesn't exceed current batch
@@ -339,17 +339,17 @@ class LdapBatchProcessingModel(FlextModels.Entity):
             return FlextResult[None].fail(f"Batch processing validation failed: {e}")
 
     @property
-    def is_batch_full(self) -> bool:
+    def is_batch_full(self: object) -> bool:
         """Check if current batch is full."""
         return len(self.current_batch) >= self.batch_size
 
     @property
-    def current_batch_size(self) -> int:
+    def current_batch_size(self: object) -> int:
         """Get current batch size."""
         return len(self.current_batch)
 
     @property
-    def success_rate(self) -> float:
+    def success_rate(self: object) -> float:
         """Calculate success rate percentage."""
         total_ops = self.successful_operations + self.failed_operations
         if total_ops == 0:
@@ -367,7 +367,7 @@ class LdapBatchProcessingModel(FlextModels.Entity):
             },
         )
 
-    def clear_batch(self) -> LdapBatchProcessingModel:
+    def clear_batch(self: object) -> LdapBatchProcessingModel:
         """Clear current batch after processing (immutable operation)."""
         return self.model_copy(
             update={
@@ -445,7 +445,7 @@ class LdapOperationStatisticsModel(FlextModels.Entity):
         description="When statistics collection started",
     )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate operation statistics business rules."""
         try:
             # Validate operation counts are consistent
@@ -474,19 +474,19 @@ class LdapOperationStatisticsModel(FlextModels.Entity):
             return FlextResult[None].fail(f"Statistics validation failed: {e}")
 
     @property
-    def success_rate(self) -> float:
+    def success_rate(self: object) -> float:
         """Calculate success rate percentage."""
         if self.total_operations == 0:
             return 0.0
         return (self.successful_operations / self.total_operations) * 100.0
 
     @property
-    def failure_rate(self) -> float:
+    def failure_rate(self: object) -> float:
         """Calculate failure rate percentage."""
         return 100.0 - self.success_rate
 
     @property
-    def operations_per_second(self) -> float:
+    def operations_per_second(self: object) -> float:
         """Calculate operations per second."""
         if self.total_duration_ms == 0:
             return 0.0
