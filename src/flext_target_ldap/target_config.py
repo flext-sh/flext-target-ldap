@@ -25,7 +25,7 @@ from flext_ldap import FlextLdapModels
 # Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
 
-class LdapTargetConnectionSettings(FlextModels.Config):
+class LdapTargetConnectionSettings(FlextModels.ArbitraryTypesModel):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -71,7 +71,7 @@ class LdapTargetConnectionSettings(FlextModels.Config):
             return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextModels.Config):
+class LdapTargetOperationSettings(FlextModels.ArbitraryTypesModel):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -112,7 +112,7 @@ class LdapTargetOperationSettings(FlextModels.Config):
             return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextModels.Config):
+class LdapTargetMappingSettings(FlextModels.ArbitraryTypesModel):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: FlextTypes.Core.Headers = Field(
@@ -154,7 +154,7 @@ class LdapTargetMappingSettings(FlextModels.Config):
             return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
-class TargetLdapConfig(FlextModels.Config):
+class TargetLdapConfig(FlextModels.ArbitraryTypesModel):
     """Consolidated LDAP target configuration using FlextConfig.BaseModel patterns.
 
     This configuration class consolidates all LDAP target settings while

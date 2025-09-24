@@ -20,7 +20,9 @@ from flext_target_ldap.sinks import (
     UsersSink,
 )
 from flext_target_ldap.target_client import (
+    LDAPClient,
     LdapTargetClient as LDAPTargetClient,
+    TargetLDAP,
     TargetLdap,
 )
 from flext_target_ldap.target_config import TargetLdapConfig as FlextTargetLDAPConfig
@@ -56,6 +58,7 @@ __all__: FlextTypes.Core.StringList = [
     "FlextTypes",
     "GroupsSink",
     "LDAPBaseSink",
+    "LDAPClient",
     "LDAPProcessingResult",
     "LDAPTargetClient",
     "LDAPTargetModel",
@@ -63,6 +66,7 @@ __all__: FlextTypes.Core.StringList = [
     "OrganizationalUnitsSink",
     "Sink",
     "Target",
+    "TargetLDAP",
     "TargetLdap",
     "UsersSink",
     "__version__",
