@@ -18,7 +18,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLdapClient, FlextLdapModels, get_flext_ldap_api
+from flext_ldap import FlextLdapAPI, FlextLdapClient, FlextLdapModels
 
 # Import placeholder classes from sinks module
 from flext_target_ldap.sinks import Sink, Target
@@ -103,7 +103,8 @@ class LdapTargetClient:
             self._password = ""
 
         # Create API instance using flext-ldap
-        self._api: FlextLdapClient = get_flext_ldap_api()
+        api = FlextLdapAPI()
+        self._api: FlextLdapClient = api.client
         self._current_session_id: str | None = None
 
         logger.info(

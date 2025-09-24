@@ -19,10 +19,9 @@ import ldap3
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import (
+    FlextLdapAPI,
     FlextLdapClient,
-    FlextLdapEntities,
     FlextLdapModels,
-    get_flext_ldap_api,
 )
 
 logger = FlextLogger(__name__)
@@ -216,7 +215,8 @@ class LDAPClient:
     def _get_api(self) -> FlextLdapClient:
         """Instantiate and cache FlextLdapClient lazily."""
         if self._api is None:
-            self._api = get_flext_ldap_api()
+            api = FlextLdapAPI()
+            self._api = api.client
         return self._api
 
     def connect_sync(self) -> FlextResult[None]:
@@ -464,11 +464,10 @@ class LDAPClient:
 
 # Backward compatibility aliases
 LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
-LDAPEntry = FlextLdapEntities
+LDAPEntry = FlextLdapModels.Entry
 
 __all__: FlextTypes.Core.StringList = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",
-    "get_flext_ldap_api",
 ]

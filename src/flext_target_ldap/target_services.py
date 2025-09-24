@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_ldap import get_flext_ldap_api
+from flext_ldap import FlextLdapAPI
 from flext_target_ldap import target_client as target_client_module
 from flext_target_ldap.target_config import (
     TargetLdapConfig,
@@ -88,7 +88,8 @@ class LdapConnectionService:
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize connection service."""
         self._config = config
-        self._ldap_api = get_flext_ldap_api()
+        api = FlextLdapAPI()
+        self._ldap_api = api.client
 
     async def test_connection(self) -> FlextResult[bool]:
         """Test LDAP connection with current configuration."""
