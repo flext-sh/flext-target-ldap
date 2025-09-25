@@ -26,7 +26,7 @@ class TestLDAPClient:
         """Create test LDAP client instance."""
         return LDAPClient(config=mock_ldap_config)
 
-    def test_client_initialization(self, client: LDAPClient) -> None:
+    def test_self(self, client: LDAPClient) -> None:
         """Test method."""
         if client.host != "test.ldap.com":
             msg: str = f"Expected {'test.ldap.com'}, got {client.host}"
@@ -41,7 +41,7 @@ class TestLDAPClient:
             msg: str = f"Expected {30}, got {client.timeout}"
             raise AssertionError(msg)
 
-    def test_server_uri(self, client: LDAPClient) -> None:
+    def test_self(self, client: LDAPClient) -> None:
         """Test method."""
         if client.server_uri != "ldap://test.ldap.com:389":
             msg: str = f"Expected {'ldap://test.ldap.com:389'}, got {client.server_uri}"

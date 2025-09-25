@@ -144,7 +144,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.add.return_value = True
         mock_conn_instance.modify.return_value = True
 
-        def search_side_effect(*_args: object) -> bool:
+        def search_side_effect(*_args) -> bool:
             # First search: no entry
             # Second search: entry exists
             if mock_conn_instance.search.call_count <= 1:
@@ -301,7 +301,7 @@ class TestTargetLDAPIntegration:
             dn_msg: str = f"Expected {'uid=testuser,ou=people,dc=test,dc=com'}, got {add_calls[0][0][0]}"
             raise AssertionError(dn_msg)
 
-    def test_error_handling(self, runner: Mock, tmp_path: Path) -> None:
+    def test_self(self, runner: Mock, tmp_path: Path) -> None:
         """Test error handling for invalid configurations."""
         # Invalid config
         bad_config = {"invalid": "config"}

@@ -35,7 +35,7 @@ class TestTargetLDAPUnit:
             "timeout": 30,
         }
 
-    def test_target_initialization(self, config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, config: FlextTypes.Core.Dict) -> None:
         """Test method."""
         target = TargetLDAP(config=config)
         if target.name != "target-ldap":
@@ -43,7 +43,7 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
         assert target.config == config
 
-    def test_get_sink_users(self, config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, config: FlextTypes.Core.Dict) -> None:
         """Test method."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("users")
@@ -54,7 +54,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {UsersSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_groups(self, config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, config: FlextTypes.Core.Dict) -> None:
         """Test method."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("groups")
@@ -65,7 +65,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {GroupsSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_generic(self, config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, config: FlextTypes.Core.Dict) -> None:
         """Test method."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("custom_stream")
@@ -76,7 +76,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {GenericSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_dn_template_configuration(self, config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, config: FlextTypes.Core.Dict) -> None:
         """Test method."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
 
@@ -87,7 +87,7 @@ class TestTargetLDAPUnit:
             target.config["users_dn_template"] == "uid={uid},ou=people,dc=test,dc=com"
         )
 
-    def test_object_class_configuration(self, config: FlextTypes.Core.Dict) -> None:
+    def test_self(self, config: FlextTypes.Core.Dict) -> None:
         """Test method."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
 
