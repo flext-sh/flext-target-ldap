@@ -128,7 +128,7 @@ class LDAPDataTransformer:
     ) -> FlextResult[dict[str, FlextTypes.Core.StringList]]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes = {}
+            attributes: dict[str, list[str]] = {}
 
             # Add object classes
             attributes["objectClass"] = object_classes
