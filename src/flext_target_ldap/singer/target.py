@@ -10,6 +10,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import override
+
 from flext_core import FlextLogger, FlextResult, FlextTypes
 
 logger: FlextLogger = FlextLogger(__name__)
@@ -18,6 +20,7 @@ logger: FlextLogger = FlextLogger(__name__)
 class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
+    @override
     def __init__(self, config: FlextTypes.Core.Dict | None = None) -> None:
         """Initialize Singer LDAP target.
 
@@ -54,7 +57,7 @@ class SingerTargetLDAP:
                 processed_count += 1
 
             result = {
-                "processed_messages": processed_count,
+                "processed_messages": "processed_count",
                 "status": "completed",
             }
 

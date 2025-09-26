@@ -44,7 +44,7 @@ class TestLDAPBaseSink:
             key_properties=["dn"],
         )
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_ldap_sink_initialization(self, sink: LDAPBaseSink) -> None:
         """Test LDAP base sink initialization with proper configuration."""
         if sink.stream_name != "test_stream":
             stream_msg: str = f"Expected {'test_stream'}, got {sink.stream_name}"
@@ -54,7 +54,7 @@ class TestLDAPBaseSink:
             schema_msg: str = f"Expected {'dn'} in {sink.schema['properties']}"
             raise AssertionError(schema_msg)
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_build_dn_not_implemented(self, sink: LDAPBaseSink) -> None:
         """Test that build_dn method raises error when not implemented in subclass."""
         record = {"cn": "test"}
         result = sink.build_dn(record)
@@ -66,7 +66,7 @@ class TestLDAPBaseSink:
             )
             raise AssertionError(error_msg)
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_build_attributes_not_implemented(self, sink: LDAPBaseSink) -> None:
         """Test that build_attributes method raises error when not implemented in subclass."""
         record = {"cn": "test"}
         result = sink.build_attributes(record)
@@ -78,7 +78,7 @@ class TestLDAPBaseSink:
             )
             raise AssertionError(error_msg)
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
         """Test that get_object_classes returns default 'top' class."""
         record: FlextTypes.Core.Dict = {}
         classes = sink.get_object_classes(record)
@@ -86,7 +86,7 @@ class TestLDAPBaseSink:
             classes_msg: str = f"Expected {['top']}, got {classes}"
             raise AssertionError(classes_msg)
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_validate_entry_success(self, sink: LDAPBaseSink) -> None:
         """Test successful validation of LDAP entry with valid DN, attributes, and object classes."""
         # Mock the private _client attribute since client is a property
         mock_client = MagicMock()
@@ -100,7 +100,7 @@ class TestLDAPBaseSink:
         )
         assert result.success
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_validate_entry_empty_dn(self, sink: LDAPBaseSink) -> None:
         """Test validation failure when DN is empty."""
         result = sink.validate_entry("", {"cn": ["test"]}, ["person"])
         assert not result.success
@@ -109,7 +109,7 @@ class TestLDAPBaseSink:
             dn_error_msg: str = f"Expected {'DN cannot be empty'} in {result.error}"
             raise AssertionError(dn_error_msg)
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_validate_entry_empty_attributes(self, sink: LDAPBaseSink) -> None:
         """Test validation failure when attributes are empty."""
         result = sink.validate_entry("cn=test,dc=example,dc=com", {}, ["person"])
         assert not result.success
@@ -120,7 +120,7 @@ class TestLDAPBaseSink:
             )
             raise AssertionError(attr_error_msg)
 
-    def test_self(self, sink: LDAPBaseSink) -> None:
+    def test_validate_entry_empty_object_classes(self, sink: LDAPBaseSink) -> None:
         """Test validation failure when object classes are empty."""
         result = sink.validate_entry("cn=test,dc=example,dc=com", {"cn": ["test"]}, [])
         assert not result.success
@@ -162,7 +162,7 @@ class TestUsersSink:
             key_properties=["uid"],
         )
 
-    def test_self(self, users_sink: UsersSink) -> None:
+    def test_users_build_dn_success(self, users_sink: UsersSink) -> None:
         """Test building DN for user with UID attribute."""
         record = {"uid": "testuser", "cn": "Test User"}
         result = users_sink.build_dn(record)
@@ -173,7 +173,7 @@ class TestUsersSink:
             )
             raise AssertionError(dn_result_msg)
 
-    def test_self(self, users_sink: UsersSink) -> None:
+    def test_users_build_dn_missing_uid(self, users_sink: UsersSink) -> None:
         """Test building DN failure when UID attribute is missing."""
         record = {"cn": "Test User"}
         result = users_sink.build_dn(record)
@@ -185,7 +185,7 @@ class TestUsersSink:
             )
             raise AssertionError(msg)
 
-    def test_self(self, users_sink: UsersSink) -> None:
+    def test_users_build_attributes_basic(self, users_sink: UsersSink) -> None:
         """Test building basic LDAP attributes for user record."""
         record = {
             "uid": "testuser",
@@ -211,7 +211,7 @@ class TestUsersSink:
             given_name_msg: str = f"Expected {['Test']}, got {result.data['givenName']}"
             raise AssertionError(given_name_msg)
 
-    def test_self(self, users_sink: UsersSink) -> None:
+    def test_users_build_attributes_multivalued(self, users_sink: UsersSink) -> None:
         """Test building LDAP attributes with multi-valued fields."""
         record = {
             "uid": "testuser",
@@ -229,7 +229,7 @@ class TestUsersSink:
             phone_msg: str = f"Expected {['123-456-7890', '098-765-4321']}, got {result.data['telephoneNumber']}"
             raise AssertionError(phone_msg)
 
-    def test_self(self, users_sink: UsersSink) -> None:
+    def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
         """Test getting default object classes for user entries."""
         record: FlextTypes.Core.Dict = {}
         classes = users_sink.get_object_classes(record)
@@ -301,7 +301,7 @@ class TestGroupsSink:
             key_properties=["cn"],
         )
 
-    def test_self(self, groups_sink: GroupsSink) -> None:
+    def test_groups_build_dn_success(self, groups_sink: GroupsSink) -> None:
         """Test building DN for group with CN attribute."""
         record = {"cn": "testgroup", "description": "Test Group"}
         result = groups_sink.build_dn(record)
@@ -312,7 +312,7 @@ class TestGroupsSink:
             )
             raise AssertionError(group_dn_msg)
 
-    def test_self(self, groups_sink: GroupsSink) -> None:
+    def test_groups_build_dn_missing_cn(self, groups_sink: GroupsSink) -> None:
         """Test building DN failure when CN attribute is missing."""
         record = {"description": "Test Group"}
         result = groups_sink.build_dn(record)
@@ -324,7 +324,7 @@ class TestGroupsSink:
             )
             raise AssertionError(msg)
 
-    def test_self(self, groups_sink: GroupsSink) -> None:
+    def test_groups_build_attributes_basic(self, groups_sink: GroupsSink) -> None:
         """Test building basic LDAP attributes for group record."""
         record = {
             "cn": "testgroup",
@@ -348,7 +348,7 @@ class TestGroupsSink:
             )
             raise AssertionError(members_msg)
 
-    def test_self(self, groups_sink: GroupsSink) -> None:
+    def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
         """Test getting default object classes for group entries."""
         record: FlextTypes.Core.Dict = {}
         classes = groups_sink.get_object_classes(record)
@@ -387,7 +387,7 @@ class TestOrganizationalUnitsSink:
             key_properties=["ou"],
         )
 
-    def test_self(self, ou_sink: OrganizationalUnitsSink) -> None:
+    def test_ou_build_dn_success(self, ou_sink: OrganizationalUnitsSink) -> None:
         """Test building DN for organizational unit with OU attribute."""
         record = {"ou": "testou", "description": "Test OU"}
         result = ou_sink.build_dn(record)
@@ -398,7 +398,7 @@ class TestOrganizationalUnitsSink:
             )
             raise AssertionError(ou_dn_msg)
 
-    def test_self(self, ou_sink: OrganizationalUnitsSink) -> None:
+    def test_ou_build_dn_missing_ou(self, ou_sink: OrganizationalUnitsSink) -> None:
         """Test building DN failure when OU attribute is missing."""
         record = {"description": "Test OU"}
         result = ou_sink.build_dn(record)
@@ -410,7 +410,7 @@ class TestOrganizationalUnitsSink:
             )
             raise AssertionError(ou_error_msg)
 
-    def test_self(self, ou_sink: OrganizationalUnitsSink) -> None:
+    def test_ou_build_attributes_basic(self, ou_sink: OrganizationalUnitsSink) -> None:
         """Test building basic LDAP attributes for organizational unit record."""
         record = {
             "ou": "testou",
@@ -442,7 +442,9 @@ class TestOrganizationalUnitsSink:
             postal_msg: str = f"Expected {['12345']}, got {result.data['postalCode']}"
             raise AssertionError(postal_msg)
 
-    def test_self(self, ou_sink: OrganizationalUnitsSink) -> None:
+    def test_ou_get_object_classes_default(
+        self, ou_sink: OrganizationalUnitsSink
+    ) -> None:
         """Test getting default object classes for organizational unit entries."""
         record: FlextTypes.Core.Dict = {}
         classes = ou_sink.get_object_classes(record)
@@ -481,7 +483,7 @@ class TestLDAPGenericSink:
             key_properties=["id"],
         )
 
-    def test_self(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_dn_explicit(self, generic_sink: LDAPBaseSink) -> None:
         """Test building DN using explicit DN field in record."""
         record = {"dn": "cn=test,dc=example,dc=com"}
         result = generic_sink.build_dn(record)
@@ -492,7 +494,7 @@ class TestLDAPGenericSink:
             )
             raise AssertionError(generic_dn_msg)
 
-    def test_self(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_dn_id_field(self, generic_sink: LDAPBaseSink) -> None:
         """Test building DN using ID field with CN attribute."""
         record = {"id": "testentry", "cn": "Test Entry"}
         result = generic_sink.build_dn(record)
@@ -503,7 +505,7 @@ class TestLDAPGenericSink:
             )
             raise AssertionError(generic_id_msg)
 
-    def test_self(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_dn_no_identifier(self, generic_sink: LDAPBaseSink) -> None:
         """Test building DN failure when no identifier is found."""
         record = {"description": "Test Entry"}
         result = generic_sink.build_dn(record)
@@ -515,7 +517,7 @@ class TestLDAPGenericSink:
             )
             raise AssertionError(generic_error_msg)
 
-    def test_self(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_attributes_basic(self, generic_sink: LDAPBaseSink) -> None:
         """Test building basic LDAP attributes for generic record."""
         record = {
             "id": "testentry",
@@ -543,7 +545,9 @@ class TestLDAPGenericSink:
             raise AssertionError(sdc_msg)
         assert "_sdc_received_at" not in result.data
 
-    def test_self(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_get_object_classes_from_record(
+        self, generic_sink: LDAPBaseSink
+    ) -> None:
         """Test getting object classes from record data."""
         record = {"object_classes": ["customClass", "top"]}
         classes = generic_sink.get_object_classes(record)
@@ -553,7 +557,9 @@ class TestLDAPGenericSink:
             )
             raise AssertionError(custom_classes_msg)
 
-    def test_self(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_get_object_classes_single_value(
+        self, generic_sink: LDAPBaseSink
+    ) -> None:
         """Test getting object classes from single value in record."""
         record = {"object_classes": "customClass"}
         classes = generic_sink.get_object_classes(record)
@@ -561,7 +567,9 @@ class TestLDAPGenericSink:
             single_class_msg: str = f"Expected {['customClass']}, got {classes}"
             raise AssertionError(single_class_msg)
 
-    def test_self(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_get_object_classes_default(
+        self, generic_sink: LDAPBaseSink
+    ) -> None:
         """Test getting default object classes for generic entries."""
         record: FlextTypes.Core.Dict = {}
         classes = generic_sink.get_object_classes(record)

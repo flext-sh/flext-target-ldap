@@ -12,20 +12,33 @@ from flext_core import FlextConstants
 
 
 class FlextTargetLdapConstants(FlextConstants):
-    """LDAP target loading-specific constants following flext-core patterns."""
+    """LDAP target loading-specific constants following FLEXT unified pattern with nested domains."""
 
-    # LDAP Connection Configuration
-    DEFAULT_LDAP_HOST = "localhost"
-    DEFAULT_LDAP_PORT = 389
-    DEFAULT_LDAPS_PORT = 636
-    DEFAULT_LDAP_TIMEOUT = 30
+    class Connection:
+        """LDAP connection configuration constants."""
 
-    # Singer Target Configuration
-    DEFAULT_BATCH_SIZE = 1000
-    MAX_BATCH_SIZE = 10000
+        class Ldap:
+            """Standard LDAP connection settings."""
 
-    # LDAP Operations
-    LDAP_OPERATIONS: ClassVar[list[str]] = ["ADD", "MODIFY", "DELETE", "MODDN"]
+            DEFAULT_HOST = FlextConstants.Platform.DEFAULT_HOST
+            DEFAULT_PORT = FlextConstants.Platform.LDAP_DEFAULT_PORT
+            DEFAULT_TIMEOUT = FlextConstants.Network.DEFAULT_TIMEOUT
+
+        class Ldaps:
+            """Secure LDAP connection settings."""
+
+            DEFAULT_PORT = FlextConstants.Platform.LDAPS_DEFAULT_PORT
+
+    class Processing:
+        """Singer target data processing configuration."""
+
+        DEFAULT_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+        MAX_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.MAX_ITEMS
+
+    class Operations:
+        """LDAP operation types and commands."""
+
+        TYPES: ClassVar[list[str]] = ["ADD", "MODIFY", "DELETE", "MODDN"]
 
 
 __all__ = ["FlextTargetLdapConstants"]

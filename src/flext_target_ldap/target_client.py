@@ -10,6 +10,7 @@ import asyncio
 import sys
 from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
+from typing import override
 
 from flext_core import (
     FlextConstants,
@@ -32,6 +33,11 @@ MAX_PORT_NUMBER = 65535
 class LdapSearchEntry:
     """LDAP search result entry for backward compatibility."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self, dn: str, attributes: FlextTypes.Core.Dict) -> None:
         """Initialize search entry."""
         self.dn = dn
@@ -41,6 +47,11 @@ class LdapSearchEntry:
 class LdapProcessingResult:
     """Result tracking for LDAP processing operations."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(self) -> None:
         """Initialize processing result counters."""
         self.processed_count: int = 0
@@ -74,6 +85,11 @@ class LdapTargetClient:
     to the enterprise-grade flext-ldap library, eliminating code duplication.
     """
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         config: FlextLdapModels.ConnectionConfig | FlextTypes.Core.Dict,
@@ -198,6 +214,11 @@ class LdapTargetClient:
         def connection_context() -> Generator[object]:
             # Create a real connection wrapper that delegates to flext-ldap API
             class LdapConnectionWrapper:
+                @override
+                @override
+                @override
+                @override
+                @override
                 def __init__(
                     self,
                     api: FlextLdapClient,
@@ -323,6 +344,11 @@ class LdapTargetClient:
                             for entry_dict in search_result.data:
                                 # Create a compatible entry object
                                 class CompatibleEntry:
+                                    @override
+                                    @override
+                                    @override
+                                    @override
+                                    @override
                                     def __init__(self, dn: str, attrs: dict) -> None:
                                         self.entry_dn = dn
                                         self.entry_attributes = list(attrs.keys())
@@ -562,6 +588,11 @@ class LdapTargetClient:
 class LdapBaseSink(Sink):
     """Base LDAP sink with common functionality using enterprise patterns."""
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         target: Target,
@@ -1014,6 +1045,11 @@ class TargetLdap(Target):
     name = "target-ldap"
     config_class = TargetLdapConfig
 
+    @override
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         *,
@@ -1082,9 +1118,9 @@ class TargetLdap(Target):
     def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
-            "users": LdapUsersSink,
-            "groups": LdapGroupsSink,
-            "organizational_units": LdapOrganizationalUnitsSink,
+            "users": "LdapUsersSink",
+            "groups": "LdapGroupsSink",
+            "organizational_units": "LdapOrganizationalUnitsSink",
         }
 
         sink_class = sink_mapping.get(stream_name)

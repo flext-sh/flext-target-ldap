@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 **Architecture**: Clean Architecture configuration layer
-**Patterns**: FlextConfig, FlextModels, FlextResult validation
+**Patterns**: "FlextConfig", FlextModels, FlextResult validation
 **Integration**: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -128,8 +128,8 @@ class LdapTargetMappingSettings(FlextModels.ArbitraryTypesModel):
         description="Default search filter",
     )
     search_scope: str = Field(
-        "SUBTREE",
-        description="Search scope: BASE, LEVEL, or SUBTREE",
+        SUBTREE,
+        description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
 
     def validate_business_rules(self: object) -> FlextResult[None]:
@@ -213,8 +213,8 @@ class TargetLdapConfig(FlextModels.ArbitraryTypesModel):
         description="Default search filter",
     )
     search_scope: str = Field(
-        "SUBTREE",
-        description="Search scope: BASE, LEVEL, or SUBTREE",
+        SUBTREE,
+        description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
 
     # For compatibility with BaseSettings-style configs, annotate accordingly

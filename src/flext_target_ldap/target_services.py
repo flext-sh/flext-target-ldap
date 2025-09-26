@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Protocol, override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_ldap import FlextLdapAPI
@@ -85,6 +85,10 @@ class LdapOrchestrationServiceProtocol(Protocol):
 class LdapConnectionService:
     """Service for managing LDAP connections and basic operations."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize connection service."""
         self._config: dict[str, object] = config
@@ -135,6 +139,10 @@ class LdapConnectionService:
 class LdapTransformationService:
     """Service for transforming Singer records to LDAP entries."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize transformation service."""
         self._config: dict[str, object] = config
@@ -378,6 +386,10 @@ class LdapTransformationService:
 class LdapTargetOrchestrator:
     """Application orchestrator for LDAP target operations using enterprise patterns."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         config: FlextTypes.Core.Dict | TargetLdapConfig | None = None,
@@ -470,10 +482,10 @@ class LdapTargetOrchestrator:
                         transformation_errors.append(error_msg)
 
             result = {
-                "processed_records": processed_count,
+                "processed_records": "processed_count",
                 "total_records": len(records),
-                "transformation_errors": transformation_errors,
-                "status": "completed"
+                "transformation_errors": "transformation_errors",
+                "status": completed
                 if not transformation_errors
                 else "completed_with_errors",
             }
@@ -531,6 +543,10 @@ class LdapTargetOrchestrator:
 class LdapTargetApiService:
     """Simple API service for LDAP target operations."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize API service."""
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}

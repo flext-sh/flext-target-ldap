@@ -6,6 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import override
+
 from pydantic import Field
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
@@ -58,6 +60,8 @@ class TransformationResult(FlextModels.Entity):
 class DataTransformationEngine:
     """Engine for transforming data using rules."""
 
+    @override
+    @override
     def __init__(self, rules: list[TransformationRule]) -> None:
         """Initialize transformation engine."""
         self.rules = rules
@@ -99,6 +103,8 @@ class DataTransformationEngine:
 class MigrationValidator:
     """Validator for migration data."""
 
+    @override
+    @override
     def __init__(self, *, strict_mode: bool = True) -> None:
         """Initialize migration validator."""
         self.strict_mode = strict_mode
@@ -108,6 +114,7 @@ class MigrationValidator:
             "validation_warnings": 0,
         }
 
+    @override
     def validate(
         self,
         data: FlextTypes.Core.Dict | str,

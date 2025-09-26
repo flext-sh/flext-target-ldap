@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, override
 
 from pydantic import Field
 
@@ -50,6 +50,7 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
 class SingerLDAPCatalogManager:
     """Manage Singer LDAP catalog operations using flext-core patterns."""
 
+    @override
     def __init__(self: object) -> None:
         """Initialize Singer LDAP catalog manager."""
         self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
