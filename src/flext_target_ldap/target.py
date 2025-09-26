@@ -11,6 +11,7 @@ import sys
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
+from typing import override
 
 from flext_cli import flext_cli_create_helper
 from flext_core import FlextContainer, FlextLogger, FlextTypes
@@ -19,10 +20,7 @@ from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import TargetLDAPConfig
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 from flext_target_ldap.sinks import (
-    GroupsSink,
     LDAPBaseSink,
-    OrganizationalUnitsSink,
-    UsersSink,
 )
 
 logger = FlextLogger(__name__)
@@ -37,6 +35,7 @@ class TargetLDAP(Target):
     name = "target-ldap"
     config_class = TargetLDAPConfig
 
+    @override
     def __init__(
         self,
         *,
@@ -111,9 +110,9 @@ class TargetLDAP(Target):
     def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
-            "users": UsersSink,
-            "groups": GroupsSink,
-            "organizational_units": OrganizationalUnitsSink,
+            "users": "UsersSink",
+            "groups": "GroupsSink",
+            "organizational_units": "OrganizationalUnitsSink",
         }
 
         sink_class = sink_mapping.get(stream_name)

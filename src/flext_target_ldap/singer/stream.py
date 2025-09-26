@@ -6,6 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import override
+
 from flext_core import FlextLogger, FlextResult, FlextTypes
 
 """
@@ -22,6 +24,8 @@ logger = FlextLogger(__name__)
 class LDAPStreamProcessingStats:
     """LDAP stream processing statistics - mutable for performance."""
 
+    @override
+    @override
     def __init__(self, stream_name: str) -> None:
         """Initialize LDAP stream processing statistics."""
         self.stream_name = stream_name
@@ -41,6 +45,8 @@ class LDAPStreamProcessingStats:
 class SingerLDAPStreamProcessor:
     """Process Singer LDAP streams using flext-core patterns."""
 
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize Singer LDAP stream processor."""
         self._stream_stats: dict[str, LDAPStreamProcessingStats] = {}

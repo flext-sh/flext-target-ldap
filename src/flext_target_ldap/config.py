@@ -14,7 +14,7 @@ from __future__ import annotations
 import warnings
 
 from pydantic import Field
-from pydantic_settings import SettingsConfigDict
+from pydantic_settings import ConfigDict
 
 from flext_core import (
     FlextModels,
@@ -49,9 +49,10 @@ class TargetLDAPConfig(FlextModels.Config):
     )  # Keep for compatibility
     search_filter: str = Field("(objectClass=*)", description="Default search filter")
     search_scope: str = Field(
-        "SUBTREE",
-        description="Search scope: BASE, LEVEL, or SUBTREE",
+        SUBTREE,
+        description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
+    model_config: dict[str, object] = ConfigDict()
 
     # Connection timeouts
     connect_timeout: int = Field(10, description="Connection timeout in seconds")
@@ -89,10 +90,6 @@ class TargetLDAPConfig(FlextModels.Config):
     )
 
     # Use SettingsConfigDict for Settings configuration
-    model_config = SettingsConfigDict(
-        env_prefix="TARGET_LDAP_",
-        case_sensitive=False,
-    )
 
 
 class LDAPConnectionSettings(FlextModels):

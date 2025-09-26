@@ -9,6 +9,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import override
+
 from flext_core import FlextLogger, FlextResult, FlextTypes
 
 logger: FlextLogger = FlextLogger(__name__)
@@ -17,6 +19,7 @@ logger: FlextLogger = FlextLogger(__name__)
 class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
+    @override
     def __init__(self, config: FlextTypes.Core.Dict | None = None) -> None:
         """Initialize LDAP target orchestrator.
 
@@ -53,7 +56,7 @@ class LDAPTargetOrchestrator:
                 processed_count += 1
 
             result = {
-                "loaded_records": processed_count,
+                "loaded_records": "processed_count",
                 "status": "completed",
             }
 

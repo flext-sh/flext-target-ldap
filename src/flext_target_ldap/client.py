@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager, suppress
-from typing import Protocol
+from typing import Protocol, override
 
 import ldap3
 
@@ -71,6 +71,8 @@ class LDAPConnectionProtocol(Protocol):
 class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
+    @override
+    @override
     def __init__(self, dn: str, attributes: FlextTypes.Core.Dict) -> None:
         """Initialize the instance."""
         self.dn = dn
@@ -88,6 +90,8 @@ class LDAPClient:
 
     """
 
+    @override
+    @override
     def __init__(
         self,
         config: FlextLdapModels.ConnectionConfig | FlextTypes.Core.Dict,
@@ -266,6 +270,8 @@ class LDAPClient:
 
             # Create a sync wrapper for the async connection
             class AsyncConnectionWrapper:
+                @override
+                @override
                 def __init__(self, session_id: str) -> None:
                     self.session_id = session_id
                     self.bound = True

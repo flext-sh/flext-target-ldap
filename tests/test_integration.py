@@ -144,7 +144,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance.add.return_value = True
         mock_conn_instance.modify.return_value = True
 
-        def search_side_effect(*_args) -> bool:
+        def search_side_effect(*_args: str | int | bool) -> bool:
             # First search: no entry
             # Second search: entry exists
             if mock_conn_instance.search.call_count <= 1:

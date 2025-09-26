@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import asyncio
+from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_target_ldap.client import LDAPClient
@@ -16,6 +17,10 @@ from flext_target_ldap.client import LDAPClient
 class Sink:
     """Placeholder Sink base class for Singer protocol compatibility."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         target: Target,
@@ -47,6 +52,10 @@ class Sink:
 class Target:
     """Placeholder Target base class for Singer protocol compatibility."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self, config: FlextTypes.Core.Dict) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, object] = config
@@ -58,6 +67,10 @@ logger = FlextLogger(__name__)
 class LDAPProcessingResult:
     """Result of LDAP processing operations - mutable for performance tracking."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize processing result counters."""
         self.processed_count: int = 0
@@ -87,6 +100,10 @@ class LDAPProcessingResult:
 class LDAPBaseSink(Sink):
     """Base LDAP sink with common functionality."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(
         self,
         target: Target,

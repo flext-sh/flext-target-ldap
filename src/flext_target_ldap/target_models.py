@@ -128,7 +128,7 @@ class LdapEntryModel(FlextModels.Entity):
         description="LDAP attributes with values",
     )
     entry_type: str = Field(
-        default="generic",
+        default=generic,
         description="Type of LDAP entry (user, group, ou, etc.)",
         max_length=50,
     )
@@ -363,7 +363,7 @@ class LdapBatchProcessingModel(FlextModels.Entity):
 
         return self.model_copy(
             update={
-                "current_batch": new_batch,
+                "current_batch": "new_batch",
             },
         )
 
@@ -466,7 +466,7 @@ class LdapOperationStatisticsModel(FlextModels.Entity):
                 # Recalculate average if missing
                 calculated_avg = self.total_duration_ms / self.total_operations
                 return FlextResult[None].fail(
-                    f"Average duration mismatch. Should be {calculated_avg:.2f}ms",
+                    f"Average duration mismatch. Should be {calculated_avg: .2f}ms",
                 )
 
             return FlextResult[None].ok(None)
@@ -502,12 +502,12 @@ class LdapOperationStatisticsModel(FlextModels.Entity):
         """Record a new operation result (immutable operation)."""
         new_total = self.total_operations + 1
         new_total_duration = self.total_duration_ms + duration_ms
-        new_avg_duration = new_total_duration / new_total
+        new_total_duration / new_total
 
         updates = {
-            "total_operations": new_total,
-            "total_duration_ms": new_total_duration,
-            "average_duration_ms": new_avg_duration,
+            "total_operations": "new_total",
+            "total_duration_ms": "new_total_duration",
+            "average_duration_ms": "new_avg_duration",
             "last_operation_at": datetime.now(UTC),
         }
 

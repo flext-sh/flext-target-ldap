@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
+from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 
@@ -23,6 +24,10 @@ logger = FlextLogger(__name__)
 class LDAPTypeConverter:
     """Convert data types for LDAP storage using flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize LDAP type converter."""
 
@@ -58,6 +63,10 @@ class LDAPTypeConverter:
 class LDAPDataTransformer:
     """Transform data for LDAP storage using flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self, type_converter: LDAPTypeConverter | None = None) -> None:
         """Initialize LDAP data transformer."""
         self.type_converter = type_converter or LDAPTypeConverter()
@@ -154,6 +163,10 @@ class LDAPDataTransformer:
 class LDAPSchemaMapper:
     """Map Singer schemas to LDAP schemas using flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize LDAP schema mapper."""
 
@@ -236,6 +249,10 @@ class LDAPSchemaMapper:
 class LDAPEntryManager:
     """Manage LDAP entries using flext-core patterns."""
 
+    @override
+    @override
+    @override
+    @override
     def __init__(self: object) -> None:
         """Initialize LDAP entry manager."""
 
@@ -281,8 +298,8 @@ class LDAPEntryManager:
         special_chars = {
             ",": "\\,",
             "+": "\\+",
-            '"': '\\"',
-            "\\": "\\\\",
+            '"': "\\'",
+            "\\": "\\",
             "<": "\\<",
             ">": "\\>",
             ";": "\\;",
