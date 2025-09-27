@@ -16,7 +16,7 @@ from __future__ import annotations
 from pydantic import ConfigDict, Field
 
 from flext_core import (
-    FlextModels,
+    FlextConfig,
     FlextResult,
     FlextTypes,
 )
@@ -25,7 +25,7 @@ from flext_ldap import FlextLdapModels
 # Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
 
 
-class LdapTargetConnectionSettings(FlextModels.ArbitraryTypesModel):
+class LdapTargetConnectionSettings(FlextConfig):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -71,7 +71,7 @@ class LdapTargetConnectionSettings(FlextModels.ArbitraryTypesModel):
             return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextModels.ArbitraryTypesModel):
+class LdapTargetOperationSettings(FlextConfig):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -112,7 +112,7 @@ class LdapTargetOperationSettings(FlextModels.ArbitraryTypesModel):
             return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextModels.ArbitraryTypesModel):
+class LdapTargetMappingSettings(FlextConfig):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: FlextTypes.Core.Headers = Field(
@@ -128,7 +128,7 @@ class LdapTargetMappingSettings(FlextModels.ArbitraryTypesModel):
         description="Default search filter",
     )
     search_scope: str = Field(
-        SUBTREE,
+        "SUBTREE",
         description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
 
@@ -154,7 +154,7 @@ class LdapTargetMappingSettings(FlextModels.ArbitraryTypesModel):
             return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
-class TargetLdapConfig(FlextModels.ArbitraryTypesModel):
+class TargetLdapConfig(FlextConfig):
     """Consolidated LDAP target configuration using FlextConfig.BaseModel patterns.
 
     This configuration class consolidates all LDAP target settings while
@@ -213,7 +213,7 @@ class TargetLdapConfig(FlextModels.ArbitraryTypesModel):
         description="Default search filter",
     )
     search_scope: str = Field(
-        SUBTREE,
+        "SUBTREE",
         description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
 

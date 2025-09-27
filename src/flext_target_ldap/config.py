@@ -17,6 +17,7 @@ from pydantic import Field
 from pydantic_settings import ConfigDict
 
 from flext_core import (
+    FlextConfig,
     FlextModels,
     FlextResult,
     FlextTypes,
@@ -33,7 +34,7 @@ warnings.warn(
 )
 
 
-class TargetLDAPConfig(FlextModels.Config):
+class TargetLDAPConfig(FlextConfig):
     """LDAP target configuration using consolidated patterns."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
@@ -49,7 +50,7 @@ class TargetLDAPConfig(FlextModels.Config):
     )  # Keep for compatibility
     search_filter: str = Field("(objectClass=*)", description="Default search filter")
     search_scope: str = Field(
-        SUBTREE,
+        "SUBTREE",
         description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
     model_config: dict[str, object] = ConfigDict()

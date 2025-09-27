@@ -10,6 +10,9 @@ from __future__ import annotations
 import importlib.metadata
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+
+# Standardized [Project]Models pattern
+from flext_target_ldap.models import FlextTargetLdapModels
 from flext_target_ldap.sinks import (
     GroupsSink,
     LDAPBaseSink,
@@ -40,6 +43,7 @@ from flext_target_ldap.target_services import (
     LdapTransformationService,
     LdapTransformationServiceProtocol,
 )
+from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
 try:
     __version__ = importlib.metadata.version("flext-target-ldap")
@@ -57,6 +61,9 @@ __all__: FlextTypes.Core.StringList = [
     "FlextTargetLDAPError",
     "FlextTargetLDAPService",
     "FlextTargetLDAPValidationError",
+    # Standardized [Project]Models pattern
+    "FlextTargetLdapModels",
+    "FlextTargetLdapUtilities",
     "FlextTypes",
     "GroupsSink",
     "LDAPBaseSink",
