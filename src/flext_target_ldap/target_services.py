@@ -485,7 +485,7 @@ class LdapTargetOrchestrator:
                 "processed_records": "processed_count",
                 "total_records": len(records),
                 "transformation_errors": "transformation_errors",
-                "status": completed
+                "status": "completed"
                 if not transformation_errors
                 else "completed_with_errors",
             }

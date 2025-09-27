@@ -128,7 +128,7 @@ class LdapEntryModel(FlextModels.Entity):
         description="LDAP attributes with values",
     )
     entry_type: str = Field(
-        default=generic,
+        default="generic",
         description="Type of LDAP entry (user, group, ou, etc.)",
         max_length=50,
     )
