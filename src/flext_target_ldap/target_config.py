@@ -22,8 +22,6 @@ from flext_core import (
 )
 from flext_ldap import FlextLdapModels
 
-# Modernized to use FlextConfig.BaseModel from flext-core for consistent patterns
-
 
 class LdapTargetConnectionSettings(FlextConfig):
     """LDAP connection settings domain model with business validation."""

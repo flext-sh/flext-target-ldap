@@ -10,13 +10,6 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 
-"""
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 logger = FlextLogger(__name__)
 
 
@@ -24,7 +17,6 @@ logger = FlextLogger(__name__)
 class LDAPStreamProcessingStats:
     """LDAP stream processing statistics - mutable for performance."""
 
-    @override
     @override
     def __init__(self, stream_name: str) -> None:
         """Initialize LDAP stream processing statistics."""
@@ -45,7 +37,6 @@ class LDAPStreamProcessingStats:
 class SingerLDAPStreamProcessor:
     """Process Singer LDAP streams using flext-core patterns."""
 
-    @override
     @override
     def __init__(self: object) -> None:
         """Initialize Singer LDAP stream processor."""

@@ -12,11 +12,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-# CLI testing will be replaced with flext-cli patterns
 from flext_core import FlextTypes
-
-# Import will be fixed when flext_meltano provides proper Target/Sink classes
-# from flext_target_ldap import TargetLDAP
 
 
 class TestTargetLDAPIntegration:

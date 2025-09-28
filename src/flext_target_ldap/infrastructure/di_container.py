@@ -1,19 +1,16 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+"""DI Container utilities for flext-target-ldap using flext-core patterns.
 
+This module provides dependency injection container utilities following
+flext-core foundation patterns, eliminating code duplication and ensuring
+consistent dependency management across the LDAP target implementation.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT.
 """
 
 from __future__ import annotations
 
 from flext_core import FlextContainer
-
-"""DI Container utilities for flext-target-ldap using flext-core patterns.
-
-This module provides dependency injection container utilities following
-flext-core foundation patterns, eliminating code duplication and ensuring
-consistent dependency management across the LDAP target implementation.
-"""
-
 
 get_flext_target_ldap_container = FlextContainer.get_global()
 

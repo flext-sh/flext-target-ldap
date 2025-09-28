@@ -12,13 +12,6 @@ from pydantic import Field
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
 
-"""
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 logger = FlextLogger(__name__)
 
 

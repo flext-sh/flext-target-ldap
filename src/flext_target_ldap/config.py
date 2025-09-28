@@ -12,9 +12,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import warnings
+from typing import Self
 
 from pydantic import Field
-from pydantic_settings import ConfigDict
+from pydantic_settings import SettingsConfigDict
 
 from flext_core import (
     FlextConfig,
@@ -53,7 +54,6 @@ class TargetLDAPConfig(FlextConfig):
         "SUBTREE",
         description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
-    model_config: dict[str, object] = ConfigDict()
 
     # Connection timeouts
     connect_timeout: int = Field(10, description="Connection timeout in seconds")
@@ -89,6 +89,68 @@ class TargetLDAPConfig(FlextConfig):
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
+
+    model_config = SettingsConfigDict(
+        env_prefix="FLEXT_TARGET_LDAP_",
+        case_sensitive=False,
+        extra="ignore",
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        frozen=False,
+    )
+
+    @classmethod
+    def get_global_instance(cls) -> Self:
+        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
+
+    @classmethod
+    def create_for_development(cls, **overrides: object) -> Self:
+        """Create configuration for development environment."""
+        dev_overrides: dict[str, object] = {
+            "connect_timeout": 15,
+            "receive_timeout": 45,
+            "batch_size": 50,
+            "create_missing_entries": True,
+            "update_existing_entries": True,
+            **overrides,
+        }
+        return cls.get_or_create_shared_instance(
+            project_name="flext-target-ldap", **dev_overrides
+        )
+
+    @classmethod
+    def create_for_production(cls, **overrides: object) -> Self:
+        """Create configuration for production environment."""
+        prod_overrides: dict[str, object] = {
+            "connect_timeout": 10,
+            "receive_timeout": 30,
+            "batch_size": 1000,
+            "create_missing_entries": True,
+            "update_existing_entries": True,
+            "delete_removed_entries": False,
+            **overrides,
+        }
+        return cls.get_or_create_shared_instance(
+            project_name="flext-target-ldap", **prod_overrides
+        )
+
+    @classmethod
+    def create_for_testing(cls, **overrides: object) -> Self:
+        """Create configuration for testing environment."""
+        test_overrides: dict[str, object] = {
+            "connect_timeout": 5,
+            "receive_timeout": 15,
+            "batch_size": 10,
+            "create_missing_entries": True,
+            "update_existing_entries": True,
+            "delete_removed_entries": True,
+            **overrides,
+        }
+        return cls.get_or_create_shared_instance(
+            project_name="flext-target-ldap", **test_overrides
+        )
 
     # Use SettingsConfigDict for Settings configuration
 

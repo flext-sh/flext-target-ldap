@@ -13,10 +13,7 @@ import pytest
 from flext_core import FlextTypes
 from flext_target_ldap import GroupsSink, LDAPBaseSink, TargetLDAP, UsersSink
 
-# Alias for backward compatibility
 GenericSink = LDAPBaseSink
-
-# Note: get_target_test_class is not available - would need to implement basic target tests manually
 
 
 class TestTargetLDAPUnit:

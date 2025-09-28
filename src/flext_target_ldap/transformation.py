@@ -61,7 +61,6 @@ class DataTransformationEngine:
     """Engine for transforming data using rules."""
 
     @override
-    @override
     def __init__(self, rules: list[TransformationRule]) -> None:
         """Initialize transformation engine."""
         self.rules = rules
@@ -103,7 +102,6 @@ class DataTransformationEngine:
 class MigrationValidator:
     """Validator for migration data."""
 
-    @override
     @override
     def __init__(self, *, strict_mode: bool = True) -> None:
         """Initialize migration validator."""
