@@ -18,9 +18,6 @@ class Sink:
     """Placeholder Sink base class for Singer protocol compatibility."""
 
     @override
-    @override
-    @override
-    @override
     def __init__(
         self,
         target: Target,
@@ -53,9 +50,6 @@ class Target:
     """Placeholder Target base class for Singer protocol compatibility."""
 
     @override
-    @override
-    @override
-    @override
     def __init__(self, config: FlextTypes.Core.Dict) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, object] = config
@@ -67,9 +61,6 @@ logger = FlextLogger(__name__)
 class LDAPProcessingResult:
     """Result of LDAP processing operations - mutable for performance tracking."""
 
-    @override
-    @override
-    @override
     @override
     def __init__(self: object) -> None:
         """Initialize processing result counters."""
@@ -100,9 +91,6 @@ class LDAPProcessingResult:
 class LDAPBaseSink(Sink):
     """Base LDAP sink with common functionality."""
 
-    @override
-    @override
-    @override
     @override
     def __init__(
         self,

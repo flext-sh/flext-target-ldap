@@ -15,8 +15,6 @@ from flext_core import FlextTypes
 from flext_target_ldap import LDAPClient
 from flext_tests import FlextTestDocker
 
-# Shared LDAP container fixture
-
 
 # Docker container management with FlextTestDocker
 @pytest.fixture(scope="session")

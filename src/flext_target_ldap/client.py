@@ -72,7 +72,6 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    @override
     def __init__(self, dn: str, attributes: FlextTypes.Core.Dict) -> None:
         """Initialize the instance."""
         self.dn = dn
@@ -90,7 +89,6 @@ class LDAPClient:
 
     """
 
-    @override
     @override
     def __init__(
         self,

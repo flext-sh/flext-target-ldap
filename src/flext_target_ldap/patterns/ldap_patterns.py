@@ -11,22 +11,12 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
 
-"""
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
 logger = FlextLogger(__name__)
 
 
 class LDAPTypeConverter:
     """Convert data types for LDAP storage using flext-core patterns."""
 
-    @override
-    @override
-    @override
     @override
     def __init__(self: object) -> None:
         """Initialize LDAP type converter."""
@@ -63,9 +53,6 @@ class LDAPTypeConverter:
 class LDAPDataTransformer:
     """Transform data for LDAP storage using flext-core patterns."""
 
-    @override
-    @override
-    @override
     @override
     def __init__(self, type_converter: LDAPTypeConverter | None = None) -> None:
         """Initialize LDAP data transformer."""
@@ -164,9 +151,6 @@ class LDAPSchemaMapper:
     """Map Singer schemas to LDAP schemas using flext-core patterns."""
 
     @override
-    @override
-    @override
-    @override
     def __init__(self: object) -> None:
         """Initialize LDAP schema mapper."""
 
@@ -249,9 +233,6 @@ class LDAPSchemaMapper:
 class LDAPEntryManager:
     """Manage LDAP entries using flext-core patterns."""
 
-    @override
-    @override
-    @override
     @override
     def __init__(self: object) -> None:
         """Initialize LDAP entry manager."""
