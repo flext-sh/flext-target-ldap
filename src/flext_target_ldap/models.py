@@ -16,7 +16,8 @@ from typing import Self
 
 from pydantic import Field, field_validator
 
-from flext_core import FlextModels, FlextResult, FlextTypes
+from flext_core import FlextModels, FlextResult
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
 class FlextTargetLdapModels(FlextModels):
@@ -141,11 +142,11 @@ class FlextTargetLdapModels(FlextModels):
             min_length=1,
             max_length=1000,
         )
-        object_classes: FlextTypes.Core.StringList = Field(
+        object_classes: FlextTargetLdapTypes.Core.StringList = Field(
             default_factory=list,
             description="LDAP object classes",
         )
-        attributes: dict[str, FlextTypes.Core.StringList] = Field(
+        attributes: dict[str, FlextTargetLdapTypes.Core.StringList] = Field(
             default_factory=dict,
             description="LDAP attributes with values",
         )
@@ -163,8 +164,8 @@ class FlextTargetLdapModels(FlextModels):
         @classmethod
         def validate_object_classes(
             cls,
-            v: FlextTypes.Core.StringList,
-        ) -> FlextTypes.Core.StringList:
+            v: FlextTargetLdapTypes.Core.StringList,
+        ) -> FlextTargetLdapTypes.Core.StringList:
             """Validate object classes contain 'top'."""
             if "top" not in v:
                 v.append("top")
@@ -173,7 +174,7 @@ class FlextTargetLdapModels(FlextModels):
         def validate_business_rules(self: object) -> FlextResult[None]:
             """Validate LDAP entry business rules."""
             try:
-                errors: FlextTypes.Core.StringList = []
+                errors: FlextTargetLdapTypes.Core.StringList = []
 
                 # Validate DN format
                 if (
@@ -227,7 +228,7 @@ class FlextTargetLdapModels(FlextModels):
 
         def get_attribute_values(
             self, attribute_name: str
-        ) -> FlextTypes.Core.StringList:
+        ) -> FlextTargetLdapTypes.Core.StringList:
             """Get values for a specific attribute."""
             return self.attributes.get(attribute_name, [])
 
@@ -238,7 +239,7 @@ class FlextTargetLdapModels(FlextModels):
         for LDAP target operations.
         """
 
-        original_record: FlextTypes.Core.Dict = Field(
+        original_record: FlextTargetLdapTypes.Core.Dict = Field(
             ...,
             description="Original Singer record before transformation",
         )
@@ -250,7 +251,7 @@ class FlextTargetLdapModels(FlextModels):
             default_factory=list,
             description="Attribute mappings that were applied",
         )
-        transformation_errors: FlextTypes.Core.StringList = Field(
+        transformation_errors: FlextTargetLdapTypes.Core.StringList = Field(
             default_factory=list,
             description="Any errors encountered during transformation",
         )
@@ -530,6 +531,6 @@ class FlextTargetLdapModels(FlextModels):
 
 
 # Export the unified models class
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTargetLdapTypes.Core.StringList = [
     "FlextTargetLdapModels",
 ]

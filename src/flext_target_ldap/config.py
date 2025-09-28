@@ -21,9 +21,9 @@ from flext_core import (
     FlextConfig,
     FlextModels,
     FlextResult,
-    FlextTypes,
 )
 from flext_ldap import FlextLdapModels
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 # Compatibility warning for Singer adapters migration
 warnings.warn(
@@ -81,11 +81,11 @@ class TargetLDAPConfig(FlextConfig):
     )
 
     # Mapping and transformation
-    attribute_mapping: FlextTypes.Core.Headers = Field(
+    attribute_mapping: FlextTargetLdapTypes.Core.Headers = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: FlextTypes.Core.StringList = Field(
+    object_classes: FlextTargetLdapTypes.Core.StringList = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -191,7 +191,9 @@ class LDAPOperationSettings(FlextModels):
 # Function removed - not used anywhere and caused mypy errors due to complex field typing
 
 
-def validate_ldap_config(config: FlextTypes.Core.Dict) -> FlextResult[TargetLDAPConfig]:
+def validate_ldap_config(
+    config: FlextTargetLdapTypes.Core.Dict,
+) -> FlextResult[TargetLDAPConfig]:
     """Validate LDAP configuration."""
     try:
 
@@ -249,7 +251,7 @@ def validate_ldap_config(config: FlextTypes.Core.Dict) -> FlextResult[TargetLDAP
         # Build TargetLDAPConfig explicitly
         raw_attr_map = config.get("attribute_mapping")
         if isinstance(raw_attr_map, dict):
-            attribute_mapping: FlextTypes.Core.Headers = {
+            attribute_mapping: FlextTargetLdapTypes.Core.Headers = {
                 str(k): str(v) for k, v in raw_attr_map.items()
             }
         else:
@@ -257,7 +259,7 @@ def validate_ldap_config(config: FlextTypes.Core.Dict) -> FlextResult[TargetLDAP
 
         raw_object_classes = config.get("object_classes")
         if isinstance(raw_object_classes, list):
-            object_classes: FlextTypes.Core.StringList = [
+            object_classes: FlextTargetLdapTypes.Core.StringList = [
                 str(v) for v in raw_object_classes
             ]
         else:

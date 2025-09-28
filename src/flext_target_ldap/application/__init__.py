@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from flext_core import FlextTypes
 from flext_target_ldap.application.orchestrator import LDAPTargetOrchestrator
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 """LDAP application module using flext-core patterns.
 
@@ -15,6 +16,7 @@ operations, following flext-core architectural patterns and principles.
 """
 
 
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTargetLdapTypes.Core.StringList = [
+    "FlextTypes",
     "LDAPTargetOrchestrator",
 ]

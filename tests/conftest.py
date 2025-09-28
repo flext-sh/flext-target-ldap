@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
+from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
@@ -24,7 +25,7 @@ def docker_control() -> FlextTestDocker:
 
 
 @pytest.fixture(scope="session")
-def shared_ldap_container(docker_control: FlextTestDocker) -> FlextTestDocker:
+def shared_ldap_container(docker_control: FlextTestDocker) -> Generator[str]:
     """Managed LDAP container using FlextTestDocker with auto-start."""
     result = docker_control.start_container("flext-openldap-test")
     if result.is_failure:

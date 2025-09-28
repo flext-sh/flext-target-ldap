@@ -18,9 +18,9 @@ from pydantic import ConfigDict, Field
 from flext_core import (
     FlextConfig,
     FlextResult,
-    FlextTypes,
 )
 from flext_ldap import FlextLdapModels
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
 class LdapTargetConnectionSettings(FlextConfig):
@@ -113,11 +113,11 @@ class LdapTargetOperationSettings(FlextConfig):
 class LdapTargetMappingSettings(FlextConfig):
     """LDAP attribute mapping and transformation settings."""
 
-    attribute_mapping: FlextTypes.Core.Headers = Field(
+    attribute_mapping: FlextTargetLdapTypes.Core.Headers = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: FlextTypes.Core.StringList = Field(
+    object_classes: FlextTargetLdapTypes.Core.StringList = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -196,11 +196,11 @@ class TargetLdapConfig(FlextConfig):
     )
 
     # Mapping and transformation
-    attribute_mapping: FlextTypes.Core.Headers = Field(
+    attribute_mapping: FlextTargetLdapTypes.Core.Headers = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: FlextTypes.Core.StringList = Field(
+    object_classes: FlextTargetLdapTypes.Core.StringList = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -248,7 +248,7 @@ class TargetLdapConfig(FlextConfig):
 
 
 def validate_ldap_target_config(
-    config: FlextTypes.Core.Dict,
+    config: FlextTargetLdapTypes.Core.Dict,
 ) -> FlextResult[TargetLdapConfig]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
@@ -279,8 +279,8 @@ def validate_ldap_target_config(
 
         def _to_str_list(
             value: object,
-            default: FlextTypes.Core.StringList,
-        ) -> FlextTypes.Core.StringList:
+            default: FlextTargetLdapTypes.Core.StringList,
+        ) -> FlextTargetLdapTypes.Core.StringList:
             if isinstance(value, list):
                 return [str(v) for v in value]
             return default
@@ -343,7 +343,7 @@ def validate_ldap_target_config(
         )
 
         raw_attr_map: dict[str, object] = config.get("attribute_mapping", {})
-        attribute_mapping: FlextTypes.Core.Headers = (
+        attribute_mapping: FlextTargetLdapTypes.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map.items()}
             if isinstance(raw_attr_map, dict)
             else {}

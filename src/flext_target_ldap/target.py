@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import override
 
 from flext_cli import flext_cli_create_helper
-from flext_core import FlextContainer, FlextLogger, FlextTypes
+from flext_core import FlextContainer, FlextLogger
 from flext_meltano import Sink, Target
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import TargetLDAPConfig
@@ -22,6 +22,7 @@ from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 from flext_target_ldap.sinks import (
     LDAPBaseSink,
 )
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)
 
@@ -39,7 +40,7 @@ class TargetLDAP(Target):
     def __init__(
         self,
         *,
-        config: FlextTypes.Core.Dict | None = None,
+        config: FlextTargetLdapTypes.Core.Dict | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -57,7 +58,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self: object) -> FlextTypes.Core.Dict:
+    def singer_catalog(self: object) -> FlextTargetLdapTypes.Core.Dict:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -207,7 +208,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
         # Load minimal config if provided
-        cfg: FlextTypes.Core.Dict = {}
+        cfg: FlextTargetLdapTypes.Core.Dict = {}
         if config:
             try:
                 with Path(config).open(encoding="utf-8") as f:
