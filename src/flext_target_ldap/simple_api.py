@@ -13,13 +13,13 @@ from __future__ import annotations
 
 from flext_core import (
     FlextResult,
-    FlextTypes,
 )
 from flext_ldap import FlextLdapModels, get_flext_ldap_api
 from flext_target_ldap.target import TargetLDAP
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
-def create_ldap_target(config: FlextTypes.Core.Dict) -> FlextResult[object]:
+def create_ldap_target(config: FlextTargetLdapTypes.Core.Dict) -> FlextResult[object]:
     """Create LDAP target with configuration."""
     try:
         target = TargetLDAP(config=config)
@@ -29,8 +29,8 @@ def create_ldap_target(config: FlextTypes.Core.Dict) -> FlextResult[object]:
 
 
 def load_users_to_ldap(
-    users: list[FlextTypes.Core.Dict],
-    config: FlextTypes.Core.Dict,
+    users: list[FlextTargetLdapTypes.Core.Dict],
+    config: FlextTargetLdapTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
     target_result: FlextResult[object] = create_ldap_target(config)
@@ -60,8 +60,8 @@ def load_users_to_ldap(
 
 
 def load_groups_to_ldap(
-    groups: list[FlextTypes.Core.Dict],
-    config: FlextTypes.Core.Dict,
+    groups: list[FlextTargetLdapTypes.Core.Dict],
+    config: FlextTargetLdapTypes.Core.Dict,
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
     target_result: FlextResult[object] = create_ldap_target(config)
@@ -90,7 +90,7 @@ def load_groups_to_ldap(
         return FlextResult[int].fail(f"Failed to load groups: {e}")
 
 
-def test_ldap_connection(config: FlextTypes.Core.Dict) -> FlextResult[bool]:
+def test_ldap_connection(config: FlextTargetLdapTypes.Core.Dict) -> FlextResult[bool]:
     """Test LDAP connection with given configuration."""
     try:
         # Validate connection config by creating it

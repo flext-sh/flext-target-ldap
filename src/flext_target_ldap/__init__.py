@@ -43,6 +43,7 @@ from flext_target_ldap.target_services import (
     LdapTransformationService,
     LdapTransformationServiceProtocol,
 )
+from flext_target_ldap.typings import FlextTargetLdapTypes
 from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
 try:
@@ -52,7 +53,7 @@ except importlib.metadata.PackageNotFoundError:
 
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTargetLdapTypes.Core.StringList = [
     "FlextLogger",
     "FlextModels",
     "FlextResult",

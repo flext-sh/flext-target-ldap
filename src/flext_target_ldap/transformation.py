@@ -10,7 +10,8 @@ from typing import override
 
 from pydantic import Field
 
-from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextModels, FlextResult
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)
 
@@ -40,8 +41,8 @@ class TransformationRule(FlextModels.Entity):
 class TransformationResult(FlextModels.Entity):
     """Result of data transformation."""
 
-    transformed_data: FlextTypes.Core.Dict
-    applied_rules: FlextTypes.Core.StringList = Field(default_factory=list)
+    transformed_data: FlextTargetLdapTypes.Core.Dict
+    applied_rules: FlextTargetLdapTypes.Core.StringList = Field(default_factory=list)
 
     def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate transformation result business rules."""
@@ -67,12 +68,12 @@ class DataTransformationEngine:
 
     def transform(
         self,
-        data: FlextTypes.Core.Dict,
+        data: FlextTargetLdapTypes.Core.Dict,
     ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:
             transformed_data: dict[str, object] = data.copy()
-            applied_rules: FlextTypes.Core.StringList = []
+            applied_rules: FlextTargetLdapTypes.Core.StringList = []
 
             for rule in self.rules:
                 for key, value in transformed_data.items():
@@ -115,9 +116,9 @@ class MigrationValidator:
     @override
     def validate(
         self,
-        data: FlextTypes.Core.Dict | str,
-        attributes: FlextTypes.Core.Dict | None = None,
-        object_classes: FlextTypes.Core.StringList | None = None,
+        data: FlextTargetLdapTypes.Core.Dict | str,
+        attributes: FlextTargetLdapTypes.Core.Dict | None = None,
+        object_classes: FlextTargetLdapTypes.Core.StringList | None = None,
     ) -> FlextResult[bool]:
         """Validate migration data."""
         try:
@@ -160,8 +161,8 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: FlextTypes.Core.Dict,
-        object_classes: FlextTypes.Core.StringList,
+        attributes: FlextTargetLdapTypes.Core.Dict,
+        object_classes: FlextTargetLdapTypes.Core.StringList,
     ) -> FlextResult[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)

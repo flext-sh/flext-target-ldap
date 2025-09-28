@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 
 logger: FlextLogger = FlextLogger(__name__)
 
@@ -20,7 +20,7 @@ class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
     @override
-    def __init__(self, config: FlextTypes.Core.Dict | None = None) -> None:
+    def __init__(self, config: FlextTargetLdapTypes.Core.Dict | None = None) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
@@ -35,8 +35,8 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[FlextTypes.Core.Dict],
-    ) -> FlextResult[FlextTypes.Core.Dict]:
+        records: list[FlextTargetLdapTypes.Core.Dict],
+    ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
         """Orchestrate data loading to LDAP target.
 
         Args:
@@ -61,11 +61,11 @@ class LDAPTargetOrchestrator:
             }
 
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return FlextResult[FlextTypes.Core.Dict].ok(result)
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].ok(result)
 
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[FlextTypes.Core.Dict].fail(
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
                 f"Data loading orchestration failed: {e}",
             )
 
@@ -88,4 +88,4 @@ class LDAPTargetOrchestrator:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: FlextTypes.Core.StringList = ["LDAPTargetOrchestrator"]
+__all__: FlextTargetLdapTypes.Core.StringList = ["LDAPTargetOrchestrator"]
