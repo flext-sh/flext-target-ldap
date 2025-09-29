@@ -19,6 +19,7 @@ from pydantic_settings import SettingsConfigDict
 
 from flext_core import (
     FlextConfig,
+    FlextConstants,
     FlextModels,
     FlextResult,
 )
@@ -35,8 +36,8 @@ warnings.warn(
 )
 
 
-class TargetLDAPConfig(FlextConfig):
-    """LDAP target configuration using consolidated patterns."""
+class FlextTargetLdapConfig(FlextConfig):
+    """LDAP target configuration using consolidated patterns with FLEXT standards."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
     connection: FlextLdapModels.ConnectionConfig = Field(
@@ -48,7 +49,7 @@ class TargetLDAPConfig(FlextConfig):
     base_dn: str = Field(
         ...,
         description="Base DN for LDAP operations",
-    )  # Keep for compatibility
+    )
     search_filter: str = Field("(objectClass=*)", description="Default search filter")
     search_scope: str = Field(
         "SUBTREE",
@@ -56,11 +57,19 @@ class TargetLDAPConfig(FlextConfig):
     )
 
     # Connection timeouts
-    connect_timeout: int = Field(10, description="Connection timeout in seconds")
-    receive_timeout: int = Field(30, description="Receive timeout in seconds")
+    connect_timeout: int = Field(
+        FlextConstants.Network.DEFAULT_TIMEOUT // 3,
+        description="Connection timeout in seconds",
+    )
+    receive_timeout: int = Field(
+        FlextConstants.Network.DEFAULT_TIMEOUT, description="Receive timeout in seconds"
+    )
 
     # Batch processing settings
-    batch_size: int = Field(1000, description="Batch size for bulk operations")
+    batch_size: int = Field(
+        FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+        description="Batch size for bulk operations",
+    )
     max_records: int | None = Field(
         None,
         description="Maximum records to process (None for unlimited)",
@@ -97,6 +106,7 @@ class TargetLDAPConfig(FlextConfig):
         str_strip_whitespace=True,
         validate_assignment=True,
         arbitrary_types_allowed=True,
+        use_enum_values=True,
         frozen=False,
     )
 
@@ -109,9 +119,9 @@ class TargetLDAPConfig(FlextConfig):
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
         dev_overrides: dict[str, object] = {
-            "connect_timeout": 15,
-            "receive_timeout": 45,
-            "batch_size": 50,
+            "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
+            "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT + 15,
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 20,
             "create_missing_entries": True,
             "update_existing_entries": True,
             **overrides,
@@ -124,9 +134,9 @@ class TargetLDAPConfig(FlextConfig):
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
         prod_overrides: dict[str, object] = {
-            "connect_timeout": 10,
-            "receive_timeout": 30,
-            "batch_size": 1000,
+            "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 3,
+            "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
             "create_missing_entries": True,
             "update_existing_entries": True,
             "delete_removed_entries": False,
@@ -140,9 +150,10 @@ class TargetLDAPConfig(FlextConfig):
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
         test_overrides: dict[str, object] = {
-            "connect_timeout": 5,
-            "receive_timeout": 15,
-            "batch_size": 10,
+            "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 6,
+            "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+            // 100,
             "create_missing_entries": True,
             "update_existing_entries": True,
             "delete_removed_entries": True,
@@ -159,20 +170,29 @@ class LDAPConnectionSettings(FlextModels):
     """LDAP connection settings model."""
 
     host: str = Field(..., description="LDAP server host")
-    port: int = Field(389, description="LDAP server port")
+    port: int = Field(
+        FlextConstants.Platform.LDAP_DEFAULT_PORT, description="LDAP server port"
+    )
     use_ssl: bool = Field(default=False, description="Use SSL connection")
     use_tls: bool = Field(default=False, description="Use TLS connection")
     bind_dn: str | None = Field(None, description="Bind DN")
     bind_password: str | None = Field(None, description="Bind password")
     base_dn: str = Field(..., description="Base DN")
-    connect_timeout: int = Field(10, description="Connection timeout")
-    receive_timeout: int = Field(30, description="Receive timeout")
+    connect_timeout: int = Field(
+        FlextConstants.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout"
+    )
+    receive_timeout: int = Field(
+        FlextConstants.Network.DEFAULT_TIMEOUT, description="Receive timeout"
+    )
 
 
 class LDAPOperationSettings(FlextModels):
     """LDAP operation settings model."""
 
-    batch_size: int = Field(1000, description="Batch size")
+    batch_size: int = Field(
+        FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+        description="Batch size",
+    )
     max_records: int | None = Field(None, description="Maximum records")
     create_missing_entries: bool = Field(
         default=True,
@@ -193,7 +213,7 @@ class LDAPOperationSettings(FlextModels):
 
 def validate_ldap_config(
     config: FlextTargetLdapTypes.Core.Dict,
-) -> FlextResult[TargetLDAPConfig]:
+) -> FlextResult[FlextTargetLdapConfig]:
     """Validate LDAP configuration."""
     try:
 
@@ -224,20 +244,24 @@ def validate_ldap_config(
         # Extract connection parameters
         connection_params = {
             "server": config.get("host", "localhost"),
-            "port": config.get("port", 389),
+            "port": config.get("port", FlextConstants.Platform.LDAP_DEFAULT_PORT),
             "use_ssl": config.get("use_ssl", False),
             "bind_dn": config.get("bind_dn", ""),
             "bind_password": config.get("password", ""),
-            "timeout": config.get("timeout", 30),
+            "timeout": config.get("timeout", FlextConstants.Network.DEFAULT_TIMEOUT),
         }
 
         # Create connection config
         server = _to_str(connection_params["server"], "localhost")
-        port = _to_int(connection_params["port"], 389)
+        port = _to_int(
+            connection_params["port"], FlextConstants.Platform.LDAP_DEFAULT_PORT
+        )
         use_ssl = _to_bool(connection_params["use_ssl"], default=False)
         bind_dn = _to_str(connection_params["bind_dn"], "")
         bind_password = _to_str(connection_params["bind_password"], "")
-        timeout = _to_int(connection_params["timeout"], 30)
+        timeout = _to_int(
+            connection_params["timeout"], FlextConstants.Network.DEFAULT_TIMEOUT
+        )
 
         connection_config = FlextLdapModels.ConnectionConfig(
             server=server,
@@ -248,7 +272,7 @@ def validate_ldap_config(
             timeout=timeout,
         )
 
-        # Build TargetLDAPConfig explicitly
+        # Build FlextTargetLdapConfig explicitly
         raw_attr_map = config.get("attribute_mapping")
         if isinstance(raw_attr_map, dict):
             attribute_mapping: FlextTargetLdapTypes.Core.Headers = {
@@ -265,14 +289,28 @@ def validate_ldap_config(
         else:
             object_classes = ["top"]
 
-        validated_config = TargetLDAPConfig(
+        validated_config = FlextTargetLdapConfig(
             connection=connection_config,
             base_dn=_to_str(config.get("base_dn", "")),
             search_filter=_to_str(config.get("search_filter", "(objectClass=*)")),
             search_scope=_to_str(config.get("search_scope", "SUBTREE")),
-            connect_timeout=_to_int(config.get("connect_timeout", 10), 10),
-            receive_timeout=_to_int(config.get("receive_timeout", 30), 30),
-            batch_size=_to_int(config.get("batch_size", 1000), 1000),
+            connect_timeout=_to_int(
+                config.get(
+                    "connect_timeout", FlextConstants.Network.DEFAULT_TIMEOUT // 3
+                ),
+                FlextConstants.Network.DEFAULT_TIMEOUT // 3,
+            ),
+            receive_timeout=_to_int(
+                config.get("receive_timeout", FlextConstants.Network.DEFAULT_TIMEOUT),
+                FlextConstants.Network.DEFAULT_TIMEOUT,
+            ),
+            batch_size=_to_int(
+                config.get(
+                    "batch_size",
+                    FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+                ),
+                FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+            ),
             max_records=(
                 _to_int(config.get("max_records"), 0)
                 if config.get("max_records") is not None
@@ -293,8 +331,8 @@ def validate_ldap_config(
             attribute_mapping=attribute_mapping,
             object_classes=object_classes,
         )
-        return FlextResult[TargetLDAPConfig].ok(validated_config)
+        return FlextResult[FlextTargetLdapConfig].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[TargetLDAPConfig].fail(
+        return FlextResult[FlextTargetLdapConfig].fail(
             f"Configuration validation failed: {e}",
         )

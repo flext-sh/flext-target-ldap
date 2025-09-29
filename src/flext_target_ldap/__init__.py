@@ -10,9 +10,11 @@ from __future__ import annotations
 import importlib.metadata
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+from flext_target_ldap.config import FlextTargetLdapConfig as FlextTargetLDAPConfig
 
 # Standardized [Project]Models pattern
 from flext_target_ldap.models import FlextTargetLdapModels
+from flext_target_ldap.protocols import FlextTargetLdapProtocols
 from flext_target_ldap.sinks import (
     GroupsSink,
     LDAPBaseSink,
@@ -28,7 +30,6 @@ from flext_target_ldap.target_client import (
     TargetLDAP,
     TargetLdap,
 )
-from flext_target_ldap.target_config import TargetLdapConfig as FlextTargetLDAPConfig
 from flext_target_ldap.target_exceptions import (
     FlextTargetLdapConnectionError as FlextTargetLDAPConnectionError,
     FlextTargetLdapError as FlextTargetLDAPError,
@@ -64,6 +65,7 @@ __all__: FlextTargetLdapTypes.Core.StringList = [
     "FlextTargetLDAPValidationError",
     # Standardized [Project]Models pattern
     "FlextTargetLdapModels",
+    "FlextTargetLdapProtocols",
     "FlextTargetLdapUtilities",
     "FlextTypes",
     "GroupsSink",

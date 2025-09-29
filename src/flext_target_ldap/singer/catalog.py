@@ -11,6 +11,7 @@ from typing import ClassVar, override
 from pydantic import Field
 
 from flext_core import FlextLogger, FlextModels, FlextResult
+from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)
 
