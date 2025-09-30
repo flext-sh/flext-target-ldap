@@ -8,32 +8,37 @@ from __future__ import annotations
 
 import json
 from collections.abc import Generator
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
 
 from flext_core import FlextTypes
 from flext_target_ldap import LDAPClient
-from flext_tests import FlextTestDocker
 
+# Import centralized Docker fixtures
 
-# Docker container management with FlextTestDocker
-@pytest.fixture(scope="session")
-def docker_control() -> FlextTestDocker:
-    """Provide Docker control instance for tests."""
-    return FlextTestDocker()
+if TYPE_CHECKING:
+    from flext_tests import FlextTestDocker
 
 
 @pytest.fixture(scope="session")
-def shared_ldap_container(docker_control: FlextTestDocker) -> Generator[str]:
-    """Managed LDAP container using FlextTestDocker with auto-start."""
-    result = docker_control.start_container("flext-openldap-test")
-    if result.is_failure:
-        pytest.skip(f"Failed to start LDAP container: {result.error}")
+def shared_ldap_container(flext_docker: FlextTestDocker) -> Generator[str]:
+    """Managed LDAP container using centralized FlextTestDocker with docker-compose."""
+    import os
 
-    yield "flext-openldap-test"
+    # Use centralized docker-compose file for OpenLDAP
+    compose_file = os.path.expanduser("~/flext/docker/docker-compose.openldap.yml")
 
-    docker_control.stop_container("flext-openldap-test", remove=False)
+    # Start OpenLDAP stack using docker-compose
+    start_result = flext_docker.start_compose_stack(compose_file)
+    if start_result.is_failure:
+        pytest.skip(f"OpenLDAP container failed to start: {start_result.error}")
+
+    container_name = "flext-openldap-test"
+    return container_name
+
+    # Cleanup handled by FlextTestDocker automatically
 
 
 @pytest.fixture
