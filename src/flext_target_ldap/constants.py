@@ -8,9 +8,8 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_ldap.constants import FlextLdapConstants
-
 from flext_core import FlextConstants
+from flext_ldap.constants import FlextLdapConstants
 
 
 class FlextTargetLdapConstants(FlextConstants):
@@ -35,6 +34,7 @@ class FlextTargetLdapConstants(FlextConstants):
             )
             DEFAULT_PORT = FlextLdapConstants.Protocol.DEFAULT_PORT
             DEFAULT_TIMEOUT = FlextLdapConstants.Protocol.DEFAULT_TIMEOUT_SECONDS
+            MAX_PORT_NUMBER = 65535
 
         class Ldaps:
             """Secure LDAP connection settings."""
