@@ -18,14 +18,14 @@ from flext_core import (
     FlextResult,
 )
 from flext_ldap import FlextLdapAPI, FlextLdapClient, FlextLdapModels
+from flext_target_ldap.constants import FlextTargetLdapConstants
 from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target_config import TargetLdapConfig
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)
 
-# Network constants
-MAX_PORT_NUMBER = 65535
+# Network constants - moved to FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
 
 
 class LdapSearchEntry:
@@ -287,7 +287,7 @@ class LdapTargetClient:
                             self.api.close_connection()
                             return True
 
-                        run(_delete())
+                        _delete()
                         return True
                     except Exception:
                         return False
@@ -325,7 +325,7 @@ class LdapTargetClient:
 
                         search_result: FlextResult[
                             list[FlextTargetLdapTypes.Core.Dict]
-                        ] = run(_search())
+                        ] = _search()
                         if search_result.is_success and search_result.data:
                             # Convert search results to compatible format
                             self.entries = []
@@ -717,13 +717,13 @@ class LdapBaseSink(Sink):
         """Teardown LDAP client connection."""
         if self.client:
             # Disconnect hronously
-            run(self.client.disconnect())
+            self.client.disconnect()
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
     def process_batch(self, context: FlextTargetLdapTypes.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result: FlextResult[object] = run(self.setup_client())
+        setup_result: FlextResult[object] = self.setup_client()
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
@@ -817,18 +817,14 @@ class LdapUsersSink(LdapBaseSink):
             )
 
             # Try to add the user entry
-            add_result = run(
-                self.client.add_entry(user_dn, attributes, object_classes),
-            )
+            add_result = self.client.add_entry(user_dn, attributes, object_classes)
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("User entry added successfully: %s", user_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = run(
-                    self.client.modify_entry(user_dn, attributes),
-                )
+                modify_result = self.client.modify_entry(user_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
@@ -934,18 +930,14 @@ class LdapGroupsSink(LdapBaseSink):
             )
 
             # Try to add the group entry
-            add_result = run(
-                self.client.add_entry(group_dn, attributes, object_classes),
-            )
+            add_result = self.client.add_entry(group_dn, attributes, object_classes)
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = run(
-                    self.client.modify_entry(group_dn, attributes),
-                )
+                modify_result = self.client.modify_entry(group_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("Group entry modified successfully: %s", group_dn)
@@ -1041,18 +1033,14 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             attributes = self._build_ou_attributes(record)
 
             # Try to add the OU entry
-            add_result: FlextResult[object] = run(
-                self.client.add_entry(ou_dn, attributes)
-            )
+            add_result: FlextResult[object] = self.client.add_entry(ou_dn, attributes)
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = run(
-                    self.client.modify_entry(ou_dn, attributes),
-                )
+                modify_result = self.client.modify_entry(ou_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("OU entry modified successfully: %s", ou_dn)
@@ -1224,8 +1212,8 @@ class TargetLdap(Target):
                 port = 389
         else:
             port = 389
-        if port <= 0 or port > MAX_PORT_NUMBER:
-            msg = f"LDAP port must be between 1 and {MAX_PORT_NUMBER}"
+        if port <= 0 or port > FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER:
+            msg = f"LDAP port must be between 1 and {FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER}"
             raise ValueError(msg)
 
         use_ssl = self.config.get("use_ssl", False)

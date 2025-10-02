@@ -11,6 +11,7 @@ from typing import Protocol, override
 
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdapAPI
+
 from flext_target_ldap import target_client as target_client_module
 from flext_target_ldap.target_config import (
     TargetLdapConfig,
@@ -33,7 +34,6 @@ class LdapTargetServiceProtocol(Protocol):
         self, config: FlextTargetLdapTypes.Core.Dict
     ) -> FlextResult[object]:
         """Create LDAP target instance."""
-        ...
 
     def load_records(
         self,
@@ -42,7 +42,6 @@ class LdapTargetServiceProtocol(Protocol):
         stream_type: str = "users",
     ) -> FlextResult[int]:
         """Load records to LDAP."""
-        ...
 
 
 class LdapTransformationServiceProtocol(Protocol):
@@ -56,14 +55,12 @@ class LdapTransformationServiceProtocol(Protocol):
         base_dn: str,
     ) -> FlextResult[LdapTransformationResultModel]:
         """Transform Singer record to LDAP entry."""
-        ...
 
     def validate_entry(
         self,
         entry: LdapEntryModel,
     ) -> FlextResult[None]:
         """Validate LDAP entry against business rules."""
-        ...
 
 
 class LdapOrchestrationServiceProtocol(Protocol):
@@ -75,14 +72,12 @@ class LdapOrchestrationServiceProtocol(Protocol):
         config: TargetLdapConfig,
     ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
         """Orchestrate batch data loading."""
-        ...
 
     def validate_target_configuration(
         self,
         config: TargetLdapConfig,
     ) -> FlextResult[bool]:
         """Validate target configuration."""
-        ...
 
 
 class LdapConnectionService:

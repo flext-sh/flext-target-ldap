@@ -18,6 +18,7 @@ from flext_core import FlextContainer, FlextLogger
 from flext_meltano import Sink, Target
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import FlextTargetLdapConfig
+from flext_target_ldap.constants import FlextTargetLdapConstants
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 from flext_target_ldap.sinks import (
     LDAPBaseSink,
@@ -26,8 +27,7 @@ from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)
 
-# Network constants
-MAX_PORT_NUMBER = 65535
+# Network constants - moved to FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
 
 
 class TargetLDAP(Target):
@@ -153,8 +153,8 @@ class TargetLDAP(Target):
                 port = 389
         else:
             port = 389
-        if port <= 0 or port > MAX_PORT_NUMBER:
-            msg = f"LDAP port must be between 1 and {MAX_PORT_NUMBER}"
+        if port <= 0 or port > FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER:
+            msg = f"LDAP port must be between 1 and {FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER}"
             raise ValueError(msg)
 
         use_ssl = self.config.get("use_ssl", False)

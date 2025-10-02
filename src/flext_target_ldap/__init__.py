@@ -8,11 +8,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import importlib.metadata
+from typing import Final
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
 from flext_target_ldap.config import FlextTargetLdapConfig as FlextTargetLDAPConfig
-
-# Standardized [Project]Models pattern
 from flext_target_ldap.models import FlextTargetLdapModels
 from flext_target_ldap.protocols import FlextTargetLdapProtocols
 from flext_target_ldap.sinks import (
@@ -46,15 +45,21 @@ from flext_target_ldap.target_services import (
 )
 from flext_target_ldap.typings import FlextTargetLdapTypes
 from flext_target_ldap.utilities import FlextTargetLdapUtilities
+from flext_target_ldap.version import VERSION, FlextTargetLdapVersion
 
 try:
     __version__ = importlib.metadata.version("flext-target-ldap")
 except importlib.metadata.PackageNotFoundError:
     __version__ = "0.9.0"
 
-__version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
+PROJECT_VERSION: Final[FlextTargetLdapVersion] = VERSION
 
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__version__: str = VERSION.version
+__version_info__: tuple[int | str, ...] = VERSION.version_info
+
+__all__ = [
+    "PROJECT_VERSION",
+    "VERSION",
     "FlextLogger",
     "FlextModels",
     "FlextResult",
@@ -63,10 +68,11 @@ __all__: FlextTargetLdapTypes.Core.StringList = [
     "FlextTargetLDAPError",
     "FlextTargetLDAPService",
     "FlextTargetLDAPValidationError",
-    # Standardized [Project]Models pattern
     "FlextTargetLdapModels",
     "FlextTargetLdapProtocols",
+    "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
+    "FlextTargetLdapVersion",
     "FlextTypes",
     "GroupsSink",
     "LDAPBaseSink",

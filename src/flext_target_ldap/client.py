@@ -35,11 +35,9 @@ class LDAPConnectionProtocol(Protocol):
 
     def bind(self: object) -> bool:
         """Bind to LDAP server."""
-        ...
 
     def unbind(self: object) -> None:
         """Unbind from LDAP server."""
-        ...
 
     def add(
         self,
@@ -48,15 +46,12 @@ class LDAPConnectionProtocol(Protocol):
         attributes: dict[str, object],
     ) -> bool:
         """Add LDAP entry."""
-        ...
 
     def modify(self, dn: str, changes: dict[str, object]) -> bool:
         """Modify LDAP entry."""
-        ...
 
     def delete(self, dn: str) -> bool:
         """Delete LDAP entry."""
-        ...
 
     def search(
         self,
@@ -65,7 +60,6 @@ class LDAPConnectionProtocol(Protocol):
         attributes: list[str] | None = None,
     ) -> bool:
         """Search LDAP entries."""
-        ...
 
 
 class LDAPSearchEntry:
@@ -212,7 +206,7 @@ class LDAPClient:
                 ):
                     return FlextResult[str].ok("validated")
 
-            return run(_validate())
+            return _validate()
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[str].fail(f"Connection test error: {e}")
 
@@ -321,7 +315,7 @@ class LDAPClient:
                     return str(session) if session else "default_session"
 
             try:
-                session_id = run(_get_session())
+                session_id = _get_session()
                 wrapper = ConnectionWrapper(session_id)
                 yield wrapper
             except Exception:
