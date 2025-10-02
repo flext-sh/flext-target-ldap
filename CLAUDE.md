@@ -8,13 +8,25 @@
 
 **Hierarchy**: This document provides project-specific standards based on workspace-level patterns defined in [../CLAUDE.md](../CLAUDE.md). For architectural principles, quality gates, and MCP server usage, reference the main workspace standards.
 
-## 🔗 MCP SERVER INTEGRATION
+## 📋 DOCUMENT STRUCTURE & REFERENCES
 
-| MCP Server              | Purpose                                                   | Status     |
-| ----------------------- | --------------------------------------------------------- | ---------- |
-| **serena**              | Singer target codebase analysis and LDAP loading patterns | **ACTIVE** |
-| **sequential-thinking** | LDAP data loading and Singer protocol architecture        | **ACTIVE** |
-| **github**              | Singer ecosystem integration and target PRs               | **ACTIVE** |
+**Quick Links**:
+- **[~/.claude/commands/flext.md](~/.claude/commands/flext.md)**: Optimization command for module refactoring (USE with `/flext` command)
+- **[../CLAUDE.md](../CLAUDE.md)**: FLEXT ecosystem standards and domain library rules
+
+**CRITICAL INTEGRATION DEPENDENCIES**:
+- **flext-meltano**: MANDATORY for ALL Singer operations (ZERO TOLERANCE for direct singer-sdk without flext-meltano)
+- **flext-ldap**: MANDATORY for ALL LDAP operations (ZERO TOLERANCE for direct ldap3 imports)
+- **flext-core**: Foundation patterns (FlextResult, FlextService, FlextContainer)
+
+## 🔗 MCP SERVER INTEGRATION (MANDATORY)
+
+| MCP Server              | Purpose                                                   | Status          |
+| ----------------------- | --------------------------------------------------------- | --------------- |
+| **serena-flext**        | Semantic code analysis, symbol manipulation, refactoring  | **MANDATORY**   |
+| **sequential-thinking** | LDAP data loading and Singer protocol architecture        | **RECOMMENDED** |
+| **context7**            | Third-party library documentation (Singer SDK, LDAP)      | **RECOMMENDED** |
+| **github**              | Repository operations and Singer ecosystem PRs            | **ACTIVE**      |
 
 **Usage**: `claude mcp list` for available servers, leverage for Singer-specific development patterns and LDAP loading analysis.
 

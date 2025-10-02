@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager, suppress
 from typing import Protocol, override
@@ -93,7 +92,7 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.ConnectionConfig | FlextTargetLdapTypes.Core.Dict,
+        config: FlextLdapModels.ConnectionConfig | dict[str, object],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
@@ -205,15 +204,15 @@ class LDAPClient:
             api = self._api or self._get_api()
             # Use a short-lived context just to validate
 
-            async def _validate() -> FlextResult[str]:
-                async with api.connection(
+            def _validate() -> FlextResult[str]:
+                with api.connection(
                     server_url,
                     self._bind_dn or "",
                     self._password or "",
                 ):
                     return FlextResult[str].ok("validated")
 
-            return asyncio.run(_validate())
+            return run(_validate())
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[str].fail(f"Connection test error: {e}")
 
@@ -227,7 +226,7 @@ class LDAPClient:
     def connect_sync(self: object) -> FlextResult[None]:
         """Sync connect method for backward compatibility."""
         # Note: This is for backward compatibility only
-        # Real connections should use async connect()
+        # Real connections should use connect()
         logger.info("Sync connect called - using flext-ldap infrastructure")
         return FlextResult[None].ok(None)
 
@@ -264,13 +263,13 @@ class LDAPClient:
                         conn.unbind()
                 return
 
-            # Fallback: Use flext-ldap API with async context
+            # Fallback: Use flext-ldap API with context
             api = self._get_api()
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
 
-            # Create a sync wrapper for the async connection
-            class AsyncConnectionWrapper:
+            # Create a sync wrapper for the connection
+            class ConnectionWrapper:
                 @override
                 @override
                 def __init__(self, session_id: str) -> None:
@@ -311,9 +310,9 @@ class LDAPClient:
                     self.entries = []  # Empty results for compatibility
                     return True
 
-            # Create async context and extract session
-            async def _get_session() -> str:
-                async with api.connection(
+            # Create context and extract session
+            def _get_session() -> str:
+                with api.connection(
                     server_url,
                     self._bind_dn or "",
                     self._password or "",
@@ -322,12 +321,12 @@ class LDAPClient:
                     return str(session) if session else "default_session"
 
             try:
-                session_id = asyncio.run(_get_session())
-                wrapper = AsyncConnectionWrapper(session_id)
+                session_id = run(_get_session())
+                wrapper = ConnectionWrapper(session_id)
                 yield wrapper
             except Exception:
                 # Fallback wrapper for tests
-                wrapper = AsyncConnectionWrapper("test_session")
+                wrapper = ConnectionWrapper("test_session")
                 yield wrapper
 
         return connection_context()
