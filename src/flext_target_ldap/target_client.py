@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT.
 
 from __future__ import annotations
 
-import asyncio
 import sys
 from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
@@ -153,7 +152,7 @@ class LdapTargetClient:
         protocol = "ldaps" if self.config.use_ssl else "ldap"
         return f"{protocol}://{self.config.server}:{self.config.port}"
 
-    async def connect(self) -> FlextResult[str]:
+    def connect(self) -> FlextResult[str]:
         """Validate connectivity to LDAP server using flext-ldap API."""
         try:
             # Build server URL from config
@@ -161,7 +160,7 @@ class LdapTargetClient:
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
 
             # Establish connection to validate connectivity
-            connect_result = await self._api.connect(
+            connect_result = self._api.connect(
                 server_url,
                 self._bind_dn or "",
                 self._password or "",
@@ -173,7 +172,7 @@ class LdapTargetClient:
                 )
 
             # Close the connection after validation
-            await self._api.close_connection()
+            self._api.close_connection()
 
             logger.info(
                 "LDAP connectivity validated for %s:%d",
@@ -231,11 +230,11 @@ class LdapTargetClient:
                     _object_classes: list[str],
                     _attributes: dict,
                 ) -> bool:
-                    # Delegate to async flext-ldap API
+                    # Delegate to flext-ldap API
                     try:
 
-                        async def _add() -> bool:
-                            connect_result = await self.api.connect(
+                        def _add() -> bool:
+                            connect_result = self.api.connect(
                                 self.server_url,
                                 self.bind_dn or "",
                                 self.password or "",
@@ -243,20 +242,20 @@ class LdapTargetClient:
                             if connect_result.is_failure:
                                 return False
                             # Use flext-ldap API for adding entries
-                            await self.api.close_connection()
+                            self.api.close_connection()
                             return True
 
-                        asyncio.run(_add())
+                        run(_add())
                         return True
                     except Exception:
                         return False
 
                 def modify(self, _dn: str, _changes: dict) -> bool:
-                    # Delegate to async flext-ldap API
+                    # Delegate to flext-ldap API
                     try:
 
-                        async def _modify() -> bool:
-                            connect_result = await self.api.connect(
+                        def _modify() -> bool:
+                            connect_result = self.api.connect(
                                 self.server_url,
                                 self.bind_dn or "",
                                 self.password or "",
@@ -264,20 +263,20 @@ class LdapTargetClient:
                             if connect_result.is_failure:
                                 return False
                             # Use flext-ldap API for modifying entries
-                            await self.api.close_connection()
+                            self.api.close_connection()
                             return True
 
-                        asyncio.run(_modify())
+                        run(_modify())
                         return True
                     except Exception:
                         return False
 
                 def delete(self, _dn: str) -> bool:
-                    # Delegate to async flext-ldap API
+                    # Delegate to flext-ldap API
                     try:
 
-                        async def _delete() -> bool:
-                            connect_result = await self.api.connect(
+                        def _delete() -> bool:
+                            connect_result = self.api.connect(
                                 self.server_url,
                                 self.bind_dn or "",
                                 self.password or "",
@@ -285,10 +284,10 @@ class LdapTargetClient:
                             if connect_result.is_failure:
                                 return False
                             # Use flext-ldap API for deleting entries
-                            await self.api.close_connection()
+                            self.api.close_connection()
                             return True
 
-                        asyncio.run(_delete())
+                        run(_delete())
                         return True
                     except Exception:
                         return False
@@ -299,13 +298,13 @@ class LdapTargetClient:
                     search_filter: str,
                     attributes: list | None = None,
                 ) -> bool:
-                    # Delegate to async flext-ldap API
+                    # Delegate to flext-ldap API
                     try:
 
-                        async def _search() -> FlextResult[
+                        def _search() -> FlextResult[
                             list[FlextTargetLdapTypes.Core.Dict]
                         ]:
-                            connect_result = await self.api.connect(
+                            connect_result = self.api.connect(
                                 self.server_url,
                                 self.bind_dn or "",
                                 self.password or "",
@@ -315,18 +314,18 @@ class LdapTargetClient:
                                     list[FlextTargetLdapTypes.Core.Dict]
                                 ].fail(connect_result.error)
 
-                            search_result = await self.api.search(
+                            search_result = self.api.search(
                                 base_dn=base_dn,
                                 filter_str=search_filter,
                                 attributes=attributes,
                             )
 
-                            await self.api.close_connection()
+                            self.api.close_connection()
                             return search_result
 
                         search_result: FlextResult[
                             list[FlextTargetLdapTypes.Core.Dict]
-                        ] = asyncio.run(_search())
+                        ] = run(_search())
                         if search_result.is_success and search_result.data:
                             # Convert search results to compatible format
                             self.entries = []
@@ -376,7 +375,7 @@ class LdapTargetClient:
 
         return connection_context()
 
-    async def add_entry(
+    def add_entry(
         self,
         dn: str,
         attributes: FlextTargetLdapTypes.Core.Dict,
@@ -405,7 +404,7 @@ class LdapTargetClient:
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
 
             # Connect to LDAP server
-            connect_result = await self._api.connect(
+            connect_result = self._api.connect(
                 server_url,
                 self._bind_dn or "",
                 self._password or "",
@@ -427,7 +426,7 @@ class LdapTargetClient:
                     members: list[object] = [
                         str(m) for m in ldap_attributes.get("member", [])
                     ]
-                    result = await self._api.create_group(
+                    result = self._api.create_group(
                         dn=dn,
                         cn=cn,
                         description=None,
@@ -444,13 +443,13 @@ class LdapTargetClient:
                 return FlextResult[bool].ok(data=True)
             finally:
                 # Close the connection
-                await self._api.close_connection()
+                self._api.close_connection()
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add entry %s", dn)
             return FlextResult[bool].fail(f"Add entry failed: {e}")
 
-    async def modify_entry(
+    def modify_entry(
         self,
         dn: str,
         changes: FlextTargetLdapTypes.Core.Dict,
@@ -472,7 +471,7 @@ class LdapTargetClient:
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
             # Connect to LDAP server
-            connect_result = await self._api.connect(
+            connect_result = self._api.connect(
                 server_url,
                 self._bind_dn or "",
                 self._password or "",
@@ -491,7 +490,7 @@ class LdapTargetClient:
                     return FlextResult[bool].ok(data=True)
             finally:
                 # Close the connection
-                await self._api.close_connection()
+                self._api.close_connection()
 
             error_msg = f"Failed to modify entry {dn}: {result.error}"
             logger.error(error_msg)
@@ -501,7 +500,7 @@ class LdapTargetClient:
             logger.exception("Failed to modify entry %s", dn)
             return FlextResult[bool].fail(f"Modify entry failed: {e}")
 
-    async def search_entry(
+    def search_entry(
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
@@ -523,7 +522,7 @@ class LdapTargetClient:
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
 
             # Connect to LDAP server
-            connect_result = await self._api.connect(
+            connect_result = self._api.connect(
                 server_url,
                 self._bind_dn or "",
                 self._password or "",
@@ -534,14 +533,14 @@ class LdapTargetClient:
                 )
 
             try:
-                result = await self._api.search(
+                result = self._api.search(
                     base_dn=base_dn,
                     filter_str=search_filter,
                     attributes=attributes,
                 )
             finally:
                 # Close the connection
-                await self._api.close_connection()
+                self._api.close_connection()
 
             if result.is_success and result.data:
                 # Convert search results to LdapSearchEntry for backward compatibility
@@ -568,12 +567,12 @@ class LdapTargetClient:
             logger.exception("Failed to search entries in %s", base_dn)
             return FlextResult[list[LdapSearchEntry]].fail(f"Search failed: {e}")
 
-    async def disconnect(self) -> FlextResult[bool]:
+    def disconnect(self) -> FlextResult[bool]:
         """Disconnect noop (connection is context-managed per operation)."""
         logger.debug("No persistent session to disconnect")
         return FlextResult[bool].ok(data=True)
 
-    async def delete_entry(self, dn: str) -> FlextResult[bool]:
+    def delete_entry(self, dn: str) -> FlextResult[bool]:
         """Delete LDAP entry using flext-ldap API."""
         try:
             if not dn:
@@ -586,7 +585,7 @@ class LdapTargetClient:
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
 
             # Connect to LDAP server
-            connect_result = await self._api.connect(
+            connect_result = self._api.connect(
                 server_url,
                 self._bind_dn or "",
                 self._password or "",
@@ -604,13 +603,13 @@ class LdapTargetClient:
                 return FlextResult[bool].ok(data=True)
             finally:
                 # Close the connection
-                await self._api.close_connection()
+                self._api.close_connection()
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to delete entry %s", dn)
             return FlextResult[bool].fail(f"Delete entry failed: {e}")
 
-    async def entry_exists(self, dn: str) -> FlextResult[bool]:
+    def entry_exists(self, dn: str) -> FlextResult[bool]:
         """Check if LDAP entry exists using flext-ldap API."""
         try:
             if not dn:
@@ -619,7 +618,7 @@ class LdapTargetClient:
             logger.info("Checking if LDAP entry exists: %s", dn)
 
             # Use search to check if entry exists
-            search_result = await self.search_entry(
+            search_result = self.search_entry(
                 base_dn=dn,
                 search_filter="(objectClass=*)",
                 attributes=["dn"],
@@ -634,7 +633,7 @@ class LdapTargetClient:
             logger.exception("Failed to check entry existence: %s", dn)
             return FlextResult[bool].fail(f"Entry exists check failed: {e}")
 
-    async def get_entry(
+    def get_entry(
         self,
         dn: str,
         attributes: list[str] | None = None,
@@ -646,7 +645,7 @@ class LdapTargetClient:
 
             logger.info("Getting LDAP entry: %s", dn)
 
-            search_result = await self.search_entry(dn, "(objectClass=*)", attributes)
+            search_result = self.search_entry(dn, "(objectClass=*)", attributes)
 
             if search_result.is_success and search_result.data:
                 return FlextResult[LdapSearchEntry | None].ok(search_result.data[0])
@@ -676,7 +675,7 @@ class LdapBaseSink(Sink):
         self.client: LdapTargetClient | None = None
         self._processing_result: FlextResult[object] = LdapProcessingResult()
 
-    async def setup_client(self) -> FlextResult[LdapTargetClient]:
+    def setup_client(self) -> FlextResult[LdapTargetClient]:
         """Set up LDAP client connection."""
         try:
             # Create dict configuration for LdapTargetClient compatibility
@@ -699,7 +698,7 @@ class LdapBaseSink(Sink):
             }
 
             self.client = LdapTargetClient(connection_config)
-            connect_result: FlextResult[object] = await self.client.connect()
+            connect_result: FlextResult[object] = self.client.connect()
 
             if not connect_result.is_success:
                 return FlextResult[LdapTargetClient].fail(
@@ -717,14 +716,14 @@ class LdapBaseSink(Sink):
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""
         if self.client:
-            # Disconnect asynchronously
-            asyncio.run(self.client.disconnect())
+            # Disconnect hronously
+            run(self.client.disconnect())
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
     def process_batch(self, context: FlextTargetLdapTypes.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result: FlextResult[object] = asyncio.run(self.setup_client())
+        setup_result: FlextResult[object] = run(self.setup_client())
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
@@ -818,7 +817,7 @@ class LdapUsersSink(LdapBaseSink):
             )
 
             # Try to add the user entry
-            add_result = asyncio.run(
+            add_result = run(
                 self.client.add_entry(user_dn, attributes, object_classes),
             )
 
@@ -827,7 +826,7 @@ class LdapUsersSink(LdapBaseSink):
                 logger.debug("User entry added successfully: %s", user_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(
+                modify_result = run(
                     self.client.modify_entry(user_dn, attributes),
                 )
                 if modify_result.is_success:
@@ -935,7 +934,7 @@ class LdapGroupsSink(LdapBaseSink):
             )
 
             # Try to add the group entry
-            add_result = asyncio.run(
+            add_result = run(
                 self.client.add_entry(group_dn, attributes, object_classes),
             )
 
@@ -944,7 +943,7 @@ class LdapGroupsSink(LdapBaseSink):
                 logger.debug("Group entry added successfully: %s", group_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(
+                modify_result = run(
                     self.client.modify_entry(group_dn, attributes),
                 )
                 if modify_result.is_success:
@@ -1042,7 +1041,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             attributes = self._build_ou_attributes(record)
 
             # Try to add the OU entry
-            add_result: FlextResult[object] = asyncio.run(
+            add_result: FlextResult[object] = run(
                 self.client.add_entry(ou_dn, attributes)
             )
 
@@ -1051,7 +1050,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
                 logger.debug("OU entry added successfully: %s", ou_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result = asyncio.run(
+                modify_result = run(
                     self.client.modify_entry(ou_dn, attributes),
                 )
                 if modify_result.is_success:

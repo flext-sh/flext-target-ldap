@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import asyncio
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
@@ -107,7 +106,7 @@ class LDAPBaseSink(Sink):
         self.client: LDAPClient | None = None
         self._processing_result: FlextResult[object] = LDAPProcessingResult()
 
-    async def setup_client(self) -> FlextResult[LDAPClient]:
+    def setup_client(self) -> FlextResult[LDAPClient]:
         """Set up LDAP client connection."""
         try:
             # Create dict configuration for LDAPClient compatibility
@@ -146,7 +145,7 @@ class LDAPBaseSink(Sink):
 
     def process_batch(self, context: FlextTargetLdapTypes.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result: FlextResult[object] = asyncio.run(self.setup_client())
+        setup_result: FlextResult[object] = run(self.setup_client())
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return

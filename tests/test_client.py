@@ -123,7 +123,7 @@ class TestLDAPClient:
 
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.ServerPool")
-    async def test_add_entry_already_exists(
+    def test_add_entry_already_exists(
         self,
         mock_pool_class: MagicMock,
         mock_connection_class: MagicMock,
@@ -141,7 +141,7 @@ class TestLDAPClient:
         mock_pool = MagicMock()
         mock_pool_class.return_value = mock_pool
 
-        result = await client.add_entry(
+        result = client.add_entry(
             dn="uid=test,dc=test,dc=com",
             object_classes=["person"],
             attributes={"cn": "Test"},
