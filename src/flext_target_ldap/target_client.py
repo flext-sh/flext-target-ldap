@@ -245,7 +245,7 @@ class LdapTargetClient:
                             self.api.close_connection()
                             return True
 
-                        run(_add())
+                        _add()
                         return True
                     except Exception:
                         return False
@@ -266,7 +266,7 @@ class LdapTargetClient:
                             self.api.close_connection()
                             return True
 
-                        run(_modify())
+                        _modify()
                         return True
                     except Exception:
                         return False
