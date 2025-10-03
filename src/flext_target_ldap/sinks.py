@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from asyncio import run
 from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
