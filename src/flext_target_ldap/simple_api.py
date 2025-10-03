@@ -11,10 +11,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_ldap import FlextLdapModels, get_flext_ldap_api
+
 from flext_core import (
     FlextResult,
+    FlextTypes,
 )
-from flext_ldap import FlextLdapModels, get_flext_ldap_api
 from flext_target_ldap.target import TargetLDAP
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
@@ -44,7 +46,7 @@ def load_users_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink: dict[str, object] = target.get_sink_class("users")(
+        sink: FlextTypes.Dict = target.get_sink_class("users")(
             target, "users", {}, ["username"]
         )
 
@@ -75,7 +77,7 @@ def load_groups_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink: dict[str, object] = target.get_sink_class("groups")(
+        sink: FlextTypes.Dict = target.get_sink_class("groups")(
             target, "groups", {}, ["name"]
         )
 

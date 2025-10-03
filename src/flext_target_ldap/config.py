@@ -14,6 +14,7 @@ from __future__ import annotations
 import warnings
 from typing import Self
 
+from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
@@ -22,8 +23,8 @@ from flext_core import (
     FlextConstants,
     FlextModels,
     FlextResult,
+    FlextTypes,
 )
-from flext_ldap import FlextLdapModels
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 # Compatibility warning for Singer adapters migration
@@ -118,7 +119,7 @@ class FlextTargetLdapConfig(FlextConfig):
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: dict[str, object] = {
+        dev_overrides: FlextTypes.Dict = {
             "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
             "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT + 15,
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 20,
@@ -133,7 +134,7 @@ class FlextTargetLdapConfig(FlextConfig):
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: dict[str, object] = {
+        prod_overrides: FlextTypes.Dict = {
             "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 3,
             "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
@@ -149,7 +150,7 @@ class FlextTargetLdapConfig(FlextConfig):
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: dict[str, object] = {
+        test_overrides: FlextTypes.Dict = {
             "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 6,
             "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE

@@ -13,13 +13,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import (
-    FlextConfig,
-    FlextResult,
-)
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
+from flext_core import (
+    FlextConfig,
+    FlextResult,
+    FlextTypes,
+)
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
@@ -251,7 +252,7 @@ def validate_ldap_target_config(
             default=False,
         )
 
-        raw_attr_map: dict[str, object] = config.get("attribute_mapping", {})
+        raw_attr_map: FlextTypes.Dict = config.get("attribute_mapping", {})
         attribute_mapping: FlextTargetLdapTypes.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map.items()}
             if isinstance(raw_attr_map, dict)

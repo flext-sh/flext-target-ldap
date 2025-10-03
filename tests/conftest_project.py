@@ -12,8 +12,8 @@ from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
-from flext_core import FlextTypes
 
+from flext_core import FlextTypes
 from flext_target_ldap import LDAPClient
 
 # Import centralized Docker fixtures
@@ -41,7 +41,7 @@ def shared_ldap_container(flext_docker: FlextTestDocker) -> Generator[str]:
 
 
 @pytest.fixture
-def mock_ldap_config() -> FlextTypes.Core.Dict:
+def mock_ldap_config() -> FlextTypes.Dict:
     """Create mock LDAP configuration for testing."""
     return {
         "host": "test.ldap.com",
@@ -66,7 +66,7 @@ def mock_ldap_config() -> FlextTypes.Core.Dict:
 
 
 @pytest.fixture
-def sample_user_record() -> FlextTypes.Core.Dict:
+def sample_user_record() -> FlextTypes.Dict:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -80,7 +80,7 @@ def sample_user_record() -> FlextTypes.Core.Dict:
 
 
 @pytest.fixture
-def sample_group_record() -> FlextTypes.Core.Dict:
+def sample_group_record() -> FlextTypes.Dict:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -95,7 +95,7 @@ def sample_group_record() -> FlextTypes.Core.Dict:
 
 
 @pytest.fixture
-def sample_ou_record() -> FlextTypes.Core.Dict:
+def sample_ou_record() -> FlextTypes.Dict:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "ou=engineering,dc=test,dc=com",
@@ -106,7 +106,7 @@ def sample_ou_record() -> FlextTypes.Core.Dict:
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record: FlextTypes.Core.Dict) -> str:
+def singer_message_record(sample_user_record: FlextTypes.Dict) -> str:
     """Create mock LDAP configuration for testing."""
     message = {
         "type": "RECORD",
@@ -169,7 +169,7 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: FlextTypes.Core.Dict) -> MagicMock:
+def mock_target(mock_ldap_config: FlextTypes.Dict) -> MagicMock:
     """Create mock LDAP configuration for testing."""
     target = MagicMock()
     target.config = mock_ldap_config
