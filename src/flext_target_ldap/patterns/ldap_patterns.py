@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)
@@ -73,9 +73,9 @@ class LDAPDataTransformer:
                 ldap_key = self._normalize_ldap_attribute_name(key)
 
                 if schema:
-                    properties: dict[str, object] = schema.get("properties", {})
+                    properties: FlextTypes.Dict = schema.get("properties", {})
                     if isinstance(properties, dict):
-                        prop_def: dict[str, object] = properties.get(key, {})
+                        prop_def: FlextTypes.Dict = properties.get(key, {})
                         if isinstance(prop_def, dict):
                             singer_type = prop_def.get("type", "string")
                         else:
@@ -125,7 +125,7 @@ class LDAPDataTransformer:
     ) -> FlextResult[dict[str, FlextTargetLdapTypes.Core.StringList]]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes: dict[str, list[str]] = {}
+            attributes: dict[str, FlextTypes.StringList] = {}
 
             # Add object classes
             attributes["objectClass"] = object_classes
@@ -165,7 +165,7 @@ class LDAPSchemaMapper:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: FlextTargetLdapTypes.Core.Headers = {}
-            properties: dict[str, object] = schema.get("properties", {})
+            properties: FlextTypes.Dict = schema.get("properties", {})
 
             if isinstance(properties, dict):
                 for prop_name, prop_def in properties.items():

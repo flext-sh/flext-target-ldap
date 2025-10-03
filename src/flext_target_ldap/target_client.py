@@ -11,13 +11,15 @@ from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
 from typing import override
 
+from flext_ldap import FlextLdapAPI, FlextLdapClient, FlextLdapModels
+
 from flext_core import (
     FlextConstants,
     FlextContainer,
     FlextLogger,
     FlextResult,
+    FlextTypes,
 )
-from flext_ldap import FlextLdapAPI, FlextLdapClient, FlextLdapModels
 from flext_target_ldap.constants import FlextTargetLdapConstants
 from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target_config import TargetLdapConfig
@@ -227,7 +229,7 @@ class LdapTargetClient:
                 def add(
                     self,
                     _dn: str,
-                    _object_classes: list[str],
+                    _object_classes: FlextTypes.StringList,
                     _attributes: dict,
                 ) -> bool:
                     # Delegate to flext-ldap API
@@ -379,7 +381,7 @@ class LdapTargetClient:
         self,
         dn: str,
         attributes: FlextTargetLdapTypes.Core.Dict,
-        object_classes: list[str] | None = None,
+        object_classes: FlextTypes.StringList | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
@@ -416,14 +418,14 @@ class LdapTargetClient:
 
             try:
                 # Use create_group when objectClass indicates group, else create_user
-                is_group: list[object] = "groupOfNames" in ldap_attributes.get(
+                is_group: FlextTypes.List = "groupOfNames" in ldap_attributes.get(
                     "objectClass", []
                 )
                 if is_group:
                     # Minimal group creation via API
-                    cn_values: list[object] = ldap_attributes.get("cn", [])
+                    cn_values: FlextTypes.List = ldap_attributes.get("cn", [])
                     cn = str(cn_values[0]) if cn_values else "group"
-                    members: list[object] = [
+                    members: FlextTypes.List = [
                         str(m) for m in ldap_attributes.get("member", [])
                     ]
                     result = self._api.create_group(
@@ -504,7 +506,7 @@ class LdapTargetClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: list[str] | None = None,
+        attributes: FlextTypes.StringList | None = None,
     ) -> FlextResult[list[LdapSearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
@@ -636,7 +638,7 @@ class LdapTargetClient:
     def get_entry(
         self,
         dn: str,
-        attributes: list[str] | None = None,
+        attributes: FlextTypes.StringList | None = None,
     ) -> FlextResult[LdapSearchEntry | None]:
         """Get LDAP entry using flext-ldap API."""
         try:
@@ -666,7 +668,7 @@ class LdapBaseSink(Sink):
         target: Target,
         stream_name: str,
         schema: FlextTargetLdapTypes.Core.Dict,
-        key_properties: list[str],
+        key_properties: FlextTypes.StringList,
     ) -> None:
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
@@ -729,9 +731,11 @@ class LdapBaseSink(Sink):
             return
 
         try:
-            records_raw: list[object] = context.get("records", [])
+            records_raw: FlextTypes.List = context.get("records", [])
 
-            records: list[object] = records_raw if isinstance(records_raw, list) else []
+            records: FlextTypes.List = (
+                records_raw if isinstance(records_raw, list) else []
+            )
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -752,8 +756,8 @@ class LdapBaseSink(Sink):
 
     def process_record(
         self,
-        record: dict[str, object],
-        _context: dict[str, object],
+        record: FlextTypes.Dict,
+        _context: FlextTypes.Dict,
     ) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
@@ -780,8 +784,8 @@ class LdapUsersSink(LdapBaseSink):
 
     def process_record(
         self,
-        record: dict[str, object],
-        _context: dict[str, object],
+        record: FlextTypes.Dict,
+        _context: FlextTypes.Dict,
     ) -> None:
         """Process a user record."""
         if not self.client:

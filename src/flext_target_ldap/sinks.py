@@ -8,8 +8,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
-
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
@@ -53,7 +52,7 @@ class Target:
     @override
     def __init__(self, config: FlextTargetLdapTypes.Core.Dict) -> None:
         """Initialize target with configuration."""
-        self.config: dict[str, object] = config
+        self.config: FlextTypes.Dict = config
 
 
 logger = FlextLogger(__name__)
@@ -152,9 +151,11 @@ class LDAPBaseSink(Sink):
             return
 
         try:
-            records_raw: list[object] = context.get("records", [])
+            records_raw: FlextTypes.List = context.get("records", [])
 
-            records: list[object] = records_raw if isinstance(records_raw, list) else []
+            records: FlextTypes.List = (
+                records_raw if isinstance(records_raw, list) else []
+            )
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -310,9 +311,7 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, object] = self._target.config.get(
-            "attribute_mapping", {}
-        )
+        mapping_obj: FlextTypes.Dict = self._target.config.get("attribute_mapping", {})
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)
@@ -425,9 +424,7 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, object] = self._target.config.get(
-            "attribute_mapping", {}
-        )
+        mapping_obj: FlextTypes.Dict = self._target.config.get("attribute_mapping", {})
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)
@@ -527,9 +524,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, object] = self._target.config.get(
-            "attribute_mapping", {}
-        )
+        mapping_obj: FlextTypes.Dict = self._target.config.get("attribute_mapping", {})
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)

@@ -22,7 +22,7 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: FlextTypes.Core.Dict) -> LDAPClient:
+    def client(self, mock_ldap_config: FlextTypes.Dict) -> LDAPClient:
         """Create test LDAP client instance."""
         return LDAPClient(config=mock_ldap_config)
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger: FlextLogger = FlextLogger(__name__)
@@ -31,7 +31,7 @@ class LDAPTargetOrchestrator:
             object: Description of return value.
 
         """
-        self.config: dict[str, object] = config or {}
+        self.config: FlextTypes.Dict = config or {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
