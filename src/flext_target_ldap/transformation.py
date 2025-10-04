@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from typing import override
 
+from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
 from pydantic import Field
 
-from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)

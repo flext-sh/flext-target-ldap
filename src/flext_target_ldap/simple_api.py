@@ -11,12 +11,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapModels, get_flext_ldap_api
-
 from flext_core import (
     FlextResult,
     FlextTypes,
 )
+from flext_ldap import FlextLdapModels, get_flext_ldap_api
+
 from flext_target_ldap.target import TargetLDAP
 from flext_target_ldap.typings import FlextTargetLdapTypes
 

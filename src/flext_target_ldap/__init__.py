@@ -11,6 +11,7 @@ import importlib.metadata
 from typing import Final
 
 from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+
 from flext_target_ldap.config import FlextTargetLdapConfig as FlextTargetLDAPConfig
 from flext_target_ldap.models import FlextTargetLdapModels
 from flext_target_ldap.protocols import FlextTargetLdapProtocols

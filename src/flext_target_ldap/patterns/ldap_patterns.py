@@ -10,6 +10,7 @@ import json
 from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
+
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 logger = FlextLogger(__name__)

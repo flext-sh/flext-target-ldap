@@ -1,6 +1,6 @@
 """Target LDAP protocols for FLEXT ecosystem."""
 
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from flext_core import FlextProtocols, FlextResult, FlextTypes
 
@@ -58,9 +58,7 @@ class FlextTargetLdapProtocols:
         class ConnectionProtocol(FlextProtocols.Domain.Service, Protocol):
             """Protocol for LDAP connection management."""
 
-            def connect(
-                self, config: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Any]: ...
+            def connect(self, config: FlextTypes.Dict) -> FlextResult[Any]: ...
 
         @runtime_checkable
         class SingerProtocol(FlextProtocols.Domain.Service, Protocol):

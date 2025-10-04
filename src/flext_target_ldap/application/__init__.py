@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT.
 from __future__ import annotations
 
 from flext_core import FlextTypes
+
 from flext_target_ldap.application.orchestrator import LDAPTargetOrchestrator
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
