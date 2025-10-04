@@ -9,8 +9,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-
 from flext_core import FlextTypes
+
 from flext_target_ldap import (
     GroupsSink,
     LDAPBaseSink,

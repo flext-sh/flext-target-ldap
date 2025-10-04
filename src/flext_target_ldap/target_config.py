@@ -13,14 +13,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapModels
-from pydantic import Field
-
 from flext_core import (
     FlextConfig,
     FlextResult,
     FlextTypes,
 )
+from flext_ldap import FlextLdapModels
+from pydantic import Field
+
+from flext_target_ldap.config import FlextTargetLdapConfig
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
@@ -340,7 +341,6 @@ def create_default_ldap_target_config(
 
 
 # Import the new standardized config class and create backwards compatibility alias
-from flext_target_ldap.config import FlextTargetLdapConfig
 
 # Backward compatibility aliases
 TargetLDAPConfig = FlextTargetLdapConfig

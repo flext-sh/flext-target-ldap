@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT.
 from __future__ import annotations
 
 from flext_core import FlextTypes
+
 from flext_target_ldap.infrastructure.di_container import (
     configure_flext_target_ldap_dependencies,
     get_flext_target_ldap_container,

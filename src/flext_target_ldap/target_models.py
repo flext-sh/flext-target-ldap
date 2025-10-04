@@ -9,9 +9,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
+from flext_core import FlextModels, FlextResult
 from pydantic import Field, field_validator
 
-from flext_core import FlextModels, FlextResult
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 

@@ -11,8 +11,6 @@ from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
 from typing import override
 
-from flext_ldap import FlextLdapAPI, FlextLdapClient, FlextLdapModels
-
 from flext_core import (
     FlextConstants,
     FlextContainer,
@@ -20,6 +18,8 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
+from flext_ldap import FlextLdapAPI, FlextLdapClient, FlextLdapModels
+
 from flext_target_ldap.constants import FlextTargetLdapConstants
 from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target_config import TargetLdapConfig

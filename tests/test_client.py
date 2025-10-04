@@ -9,9 +9,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+from flext_core import FlextTypes
 from ldap3.core import exceptions as ldap3_exceptions
 
-from flext_core import FlextTypes
 from flext_target_ldap import LDAPClient
 
 # Constants

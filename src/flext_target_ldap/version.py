@@ -1,35 +1,32 @@
-"""Project metadata for flext target ldap."""
+"""Version information for flext-target-ldap."""
 
 from __future__ import annotations
 
-from typing import Final, cast
+from typing import Final
 
-from flext_core.metadata import (
-    FlextProjectMetadata,
-    FlextProjectVersion,
-    build_metadata_exports,
-)
+MAJOR: Final[int] = 0
+MINOR: Final[int] = 9
+PATCH: Final[int] = 0
 
-_metadata = build_metadata_exports(__file__)
-globals().update(_metadata)
-_metadata_obj = cast("FlextProjectMetadata", _metadata["__flext_metadata__"])
+__version__: Final[str] = f"{MAJOR}.{MINOR}.{PATCH}"
+__version_info__: Final[tuple[int, int, int]] = (MAJOR, MINOR, PATCH)
 
 
-class FlextTargetLdapVersion(FlextProjectVersion):
-    """Structured metadata for the flext target ldap distribution."""
+class FlextTargetLdapVersion:
+    """Version information container for flext-target-ldap."""
+
+    def __init__(self) -> None:
+        self.major = MAJOR
+        self.minor = MINOR
+        self.patch = PATCH
+        self.version = __version__
+        self.version_info = __version_info__
 
     @classmethod
     def current(cls) -> FlextTargetLdapVersion:
-        """Return canonical metadata loaded from pyproject.toml."""
-        return cls.from_metadata(_metadata_obj)
+        """Return current version information."""
+        return cls()
 
 
 VERSION: Final[FlextTargetLdapVersion] = FlextTargetLdapVersion.current()
-__version__: Final[str] = VERSION.version
-__version_info__: Final[tuple[int | str, ...]] = VERSION.version_info
-
-for _name in tuple(_metadata):
-    if _name not in {"__version__", "__version_info__"}:
-        globals().pop(_name, None)
-
 __all__ = ["VERSION", "FlextTargetLdapVersion", "__version__", "__version_info__"]

@@ -10,6 +10,7 @@ from asyncio import run
 from typing import override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
+
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.typings import FlextTargetLdapTypes
 

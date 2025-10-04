@@ -14,10 +14,6 @@ from __future__ import annotations
 import warnings
 from typing import Self
 
-from flext_ldap import FlextLdapModels
-from pydantic import Field
-from pydantic_settings import SettingsConfigDict
-
 from flext_core import (
     FlextConfig,
     FlextConstants,
@@ -25,6 +21,10 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
+from flext_ldap import FlextLdapModels
+from pydantic import Field
+from pydantic_settings import SettingsConfigDict
+
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 # Compatibility warning for Singer adapters migration

@@ -8,9 +8,8 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_ldap.constants import FlextLdapConstants
-
 from flext_core import FlextConstants, FlextTypes
+from flext_ldap.constants import FlextLdapConstants
 
 
 class FlextTargetLdapConstants(FlextConstants):
@@ -18,9 +17,6 @@ class FlextTargetLdapConstants(FlextConstants):
 
     Composes with FlextLdapConstants to avoid duplication and ensure consistency.
     """
-
-    # Import LDAP-specific constants from flext-ldap (composition pattern)
-    from flext_ldap.constants import FlextLdapConstants
 
     class Connection:
         """LDAP connection configuration constants."""
@@ -64,9 +60,9 @@ class FlextTargetLdapConstants(FlextConstants):
     class Validation:
         """Target-specific validation configuration."""
 
-        DN_VALIDATION_PATTERN = FlextLdapConstants.LdapValidation.DN_PATTERN
-        FILTER_VALIDATION_PATTERN = FlextLdapConstants.LdapValidation.FILTER_PATTERN
-        MAX_DN_LENGTH = FlextLdapConstants.LdapValidation.MAX_DN_LENGTH
+        DN_VALIDATION_PATTERN = FlextLdapConstants.Validation.DN_PATTERN
+        FILTER_VALIDATION_PATTERN = FlextLdapConstants.Validation.FILTER_PATTERN
+        MAX_DN_LENGTH = FlextLdapConstants.Validation.MAX_DN_LENGTH
 
 
 __all__ = ["FlextTargetLdapConstants"]

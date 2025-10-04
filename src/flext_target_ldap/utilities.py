@@ -13,6 +13,8 @@ from typing import ClassVar, override
 
 from flext_core import FlextResult, FlextTypes, FlextUtilities
 
+from flext_target_ldap.constants import FlextTargetLdapConstants
+
 
 class FlextTargetLdapUtilities(FlextUtilities):
     """Single unified utilities class for Singer target LDAP operations.
@@ -22,10 +24,6 @@ class FlextTargetLdapUtilities(FlextUtilities):
     Extends FlextUtilities with LDAP target-specific operations.
     """
 
-    # Configuration constants
-    DEFAULT_BATCH_SIZE: ClassVar[int] = 1000
-    DEFAULT_TIMEOUT: ClassVar[int] = 30
-    MAX_RETRIES: ClassVar[int] = 3
     LDAP_DEFAULT_PORT: ClassVar[int] = 389
     LDAPS_DEFAULT_PORT: ClassVar[int] = 636
 
@@ -467,7 +465,11 @@ class FlextTargetLdapUtilities(FlextUtilities):
             # Validate port if provided
             if "port" in config:
                 port = config["port"]
-                if not isinstance(port, int) or port <= 0 or port > 65535:
+                if (
+                    not isinstance(port, int)
+                    or port <= 0
+                    or port > FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
+                ):
                     return FlextResult[FlextTypes.Dict].fail(
                         "Port must be a valid integer between 1 and 65535"
                     )
