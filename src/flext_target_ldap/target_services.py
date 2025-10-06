@@ -10,7 +10,7 @@ from datetime import UTC, datetime
 from typing import Protocol, override
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_ldap import FlextLdapAPI
+from flext_ldap import FlextLDAP
 
 from flext_target_ldap import target_client as target_client_module
 from flext_target_ldap.target_config import (
@@ -87,7 +87,7 @@ class LdapConnectionService:
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize connection service."""
         self._config: FlextTypes.Dict = config
-        api = FlextLdapAPI()
+        api = FlextLDAP()
         self._ldap_api = api.client
 
     def test_connection(self) -> FlextResult[bool]:
