@@ -20,7 +20,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLDAPModels
+from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
@@ -31,7 +31,7 @@ class FlextTargetLdapConfig(FlextConfig):
     """LDAP target configuration using consolidated patterns with FLEXT standards."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLDAPModels.ConnectionConfig = Field(
+    connection: FlextLdapModels.ConnectionConfig = Field(
         ...,
         description="LDAP connection configuration",
     )
@@ -251,7 +251,7 @@ def validate_ldap_config(
             connection_params["timeout"], FlextConstants.Network.DEFAULT_TIMEOUT
         )
 
-        connection_config = FlextLDAPModels.ConnectionConfig(
+        connection_config = FlextLdapModels.ConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,

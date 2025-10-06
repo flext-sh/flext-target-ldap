@@ -18,7 +18,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLDAP, FlextLDAPClient, FlextLDAPModels
+from flext_ldap import FlextLdap, FlextLdapClients, FlextLdapModels
 
 from flext_target_ldap.constants import FlextTargetLdapConstants
 from flext_target_ldap.sinks import Sink, Target
@@ -80,12 +80,12 @@ class LdapTargetClient:
     @override
     def __init__(
         self,
-        config: FlextLDAPModels.ConnectionConfig | FlextTargetLdapTypes.Core.Dict,
+        config: FlextLdapModels.ConnectionConfig | FlextTargetLdapTypes.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLDAPModels.ConnectionConfig
-            self.config = FlextLDAPModels.ConnectionConfig(
+            # Convert dict to proper FlextLdapModels.ConnectionConfig
+            self.config = FlextLdapModels.ConnectionConfig(
                 server=str(
                     config.get("host", "localhost"),
                 ),
@@ -102,13 +102,13 @@ class LdapTargetClient:
             self._password: str = str(config.get("password", ""))
         else:
             self.config = config
-            # Default authentication credentials when using FlextLDAPModels.ConnectionConfig directly
+            # Default authentication credentials when using FlextLdapModels.ConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
 
         # Create API instance using flext-ldap
-        api = FlextLDAP()
-        self._api: FlextLDAPClient = api.client
+        api = FlextLdap()
+        self._api: FlextLdapClients = api.client
         self._current_session_id: str | None = None
 
         logger.info(
@@ -209,7 +209,7 @@ class LdapTargetClient:
                 @override
                 def __init__(
                     self,
-                    api: FlextLDAPClient,
+                    api: FlextLdapClients,
                     server_url: str,
                     bind_dn: str | None,
                     password: str | None,
