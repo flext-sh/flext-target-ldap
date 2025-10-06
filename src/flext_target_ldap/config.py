@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import warnings
 from typing import Self
 
 from flext_core import (
@@ -21,27 +20,18 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLdapModels
+from flext_ldap import FlextLDAPModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
-
-# Compatibility warning for Singer adapters migration
-warnings.warn(
-    "🔄 ARCHITECTURE EVOLUTION: Singer adapters moved from flext-core to flext-meltano.\n"
-    "💡 FUTURE PLAN: Use flext_meltano.config.SingerTargetConfig\n"
-    "⚡ CURRENT: Updated to use FlextConfig.Settings from flext-core",
-    DeprecationWarning,
-    stacklevel=2,
-)
 
 
 class FlextTargetLdapConfig(FlextConfig):
     """LDAP target configuration using consolidated patterns with FLEXT standards."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLdapModels.ConnectionConfig = Field(
+    connection: FlextLDAPModels.ConnectionConfig = Field(
         ...,
         description="LDAP connection configuration",
     )
@@ -209,9 +199,6 @@ class LDAPOperationSettings(FlextModels):
     )
 
 
-# Function removed - not used anywhere and caused mypy errors due to complex field typing
-
-
 def validate_ldap_config(
     config: FlextTargetLdapTypes.Core.Dict,
 ) -> FlextResult[FlextTargetLdapConfig]:
@@ -264,7 +251,7 @@ def validate_ldap_config(
             connection_params["timeout"], FlextConstants.Network.DEFAULT_TIMEOUT
         )
 
-        connection_config = FlextLdapModels.ConnectionConfig(
+        connection_config = FlextLDAPModels.ConnectionConfig(
             server=server,
             port=port,
             use_ssl=use_ssl,

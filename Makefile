@@ -153,4 +153,55 @@ v: validate
 ld: load
 
 .DEFAULT_GOAL := help
-.PHONY: help install install-dev setup validate check lint format type-check security fix test test-unit test-integration test-singer test-fast coverage-html load validate-target-config test-target dry-run ldap-connect ldap-schema ldap-write-test build build-clean docs docs-serve deps-update deps-show deps-audit shell pre-commit clean clean-all reset diagnose doctor t l f tc c i v ld
+.PHONY: help install install-dev setup validate check lint format type-check security fix test test-unit test-integration test-singer test-fast coverage-html load validate-target-config test-target dry-run ldap-connect ldap-schema ldap-write-test build build-clean docs docs-serve deps-update deps-show deps-audit shell pre-commit clean clean-all reset diagnose doctor t l f tc c i v ld# =============================================================================
+# MAINTENANCE
+# =============================================================================
+
+.PHONY: clean
+clean: ## Clean build artifacts and cruft
+	@echo "🧹 Cleaning $(PROJECT_NAME) - removing build artifacts, cache files, and cruft..."
+
+	# Build artifacts
+	rm -rf build/ dist/ *.egg-info/
+
+	# Test artifacts
+	rm -rf .pytest_cache/ htmlcov/ .coverage .coverage.* coverage.xml
+
+	# Python cache directories
+	rm -rf .mypy_cache/ .pyrefly_cache/ .ruff_cache/
+
+	# Python bytecode
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	find . -type f -name "*.pyo" -delete 2>/dev/null || true
+
+	# Temporary files
+	find . -type f -name "*.tmp" -delete 2>/dev/null || true
+	find . -type f -name "*.temp" -delete 2>/dev/null || true
+	find . -type f -name ".DS_Store" -delete 2>/dev/null || true
+
+	# Log files
+	find . -type f -name "*.log" -delete 2>/dev/null || true
+
+	# Editor files
+	find . -type f -name ".vscode/settings.json" -delete 2>/dev/null || true
+	find . -type f -name ".idea/" -type d -exec rm -rf {} + 2>/dev/null || true
+
+	
+	# Target-specific files
+	rm -rf state.json state-*.json
+	rm -rf data/ output/ temp/
+
+	@echo "✅ $(PROJECT_NAME) cleanup complete"
+
+.PHONY: clean-all
+clean-all: clean ## Deep clean including venv
+	rm -rf .venv/
+
+.PHONY: reset
+reset: clean-all setup ## Reset project
+
+# =============================================================================
+# DIAGNOSTICS
+# =============================================================================
+

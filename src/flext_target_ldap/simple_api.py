@@ -15,7 +15,7 @@ from flext_core import (
     FlextResult,
     FlextTypes,
 )
-from flext_ldap import FlextLdapModels, get_flext_ldap_api
+from flext_ldap import FlextLDAPModels, get_flext_ldap_api
 
 from flext_target_ldap.target import TargetLDAP
 from flext_target_ldap.typings import FlextTargetLdapTypes
@@ -96,7 +96,7 @@ def test_ldap_connection(config: FlextTargetLdapTypes.Core.Dict) -> FlextResult[
     """Test LDAP connection with given configuration."""
     try:
         # Validate connection config by creating it
-        _ = FlextLdapModels.ConnectionConfig(
+        _ = FlextLDAPModels.ConnectionConfig(
             server=str(config.get("host", "localhost")),
             port=int(str(config.get("port", 389)))
             if config.get("port", 389) is not None
