@@ -807,7 +807,7 @@ class LdapUsersSink(LdapBaseSink):
             user_dn = f"uid={username},{base_dn}"
 
             # Build LDAP attributes from record
-            attributes = self._build_user_attributes(record)
+            attributes = self.build_user_attributes(record)
 
             # Extract object classes for the add_entry call
             object_classes_raw = attributes.pop(
@@ -846,7 +846,7 @@ class LdapUsersSink(LdapBaseSink):
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
-    def _build_user_attributes(
+    def build_user_attributes(
         self,
         record: FlextTargetLdapTypes.Core.Dict,
     ) -> FlextTargetLdapTypes.Core.Dict:
