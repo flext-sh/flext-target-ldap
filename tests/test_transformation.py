@@ -36,13 +36,13 @@ class TestDataTransformationEngine:
         """Test transform oracle dn structure function."""
         rule = TransformationRule(
             name="oracle_dn_structure_transform",
-            pattern="dc=ctbc",
-            replacement="dc=network,dc=ctbc",
+            pattern="dc=invaliddc",
+            replacement="dc=network,dc=invaliddc",
         )
         engine = DataTransformationEngine([rule])
 
         entry = {
-            "dn": "cn=testuser,ou=people,dc=ctbc",
+            "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "person"],
             "cn": "testuser",
         }
@@ -54,7 +54,7 @@ class TestDataTransformationEngine:
         assert transform_result is not None
         assert (
             transform_result.transformed_data["dn"]
-            == "cn=testuser,ou=people,dc=network,dc=ctbc"
+            == "cn=testuser,ou=people,dc=network,dc=invaliddc"
         )
         if "oracle_dn_structure_transform" not in transform_result.applied_rules:
             msg: str = f"Expected {'oracle_dn_structure_transform'} in {transform_result.applied_rules}"
@@ -170,7 +170,7 @@ class TestDataTransformationEngine:
         engine = DataTransformationEngine([rule])
 
         entry = {
-            "dn": "cn=testuser,ou=people,dc=ctbc",
+            "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser"],
             "cn": "testuser",
         }
@@ -195,7 +195,7 @@ class TestDataTransformationEngine:
         entries = [
             {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
             {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
-            {"dn": "cn=user3,dc=ctbc", "objectClass": ["orclUser"]},
+            {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
         ]
 
         for entry in entries:
@@ -360,8 +360,8 @@ class TestIntegratedTransformation:
         rules = [
             TransformationRule(
                 name="oracle_dn_transform",
-                pattern="dc=ctbc",
-                replacement="dc=network,dc=ctbc",
+                pattern="dc=invaliddc",
+                replacement="dc=network,dc=invaliddc",
             ),
             TransformationRule(
                 name="oracle_objectclass",
@@ -376,7 +376,7 @@ class TestIntegratedTransformation:
 
         # Oracle entry to migrate
         oracle_entry = {
-            "dn": "cn=john.doe,ou=people,dc=ctbc",
+            "dn": "cn=john.doe,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "top"],
             "orclSamAccountName": "john.doe",
             "orclCommonName": "John Doe",
@@ -396,8 +396,8 @@ class TestIntegratedTransformation:
         transformed_entry = transform.transformed_data
 
         # Check DN transformation
-        if transformed_entry["dn"] != "cn=john.doe,ou=people,dc=network,dc=ctbc":
-            msg: str = f"Expected {'cn=john.doe,ou=people,dc=network,dc=ctbc'}, got {transformed_entry['dn']}"
+        if transformed_entry["dn"] != "cn=john.doe,ou=people,dc=network,dc=invaliddc":
+            msg: str = f"Expected {'cn=john.doe,ou=people,dc=network,dc=invaliddc'}, got {transformed_entry['dn']}"
             raise AssertionError(msg)
 
         # Check object class conversion - check if transformation was applied
@@ -439,7 +439,7 @@ class TestIntegratedTransformation:
                 "objectClass": ["orclContext"],
             },
             {
-                "dn": "cn=testuser,ou=people,dc=ctbc",
+                "dn": "cn=testuser,ou=people,dc=invaliddc",
                 "objectClass": ["orclUser"],
             },
             {

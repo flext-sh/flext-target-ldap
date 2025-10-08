@@ -2,7 +2,7 @@
 
 **Enterprise-Grade LDAP Data Loading Target with Singer Protocol Integration**  
 **Version**: 2.1.0 | **Authority**: PROJECT | **Updated**: 2025-01-08  
-**Environment**: `/home/marlonsc/flext/.venv/bin/python` (No PYTHONPATH required)  
+**Environment**: `../.venv/bin/python` (No PYTHONPATH required)  
 **Parent**: [FLEXT Workspace CLAUDE.md](../CLAUDE.md)
 **Based on**: flext-core 0.9.9 with 75%+ test coverage (PROVEN FOUNDATION)
 
@@ -1463,7 +1463,7 @@ def ldap_directory_operation(query: str, ldap_config: LdapConnectionConfig) -> F
 ### Before Starting object Work
 
 - [ ] Read all documentation: `CLAUDE.md`, `FLEXT_REFACTORING_PROMPT.md`, project `README.md`
-- [ ] Verify virtual environment: `/home/marlonsc/flext/.venv/bin/python` (VERIFIED WORKING)
+- [ ] Verify virtual environment: `../.venv/bin/python` (VERIFIED WORKING)
 - [ ] Run baseline quality assessment using exact commands provided
 - [ ] Plan incremental improvements (never wholesale rewrites)
 - [ ] Establish measurable success criteria from current baseline

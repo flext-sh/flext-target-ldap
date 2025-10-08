@@ -22,7 +22,6 @@
     ]
     description = "FLEXT Target LDAP - Singer Target for LDAP Directory Services"
     keywords = [
-        "",
         "data-loading",
         "enterprise",
         "etl",
