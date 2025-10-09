@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_target_ldap.__version__ import __version__, __version_info__
+
 import importlib.metadata
 from typing import Final
 
