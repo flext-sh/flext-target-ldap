@@ -48,21 +48,8 @@ from flext_target_ldap.target_services import (
 )
 from flext_target_ldap.typings import FlextTargetLdapTypes
 from flext_target_ldap.utilities import FlextTargetLdapUtilities
-from flext_target_ldap.version import VERSION, FlextTargetLdapVersion
-
-try:
-    __version__ = importlib.metadata.version("flext-target-ldap")
-except importlib.metadata.PackageNotFoundError:
-    __version__ = "0.9.0"
-
-PROJECT_VERSION: Final[FlextTargetLdapVersion] = VERSION
-
-__version__: str = VERSION.version
-__version_info__: tuple[int | str, ...] = VERSION.version_info
 
 __all__ = [
-    "PROJECT_VERSION",
-    "VERSION",
     "FlextLogger",
     "FlextModels",
     "FlextResult",
@@ -75,7 +62,6 @@ __all__ = [
     "FlextTargetLdapProtocols",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
-    "FlextTargetLdapVersion",
     "FlextTypes",
     "GroupsSink",
     "LDAPBaseSink",
