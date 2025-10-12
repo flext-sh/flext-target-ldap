@@ -11,15 +11,18 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextCore
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-logger: FlextLogger = FlextLogger(__name__)
+logger: FlextCore.Logger = FlextCore.Logger(__name__)
 
 
 class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
+
+    # Type annotations for pyrefly
+    config: FlextCore.Types.Dict
 
     @override
     def __init__(self, config: FlextTargetLdapTypes.Core.Dict | None = None) -> None:
@@ -32,20 +35,20 @@ class LDAPTargetOrchestrator:
             object: Description of return value.
 
         """
-        self.config: FlextTypes.Dict = config or {}
+        self.config: FlextCore.Types.Dict = config or {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
         self,
         records: list[FlextTargetLdapTypes.Core.Dict],
-    ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
+    ) -> FlextCore.Result[FlextTargetLdapTypes.Core.Dict]:
         """Orchestrate data loading to LDAP target.
 
         Args:
             records: Records to load to LDAP
 
         Returns:
-            FlextResult with loading status
+            FlextCore.Result with loading status
 
         """
         try:
@@ -63,19 +66,19 @@ class LDAPTargetOrchestrator:
             }
 
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return FlextResult[FlextTargetLdapTypes.Core.Dict].ok(result)
+            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].ok(result)
 
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
+            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].fail(
                 f"Data loading orchestration failed: {e}",
             )
 
-    def validate_target_configuration(self: object) -> FlextResult[bool]:
+    def validate_target_configuration(self: object) -> FlextCore.Result[bool]:
         """Validate LDAP target configuration.
 
         Returns:
-            FlextResult indicating validation success
+            FlextCore.Result indicating validation success
 
         """
         try:
@@ -83,11 +86,13 @@ class LDAPTargetOrchestrator:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
-                    return FlextResult[bool].fail(f"Missing required field: {field}")
+                    return FlextCore.Result[bool].fail(
+                        f"Missing required field: {field}"
+                    )
 
-            return FlextResult[bool].ok(data=True)
+            return FlextCore.Result[bool].ok(data=True)
         except Exception as e:
-            return FlextResult[bool].fail(f"Configuration validation failed: {e}")
+            return FlextCore.Result[bool].fail(f"Configuration validation failed: {e}")
 
 
 __all__: FlextTargetLdapTypes.Core.StringList = ["LDAPTargetOrchestrator"]

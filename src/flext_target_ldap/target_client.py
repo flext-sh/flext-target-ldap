@@ -11,13 +11,7 @@ from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
 from typing import override
 
-from flext_core import (
-    FlextConstants,
-    FlextContainer,
-    FlextLogger,
-    FlextResult,
-    FlextTypes,
-)
+from flext_core import FlextCore
 from flext_ldap import FlextLdap, FlextLdapClients, FlextLdapModels
 
 from flext_target_ldap.constants import FlextTargetLdapConstants
@@ -25,7 +19,7 @@ from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target_config import TargetLdapConfig
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 
 # Network constants - moved to FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
 
@@ -154,7 +148,7 @@ class LdapTargetClient:
         protocol = "ldaps" if self.config.use_ssl else "ldap"
         return f"{protocol}://{self.config.server}:{self.config.port}"
 
-    def connect(self) -> FlextResult[str]:
+    def connect(self) -> FlextCore.Result[str]:
         """Validate connectivity to LDAP server using flext-ldap API."""
         try:
             # Build server URL from config
@@ -169,7 +163,7 @@ class LdapTargetClient:
             )
 
             if connect_result.is_failure:
-                return FlextResult[str].fail(
+                return FlextCore.Result[str].fail(
                     f"Connection failed: {connect_result.error}"
                 )
 
@@ -181,12 +175,12 @@ class LdapTargetClient:
                 self.config.server,
                 self.config.port,
             )
-            return FlextResult[str].ok("validated")
+            return FlextCore.Result[str].ok("validated")
 
         except Exception as e:
             error_msg = f"Connection error: {e}"
             logger.exception(error_msg)
-            return FlextResult[str].fail(error_msg)
+            return FlextCore.Result[str].fail(error_msg)
 
     def get_connection(self) -> _GeneratorContextManager[object]:
         """Get LDAP connection context manager (compatibility method).
@@ -229,7 +223,7 @@ class LdapTargetClient:
                 def add(
                     self,
                     _dn: str,
-                    _object_classes: FlextTypes.StringList,
+                    _object_classes: FlextCore.Types.StringList,
                     _attributes: dict,
                 ) -> bool:
                     # Delegate to flext-ldap API
@@ -303,7 +297,7 @@ class LdapTargetClient:
                     # Delegate to flext-ldap API
                     try:
 
-                        def _search() -> FlextResult[
+                        def _search() -> FlextCore.Result[
                             list[FlextTargetLdapTypes.Core.Dict]
                         ]:
                             connect_result = self.api.connect(
@@ -312,7 +306,7 @@ class LdapTargetClient:
                                 self.password or "",
                             )
                             if connect_result.is_failure:
-                                return FlextResult[
+                                return FlextCore.Result[
                                     list[FlextTargetLdapTypes.Core.Dict]
                                 ].fail(connect_result.error)
 
@@ -325,7 +319,7 @@ class LdapTargetClient:
                             self.api.close_connection()
                             return search_result
 
-                        search_result: FlextResult[
+                        search_result: FlextCore.Result[
                             list[FlextTargetLdapTypes.Core.Dict]
                         ] = _search()
                         if search_result.is_success and search_result.data:
@@ -381,8 +375,8 @@ class LdapTargetClient:
         self,
         dn: str,
         attributes: FlextTargetLdapTypes.Core.Dict,
-        object_classes: FlextTypes.StringList | None = None,
-    ) -> FlextResult[bool]:
+        object_classes: FlextCore.Types.StringList | None = None,
+    ) -> FlextCore.Result[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
             # Prepare attributes for flext-ldap
@@ -412,20 +406,20 @@ class LdapTargetClient:
                 self._password or "",
             )
             if connect_result.is_failure:
-                return FlextResult[bool].fail(
+                return FlextCore.Result[bool].fail(
                     f"Connection failed: {connect_result.error}"
                 )
 
             try:
                 # Use create_group when objectClass indicates group, else create_user
-                is_group: FlextTypes.List = "groupOfNames" in ldap_attributes.get(
+                is_group: FlextCore.Types.List = "groupOfNames" in ldap_attributes.get(
                     "objectClass", []
                 )
                 if is_group:
                     # Minimal group creation via API
-                    cn_values: FlextTypes.List = ldap_attributes.get("cn", [])
+                    cn_values: FlextCore.Types.List = ldap_attributes.get("cn", [])
                     cn = str(cn_values[0]) if cn_values else "group"
-                    members: FlextTypes.List = [
+                    members: FlextCore.Types.List = [
                         str(m) for m in ldap_attributes.get("member", [])
                     ]
                     result = self._api.create_group(
@@ -434,28 +428,28 @@ class LdapTargetClient:
                         description=None,
                         members=members or None,
                     )
-                    # Convert to boolean FlextResult
+                    # Convert to boolean FlextCore.Result
                     if result.is_success:
-                        return FlextResult[bool].ok(data=True)
-                    return FlextResult[bool].fail(
+                        return FlextCore.Result[bool].ok(data=True)
+                    return FlextCore.Result[bool].fail(
                         result.error or "Group creation failed",
                     )
                 # Fallback: create generic entry via modify flow (unsupported path)
                 # Emulate success by returning ok; real implementation would add support if needed
-                return FlextResult[bool].ok(data=True)
+                return FlextCore.Result[bool].ok(data=True)
             finally:
                 # Close the connection
                 self._api.close_connection()
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add entry %s", dn)
-            return FlextResult[bool].fail(f"Add entry failed: {e}")
+            return FlextCore.Result[bool].fail(f"Add entry failed: {e}")
 
     def modify_entry(
         self,
         dn: str,
         changes: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextResult[bool]:
+    ) -> FlextCore.Result[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             # Prepare changes for flext-ldap
@@ -479,39 +473,39 @@ class LdapTargetClient:
                 self._password or "",
             )
             if connect_result.is_failure:
-                return FlextResult[bool].fail(
+                return FlextCore.Result[bool].fail(
                     f"Connection failed: {connect_result.error}"
                 )
 
             try:
                 # No modify_entry in API; assume success in dry-run mode
-                result: FlextResult[object] = FlextResult[None].ok(data=True)
+                result: FlextCore.Result[object] = FlextCore.Result[None].ok(data=True)
 
                 if result.is_success:
                     logger.debug("Successfully modified LDAP entry: %s", dn)
-                    return FlextResult[bool].ok(data=True)
+                    return FlextCore.Result[bool].ok(data=True)
             finally:
                 # Close the connection
                 self._api.close_connection()
 
             error_msg = f"Failed to modify entry {dn}: {result.error}"
             logger.error(error_msg)
-            return FlextResult[bool].fail(error_msg)
+            return FlextCore.Result[bool].fail(error_msg)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to modify entry %s", dn)
-            return FlextResult[bool].fail(f"Modify entry failed: {e}")
+            return FlextCore.Result[bool].fail(f"Modify entry failed: {e}")
 
     def search_entry(
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: FlextTypes.StringList | None = None,
-    ) -> FlextResult[list[LdapSearchEntry]]:
+        attributes: FlextCore.Types.StringList | None = None,
+    ) -> FlextCore.Result[list[LdapSearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:
-                return FlextResult[list[LdapSearchEntry]].fail("Base DN required")
+                return FlextCore.Result[list[LdapSearchEntry]].fail("Base DN required")
 
             logger.info(
                 "Searching LDAP entries using flext-ldap API: %s with filter %s",
@@ -530,7 +524,7 @@ class LdapTargetClient:
                 self._password or "",
             )
             if connect_result.is_failure:
-                return FlextResult[list[LdapSearchEntry]].fail(
+                return FlextCore.Result[list[LdapSearchEntry]].fail(
                     f"Connection failed: {connect_result.error}"
                 )
 
@@ -559,26 +553,26 @@ class LdapTargetClient:
                     entries.append(compat_entry)
 
                 logger.debug("Successfully found %d LDAP entries", len(entries))
-                return FlextResult[list[LdapSearchEntry]].ok(entries)
+                return FlextCore.Result[list[LdapSearchEntry]].ok(entries)
 
             # Return empty list rather than error for no results
             logger.debug("No LDAP entries found")
-            return FlextResult[list[LdapSearchEntry]].ok([])
+            return FlextCore.Result[list[LdapSearchEntry]].ok([])
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
-            return FlextResult[list[LdapSearchEntry]].fail(f"Search failed: {e}")
+            return FlextCore.Result[list[LdapSearchEntry]].fail(f"Search failed: {e}")
 
-    def disconnect(self) -> FlextResult[bool]:
+    def disconnect(self) -> FlextCore.Result[bool]:
         """Disconnect noop (connection is context-managed per operation)."""
         logger.debug("No persistent session to disconnect")
-        return FlextResult[bool].ok(data=True)
+        return FlextCore.Result[bool].ok(data=True)
 
-    def delete_entry(self, dn: str) -> FlextResult[bool]:
+    def delete_entry(self, dn: str) -> FlextCore.Result[bool]:
         """Delete LDAP entry using flext-ldap API."""
         try:
             if not dn:
-                return FlextResult[bool].fail("DN required")
+                return FlextCore.Result[bool].fail("DN required")
 
             logger.info("Deleting LDAP entry using flext-ldap API: %s", dn)
 
@@ -593,7 +587,7 @@ class LdapTargetClient:
                 self._password or "",
             )
             if connect_result.is_failure:
-                return FlextResult[bool].fail(
+                return FlextCore.Result[bool].fail(
                     f"Connection failed: {connect_result.error}"
                 )
 
@@ -602,20 +596,20 @@ class LdapTargetClient:
                 # Note: This is a placeholder implementation since flext-ldap may not have delete_entry
                 # In a real implementation, you would call the appropriate delete method
                 logger.debug("Successfully deleted LDAP entry: %s", dn)
-                return FlextResult[bool].ok(data=True)
+                return FlextCore.Result[bool].ok(data=True)
             finally:
                 # Close the connection
                 self._api.close_connection()
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to delete entry %s", dn)
-            return FlextResult[bool].fail(f"Delete entry failed: {e}")
+            return FlextCore.Result[bool].fail(f"Delete entry failed: {e}")
 
-    def entry_exists(self, dn: str) -> FlextResult[bool]:
+    def entry_exists(self, dn: str) -> FlextCore.Result[bool]:
         """Check if LDAP entry exists using flext-ldap API."""
         try:
             if not dn:
-                return FlextResult[bool].fail("DN required")
+                return FlextCore.Result[bool].fail("DN required")
 
             logger.info("Checking if LDAP entry exists: %s", dn)
 
@@ -627,36 +621,40 @@ class LdapTargetClient:
             )
 
             if search_result.is_success and search_result.data is not None:
-                return FlextResult[bool].ok(len(search_result.data) > 0)
+                return FlextCore.Result[bool].ok(len(search_result.data) > 0)
 
-            return FlextResult[bool].ok(data=False)
+            return FlextCore.Result[bool].ok(data=False)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to check entry existence: %s", dn)
-            return FlextResult[bool].fail(f"Entry exists check failed: {e}")
+            return FlextCore.Result[bool].fail(f"Entry exists check failed: {e}")
 
     def get_entry(
         self,
         dn: str,
-        attributes: FlextTypes.StringList | None = None,
-    ) -> FlextResult[LdapSearchEntry | None]:
+        attributes: FlextCore.Types.StringList | None = None,
+    ) -> FlextCore.Result[LdapSearchEntry | None]:
         """Get LDAP entry using flext-ldap API."""
         try:
             if not dn:
-                return FlextResult[LdapSearchEntry | None].fail("DN required")
+                return FlextCore.Result[LdapSearchEntry | None].fail("DN required")
 
             logger.info("Getting LDAP entry: %s", dn)
 
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
 
             if search_result.is_success and search_result.data:
-                return FlextResult[LdapSearchEntry | None].ok(search_result.data[0])
+                return FlextCore.Result[LdapSearchEntry | None].ok(
+                    search_result.data[0]
+                )
 
-            return FlextResult[LdapSearchEntry | None].ok(None)
+            return FlextCore.Result[LdapSearchEntry | None].ok(None)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to get entry: %s", dn)
-            return FlextResult[LdapSearchEntry | None].fail(f"Get entry failed: {e}")
+            return FlextCore.Result[LdapSearchEntry | None].fail(
+                f"Get entry failed: {e}"
+            )
 
 
 class LdapBaseSink(Sink):
@@ -668,52 +666,52 @@ class LdapBaseSink(Sink):
         target: Target,
         stream_name: str,
         schema: FlextTargetLdapTypes.Core.Dict,
-        key_properties: FlextTypes.StringList,
+        key_properties: FlextCore.Types.StringList,
     ) -> None:
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
         # Store target reference for config access
         self._target = target
         self.client: LdapTargetClient | None = None
-        self._processing_result: FlextResult[object] = LdapProcessingResult()
+        self._processing_result: FlextCore.Result[object] = LdapProcessingResult()
 
-    def setup_client(self) -> FlextResult[LdapTargetClient]:
+    def setup_client(self) -> FlextCore.Result[LdapTargetClient]:
         """Set up LDAP client connection."""
         try:
             # Create dict configuration for LdapTargetClient compatibility
             connection_config = {
                 "host": self._target.config.get(
                     "host",
-                    FlextConstants.Infrastructure.DEFAULT_HOST,
+                    FlextCore.Constants.Infrastructure.DEFAULT_HOST,
                 ),
                 "port": self._target.config.get(
                     "port",
-                    FlextConstants.Platform.LDAP_PORT,
+                    FlextCore.Constants.Platform.LDAP_PORT,
                 ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),
                 "timeout": self._target.config.get(
                     "timeout",
-                    FlextConstants.Defaults.TIMEOUT,
+                    FlextCore.Constants.Defaults.TIMEOUT,
                 ),
             }
 
             self.client = LdapTargetClient(connection_config)
-            connect_result: FlextResult[object] = self.client.connect()
+            connect_result: FlextCore.Result[object] = self.client.connect()
 
             if not connect_result.is_success:
-                return FlextResult[LdapTargetClient].fail(
+                return FlextCore.Result[LdapTargetClient].fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
 
             logger.info("LDAP client setup successful for stream: %s", self.stream_name)
-            return FlextResult[LdapTargetClient].ok(self.client)
+            return FlextCore.Result[LdapTargetClient].ok(self.client)
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
-            return FlextResult[LdapTargetClient].fail(error_msg)
+            return FlextCore.Result[LdapTargetClient].fail(error_msg)
 
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""
@@ -725,15 +723,15 @@ class LdapBaseSink(Sink):
 
     def process_batch(self, context: FlextTargetLdapTypes.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result: FlextResult[object] = self.setup_client()
+        setup_result: FlextCore.Result[object] = self.setup_client()
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
 
         try:
-            records_raw: FlextTypes.List = context.get("records", [])
+            records_raw: FlextCore.Types.List = context.get("records", [])
 
-            records: FlextTypes.List = (
+            records: FlextCore.Types.List = (
                 records_raw if isinstance(records_raw, list) else []
             )
             logger.info(
@@ -756,8 +754,8 @@ class LdapBaseSink(Sink):
 
     def process_record(
         self,
-        record: FlextTypes.Dict,
-        _context: FlextTypes.Dict,
+        record: FlextCore.Types.Dict,
+        _context: FlextCore.Types.Dict,
     ) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
@@ -784,8 +782,8 @@ class LdapUsersSink(LdapBaseSink):
 
     def process_record(
         self,
-        record: FlextTypes.Dict,
-        _context: FlextTypes.Dict,
+        record: FlextCore.Types.Dict,
+        _context: FlextCore.Types.Dict,
     ) -> None:
         """Process a user record."""
         if not self.client:
@@ -802,7 +800,7 @@ class LdapUsersSink(LdapBaseSink):
             # Build DN for user
             base_dn = self._target.config.get(
                 "base_dn",
-                FlextConstants.Platform.DEFAULT_LDAP_BASE_DN,
+                FlextCore.Constants.Platform.DEFAULT_LDAP_BASE_DN,
             )
             user_dn = f"uid={username},{base_dn}"
 
@@ -920,7 +918,7 @@ class LdapGroupsSink(LdapBaseSink):
                 return
 
             # Build DN for group
-            group_dn = f"cn={group_name},{self._target.config.get('base_dn', FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)}"
+            group_dn = f"cn={group_name},{self._target.config.get('base_dn', FlextCore.Constants.Platform.DEFAULT_LDAP_BASE_DN)}"
 
             # Build LDAP attributes from record
             attributes = self._build_group_attributes(record)
@@ -1031,13 +1029,15 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
                 return
 
             # Build DN for OU
-            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)}"
+            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', FlextCore.Constants.Platform.DEFAULT_LDAP_BASE_DN)}"
 
             # Build LDAP attributes from record
             attributes = self._build_ou_attributes(record)
 
             # Try to add the OU entry
-            add_result: FlextResult[object] = self.client.add_entry(ou_dn, attributes)
+            add_result: FlextCore.Result[object] = self.client.add_entry(
+                ou_dn, attributes
+            )
 
             if add_result.is_success:
                 self._processing_result.add_success()
@@ -1118,7 +1118,7 @@ class TargetLdap(Target):
             self.validate_config()
 
         # Initialize container for dependency injection
-        self._container: FlextContainer | None = None
+        self._container: FlextCore.Container | None = None
 
     @property
     def singer_catalog(self) -> FlextTargetLdapTypes.Core.Dict:
@@ -1231,10 +1231,10 @@ class TargetLdap(Target):
     def setup(self) -> None:
         """Set up the LDAP target."""
         # Initialize DI container
-        self._container = FlextContainer.get_global()
+        self._container = FlextCore.Container.get_global()
         logger.info("DI container initialized successfully")
 
-        host = self.config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
+        host = self.config.get("host", FlextCore.Constants.Infrastructure.DEFAULT_HOST)
         logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:

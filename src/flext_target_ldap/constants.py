@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextConstants, FlextTypes
+from flext_core import FlextCore
 from flext_ldap.constants import FlextLdapConstants
 
 
-class FlextTargetLdapConstants(FlextConstants):
+class FlextTargetLdapConstants(FlextCore.Constants):
     """LDAP target loading-specific constants following FLEXT unified pattern with nested domains.
 
     Composes with FlextLdapConstants to avoid duplication and ensure consistency.
@@ -27,7 +27,7 @@ class FlextTargetLdapConstants(FlextConstants):
             DEFAULT_HOST = (
                 FlextLdapConstants.Protocol.DEFAULT_HOST
                 if hasattr(FlextLdapConstants.Protocol, "DEFAULT_HOST")
-                else FlextConstants.Platform.DEFAULT_HOST
+                else FlextCore.Constants.Platform.DEFAULT_HOST
             )
             DEFAULT_PORT = FlextLdapConstants.Protocol.DEFAULT_PORT
             DEFAULT_TIMEOUT = FlextLdapConstants.Protocol.DEFAULT_TIMEOUT_SECONDS
@@ -41,14 +41,21 @@ class FlextTargetLdapConstants(FlextConstants):
     class Processing:
         """Singer target data processing configuration."""
 
-        DEFAULT_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
-        MAX_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.MAX_ITEMS
+        DEFAULT_BATCH_SIZE = (
+            FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE
+        )
+        MAX_BATCH_SIZE = FlextCore.Constants.Performance.BatchProcessing.MAX_ITEMS
         DEFAULT_PAGE_SIZE = FlextLdapConstants.Connection.DEFAULT_PAGE_SIZE
 
     class Operations:
         """LDAP operation types and commands."""
 
-        TYPES: ClassVar[FlextTypes.StringList] = ["ADD", "MODIFY", "DELETE", "MODDN"]
+        TYPES: ClassVar[FlextCore.Types.StringList] = [
+            "ADD",
+            "MODIFY",
+            "DELETE",
+            "MODDN",
+        ]
 
     class Loading:
         """Target-specific loading configuration."""

@@ -6,35 +6,35 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextExceptions
+from flext_core import FlextCore
 
 
 # ✅ DIRECT EXCEPTION CLASSES: Use direct inheritance instead of factory pattern
-class FlextTargetLdapError(FlextExceptions.Error):
+class FlextTargetLdapError(FlextCore.Exceptions.Error):
     """Generic LDAP target errors."""
 
 
-class FlextTargetLdapValidationError(FlextExceptions.ValidationError):
+class FlextTargetLdapValidationError(FlextCore.Exceptions.ValidationError):
     """LDAP target validation-specific errors."""
 
 
-class FlextTargetLdapConfigurationError(FlextExceptions.ConfigurationError):
+class FlextTargetLdapConfigurationError(FlextCore.Exceptions.ConfigurationError):
     """LDAP target configuration-specific errors."""
 
 
-class FlextTargetLdapProcessingError(FlextExceptions.ProcessingError):
+class FlextTargetLdapProcessingError(FlextCore.Exceptions.ProcessingError):
     """LDAP target processing-specific errors."""
 
 
-class FlextTargetLdapConnectionError(FlextExceptions.ConnectionError):
+class FlextTargetLdapConnectionError(FlextCore.Exceptions.ConnectionError):
     """LDAP target connection-specific errors."""
 
 
-class FlextTargetLdapAuthenticationError(FlextExceptions.AuthenticationError):
+class FlextTargetLdapAuthenticationError(FlextCore.Exceptions.AuthenticationError):
     """LDAP target authentication-specific errors."""
 
 
-class FlextTargetLdapTimeoutError(FlextExceptions.TimeoutError):
+class FlextTargetLdapTimeoutError(FlextCore.Exceptions.TimeoutError):
     """LDAP target timeout-specific errors."""
 
 
