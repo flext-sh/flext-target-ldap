@@ -9,7 +9,7 @@ from __future__ import annotations
 from asyncio import run
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextCore
 
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.typings import FlextTargetLdapTypes
@@ -37,15 +37,15 @@ class Sink:
         self,
         _record: FlextTargetLdapTypes.Core.Dict,
         _context: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> FlextCore.Result[None]:
         """Process a record using the target."""
         # Implementation will delegate to target's process method
         try:
             # Basic processing - this is a placeholder implementation
             # Real implementation would transform and load the record to LDAP
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
         except Exception as e:
-            return FlextResult[None].fail(f"Record processing failed: {e}")
+            return FlextCore.Result[None].fail(f"Record processing failed: {e}")
 
 
 class Target:
@@ -54,10 +54,10 @@ class Target:
     @override
     def __init__(self, config: FlextTargetLdapTypes.Core.Dict) -> None:
         """Initialize target with configuration."""
-        self.config: FlextTypes.Dict = config
+        self.config: FlextCore.Types.Dict = config
 
 
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 
 
 class LDAPProcessingResult:
@@ -106,9 +106,9 @@ class LDAPBaseSink(Sink):
         # Store target reference for config access
         self._target = target
         self.client: LDAPClient | None = None
-        self._processing_result: FlextResult[object] = LDAPProcessingResult()
+        self._processing_result: FlextCore.Result[object] = LDAPProcessingResult()
 
-    def setup_client(self) -> FlextResult[LDAPClient]:
+    def setup_client(self) -> FlextCore.Result[LDAPClient]:
         """Set up LDAP client connection."""
         try:
             # Create dict configuration for LDAPClient compatibility
@@ -122,20 +122,20 @@ class LDAPBaseSink(Sink):
             }
 
             self.client = LDAPClient(connection_config)
-            connect_result: FlextResult[object] = self.client.connect()
+            connect_result: FlextCore.Result[object] = self.client.connect()
 
             if not connect_result.is_success:
-                return FlextResult[LDAPClient].fail(
+                return FlextCore.Result[LDAPClient].fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
 
             logger.info("LDAP client setup successful for stream: %s", self.stream_name)
-            return FlextResult[LDAPClient].ok(self.client)
+            return FlextCore.Result[LDAPClient].ok(self.client)
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
-            return FlextResult[LDAPClient].fail(error_msg)
+            return FlextCore.Result[LDAPClient].fail(error_msg)
 
     def teardown_client(self: object) -> None:
         """Teardown LDAP client connection."""
@@ -147,15 +147,15 @@ class LDAPBaseSink(Sink):
 
     def process_batch(self, context: FlextTargetLdapTypes.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result: FlextResult[object] = run(self.setup_client())
+        setup_result: FlextCore.Result[object] = run(self.setup_client())
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
 
         try:
-            records_raw: FlextTypes.List = context.get("records", [])
+            records_raw: FlextCore.Types.List = context.get("records", [])
 
-            records: FlextTypes.List = (
+            records: FlextCore.Types.List = (
                 records_raw if isinstance(records_raw, list) else []
             )
             logger.info(
@@ -240,7 +240,7 @@ class UsersSink(LDAPBaseSink):
             )
 
             # Try to add the user entry
-            add_result: FlextResult[bool] = self.client.add_entry(
+            add_result: FlextCore.Result[bool] = self.client.add_entry(
                 user_dn,
                 attributes,
                 object_classes,
@@ -251,7 +251,7 @@ class UsersSink(LDAPBaseSink):
                 logger.debug("User entry added successfully: %s", user_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result: FlextResult[bool] = self.client.modify_entry(
+                modify_result: FlextCore.Result[bool] = self.client.modify_entry(
                     user_dn,
                     attributes,
                 )
@@ -313,7 +313,9 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: FlextTypes.Dict = self._target.config.get("attribute_mapping", {})
+        mapping_obj: FlextCore.Types.Dict = self._target.config.get(
+            "attribute_mapping", {}
+        )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)
@@ -358,7 +360,7 @@ class GroupsSink(LDAPBaseSink):
             )
 
             # Try to add the group entry
-            add_result: FlextResult[bool] = self.client.add_entry(
+            add_result: FlextCore.Result[bool] = self.client.add_entry(
                 group_dn,
                 attributes,
                 object_classes,
@@ -369,7 +371,7 @@ class GroupsSink(LDAPBaseSink):
                 logger.debug("Group entry added successfully: %s", group_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result: FlextResult[bool] = self.client.modify_entry(
+                modify_result: FlextCore.Result[bool] = self.client.modify_entry(
                     group_dn,
                     attributes,
                 )
@@ -426,7 +428,9 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: FlextTypes.Dict = self._target.config.get("attribute_mapping", {})
+        mapping_obj: FlextCore.Types.Dict = self._target.config.get(
+            "attribute_mapping", {}
+        )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)
@@ -466,14 +470,16 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             attributes = self._build_ou_attributes(record)
 
             # Try to add the OU entry
-            add_result: FlextResult[bool] = self.client.add_entry(ou_dn, attributes)
+            add_result: FlextCore.Result[bool] = self.client.add_entry(
+                ou_dn, attributes
+            )
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
-                modify_result: FlextResult[bool] = self.client.modify_entry(
+                modify_result: FlextCore.Result[bool] = self.client.modify_entry(
                     ou_dn,
                     attributes,
                 )
@@ -526,7 +532,9 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: FlextTypes.Dict = self._target.config.get("attribute_mapping", {})
+        mapping_obj: FlextCore.Types.Dict = self._target.config.get(
+            "attribute_mapping", {}
+        )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
                 value = record.get(singer_field)

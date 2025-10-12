@@ -1,11 +1,11 @@
 """FLEXT Target LDAP Types - Domain-specific Singer LDAP target type definitions.
 
-This module provides Singer LDAP target-specific type definitions extending FlextTypes.
+This module provides Singer LDAP target-specific type definitions extending FlextCore.Types.
 Follows FLEXT standards:
 - Domain-specific complex types only
 - No simple aliases to primitive types
 - Python 3.13+ syntax
-- Extends FlextTypes properly
+- Extends FlextCore.Types properly
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from flext_core import FlextTypes
+from flext_core import FlextCore
 
 # =============================================================================
 # TARGET LDAP-SPECIFIC TYPE VARIABLES - Domain-specific TypeVars for Singer LDAP target operations
@@ -23,8 +23,8 @@ from flext_core import FlextTypes
 
 
 # Singer LDAP target domain TypeVars
-class FlextTargetLdapTypes(FlextTypes):
-    """Singer LDAP target-specific type definitions extending FlextTypes.
+class FlextTargetLdapTypes(FlextCore.Types):
+    """Singer LDAP target-specific type definitions extending FlextCore.Types.
 
     Domain-specific type system for Singer LDAP target operations.
     Contains ONLY complex LDAP target-specific types, no simple aliases.
@@ -73,11 +73,13 @@ class FlextTargetLdapTypes(FlextTypes):
         type AuthenticationSettings = dict[
             str, str | bool | dict[str, FlextTargetLdapTypes.Core.ConfigValue]
         ]
-        type SchemaDefinition = dict[str, str | FlextTypes.StringList | FlextTypes.Dict]
+        type SchemaDefinition = dict[
+            str, str | FlextCore.Types.StringList | FlextCore.Types.Dict
+        ]
         type DirectoryStructure = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type OperationalAttributes = dict[str, str | bool | FlextTypes.Dict]
+        type OperationalAttributes = dict[str, str | bool | FlextCore.Types.Dict]
 
     # =========================================================================
     # LDAP ENTRY TYPES - Complex LDAP entry and attribute types
@@ -92,20 +94,20 @@ class FlextTargetLdapTypes(FlextTypes):
         type AttributeMapping = dict[
             str,
             str
-            | FlextTypes.StringList
+            | FlextCore.Types.StringList
             | dict[str, FlextTargetLdapTypes.Core.JsonValue],
         ]
         type ObjectClassDefinition = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type DistinguishedName = dict[str, str | FlextTypes.Dict]
+        type DistinguishedName = dict[str, str | FlextCore.Types.Dict]
         type AttributeValues = dict[
             str,
             str
-            | FlextTypes.StringList
+            | FlextCore.Types.StringList
             | dict[str, FlextTargetLdapTypes.Core.JsonValue],
         ]
-        type EntryValidation = dict[str, bool | str | FlextTypes.Dict]
+        type EntryValidation = dict[str, bool | str | FlextCore.Types.Dict]
 
     # =========================================================================
     # LDAP OPERATIONS TYPES - Complex LDAP operation types
@@ -120,9 +122,11 @@ class FlextTargetLdapTypes(FlextTypes):
         type SearchOperations = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type ModifyOperations = dict[str, str | FlextTypes.StringList | FlextTypes.Dict]
+        type ModifyOperations = dict[
+            str, str | FlextCore.Types.StringList | FlextCore.Types.Dict
+        ]
         type AddOperations = dict[str, dict[str, FlextTargetLdapTypes.Core.JsonValue]]
-        type DeleteOperations = dict[str, str | bool | FlextTypes.Dict]
+        type DeleteOperations = dict[str, str | bool | FlextCore.Types.Dict]
         type BindOperations = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.ConfigValue]
         ]
@@ -140,14 +144,14 @@ class FlextTargetLdapTypes(FlextTypes):
         type AuthenticationMethods = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type TlsConfiguration = dict[str, str | bool | FlextTypes.Dict]
+        type TlsConfiguration = dict[str, str | bool | FlextCore.Types.Dict]
         type CredentialManagement = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.ConfigValue]
         ]
         type AccessControl = dict[
             str, bool | str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type CertificateHandling = dict[str, str | FlextTypes.Dict]
+        type CertificateHandling = dict[str, str | FlextCore.Types.Dict]
 
     # =========================================================================
     # DATA TRANSFORMATION TYPES - Complex data transformation types
@@ -159,11 +163,13 @@ class FlextTargetLdapTypes(FlextTypes):
         type TransformationConfiguration = dict[
             str, str | bool | dict[str, FlextTargetLdapTypes.Core.ConfigValue]
         ]
-        type FieldMapping = dict[str, str | FlextTypes.StringList | FlextTypes.Dict]
+        type FieldMapping = dict[
+            str, str | FlextCore.Types.StringList | FlextCore.Types.Dict
+        ]
         type DataValidation = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type TypeConversion = dict[str, bool | str | FlextTypes.Dict]
+        type TypeConversion = dict[str, bool | str | FlextCore.Types.Dict]
         type FilteringRules = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
@@ -185,12 +191,12 @@ class FlextTargetLdapTypes(FlextTypes):
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
         type StreamRecord = dict[
-            str, FlextTargetLdapTypes.Core.JsonValue | FlextTypes.Dict
+            str, FlextTargetLdapTypes.Core.JsonValue | FlextCore.Types.Dict
         ]
         type StreamState = dict[
             str, str | int | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type StreamBookmark = dict[str, str | int | FlextTypes.Dict]
+        type StreamBookmark = dict[str, str | int | FlextCore.Types.Dict]
         type StreamSchema = dict[
             str, str | dict[str, FlextTargetLdapTypes.Core.JsonValue] | bool
         ]
@@ -205,11 +211,11 @@ class FlextTargetLdapTypes(FlextTypes):
         type ErrorConfiguration = dict[
             str, bool | str | int | dict[str, FlextTargetLdapTypes.Core.ConfigValue]
         ]
-        type ErrorRecovery = dict[str, str | bool | FlextTypes.Dict]
+        type ErrorRecovery = dict[str, str | bool | FlextCore.Types.Dict]
         type ErrorReporting = dict[
             str, str | int | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
-        type ErrorClassification = dict[str, str | int | FlextTypes.Dict]
+        type ErrorClassification = dict[str, str | int | FlextCore.Types.Dict]
         type ErrorMetrics = dict[
             str, int | float | dict[str, FlextTargetLdapTypes.Core.JsonValue]
         ]
@@ -218,10 +224,10 @@ class FlextTargetLdapTypes(FlextTypes):
         ]
 
     # =========================================================================
-    # CORE COMMONLY USED TYPES - Extending FlextTypes for Target LDAP domain
+    # CORE COMMONLY USED TYPES - Extending FlextCore.Types for Target LDAP domain
     # =========================================================================
 
-    class Core(FlextTypes):
+    class Core(FlextCore.Types):
         """Core Target LDAP-specific type aliases extending FlextTargetLdapTypes.Core.
 
         Provides standardized type aliases for frequent Target LDAP patterns while
@@ -229,81 +235,93 @@ class FlextTargetLdapTypes(FlextTypes):
         usage throughout the Target LDAP codebase.
         """
 
-        # Core aliases for compatibility with FlextTypes
-        type Dict = FlextTypes.Dict
-        type List = FlextTypes.List
-        type StringList = FlextTypes.StringList
+        # Core aliases for compatibility with FlextCore.Types
+        type Dict = FlextCore.Types.Dict
+        type List = FlextCore.Types.List
+        type StringList = FlextCore.Types.StringList
         type ConfigValue = (
-            str | int | bool | float | FlextTypes.List | FlextTypes.Dict | None
+            str
+            | int
+            | bool
+            | float
+            | FlextCore.Types.List
+            | FlextCore.Types.Dict
+            | None
         )
         type JsonValue = (
-            str | int | bool | float | FlextTypes.List | FlextTypes.Dict | None
+            str
+            | int
+            | bool
+            | float
+            | FlextCore.Types.List
+            | FlextCore.Types.Dict
+            | None
         )
 
         # Target LDAP configuration and data types
-        type TargetLdapConfigDict = FlextTypes.Dict
-        type LdapTargetConfigDict = FlextTypes.Dict
-        type SingerTargetDict = FlextTypes.Dict
-        type DirectoryConfigDict = FlextTypes.Dict
-        type ConnectionConfigDict = FlextTypes.Dict
-        type SecurityConfigDict = FlextTypes.Dict
-        type OperationConfigDict = FlextTypes.Dict
-        type LoadingConfigDict = FlextTypes.Dict
+        type TargetLdapConfigDict = FlextCore.Types.Dict
+        type LdapTargetConfigDict = FlextCore.Types.Dict
+        type SingerTargetDict = FlextCore.Types.Dict
+        type DirectoryConfigDict = FlextCore.Types.Dict
+        type ConnectionConfigDict = FlextCore.Types.Dict
+        type SecurityConfigDict = FlextCore.Types.Dict
+        type OperationConfigDict = FlextCore.Types.Dict
+        type LoadingConfigDict = FlextCore.Types.Dict
 
         # LDAP target operation types
-        type LdapEntryDict = FlextTypes.Dict
-        type LdapAttributeDict = FlextTypes.Dict
-        type LdapOperationDict = FlextTypes.Dict
-        type LdapResultDict = FlextTypes.Dict
-        type DirectoryEntryDict = FlextTypes.Dict
-        type TargetRecordDict = FlextTypes.Dict
-        type SingerRecordDict = FlextTypes.Dict
-        type SingerStateDict = FlextTypes.Dict
+        type LdapEntryDict = FlextCore.Types.Dict
+        type LdapAttributeDict = FlextCore.Types.Dict
+        type LdapOperationDict = FlextCore.Types.Dict
+        type LdapResultDict = FlextCore.Types.Dict
+        type DirectoryEntryDict = FlextCore.Types.Dict
+        type TargetRecordDict = FlextCore.Types.Dict
+        type SingerRecordDict = FlextCore.Types.Dict
+        type SingerStateDict = FlextCore.Types.Dict
 
         # Singer protocol types for target LDAP
-        type SingerMessageDict = FlextTypes.Dict
-        type SingerSchemaDict = FlextTypes.Dict
-        type SingerCatalogDict = FlextTypes.Dict
-        type StreamConfigDict = FlextTypes.Dict
-        type StreamSchemaDict = FlextTypes.Dict
-        type StreamRecordDict = FlextTypes.Dict
-        type StreamStateDict = FlextTypes.Dict
+        type SingerMessageDict = FlextCore.Types.Dict
+        type SingerSchemaDict = FlextCore.Types.Dict
+        type SingerCatalogDict = FlextCore.Types.Dict
+        type StreamConfigDict = FlextCore.Types.Dict
+        type StreamSchemaDict = FlextCore.Types.Dict
+        type StreamRecordDict = FlextCore.Types.Dict
+        type StreamStateDict = FlextCore.Types.Dict
 
         # LDAP target processing types
-        type TransformationDict = FlextTypes.Dict
-        type ValidationDict = FlextTypes.Dict
-        type MappingDict = FlextTypes.Dict
-        type FilteringDict = FlextTypes.Dict
-        type LoadingResultDict = FlextTypes.Dict
-        type ProcessingResultDict = FlextTypes.Dict
-        type ErrorResultDict = FlextTypes.Dict
-        type MetricsDict = FlextTypes.FloatDict
+        type TransformationDict = FlextCore.Types.Dict
+        type ValidationDict = FlextCore.Types.Dict
+        type MappingDict = FlextCore.Types.Dict
+        type FilteringDict = FlextCore.Types.Dict
+        type LoadingResultDict = FlextCore.Types.Dict
+        type ProcessingResultDict = FlextCore.Types.Dict
+        type ErrorResultDict = FlextCore.Types.Dict
+        type MetricsDict = FlextCore.Types.FloatDict
 
         # Target LDAP lists
-        type LdapEntryList = list[FlextTypes.Dict]
-        type SingerRecordList = list[FlextTypes.Dict]
-        type StreamNameList = FlextTypes.StringList
-        type AttributeNameList = FlextTypes.StringList
-        type OperationList = FlextTypes.StringList
-        type ErrorList = FlextTypes.StringList
-        type MetricsList = FlextTypes.FloatList
-        type ResultList = list[FlextTypes.Dict]
+        type LdapEntryList = list[FlextCore.Types.Dict]
+        type SingerRecordList = list[FlextCore.Types.Dict]
+        type StreamNameList = FlextCore.Types.StringList
+        type AttributeNameList = FlextCore.Types.StringList
+        type OperationList = FlextCore.Types.StringList
+        type ErrorList = FlextCore.Types.StringList
+        type MetricsList = FlextCore.Types.FloatList
+        type ResultList = list[FlextCore.Types.Dict]
 
     # =========================================================================
-    # SINGER TARGET LDAP PROJECT TYPES - Domain-specific project types extending FlextTypes
+    # SINGER TARGET LDAP PROJECT TYPES - Domain-specific project types extending FlextCore.Types
     # =========================================================================
 
-    class Project(FlextTypes.Project):
-        """Singer Target LDAP-specific project types extending FlextTypes.Project.
+    class Project(FlextCore.Types.Project):
+        """Singer Target LDAP-specific project types extending FlextCore.Types.Project.
 
         Adds Singer target LDAP-specific project types while inheriting
-        generic types from FlextTypes. Follows domain separation principle:
+        generic types from FlextCore.Types. Follows domain separation principle:
         Singer target LDAP domain owns LDAP loading and Singer protocol-specific types.
         """
 
         # Singer target LDAP-specific project types extending the generic ones
         type ProjectType = Literal[
-            # Generic types inherited from FlextTypes.Project
+            # Generic types inherited from FlextCore.Types.Project
             "library",
             "application",
             "service",
@@ -330,8 +348,8 @@ class FlextTargetLdapTypes(FlextTypes):
         type SingerTargetLdapProjectConfig = dict[
             str, FlextTargetLdapTypes.Core.ConfigValue | object
         ]
-        type LdapLoaderConfig = dict[str, str | int | bool | FlextTypes.StringList]
-        type SingerProtocolConfig = dict[str, bool | str | FlextTypes.Dict]
+        type LdapLoaderConfig = dict[str, str | int | bool | FlextCore.Types.StringList]
+        type SingerProtocolConfig = dict[str, bool | str | FlextCore.Types.Dict]
         type TargetLdapPipelineConfig = dict[
             str, FlextTargetLdapTypes.Core.ConfigValue | object
         ]
@@ -341,6 +359,6 @@ class FlextTargetLdapTypes(FlextTypes):
 # PUBLIC API EXPORTS - Singer LDAP target TypeVars and types
 # =============================================================================
 
-__all__: FlextTypes.StringList = [
+__all__: FlextCore.Types.StringList = [
     "FlextTargetLdapTypes",
 ]

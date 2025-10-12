@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import override
 
 from flext_cli import flext_cli_create_helper
-from flext_core import FlextContainer, FlextLogger, FlextTypes
+from flext_core import FlextCore
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
@@ -26,7 +26,7 @@ from flext_target_ldap.sinks import (
 )
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 
 # Network constants - moved to FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
 
@@ -49,7 +49,7 @@ class TargetLDAP(Target):
 
         # Initialize orchestrator with new modular architecture
         self._orchestrator: LDAPTargetOrchestrator | None = None
-        self._container: FlextContainer | None = None
+        self._container: FlextCore.Container | None = None
 
     @property
     def orchestrator(self: object) -> LDAPTargetOrchestrator:
@@ -243,7 +243,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     current_stream = obj.get("stream")
                 elif msg_type == "RECORD" and api is not None:
                     # Perform minimal add/modify/delete via patched API for tests
-                    record: FlextTypes.Dict = obj.get("record") or {}
+                    record: FlextCore.Types.Dict = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
                     dn = record.get("dn")
 

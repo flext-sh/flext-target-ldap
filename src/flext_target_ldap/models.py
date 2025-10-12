@@ -1,6 +1,6 @@
 """FLEXT Target LDAP Models - Consolidated domain models following [Project]Models patterns.
 
-This module implements the FlextTargetLdapModels class that extends FlextModels,
+This module implements the FlextTargetLdapModels class that extends FlextCore.Models,
 providing unified LDAP target domain models with nested classes for composition
 and validation reuse. Follows the FLEXT ecosystem unified models standard.
 
@@ -14,14 +14,14 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Self
 
-from flext_core import FlextModels, FlextResult
+from flext_core import FlextCore
 from pydantic import Field, field_validator
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
-class FlextTargetLdapModels(FlextModels):
-    """Unified LDAP target models extending FlextModels with nested domain classes.
+class FlextTargetLdapModels(FlextCore.Models):
+    """Unified LDAP target models extending FlextCore.Models with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
     for composition and validation reuse, following the [Project]Models standard.
@@ -57,7 +57,7 @@ class FlextTargetLdapModels(FlextModels):
         DOMAIN = "domain"
         DOMAIN_COMPONENT = "dcObject"
 
-    class AttributeMapping(FlextModels.Entity):
+    class AttributeMapping(FlextCore.Models.Entity):
         """LDAP attribute mapping configuration with validation.
 
         Immutable value object defining how Singer fields map to LDAP attributes
@@ -91,7 +91,7 @@ class FlextTargetLdapModels(FlextModels):
             max_length=1000,
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self: object) -> FlextCore.Result[None]:
             """Validate attribute mapping business rules."""
             try:
                 # Validate field name format
@@ -100,13 +100,13 @@ class FlextTargetLdapModels(FlextModels):
                     .replace("-", "")
                     .isalnum()
                 ):
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         "Singer field name must be alphanumeric with underscores/hyphens",
                     )
 
                 # Validate LDAP attribute format
                 if not self.ldap_attribute_name.replace("-", "").isalnum():
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         "LDAP attribute name must be alphanumeric with hyphens",
                     )
 
@@ -119,17 +119,17 @@ class FlextTargetLdapModels(FlextModels):
                         "normalize",
                     }
                     if self.transformation_rule not in valid_transformations:
-                        return FlextResult[None].fail(
+                        return FlextCore.Result[None].fail(
                             f"Invalid transformation rule. Must be one of {valid_transformations}",
                         )
 
-                return FlextResult[None].ok(None)
+                return FlextCore.Result[None].ok(None)
             except Exception as e:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"Attribute mapping validation failed: {e}"
                 )
 
-    class Entry(FlextModels.Entity):
+    class Entry(FlextCore.Models.Entity):
         """LDAP entry representation with validation and business rules.
 
         Immutable value object representing a complete LDAP entry with
@@ -171,7 +171,7 @@ class FlextTargetLdapModels(FlextModels):
                 v.append("top")
             return v
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self: object) -> FlextCore.Result[None]:
             """Validate LDAP entry business rules."""
             try:
                 errors: FlextTargetLdapTypes.Core.StringList = []
@@ -208,10 +208,10 @@ class FlextTargetLdapModels(FlextModels):
                         )
 
                 if errors:
-                    return FlextResult[None].fail("; ".join(errors))
-                return FlextResult[None].ok(None)
+                    return FlextCore.Result[None].fail("; ".join(errors))
+                return FlextCore.Result[None].ok(None)
             except Exception as e:
-                return FlextResult[None].fail(f"LDAP entry validation failed: {e}")
+                return FlextCore.Result[None].fail(f"LDAP entry validation failed: {e}")
 
         def get_rdn(self: object) -> str:
             """Get the Relative Distinguished Name (RDN) from the DN."""
@@ -232,7 +232,7 @@ class FlextTargetLdapModels(FlextModels):
             """Get values for a specific attribute."""
             return self.attributes.get(attribute_name, [])
 
-    class TransformationResult(FlextModels.Entity):
+    class TransformationResult(FlextCore.Models.Entity):
         """Result of LDAP data transformation operations.
 
         Tracks transformation statistics, applied rules, and processing metrics
@@ -265,23 +265,25 @@ class FlextTargetLdapModels(FlextModels):
             description="When transformation was performed",
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self: object) -> FlextCore.Result[None]:
             """Validate transformation result business rules."""
             try:
                 # Validate we have meaningful data
                 if not self.original_record:
-                    return FlextResult[None].fail("Original record cannot be empty")
+                    return FlextCore.Result[None].fail(
+                        "Original record cannot be empty"
+                    )
 
                 # Validate transformed entry is valid
                 entry_validation = self.transformed_entry.validate_business_rules()
                 if not entry_validation.is_success:
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         f"Transformed entry is invalid: {entry_validation.error}",
                     )
 
-                return FlextResult[None].ok(None)
+                return FlextCore.Result[None].ok(None)
             except Exception as e:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"Transformation result validation failed: {e}",
                 )
 
@@ -299,7 +301,7 @@ class FlextTargetLdapModels(FlextModels):
             """Check if transformation has any errors."""
             return bool(self.transformation_errors)
 
-    class BatchProcessing(FlextModels.Entity):
+    class BatchProcessing(FlextCore.Models.Entity):
         """LDAP batch processing configuration and state tracking.
 
         Manages batching of LDAP operations for optimal performance,
@@ -342,12 +344,12 @@ class FlextTargetLdapModels(FlextModels):
             description="Timestamp of last batch processing",
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self: object) -> FlextCore.Result[None]:
             """Validate batch processing business rules."""
             try:
                 # Validate batch size doesn't exceed current batch
                 if len(self.current_batch) > self.batch_size:
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         f"Current batch size ({len(self.current_batch)}) exceeds maximum ({self.batch_size})",
                     )
 
@@ -356,13 +358,13 @@ class FlextTargetLdapModels(FlextModels):
                     self.successful_operations + self.failed_operations
                     > self.total_processed
                 ):
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         "Operation counters exceed total processed count",
                     )
 
-                return FlextResult[None].ok(None)
+                return FlextCore.Result[None].ok(None)
             except Exception as e:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"Batch processing validation failed: {e}"
                 )
 
@@ -421,7 +423,7 @@ class FlextTargetLdapModels(FlextModels):
                 },
             )
 
-    class OperationStatistics(FlextModels.Entity):
+    class OperationStatistics(FlextCore.Models.Entity):
         """LDAP operation statistics and performance metrics.
 
         Comprehensive tracking of LDAP target operations for performance
@@ -467,7 +469,7 @@ class FlextTargetLdapModels(FlextModels):
             description="When processing completed",
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self: object) -> FlextCore.Result[None]:
             """Validate operation statistics business rules."""
             try:
                 # Validate that successful operations don't exceed total
@@ -480,19 +482,19 @@ class FlextTargetLdapModels(FlextModels):
                     total_successful + self.failed_operations
                     > self.total_entries_processed
                 ):
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         "Total operations exceed total entries processed",
                     )
 
                 # Validate time range
                 if self.end_time and self.end_time < self.start_time:
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         "End time cannot be before start time",
                     )
 
-                return FlextResult[None].ok(None)
+                return FlextCore.Result[None].ok(None)
             except Exception as e:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"Operation statistics validation failed: {e}"
                 )
 

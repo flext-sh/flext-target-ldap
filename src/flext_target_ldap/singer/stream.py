@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextCore
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 
 
 # Local LDAP stream processing classes (no fallbacks - real implementation)
@@ -44,26 +44,26 @@ class SingerLDAPStreamProcessor:
         """Initialize Singer LDAP stream processor."""
         self._stream_stats: dict[str, LDAPStreamProcessingStats] = {}
 
-    def initialize_stream(self, stream_name: str) -> FlextResult[None]:
+    def initialize_stream(self, stream_name: str) -> FlextCore.Result[None]:
         """Initialize LDAP stream processing."""
         try:
             self._stream_stats[stream_name] = LDAPStreamProcessingStats(stream_name)
             logger.info("Initialized LDAP stream processing: %s", stream_name)
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP stream initialization failed: %s", stream_name)
-            return FlextResult[None].fail(f"Stream initialization failed: {e}")
+            return FlextCore.Result[None].fail(f"Stream initialization failed: {e}")
 
     def get_stream_stats(
         self,
         stream_name: str,
-    ) -> FlextResult[LDAPStreamProcessingStats]:
+    ) -> FlextCore.Result[LDAPStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
-            return FlextResult[LDAPStreamProcessingStats].fail(
+            return FlextCore.Result[LDAPStreamProcessingStats].fail(
                 f"LDAP stream not found: {stream_name}",
             )
-        return FlextResult[LDAPStreamProcessingStats].ok(
+        return FlextCore.Result[LDAPStreamProcessingStats].ok(
             self._stream_stats[stream_name],
         )
 
