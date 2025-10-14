@@ -90,7 +90,7 @@ class LDAPClient:
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLdapModels.ConnectionConfig
+            # Convert dict[str, object] to proper FlextLdapModels.ConnectionConfig
             self.config: FlextLdapModels.ConnectionConfig = (
                 FlextLdapModels.ConnectionConfig(
                     server=str(config.get("host", "localhost")),

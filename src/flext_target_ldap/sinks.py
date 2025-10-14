@@ -111,7 +111,7 @@ class LDAPBaseSink(Sink):
     def setup_client(self) -> FlextCore.Result[LDAPClient]:
         """Set up LDAP client connection."""
         try:
-            # Create dict configuration for LDAPClient compatibility
+            # Create dict[str, object] configuration for LDAPClient compatibility
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
                 "port": self._target.config.get("port", 389),
