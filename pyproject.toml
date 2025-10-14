@@ -85,6 +85,13 @@
         "tests",
     ]
 
+
+        # SubConfig: Disable unknown-name error for models.py
+        # This handles forward references to classes defined later in the same file
+        [[tool.pyrefly.sub-config]]
+            matches = "**/models.py"
+            [tool.pyrefly.sub-config.errors]
+                unknown-name = false
     [tool.poetry.dependencies]
         python = ">=3.13,<3.14"
 
