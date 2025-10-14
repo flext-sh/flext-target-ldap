@@ -78,7 +78,7 @@ class LdapTargetClient:
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict to proper FlextLdapModels.ConnectionConfig
+            # Convert dict[str, object] to proper FlextLdapModels.ConnectionConfig
             self.config = FlextLdapModels.ConnectionConfig(
                 server=str(
                     config.get("host", "localhost"),
@@ -678,7 +678,7 @@ class LdapBaseSink(Sink):
     def setup_client(self) -> FlextCore.Result[LdapTargetClient]:
         """Set up LDAP client connection."""
         try:
-            # Create dict configuration for LdapTargetClient compatibility
+            # Create dict[str, object] configuration for LdapTargetClient compatibility
             connection_config = {
                 "host": self._target.config.get(
                     "host",

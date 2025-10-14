@@ -202,7 +202,7 @@ def validate_ldap_target_config(
 
         # Extract connection parameters for FlextLdapModels.ConnectionConfig
         connection_params = {
-            # Map external dict keys to FlextLdapModels.ConnectionConfig fields
+            # Map external dict[str, object] keys to FlextLdapModels.ConnectionConfig fields
             "server": config.get("host", "localhost"),
             "port": config.get("port", 389),
             "use_ssl": config.get("use_ssl", False),
