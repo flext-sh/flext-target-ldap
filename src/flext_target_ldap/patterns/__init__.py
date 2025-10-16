@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_core import FlextTypes
+
 from flext_target_ldap.patterns.ldap_patterns import (
     LDAPDataTransformer,
     LDAPEntryManager,
@@ -16,7 +18,7 @@ from flext_target_ldap.patterns.ldap_patterns import (
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 __all__: FlextTargetLdapTypes.Core.StringList = [
-    "FlextCore.Types",
+    "FlextTypes",
     "LDAPDataTransformer",
     "LDAPEntryManager",
     "LDAPSchemaMapper",

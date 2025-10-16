@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+
 from flext_target_ldap.__version__ import __version__, __version_info__
 from flext_target_ldap.config import FlextTargetLdapConfig as FlextTargetLDAPConfig
 from flext_target_ldap.models import FlextTargetLdapModels
@@ -44,10 +46,9 @@ from flext_target_ldap.typings import FlextTargetLdapTypes
 from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
 __all__ = [
-    "FlextCore.Logger",
-    "FlextCore.Models",
-    "FlextCore.Result",
-    "FlextCore.Types",
+    "FlextLogger",
+    "FlextModels",
+    "FlextResult",
     "FlextTargetLDAPConfig",
     "FlextTargetLDAPConnectionError",
     "FlextTargetLDAPError",
@@ -57,6 +58,7 @@ __all__ = [
     "FlextTargetLdapProtocols",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
+    "FlextTypes",
     "GroupsSink",
     "LDAPBaseSink",
     "LDAPClient",

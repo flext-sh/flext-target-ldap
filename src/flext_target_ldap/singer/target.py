@@ -13,11 +13,11 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextResult, FlextTypes
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-logger: FlextCore.Logger = FlextCore.Logger(__name__)
+logger: FlextLogger = FlextLogger(__name__)
 
 
 class SingerTargetLDAP:
@@ -34,20 +34,20 @@ class SingerTargetLDAP:
             object: Description of return value.
 
         """
-        self.config: FlextCore.Types.Dict = config or {}
+        self.config: FlextTypes.Dict = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
         self,
         messages: list[FlextTargetLdapTypes.Core.Dict],
-    ) -> FlextCore.Result[FlextTargetLdapTypes.Core.Dict]:
+    ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
         """Process Singer messages for LDAP target.
 
         Args:
             messages: Singer messages to process
 
         Returns:
-            FlextCore.Result with processing status
+            FlextResult with processing status
 
         """
         try:
@@ -68,19 +68,19 @@ class SingerTargetLDAP:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].ok(result)
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].ok(result)
 
         except Exception as e:
             logger.exception("Singer message processing failed")
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].fail(
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
                 f"Message processing failed: {e}",
             )
 
-    def validate_singer_config(self: object) -> FlextCore.Result[bool]:
+    def validate_singer_config(self: object) -> FlextResult[bool]:
         """Validate Singer LDAP target configuration.
 
         Returns:
-            FlextCore.Result indicating validation success
+            FlextResult indicating validation success
 
         """
         try:
@@ -88,13 +88,11 @@ class SingerTargetLDAP:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
-                    return FlextCore.Result[bool].fail(
-                        f"Missing required field: {field}"
-                    )
+                    return FlextResult[bool].fail(f"Missing required field: {field}")
 
-            return FlextCore.Result[bool].ok(data=True)
+            return FlextResult[bool].ok(data=True)
         except Exception as e:
-            return FlextCore.Result[bool].fail(f"Configuration validation failed: {e}")
+            return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 
 __all__: FlextTargetLdapTypes.Core.StringList = ["SingerTargetLDAP"]

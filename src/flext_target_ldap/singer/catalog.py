@@ -9,16 +9,16 @@ from __future__ import annotations
 
 from typing import ClassVar, override
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextModels, FlextResult
 from pydantic import Field
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 
 # Local LDAP catalog classes (no fallbacks - real implementation)
-class SingerLDAPCatalogEntry(FlextCore.Models.Entity):
+class SingerLDAPCatalogEntry(FlextModels.Entity):
     """Singer LDAP catalog entry using flext-core patterns."""
 
     tap_stream_id: str
@@ -30,18 +30,18 @@ class SingerLDAPCatalogEntry(FlextCore.Models.Entity):
     key_properties: ClassVar[FlextTargetLdapTypes.Core.StringList] = []
     bookmark_properties: ClassVar[FlextTargetLdapTypes.Core.StringList] = []
 
-    def validate_business_rules(self: object) -> FlextCore.Result[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate catalog entry business rules."""
         try:
             if not self.tap_stream_id.strip():
-                return FlextCore.Result[None].fail("tap_stream_id cannot be empty")
+                return FlextResult[None].fail("tap_stream_id cannot be empty")
             if not self.stream.strip():
-                return FlextCore.Result[None].fail("stream cannot be empty")
+                return FlextResult[None].fail("stream cannot be empty")
             if not self.stream_schema:
-                return FlextCore.Result[None].fail("stream_schema cannot be empty")
-            return FlextCore.Result[None].ok(None)
+                return FlextResult[None].fail("stream_schema cannot be empty")
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextCore.Result[None].fail(f"Catalog entry validation failed: {e}")
+            return FlextResult[None].fail(f"Catalog entry validation failed: {e}")
 
 
 class SingerLDAPCatalogManager:
@@ -56,7 +56,7 @@ class SingerLDAPCatalogManager:
         self,
         stream_name: str,
         schema: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextCore.Result[None]:
+    ) -> FlextResult[None]:
         """Add LDAP stream to catalog."""
         try:
             entry = SingerLDAPCatalogEntry(
@@ -66,18 +66,18 @@ class SingerLDAPCatalogManager:
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)
-            return FlextCore.Result[None].ok(None)
+            return FlextResult[None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
-            return FlextCore.Result[None].fail(f"Stream addition failed: {e}")
+            return FlextResult[None].fail(f"Stream addition failed: {e}")
 
-    def get_stream(self, stream_name: str) -> FlextCore.Result[SingerLDAPCatalogEntry]:
+    def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
-            return FlextCore.Result[SingerLDAPCatalogEntry].fail(
+            return FlextResult[SingerLDAPCatalogEntry].fail(
                 f"LDAP stream not found: {stream_name}",
             )
-        return FlextCore.Result[SingerLDAPCatalogEntry].ok(
+        return FlextResult[SingerLDAPCatalogEntry].ok(
             self._catalog_entries[stream_name],
         )
 

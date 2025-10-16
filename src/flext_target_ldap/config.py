@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from flext_core import FlextCore
+from flext_core import FlextConfig, FlextConstants, FlextModels, FlextResult, FlextTypes
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
@@ -22,7 +22,7 @@ from pydantic_settings import SettingsConfigDict
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
-class FlextTargetLdapConfig(FlextCore.Config):
+class FlextTargetLdapConfig(FlextConfig):
     """LDAP target configuration using consolidated patterns with FLEXT standards."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
@@ -44,17 +44,17 @@ class FlextTargetLdapConfig(FlextCore.Config):
 
     # Connection timeouts
     connect_timeout: int = Field(
-        FlextCore.Constants.Network.DEFAULT_TIMEOUT // 3,
+        FlextConstants.Network.DEFAULT_TIMEOUT // 3,
         description="Connection timeout in seconds",
     )
     receive_timeout: int = Field(
-        FlextCore.Constants.Network.DEFAULT_TIMEOUT,
+        FlextConstants.Network.DEFAULT_TIMEOUT,
         description="Receive timeout in seconds",
     )
 
     # Batch processing settings
     batch_size: int = Field(
-        FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
+        FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
         description="Batch size for bulk operations",
     )
     max_records: int | None = Field(
@@ -99,17 +99,16 @@ class FlextTargetLdapConfig(FlextCore.Config):
 
     @classmethod
     def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextCore.Config pattern."""
+        """Get the global singleton instance using enhanced FlextConfig pattern."""
         return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
 
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: FlextCore.Types.Dict = {
-            "connect_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT // 2,
-            "receive_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT + 15,
-            "batch_size": FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE
-            // 20,
+        dev_overrides: FlextTypes.Dict = {
+            "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
+            "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT + 15,
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 20,
             "create_missing_entries": True,
             "update_existing_entries": True,
             **overrides,
@@ -121,10 +120,10 @@ class FlextTargetLdapConfig(FlextCore.Config):
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: FlextCore.Types.Dict = {
-            "connect_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT // 3,
-            "receive_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT,
-            "batch_size": FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
+        prod_overrides: FlextTypes.Dict = {
+            "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 3,
+            "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
             "create_missing_entries": True,
             "update_existing_entries": True,
             "delete_removed_entries": False,
@@ -137,10 +136,10 @@ class FlextTargetLdapConfig(FlextCore.Config):
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: FlextCore.Types.Dict = {
-            "connect_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT // 6,
-            "receive_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT // 2,
-            "batch_size": FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE
+        test_overrides: FlextTypes.Dict = {
+            "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 6,
+            "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
             // 100,
             "create_missing_entries": True,
             "update_existing_entries": True,
@@ -154,12 +153,12 @@ class FlextTargetLdapConfig(FlextCore.Config):
     # Use SettingsConfigDict for Settings configuration
 
 
-class LDAPConnectionSettings(FlextCore.Models):
+class LDAPConnectionSettings(FlextModels):
     """LDAP connection settings model."""
 
     host: str = Field(..., description="LDAP server host")
     port: int = Field(
-        FlextCore.Constants.Platform.LDAP_DEFAULT_PORT, description="LDAP server port"
+        FlextConstants.Platform.LDAP_DEFAULT_PORT, description="LDAP server port"
     )
     use_ssl: bool = Field(default=False, description="Use SSL connection")
     use_tls: bool = Field(default=False, description="Use TLS connection")
@@ -167,19 +166,19 @@ class LDAPConnectionSettings(FlextCore.Models):
     bind_password: str | None = Field(None, description="Bind password")
     base_dn: str = Field(..., description="Base DN")
     connect_timeout: int = Field(
-        FlextCore.Constants.Network.DEFAULT_TIMEOUT // 3,
+        FlextConstants.Network.DEFAULT_TIMEOUT // 3,
         description="Connection timeout",
     )
     receive_timeout: int = Field(
-        FlextCore.Constants.Network.DEFAULT_TIMEOUT, description="Receive timeout"
+        FlextConstants.Network.DEFAULT_TIMEOUT, description="Receive timeout"
     )
 
 
-class LDAPOperationSettings(FlextCore.Models):
+class LDAPOperationSettings(FlextModels):
     """LDAP operation settings model."""
 
     batch_size: int = Field(
-        FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
+        FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
         description="Batch size",
     )
     max_records: int | None = Field(None, description="Maximum records")
@@ -199,7 +198,7 @@ class LDAPOperationSettings(FlextCore.Models):
 
 def validate_ldap_config(
     config: FlextTargetLdapTypes.Core.Dict,
-) -> FlextCore.Result[FlextTargetLdapConfig]:
+) -> FlextResult[FlextTargetLdapConfig]:
     """Validate LDAP configuration."""
     try:
 
@@ -230,25 +229,23 @@ def validate_ldap_config(
         # Extract connection parameters
         connection_params = {
             "server": config.get("host", "localhost"),
-            "port": config.get("port", FlextCore.Constants.Platform.LDAP_DEFAULT_PORT),
+            "port": config.get("port", FlextConstants.Platform.LDAP_DEFAULT_PORT),
             "use_ssl": config.get("use_ssl", False),
             "bind_dn": config.get("bind_dn", ""),
             "bind_password": config.get("password", ""),
-            "timeout": config.get(
-                "timeout", FlextCore.Constants.Network.DEFAULT_TIMEOUT
-            ),
+            "timeout": config.get("timeout", FlextConstants.Network.DEFAULT_TIMEOUT),
         }
 
         # Create connection config
         server = _to_str(connection_params["server"], "localhost")
         port = _to_int(
-            connection_params["port"], FlextCore.Constants.Platform.LDAP_DEFAULT_PORT
+            connection_params["port"], FlextConstants.Platform.LDAP_DEFAULT_PORT
         )
         use_ssl = _to_bool(connection_params["use_ssl"], default=False)
         bind_dn = _to_str(connection_params["bind_dn"], "")
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(
-            connection_params["timeout"], FlextCore.Constants.Network.DEFAULT_TIMEOUT
+            connection_params["timeout"], FlextConstants.Network.DEFAULT_TIMEOUT
         )
 
         connection_config = FlextLdapModels.ConnectionConfig(
@@ -284,22 +281,20 @@ def validate_ldap_config(
             search_scope=_to_str(config.get("search_scope", "SUBTREE")),
             connect_timeout=_to_int(
                 config.get(
-                    "connect_timeout", FlextCore.Constants.Network.DEFAULT_TIMEOUT // 3
+                    "connect_timeout", FlextConstants.Network.DEFAULT_TIMEOUT // 3
                 ),
-                FlextCore.Constants.Network.DEFAULT_TIMEOUT // 3,
+                FlextConstants.Network.DEFAULT_TIMEOUT // 3,
             ),
             receive_timeout=_to_int(
-                config.get(
-                    "receive_timeout", FlextCore.Constants.Network.DEFAULT_TIMEOUT
-                ),
-                FlextCore.Constants.Network.DEFAULT_TIMEOUT,
+                config.get("receive_timeout", FlextConstants.Network.DEFAULT_TIMEOUT),
+                FlextConstants.Network.DEFAULT_TIMEOUT,
             ),
             batch_size=_to_int(
                 config.get(
                     "batch_size",
-                    FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
+                    FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
                 ),
-                FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
+                FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
             ),
             max_records=(
                 _to_int(config.get("max_records"), 0)
@@ -321,8 +316,8 @@ def validate_ldap_config(
             attribute_mapping=attribute_mapping,
             object_classes=object_classes,
         )
-        return FlextCore.Result[FlextTargetLdapConfig].ok(validated_config)
+        return FlextResult[FlextTargetLdapConfig].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextCore.Result[FlextTargetLdapConfig].fail(
+        return FlextResult[FlextTargetLdapConfig].fail(
             f"Configuration validation failed: {e}",
         )

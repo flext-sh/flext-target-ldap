@@ -5,13 +5,15 @@ SPDX-License-Identifier: MIT.
 
 from __future__ import annotations
 
+from flext_core import FlextTypes
+
 from flext_target_ldap.singer.catalog import SingerLDAPCatalogManager
 from flext_target_ldap.singer.stream import SingerLDAPStreamProcessor
 from flext_target_ldap.singer.target import SingerTargetLDAP
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 __all__: FlextTargetLdapTypes.Core.StringList = [
-    "FlextCore.Types",
+    "FlextTypes",
     "SingerLDAPCatalogManager",
     "SingerLDAPStreamProcessor",
     "SingerTargetLDAP",

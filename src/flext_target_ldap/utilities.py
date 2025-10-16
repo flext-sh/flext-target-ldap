@@ -12,17 +12,17 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextCore
+from flext_core import FlextResult, FlextTypes, FlextUtilities
 
 from flext_target_ldap.constants import FlextTargetLdapConstants
 
 
-class FlextTargetLdapUtilities(FlextCore.Utilities):
+class FlextTargetLdapUtilities(FlextUtilities):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for
     domain-specific Singer target functionality with LDAP directory operations.
-    Extends FlextCore.Utilities with LDAP target-specific operations.
+    Extends FlextUtilities with LDAP target-specific operations.
     """
 
     LDAP_DEFAULT_PORT: ClassVar[int] = 389
@@ -37,104 +37,100 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
         """Singer protocol utilities for target operations."""
 
         @staticmethod
-        def parse_singer_message(line: str) -> FlextCore.Result[FlextCore.Types.Dict]:
+        def parse_singer_message(line: str) -> FlextResult[FlextTypes.Dict]:
             """Parse Singer message from input line.
 
             Args:
                 line: JSON line from Singer tap
 
             Returns:
-                FlextCore.Result[FlextCore.Types.Dict]: Parsed message or error
+                FlextResult[FlextTypes.Dict]: Parsed message or error
 
             """
             if not line or not line.strip():
-                return FlextCore.Result[FlextCore.Types.Dict].fail("Empty input line")
+                return FlextResult[FlextTypes.Dict].fail("Empty input line")
 
             try:
                 message = json.loads(line.strip())
                 if not isinstance(message, dict):
-                    return FlextCore.Result[FlextCore.Types.Dict].fail(
+                    return FlextResult[FlextTypes.Dict].fail(
                         "Message must be a JSON object"
                     )
 
                 if "type" not in message:
-                    return FlextCore.Result[FlextCore.Types.Dict].fail(
+                    return FlextResult[FlextTypes.Dict].fail(
                         "Message missing required 'type' field"
                     )
 
-                return FlextCore.Result[FlextCore.Types.Dict].ok(message)
+                return FlextResult[FlextTypes.Dict].ok(message)
 
             except json.JSONDecodeError as e:
-                return FlextCore.Result[FlextCore.Types.Dict].fail(f"Invalid JSON: {e}")
+                return FlextResult[FlextTypes.Dict].fail(f"Invalid JSON: {e}")
 
         @staticmethod
         def validate_record_message(
-            message: FlextCore.Types.Dict,
-        ) -> FlextCore.Result[FlextCore.Types.Dict]:
+            message: FlextTypes.Dict,
+        ) -> FlextResult[FlextTypes.Dict]:
             """Validate Singer RECORD message structure.
 
             Args:
                 message: Singer message to validate
 
             Returns:
-                FlextCore.Result[FlextCore.Types.Dict]: Validated record or error
+                FlextResult[FlextTypes.Dict]: Validated record or error
 
             """
             if message.get("type") != "RECORD":
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
-                    "Message type must be RECORD"
-                )
+                return FlextResult[FlextTypes.Dict].fail("Message type must be RECORD")
 
             required_fields = ["stream", "record"]
             for field in required_fields:
                 if field not in message:
-                    return FlextCore.Result[FlextCore.Types.Dict].fail(
+                    return FlextResult[FlextTypes.Dict].fail(
                         f"RECORD message missing '{field}' field"
                     )
 
             record = message["record"]
             if not isinstance(record, dict):
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     "Record data must be a dictionary"
                 )
 
-            return FlextCore.Result[FlextCore.Types.Dict].ok(message)
+            return FlextResult[FlextTypes.Dict].ok(message)
 
         @staticmethod
         def validate_schema_message(
-            message: FlextCore.Types.Dict,
-        ) -> FlextCore.Result[FlextCore.Types.Dict]:
+            message: FlextTypes.Dict,
+        ) -> FlextResult[FlextTypes.Dict]:
             """Validate Singer SCHEMA message structure.
 
             Args:
                 message: Singer message to validate
 
             Returns:
-                FlextCore.Result[FlextCore.Types.Dict]: Validated schema or error
+                FlextResult[FlextTypes.Dict]: Validated schema or error
 
             """
             if message.get("type") != "SCHEMA":
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
-                    "Message type must be SCHEMA"
-                )
+                return FlextResult[FlextTypes.Dict].fail("Message type must be SCHEMA")
 
             required_fields = ["stream", "schema"]
             for field in required_fields:
                 if field not in message:
-                    return FlextCore.Result[FlextCore.Types.Dict].fail(
+                    return FlextResult[FlextTypes.Dict].fail(
                         f"SCHEMA message missing '{field}' field"
                     )
 
             schema = message["schema"]
             if not isinstance(schema, dict):
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     "Schema data must be a dictionary"
                 )
 
-            return FlextCore.Result[FlextCore.Types.Dict].ok(message)
+            return FlextResult[FlextTypes.Dict].ok(message)
 
         @staticmethod
-        def write_state_message(state: FlextCore.Types.Dict) -> None:
+        def write_state_message(state: FlextTypes.Dict) -> None:
             """Write Singer state message to stdout.
 
             Args:
@@ -147,10 +143,10 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
 
         @staticmethod
         def build_ldap_dn(
-            record: FlextCore.Types.Dict,
+            record: FlextTypes.Dict,
             dn_template: str,
             base_dn: str,
-        ) -> FlextCore.Result[str]:
+        ) -> FlextResult[str]:
             """Build LDAP Distinguished Name from record data.
 
             Args:
@@ -159,11 +155,11 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 base_dn: Base DN for the directory
 
             Returns:
-                FlextCore.Result[str]: Built DN or error
+                FlextResult[str]: Built DN or error
 
             """
             if not record or not dn_template or not base_dn:
-                return FlextCore.Result[str].fail(
+                return FlextResult[str].fail(
                     "Record, DN template, and base DN are required"
                 )
 
@@ -174,14 +170,14 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                     placeholder = f"{{{key}}}"
                     if placeholder in dn_rdn:
                         if value is None:
-                            return FlextCore.Result[str].fail(
+                            return FlextResult[str].fail(
                                 f"Cannot build DN: {key} is null"
                             )
                         dn_rdn = dn_rdn.replace(placeholder, str(value))
 
                 # Check if all placeholders were replaced
                 if "{" in dn_rdn and "}" in dn_rdn:
-                    return FlextCore.Result[str].fail(
+                    return FlextResult[str].fail(
                         f"Unresolved placeholders in DN: {dn_rdn}"
                     )
 
@@ -192,12 +188,12 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 if not FlextTargetLdapUtilities.LdapDataProcessing.validate_dn_format(
                     full_dn
                 ):
-                    return FlextCore.Result[str].fail(f"Invalid DN format: {full_dn}")
+                    return FlextResult[str].fail(f"Invalid DN format: {full_dn}")
 
-                return FlextCore.Result[str].ok(full_dn)
+                return FlextResult[str].ok(full_dn)
 
             except Exception as e:
-                return FlextCore.Result[str].fail(f"Error building DN: {e}")
+                return FlextResult[str].fail(f"Error building DN: {e}")
 
         @staticmethod
         def validate_dn_format(dn: str) -> bool:
@@ -222,9 +218,9 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
 
         @staticmethod
         def convert_record_to_ldap_attributes(
-            record: FlextCore.Types.Dict,
-            attribute_mapping: FlextCore.Types.StringDict | None = None,
-        ) -> FlextCore.Result[dict[str, list[bytes]]]:
+            record: FlextTypes.Dict,
+            attribute_mapping: FlextTypes.StringDict | None = None,
+        ) -> FlextResult[dict[str, list[bytes]]]:
             """Convert Singer record to LDAP attributes format.
 
             Args:
@@ -232,11 +228,11 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 attribute_mapping: Optional mapping from record keys to LDAP attributes
 
             Returns:
-                FlextCore.Result[dict[str, list[bytes]]]: LDAP attributes or error
+                FlextResult[dict[str, list[bytes]]]: LDAP attributes or error
 
             """
             if not record:
-                return FlextCore.Result[dict[str, list[bytes]]].fail(
+                return FlextResult[dict[str, list[bytes]]].fail(
                     "Record cannot be empty"
                 )
 
@@ -265,10 +261,10 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                         # Single-value attribute
                         ldap_attrs[ldap_attr] = [str(value).encode("utf-8")]
 
-                return FlextCore.Result[dict[str, list[bytes]]].ok(ldap_attrs)
+                return FlextResult[dict[str, list[bytes]]].ok(ldap_attrs)
 
             except Exception as e:
-                return FlextCore.Result[dict[str, list[bytes]]].fail(
+                return FlextResult[dict[str, list[bytes]]].fail(
                     f"Error converting to LDAP attributes: {e}"
                 )
 
@@ -304,9 +300,9 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
 
         @staticmethod
         def extract_object_classes(
-            record: FlextCore.Types.Dict,
-            default_object_classes: FlextCore.Types.StringList | None = None,
-        ) -> FlextCore.Types.StringList:
+            record: FlextTypes.Dict,
+            default_object_classes: FlextTypes.StringList | None = None,
+        ) -> FlextTypes.StringList:
             """Extract object classes for LDAP entry.
 
             Args:
@@ -314,7 +310,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 default_object_classes: Default object classes if not in record
 
             Returns:
-                FlextCore.Types.StringList: List of object classes
+                FlextTypes.StringList: List of object classes
 
             """
             # Check for object classes in record
@@ -359,8 +355,8 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
         @staticmethod
         def validate_stream_compatibility(
             stream_name: str,
-            schema: FlextCore.Types.Dict,
-        ) -> FlextCore.Result[bool]:
+            schema: FlextTypes.Dict,
+        ) -> FlextResult[bool]:
             """Validate stream compatibility with LDAP operations.
 
             Args:
@@ -368,18 +364,16 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 schema: Stream schema
 
             Returns:
-                FlextCore.Result[bool]: Validation result
+                FlextResult[bool]: Validation result
 
             """
             if not stream_name or not schema:
-                return FlextCore.Result[bool].fail(
-                    "Stream name and schema are required"
-                )
+                return FlextResult[bool].fail("Stream name and schema are required")
 
             # Check if schema has required properties
             properties = schema.get("properties", {})
             if not properties:
-                return FlextCore.Result[bool].fail("Schema must have properties")
+                return FlextResult[bool].fail("Schema must have properties")
 
             # Check for DN building capability
             has_dn_field = "dn" in properties
@@ -388,18 +382,18 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
             )
 
             if not has_dn_field and not has_id_fields:
-                return FlextCore.Result[bool].fail(
+                return FlextResult[bool].fail(
                     "Schema must have either 'dn' field or identifier fields (id, uid, cn, username, email)"
                 )
 
-            return FlextCore.Result[bool].ok(True)
+            return FlextResult[bool].ok(True)
 
         @staticmethod
         def generate_ldap_stream_metadata(
             stream_name: str,
             record_count: int,
             processing_time: float,
-        ) -> FlextCore.Types.Dict:
+        ) -> FlextTypes.Dict:
             """Generate metadata for LDAP stream processing.
 
             Args:
@@ -408,7 +402,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 processing_time: Time taken for processing
 
             Returns:
-                FlextCore.Types.Dict: Stream metadata
+                FlextTypes.Dict: Stream metadata
 
             """
             return {
@@ -425,29 +419,29 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
 
         @staticmethod
         def validate_ldap_connection_config(
-            config: FlextCore.Types.Dict,
-        ) -> FlextCore.Result[FlextCore.Types.Dict]:
+            config: FlextTypes.Dict,
+        ) -> FlextResult[FlextTypes.Dict]:
             """Validate LDAP connection configuration.
 
             Args:
                 config: Configuration dictionary
 
             Returns:
-                FlextCore.Result[FlextCore.Types.Dict]: Validated config or error
+                FlextResult[FlextTypes.Dict]: Validated config or error
 
             """
             required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
             missing_fields = [field for field in required_fields if field not in config]
 
             if missing_fields:
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     f"Missing required LDAP connection fields: {', '.join(missing_fields)}"
                 )
 
             # Validate host format
             host = config["host"]
             if not isinstance(host, str) or not host.strip():
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     "Host must be a non-empty string"
                 )
 
@@ -456,7 +450,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
             if not FlextTargetLdapUtilities.LdapDataProcessing.validate_dn_format(
                 bind_dn
             ):
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     f"Invalid bind DN format: {bind_dn}"
                 )
 
@@ -465,7 +459,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
             if not FlextTargetLdapUtilities.LdapDataProcessing.validate_dn_format(
                 base_dn
             ):
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     f"Invalid base DN format: {base_dn}"
                 )
 
@@ -477,7 +471,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                     or port <= 0
                     or port > FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
                 ):
-                    return FlextCore.Result[FlextCore.Types.Dict].fail(
+                    return FlextResult[FlextTypes.Dict].fail(
                         "Port must be a valid integer between 1 and 65535"
                     )
 
@@ -485,23 +479,23 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
             use_ssl = config.get("use_ssl", False)
             use_tls = config.get("use_tls", False)
             if use_ssl and use_tls:
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     "Cannot use both SSL and TLS simultaneously"
                 )
 
-            return FlextCore.Result[FlextCore.Types.Dict].ok(config)
+            return FlextResult[FlextTypes.Dict].ok(config)
 
         @staticmethod
         def validate_target_config(
-            config: FlextCore.Types.Dict,
-        ) -> FlextCore.Result[FlextCore.Types.Dict]:
+            config: FlextTypes.Dict,
+        ) -> FlextResult[FlextTypes.Dict]:
             """Validate target configuration.
 
             Args:
                 config: Target configuration
 
             Returns:
-                FlextCore.Result[FlextCore.Types.Dict]: Validated config or error
+                FlextResult[FlextTypes.Dict]: Validated config or error
 
             """
             # Validate LDAP connection
@@ -515,7 +509,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
             operation_mode = config.get("operation_mode", "upsert")
             valid_modes = ["insert", "update", "upsert", "delete"]
             if operation_mode not in valid_modes:
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}"
                 )
 
@@ -523,7 +517,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
             if "dn_template" in config:
                 dn_template = config["dn_template"]
                 if not isinstance(dn_template, str) or not dn_template.strip():
-                    return FlextCore.Result[FlextCore.Types.Dict].fail(
+                    return FlextResult[FlextTypes.Dict].fail(
                         "DN template must be a non-empty string"
                     )
 
@@ -532,19 +526,19 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 "batch_size", FlextTargetLdapUtilities.DEFAULT_BATCH_SIZE
             )
             if not isinstance(batch_size, int) or batch_size <= 0:
-                return FlextCore.Result[FlextCore.Types.Dict].fail(
+                return FlextResult[FlextTypes.Dict].fail(
                     "Batch size must be a positive integer"
                 )
 
-            return FlextCore.Result[FlextCore.Types.Dict].ok(config)
+            return FlextResult[FlextTypes.Dict].ok(config)
 
     class StateManagement:
         """State management utilities for target operations."""
 
         @staticmethod
         def get_target_state(
-            state: FlextCore.Types.Dict, stream_name: str
-        ) -> FlextCore.Types.Dict:
+            state: FlextTypes.Dict, stream_name: str
+        ) -> FlextTypes.Dict:
             """Get state for a specific target stream.
 
             Args:
@@ -552,17 +546,17 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 stream_name: Name of the stream
 
             Returns:
-                FlextCore.Types.Dict: Stream state
+                FlextTypes.Dict: Stream state
 
             """
             return state.get("bookmarks", {}).get(stream_name, {})
 
         @staticmethod
         def set_target_state(
-            state: FlextCore.Types.Dict,
+            state: FlextTypes.Dict,
             stream_name: str,
-            stream_state: FlextCore.Types.Dict,
-        ) -> FlextCore.Types.Dict:
+            stream_state: FlextTypes.Dict,
+        ) -> FlextTypes.Dict:
             """Set state for a specific target stream.
 
             Args:
@@ -571,7 +565,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 stream_state: State data for the stream
 
             Returns:
-                FlextCore.Types.Dict: Updated state
+                FlextTypes.Dict: Updated state
 
             """
             if "bookmarks" not in state:
@@ -584,8 +578,8 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
         def create_processing_state(
             stream_name: str,
             records_processed: int,
-            last_processed_record: FlextCore.Types.Dict | None = None,
-        ) -> FlextCore.Types.Dict:
+            last_processed_record: FlextTypes.Dict | None = None,
+        ) -> FlextTypes.Dict:
             """Create processing state for target stream.
 
             Args:
@@ -594,7 +588,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 last_processed_record: Last processed record for checkpointing
 
             Returns:
-                FlextCore.Types.Dict: Processing state
+                FlextTypes.Dict: Processing state
 
             """
             state = {
@@ -619,10 +613,10 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
 
         @staticmethod
         def update_processing_progress(
-            state: FlextCore.Types.Dict,
+            state: FlextTypes.Dict,
             stream_name: str,
             records_count: int,
-        ) -> FlextCore.Types.Dict:
+        ) -> FlextTypes.Dict:
             """Update processing progress in state.
 
             Args:
@@ -631,7 +625,7 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
                 records_count: Number of records processed in this batch
 
             Returns:
-                FlextCore.Types.Dict: Updated state
+                FlextTypes.Dict: Updated state
 
             """
             stream_state = FlextTargetLdapUtilities.StateManagement.get_target_state(
@@ -654,26 +648,26 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
 
     # Proxy methods for backward compatibility
     @classmethod
-    def parse_singer_message(cls, line: str) -> FlextCore.Result[FlextCore.Types.Dict]:
+    def parse_singer_message(cls, line: str) -> FlextResult[FlextTypes.Dict]:
         """Proxy method for SingerUtilities.parse_singer_message()."""
         return cls.SingerUtilities.parse_singer_message(line)
 
     @classmethod
     def build_ldap_dn(
         cls,
-        record: FlextCore.Types.Dict,
+        record: FlextTypes.Dict,
         dn_template: str,
         base_dn: str,
-    ) -> FlextCore.Result[str]:
+    ) -> FlextResult[str]:
         """Proxy method for LdapDataProcessing.build_ldap_dn()."""
         return cls.LdapDataProcessing.build_ldap_dn(record, dn_template, base_dn)
 
     @classmethod
     def convert_record_to_ldap_attributes(
         cls,
-        record: FlextCore.Types.Dict,
-        attribute_mapping: FlextCore.Types.StringDict | None = None,
-    ) -> FlextCore.Result[dict[str, list[bytes]]]:
+        record: FlextTypes.Dict,
+        attribute_mapping: FlextTypes.StringDict | None = None,
+    ) -> FlextResult[dict[str, list[bytes]]]:
         """Proxy method for LdapDataProcessing.convert_record_to_ldap_attributes()."""
         return cls.LdapDataProcessing.convert_record_to_ldap_attributes(
             record, attribute_mapping
@@ -681,15 +675,15 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
 
     @classmethod
     def validate_ldap_connection_config(
-        cls, config: FlextCore.Types.Dict
-    ) -> FlextCore.Result[FlextCore.Types.Dict]:
+        cls, config: FlextTypes.Dict
+    ) -> FlextResult[FlextTypes.Dict]:
         """Proxy method for ConfigValidation.validate_ldap_connection_config()."""
         return cls.ConfigValidation.validate_ldap_connection_config(config)
 
     @classmethod
     def get_target_state(
-        cls, state: FlextCore.Types.Dict, stream_name: str
-    ) -> FlextCore.Types.Dict:
+        cls, state: FlextTypes.Dict, stream_name: str
+    ) -> FlextTypes.Dict:
         """Proxy method for StateManagement.get_target_state()."""
         return cls.StateManagement.get_target_state(state, stream_name)
 
@@ -698,8 +692,8 @@ class FlextTargetLdapUtilities(FlextCore.Utilities):
         cls,
         stream_name: str,
         records_processed: int,
-        last_processed_record: FlextCore.Types.Dict | None = None,
-    ) -> FlextCore.Types.Dict:
+        last_processed_record: FlextTypes.Dict | None = None,
+    ) -> FlextTypes.Dict:
         """Proxy method for StateManagement.create_processing_state()."""
         return cls.StateManagement.create_processing_state(
             stream_name, records_processed, last_processed_record

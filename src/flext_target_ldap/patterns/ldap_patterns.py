@@ -10,11 +10,11 @@ from __future__ import annotations
 import json
 from typing import override
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextResult, FlextTypes
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class LDAPTypeConverter:
@@ -28,29 +28,29 @@ class LDAPTypeConverter:
         self,
         singer_type: str,
         value: object,
-    ) -> FlextCore.Result[object]:
+    ) -> FlextResult[object]:
         """Convert Singer type to LDAP-compatible type."""
         try:
             if value is None:
                 result = None
             elif singer_type in {"string", "text"}:
-                result: FlextCore.Result[object] = str(value)
+                result: FlextResult[object] = str(value)
             elif singer_type in {"integer", "number"}:
-                result: FlextCore.Result[object] = str(
+                result: FlextResult[object] = str(
                     value
                 )  # LDAP stores numbers as strings
             elif singer_type == "boolean":
                 result = "TRUE" if value else "FALSE"
             elif singer_type in {"object", "array"}:
-                result: FlextCore.Result[object] = json.dumps(value)
+                result: FlextResult[object] = json.dumps(value)
             else:
-                result: FlextCore.Result[object] = str(value)
+                result: FlextResult[object] = str(value)
 
-            return FlextCore.Result[object].ok(result)
+            return FlextResult[object].ok(result)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.warning("Type conversion failed for %s: %s", singer_type, e)
-            return FlextCore.Result[object].ok(str(value))  # Fallback to string
+            return FlextResult[object].ok(str(value))  # Fallback to string
 
 
 class LDAPDataTransformer:
@@ -65,7 +65,7 @@ class LDAPDataTransformer:
         self,
         record: FlextTargetLdapTypes.Core.Dict,
         schema: FlextTargetLdapTypes.Core.Dict | None = None,
-    ) -> FlextCore.Result[FlextTargetLdapTypes.Core.Dict]:
+    ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
         """Transform Singer record for LDAP storage."""
         try:
             transformed = {}
@@ -75,9 +75,9 @@ class LDAPDataTransformer:
                 ldap_key = self._normalize_ldap_attribute_name(key)
 
                 if schema:
-                    properties: FlextCore.Types.Dict = schema.get("properties", {})
+                    properties: FlextTypes.Dict = schema.get("properties", {})
                     if isinstance(properties, dict):
-                        prop_def: FlextCore.Types.Dict = properties.get(key, {})
+                        prop_def: FlextTypes.Dict = properties.get(key, {})
                         if isinstance(prop_def, dict):
                             singer_type = prop_def.get("type", "string")
                         else:
@@ -96,11 +96,11 @@ class LDAPDataTransformer:
                 else:
                     transformed[ldap_key] = value
 
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].ok(transformed)
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].ok(transformed)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].fail(
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
                 f"Record transformation failed: {e}",
             )
 
@@ -124,10 +124,10 @@ class LDAPDataTransformer:
         self,
         record: FlextTargetLdapTypes.Core.Dict,
         object_classes: FlextTargetLdapTypes.Core.StringList,
-    ) -> FlextCore.Result[dict[str, FlextTargetLdapTypes.Core.StringList]]:
+    ) -> FlextResult[dict[str, FlextTargetLdapTypes.Core.StringList]]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes: dict[str, FlextCore.Types.StringList] = {}
+            attributes: dict[str, FlextTypes.StringList] = {}
 
             # Add object classes
             attributes["objectClass"] = object_classes
@@ -141,15 +141,13 @@ class LDAPDataTransformer:
                     else:
                         attributes[key] = [str(value)]
 
-            return FlextCore.Result[dict[str, FlextTargetLdapTypes.Core.StringList]].ok(
+            return FlextResult[dict[str, FlextTargetLdapTypes.Core.StringList]].ok(
                 attributes
             )
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return FlextCore.Result[
-                dict[str, FlextTargetLdapTypes.Core.StringList]
-            ].fail(
+            return FlextResult[dict[str, FlextTargetLdapTypes.Core.StringList]].fail(
                 f"Attribute preparation failed: {e}",
             )
 
@@ -165,11 +163,11 @@ class LDAPSchemaMapper:
         self,
         schema: FlextTargetLdapTypes.Core.Dict,
         object_class: str = "inetOrgPerson",
-    ) -> FlextCore.Result[FlextTargetLdapTypes.Core.Headers]:
+    ) -> FlextResult[FlextTargetLdapTypes.Core.Headers]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: FlextTargetLdapTypes.Core.Headers = {}
-            properties: FlextCore.Types.Dict = schema.get("properties", {})
+            properties: FlextTypes.Dict = schema.get("properties", {})
 
             if isinstance(properties, dict):
                 for prop_name, prop_def in properties.items():
@@ -191,13 +189,11 @@ class LDAPSchemaMapper:
                 # If properties is not a dict, return empty attributes
                 pass  # Already handled in the above block
 
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Headers].ok(
-                ldap_attributes
-            )
+            return FlextResult[FlextTargetLdapTypes.Core.Headers].ok(ldap_attributes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP schema mapping failed")
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Headers].fail(
+            return FlextResult[FlextTargetLdapTypes.Core.Headers].fail(
                 f"Schema mapping failed: {e}",
             )
 
@@ -218,25 +214,25 @@ class LDAPSchemaMapper:
         self,
         prop_def: FlextTargetLdapTypes.Core.Dict,
         _object_class: str,
-    ) -> FlextCore.Result[str]:
+    ) -> FlextResult[str]:
         """Map Singer property definition to LDAP attribute syntax."""
         try:
             prop_type = prop_def.get("type", "string")
             prop_format = prop_def.get("format")
 
             if prop_format in {"date-time", "date"}:
-                return FlextCore.Result[str].ok("GeneralizedTime")
+                return FlextResult[str].ok("GeneralizedTime")
             if prop_type in {"integer", "number"}:
-                return FlextCore.Result[str].ok("Integer")
+                return FlextResult[str].ok("Integer")
             if prop_type == "boolean":
-                return FlextCore.Result[str].ok("Boolean")
+                return FlextResult[str].ok("Boolean")
             if prop_type in {"object", "array"}:
-                return FlextCore.Result[str].ok("OctetString")
-            return FlextCore.Result[str].ok("DirectoryString")
+                return FlextResult[str].ok("OctetString")
+            return FlextResult[str].ok("DirectoryString")
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.warning("LDAP type mapping failed: %s", e)
-            return FlextCore.Result[str].ok("DirectoryString")
+            return FlextResult[str].ok("DirectoryString")
 
 
 class LDAPEntryManager:
@@ -251,7 +247,7 @@ class LDAPEntryManager:
         record: FlextTargetLdapTypes.Core.Dict,
         base_dn: str,
         rdn_attribute: str = "cn",
-    ) -> FlextCore.Result[str]:
+    ) -> FlextResult[str]:
         """Generate Distinguished Name for LDAP entry."""
         try:
             # Get RDN value
@@ -266,7 +262,7 @@ class LDAPEntryManager:
                         break
 
                 if not rdn_value:
-                    return FlextCore.Result[str].fail(
+                    return FlextResult[str].fail(
                         f"No value found for RDN attribute: {rdn_attribute}",
                     )
 
@@ -276,11 +272,11 @@ class LDAPEntryManager:
             # Construct DN
             dn = f"{rdn_attribute}={escaped_value},{base_dn}"
 
-            return FlextCore.Result[str].ok(dn)
+            return FlextResult[str].ok(dn)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("DN generation failed")
-            return FlextCore.Result[str].fail(f"DN generation failed: {e}")
+            return FlextResult[str].fail(f"DN generation failed: {e}")
 
     def _escape_dn_value(self, value: str) -> str:
         """Escape special characters in DN values."""
@@ -312,7 +308,7 @@ class LDAPEntryManager:
         self,
         record: FlextTargetLdapTypes.Core.Dict,
         stream_name: str,
-    ) -> FlextCore.Result[FlextTargetLdapTypes.Core.StringList]:
+    ) -> FlextResult[FlextTargetLdapTypes.Core.StringList]:
         """Determine appropriate object classes for LDAP entry."""
         try:
             object_classes = ["top"]  # All entries must have 'top'
@@ -337,13 +333,11 @@ class LDAPEntryManager:
                     ["person", "organizationalPerson", "inetOrgPerson"],
                 )
 
-            return FlextCore.Result[FlextTargetLdapTypes.Core.StringList].ok(
-                object_classes
-            )
+            return FlextResult[FlextTargetLdapTypes.Core.StringList].ok(object_classes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
-            return FlextCore.Result[FlextTargetLdapTypes.Core.StringList].fail(
+            return FlextResult[FlextTargetLdapTypes.Core.StringList].fail(
                 f"Object class determination failed: {e}",
             )
 
@@ -351,7 +345,7 @@ class LDAPEntryManager:
         self,
         attributes: FlextTargetLdapTypes.Core.Dict,
         object_classes: FlextTargetLdapTypes.Core.StringList,
-    ) -> FlextCore.Result[bool]:
+    ) -> FlextResult[bool]:
         """Validate LDAP entry attributes against object class requirements."""
         try:
             # Basic validation - could be enhanced with schema checking
@@ -368,21 +362,21 @@ class LDAPEntryManager:
             # Check for required attributes
             missing_attrs = required_attrs - set(attributes.keys())
             if missing_attrs:
-                return FlextCore.Result[bool].fail(
+                return FlextResult[bool].fail(
                     f"Missing required attributes: {missing_attrs}",
                 )
 
-            return FlextCore.Result[bool].ok(data=True)
+            return FlextResult[bool].ok(data=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")
-            return FlextCore.Result[bool].fail(f"Entry validation failed: {e}")
+            return FlextResult[bool].fail(f"Entry validation failed: {e}")
 
     def prepare_modify_changes(
         self,
         current_attrs: FlextTargetLdapTypes.Core.Dict,
         new_attrs: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextCore.Result[FlextTargetLdapTypes.Core.Dict]:
+    ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
         """Prepare modification changes for LDAP entry."""
         try:
             changes: FlextTargetLdapTypes.Core.Dict = {}
@@ -411,10 +405,10 @@ class LDAPEntryManager:
                         )
                         changes[attr] = [("MODIFY_REPLACE", values)]
 
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].ok(changes)
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].ok(changes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return FlextCore.Result[FlextTargetLdapTypes.Core.Dict].fail(
+            return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
                 f"Modify changes preparation failed: {e}",
             )
