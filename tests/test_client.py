@@ -10,7 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import FlextCore
+from flext_core import FlextTypes
 from ldap3.core import exceptions as ldap3_exceptions
 
 from flext_target_ldap import LDAPClient
@@ -23,7 +23,7 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: FlextCore.Types.Dict) -> LDAPClient:
+    def client(self, mock_ldap_config: FlextTypes.Dict) -> LDAPClient:
         """Create test LDAP client instance."""
         return LDAPClient(config=mock_ldap_config)
 

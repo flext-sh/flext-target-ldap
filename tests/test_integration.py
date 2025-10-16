@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_core import FlextCore
+from flext_core import FlextTypes
 
 
 class TestTargetLDAPIntegration:
@@ -32,7 +32,7 @@ class TestTargetLDAPIntegration:
     def config_file(
         self,
         tmp_path: Path,
-        mock_ldap_config: FlextCore.Types.Dict,
+        mock_ldap_config: FlextTypes.Dict,
     ) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
@@ -237,7 +237,7 @@ class TestTargetLDAPIntegration:
         self,
         runner: Mock,
         tmp_path: Path,
-        mock_ldap_config: FlextCore.Types.Dict,
+        mock_ldap_config: FlextTypes.Dict,
     ) -> None:
         """Test DN template usage for record processing."""
         # Add DN template to config

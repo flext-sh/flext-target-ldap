@@ -10,7 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-from flext_core import FlextCore
+from flext_core import FlextTypes
 
 from flext_target_ldap import (
     GroupsSink,
@@ -27,7 +27,7 @@ class TestLDAPBaseSink:
     def sink(
         self,
         mock_target: MagicMock,
-        mock_ldap_config: FlextCore.Types.Dict,
+        mock_ldap_config: FlextTypes.Dict,
     ) -> LDAPBaseSink:
         """Create LDAP base sink fixture for testing."""
         # Use mock_ldap_config parameter to avoid unused argument warning
@@ -81,7 +81,7 @@ class TestLDAPBaseSink:
 
     def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
         """Test that get_object_classes returns default 'top' class."""
-        record: FlextCore.Types.Dict = {}
+        record: FlextTypes.Dict = {}
         classes = sink.get_object_classes(record)
         if classes != ["top"]:
             classes_msg: str = f"Expected {['top']}, got {classes}"
@@ -140,7 +140,7 @@ class TestUsersSink:
     def users_sink(
         self,
         mock_target: MagicMock,
-        _mock_ldap_config: FlextCore.Types.Dict,
+        _mock_ldap_config: FlextTypes.Dict,
     ) -> UsersSink:
         """Create users sink fixture for testing."""
         mock_target.config.update(
@@ -232,7 +232,7 @@ class TestUsersSink:
 
     def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
         """Test getting default object classes for user entries."""
-        record: FlextCore.Types.Dict = {}
+        record: FlextTypes.Dict = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["inetOrgPerson", "organizationalPerson", "person", "top"]:
             user_classes_msg: str = f"Expected {['inetOrgPerson', 'organizationalPerson', 'person', 'top']}, got {classes}"
@@ -264,7 +264,7 @@ class TestUsersSink:
             schema=schema,
             key_properties=["uid"],
         )
-        record: FlextCore.Types.Dict = {}
+        record: FlextTypes.Dict = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["customUser", "top"]:
             custom_user_classes_msg: str = (
@@ -280,7 +280,7 @@ class TestGroupsSink:
     def groups_sink(
         self,
         mock_target: MagicMock,
-        _mock_ldap_config: FlextCore.Types.Dict,
+        _mock_ldap_config: FlextTypes.Dict,
     ) -> GroupsSink:
         """Create groups sink fixture for testing."""
         mock_target.config.update(
@@ -351,7 +351,7 @@ class TestGroupsSink:
 
     def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
         """Test getting default object classes for group entries."""
-        record: FlextCore.Types.Dict = {}
+        record: FlextTypes.Dict = {}
         classes = groups_sink.get_object_classes(record)
         if classes != ["groupOfNames", "top"]:
             group_classes_msg: str = (
@@ -367,7 +367,7 @@ class TestOrganizationalUnitsSink:
     def ou_sink(
         self,
         mock_target: MagicMock,
-        _mock_ldap_config: FlextCore.Types.Dict,
+        _mock_ldap_config: FlextTypes.Dict,
     ) -> OrganizationalUnitsSink:
         """Create organizational units sink fixture for testing."""
         mock_target.config.update(
@@ -447,7 +447,7 @@ class TestOrganizationalUnitsSink:
         self, ou_sink: OrganizationalUnitsSink
     ) -> None:
         """Test getting default object classes for organizational unit entries."""
-        record: FlextCore.Types.Dict = {}
+        record: FlextTypes.Dict = {}
         classes = ou_sink.get_object_classes(record)
         if classes != ["organizationalUnit", "top"]:
             ou_classes_msg: str = (
@@ -463,7 +463,7 @@ class TestLDAPGenericSink:
     def generic_sink(
         self,
         mock_target: MagicMock,
-        _mock_ldap_config: FlextCore.Types.Dict,
+        _mock_ldap_config: FlextTypes.Dict,
     ) -> LDAPBaseSink:
         """Create generic LDAP sink fixture for testing."""
         mock_target.config.update(
@@ -572,7 +572,7 @@ class TestLDAPGenericSink:
         self, generic_sink: LDAPBaseSink
     ) -> None:
         """Test getting default object classes for generic entries."""
-        record: FlextCore.Types.Dict = {}
+        record: FlextTypes.Dict = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
             default_classes_msg: str = f"Expected {['top']}, got {classes}"
@@ -603,7 +603,7 @@ class TestLDAPGenericSink:
             schema=schema,
             key_properties=["id"],
         )
-        record: FlextCore.Types.Dict = {}
+        record: FlextTypes.Dict = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customGeneric", "top"]:
             configured_classes_msg: str = (

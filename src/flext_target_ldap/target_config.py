@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 **Architecture**: Clean Architecture configuration layer
-**Patterns**: "FlextCore.Config", FlextCore.Models, FlextCore.Result validation
+**Patterns**: "FlextConfig", FlextModels, FlextResult validation
 **Integration**: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -14,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextCore
+from flext_core import FlextConfig, FlextResult, FlextTypes
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
@@ -22,7 +22,7 @@ from flext_target_ldap.config import FlextTargetLdapConfig
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
-class LdapTargetConnectionSettings(FlextCore.Config):
+class LdapTargetConnectionSettings(FlextConfig):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -35,18 +35,18 @@ class LdapTargetConnectionSettings(FlextCore.Config):
     connect_timeout: int = Field(10, description="Connection timeout in seconds", ge=1)
     receive_timeout: int = Field(30, description="Receive timeout in seconds", ge=1)
 
-    def validate_business_rules(self: object) -> FlextCore.Result[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate LDAP connection business rules."""
         try:
             # Mutual exclusivity validation
             if self.use_ssl and self.use_tls:
-                return FlextCore.Result[None].fail(
+                return FlextResult[None].fail(
                     "Cannot use both SSL and TLS simultaneously",
                 )
 
             # Authentication validation
             if self.bind_dn and not self.bind_password:
-                return FlextCore.Result[None].fail(
+                return FlextResult[None].fail(
                     "Bind password required when bind DN is provided",
                 )
 
@@ -55,24 +55,20 @@ class LdapTargetConnectionSettings(FlextCore.Config):
             ldaps_standard_port = 636
 
             if self.use_ssl and self.port == ldap_standard_port:
-                return FlextCore.Result[None].fail(
-                    "SSL typically uses port 636, not 389"
-                )
+                return FlextResult[None].fail("SSL typically uses port 636, not 389")
             if (
                 not self.use_ssl
                 and not self.use_tls
                 and self.port == ldaps_standard_port
             ):
-                return FlextCore.Result[None].fail("Port 636 typically requires SSL")
+                return FlextResult[None].fail("Port 636 typically requires SSL")
 
-            return FlextCore.Result[None].ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextCore.Result[None].fail(
-                f"Connection settings validation failed: {e}"
-            )
+            return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextCore.Config):
+class LdapTargetOperationSettings(FlextConfig):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -94,12 +90,12 @@ class LdapTargetOperationSettings(FlextCore.Config):
         description="Delete entries not in source",
     )
 
-    def validate_business_rules(self: object) -> FlextCore.Result[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate operation settings business rules."""
         try:
             # Logical consistency validation
             if not self.create_missing_entries and not self.update_existing_entries:
-                return FlextCore.Result[None].fail(
+                return FlextResult[None].fail(
                     "At least one of create_missing_entries or update_existing_entries must be True",
                 )
 
@@ -108,14 +104,12 @@ class LdapTargetOperationSettings(FlextCore.Config):
                 # This is a destructive operation - could add additional validation
                 pass
 
-            return FlextCore.Result[None].ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextCore.Result[None].fail(
-                f"Operation settings validation failed: {e}"
-            )
+            return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextCore.Config):
+class LdapTargetMappingSettings(FlextConfig):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: FlextTargetLdapTypes.Core.Headers = Field(
@@ -135,12 +129,12 @@ class LdapTargetMappingSettings(FlextCore.Config):
         description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
 
-    def validate_business_rules(self: object) -> FlextCore.Result[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate mapping settings business rules."""
         try:
             # Object class validation
             if not self.object_classes:
-                return FlextCore.Result[None].fail("Object classes cannot be empty")
+                return FlextResult[None].fail("Object classes cannot be empty")
             if "top" not in self.object_classes:
                 # Add 'top' as it's required for all LDAP entries
                 self.object_classes.append("top")
@@ -148,15 +142,13 @@ class LdapTargetMappingSettings(FlextCore.Config):
             # Search scope validation
             valid_scopes = {"BASE", "LEVEL", "SUBTREE"}
             if self.search_scope.upper() not in valid_scopes:
-                return FlextCore.Result[None].fail(
+                return FlextResult[None].fail(
                     f"Search scope must be one of {valid_scopes}",
                 )
 
-            return FlextCore.Result[None].ok(None)
+            return FlextResult[None].ok(None)
         except Exception as e:
-            return FlextCore.Result[None].fail(
-                f"Mapping settings validation failed: {e}"
-            )
+            return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
 # TargetLdapConfig class moved to config.py as FlextTargetLdapConfig
@@ -165,7 +157,7 @@ class LdapTargetMappingSettings(FlextCore.Config):
 
 def validate_ldap_target_config(
     config: FlextTargetLdapTypes.Core.Dict,
-) -> FlextCore.Result[FlextTargetLdapConfig]:
+) -> FlextResult[FlextTargetLdapConfig]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
         # Helpers to safely coerce basic types from object
@@ -258,7 +250,7 @@ def validate_ldap_target_config(
             default=False,
         )
 
-        raw_attr_map: FlextCore.Types.Dict = config.get("attribute_mapping", {})
+        raw_attr_map: FlextTypes.Dict = config.get("attribute_mapping", {})
         attribute_mapping: FlextTargetLdapTypes.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map.items()}
             if isinstance(raw_attr_map, dict)
@@ -287,18 +279,18 @@ def validate_ldap_target_config(
         )
 
         # Run business rules validation
-        validation_result: FlextCore.Result[object] = (
+        validation_result: FlextResult[object] = (
             validated_config.validate_business_rules()
         )
         if not validation_result.is_success:
-            return FlextCore.Result[FlextTargetLdapConfig].fail(
+            return FlextResult[FlextTargetLdapConfig].fail(
                 validation_result.error or "Invalid configuration",
             )
 
-        return FlextCore.Result[FlextTargetLdapConfig].ok(validated_config)
+        return FlextResult[FlextTargetLdapConfig].ok(validated_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextCore.Result[FlextTargetLdapConfig].fail(
+        return FlextResult[FlextTargetLdapConfig].fail(
             f"Configuration validation failed: {e}",
         )
 
@@ -309,7 +301,7 @@ def create_default_ldap_target_config(
     *,
     port: int = 389,
     use_ssl: bool = False,
-) -> FlextCore.Result[FlextTargetLdapConfig]:
+) -> FlextResult[FlextTargetLdapConfig]:
     """Create default LDAP target configuration with minimal parameters."""
     try:
         # Create connection config
@@ -331,18 +323,16 @@ def create_default_ldap_target_config(
         )
 
         # Validate business rules
-        validation_result: FlextCore.Result[object] = (
-            target_config.validate_business_rules()
-        )
+        validation_result: FlextResult[object] = target_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextCore.Result[FlextTargetLdapConfig].fail(
+            return FlextResult[FlextTargetLdapConfig].fail(
                 validation_result.error or "Invalid configuration",
             )
 
-        return FlextCore.Result[FlextTargetLdapConfig].ok(target_config)
+        return FlextResult[FlextTargetLdapConfig].ok(target_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextCore.Result[FlextTargetLdapConfig].fail(
+        return FlextResult[FlextTargetLdapConfig].fail(
             f"Default configuration creation failed: {e}",
         )
 
