@@ -15,7 +15,7 @@ from contextlib import _GeneratorContextManager, contextmanager, suppress
 from typing import Protocol, override
 
 import ldap3
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdap,
     FlextLdapClients,
@@ -31,7 +31,7 @@ class LDAPConnectionProtocol(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: FlextTypes.List
+    entries: list[object]
 
     def bind(self: object) -> bool:
         """Bind to LDAP server."""
@@ -42,12 +42,12 @@ class LDAPConnectionProtocol(Protocol):
     def add(
         self,
         dn: str,
-        object_classes: FlextTypes.StringList,
-        attributes: FlextTypes.Dict,
+        object_classes: list[str],
+        attributes: dict[str, object],
     ) -> bool:
         """Add LDAP entry."""
 
-    def modify(self, dn: str, changes: FlextTypes.Dict) -> bool:
+    def modify(self, dn: str, changes: dict[str, object]) -> bool:
         """Modify LDAP entry."""
 
     def delete(self, dn: str) -> bool:
@@ -57,7 +57,7 @@ class LDAPConnectionProtocol(Protocol):
         self,
         base_dn: str,
         search_filter: str,
-        attributes: FlextTypes.StringList | None = None,
+        attributes: list[str] | None = None,
     ) -> bool:
         """Search LDAP entries."""
 
@@ -86,7 +86,7 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.ConnectionConfig | FlextTypes.Dict,
+        config: FlextLdapModels.ConnectionConfig | dict[str, object],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
@@ -269,7 +269,7 @@ class LDAPClient:
                 def __init__(self, session_id: str) -> None:
                     self.session_id = session_id
                     self.bound = True
-                    self.entries: FlextTypes.List = []
+                    self.entries: list[object] = []
 
                 def bind(self: object) -> bool:
                     return True
@@ -280,13 +280,13 @@ class LDAPClient:
                 def add(
                     self,
                     _dn: str,
-                    _object_classes: FlextTypes.StringList,
-                    _attributes: FlextTypes.Dict,
+                    _object_classes: list[str],
+                    _attributes: dict[str, object],
                 ) -> bool:
                     # Delegate to flext-ldap API
                     return True
 
-                def modify(self, _dn: str, _changes: FlextTypes.Dict) -> bool:
+                def modify(self, _dn: str, _changes: dict[str, object]) -> bool:
                     # Delegate to flext-ldap API
                     return True
 
@@ -298,7 +298,7 @@ class LDAPClient:
                     self,
                     _base_dn: str,
                     _search_filter: str,
-                    _attributes: FlextTypes.StringList | None = None,
+                    _attributes: list[str] | None = None,
                 ) -> bool:
                     # Delegate to flext-ldap API
                     self.entries = []  # Empty results for compatibility
@@ -398,11 +398,11 @@ class LDAPClient:
             with self.get_connection() as conn:
                 # conn is now properly typed as LDAPConnectionProtocol
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: FlextTypes.List = getattr(conn, "entries", [])
+                raw_entries: list[object] = getattr(conn, "entries", [])
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     dn = getattr(raw, "entry_dn", "")
-                    attr_names: FlextTypes.List = (
+                    attr_names: list[object] = (
                         getattr(raw, "entry_attributes", []) or []
                     )
                     attrs: FlextTargetLdapTypes.Core.Dict = {}

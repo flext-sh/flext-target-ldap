@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_core import FlextConstants, FlextTypes
+from flext_core import FlextConstants
 from flext_ldap.constants import FlextLdapConstants
 
 
@@ -49,7 +49,7 @@ class FlextTargetLdapConstants(FlextConstants):
     class Operations:
         """LDAP operation types and commands."""
 
-        TYPES: ClassVar[FlextTypes.StringList] = [
+        TYPES: ClassVar[list[str]] = [
             "ADD",
             "MODIFY",
             "DELETE",

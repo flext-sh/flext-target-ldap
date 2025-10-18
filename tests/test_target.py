@@ -10,7 +10,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import FlextTypes
 
 from flext_target_ldap import GroupsSink, LDAPBaseSink, TargetLDAP, UsersSink
 
@@ -21,7 +20,7 @@ class TestTargetLDAPUnit:
     """Unit tests for TargetLDAP."""
 
     @pytest.fixture
-    def config(self) -> FlextTypes.Dict:
+    def config(self) -> dict[str, object]:
         """Create test configuration for LDAP target."""
         return {
             "host": "test.ldap.com",
@@ -33,7 +32,7 @@ class TestTargetLDAPUnit:
             "timeout": 30,
         }
 
-    def test_target_initialization(self, config: FlextTypes.Dict) -> None:
+    def test_target_initialization(self, config: dict[str, object]) -> None:
         """Test target LDAP initialization with name and config."""
         target = TargetLDAP(config=config)
         if target.name != "target-ldap":
@@ -41,7 +40,7 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
         assert target.config == config
 
-    def test_get_sink_class_users(self, config: FlextTypes.Dict) -> None:
+    def test_get_sink_class_users(self, config: dict[str, object]) -> None:
         """Test getting users sink class."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("users")
@@ -52,7 +51,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {UsersSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_class_groups(self, config: FlextTypes.Dict) -> None:
+    def test_get_sink_class_groups(self, config: dict[str, object]) -> None:
         """Test getting groups sink class."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("groups")
@@ -63,7 +62,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {GroupsSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_class_generic(self, config: FlextTypes.Dict) -> None:
+    def test_get_sink_class_generic(self, config: dict[str, object]) -> None:
         """Test getting generic sink class for unknown stream."""
         target = TargetLDAP(config=config)
         sink_class = target.get_sink_class("custom_stream")
@@ -74,7 +73,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {GenericSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_dn_template_processing(self, config: FlextTypes.Dict) -> None:
+    def test_dn_template_processing(self, config: dict[str, object]) -> None:
         """Test DN template configuration processing."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
 
@@ -85,7 +84,7 @@ class TestTargetLDAPUnit:
             target.config["users_dn_template"] == "uid={uid},ou=people,dc=test,dc=com"
         )
 
-    def test_object_classes_processing(self, config: FlextTypes.Dict) -> None:
+    def test_object_classes_processing(self, config: dict[str, object]) -> None:
         """Test default object classes configuration processing."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
 
@@ -100,7 +99,7 @@ class TestTargetLDAPUnit:
     def test_process_record(
         self,
         mock_client_class: MagicMock,
-        config: FlextTypes.Dict,
+        config: dict[str, object],
     ) -> None:
         """Test processing a record through the LDAP target."""
         # Mock LDAP client
@@ -137,7 +136,7 @@ class TestTargetLDAPUnit:
     def test_process_delete_record(
         self,
         mock_client_class: MagicMock,
-        config: FlextTypes.Dict,
+        config: dict[str, object],
     ) -> None:
         """Test processing a delete record through the LDAP target."""
         # Mock LDAP client

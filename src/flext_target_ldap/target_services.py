@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Protocol, override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdap
 
 from flext_target_ldap import target_client as target_client_module
@@ -87,7 +87,7 @@ class LdapConnectionService:
     @override
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize connection service."""
-        self._config: FlextTypes.Dict = config
+        self._config: dict[str, object] = config
         api = FlextLdap()
         self._ldap_api = api.client
 
@@ -142,7 +142,7 @@ class LdapTransformationService:
         from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
         self._utilities = FlextTargetLdapUtilities()
-        self._config: FlextTypes.Dict = config
+        self._config: dict[str, object] = config
 
     def transform_record(
         self,
@@ -415,13 +415,13 @@ class LdapTargetOrchestrator:
         self._utilities = FlextTargetLdapUtilities()
 
         if isinstance(config, dict):
-            self.config: FlextTypes.Dict = config
+            self.config: dict[str, object] = config
             self._typed_config: TargetLdapConfig | None = None
         elif isinstance(config, TargetLdapConfig):
-            self._typed_config: FlextTypes.Dict = config
-            self.config: FlextTypes.Dict = {}  # For backward compatibility
+            self._typed_config: dict[str, object] = config
+            self.config: dict[str, object] = {}  # For backward compatibility
         else:
-            self.config: FlextTypes.Dict = {}
+            self.config: dict[str, object] = {}
             self._typed_config = None
 
         # Initialize services
@@ -456,7 +456,7 @@ class LdapTargetOrchestrator:
             logger.info("Starting LDAP data loading orchestration")
 
             # Use provided config or stored config
-            working_config: FlextTypes.Dict = config or self._typed_config
+            working_config: dict[str, object] = config or self._typed_config
             if not working_config:
                 return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
                     "No configuration available for orchestration",
@@ -579,7 +579,7 @@ class LdapTargetOrchestrator:
         """Validate LDAP target configuration."""
         try:
             # Use provided config or stored config
-            working_config: FlextTypes.Dict = config or self._typed_config
+            working_config: dict[str, object] = config or self._typed_config
             if not working_config:
                 return FlextResult[bool].fail(
                     "No configuration available for validation",
@@ -672,7 +672,7 @@ class LdapTargetApiService:
             if not isinstance(target, target_client_module.TargetLdap):
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 
-            sink: FlextTypes.Dict = target.get_sink_class("users")(
+            sink: dict[str, object] = target.get_sink_class("users")(
                 target, "users", {}, ["username"]
             )
 
@@ -706,7 +706,7 @@ class LdapTargetApiService:
             if not isinstance(target, target_client_module.TargetLdap):
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 
-            sink: FlextTypes.Dict = target.get_sink_class("groups")(
+            sink: dict[str, object] = target.get_sink_class("groups")(
                 target, "groups", {}, ["name"]
             )
 
@@ -727,7 +727,7 @@ class LdapTargetApiService:
         """Test LDAP connection with given configuration."""
         try:
             # Create LDAP connection config
-            config_result: FlextTypes.Dict = validate_ldap_target_config(config)
+            config_result: dict[str, object] = validate_ldap_target_config(config)
             if not config_result.is_success:
                 return FlextResult[bool].fail(
                     f"Configuration validation failed: {config_result.error}",

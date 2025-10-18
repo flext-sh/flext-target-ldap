@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
@@ -23,7 +23,7 @@ class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
     # Type annotations for pyrefly
-    config: FlextTypes.Dict
+    config: dict[str, object]
 
     @override
     def __init__(self, config: FlextTargetLdapTypes.Core.Dict | None = None) -> None:
@@ -36,7 +36,7 @@ class LDAPTargetOrchestrator:
             object: Description of return value.
 
         """
-        self.config: FlextTypes.Dict = config or {}
+        self.config: dict[str, object] = config or {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(

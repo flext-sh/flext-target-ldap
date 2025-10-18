@@ -16,6 +16,6 @@ operations, following flext-core architectural patterns and principles.
 
 
 __all__: FlextTargetLdapTypes.Core.StringList = [
-    "FlextTypes.Dict",
     "LDAPTargetOrchestrator",
+    "dict[str, object]",
 ]

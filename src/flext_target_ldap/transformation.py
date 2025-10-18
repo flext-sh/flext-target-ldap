@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextModels, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextModels, FlextResult
 from pydantic import Field
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
@@ -73,7 +73,7 @@ class DataTransformationEngine:
     ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: FlextTypes.Dict = data.copy()
+            transformed_data: dict[str, object] = data.copy()
             applied_rules: FlextTargetLdapTypes.Core.StringList = []
 
             for rule in self.rules:

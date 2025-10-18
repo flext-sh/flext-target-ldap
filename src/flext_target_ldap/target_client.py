@@ -16,7 +16,6 @@ from flext_core import (
     FlextContainer,
     FlextLogger,
     FlextResult,
-    FlextTypes,
 )
 from flext_ldap import FlextLdap, FlextLdapClients, FlextLdapModels
 
@@ -229,7 +228,7 @@ class LdapTargetClient:
                 def add(
                     self,
                     _dn: str,
-                    _object_classes: FlextTypes.StringList,
+                    _object_classes: list[str],
                     _attributes: dict,
                 ) -> bool:
                     # Delegate to flext-ldap API
@@ -381,7 +380,7 @@ class LdapTargetClient:
         self,
         dn: str,
         attributes: FlextTargetLdapTypes.Core.Dict,
-        object_classes: FlextTypes.StringList | None = None,
+        object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
@@ -418,14 +417,14 @@ class LdapTargetClient:
 
             try:
                 # Use create_group when objectClass indicates group, else create_user
-                is_group: FlextTypes.List = "groupOfNames" in ldap_attributes.get(
+                is_group: list[object] = "groupOfNames" in ldap_attributes.get(
                     "objectClass", []
                 )
                 if is_group:
                     # Minimal group creation via API
-                    cn_values: FlextTypes.List = ldap_attributes.get("cn", [])
+                    cn_values: list[object] = ldap_attributes.get("cn", [])
                     cn = str(cn_values[0]) if cn_values else "group"
-                    members: FlextTypes.List = [
+                    members: list[object] = [
                         str(m) for m in ldap_attributes.get("member", [])
                     ]
                     result = self._api.create_group(
@@ -506,7 +505,7 @@ class LdapTargetClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: FlextTypes.StringList | None = None,
+        attributes: list[str] | None = None,
     ) -> FlextResult[list[LdapSearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
@@ -638,7 +637,7 @@ class LdapTargetClient:
     def get_entry(
         self,
         dn: str,
-        attributes: FlextTypes.StringList | None = None,
+        attributes: list[str] | None = None,
     ) -> FlextResult[LdapSearchEntry | None]:
         """Get LDAP entry using flext-ldap API."""
         try:
@@ -668,7 +667,7 @@ class LdapBaseSink(Sink):
         target: Target,
         stream_name: str,
         schema: FlextTargetLdapTypes.Core.Dict,
-        key_properties: FlextTypes.StringList,
+        key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
@@ -731,11 +730,9 @@ class LdapBaseSink(Sink):
             return
 
         try:
-            records_raw: FlextTypes.List = context.get("records", [])
+            records_raw: list[object] = context.get("records", [])
 
-            records: FlextTypes.List = (
-                records_raw if isinstance(records_raw, list) else []
-            )
+            records: list[object] = records_raw if isinstance(records_raw, list) else []
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -756,8 +753,8 @@ class LdapBaseSink(Sink):
 
     def process_record(
         self,
-        record: FlextTypes.Dict,
-        _context: FlextTypes.Dict,
+        record: dict[str, object],
+        _context: dict[str, object],
     ) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
@@ -784,8 +781,8 @@ class LdapUsersSink(LdapBaseSink):
 
     def process_record(
         self,
-        record: FlextTypes.Dict,
-        _context: FlextTypes.Dict,
+        record: dict[str, object],
+        _context: dict[str, object],
     ) -> None:
         """Process a user record."""
         if not self.client:

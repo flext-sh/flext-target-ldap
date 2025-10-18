@@ -58,7 +58,6 @@ __all__ = [
     "FlextTargetLdapProtocols",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
-    "FlextTypes.Dict",
     "GroupsSink",
     "LDAPBaseSink",
     "LDAPClient",
@@ -76,4 +75,5 @@ __all__ = [
     "UsersSink",
     "__version__",
     "__version_info__",
+    "dict[str, object]",
 ]
