@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from flext_core import FlextTypes
 
 from flext_target_ldap import LDAPClient
 
@@ -43,7 +42,7 @@ def shared_ldap_container(flext_docker: FlextTestDocker) -> Generator[str]:
 
 
 @pytest.fixture
-def mock_ldap_config() -> FlextTypes.Dict:
+def mock_ldap_config() -> dict[str, object]:
     """Create mock LDAP configuration for testing."""
     return {
         "host": "test.ldap.com",
@@ -68,7 +67,7 @@ def mock_ldap_config() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def sample_user_record() -> FlextTypes.Dict:
+def sample_user_record() -> dict[str, object]:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -82,7 +81,7 @@ def sample_user_record() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def sample_group_record() -> FlextTypes.Dict:
+def sample_group_record() -> dict[str, object]:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -97,7 +96,7 @@ def sample_group_record() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def sample_ou_record() -> FlextTypes.Dict:
+def sample_ou_record() -> dict[str, object]:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "ou=engineering,dc=test,dc=com",
@@ -108,7 +107,7 @@ def sample_ou_record() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record: FlextTypes.Dict) -> str:
+def singer_message_record(sample_user_record: dict[str, object]) -> str:
     """Create mock LDAP configuration for testing."""
     message = {
         "type": "RECORD",
@@ -171,7 +170,7 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: FlextTypes.Dict) -> MagicMock:
+def mock_target(mock_ldap_config: dict[str, object]) -> MagicMock:
     """Create mock LDAP configuration for testing."""
     target = MagicMock()
     target.config = mock_ldap_config

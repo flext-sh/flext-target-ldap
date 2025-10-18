@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from flext_core import FlextConfig, FlextConstants, FlextModels, FlextResult, FlextTypes
+from flext_core import FlextConfig, FlextConstants, FlextModels, FlextResult
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
@@ -105,7 +105,7 @@ class FlextTargetLdapConfig(FlextConfig):
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: FlextTypes.Dict = {
+        dev_overrides: dict[str, object] = {
             "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
             "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT + 15,
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 20,
@@ -120,7 +120,7 @@ class FlextTargetLdapConfig(FlextConfig):
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: FlextTypes.Dict = {
+        prod_overrides: dict[str, object] = {
             "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 3,
             "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
@@ -136,7 +136,7 @@ class FlextTargetLdapConfig(FlextConfig):
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: FlextTypes.Dict = {
+        test_overrides: dict[str, object] = {
             "connect_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 6,
             "receive_timeout": FlextConstants.Network.DEFAULT_TIMEOUT // 2,
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE

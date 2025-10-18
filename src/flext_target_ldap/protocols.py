@@ -2,7 +2,7 @@
 
 from typing import Protocol, runtime_checkable
 
-from flext_core import FlextProtocols, FlextResult, FlextTypes
+from flext_core import FlextProtocols, FlextResult
 
 
 class FlextTargetLdapProtocols:
@@ -29,7 +29,7 @@ class FlextTargetLdapProtocols:
         class TargetProtocol(FlextProtocols.Service, Protocol):
             """Protocol for LDAP target operations."""
 
-            def process_record(self, record: FlextTypes.Dict) -> FlextResult[None]:
+            def process_record(self, record: dict[str, object]) -> FlextResult[None]:
                 """Process a single record."""
                 ...
 
@@ -38,8 +38,8 @@ class FlextTargetLdapProtocols:
             """Protocol for Singer to LDAP transformation."""
 
             def transform_to_ldap(
-                self, record: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Dict]:
+                self, record: dict[str, object]
+            ) -> FlextResult[dict[str, object]]:
                 """Transform record to LDAP format."""
                 ...
 
@@ -48,7 +48,7 @@ class FlextTargetLdapProtocols:
             """Protocol for LDAP loading orchestration."""
 
             def orchestrate_load(
-                self, records: list[FlextTypes.Dict]
+                self, records: list[dict[str, object]]
             ) -> FlextResult[None]:
                 """Orchestrate loading of records."""
                 ...
@@ -57,7 +57,7 @@ class FlextTargetLdapProtocols:
         class ConnectionProtocol(FlextProtocols.Service, Protocol):
             """Protocol for LDAP connection management."""
 
-            def connect(self, config: FlextTypes.Dict) -> FlextResult[object]:
+            def connect(self, config: dict[str, object]) -> FlextResult[object]:
                 """Connect to LDAP server."""
                 ...
 
@@ -66,7 +66,7 @@ class FlextTargetLdapProtocols:
             """Protocol for Singer message handling."""
 
             def process_singer_message(
-                self, message: FlextTypes.Dict
+                self, message: dict[str, object]
             ) -> FlextResult[None]: ...
 
         @runtime_checkable
@@ -80,7 +80,7 @@ class FlextTargetLdapProtocols:
             """Protocol for LDAP security operations."""
 
             def validate_credentials(
-                self, config: FlextTypes.Dict
+                self, config: dict[str, object]
             ) -> FlextResult[bool]: ...
 
         @runtime_checkable

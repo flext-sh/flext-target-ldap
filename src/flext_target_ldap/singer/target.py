@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
@@ -34,7 +34,7 @@ class SingerTargetLDAP:
             object: Description of return value.
 
         """
-        self.config: FlextTypes.Dict = config or {}
+        self.config: dict[str, object] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
