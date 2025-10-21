@@ -138,7 +138,7 @@ class LdapTransformationService:
     @override
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize transformation service."""
-        # ZERO TOLERANCE FIX: Use FlextTargetLdapUtilities for ALL business logic
+        # Zero Tolerance FIX: Use FlextTargetLdapUtilities for ALL business logic
         from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
         self._utilities = FlextTargetLdapUtilities()
@@ -157,7 +157,7 @@ class LdapTransformationService:
             transformation_errors: FlextTargetLdapTypes.Core.StringList = []
             applied_mappings: list[LdapAttributeMappingModel] = []
 
-            # ZERO TOLERANCE FIX: Use utilities for DN building
+            # Zero Tolerance FIX: Use utilities for DN building
             dn_template = self._determine_dn_template(object_classes)
             dn_result = self._utilities.LdapDataProcessing.build_ldap_dn(
                 record=record, dn_template=dn_template, base_dn=base_dn
@@ -170,7 +170,7 @@ class LdapTransformationService:
             else:
                 dn = dn_result.value
 
-            # ZERO TOLERANCE FIX: Use utilities for LDAP attribute conversion
+            # Zero Tolerance FIX: Use utilities for LDAP attribute conversion
             attribute_mapping_dict = {
                 mapping.singer_field_name: mapping.ldap_attribute_name
                 for mapping in mappings
@@ -235,7 +235,7 @@ class LdapTransformationService:
                         f"Error transforming '{mapping.singer_field_name}': {e}",
                     )
 
-            # ZERO TOLERANCE FIX: Use utilities for object class extraction
+            # Zero Tolerance FIX: Use utilities for object class extraction
             final_object_classes = (
                 self._utilities.LdapDataProcessing.extract_object_classes(
                     record=record, default_object_classes=object_classes
@@ -409,7 +409,7 @@ class LdapTargetOrchestrator:
         config: FlextTargetLdapTypes.Core.Dict | TargetLdapConfig | None = None,
     ) -> None:
         """Initialize LDAP target orchestrator."""
-        # ZERO TOLERANCE FIX: Use FlextTargetLdapUtilities for ALL business logic
+        # Zero Tolerance FIX: Use FlextTargetLdapUtilities for ALL business logic
         from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
         self._utilities = FlextTargetLdapUtilities()
@@ -462,7 +462,7 @@ class LdapTargetOrchestrator:
                     "No configuration available for orchestration",
                 )
 
-            # ZERO TOLERANCE FIX: Use utilities for stream compatibility validation
+            # Zero Tolerance FIX: Use utilities for stream compatibility validation
             if (
                 hasattr(working_config, "object_classes")
                 and working_config.object_classes
@@ -487,7 +487,7 @@ class LdapTargetOrchestrator:
                         compatibility_result.error,
                     )
 
-            # ZERO TOLERANCE FIX: Use utilities for batch size calculation
+            # Zero Tolerance FIX: Use utilities for batch size calculation
             optimal_batch_size = (
                 self._utilities.StreamUtilities.calculate_ldap_batch_size(
                     record_count=len(records), target_batches=10
@@ -539,7 +539,7 @@ class LdapTargetOrchestrator:
                         logger.exception(error_msg)
                         transformation_errors.append(error_msg)
 
-            # ZERO TOLERANCE FIX: Use utilities for stream metadata generation
+            # Zero Tolerance FIX: Use utilities for stream metadata generation
             processing_time = 1.0  # Would be calculated in real implementation
             stream_metadata = (
                 self._utilities.StreamUtilities.generate_ldap_stream_metadata(
@@ -585,7 +585,7 @@ class LdapTargetOrchestrator:
                     "No configuration available for validation",
                 )
 
-            # ZERO TOLERANCE FIX: Use utilities for configuration validation
+            # Zero Tolerance FIX: Use utilities for configuration validation
             config_dict = {
                 "host": getattr(working_config, "host", ""),
                 "bind_dn": getattr(working_config, "bind_dn", ""),

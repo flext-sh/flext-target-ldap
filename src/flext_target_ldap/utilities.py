@@ -41,10 +41,10 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Parse Singer message from input line.
 
             Args:
-                line: JSON line from Singer tap
+            line: JSON line from Singer tap
 
             Returns:
-                FlextResult[dict[str, object]]: Parsed message or error
+            FlextResult[dict[str, object]]: Parsed message or error
 
             """
             if not line or not line.strip():
@@ -74,10 +74,10 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Validate Singer RECORD message structure.
 
             Args:
-                message: Singer message to validate
+            message: Singer message to validate
 
             Returns:
-                FlextResult[dict[str, object]]: Validated record or error
+            FlextResult[dict[str, object]]: Validated record or error
 
             """
             if message.get("type") != "RECORD":
@@ -107,10 +107,10 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Validate Singer SCHEMA message structure.
 
             Args:
-                message: Singer message to validate
+            message: Singer message to validate
 
             Returns:
-                FlextResult[dict[str, object]]: Validated schema or error
+            FlextResult[dict[str, object]]: Validated schema or error
 
             """
             if message.get("type") != "SCHEMA":
@@ -138,7 +138,7 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Write Singer state message to stdout.
 
             Args:
-                state: State data to write
+            state: State data to write
 
             """
 
@@ -154,12 +154,12 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Build LDAP Distinguished Name from record data.
 
             Args:
-                record: Record data
-                dn_template: DN template with placeholders
-                base_dn: Base DN for the directory
+            record: Record data
+            dn_template: DN template with placeholders
+            base_dn: Base DN for the directory
 
             Returns:
-                FlextResult[str]: Built DN or error
+            FlextResult[str]: Built DN or error
 
             """
             if not record or not dn_template or not base_dn:
@@ -204,10 +204,10 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Validate LDAP Distinguished Name format.
 
             Args:
-                dn: Distinguished Name to validate
+            dn: Distinguished Name to validate
 
             Returns:
-                bool: True if valid, False otherwise
+            bool: True if valid, False otherwise
 
             """
             if not dn:
@@ -228,11 +228,11 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Convert Singer record to LDAP attributes format.
 
             Args:
-                record: Singer record data
-                attribute_mapping: Optional mapping from record keys to LDAP attributes
+            record: Singer record data
+            attribute_mapping: Optional mapping from record keys to LDAP attributes
 
             Returns:
-                FlextResult[dict[str, list[bytes]]]: LDAP attributes or error
+            FlextResult[dict[str, list[bytes]]]: LDAP attributes or error
 
             """
             if not record:
@@ -277,10 +277,10 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Sanitize value for LDAP attribute insertion.
 
             Args:
-                value: Value to sanitize
+            value: Value to sanitize
 
             Returns:
-                str: Sanitized value
+            str: Sanitized value
 
             """
             if not value:
@@ -310,11 +310,11 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Extract object classes for LDAP entry.
 
             Args:
-                record: Singer record data
-                default_object_classes: Default object classes if not in record
+            record: Singer record data
+            default_object_classes: Default object classes if not in record
 
             Returns:
-                list[str]: List of object classes
+            list[str]: List of object classes
 
             """
             # Check for object classes in record
@@ -343,11 +343,11 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Calculate optimal batch size for LDAP operations.
 
             Args:
-                record_count: Total number of records
-                target_batches: Target number of batches
+            record_count: Total number of records
+            target_batches: Target number of batches
 
             Returns:
-                int: Optimal batch size
+            int: Optimal batch size
 
             """
             if record_count <= 0:
@@ -364,11 +364,11 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Validate stream compatibility with LDAP operations.
 
             Args:
-                stream_name: Name of the stream
-                schema: Stream schema
+            stream_name: Name of the stream
+            schema: Stream schema
 
             Returns:
-                FlextResult[bool]: Validation result
+            FlextResult[bool]: Validation result
 
             """
             if not stream_name or not schema:
@@ -401,12 +401,12 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Generate metadata for LDAP stream processing.
 
             Args:
-                stream_name: Name of the stream
-                record_count: Number of records processed
-                processing_time: Time taken for processing
+            stream_name: Name of the stream
+            record_count: Number of records processed
+            processing_time: Time taken for processing
 
             Returns:
-                dict[str, object]: Stream metadata
+            dict[str, object]: Stream metadata
 
             """
             return {
@@ -428,10 +428,10 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Validate LDAP connection configuration.
 
             Args:
-                config: Configuration dictionary
+            config: Configuration dictionary
 
             Returns:
-                FlextResult[dict[str, object]]: Validated config or error
+            FlextResult[dict[str, object]]: Validated config or error
 
             """
             required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
@@ -496,10 +496,10 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Validate target configuration.
 
             Args:
-                config: Target configuration
+            config: Target configuration
 
             Returns:
-                FlextResult[dict[str, object]]: Validated config or error
+            FlextResult[dict[str, object]]: Validated config or error
 
             """
             # Validate LDAP connection
@@ -546,11 +546,11 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Get state for a specific target stream.
 
             Args:
-                state: Complete state dictionary
-                stream_name: Name of the stream
+            state: Complete state dictionary
+            stream_name: Name of the stream
 
             Returns:
-                dict[str, object]: Stream state
+            dict[str, object]: Stream state
 
             """
             return state.get("bookmarks", {}).get(stream_name, {})
@@ -564,12 +564,12 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Set state for a specific target stream.
 
             Args:
-                state: Complete state dictionary
-                stream_name: Name of the stream
-                stream_state: State data for the stream
+            state: Complete state dictionary
+            stream_name: Name of the stream
+            stream_state: State data for the stream
 
             Returns:
-                dict[str, object]: Updated state
+            dict[str, object]: Updated state
 
             """
             if "bookmarks" not in state:
@@ -587,12 +587,12 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Create processing state for target stream.
 
             Args:
-                stream_name: Name of the stream
-                records_processed: Number of records processed
-                last_processed_record: Last processed record for checkpointing
+            stream_name: Name of the stream
+            records_processed: Number of records processed
+            last_processed_record: Last processed record for checkpointing
 
             Returns:
-                dict[str, object]: Processing state
+            dict[str, object]: Processing state
 
             """
             state = {
@@ -624,12 +624,12 @@ class FlextTargetLdapUtilities(FlextUtilities):
             """Update processing progress in state.
 
             Args:
-                state: Current state
-                stream_name: Name of the stream
-                records_count: Number of records processed in this batch
+            state: Current state
+            stream_name: Name of the stream
+            records_count: Number of records processed in this batch
 
             Returns:
-                dict[str, object]: Updated state
+            dict[str, object]: Updated state
 
             """
             stream_state = FlextTargetLdapUtilities.StateManagement.get_target_state(

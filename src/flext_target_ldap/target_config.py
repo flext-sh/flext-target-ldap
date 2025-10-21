@@ -3,9 +3,9 @@
 This module consolidates all LDAP target configuration classes with descriptive PEP8 names,
 removing duplication and using proper flext-core + flext-ldap integration.
 
-**Architecture**: Clean Architecture configuration layer
-**Patterns**: "FlextConfig", FlextModels, FlextResult validation
-**Integration**: Complete flext-ldap connection config reuse
+Architecture: Clean Architecture configuration layer
+Patterns: "FlextConfig", FlextModels, FlextResult validation
+Integration: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -23,7 +23,7 @@ from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
 class LdapTargetConnectionSettings(FlextConfig):
-    """LDAP connection settings domain model with business validation."""
+ """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
     port: int = Field(389, description="LDAP server port", ge=1, le=65535)

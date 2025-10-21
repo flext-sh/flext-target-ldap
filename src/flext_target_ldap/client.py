@@ -2,7 +2,7 @@
 
 This module provides a backward-compatible LDAP client interface that delegates
 all LDAP operations to the flext-ldap library, removing code duplication and
-leveraging enterprise-grade LDAP functionality.
+leveraging LDAP functionality.
 
 Copyright (c) 2025 Flext. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -76,10 +76,10 @@ class LDAPClient:
     """Backward-compatible LDAP client using flext-ldap API for all operations.
 
     This class provides compatibility with existing flext-target-ldap code while
-    delegating all LDAP operations to the enterprise-grade flext-ldap library.
+    delegating all LDAP operations to the flext-ldap library.
 
     Returns:
-            object: Description of return value.
+    object: Description of return value.
 
     """
 
@@ -169,7 +169,7 @@ class LDAPClient:
         This method is synchronous to match legacy tests.
 
         Returns:
-            FlextResult[str]:: Description of return value.
+        FlextResult[str]:: Description of return value.
 
         """
         try:
@@ -232,7 +232,7 @@ class LDAPClient:
         Returns a real LDAP connection for production use.
 
         Returns:
-            _GeneratorContextManager[LDAPConnectionProtocol]: LDAP connection context manager.
+        _GeneratorContextManager[LDAPConnectionProtocol]: LDAP connection context manager.
 
         """
 
