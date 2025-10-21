@@ -30,10 +30,10 @@ class LDAPTargetOrchestrator:
         """Initialize LDAP target orchestrator.
 
         Args:
-            config: Configuration dictionary
+        config: Configuration dictionary
 
         Returns:
-            object: Description of return value.
+        object: Description of return value.
 
         """
         self.config: dict[str, object] = config or {}
@@ -46,10 +46,10 @@ class LDAPTargetOrchestrator:
         """Orchestrate data loading to LDAP target.
 
         Args:
-            records: Records to load to LDAP
+        records: Records to load to LDAP
 
         Returns:
-            FlextResult with loading status
+        FlextResult with loading status
 
         """
         try:
@@ -79,7 +79,7 @@ class LDAPTargetOrchestrator:
         """Validate LDAP target configuration.
 
         Returns:
-            FlextResult indicating validation success
+        FlextResult indicating validation success
 
         """
         try:

@@ -10,7 +10,7 @@ from __future__ import annotations
 from flext_core import FlextExceptions
 
 
-# ✅ DIRECT EXCEPTION CLASSES: Use direct inheritance instead of factory pattern
+# DIRECT EXCEPTION CLASSES: Use direct inheritance instead of factory pattern
 class FlextTargetLdapError(FlextExceptions.Error):
     """Generic LDAP target errors."""
 

@@ -28,10 +28,10 @@ class SingerTargetLDAP:
         """Initialize Singer LDAP target.
 
         Args:
-            config: Configuration dictionary
+        config: Configuration dictionary
 
         Returns:
-            object: Description of return value.
+        object: Description of return value.
 
         """
         self.config: dict[str, object] = config or {}
@@ -44,10 +44,10 @@ class SingerTargetLDAP:
         """Process Singer messages for LDAP target.
 
         Args:
-            messages: Singer messages to process
+        messages: Singer messages to process
 
         Returns:
-            FlextResult with processing status
+        FlextResult with processing status
 
         """
         try:
@@ -80,7 +80,7 @@ class SingerTargetLDAP:
         """Validate Singer LDAP target configuration.
 
         Returns:
-            FlextResult indicating validation success
+        FlextResult indicating validation success
 
         """
         try:

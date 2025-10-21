@@ -425,7 +425,7 @@ class FlextTargetLdapModels(FlextModels):
     class OperationStatistics(FlextModels.Entity):
         """LDAP operation statistics and performance metrics.
 
-        Comprehensive tracking of LDAP target operations for performance
+        Complete tracking of LDAP target operations for performance
         monitoring, reporting, and optimization analysis.
         """
 

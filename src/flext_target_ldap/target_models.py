@@ -401,7 +401,7 @@ class LdapBatchProcessingModel(FlextModels.Entity):
 class LdapOperationStatisticsModel(FlextModels.Entity):
     """Statistics tracking for LDAP target operations.
 
-    Comprehensive metrics and performance data for LDAP operations,
+    Complete metrics and performance data for LDAP operations,
     including timing, success rates, and error tracking.
     """
 

@@ -73,7 +73,7 @@ class LdapTargetClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
 
     This client provides backward compatibility while delegating all LDAP operations
-    to the enterprise-grade flext-ldap library, eliminating code duplication.
+    to the flext-ldap library, eliminating code duplication.
     """
 
     @override
@@ -193,7 +193,7 @@ class LdapTargetClient:
         Returns a real LDAP connection wrapper compatible with the existing interface.
 
         Returns:
-            _GeneratorContextManager[object]: LDAP connection context manager.
+        _GeneratorContextManager[object]: LDAP connection context manager.
 
         """
 
@@ -1096,7 +1096,7 @@ class TargetLdap(Target):
     """Enterprise LDAP target implementation using flext-core patterns.
 
     This target provides complete Singer protocol implementation with
-    enterprise-grade LDAP operations via flext-ldap integration.
+    LDAP operations via flext-ldap integration.
     """
 
     name = "target-ldap"
