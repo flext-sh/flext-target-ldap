@@ -23,7 +23,7 @@ from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
 class LdapTargetConnectionSettings(FlextConfig):
- """LDAP connection settings domain model with business validation."""
+    """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
     port: int = Field(389, description="LDAP server port", ge=1, le=65535)
