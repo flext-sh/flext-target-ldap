@@ -189,7 +189,7 @@ class FlextTargetLdapUtilities(FlextUtilities):
                 full_dn = f"{dn_rdn},{base_dn}"
 
                 # Validate DN format
-                if not FlextTargetLdapUtilities.LdapDataProcessing.validate_dn_format(
+                if not FlextTargetLdapUtilities.LdapDataProcessing.FlextLdifUtilities.DN.split(
                     full_dn
                 ):
                     return FlextResult[str].fail(f"Invalid DN format: {full_dn}")
@@ -200,7 +200,7 @@ class FlextTargetLdapUtilities(FlextUtilities):
                 return FlextResult[str].fail(f"Error building DN: {e}")
 
         @staticmethod
-        def validate_dn_format(dn: str) -> bool:
+        def FlextLdifUtilities.DN.split(dn: str) -> bool:
             """Validate LDAP Distinguished Name format.
 
             Args:
@@ -451,7 +451,7 @@ class FlextTargetLdapUtilities(FlextUtilities):
 
             # Validate bind DN format
             bind_dn = config["bind_dn"]
-            if not FlextTargetLdapUtilities.LdapDataProcessing.validate_dn_format(
+            if not FlextTargetLdapUtilities.LdapDataProcessing.FlextLdifUtilities.DN.split(
                 bind_dn
             ):
                 return FlextResult[dict[str, object]].fail(
@@ -460,7 +460,7 @@ class FlextTargetLdapUtilities(FlextUtilities):
 
             # Validate base DN format
             base_dn = config["base_dn"]
-            if not FlextTargetLdapUtilities.LdapDataProcessing.validate_dn_format(
+            if not FlextTargetLdapUtilities.LdapDataProcessing.FlextLdifUtilities.DN.split(
                 base_dn
             ):
                 return FlextResult[dict[str, object]].fail(
