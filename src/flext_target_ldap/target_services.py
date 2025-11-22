@@ -24,6 +24,7 @@ from flext_target_ldap.target_models import (
     LdapTransformationResultModel,
 )
 from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
 logger = FlextLogger(__name__)
 
@@ -139,8 +140,6 @@ class LdapTransformationService:
     def __init__(self, config: TargetLdapConfig) -> None:
         """Initialize transformation service."""
         # Zero Tolerance FIX: Use FlextTargetLdapUtilities for ALL business logic
-        from flext_target_ldap.utilities import FlextTargetLdapUtilities
-
         self._utilities = FlextTargetLdapUtilities()
         self._config: dict[str, object] = config
 
@@ -410,8 +409,6 @@ class LdapTargetOrchestrator:
     ) -> None:
         """Initialize LDAP target orchestrator."""
         # Zero Tolerance FIX: Use FlextTargetLdapUtilities for ALL business logic
-        from flext_target_ldap.utilities import FlextTargetLdapUtilities
-
         self._utilities = FlextTargetLdapUtilities()
 
         if isinstance(config, dict):
