@@ -722,7 +722,7 @@ class LdapBaseSink(Sink):
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
-    def process_batch(self, context: FlextTargetLdapTypes.Core.Dict) -> None:
+    def process_batch(self, _context: FlextTargetLdapTypes.Core.Dict) -> None:
         """Process a batch of records."""
         setup_result: FlextResult[object] = self.setup_client()
         if not setup_result.is_success:
