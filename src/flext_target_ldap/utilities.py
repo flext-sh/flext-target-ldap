@@ -12,17 +12,17 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextResult, FlextUtilities
+from flext_core import FlextResult, u
 
 from flext_target_ldap.constants import FlextTargetLdapConstants
 
 
-class FlextTargetLdapUtilities(FlextUtilities):
+class FlextTargetLdapUtilities(u):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for
     domain-specific Singer target functionality with LDAP directory operations.
-    Extends FlextUtilities with LDAP target-specific operations.
+    Extends urget-specific operations.
     """
 
     LDAP_DEFAULT_PORT: ClassVar[int] = 389
