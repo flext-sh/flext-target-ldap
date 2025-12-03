@@ -2,11 +2,11 @@
 
 from typing import Protocol, runtime_checkable
 
-from flext_core import FlextProtocols, FlextResult
+from flext_core import FlextResult, p
 
 
 class FlextTargetLdapProtocols:
-    """Singer Target LDAP protocols with explicit re-exports from FlextProtocols foundation.
+    """Singer Target LDAP protocols with explicit re-exports from p foundation.
 
     Domain Extension Pattern (Phase 3):
     - Explicit re-export of foundation protocols (not inheritance)
@@ -26,7 +26,7 @@ class FlextTargetLdapProtocols:
         """Singer Target LDAP domain protocols for LDAP directory loading."""
 
         @runtime_checkable
-        class TargetProtocol(FlextProtocols.Service, Protocol):
+        class TargetProtocol(p.Service, Protocol):
             """Protocol for LDAP target operations."""
 
             def process_record(self, record: dict[str, object]) -> FlextResult[None]:
@@ -34,7 +34,7 @@ class FlextTargetLdapProtocols:
                 ...
 
         @runtime_checkable
-        class TransformationProtocol(FlextProtocols.Service, Protocol):
+        class TransformationProtocol(p.Service, Protocol):
             """Protocol for Singer to LDAP transformation."""
 
             def transform_to_ldap(
@@ -44,7 +44,7 @@ class FlextTargetLdapProtocols:
                 ...
 
         @runtime_checkable
-        class OrchestrationProtocol(FlextProtocols.Service, Protocol):
+        class OrchestrationProtocol(p.Service, Protocol):
             """Protocol for LDAP loading orchestration."""
 
             def orchestrate_load(
@@ -54,7 +54,7 @@ class FlextTargetLdapProtocols:
                 ...
 
         @runtime_checkable
-        class ConnectionProtocol(FlextProtocols.Service, Protocol):
+        class ConnectionProtocol(p.Service, Protocol):
             """Protocol for LDAP connection management."""
 
             def connect(self, config: dict[str, object]) -> FlextResult[object]:
@@ -62,7 +62,7 @@ class FlextTargetLdapProtocols:
                 ...
 
         @runtime_checkable
-        class SingerProtocol(FlextProtocols.Service, Protocol):
+        class SingerProtocol(p.Service, Protocol):
             """Protocol for Singer message handling."""
 
             def process_singer_message(
@@ -70,13 +70,13 @@ class FlextTargetLdapProtocols:
             ) -> FlextResult[None]: ...
 
         @runtime_checkable
-        class PerformanceProtocol(FlextProtocols.Service, Protocol):
+        class PerformanceProtocol(p.Service, Protocol):
             """Protocol for LDAP loading performance."""
 
             def optimize_batch(self, batch_size: int) -> FlextResult[int]: ...
 
         @runtime_checkable
-        class SecurityProtocol(FlextProtocols.Service, Protocol):
+        class SecurityProtocol(p.Service, Protocol):
             """Protocol for LDAP security operations."""
 
             def validate_credentials(
@@ -84,7 +84,7 @@ class FlextTargetLdapProtocols:
             ) -> FlextResult[bool]: ...
 
         @runtime_checkable
-        class MonitoringProtocol(FlextProtocols.Service, Protocol):
+        class MonitoringProtocol(p.Service, Protocol):
             """Protocol for LDAP loading monitoring."""
 
             def track_load_progress(self, records: int) -> FlextResult[None]: ...
