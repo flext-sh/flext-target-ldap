@@ -201,85 +201,91 @@ class LDAPOperationSettings(FlextModels):
     )
 
 
+def _to_int(value: object, default: int) -> int:
+    """Convert value to int."""
+    if isinstance(value, bool):
+        return default
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except ValueError:
+            return default
+    return default
+
+
+def _to_bool(value: object, *, default: bool) -> bool:
+    """Convert value to bool."""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return value != 0
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return default
+
+
+def _to_str(value: object, default: str = "") -> str:
+    """Convert value to string."""
+    return str(value) if value is not None else default
+
+
+def _build_connection_config(
+    config: FlextTargetLdapTypes.Core.Dict,
+) -> FlextLdapModels.ConnectionConfig:
+    """Build connection configuration from config dict."""
+    server = _to_str(config.get("host", "localhost"), "localhost")
+    port = _to_int(
+        config.get("port", FlextConstants.Platform.LDAP_DEFAULT_PORT),
+        FlextConstants.Platform.LDAP_DEFAULT_PORT,
+    )
+    use_ssl = _to_bool(config.get("use_ssl", False), default=False)
+    bind_dn = _to_str(config.get("bind_dn", ""), "")
+    bind_password = _to_str(config.get("password", ""), "")
+    timeout = _to_int(
+        config.get("timeout", FlextConstants.Network.DEFAULT_TIMEOUT),
+        FlextConstants.Network.DEFAULT_TIMEOUT,
+    )
+
+    return FlextLdapModels.ConnectionConfig(
+        server=server,
+        port=port,
+        use_ssl=use_ssl,
+        bind_dn=bind_dn,
+        bind_password=bind_password,
+        timeout=timeout,
+    )
+
+
+def _extract_attribute_mapping(
+    config: FlextTargetLdapTypes.Core.Dict,
+) -> FlextTargetLdapTypes.Core.Headers:
+    """Extract attribute mapping from config."""
+    raw_attr_map = config.get("attribute_mapping")
+    if isinstance(raw_attr_map, dict):
+        return {str(k): str(v) for k, v in raw_attr_map.items()}
+    return {}
+
+
+def _extract_object_classes(
+    config: FlextTargetLdapTypes.Core.Dict,
+) -> FlextTargetLdapTypes.Core.StringList:
+    """Extract object classes from config."""
+    raw_object_classes = config.get("object_classes")
+    if isinstance(raw_object_classes, list):
+        return [str(v) for v in raw_object_classes]
+    return ["top"]
+
+
 def validate_ldap_config(
     config: FlextTargetLdapTypes.Core.Dict,
 ) -> FlextResult[FlextTargetLdapConfig]:
     """Validate LDAP configuration."""
     try:
-
-        def _to_int(value: object, default: int) -> int:
-            if isinstance(value, bool):
-                return default
-            if isinstance(value, int):
-                return value
-            if isinstance(value, str):
-                try:
-                    return int(value)
-                except ValueError:
-                    return default
-            return default
-
-        def _to_bool(value: object, *, default: bool) -> bool:
-            if isinstance(value, bool):
-                return value
-            if isinstance(value, int):
-                return value != 0
-            if isinstance(value, str):
-                return value.strip().lower() in {"1", "true", "yes", "on"}
-            return default
-
-        def _to_str(value: object, default: str = "") -> str:
-            return str(value) if value is not None else default
-
-        # Extract connection parameters
-        connection_params = {
-            "server": config.get("host", "localhost"),
-            "port": config.get("port", FlextConstants.Platform.LDAP_DEFAULT_PORT),
-            "use_ssl": config.get("use_ssl", False),
-            "bind_dn": config.get("bind_dn", ""),
-            "bind_password": config.get("password", ""),
-            "timeout": config.get("timeout", FlextConstants.Network.DEFAULT_TIMEOUT),
-        }
-
-        # Create connection config
-        server = _to_str(connection_params["server"], "localhost")
-        port = _to_int(
-            connection_params["port"],
-            FlextConstants.Platform.LDAP_DEFAULT_PORT,
-        )
-        use_ssl = _to_bool(connection_params["use_ssl"], default=False)
-        bind_dn = _to_str(connection_params["bind_dn"], "")
-        bind_password = _to_str(connection_params["bind_password"], "")
-        timeout = _to_int(
-            connection_params["timeout"],
-            FlextConstants.Network.DEFAULT_TIMEOUT,
-        )
-
-        connection_config = FlextLdapModels.ConnectionConfig(
-            server=server,
-            port=port,
-            use_ssl=use_ssl,
-            bind_dn=bind_dn,
-            bind_password=bind_password,
-            timeout=timeout,
-        )
-
-        # Build FlextTargetLdapConfig explicitly
-        raw_attr_map = config.get("attribute_mapping")
-        if isinstance(raw_attr_map, dict):
-            attribute_mapping: FlextTargetLdapTypes.Core.Headers = {
-                str(k): str(v) for k, v in raw_attr_map.items()
-            }
-        else:
-            attribute_mapping = {}
-
-        raw_object_classes = config.get("object_classes")
-        if isinstance(raw_object_classes, list):
-            object_classes: FlextTargetLdapTypes.Core.StringList = [
-                str(v) for v in raw_object_classes
-            ]
-        else:
-            object_classes = ["top"]
+        connection_config = _build_connection_config(config)
+        attribute_mapping = _extract_attribute_mapping(config)
+        object_classes = _extract_object_classes(config)
 
         validated_config = FlextTargetLdapConfig(
             connection=connection_config,

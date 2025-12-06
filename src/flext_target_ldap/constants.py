@@ -59,8 +59,8 @@ class FlextTargetLdapConstants(FlextConstants):
     class Loading:
         """Target-specific loading configuration."""
 
-        class DEFAULT_LOAD_TIMEOUT(FlextLdapConstants.DEFAULT_TIMEOUT):
-            """DEFAULT_LOAD_TIMEOUT - real inheritance."""
+        class DefaultLoadTimeout(FlextLdapConstants.DEFAULT_TIMEOUT):
+            """DefaultLoadTimeout - real inheritance."""
 
         MAX_LOAD_RETRIES = FlextLdapConstants.LdapRetry.CONNECTION_MAX_RETRIES
         LOAD_RETRY_DELAY = FlextLdapConstants.LdapRetry.CONNECTION_RETRY_DELAY

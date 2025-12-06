@@ -70,13 +70,17 @@ class FlextTargetLdapProtocols:
             def process_singer_message(
                 self,
                 message: dict[str, object],
-            ) -> FlextResult[None]: ...
+            ) -> FlextResult[None]:
+                """Process a Singer protocol message."""
+                ...
 
         @runtime_checkable
         class PerformanceProtocol(p.Service, Protocol):
             """Protocol for LDAP loading performance."""
 
-            def optimize_batch(self, batch_size: int) -> FlextResult[int]: ...
+            def optimize_batch(self, batch_size: int) -> FlextResult[int]:
+                """Optimize batch size for LDAP loading."""
+                ...
 
         @runtime_checkable
         class SecurityProtocol(p.Service, Protocol):
@@ -85,13 +89,17 @@ class FlextTargetLdapProtocols:
             def validate_credentials(
                 self,
                 config: dict[str, object],
-            ) -> FlextResult[bool]: ...
+            ) -> FlextResult[bool]:
+                """Validate LDAP credentials."""
+                ...
 
         @runtime_checkable
         class MonitoringProtocol(p.Service, Protocol):
             """Protocol for LDAP loading monitoring."""
 
-            def track_load_progress(self, records: int) -> FlextResult[None]: ...
+            def track_load_progress(self, records: int) -> FlextResult[None]:
+                """Track LDAP loading progress."""
+                ...
 
     # ============================================================================
     # BACKWARD COMPATIBILITY ALIASES (100% COMPATIBILITY)

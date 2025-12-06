@@ -205,30 +205,79 @@ if __name__ == "__main__":
     main()
 
 
+def _load_config_from_file(config_path: str) -> FlextTargetLdapTypes.Core.Dict:
+    """Load configuration from JSON file."""
+    try:
+        with Path(config_path).open(encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _get_ldap_api() -> object | None:
+    """Get optional LDAP API module."""
+    try:
+        client_mod = import_module("flext_target_ldap.client")
+        return client_mod.get_flext_ldap_api()
+    except Exception:
+        return None
+
+
+def _construct_dn(
+    stream: str,
+    record: dict[str, object],
+    base_dn: str,
+) -> str:
+    """Construct DN from record based on stream type."""
+    if stream == "users":
+        uid = record.get("uid") or record.get("username") or "user"
+        return f"uid={uid},{base_dn}"
+    if stream == "groups":
+        cn = record.get("cn") or record.get("name") or "group"
+        return f"cn={cn},{base_dn}"
+    name = record.get("name") or "entry"
+    return f"cn={name},{base_dn}"
+
+
+def _process_record_message(
+    record: dict[str, object],
+    stream: str,
+    cfg: FlextTargetLdapTypes.Core.Dict,
+    api: object | None,
+    seen_dns: set[str],
+) -> None:
+    """Process a RECORD message."""
+    if api is None:
+        return
+
+    dn = record.get("dn")
+    if not dn:
+        base_dn = str(cfg.get("base_dn", "dc=test,dc=com"))
+        dn = _construct_dn(stream, record, base_dn)
+
+    # Delete vs upsert
+    if record.get("_sdc_deleted_at"):
+        with suppress(Exception):
+            api.delete(dn)
+    else:
+        try:
+            if dn in seen_dns:
+                api.modify(dn, record)
+            else:
+                api.add(dn, record)
+                seen_dns.add(dn)
+        except Exception:
+            with suppress(Exception):
+                api.modify(dn, record)
+
+
 # FLEXT-CLI implementation for tests (echoes STATE lines)
 def _target_ldap_flext_cli(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
-        # Load minimal config if provided
-        cfg: FlextTargetLdapTypes.Core.Dict = {}
-        if config:
-            try:
-                with Path(config).open(encoding="utf-8") as f:
-                    cfg = json.load(f)
-            except Exception:
-                cfg = {}
-
-        # Capture basic schema info per stream
+        cfg = _load_config_from_file(config) if config else {}
         current_stream: str | None = None
-
-        # Optional API (patched in tests)
-        try:
-            client_mod = import_module("flext_target_ldap.client")
-            api = client_mod.get_flext_ldap_api()
-        except Exception:
-            api = None
-
-        # Track DNs processed to decide add vs modify on duplicates
+        api = _get_ldap_api()
         seen_dns: set[str] = set()
 
         for line in sys.stdin:
@@ -236,52 +285,19 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                 obj = json.loads(line)
                 msg_type = obj.get("type")
                 if msg_type == "STATE":
-                    # Use flext-cli for output instead of click.echo
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
                     obj.get("schema") or {}
                     current_stream = obj.get("stream")
                 elif msg_type == "RECORD" and api is not None:
-                    # Perform minimal add/modify/delete via patched API for tests
                     record: dict[str, object] = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
-                    dn = record.get("dn")
-
-                    # Basic DN construction if not provided
-                    if not dn:
-                        base_dn = str(cfg.get("base_dn", "dc=test,dc=com"))
-                        if stream == "users":
-                            uid = record.get("uid") or record.get("username") or "user"
-                            dn = f"uid={uid},{base_dn}"
-                        elif stream == "groups":
-                            cn = record.get("cn") or record.get("name") or "group"
-                            dn = f"cn={cn},{base_dn}"
-                        else:
-                            name = record.get("name") or "entry"
-                            dn = f"cn={name},{base_dn}"
-
-                    # Delete vs upsert
-                    if record.get("_sdc_deleted_at"):
-                        with suppress(Exception):
-                            api.delete(dn)
-                    else:
-                        try:
-                            if dn in seen_dns:
-                                api.modify(dn, record)
-                            else:
-                                api.add(dn, record)
-                                seen_dns.add(dn)
-                        except Exception:
-                            # If first add fails, try modify once
-                            with suppress(Exception):
-                                api.modify(dn, record)
+                    _process_record_message(record, stream, cfg, api, seen_dns)
             except Exception:
-                # Ignore malformed lines; continue processing, but log for visibility
                 logger.debug("Malformed input line skipped in CLI", exc_info=True)
                 continue
     except Exception:
-        # Swallow any unexpected top-level error to keep exit code 0 for tests
         logger.debug("Unexpected error in CLI suppressed", exc_info=True)
 
 
