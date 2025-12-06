@@ -203,7 +203,8 @@ class LdapEntryModel(FlextModels.Entity):
         return object_class.lower() in [oc.lower() for oc in self.object_classes]
 
     def get_attribute_values(
-        self, attribute_name: str
+        self,
+        attribute_name: str,
     ) -> FlextTargetLdapTypes.Core.StringList:
         """Get values for a specific attribute."""
         return self.attributes.get(attribute_name, [])
@@ -527,7 +528,8 @@ class LdapOperationStatisticsModel(FlextModels.Entity):
         return self.model_copy(update=updates)
 
     def get_recent_errors(
-        self, limit: int = 10
+        self,
+        limit: int = 10,
     ) -> FlextTargetLdapTypes.Core.StringList:
         """Get most recent error messages."""
         return self.error_messages[-limit:] if self.error_messages else []

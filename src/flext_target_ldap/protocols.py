@@ -38,7 +38,8 @@ class FlextTargetLdapProtocols:
             """Protocol for Singer to LDAP transformation."""
 
             def transform_to_ldap(
-                self, record: dict[str, object]
+                self,
+                record: dict[str, object],
             ) -> FlextResult[dict[str, object]]:
                 """Transform record to LDAP format."""
                 ...
@@ -48,7 +49,8 @@ class FlextTargetLdapProtocols:
             """Protocol for LDAP loading orchestration."""
 
             def orchestrate_load(
-                self, records: list[dict[str, object]]
+                self,
+                records: list[dict[str, object]],
             ) -> FlextResult[None]:
                 """Orchestrate loading of records."""
                 ...
@@ -66,7 +68,8 @@ class FlextTargetLdapProtocols:
             """Protocol for Singer message handling."""
 
             def process_singer_message(
-                self, message: dict[str, object]
+                self,
+                message: dict[str, object],
             ) -> FlextResult[None]: ...
 
         @runtime_checkable
@@ -80,7 +83,8 @@ class FlextTargetLdapProtocols:
             """Protocol for LDAP security operations."""
 
             def validate_credentials(
-                self, config: dict[str, object]
+                self,
+                config: dict[str, object],
             ) -> FlextResult[bool]: ...
 
         @runtime_checkable
@@ -93,23 +97,69 @@ class FlextTargetLdapProtocols:
     # BACKWARD COMPATIBILITY ALIASES (100% COMPATIBILITY)
     # ============================================================================
 
-    TargetProtocol = TargetLdap.TargetProtocol
-    TransformationProtocol = TargetLdap.TransformationProtocol
-    OrchestrationProtocol = TargetLdap.OrchestrationProtocol
-    ConnectionProtocol = TargetLdap.ConnectionProtocol
-    SingerProtocol = TargetLdap.SingerProtocol
-    PerformanceProtocol = TargetLdap.PerformanceProtocol
-    SecurityProtocol = TargetLdap.SecurityProtocol
-    MonitoringProtocol = TargetLdap.MonitoringProtocol
+    @runtime_checkable
+    class TargetProtocol(TargetLdap.TargetProtocol):
+        """TargetProtocol - real inheritance."""
 
-    LdapTargetProtocol = TargetLdap.TargetProtocol
-    LdapTransformationProtocol = TargetLdap.TransformationProtocol
-    LdapOrchestrationProtocol = TargetLdap.OrchestrationProtocol
-    LdapConnectionProtocol = TargetLdap.ConnectionProtocol
-    LdapSingerProtocol = TargetLdap.SingerProtocol
-    LdapPerformanceProtocol = TargetLdap.PerformanceProtocol
-    LdapSecurityProtocol = TargetLdap.SecurityProtocol
-    LdapMonitoringProtocol = TargetLdap.MonitoringProtocol
+    @runtime_checkable
+    class TransformationProtocol(TargetLdap.TransformationProtocol):
+        """TransformationProtocol - real inheritance."""
+
+    @runtime_checkable
+    class OrchestrationProtocol(TargetLdap.OrchestrationProtocol):
+        """OrchestrationProtocol - real inheritance."""
+
+    @runtime_checkable
+    class ConnectionProtocol(TargetLdap.ConnectionProtocol):
+        """ConnectionProtocol - real inheritance."""
+
+    @runtime_checkable
+    class SingerProtocol(TargetLdap.SingerProtocol):
+        """SingerProtocol - real inheritance."""
+
+    @runtime_checkable
+    class PerformanceProtocol(TargetLdap.PerformanceProtocol):
+        """PerformanceProtocol - real inheritance."""
+
+    @runtime_checkable
+    class SecurityProtocol(TargetLdap.SecurityProtocol):
+        """SecurityProtocol - real inheritance."""
+
+    @runtime_checkable
+    class MonitoringProtocol(TargetLdap.MonitoringProtocol):
+        """MonitoringProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapTargetProtocol(TargetLdap.TargetProtocol):
+        """LdapTargetProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapTransformationProtocol(TargetLdap.TransformationProtocol):
+        """LdapTransformationProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapOrchestrationProtocol(TargetLdap.OrchestrationProtocol):
+        """LdapOrchestrationProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapConnectionProtocol(TargetLdap.ConnectionProtocol):
+        """LdapConnectionProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapSingerProtocol(TargetLdap.SingerProtocol):
+        """LdapSingerProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapPerformanceProtocol(TargetLdap.PerformanceProtocol):
+        """LdapPerformanceProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapSecurityProtocol(TargetLdap.SecurityProtocol):
+        """LdapSecurityProtocol - real inheritance."""
+
+    @runtime_checkable
+    class LdapMonitoringProtocol(TargetLdap.MonitoringProtocol):
+        """LdapMonitoringProtocol - real inheritance."""
 
 
 __all__ = [
