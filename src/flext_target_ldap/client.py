@@ -353,7 +353,9 @@ class LDAPClient:
             return FlextResult[bool].fail(f"Add entry failed: {e}")
 
     def modify_entry(
-        self, dn: str, changes: FlextTargetLdapTypes.Core.Dict
+        self,
+        dn: str,
+        changes: FlextTargetLdapTypes.Core.Dict,
     ) -> FlextResult[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
@@ -449,7 +451,9 @@ class LDAPClient:
 
             logger.info("Getting LDAP entry: %s", dn)
             search_result: FlextResult[object] = self.search_entry(
-                dn, "(objectClass=*)", attributes
+                dn,
+                "(objectClass=*)",
+                attributes,
             )
             if search_result.is_success and search_result.data:
                 return FlextResult[LDAPSearchEntry | None].ok(search_result.data[0])
@@ -470,9 +474,14 @@ class LDAPClient:
             return FlextResult[bool].fail(f"Disconnect failed: {e}")
 
 
-# Backward compatibility aliases
-LDAPConnectionConfig = FlextLdapModels.ConnectionConfig
-LDAPEntry = FlextLdapModels.Entry
+# Backward compatibility classes with real inheritance
+class LDAPConnectionConfig(FlextLdapModels.ConnectionConfig):
+    """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
+
+
+class LDAPEntry(FlextLdapModels.Entry):
+    """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
+
 
 __all__: FlextTargetLdapTypes.Core.StringList = [
     "LDAPClient",

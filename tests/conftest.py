@@ -20,15 +20,15 @@ from flext_target_ldap import LDAPClient
 # Import centralized Docker fixtures
 
 if TYPE_CHECKING:
-    from flext_tests import FlextTestDocker
+    from flext_tests import FlextTestsDocker
 
 
 @pytest.fixture(scope="session")
-def shared_ldap_container(flext_docker: FlextTestDocker) -> Generator[str]:
-    """Managed LDAP container using centralized FlextTestDocker with docker-compose."""
+def shared_ldap_container(flext_docker: FlextTestsDocker) -> Generator[str]:
+    """Managed LDAP container using centralized FlextTestsDocker with docker-compose."""
     # Use centralized docker-compose file for OpenLDAP
     compose_file = pathlib.Path(
-        "~/flext/docker/docker-compose.openldap.yml"
+        "~/flext/docker/docker-compose.openldap.yml",
     ).expanduser()
 
     # Start OpenLDAP stack using docker-compose
@@ -38,7 +38,7 @@ def shared_ldap_container(flext_docker: FlextTestDocker) -> Generator[str]:
 
     return "flext-openldap-test"
 
-    # Cleanup handled by FlextTestDocker automatically
+    # Cleanup handled by FlextTestsDocker automatically
 
 
 @pytest.fixture

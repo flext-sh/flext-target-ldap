@@ -169,7 +169,7 @@ class LdapTargetClient:
 
             if connect_result.is_failure:
                 return FlextResult[str].fail(
-                    f"Connection failed: {connect_result.error}"
+                    f"Connection failed: {connect_result.error}",
                 )
 
             # Close the connection after validation
@@ -412,13 +412,14 @@ class LdapTargetClient:
             )
             if connect_result.is_failure:
                 return FlextResult[bool].fail(
-                    f"Connection failed: {connect_result.error}"
+                    f"Connection failed: {connect_result.error}",
                 )
 
             try:
                 # Use create_group when objectClass indicates group, else create_user
                 is_group: list[object] = "groupOfNames" in ldap_attributes.get(
-                    "objectClass", []
+                    "objectClass",
+                    [],
                 )
                 if is_group:
                     # Minimal group creation via API
@@ -479,7 +480,7 @@ class LdapTargetClient:
             )
             if connect_result.is_failure:
                 return FlextResult[bool].fail(
-                    f"Connection failed: {connect_result.error}"
+                    f"Connection failed: {connect_result.error}",
                 )
 
             try:
@@ -530,7 +531,7 @@ class LdapTargetClient:
             )
             if connect_result.is_failure:
                 return FlextResult[list[LdapSearchEntry]].fail(
-                    f"Connection failed: {connect_result.error}"
+                    f"Connection failed: {connect_result.error}",
                 )
 
             try:
@@ -593,7 +594,7 @@ class LdapTargetClient:
             )
             if connect_result.is_failure:
                 return FlextResult[bool].fail(
-                    f"Connection failed: {connect_result.error}"
+                    f"Connection failed: {connect_result.error}",
                 )
 
             try:
@@ -885,7 +886,8 @@ class LdapUsersSink(LdapBaseSink):
 
         # Apply custom attribute mapping
         mapping_obj: FlextTargetLdapTypes.Core.Dict = self._target.config.get(
-            "attribute_mapping", {}
+            "attribute_mapping",
+            {},
         )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
@@ -993,7 +995,8 @@ class LdapGroupsSink(LdapBaseSink):
 
         # Apply custom attribute mapping
         mapping_obj: FlextTargetLdapTypes.Core.Dict = self._target.config.get(
-            "attribute_mapping", {}
+            "attribute_mapping",
+            {},
         )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
@@ -1081,7 +1084,8 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
 
         # Apply custom attribute mapping
         mapping_obj: FlextTargetLdapTypes.Core.Dict = self._target.config.get(
-            "attribute_mapping", {}
+            "attribute_mapping",
+            {},
         )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():

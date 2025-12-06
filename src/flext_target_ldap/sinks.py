@@ -313,7 +313,8 @@ class UsersSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_obj: dict[str, object] = self._target.config.get(
-            "attribute_mapping", {}
+            "attribute_mapping",
+            {},
         )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
@@ -428,7 +429,8 @@ class GroupsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_obj: dict[str, object] = self._target.config.get(
-            "attribute_mapping", {}
+            "attribute_mapping",
+            {},
         )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():
@@ -530,7 +532,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_obj: dict[str, object] = self._target.config.get(
-            "attribute_mapping", {}
+            "attribute_mapping",
+            {},
         )
         if isinstance(mapping_obj, dict):
             for singer_field, ldap_attr in mapping_obj.items():

@@ -114,7 +114,8 @@ class FlextTargetLdapConfig(FlextConfig):
             **overrides,
         }
         return cls.get_or_create_shared_instance(
-            project_name="flext-target-ldap", **dev_overrides
+            project_name="flext-target-ldap",
+            **dev_overrides,
         )
 
     @classmethod
@@ -130,7 +131,8 @@ class FlextTargetLdapConfig(FlextConfig):
             **overrides,
         }
         return cls.get_or_create_shared_instance(
-            project_name="flext-target-ldap", **prod_overrides
+            project_name="flext-target-ldap",
+            **prod_overrides,
         )
 
     @classmethod
@@ -147,7 +149,8 @@ class FlextTargetLdapConfig(FlextConfig):
             **overrides,
         }
         return cls.get_or_create_shared_instance(
-            project_name="flext-target-ldap", **test_overrides
+            project_name="flext-target-ldap",
+            **test_overrides,
         )
 
     # Use SettingsConfigDict for Settings configuration
@@ -158,7 +161,8 @@ class LDAPConnectionSettings(FlextModels):
 
     host: str = Field(..., description="LDAP server host")
     port: int = Field(
-        FlextConstants.Platform.LDAP_DEFAULT_PORT, description="LDAP server port"
+        FlextConstants.Platform.LDAP_DEFAULT_PORT,
+        description="LDAP server port",
     )
     use_ssl: bool = Field(default=False, description="Use SSL connection")
     use_tls: bool = Field(default=False, description="Use TLS connection")
@@ -170,7 +174,8 @@ class LDAPConnectionSettings(FlextModels):
         description="Connection timeout",
     )
     receive_timeout: int = Field(
-        FlextConstants.Network.DEFAULT_TIMEOUT, description="Receive timeout"
+        FlextConstants.Network.DEFAULT_TIMEOUT,
+        description="Receive timeout",
     )
 
 
@@ -239,13 +244,15 @@ def validate_ldap_config(
         # Create connection config
         server = _to_str(connection_params["server"], "localhost")
         port = _to_int(
-            connection_params["port"], FlextConstants.Platform.LDAP_DEFAULT_PORT
+            connection_params["port"],
+            FlextConstants.Platform.LDAP_DEFAULT_PORT,
         )
         use_ssl = _to_bool(connection_params["use_ssl"], default=False)
         bind_dn = _to_str(connection_params["bind_dn"], "")
         bind_password = _to_str(connection_params["bind_password"], "")
         timeout = _to_int(
-            connection_params["timeout"], FlextConstants.Network.DEFAULT_TIMEOUT
+            connection_params["timeout"],
+            FlextConstants.Network.DEFAULT_TIMEOUT,
         )
 
         connection_config = FlextLdapModels.ConnectionConfig(
@@ -281,7 +288,8 @@ def validate_ldap_config(
             search_scope=_to_str(config.get("search_scope", "SUBTREE")),
             connect_timeout=_to_int(
                 config.get(
-                    "connect_timeout", FlextConstants.Network.DEFAULT_TIMEOUT // 3
+                    "connect_timeout",
+                    FlextConstants.Network.DEFAULT_TIMEOUT // 3,
                 ),
                 FlextConstants.Network.DEFAULT_TIMEOUT // 3,
             ),

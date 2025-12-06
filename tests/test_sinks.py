@@ -443,7 +443,8 @@ class TestOrganizationalUnitsSink:
             raise AssertionError(postal_msg)
 
     def test_ou_get_object_classes_default(
-        self, ou_sink: OrganizationalUnitsSink
+        self,
+        ou_sink: OrganizationalUnitsSink,
     ) -> None:
         """Test getting default object classes for organizational unit entries."""
         record: dict[str, object] = {}
@@ -546,7 +547,8 @@ class TestLDAPGenericSink:
         assert "_sdc_received_at" not in result.data
 
     def test_generic_get_object_classes_from_record(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         """Test getting object classes from record data."""
         record = {"object_classes": ["customClass", "top"]}
@@ -558,7 +560,8 @@ class TestLDAPGenericSink:
             raise AssertionError(custom_classes_msg)
 
     def test_generic_get_object_classes_single_value(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         """Test getting object classes from single value in record."""
         record = {"object_classes": "customClass"}
@@ -568,7 +571,8 @@ class TestLDAPGenericSink:
             raise AssertionError(single_class_msg)
 
     def test_generic_get_object_classes_default(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         """Test getting default object classes for generic entries."""
         record: dict[str, object] = {}

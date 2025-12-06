@@ -24,7 +24,8 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
     tap_stream_id: str
     stream: str
     stream_schema: FlextTargetLdapTypes.Core.Dict = Field(
-        ..., description="Singer stream schema"
+        ...,
+        description="Singer stream schema",
     )
     metadata: list[FlextTargetLdapTypes.Core.Dict] = Field(default_factory=list)
     key_properties: ClassVar[FlextTargetLdapTypes.Core.StringList] = []

@@ -37,7 +37,7 @@ class LDAPTypeConverter:
                 result: FlextResult[object] = str(value)
             elif singer_type in {"integer", "number"}:
                 result: FlextResult[object] = str(
-                    value
+                    value,
                 )  # LDAP stores numbers as strings
             elif singer_type == "boolean":
                 result = "TRUE" if value else "FALSE"
@@ -142,7 +142,7 @@ class LDAPDataTransformer:
                         attributes[key] = [str(value)]
 
             return FlextResult[dict[str, FlextTargetLdapTypes.Core.StringList]].ok(
-                attributes
+                attributes,
             )
 
         except (RuntimeError, ValueError, TypeError) as e:

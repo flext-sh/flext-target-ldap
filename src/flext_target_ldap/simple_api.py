@@ -47,7 +47,10 @@ def load_users_to_ldap(
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
         sink: dict[str, object] = target.get_sink_class("users")(
-            target, "users", {}, ["username"]
+            target,
+            "users",
+            {},
+            ["username"],
         )
 
         # Process records
@@ -78,7 +81,10 @@ def load_groups_to_ldap(
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
         sink: dict[str, object] = target.get_sink_class("groups")(
-            target, "groups", {}, ["name"]
+            target,
+            "groups",
+            {},
+            ["name"],
         )
 
         # Process records

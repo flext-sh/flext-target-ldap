@@ -127,7 +127,7 @@ class FlextTargetLdapModels(FlextModels):
                 return FlextResult[None].ok(None)
             except Exception as e:
                 return FlextResult[None].fail(
-                    f"Attribute mapping validation failed: {e}"
+                    f"Attribute mapping validation failed: {e}",
                 )
 
     class Entry(FlextModels.Entity):
@@ -228,7 +228,8 @@ class FlextTargetLdapModels(FlextModels):
             return object_class.lower() in [oc.lower() for oc in self.object_classes]
 
         def get_attribute_values(
-            self, attribute_name: str
+            self,
+            attribute_name: str,
         ) -> FlextTargetLdapTypes.Core.StringList:
             """Get values for a specific attribute."""
             return self.attributes.get(attribute_name, [])
@@ -364,7 +365,7 @@ class FlextTargetLdapModels(FlextModels):
                 return FlextResult[None].ok(None)
             except Exception as e:
                 return FlextResult[None].fail(
-                    f"Batch processing validation failed: {e}"
+                    f"Batch processing validation failed: {e}",
                 )
 
         @property
@@ -494,7 +495,7 @@ class FlextTargetLdapModels(FlextModels):
                 return FlextResult[None].ok(None)
             except Exception as e:
                 return FlextResult[None].fail(
-                    f"Operation statistics validation failed: {e}"
+                    f"Operation statistics validation failed: {e}",
                 )
 
         @property

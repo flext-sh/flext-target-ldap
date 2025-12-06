@@ -33,7 +33,8 @@ class LdapTargetServiceProtocol(Protocol):
     """Protocol for LDAP target services."""
 
     def create_target(
-        self, config: FlextTargetLdapTypes.Core.Dict
+        self,
+        config: FlextTargetLdapTypes.Core.Dict,
     ) -> FlextResult[object]:
         """Create LDAP target instance."""
 
@@ -159,7 +160,9 @@ class LdapTransformationService:
             # Zero Tolerance FIX: Use utilities for DN building
             dn_template = self._determine_dn_template(object_classes)
             dn_result = self._utilities.LdapDataProcessing.build_ldap_dn(
-                record=record, dn_template=dn_template, base_dn=base_dn
+                record=record,
+                dn_template=dn_template,
+                base_dn=base_dn,
             )
 
             if dn_result.is_failure:
@@ -177,13 +180,14 @@ class LdapTransformationService:
 
             conversion_result = (
                 self._utilities.LdapDataProcessing.convert_record_to_ldap_attributes(
-                    record=record, attribute_mapping=attribute_mapping_dict
+                    record=record,
+                    attribute_mapping=attribute_mapping_dict,
                 )
             )
 
             if conversion_result.is_failure:
                 transformation_errors.append(
-                    f"Attribute conversion failed: {conversion_result.error}"
+                    f"Attribute conversion failed: {conversion_result.error}",
                 )
                 ldap_attributes_bytes = {}
             else:
@@ -223,7 +227,7 @@ class LdapTransformationService:
                         # Use utilities for sanitization
                         processed_value = (
                             self._utilities.LdapDataProcessing.sanitize_ldap_value(
-                                processed_value
+                                processed_value,
                             )
                         )
 
@@ -237,7 +241,8 @@ class LdapTransformationService:
             # Zero Tolerance FIX: Use utilities for object class extraction
             final_object_classes = (
                 self._utilities.LdapDataProcessing.extract_object_classes(
-                    record=record, default_object_classes=object_classes
+                    record=record,
+                    default_object_classes=object_classes,
                 )
             )
 
@@ -282,7 +287,8 @@ class LdapTransformationService:
             )
 
     def _determine_dn_template(
-        self, object_classes: FlextTargetLdapTypes.Core.StringList
+        self,
+        object_classes: FlextTargetLdapTypes.Core.StringList,
     ) -> str:
         """Determine DN template based on object classes."""
         oc_lower = [oc.lower() for oc in object_classes]
@@ -315,7 +321,8 @@ class LdapTransformationService:
             return value
 
     def _determine_entry_type(
-        self, object_classes: FlextTargetLdapTypes.Core.StringList
+        self,
+        object_classes: FlextTargetLdapTypes.Core.StringList,
     ) -> str:
         """Determine entry type from object classes."""
         oc_lower = [oc.lower() for oc in object_classes]
@@ -474,7 +481,8 @@ class LdapTargetOrchestrator:
 
                 compatibility_result = (
                     self._utilities.StreamUtilities.validate_stream_compatibility(
-                        stream_name="ldap_target", schema=mock_schema
+                        stream_name="ldap_target",
+                        schema=mock_schema,
                     )
                 )
 
@@ -487,7 +495,8 @@ class LdapTargetOrchestrator:
             # Zero Tolerance FIX: Use utilities for batch size calculation
             optimal_batch_size = (
                 self._utilities.StreamUtilities.calculate_ldap_batch_size(
-                    record_count=len(records), target_batches=10
+                    record_count=len(records),
+                    target_batches=10,
                 )
             )
 
@@ -495,7 +504,9 @@ class LdapTargetOrchestrator:
             batch_size = min(
                 optimal_batch_size,
                 getattr(
-                    working_config, "batch_size", self._utilities.DEFAULT_BATCH_SIZE
+                    working_config,
+                    "batch_size",
+                    self._utilities.DEFAULT_BATCH_SIZE,
                 ),
             )
 
@@ -593,12 +604,14 @@ class LdapTargetOrchestrator:
                 "use_tls": getattr(working_config, "use_tls", False),
                 "operation_mode": getattr(working_config, "operation_mode", "upsert"),
                 "batch_size": getattr(
-                    working_config, "batch_size", self._utilities.DEFAULT_BATCH_SIZE
+                    working_config,
+                    "batch_size",
+                    self._utilities.DEFAULT_BATCH_SIZE,
                 ),
             }
 
             validation_result = self._utilities.ConfigValidation.validate_target_config(
-                config_dict
+                config_dict,
             )
             if validation_result.is_failure:
                 return FlextResult[bool].fail(
@@ -670,7 +683,10 @@ class LdapTargetApiService:
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 
             sink: dict[str, object] = target.get_sink_class("users")(
-                target, "users", {}, ["username"]
+                target,
+                "users",
+                {},
+                ["username"],
             )
 
             # Process records
@@ -704,7 +720,10 @@ class LdapTargetApiService:
                 return FlextResult[int].fail("Target is not a TargetLdap instance")
 
             sink: dict[str, object] = target.get_sink_class("groups")(
-                target, "groups", {}, ["name"]
+                target,
+                "groups",
+                {},
+                ["name"],
             )
 
             # Process records
