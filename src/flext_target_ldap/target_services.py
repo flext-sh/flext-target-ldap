@@ -144,6 +144,98 @@ class LdapTransformationService:
         self._utilities = FlextTargetLdapUtilities()
         self._config: dict[str, object] = config
 
+    def _build_dn_from_record(
+        self,
+        record: FlextTargetLdapTypes.Core.Dict,
+        object_classes: FlextTargetLdapTypes.Core.StringList,
+        base_dn: str,
+        errors: FlextTargetLdapTypes.Core.StringList,
+    ) -> str:
+        """Build DN from record or return fallback."""
+        dn_template = self._determine_dn_template(object_classes)
+        dn_result = self._utilities.LdapDataProcessing.build_ldap_dn(
+            record=record,
+            dn_template=dn_template,
+            base_dn=base_dn,
+        )
+
+        if dn_result.is_failure:
+            errors.append(f"DN building failed: {dn_result.error}")
+            return f"cn=unknown-{int(datetime.now(UTC).timestamp())},{base_dn}"
+        return dn_result.value
+
+    def _convert_attributes(
+        self,
+        record: FlextTargetLdapTypes.Core.Dict,
+        mappings: list[LdapAttributeMappingModel],
+        errors: FlextTargetLdapTypes.Core.StringList,
+    ) -> dict[str, FlextTargetLdapTypes.Core.StringList]:
+        """Convert record to LDAP attributes."""
+        attribute_mapping_dict = {
+            mapping.singer_field_name: mapping.ldap_attribute_name
+            for mapping in mappings
+        }
+
+        conversion_result = (
+            self._utilities.LdapDataProcessing.convert_record_to_ldap_attributes(
+                record=record,
+                attribute_mapping=attribute_mapping_dict,
+            )
+        )
+
+        if conversion_result.is_failure:
+            errors.append(
+                f"Attribute conversion failed: {conversion_result.error}",
+            )
+            return {}
+
+        ldap_attributes_bytes = conversion_result.value
+        return {
+            attr_name: [val.decode("utf-8") for val in attr_values]
+            for attr_name, attr_values in ldap_attributes_bytes.items()
+        }
+
+    def _process_mappings(
+        self,
+        record: FlextTargetLdapTypes.Core.Dict,
+        mappings: list[LdapAttributeMappingModel],
+        errors: FlextTargetLdapTypes.Core.StringList,
+    ) -> list[LdapAttributeMappingModel]:
+        """Process mappings and track applied ones."""
+        applied_mappings: list[LdapAttributeMappingModel] = []
+
+        for mapping in mappings:
+            try:
+                value = record.get(mapping.singer_field_name)
+                if value is None and mapping.default_value:
+                    value = mapping.default_value
+                if value is None:
+                    if mapping.is_required:
+                        errors.append(
+                            f"Required field '{mapping.singer_field_name}' is missing",
+                        )
+                    continue
+
+                if mapping.transformation_rule and value is not None:
+                    processed_value = self._apply_transformation_rule(
+                        str(value),
+                        mapping.transformation_rule,
+                    )
+                    processed_value = (
+                        self._utilities.LdapDataProcessing.sanitize_ldap_value(
+                            processed_value,
+                        )
+                    )
+
+                applied_mappings.append(mapping)
+
+            except (RuntimeError, ValueError, TypeError) as e:
+                errors.append(
+                    f"Error transforming '{mapping.singer_field_name}': {e}",
+                )
+
+        return applied_mappings
+
     def transform_record(
         self,
         record: FlextTargetLdapTypes.Core.Dict,
@@ -155,90 +247,26 @@ class LdapTransformationService:
         try:
             start_time = datetime.now(UTC)
             transformation_errors: FlextTargetLdapTypes.Core.StringList = []
-            applied_mappings: list[LdapAttributeMappingModel] = []
 
-            # Zero Tolerance FIX: Use utilities for DN building
-            dn_template = self._determine_dn_template(object_classes)
-            dn_result = self._utilities.LdapDataProcessing.build_ldap_dn(
-                record=record,
-                dn_template=dn_template,
-                base_dn=base_dn,
+            dn = self._build_dn_from_record(
+                record,
+                object_classes,
+                base_dn,
+                transformation_errors,
             )
 
-            if dn_result.is_failure:
-                transformation_errors.append(f"DN building failed: {dn_result.error}")
-                # Use fallback DN
-                dn = f"cn=unknown-{int(datetime.now(UTC).timestamp())},{base_dn}"
-            else:
-                dn = dn_result.value
-
-            # Zero Tolerance FIX: Use utilities for LDAP attribute conversion
-            attribute_mapping_dict = {
-                mapping.singer_field_name: mapping.ldap_attribute_name
-                for mapping in mappings
-            }
-
-            conversion_result = (
-                self._utilities.LdapDataProcessing.convert_record_to_ldap_attributes(
-                    record=record,
-                    attribute_mapping=attribute_mapping_dict,
-                )
+            ldap_attributes = self._convert_attributes(
+                record,
+                mappings,
+                transformation_errors,
             )
 
-            if conversion_result.is_failure:
-                transformation_errors.append(
-                    f"Attribute conversion failed: {conversion_result.error}",
-                )
-                ldap_attributes_bytes = {}
-            else:
-                ldap_attributes_bytes = conversion_result.value
+            applied_mappings = self._process_mappings(
+                record,
+                mappings,
+                transformation_errors,
+            )
 
-            # Convert bytes back to strings for the model
-            ldap_attributes: dict[str, FlextTargetLdapTypes.Core.StringList] = {}
-            for attr_name, attr_values in ldap_attributes_bytes.items():
-                ldap_attributes[attr_name] = [
-                    val.decode("utf-8") for val in attr_values
-                ]
-
-            # Process mappings for applied_mappings tracking
-            for mapping in mappings:
-                try:
-                    # Get value from record
-                    value = record.get(mapping.singer_field_name)
-
-                    # Apply default value if missing
-                    if value is None and mapping.default_value:
-                        value = mapping.default_value
-
-                    # Skip if no value and not required
-                    if value is None:
-                        if mapping.is_required:
-                            transformation_errors.append(
-                                f"Required field '{mapping.singer_field_name}' is missing",
-                            )
-                        continue
-
-                    # Apply transformation rule using utilities (sanitization)
-                    if mapping.transformation_rule and value is not None:
-                        processed_value = self._apply_transformation_rule(
-                            str(value),
-                            mapping.transformation_rule,
-                        )
-                        # Use utilities for sanitization
-                        processed_value = (
-                            self._utilities.LdapDataProcessing.sanitize_ldap_value(
-                                processed_value,
-                            )
-                        )
-
-                    applied_mappings.append(mapping)
-
-                except (RuntimeError, ValueError, TypeError) as e:
-                    transformation_errors.append(
-                        f"Error transforming '{mapping.singer_field_name}': {e}",
-                    )
-
-            # Zero Tolerance FIX: Use utilities for object class extraction
             final_object_classes = (
                 self._utilities.LdapDataProcessing.extract_object_classes(
                     record=record,
@@ -246,7 +274,6 @@ class LdapTransformationService:
                 )
             )
 
-            # Create LDAP entry model
             try:
                 ldap_entry = LdapEntryModel(
                     distinguished_name=dn,
@@ -256,7 +283,6 @@ class LdapTransformationService:
                 )
             except (RuntimeError, ValueError, TypeError) as e:
                 transformation_errors.append(f"Error creating LDAP entry: {e}")
-                # Create minimal entry for error reporting
                 ldap_entry = LdapEntryModel(
                     distinguished_name=dn,
                     object_classes=["top"],
@@ -264,11 +290,9 @@ class LdapTransformationService:
                     entry_type="error",
                 )
 
-            # Calculate processing time
             end_time = datetime.now(UTC)
             processing_time = int((end_time - start_time).total_seconds() * 1000)
 
-            # Create transformation result
             result = LdapTransformationResultModel(
                 original_record=record,
                 transformed_entry=ldap_entry,
@@ -450,6 +474,103 @@ class LdapTargetOrchestrator:
             self._transformation_service = LdapTransformationService(self._typed_config)
         return self._transformation_service
 
+    def _validate_stream_compatibility(
+        self,
+        working_config: dict[str, object] | object,
+        records: list[FlextTargetLdapTypes.Core.Dict],
+    ) -> None:
+        """Validate stream compatibility."""
+        if not (
+            hasattr(working_config, "object_classes")
+            and working_config.object_classes
+        ):
+            return
+
+        mock_schema: FlextTargetLdapTypes.Core.Dict = {
+            "type": "object",
+            "properties": {},
+        }
+
+        if records:
+            for key in records[0]:
+                mock_schema["properties"][key] = {"type": "string"}
+
+        compatibility_result = (
+            self._utilities.StreamUtilities.validate_stream_compatibility(
+                stream_name="ldap_target",
+                schema=mock_schema,
+            )
+        )
+
+        if compatibility_result.is_failure:
+            logger.warning(
+                "Stream compatibility validation failed: %s",
+                compatibility_result.error,
+            )
+
+    def _calculate_batch_size(
+        self,
+        records_count: int,
+        working_config: dict[str, object] | object,
+    ) -> int:
+        """Calculate optimal batch size."""
+        optimal_batch_size = (
+            self._utilities.StreamUtilities.calculate_ldap_batch_size(
+                record_count=records_count,
+                target_batches=10,
+            )
+        )
+
+        return min(
+            optimal_batch_size,
+            getattr(
+                working_config,
+                "batch_size",
+                self._utilities.DEFAULT_BATCH_SIZE,
+            ),
+        )
+
+    def _process_records_batch(
+        self,
+        records: list[FlextTargetLdapTypes.Core.Dict],
+        batch_size: int,
+        working_config: dict[str, object] | object,
+        transformation_service: LdapTransformationService,
+    ) -> tuple[int, FlextTargetLdapTypes.Core.StringList]:
+        """Process records in batches and return counts/errors."""
+        processed_count = 0
+        transformation_errors: FlextTargetLdapTypes.Core.StringList = []
+
+        for i in range(0, len(records), batch_size):
+            batch = records[i : i + batch_size]
+            logger.debug("Processing batch %d-%d", i, i + len(batch))
+
+            for record in batch:
+                try:
+                    mappings = transformation_service.get_default_mappings("user")
+                    object_classes = working_config.object_classes
+
+                    transform_result = transformation_service.transform_record(
+                        record=record,
+                        mappings=mappings,
+                        object_classes=object_classes,
+                        base_dn=working_config.base_dn,
+                    )
+
+                    if transform_result.is_success:
+                        processed_count += 1
+                    else:
+                        transformation_errors.append(
+                            transform_result.error or "Unknown error",
+                        )
+
+                except Exception as e:
+                    error_msg = f"Error processing record: {e}"
+                    logger.exception(error_msg)
+                    transformation_errors.append(error_msg)
+
+        return processed_count, transformation_errors
+
     def orchestrate_data_loading(
         self,
         records: list[FlextTargetLdapTypes.Core.Dict],
@@ -459,96 +580,25 @@ class LdapTargetOrchestrator:
         try:
             logger.info("Starting LDAP data loading orchestration")
 
-            # Use provided config or stored config
             working_config: dict[str, object] = config or self._typed_config
             if not working_config:
                 return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
                     "No configuration available for orchestration",
                 )
 
-            # Zero Tolerance FIX: Use utilities for stream compatibility validation
-            if (
-                hasattr(working_config, "object_classes")
-                and working_config.object_classes
-            ):
-                # Create mock schema for validation
-                mock_schema = {"type": "object", "properties": {}}
+            self._validate_stream_compatibility(working_config, records)
 
-                # Add properties based on first record if available
-                if records:
-                    for key in records[0]:
-                        mock_schema["properties"][key] = {"type": "string"}
-
-                compatibility_result = (
-                    self._utilities.StreamUtilities.validate_stream_compatibility(
-                        stream_name="ldap_target",
-                        schema=mock_schema,
-                    )
-                )
-
-                if compatibility_result.is_failure:
-                    logger.warning(
-                        "Stream compatibility validation failed: %s",
-                        compatibility_result.error,
-                    )
-
-            # Zero Tolerance FIX: Use utilities for batch size calculation
-            optimal_batch_size = (
-                self._utilities.StreamUtilities.calculate_ldap_batch_size(
-                    record_count=len(records),
-                    target_batches=10,
-                )
-            )
-
-            # Use the calculated batch size or config batch size
-            batch_size = min(
-                optimal_batch_size,
-                getattr(
-                    working_config,
-                    "batch_size",
-                    self._utilities.DEFAULT_BATCH_SIZE,
-                ),
-            )
-
-            # Initialize services
+            batch_size = self._calculate_batch_size(len(records), working_config)
             transformation_service = LdapTransformationService(working_config)
 
-            # Process records in batches
-            processed_count = 0
-            transformation_errors: FlextTargetLdapTypes.Core.StringList = []
+            processed_count, transformation_errors = self._process_records_batch(
+                records,
+                batch_size,
+                working_config,
+                transformation_service,
+            )
 
-            for i in range(0, len(records), batch_size):
-                batch = records[i : i + batch_size]
-                logger.debug("Processing batch %d-%d", i, i + len(batch))
-
-                for record in batch:
-                    try:
-                        # Get default mappings for user type (could be made configurable)
-                        mappings = transformation_service.get_default_mappings("user")
-                        object_classes = working_config.object_classes
-
-                        # Transform record
-                        transform_result = transformation_service.transform_record(
-                            record=record,
-                            mappings=mappings,
-                            object_classes=object_classes,
-                            base_dn=working_config.base_dn,
-                        )
-
-                        if transform_result.is_success:
-                            processed_count += 1
-                        else:
-                            transformation_errors.append(
-                                transform_result.error or "Unknown error",
-                            )
-
-                    except Exception as e:
-                        error_msg = f"Error processing record: {e}"
-                        logger.exception(error_msg)
-                        transformation_errors.append(error_msg)
-
-            # Zero Tolerance FIX: Use utilities for stream metadata generation
-            processing_time = 1.0  # Would be calculated in real implementation
+            processing_time = 1.0
             stream_metadata = (
                 self._utilities.StreamUtilities.generate_ldap_stream_metadata(
                     stream_name="ldap_target",

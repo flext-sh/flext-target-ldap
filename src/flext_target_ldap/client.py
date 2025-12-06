@@ -224,6 +224,87 @@ class LDAPClient:
         logger.info("Sync connect called - using flext-ldap infrastructure")
         return FlextResult[None].ok(None)
 
+    def _try_ldap3_connection(
+        self: object,
+    ) -> tuple[bool, object | None]:
+        """Try to create ldap3 connection if available.
+
+        Returns:
+            Tuple of (success, connection) where connection is None if ldap3 unavailable.
+
+        """
+        server_pool_cls = getattr(ldap3, "ServerPool", None)
+        connection_cls = getattr(ldap3, "Connection", None)
+        if server_pool_cls is None or connection_cls is None:
+            return False, None
+
+        server_pool = server_pool_cls([self.config.server])
+        conn = connection_cls(
+            server_pool,
+            user=self._bind_dn or None,
+            password=self._password or None,
+        )
+        return True, conn
+
+    def _get_flext_ldap_wrapper(
+        self: object,
+    ) -> object:
+        """Create a connection wrapper using flext-ldap API."""
+        api = self._get_api()
+        protocol = "ldaps" if self.config.use_ssl else "ldap"
+        server_url = f"{protocol}://{self.config.server}:{self.config.port}"
+
+        # Create a sync wrapper for the connection
+        class ConnectionWrapper:
+            @override
+            def __init__(self, session_id: str) -> None:
+                self.session_id = session_id
+                self.bound = True
+                self.entries: list[object] = []
+
+            def bind(self: object) -> bool:
+                return True
+
+            def unbind(self: object) -> None:
+                pass
+
+            def add(
+                self,
+                _dn: str,
+                _object_classes: list[str],
+                _attributes: dict[str, object],
+            ) -> bool:
+                return True
+
+            def modify(self, _dn: str, _changes: dict[str, object]) -> bool:
+                return True
+
+            def delete(self, _dn: str) -> bool:
+                return True
+
+            def search(
+                self,
+                _base_dn: str,
+                _search_filter: str,
+                _attributes: list[str] | None = None,
+            ) -> bool:
+                self.entries = []
+                return True
+
+        def _get_session() -> str:
+            with api.connection(
+                server_url,
+                self._bind_dn or "",
+                self._password or "",
+            ) as session:
+                return str(session) if session else "default_session"
+
+        try:
+            session_id = _get_session()
+            return ConnectionWrapper(session_id)
+        except Exception:
+            return ConnectionWrapper("test_session")
+
     def get_connection(
         self: object,
     ) -> _GeneratorContextManager[LDAPConnectionProtocol]:
@@ -238,16 +319,9 @@ class LDAPClient:
 
         @contextmanager
         def connection_context() -> Generator[LDAPConnectionProtocol]:
-            # Primary path: Use ldap3 directly if available
-            server_pool_cls = getattr(ldap3, "ServerPool", None)
-            connection_cls = getattr(ldap3, "Connection", None)
-            if server_pool_cls is not None and connection_cls is not None:
-                server_pool = server_pool_cls([self.config.server])
-                conn = connection_cls(
-                    server_pool,
-                    user=self._bind_dn or None,
-                    password=self._password or None,
-                )
+            # Try primary path: ldap3
+            success, conn = self._try_ldap3_connection()
+            if success and conn is not None:
                 try:
                     conn.bind()
                     conn.bound = True
@@ -257,71 +331,9 @@ class LDAPClient:
                         conn.unbind()
                 return
 
-            # Fallback: Use flext-ldap API with context
-            api = self._get_api()
-            protocol = "ldaps" if self.config.use_ssl else "ldap"
-            server_url = f"{protocol}://{self.config.server}:{self.config.port}"
-
-            # Create a sync wrapper for the connection
-            class ConnectionWrapper:
-                @override
-                @override
-                def __init__(self, session_id: str) -> None:
-                    self.session_id = session_id
-                    self.bound = True
-                    self.entries: list[object] = []
-
-                def bind(self: object) -> bool:
-                    return True
-
-                def unbind(self: object) -> None:
-                    pass
-
-                def add(
-                    self,
-                    _dn: str,
-                    _object_classes: list[str],
-                    _attributes: dict[str, object],
-                ) -> bool:
-                    # Delegate to flext-ldap API
-                    return True
-
-                def modify(self, _dn: str, _changes: dict[str, object]) -> bool:
-                    # Delegate to flext-ldap API
-                    return True
-
-                def delete(self, _dn: str) -> bool:
-                    # Delegate to flext-ldap API
-                    return True
-
-                def search(
-                    self,
-                    _base_dn: str,
-                    _search_filter: str,
-                    _attributes: list[str] | None = None,
-                ) -> bool:
-                    # Delegate to flext-ldap API
-                    self.entries = []  # Empty results for compatibility
-                    return True
-
-            # Create context and extract session
-            def _get_session() -> str:
-                with api.connection(
-                    server_url,
-                    self._bind_dn or "",
-                    self._password or "",
-                ) as session:
-                    # Convert session to string identifier
-                    return str(session) if session else "default_session"
-
-            try:
-                session_id = _get_session()
-                wrapper = ConnectionWrapper(session_id)
-                yield wrapper
-            except Exception:
-                # Fallback wrapper for tests
-                wrapper = ConnectionWrapper("test_session")
-                yield wrapper
+            # Fallback: Use flext-ldap API with wrapper
+            wrapper = self._get_flext_ldap_wrapper()
+            yield wrapper
 
         return connection_context()
 

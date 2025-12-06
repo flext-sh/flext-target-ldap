@@ -69,6 +69,136 @@ class LdapProcessingResult:
         self.errors.append(error_message)
 
 
+class _CompatibleEntry:
+    """Compatible LDAP entry object."""
+
+    @override
+    def __init__(self, dn: str, attrs: dict) -> None:
+        """Initialize compatible entry."""
+        self.entry_dn = dn
+        self.entry_attributes = list(attrs.keys())
+        for key, values in attrs.items():
+            setattr(self, key, values)
+
+
+class _LdapConnectionWrapper:
+    """LDAP connection wrapper delegating to flext-ldap API."""
+
+    @override
+    def __init__(
+        self,
+        api: FlextLdapClients,
+        server_url: str,
+        bind_dn: str | None,
+        password: str | None,
+    ) -> None:
+        """Initialize wrapper."""
+        self.api = api
+        self.server_url = server_url
+        self.bind_dn = bind_dn
+        self.password = password
+        self.bound = True
+        self.entries: list[object] = []
+
+    def bind(self) -> bool:
+        """Bind to LDAP server."""
+        return True
+
+    def unbind(self) -> None:
+        """Unbind from LDAP server."""
+
+    def add(
+        self,
+        _dn: str,
+        _object_classes: list[str],
+        _attributes: dict,
+    ) -> bool:
+        """Add entry to LDAP."""
+        try:
+            connect_result = self.api.connect(
+                self.server_url,
+                self.bind_dn or "",
+                self.password or "",
+            )
+            if connect_result.is_failure:
+                return False
+            self.api.close_connection()
+            return True
+        except Exception:
+            return False
+
+    def modify(self, _dn: str, _changes: dict) -> bool:
+        """Modify entry in LDAP."""
+        try:
+            connect_result = self.api.connect(
+                self.server_url,
+                self.bind_dn or "",
+                self.password or "",
+            )
+            if connect_result.is_failure:
+                return False
+            self.api.close_connection()
+            return True
+        except Exception:
+            return False
+
+    def delete(self, _dn: str) -> bool:
+        """Delete entry from LDAP."""
+        try:
+            connect_result = self.api.connect(
+                self.server_url,
+                self.bind_dn or "",
+                self.password or "",
+            )
+            if connect_result.is_failure:
+                return False
+            self.api.close_connection()
+            return True
+        except Exception:
+            return False
+
+    def search(
+        self,
+        base_dn: str,
+        search_filter: str,
+        attributes: list | None = None,
+    ) -> bool:
+        """Search LDAP directory."""
+        try:
+            connect_result = self.api.connect(
+                self.server_url,
+                self.bind_dn or "",
+                self.password or "",
+            )
+            if connect_result.is_failure:
+                self.entries = []
+                return False
+
+            search_result = self.api.search(
+                base_dn=base_dn,
+                filter_str=search_filter,
+                attributes=attributes,
+            )
+
+            self.api.close_connection()
+
+            if search_result.is_success and search_result.data:
+                self.entries = []
+                for entry_dict in search_result.data:
+                    dn = entry_dict.get("dn", "")
+                    attrs = {
+                        k: v for k, v in entry_dict.items() if k != "dn"
+                    }
+                    compat_entry = _CompatibleEntry(dn, attrs)
+                    self.entries.append(compat_entry)
+            else:
+                self.entries = []
+            return True
+        except Exception:
+            self.entries = []
+            return False
+
+
 class LdapTargetClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
 
@@ -187,6 +317,19 @@ class LdapTargetClient:
             logger.exception(error_msg)
             return FlextResult[str].fail(error_msg)
 
+    def _create_connection_wrapper(
+        self,
+        api: FlextLdapClients,
+        server_url: str,
+    ) -> object:
+        """Create LDAP connection wrapper for delegation."""
+        return _LdapConnectionWrapper(
+            api,
+            server_url,
+            self._bind_dn or None,
+            self._password or None,
+        )
+
     def get_connection(self) -> _GeneratorContextManager[object]:
         """Get LDAP connection context manager (compatibility method).
 
@@ -199,175 +342,9 @@ class LdapTargetClient:
 
         @contextmanager
         def connection_context() -> Generator[object]:
-            # Create a real connection wrapper that delegates to flext-ldap API
-            class LdapConnectionWrapper:
-                @override
-                @override
-                @override
-                @override
-                @override
-                def __init__(
-                    self,
-                    api: FlextLdapClients,
-                    server_url: str,
-                    bind_dn: str | None,
-                    password: str | None,
-                ) -> None:
-                    self.api = api
-                    self.server_url = server_url
-                    self.bind_dn = bind_dn
-                    self.password = password
-                    self.bound = True
-
-                def bind(self) -> bool:
-                    return True
-
-                def unbind(self) -> None:
-                    pass
-
-                def add(
-                    self,
-                    _dn: str,
-                    _object_classes: list[str],
-                    _attributes: dict,
-                ) -> bool:
-                    # Delegate to flext-ldap API
-                    try:
-
-                        def _add() -> bool:
-                            connect_result = self.api.connect(
-                                self.server_url,
-                                self.bind_dn or "",
-                                self.password or "",
-                            )
-                            if connect_result.is_failure:
-                                return False
-                            # Use flext-ldap API for adding entries
-                            self.api.close_connection()
-                            return True
-
-                        _add()
-                        return True
-                    except Exception:
-                        return False
-
-                def modify(self, _dn: str, _changes: dict) -> bool:
-                    # Delegate to flext-ldap API
-                    try:
-
-                        def _modify() -> bool:
-                            connect_result = self.api.connect(
-                                self.server_url,
-                                self.bind_dn or "",
-                                self.password or "",
-                            )
-                            if connect_result.is_failure:
-                                return False
-                            # Use flext-ldap API for modifying entries
-                            self.api.close_connection()
-                            return True
-
-                        _modify()
-                        return True
-                    except Exception:
-                        return False
-
-                def delete(self, _dn: str) -> bool:
-                    # Delegate to flext-ldap API
-                    try:
-
-                        def _delete() -> bool:
-                            connect_result = self.api.connect(
-                                self.server_url,
-                                self.bind_dn or "",
-                                self.password or "",
-                            )
-                            if connect_result.is_failure:
-                                return False
-                            # Use flext-ldap API for deleting entries
-                            self.api.close_connection()
-                            return True
-
-                        _delete()
-                        return True
-                    except Exception:
-                        return False
-
-                def search(
-                    self,
-                    base_dn: str,
-                    search_filter: str,
-                    attributes: list | None = None,
-                ) -> bool:
-                    # Delegate to flext-ldap API
-                    try:
-
-                        def _search() -> FlextResult[
-                            list[FlextTargetLdapTypes.Core.Dict]
-                        ]:
-                            connect_result = self.api.connect(
-                                self.server_url,
-                                self.bind_dn or "",
-                                self.password or "",
-                            )
-                            if connect_result.is_failure:
-                                return FlextResult[
-                                    list[FlextTargetLdapTypes.Core.Dict]
-                                ].fail(connect_result.error)
-
-                            search_result = self.api.search(
-                                base_dn=base_dn,
-                                filter_str=search_filter,
-                                attributes=attributes,
-                            )
-
-                            self.api.close_connection()
-                            return search_result
-
-                        search_result: FlextResult[
-                            list[FlextTargetLdapTypes.Core.Dict]
-                        ] = _search()
-                        if search_result.is_success and search_result.data:
-                            # Convert search results to compatible format
-                            self.entries = []
-                            for entry_dict in search_result.data:
-                                # Create a compatible entry object
-                                class CompatibleEntry:
-                                    @override
-                                    @override
-                                    @override
-                                    @override
-                                    @override
-                                    def __init__(self, dn: str, attrs: dict) -> None:
-                                        self.entry_dn = dn
-                                        self.entry_attributes = list(attrs.keys())
-                                        for key, values in attrs.items():
-                                            setattr(self, key, values)
-
-                                # Extract DN and attributes from the dictionary
-                                dn = entry_dict.get("dn", "")
-                                attrs = {
-                                    k: v for k, v in entry_dict.items() if k != "dn"
-                                }
-
-                                compat_entry = CompatibleEntry(dn, attrs)
-                                self.entries.append(compat_entry)
-                        else:
-                            self.entries = []
-                        return True
-                    except Exception:
-                        self.entries = []
-                        return False
-
-            # Create wrapper instance using the existing API
             protocol = "ldaps" if self.config.use_ssl else "ldap"
             server_url = f"{protocol}://{self.config.server}:{self.config.port}"
-            wrapper = LdapConnectionWrapper(
-                self._api,
-                server_url,
-                self._bind_dn or None,
-                self._password or None,
-            )
+            wrapper = self._create_connection_wrapper(self._api, server_url)
 
             try:
                 yield wrapper
@@ -731,7 +708,7 @@ class LdapBaseSink(Sink):
             return
 
         try:
-            records_raw: list[object] = context.get("records", [])
+            records_raw: list[object] = _context.get("records", [])
 
             records: list[object] = records_raw if isinstance(records_raw, list) else []
             logger.info(
@@ -741,7 +718,7 @@ class LdapBaseSink(Sink):
             )
 
             for record in records:
-                self.process_record(record, context)
+                self.process_record(record, _context)
 
             logger.info(
                 "Batch processing completed. Success: %d, Errors: %d",

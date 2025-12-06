@@ -154,7 +154,7 @@ class LDAPBaseSink(Sink):
             return
 
         try:
-            records_raw: list[object] = context.get("records", [])
+            records_raw: list[object] = _context.get("records", [])
 
             records: list[object] = records_raw if isinstance(records_raw, list) else []
             logger.info(
@@ -164,7 +164,7 @@ class LDAPBaseSink(Sink):
             )
 
             for record in records:
-                self.process_record(record, context)
+                self.process_record(record, _context)
 
             logger.info(
                 "Batch processing completed. Success: %d, Errors: %d",
