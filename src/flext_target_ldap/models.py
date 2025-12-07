@@ -533,6 +533,6 @@ class FlextTargetLdapModels(FlextModels):
 
 
 # Export the unified models class
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__all__: list[str] = [
     "FlextTargetLdapModels",
 ]

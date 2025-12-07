@@ -95,4 +95,4 @@ class SingerTargetLDAP:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: FlextTargetLdapTypes.Core.StringList = ["SingerTargetLDAP"]
+__all__: list[str] = ["SingerTargetLDAP"]

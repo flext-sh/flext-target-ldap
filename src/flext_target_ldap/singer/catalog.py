@@ -12,7 +12,7 @@ from typing import ClassVar, override
 from flext_core import FlextLogger, FlextModels, FlextResult
 from pydantic import Field
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
@@ -23,13 +23,13 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
 
     tap_stream_id: str
     stream: str
-    stream_schema: FlextTargetLdapTypes.Core.Dict = Field(
+    stream_schema: t.Core.Dict = Field(
         ...,
         description="Singer stream schema",
     )
-    metadata: list[FlextTargetLdapTypes.Core.Dict] = Field(default_factory=list)
-    key_properties: ClassVar[FlextTargetLdapTypes.Core.StringList] = []
-    bookmark_properties: ClassVar[FlextTargetLdapTypes.Core.StringList] = []
+    metadata: list[t.Core.Dict] = Field(default_factory=list)
+    key_properties: ClassVar[t.Core.StringList] = []
+    bookmark_properties: ClassVar[t.Core.StringList] = []
 
     def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate catalog entry business rules."""
@@ -56,7 +56,7 @@ class SingerLDAPCatalogManager:
     def add_stream(
         self,
         stream_name: str,
-        schema: FlextTargetLdapTypes.Core.Dict,
+        schema: t.Core.Dict,
     ) -> FlextResult[None]:
         """Add LDAP stream to catalog."""
         try:
@@ -84,7 +84,7 @@ class SingerLDAPCatalogManager:
 
 
 # Re-export for backward compatibility
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__all__: list[str] = [
     "SingerLDAPCatalogEntry",
     "SingerLDAPCatalogManager",
 ]

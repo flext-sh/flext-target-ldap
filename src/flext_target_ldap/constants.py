@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, Final
 
 from flext_core import FlextConstants
 from flext_ldap.constants import FlextLdapConstants
@@ -59,9 +59,7 @@ class FlextTargetLdapConstants(FlextConstants):
     class Loading:
         """Target-specific loading configuration."""
 
-        class DefaultLoadTimeout(FlextLdapConstants.DEFAULT_TIMEOUT):
-            """DefaultLoadTimeout - real inheritance."""
-
+        DEFAULT_LOAD_TIMEOUT: Final[int] = FlextLdapConstants.ConnectionDefaults.TIMEOUT
         MAX_LOAD_RETRIES = FlextLdapConstants.LdapRetry.CONNECTION_MAX_RETRIES
         LOAD_RETRY_DELAY = FlextLdapConstants.LdapRetry.CONNECTION_RETRY_DELAY
 
@@ -73,4 +71,6 @@ class FlextTargetLdapConstants(FlextConstants):
         MAX_DN_LENGTH = FlextLdapConstants.Validation.MAX_DN_LENGTH
 
 
-__all__ = ["FlextTargetLdapConstants"]
+c = FlextTargetLdapConstants
+
+__all__ = ["FlextTargetLdapConstants", "c"]

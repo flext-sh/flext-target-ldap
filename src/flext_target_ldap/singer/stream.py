@@ -11,7 +11,7 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
@@ -27,7 +27,7 @@ class LDAPStreamProcessingStats:
         self.records_processed = 0
         self.records_success = 0
         self.records_failed = 0
-        self.errors: FlextTargetLdapTypes.Core.StringList = []
+        self.errors: t.Core.StringList = []
 
     @property
     def success_rate(self: object) -> float:
@@ -70,7 +70,7 @@ class SingerLDAPStreamProcessor:
 
 
 # Re-export for backward compatibility
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__all__: list[str] = [
     "LDAPStreamProcessingStats",
     "SingerLDAPStreamProcessor",
 ]
