@@ -186,9 +186,7 @@ class _LdapConnectionWrapper:
                 self.entries = []
                 for entry_dict in search_result.data:
                     dn = entry_dict.get("dn", "")
-                    attrs = {
-                        k: v for k, v in entry_dict.items() if k != "dn"
-                    }
+                    attrs = {k: v for k, v in entry_dict.items() if k != "dn"}
                     compat_entry = _CompatibleEntry(dn, attrs)
                     self.entries.append(compat_entry)
             else:
