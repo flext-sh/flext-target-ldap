@@ -10,7 +10,8 @@ from flext_target_ldap.singer.stream import SingerLDAPStreamProcessor
 from flext_target_ldap.singer.target import SingerTargetLDAP
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__all__: list[str] = [
+    "FlextTargetLdapTypes",
     "SingerLDAPCatalogManager",
     "SingerLDAPStreamProcessor",
     "SingerTargetLDAP",

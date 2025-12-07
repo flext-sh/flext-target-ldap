@@ -15,7 +15,8 @@ from flext_target_ldap.infrastructure.di_container import (
 )
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__all__: list[str] = [
+    "FlextTargetLdapTypes",
     "configure_flext_target_ldap_dependencies",
     "dict[str, object]",
     "get_flext_target_ldap_container",

@@ -15,7 +15,8 @@ from flext_target_ldap.patterns.ldap_patterns import (
 )
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__all__: list[str] = [
+    "FlextTargetLdapTypes",
     "LDAPDataTransformer",
     "LDAPEntryManager",
     "LDAPSchemaMapper",

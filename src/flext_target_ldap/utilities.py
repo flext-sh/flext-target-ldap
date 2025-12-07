@@ -27,6 +27,7 @@ class FlextTargetLdapUtilities(u):
 
     LDAP_DEFAULT_PORT: ClassVar[int] = 389
     LDAPS_DEFAULT_PORT: ClassVar[int] = 636
+    DEFAULT_BATCH_SIZE: ClassVar[int] = 100
 
     @override
     def __init__(self) -> None:
@@ -189,9 +190,7 @@ class FlextTargetLdapUtilities(u):
                 full_dn = f"{dn_rdn},{base_dn}"
 
                 # Validate DN format
-                if not FlextTargetLdapUtilities.LdapDataProcessing.FlextLdifUtilities.DN.split(
-                    full_dn,
-                ):
+                if not FlextTargetLdapUtilities.LdapDataProcessing.split(full_dn):
                     return FlextResult[str].fail(f"Invalid DN format: {full_dn}")
 
                 return FlextResult[str].ok(full_dn)
@@ -451,18 +450,14 @@ class FlextTargetLdapUtilities(u):
 
             # Validate bind DN format
             bind_dn = config["bind_dn"]
-            if not FlextTargetLdapUtilities.LdapDataProcessing.FlextLdifUtilities.DN.split(
-                bind_dn,
-            ):
+            if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
                 return FlextResult[dict[str, object]].fail(
                     f"Invalid bind DN format: {bind_dn}",
                 )
 
             # Validate base DN format
             base_dn = config["base_dn"]
-            if not FlextTargetLdapUtilities.LdapDataProcessing.FlextLdifUtilities.DN.split(
-                base_dn,
-            ):
+            if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
                 return FlextResult[dict[str, object]].fail(
                     f"Invalid base DN format: {base_dn}",
                 )

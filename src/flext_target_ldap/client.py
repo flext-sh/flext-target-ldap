@@ -495,7 +495,7 @@ class LDAPEntry(FlextLdapModels.Entry):
     """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
 
 
-__all__: FlextTargetLdapTypes.Core.StringList = [
+__all__: list[str] = [
     "LDAPClient",
     "LDAPConnectionConfig",
     "LDAPEntry",
