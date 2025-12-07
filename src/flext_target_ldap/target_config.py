@@ -265,7 +265,9 @@ def validate_ldap_target_config(
             config.get("object_classes", ["top"]),
             ["top"],
         )
-        search_filter = _target_config_to_str(config.get("search_filter", "(objectClass=*)"))
+        search_filter = _target_config_to_str(
+            config.get("search_filter", "(objectClass=*)")
+        )
         search_scope = _target_config_to_str(config.get("search_scope", "SUBTREE"))
 
         validated_config = FlextTargetLdapConfig(

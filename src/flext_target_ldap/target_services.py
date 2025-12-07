@@ -481,8 +481,7 @@ class LdapTargetOrchestrator:
     ) -> None:
         """Validate stream compatibility."""
         if not (
-            hasattr(working_config, "object_classes")
-            and working_config.object_classes
+            hasattr(working_config, "object_classes") and working_config.object_classes
         ):
             return
 
@@ -514,11 +513,9 @@ class LdapTargetOrchestrator:
         working_config: dict[str, object] | object,
     ) -> int:
         """Calculate optimal batch size."""
-        optimal_batch_size = (
-            self._utilities.StreamUtilities.calculate_ldap_batch_size(
-                record_count=records_count,
-                target_batches=10,
-            )
+        optimal_batch_size = self._utilities.StreamUtilities.calculate_ldap_batch_size(
+            record_count=records_count,
+            target_batches=10,
         )
 
         return min(
