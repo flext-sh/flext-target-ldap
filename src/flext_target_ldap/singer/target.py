@@ -15,7 +15,7 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 logger: FlextLogger = FlextLogger(__name__)
 
@@ -24,7 +24,7 @@ class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
     @override
-    def __init__(self, config: FlextTargetLdapTypes.Core.Dict | None = None) -> None:
+    def __init__(self, config: t.Core.Dict | None = None) -> None:
         """Initialize Singer LDAP target.
 
         Args:
@@ -39,8 +39,8 @@ class SingerTargetLDAP:
 
     def process_singer_messages(
         self,
-        messages: list[FlextTargetLdapTypes.Core.Dict],
-    ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
+        messages: list[t.Core.Dict],
+    ) -> FlextResult[t.Core.Dict]:
         """Process Singer messages for LDAP target.
 
         Args:
@@ -68,11 +68,11 @@ class SingerTargetLDAP:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return FlextResult[FlextTargetLdapTypes.Core.Dict].ok(result)
+            return FlextResult[t.Core.Dict].ok(result)
 
         except Exception as e:
             logger.exception("Singer message processing failed")
-            return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
+            return FlextResult[t.Core.Dict].fail(
                 f"Message processing failed: {e}",
             )
 

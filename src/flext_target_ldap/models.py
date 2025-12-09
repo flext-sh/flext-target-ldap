@@ -16,9 +16,10 @@ from enum import StrEnum
 from typing import Self
 
 from flext_core import FlextModels, FlextResult
+from flext_core.utilities import u
 from pydantic import Field, field_validator
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapModels(FlextModels):
@@ -28,6 +29,14 @@ class FlextTargetLdapModels(FlextModels):
     for composition and validation reuse, following the [Project]Models standard.
     Integrates with flext-core patterns for enterprise LDAP data loading.
     """
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        """Warn when FlextTargetLdapModels is subclassed directly."""
+        super().__init_subclass__(**kwargs)
+        u.Deprecation.warn_once(
+            f"subclass:{cls.__name__}",
+            "Subclassing FlextTargetLdapModels is deprecated. Use FlextModels directly with composition instead.",
+        )
 
     class ObjectClass(StrEnum):
         """Standard LDAP object classes for target operations.
@@ -92,7 +101,7 @@ class FlextTargetLdapModels(FlextModels):
             max_length=1000,
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[None]:
             """Validate attribute mapping business rules."""
             try:
                 # Validate field name format
@@ -143,11 +152,11 @@ class FlextTargetLdapModels(FlextModels):
             min_length=1,
             max_length=1000,
         )
-        object_classes: FlextTargetLdapTypes.Core.StringList = Field(
+        object_classes: t.Core.StringList = Field(
             default_factory=list,
             description="LDAP object classes",
         )
-        attributes: dict[str, FlextTargetLdapTypes.Core.StringList] = Field(
+        attributes: dict[str, t.Core.StringList] = Field(
             default_factory=dict,
             description="LDAP attributes with values",
         )
@@ -165,17 +174,17 @@ class FlextTargetLdapModels(FlextModels):
         @classmethod
         def validate_object_classes(
             cls,
-            v: FlextTargetLdapTypes.Core.StringList,
-        ) -> FlextTargetLdapTypes.Core.StringList:
+            v: t.Core.StringList,
+        ) -> t.Core.StringList:
             """Validate object classes contain 'top'."""
             if "top" not in v:
                 v.append("top")
             return v
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[None]:
             """Validate LDAP entry business rules."""
             try:
-                errors: FlextTargetLdapTypes.Core.StringList = []
+                errors: t.Core.StringList = []
 
                 # Validate DN format
                 if (
@@ -214,11 +223,11 @@ class FlextTargetLdapModels(FlextModels):
             except Exception as e:
                 return FlextResult[None].fail(f"LDAP entry validation failed: {e}")
 
-        def get_rdn(self: object) -> str:
+        def get_rdn(self) -> str:
             """Get the Relative Distinguished Name (RDN) from the DN."""
             return self.distinguished_name.split(",")[0].strip()
 
-        def get_parent_dn(self: object) -> str:
+        def get_parent_dn(self) -> str:
             """Get the parent DN by removing the RDN."""
             parts = self.distinguished_name.split(",", 1)
             return parts[1].strip() if len(parts) > 1 else ""
@@ -230,7 +239,7 @@ class FlextTargetLdapModels(FlextModels):
         def get_attribute_values(
             self,
             attribute_name: str,
-        ) -> FlextTargetLdapTypes.Core.StringList:
+        ) -> t.Core.StringList:
             """Get values for a specific attribute."""
             return self.attributes.get(attribute_name, [])
 
@@ -241,7 +250,7 @@ class FlextTargetLdapModels(FlextModels):
         for LDAP target operations.
         """
 
-        original_record: FlextTargetLdapTypes.Core.Dict = Field(
+        original_record: t.Core.Dict = Field(
             ...,
             description="Original Singer record before transformation",
         )
@@ -253,7 +262,7 @@ class FlextTargetLdapModels(FlextModels):
             default_factory=list,
             description="Attribute mappings that were applied",
         )
-        transformation_errors: FlextTargetLdapTypes.Core.StringList = Field(
+        transformation_errors: t.Core.StringList = Field(
             default_factory=list,
             description="object errors encountered during transformation",
         )
@@ -267,7 +276,7 @@ class FlextTargetLdapModels(FlextModels):
             description="When transformation was performed",
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[None]:
             """Validate transformation result business rules."""
             try:
                 # Validate we have meaningful data
@@ -288,7 +297,7 @@ class FlextTargetLdapModels(FlextModels):
                 )
 
         @property
-        def success_rate(self: object) -> float:
+        def success_rate(self) -> float:
             """Calculate transformation success rate."""
             total_mappings = len(self.applied_mappings)
             if total_mappings == 0:
@@ -297,7 +306,7 @@ class FlextTargetLdapModels(FlextModels):
             error_count = len(self.transformation_errors)
             return ((total_mappings - error_count) / total_mappings) * 100.0
 
-        def has_errors(self: object) -> bool:
+        def has_errors(self) -> bool:
             """Check if transformation has any errors."""
             return bool(self.transformation_errors)
 
@@ -344,7 +353,7 @@ class FlextTargetLdapModels(FlextModels):
             description="Timestamp of last batch processing",
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[None]:
             """Validate batch processing business rules."""
             try:
                 # Validate batch size doesn't exceed current batch
@@ -369,17 +378,17 @@ class FlextTargetLdapModels(FlextModels):
                 )
 
         @property
-        def is_batch_full(self: object) -> bool:
+        def is_batch_full(self) -> bool:
             """Check if current batch is full."""
             return len(self.current_batch) >= self.batch_size
 
         @property
-        def current_batch_size(self: object) -> int:
+        def current_batch_size(self) -> int:
             """Get current batch size."""
             return len(self.current_batch)
 
         @property
-        def success_rate(self: object) -> float:
+        def success_rate(self) -> float:
             """Calculate success rate percentage."""
             total_ops = self.successful_operations + self.failed_operations
             if total_ops == 0:
@@ -397,7 +406,7 @@ class FlextTargetLdapModels(FlextModels):
                 },
             )
 
-        def clear_batch(self: object) -> Self:
+        def clear_batch(self) -> Self:
             """Clear current batch after processing (immutable operation)."""
             return self.model_copy(
                 update={
@@ -469,7 +478,7 @@ class FlextTargetLdapModels(FlextModels):
             description="When processing completed",
         )
 
-        def validate_business_rules(self: object) -> FlextResult[None]:
+        def validate_business_rules(self) -> FlextResult[None]:
             """Validate operation statistics business rules."""
             try:
                 # Validate that successful operations don't exceed total
@@ -499,7 +508,7 @@ class FlextTargetLdapModels(FlextModels):
                 )
 
         @property
-        def success_rate(self: object) -> float:
+        def success_rate(self) -> float:
             """Calculate overall success rate percentage."""
             if self.total_entries_processed == 0:
                 return 0.0
@@ -509,21 +518,21 @@ class FlextTargetLdapModels(FlextModels):
             return (successful / self.total_entries_processed) * 100.0
 
         @property
-        def total_duration_seconds(self: object) -> float:
+        def total_duration_seconds(self) -> float:
             """Calculate total processing duration in seconds."""
             if not self.end_time:
                 return 0.0
             return (self.end_time - self.start_time).total_seconds()
 
         @property
-        def operations_per_second(self: object) -> float:
+        def operations_per_second(self) -> float:
             """Calculate operations per second throughput."""
             duration = self.total_duration_seconds
             if duration == 0.0:
                 return 0.0
             return self.total_entries_processed / duration
 
-        def complete_processing(self: object) -> Self:
+        def complete_processing(self) -> Self:
             """Mark processing as completed (immutable operation)."""
             return self.model_copy(
                 update={
@@ -533,6 +542,11 @@ class FlextTargetLdapModels(FlextModels):
 
 
 # Export the unified models class
+m = FlextTargetLdapModels
+m_target_ldap = FlextTargetLdapModels
+
 __all__: list[str] = [
     "FlextTargetLdapModels",
+    "m",
+    "m_target_ldap",
 ]

@@ -19,7 +19,7 @@ from flext_ldap import FlextLdapModels
 from pydantic import Field
 
 from flext_target_ldap.config import FlextTargetLdapConfig
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 
 class LdapTargetConnectionSettings(FlextConfig):
@@ -112,11 +112,11 @@ class LdapTargetOperationSettings(FlextConfig):
 class LdapTargetMappingSettings(FlextConfig):
     """LDAP attribute mapping and transformation settings."""
 
-    attribute_mapping: FlextTargetLdapTypes.Core.Headers = Field(
+    attribute_mapping: t.Core.Headers = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: FlextTargetLdapTypes.Core.StringList = Field(
+    object_classes: t.Core.StringList = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -187,8 +187,8 @@ def _target_config_to_str(value: object, default: str = "") -> str:
 
 def _target_config_to_str_list(
     value: object,
-    default: FlextTargetLdapTypes.Core.StringList,
-) -> FlextTargetLdapTypes.Core.StringList:
+    default: t.Core.StringList,
+) -> t.Core.StringList:
     """Convert value to string list."""
     if isinstance(value, list):
         return [str(v) for v in value]
@@ -196,7 +196,7 @@ def _target_config_to_str_list(
 
 
 def _build_target_connection_config(
-    config: FlextTargetLdapTypes.Core.Dict,
+    config: t.Core.Dict,
 ) -> FlextLdapModels.ConnectionConfig:
     """Build connection config for target."""
     server = _target_config_to_str(config.get("host", "localhost"), "localhost")
@@ -216,7 +216,7 @@ def _build_target_connection_config(
     )
 
 
-def _extract_target_max_records(config: FlextTargetLdapTypes.Core.Dict) -> int | None:
+def _extract_target_max_records(config: t.Core.Dict) -> int | None:
     """Extract max records from config."""
     max_records_val = config.get("max_records")
     if isinstance(max_records_val, bool):
@@ -232,7 +232,7 @@ def _extract_target_max_records(config: FlextTargetLdapTypes.Core.Dict) -> int |
 
 
 def validate_ldap_target_config(
-    config: FlextTargetLdapTypes.Core.Dict,
+    config: t.Core.Dict,
 ) -> FlextResult[FlextTargetLdapConfig]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
@@ -256,7 +256,7 @@ def validate_ldap_target_config(
         )
 
         raw_attr_map: dict[str, object] = config.get("attribute_mapping", {})
-        attribute_mapping: FlextTargetLdapTypes.Core.Headers = (
+        attribute_mapping: t.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map.items()}
             if isinstance(raw_attr_map, dict)
             else {}
