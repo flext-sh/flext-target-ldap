@@ -13,7 +13,7 @@ from enum import StrEnum
 from flext_core import FlextModels, FlextResult
 from pydantic import Field, field_validator
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 
 class LdapObjectClassModel(StrEnum):
@@ -121,11 +121,11 @@ class LdapEntryModel(FlextModels.Entity):
         min_length=1,
         max_length=1000,
     )
-    object_classes: FlextTargetLdapTypes.Core.StringList = Field(
+    object_classes: t.Core.StringList = Field(
         default_factory=list,
         description="LDAP object classes",
     )
-    attributes: dict[str, FlextTargetLdapTypes.Core.StringList] = Field(
+    attributes: dict[str, t.Core.StringList] = Field(
         default_factory=dict,
         description="LDAP attributes with values",
     )
@@ -143,8 +143,8 @@ class LdapEntryModel(FlextModels.Entity):
     @classmethod
     def validate_object_classes(
         cls,
-        v: FlextTargetLdapTypes.Core.StringList,
-    ) -> FlextTargetLdapTypes.Core.StringList:
+        v: t.Core.StringList,
+    ) -> t.Core.StringList:
         """Validate object classes contain 'top'."""
         if "top" not in v:
             v.append("top")
@@ -153,7 +153,7 @@ class LdapEntryModel(FlextModels.Entity):
     def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate LDAP entry business rules."""
         try:
-            errors: FlextTargetLdapTypes.Core.StringList = []
+            errors: t.Core.StringList = []
 
             # Validate DN format
             if "=" not in self.distinguished_name or "," not in self.distinguished_name:
@@ -205,7 +205,7 @@ class LdapEntryModel(FlextModels.Entity):
     def get_attribute_values(
         self,
         attribute_name: str,
-    ) -> FlextTargetLdapTypes.Core.StringList:
+    ) -> t.Core.StringList:
         """Get values for a specific attribute."""
         return self.attributes.get(attribute_name, [])
 
@@ -217,7 +217,7 @@ class LdapTransformationResultModel(FlextModels.Entity):
     for LDAP target operations.
     """
 
-    original_record: FlextTargetLdapTypes.Core.Dict = Field(
+    original_record: t.Core.Dict = Field(
         ...,
         description="Original Singer record before transformation",
     )
@@ -229,7 +229,7 @@ class LdapTransformationResultModel(FlextModels.Entity):
         default_factory=list,
         description="Attribute mappings that were applied",
     )
-    transformation_errors: FlextTargetLdapTypes.Core.StringList = Field(
+    transformation_errors: t.Core.StringList = Field(
         default_factory=list,
         description="object errors encountered during transformation",
     )
@@ -437,7 +437,7 @@ class LdapOperationStatisticsModel(FlextModels.Entity):
         description="Total duration of all operations in milliseconds",
         ge=0.0,
     )
-    error_messages: FlextTargetLdapTypes.Core.StringList = Field(
+    error_messages: t.Core.StringList = Field(
         default_factory=list,
         description="Collected error messages",
     )
@@ -530,7 +530,7 @@ class LdapOperationStatisticsModel(FlextModels.Entity):
     def get_recent_errors(
         self,
         limit: int = 10,
-    ) -> FlextTargetLdapTypes.Core.StringList:
+    ) -> t.Core.StringList:
         """Get most recent error messages."""
         return self.error_messages[-limit:] if self.error_messages else []
 

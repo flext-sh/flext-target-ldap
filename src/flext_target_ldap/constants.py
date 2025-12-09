@@ -7,68 +7,112 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar, Final
+from typing import Final
 
-from flext_core import FlextConstants
 from flext_ldap.constants import FlextLdapConstants
 
 
-class FlextTargetLdapConstants(FlextConstants):
+class FlextTargetLdapConstants(FlextLdapConstants):
     """LDAP target loading-specific constants following FLEXT unified pattern with nested domains.
 
-    Composes with FlextLdapConstants to avoid duplication and ensure consistency.
+    Extends FlextLdapConstants to inherit all LDAP and LDIF constants, adding
+    target-specific constants in the TargetLdap namespace.
+
+    Hierarchy:
+        FlextConstants (flext-core)
+        └── FlextLdifConstants (flext-ldif)
+            └── FlextLdapConstants (flext-ldap)
+                └── FlextTargetLdapConstants (this module)
+
+    Access patterns:
+        - c.TargetLdap.* (target-specific constants)
+        - c.Ldap.* (inherited from FlextLdapConstants)
+        - c.Ldif.* (inherited from FlextLdifConstants via FlextLdapConstants)
+        - c.Network.*, c.Errors.*, etc. (inherited from FlextConstants)
     """
 
-    class Connection:
-        """LDAP connection configuration constants."""
+    class TargetLdap:
+        """Target LDAP domain-specific constants namespace."""
 
-        class Ldap:
-            """Standard LDAP connection settings."""
+        class Connection:
+            """LDAP connection configuration constants for target operations."""
 
-            DEFAULT_HOST = (
-                FlextLdapConstants.Protocol.DEFAULT_HOST
-                if hasattr(FlextLdapConstants.Protocol, "DEFAULT_HOST")
-                else FlextConstants.Platform.DEFAULT_HOST
+            DEFAULT_HOST: Final[str] = FlextLdapConstants.Platform.DEFAULT_HOST
+            DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
+            DEFAULT_TIMEOUT: Final[int] = (
+                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
             )
-            DEFAULT_PORT = FlextLdapConstants.Protocol.DEFAULT_PORT
-            DEFAULT_TIMEOUT = FlextLdapConstants.Protocol.DEFAULT_TIMEOUT_SECONDS
-            MAX_PORT_NUMBER = 65535
+            MAX_PORT_NUMBER: Final[int] = 65535
 
-        class Ldaps:
-            """Secure LDAP connection settings."""
+            class Ldaps:
+                """Secure LDAP connection settings."""
 
-            DEFAULT_PORT = FlextLdapConstants.Protocol.DEFAULT_SSL_PORT
+                DEFAULT_PORT: Final[int] = (
+                    FlextLdapConstants.Ldap.ConnectionDefaults.PORT_SSL
+                )
 
-    class Processing:
-        """Singer target data processing configuration."""
+        class Processing:
+            """Singer target data processing configuration.
 
-        DEFAULT_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
-        MAX_BATCH_SIZE = FlextConstants.Performance.BatchProcessing.MAX_ITEMS
-        DEFAULT_PAGE_SIZE = FlextLdapConstants.Connection.DEFAULT_PAGE_SIZE
+            Note: Does not override parent Processing class to avoid inheritance conflicts.
+            """
 
-    class Operations:
-        """LDAP operation types and commands."""
+            DEFAULT_BATCH_SIZE: Final[int] = (
+                FlextLdapConstants.Performance.BatchProcessing.DEFAULT_SIZE
+            )
+            MAX_BATCH_SIZE: Final[int] = (
+                FlextLdapConstants.Performance.BatchProcessing.MAX_ITEMS
+            )
+            DEFAULT_PAGE_SIZE: Final[int] = (
+                FlextLdapConstants.Pagination.DEFAULT_PAGE_SIZE
+            )
 
-        TYPES: ClassVar[list[str]] = [
-            "ADD",
-            "MODIFY",
-            "DELETE",
-            "MODDN",
-        ]
+        class Operations:
+            """LDAP operation types and commands.
 
-    class Loading:
-        """Target-specific loading configuration."""
+            Note: For type-safe operation handling, use c.Ldap.OperationType
+            StrEnum instead of this list. This list is kept for backward compatibility.
 
-        DEFAULT_LOAD_TIMEOUT: Final[int] = FlextLdapConstants.ConnectionDefaults.TIMEOUT
-        MAX_LOAD_RETRIES = FlextLdapConstants.LdapRetry.CONNECTION_MAX_RETRIES
-        LOAD_RETRY_DELAY = FlextLdapConstants.LdapRetry.CONNECTION_RETRY_DELAY
+            DRY Pattern:
+                TYPES tuple is generated from OperationType StrEnum members to eliminate
+                string duplication. The StrEnum is the single source of truth.
+            """
 
-    class Validation:
-        """Target-specific validation configuration."""
+            # Generate tuple from OperationType StrEnum members (eliminates string duplication)
+            # Only include operations relevant for target operations: ADD, MODIFY, DELETE, MODIFY_DN
+            TYPES: Final[tuple[str, ...]] = tuple(
+                member.name
+                for member in (
+                    FlextLdapConstants.Ldap.OperationType.ADD,
+                    FlextLdapConstants.Ldap.OperationType.MODIFY,
+                    FlextLdapConstants.Ldap.OperationType.DELETE,
+                    FlextLdapConstants.Ldap.OperationType.MODIFY_DN,
+                )
+            )
 
-        DN_VALIDATION_PATTERN = FlextLdapConstants.Validation.DN_PATTERN
-        FILTER_VALIDATION_PATTERN = FlextLdapConstants.Validation.FILTER_PATTERN
-        MAX_DN_LENGTH = FlextLdapConstants.Validation.MAX_DN_LENGTH
+        class Loading:
+            """Target-specific loading configuration."""
+
+            DEFAULT_LOAD_TIMEOUT: Final[int] = (
+                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+            )
+            MAX_LOAD_RETRIES: Final[int] = (
+                FlextLdapConstants.Reliability.MAX_RETRY_ATTEMPTS
+            )
+            LOAD_RETRY_DELAY: Final[float] = (
+                FlextLdapConstants.Reliability.DEFAULT_RETRY_DELAY_SECONDS
+            )
+
+        class Validation:
+            """Target-specific validation configuration.
+
+            Note: Does not override parent Validation class to avoid inheritance conflicts.
+            """
+
+            # Validation constants from flext-ldif (parent of flext-ldap)
+            MAX_DN_LENGTH: Final[int] = (
+                FlextLdapConstants.Ldif.LdifValidation.MAX_DN_LENGTH
+            )
 
 
 c = FlextTargetLdapConstants

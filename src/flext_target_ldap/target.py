@@ -20,16 +20,16 @@ from flext_meltano import Sink, Target
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import FlextTargetLdapConfig
-from flext_target_ldap.constants import FlextTargetLdapConstants
+from flext_target_ldap.constants import c
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 from flext_target_ldap.sinks import (
     LDAPBaseSink,
 )
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
-# Network constants - moved to FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
+# Network constants - moved to c.TargetLdap.Connection.MAX_PORT_NUMBER
 
 
 class TargetLDAP(Target):
@@ -42,7 +42,7 @@ class TargetLDAP(Target):
     def __init__(
         self,
         *,
-        config: FlextTargetLdapTypes.Core.Dict | None = None,
+        config: t.Core.Dict | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -60,7 +60,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self: object) -> FlextTargetLdapTypes.Core.Dict:
+    def singer_catalog(self: object) -> t.Core.Dict:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -155,8 +155,8 @@ class TargetLDAP(Target):
                 port = 389
         else:
             port = 389
-        if port <= 0 or port > FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER:
-            msg = f"LDAP port must be between 1 and {FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER}"
+        if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
+            msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)
 
         use_ssl = self.config.get("use_ssl", False)
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> FlextTargetLdapTypes.Core.Dict:
+def _load_config_from_file(config_path: str) -> t.Core.Dict:
     """Load configuration from JSON file."""
     try:
         with Path(config_path).open(encoding="utf-8") as f:
@@ -242,7 +242,7 @@ def _construct_dn(
 def _process_record_message(
     record: dict[str, object],
     stream: str,
-    cfg: FlextTargetLdapTypes.Core.Dict,
+    cfg: t.Core.Dict,
     api: object | None,
     seen_dns: set[str],
 ) -> None:

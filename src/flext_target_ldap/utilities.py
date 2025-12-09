@@ -12,12 +12,13 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextResult, u
+from flext_core import FlextResult
+from flext_core.utilities import FlextUtilities as u_core
 
-from flext_target_ldap.constants import FlextTargetLdapConstants
+from flext_target_ldap.constants import c
 
 
-class FlextTargetLdapUtilities(u):
+class FlextTargetLdapUtilities(u_core):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for
@@ -468,7 +469,7 @@ class FlextTargetLdapUtilities(u):
                 if (
                     not isinstance(port, int)
                     or port <= 0
-                    or port > FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
+                    or port > c.TargetLdap.Connection.MAX_PORT_NUMBER
                 ):
                     return FlextResult[dict[str, object]].fail(
                         "Port must be a valid integer between 1 and 65535",

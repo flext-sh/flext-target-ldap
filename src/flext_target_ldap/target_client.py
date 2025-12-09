@@ -12,28 +12,27 @@ from contextlib import _GeneratorContextManager, contextmanager
 from typing import override
 
 from flext_core import (
-    FlextConstants,
     FlextContainer,
     FlextLogger,
     FlextResult,
 )
 from flext_ldap import FlextLdap, FlextLdapClients, FlextLdapModels
 
-from flext_target_ldap.constants import FlextTargetLdapConstants
+from flext_target_ldap.constants import c
 from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target_config import TargetLdapConfig
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
-# Network constants - moved to FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER
+# Network constants - moved to c.TargetLdap.Connection.MAX_PORT_NUMBER
 
 
 class LdapSearchEntry:
     """LDAP search result entry for backward compatibility."""
 
     @override
-    def __init__(self, dn: str, attributes: FlextTargetLdapTypes.Core.Dict) -> None:
+    def __init__(self, dn: str, attributes: t.Core.Dict) -> None:
         """Initialize search entry."""
         self.dn = dn
         self.attributes = attributes
@@ -48,7 +47,7 @@ class LdapProcessingResult:
         self.processed_count: int = 0
         self.success_count: int = 0
         self.error_count: int = 0
-        self.errors: FlextTargetLdapTypes.Core.StringList = []
+        self.errors: t.Core.StringList = []
 
     @property
     def success_rate(self) -> float:
@@ -207,7 +206,7 @@ class LdapTargetClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.ConnectionConfig | FlextTargetLdapTypes.Core.Dict,
+        config: FlextLdapModels.ConnectionConfig | t.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
@@ -354,13 +353,13 @@ class LdapTargetClient:
     def add_entry(
         self,
         dn: str,
-        attributes: FlextTargetLdapTypes.Core.Dict,
+        attributes: t.Core.Dict,
         object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
             # Prepare attributes for flext-ldap
-            ldap_attributes: dict[str, FlextTargetLdapTypes.Core.StringList] = {}
+            ldap_attributes: dict[str, t.Core.StringList] = {}
 
             # Process attributes
             for key, value in attributes.items():
@@ -429,12 +428,12 @@ class LdapTargetClient:
     def modify_entry(
         self,
         dn: str,
-        changes: FlextTargetLdapTypes.Core.Dict,
+        changes: t.Core.Dict,
     ) -> FlextResult[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             # Prepare changes for flext-ldap
-            ldap_changes: dict[str, FlextTargetLdapTypes.Core.StringList] = {}
+            ldap_changes: dict[str, t.Core.StringList] = {}
 
             for key, value in changes.items():
                 if isinstance(value, list):
@@ -642,7 +641,7 @@ class LdapBaseSink(Sink):
         self,
         target: Target,
         stream_name: str,
-        schema: FlextTargetLdapTypes.Core.Dict,
+        schema: t.Core.Dict,
         key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
@@ -659,18 +658,18 @@ class LdapBaseSink(Sink):
             connection_config = {
                 "host": self._target.config.get(
                     "host",
-                    FlextConstants.Infrastructure.DEFAULT_HOST,
+                    c.Platform.DEFAULT_HOST,
                 ),
                 "port": self._target.config.get(
                     "port",
-                    FlextConstants.Platform.LDAP_PORT,
+                    c.TargetLdap.Connection.DEFAULT_PORT,
                 ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),
                 "timeout": self._target.config.get(
                     "timeout",
-                    FlextConstants.Defaults.TIMEOUT,
+                    c.TargetLdap.Connection.DEFAULT_TIMEOUT,
                 ),
             }
 
@@ -698,7 +697,7 @@ class LdapBaseSink(Sink):
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
-    def process_batch(self, _context: FlextTargetLdapTypes.Core.Dict) -> None:
+    def process_batch(self, _context: t.Core.Dict) -> None:
         """Process a batch of records."""
         setup_result: FlextResult[object] = self.setup_client()
         if not setup_result.is_success:
@@ -775,7 +774,7 @@ class LdapUsersSink(LdapBaseSink):
             # Build DN for user
             base_dn = self._target.config.get(
                 "base_dn",
-                FlextConstants.Platform.DEFAULT_LDAP_BASE_DN,
+                "dc=example,dc=com",  # Default base DN - should come from config
             )
             user_dn = f"uid={username},{base_dn}"
 
@@ -821,14 +820,14 @@ class LdapUsersSink(LdapBaseSink):
 
     def build_user_attributes(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextTargetLdapTypes.Core.Dict:
+        record: t.Core.Dict,
+    ) -> t.Core.Dict:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: FlextTargetLdapTypes.Core.Dict = {
+        attributes: t.Core.Dict = {
             "objectClass": object_classes.copy()
             if isinstance(object_classes, list)
             else ["inetOrgPerson", "person"],
@@ -860,7 +859,7 @@ class LdapUsersSink(LdapBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: FlextTargetLdapTypes.Core.Dict = self._target.config.get(
+        mapping_obj: t.Core.Dict = self._target.config.get(
             "attribute_mapping",
             {},
         )
@@ -878,8 +877,8 @@ class LdapGroupsSink(LdapBaseSink):
 
     def process_record(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-        _context: FlextTargetLdapTypes.Core.Dict,
+        record: t.Core.Dict,
+        _context: t.Core.Dict,
     ) -> None:
         """Process a group record."""
         if not self.client:
@@ -894,7 +893,7 @@ class LdapGroupsSink(LdapBaseSink):
                 return
 
             # Build DN for group
-            group_dn = f"cn={group_name},{self._target.config.get('base_dn', FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)}"
+            group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
 
             # Build LDAP attributes from record
             attributes = self._build_group_attributes(record)
@@ -935,14 +934,14 @@ class LdapGroupsSink(LdapBaseSink):
 
     def _build_group_attributes(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextTargetLdapTypes.Core.Dict:
+        record: t.Core.Dict,
+    ) -> t.Core.Dict:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes: FlextTargetLdapTypes.Core.Dict = {
+        attributes: t.Core.Dict = {
             "objectClass": object_classes.copy()
             if isinstance(object_classes, list)
             else ["groupOfNames"],
@@ -969,7 +968,7 @@ class LdapGroupsSink(LdapBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: FlextTargetLdapTypes.Core.Dict = self._target.config.get(
+        mapping_obj: t.Core.Dict = self._target.config.get(
             "attribute_mapping",
             {},
         )
@@ -990,8 +989,8 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
 
     def process_record(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-        _context: FlextTargetLdapTypes.Core.Dict,
+        record: t.Core.Dict,
+        _context: t.Core.Dict,
     ) -> None:
         """Process an organizational unit record."""
         if not self.client:
@@ -1006,7 +1005,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
                 return
 
             # Build DN for OU
-            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', FlextConstants.Platform.DEFAULT_LDAP_BASE_DN)}"
+            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', c.Platform.DEFAULT_LDAP_BASE_DN)}"
 
             # Build LDAP attributes from record
             attributes = self._build_ou_attributes(record)
@@ -1039,10 +1038,10 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextTargetLdapTypes.Core.Dict:
+        record: t.Core.Dict,
+    ) -> t.Core.Dict:
         """Build LDAP attributes for OU entry."""
-        attributes: FlextTargetLdapTypes.Core.Dict = {
+        attributes: t.Core.Dict = {
             "objectClass": ["organizationalUnit"],
         }
 
@@ -1058,7 +1057,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: FlextTargetLdapTypes.Core.Dict = self._target.config.get(
+        mapping_obj: t.Core.Dict = self._target.config.get(
             "attribute_mapping",
             {},
         )
@@ -1085,7 +1084,7 @@ class TargetLdap(Target):
     def __init__(
         self,
         *,
-        config: FlextTargetLdapTypes.Core.Dict | None = None,
+        config: t.Core.Dict | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -1097,7 +1096,7 @@ class TargetLdap(Target):
         self._container: FlextContainer | None = None
 
     @property
-    def singer_catalog(self) -> FlextTargetLdapTypes.Core.Dict:
+    def singer_catalog(self) -> t.Core.Dict:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -1192,8 +1191,8 @@ class TargetLdap(Target):
                 port = 389
         else:
             port = 389
-        if port <= 0 or port > FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER:
-            msg = f"LDAP port must be between 1 and {FlextTargetLdapConstants.Connection.Ldap.MAX_PORT_NUMBER}"
+        if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
+            msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)
 
         use_ssl = self.config.get("use_ssl", False)
@@ -1210,7 +1209,7 @@ class TargetLdap(Target):
         self._container = FlextContainer.get_global()
         logger.info("DI container initialized successfully")
 
-        host = self.config.get("host", FlextConstants.Infrastructure.DEFAULT_HOST)
+        host = self.config.get("host", c.Platform.DEFAULT_HOST)
         logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:

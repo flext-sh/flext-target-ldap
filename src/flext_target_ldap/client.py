@@ -22,7 +22,7 @@ from flext_ldap import (
     FlextLdapModels,
 )
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
@@ -66,7 +66,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    def __init__(self, dn: str, attributes: FlextTargetLdapTypes.Core.Dict) -> None:
+    def __init__(self, dn: str, attributes: t.Core.Dict) -> None:
         """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
@@ -340,8 +340,8 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: FlextTargetLdapTypes.Core.Dict,
-        object_classes: FlextTargetLdapTypes.Core.StringList | None = None,
+        attributes: t.Core.Dict,
+        object_classes: t.Core.StringList | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -367,7 +367,7 @@ class LDAPClient:
     def modify_entry(
         self,
         dn: str,
-        changes: FlextTargetLdapTypes.Core.Dict,
+        changes: t.Core.Dict,
     ) -> FlextResult[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
@@ -398,7 +398,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: FlextTargetLdapTypes.Core.StringList | None = None,
+        attributes: t.Core.StringList | None = None,
     ) -> FlextResult[list[LDAPSearchEntry]]:
         """Search LDAP entries using ldap3-compatible connection for tests."""
         try:
@@ -419,7 +419,7 @@ class LDAPClient:
                     attr_names: list[object] = (
                         getattr(raw, "entry_attributes", []) or []
                     )
-                    attrs: FlextTargetLdapTypes.Core.Dict = {}
+                    attrs: t.Core.Dict = {}
                     for name in attr_names:
                         try:
                             attrs[name] = list(getattr(raw, name))
@@ -454,7 +454,7 @@ class LDAPClient:
     def get_entry(
         self,
         dn: str,
-        attributes: FlextTargetLdapTypes.Core.StringList | None = None,
+        attributes: t.Core.StringList | None = None,
     ) -> FlextResult[LDAPSearchEntry | None]:
         """Get LDAP entry using ldap3-compatible connection for tests."""
         try:

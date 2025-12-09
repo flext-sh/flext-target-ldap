@@ -13,7 +13,7 @@ from typing import override
 from flext_core import FlextLogger, FlextResult
 
 from flext_target_ldap.client import LDAPClient
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 
 # Placeholder classes until flext-meltano provides proper Singer protocol classes
@@ -25,8 +25,8 @@ class Sink:
         self,
         target: Target,
         stream_name: str,
-        schema: FlextTargetLdapTypes.Core.Dict,
-        key_properties: FlextTargetLdapTypes.Core.StringList,
+        schema: t.Core.Dict,
+        key_properties: t.Core.StringList,
     ) -> None:
         """Initialize sink with Singer protocol parameters."""
         self.target = target
@@ -36,8 +36,8 @@ class Sink:
 
     def process_record(
         self,
-        _record: FlextTargetLdapTypes.Core.Dict,
-        _context: FlextTargetLdapTypes.Core.Dict,
+        _record: t.Core.Dict,
+        _context: t.Core.Dict,
     ) -> FlextResult[None]:
         """Process a record using the target."""
         # Implementation will delegate to target's process method
@@ -53,7 +53,7 @@ class Target:
     """Placeholder Target base class for Singer protocol compatibility."""
 
     @override
-    def __init__(self, config: FlextTargetLdapTypes.Core.Dict) -> None:
+    def __init__(self, config: t.Core.Dict) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, object] = config
 
@@ -70,7 +70,7 @@ class LDAPProcessingResult:
         self.processed_count: int = 0
         self.success_count: int = 0
         self.error_count: int = 0
-        self.errors: FlextTargetLdapTypes.Core.StringList = []
+        self.errors: t.Core.StringList = []
 
     @property
     def success_rate(self: object) -> float:
@@ -99,8 +99,8 @@ class LDAPBaseSink(Sink):
         self,
         target: Target,
         stream_name: str,
-        schema: FlextTargetLdapTypes.Core.Dict,
-        key_properties: FlextTargetLdapTypes.Core.StringList,
+        schema: t.Core.Dict,
+        key_properties: t.Core.StringList,
     ) -> None:
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
@@ -146,7 +146,7 @@ class LDAPBaseSink(Sink):
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
-    def process_batch(self, _context: FlextTargetLdapTypes.Core.Dict) -> None:
+    def process_batch(self, _context: t.Core.Dict) -> None:
         """Process a batch of records."""
         setup_result: FlextResult[object] = run(self.setup_client())
         if not setup_result.is_success:
@@ -177,8 +177,8 @@ class LDAPBaseSink(Sink):
 
     def process_record(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-        _context: FlextTargetLdapTypes.Core.Dict,
+        record: t.Core.Dict,
+        _context: t.Core.Dict,
     ) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
@@ -205,8 +205,8 @@ class UsersSink(LDAPBaseSink):
 
     def process_record(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-        _context: FlextTargetLdapTypes.Core.Dict,
+        record: t.Core.Dict,
+        _context: t.Core.Dict,
     ) -> None:
         """Process a user record."""
         if not self.client:
@@ -273,14 +273,14 @@ class UsersSink(LDAPBaseSink):
 
     def build_user_attributes(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextTargetLdapTypes.Core.Dict:
+        record: t.Core.Dict,
+    ) -> t.Core.Dict:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: FlextTargetLdapTypes.Core.Dict = {
+        attributes: t.Core.Dict = {
             "objectClass": object_classes.copy()
             if isinstance(object_classes, list)
             else ["inetOrgPerson", "person"],
@@ -330,8 +330,8 @@ class GroupsSink(LDAPBaseSink):
 
     def process_record(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-        _context: FlextTargetLdapTypes.Core.Dict,
+        record: t.Core.Dict,
+        _context: t.Core.Dict,
     ) -> None:
         """Process a group record."""
         if not self.client:
@@ -394,14 +394,14 @@ class GroupsSink(LDAPBaseSink):
 
     def _build_group_attributes(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextTargetLdapTypes.Core.Dict:
+        record: t.Core.Dict,
+    ) -> t.Core.Dict:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes: FlextTargetLdapTypes.Core.Dict = {
+        attributes: t.Core.Dict = {
             "objectClass": object_classes.copy()
             if isinstance(object_classes, list)
             else ["groupOfNames"],
@@ -449,8 +449,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def process_record(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-        _context: FlextTargetLdapTypes.Core.Dict,
+        record: t.Core.Dict,
+        _context: t.Core.Dict,
     ) -> None:
         """Process an organizational unit record."""
         if not self.client:
@@ -501,14 +501,14 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: FlextTargetLdapTypes.Core.Dict,
-    ) -> FlextTargetLdapTypes.Core.Dict:
+        record: t.Core.Dict,
+    ) -> t.Core.Dict:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(
             "object_classes",
             ["organizationalUnit"],
         )
-        attributes: FlextTargetLdapTypes.Core.Dict = {
+        attributes: t.Core.Dict = {
             "objectClass": default_classes.copy()
             if isinstance(default_classes, list)
             else ["organizationalUnit"],

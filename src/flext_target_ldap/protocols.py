@@ -15,90 +15,111 @@ class FlextTargetLdapProtocols(p_meltano, p_ldap):
     Architecture:
     - EXTENDS: FlextLdapProtocols (inherits .Ldap.* and .Ldif.* protocols)
     - EXTENDS: FlextMeltanoProtocols (inherits .Meltano.* protocols)
-    - ADDS: Target LDAP-specific protocols in TargetLdap namespace
+    - ADDS: Target LDAP-specific protocols in Target.Ldap namespace
     - PROVIDES: Root-level alias `p` for convenient access
+
+    Usage:
+    from flext_target_ldap.protocols import p
+
+    # Foundation protocols (inherited)
+    result: p.Result[str]
+    service: p.Service[str]
+
+    # LDAP protocols (inherited)
+    entry: p.Ldap.EntryProtocol
+
+    # Meltano protocols (inherited)
+    target: p.Meltano.TargetProtocol
+
+    # Target LDAP-specific protocols
+    target_protocol: p.Target.Ldap.TargetProtocol
     """
 
-    class TargetLdap:
-        """Singer Target LDAP domain protocols for LDAP directory loading."""
+    class Target:
+        """Singer Target domain protocols."""
 
-        @runtime_checkable
-        class TargetProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for LDAP target operations."""
+        class Ldap:
+            """Singer Target LDAP domain protocols for LDAP directory loading."""
 
-            def process_record(
-                self, record: dict[str, object]
-            ) -> p_meltano.Result[bool]:
-                """Process a single record."""
-                ...
+            @runtime_checkable
+            class TargetProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for LDAP target operations."""
 
-        @runtime_checkable
-        class TransformationProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for Singer to LDAP transformation."""
+                def process_record(
+                    self, record: dict[str, object]
+                ) -> p_meltano.Result[bool]:
+                    """Process a single record."""
+                    ...
 
-            def transform_to_ldap(
-                self,
-                record: dict[str, object],
-            ) -> p_meltano.Result[dict[str, object]]:
-                """Transform record to LDAP format."""
-                ...
+            @runtime_checkable
+            class TransformationProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for Singer to LDAP transformation."""
 
-        @runtime_checkable
-        class OrchestrationProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for LDAP loading orchestration."""
+                def transform_to_ldap(
+                    self,
+                    record: dict[str, object],
+                ) -> p_meltano.Result[dict[str, object]]:
+                    """Transform record to LDAP format."""
+                    ...
 
-            def orchestrate_load(
-                self,
-                records: list[dict[str, object]],
-            ) -> p_meltano.Result[bool]:
-                """Orchestrate loading of records."""
-                ...
+            @runtime_checkable
+            class OrchestrationProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for LDAP loading orchestration."""
 
-        @runtime_checkable
-        class ConnectionProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for LDAP connection management."""
+                def orchestrate_load(
+                    self,
+                    records: list[dict[str, object]],
+                ) -> p_meltano.Result[bool]:
+                    """Orchestrate loading of records."""
+                    ...
 
-            def connect(self, config: dict[str, object]) -> p_meltano.Result[object]:
-                """Connect to LDAP server."""
-                ...
+            @runtime_checkable
+            class ConnectionProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for LDAP connection management."""
 
-        @runtime_checkable
-        class SingerProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for Singer message handling."""
+                def connect(
+                    self, config: dict[str, object]
+                ) -> p_meltano.Result[object]:
+                    """Connect to LDAP server."""
+                    ...
 
-            def process_singer_message(
-                self,
-                message: dict[str, object],
-            ) -> p_meltano.Result[bool]:
-                """Process a Singer protocol message."""
-                ...
+            @runtime_checkable
+            class SingerProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for Singer message handling."""
 
-        @runtime_checkable
-        class PerformanceProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for LDAP loading performance."""
+                def process_singer_message(
+                    self,
+                    message: dict[str, object],
+                ) -> p_meltano.Result[bool]:
+                    """Process a Singer protocol message."""
+                    ...
 
-            def optimize_batch(self, batch_size: int) -> p_meltano.Result[int]:
-                """Optimize batch size for LDAP loading."""
-                ...
+            @runtime_checkable
+            class PerformanceProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for LDAP loading performance."""
 
-        @runtime_checkable
-        class SecurityProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for LDAP security operations."""
+                def optimize_batch(self, batch_size: int) -> p_meltano.Result[int]:
+                    """Optimize batch size for LDAP loading."""
+                    ...
 
-            def validate_credentials(
-                self,
-                config: dict[str, object],
-            ) -> p_meltano.Result[bool]:
-                """Validate LDAP credentials."""
-                ...
+            @runtime_checkable
+            class SecurityProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for LDAP security operations."""
 
-        @runtime_checkable
-        class MonitoringProtocol(p_ldap.Service[object], Protocol):
-            """Protocol for LDAP loading monitoring."""
+                def validate_credentials(
+                    self,
+                    config: dict[str, object],
+                ) -> p_meltano.Result[bool]:
+                    """Validate LDAP credentials."""
+                    ...
 
-            def track_load_progress(self, records: int) -> p_meltano.Result[bool]:
-                """Track LDAP loading progress."""
-                ...
+            @runtime_checkable
+            class MonitoringProtocol(p_ldap.Service[object], Protocol):
+                """Protocol for LDAP loading monitoring."""
+
+                def track_load_progress(self, records: int) -> p_meltano.Result[bool]:
+                    """Track LDAP loading progress."""
+                    ...
 
 
 # Runtime alias for simplified usage

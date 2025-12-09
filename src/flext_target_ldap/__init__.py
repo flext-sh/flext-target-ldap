@@ -11,7 +11,7 @@ from flext_core import FlextLogger, FlextModels, FlextResult
 
 from flext_target_ldap.__version__ import __version__, __version_info__
 from flext_target_ldap.config import FlextTargetLdapConfig as FlextTargetLDAPConfig
-from flext_target_ldap.models import FlextTargetLdapModels
+from flext_target_ldap.models import FlextTargetLdapModels, m, m_target_ldap
 from flext_target_ldap.protocols import FlextTargetLdapProtocols
 from flext_target_ldap.sinks import (
     GroupsSink,
@@ -76,4 +76,6 @@ __all__ = [
     "__version__",
     "__version_info__",
     "dict[str, object]",
+    "m",
+    "m_target_ldap",
 ]

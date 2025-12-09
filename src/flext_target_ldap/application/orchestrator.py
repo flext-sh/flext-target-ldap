@@ -14,7 +14,7 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import t
 
 logger: FlextLogger = FlextLogger(__name__)
 
@@ -26,7 +26,7 @@ class LDAPTargetOrchestrator:
     config: dict[str, object]
 
     @override
-    def __init__(self, config: FlextTargetLdapTypes.Core.Dict | None = None) -> None:
+    def __init__(self, config: t.Core.Dict | None = None) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
@@ -41,8 +41,8 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[FlextTargetLdapTypes.Core.Dict],
-    ) -> FlextResult[FlextTargetLdapTypes.Core.Dict]:
+        records: list[t.Core.Dict],
+    ) -> FlextResult[t.Core.Dict]:
         """Orchestrate data loading to LDAP target.
 
         Args:
@@ -67,11 +67,11 @@ class LDAPTargetOrchestrator:
             }
 
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return FlextResult[FlextTargetLdapTypes.Core.Dict].ok(result)
+            return FlextResult[t.Core.Dict].ok(result)
 
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[FlextTargetLdapTypes.Core.Dict].fail(
+            return FlextResult[t.Core.Dict].fail(
                 f"Data loading orchestration failed: {e}",
             )
 
