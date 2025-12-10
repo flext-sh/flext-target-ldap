@@ -85,7 +85,7 @@ class FlextTargetLdapTypes(FlextTypes):
         type ObjectClassDefinition = dict[
             str, str | dict[str, FlextTypes.Json.JsonValue]
         ]
-        type DistinguishedName = dict[str, str | dict[str, object]]
+        type DN = dict[str, str | dict[str, object]]
         type AttributeValues = dict[
             str,
             str | list[str] | dict[str, FlextTypes.Json.JsonValue],
