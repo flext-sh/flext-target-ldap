@@ -19,7 +19,7 @@ class FlextTargetLdapValidationError(FlextExceptions.ValidationError):
     """LDAP target validation-specific errors."""
 
 
-class FlextTargetLdapConfigurationError(FlextExceptions.ConfigurationError):
+class FlextTargetLdapSettingsurationError(FlextExceptions.ConfigurationError):
     """LDAP target configuration-specific errors."""
 
 
@@ -47,12 +47,12 @@ FlextTargetLdapWriteError = FlextTargetLdapProcessingError  # Write is processin
 
 __all__ = [
     "FlextTargetLdapAuthenticationError",
-    "FlextTargetLdapConfigurationError",
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapError",
     "FlextTargetLdapLoadError",
     "FlextTargetLdapProcessingError",
     "FlextTargetLdapSchemaError",
+    "FlextTargetLdapSettingsurationError",
     "FlextTargetLdapTimeoutError",
     "FlextTargetLdapValidationError",
     "FlextTargetLdapWriteError",

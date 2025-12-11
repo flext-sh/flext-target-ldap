@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 Architecture: Clean Architecture configuration layer
-Patterns: "FlextConfig", FlextModels, FlextResult validation
+Patterns: "FlextSettings", FlextModels, FlextResult validation
 Integration: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -14,15 +14,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextConfig, FlextResult
+from flext_core import FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
-from flext_target_ldap.config import FlextTargetLdapConfig
+from flext_target_ldap.config import FlextTargetLdapSettings
 from flext_target_ldap.typings import t
 
 
-class LdapTargetConnectionSettings(FlextConfig):
+class LdapTargetConnectionSettings(FlextSettings):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
@@ -68,7 +68,7 @@ class LdapTargetConnectionSettings(FlextConfig):
             return FlextResult[None].fail(f"Connection settings validation failed: {e}")
 
 
-class LdapTargetOperationSettings(FlextConfig):
+class LdapTargetOperationSettings(FlextSettings):
     """LDAP operation settings domain model with business validation."""
 
     batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
@@ -109,7 +109,7 @@ class LdapTargetOperationSettings(FlextConfig):
             return FlextResult[None].fail(f"Operation settings validation failed: {e}")
 
 
-class LdapTargetMappingSettings(FlextConfig):
+class LdapTargetMappingSettings(FlextSettings):
     """LDAP attribute mapping and transformation settings."""
 
     attribute_mapping: t.Core.Headers = Field(
@@ -151,7 +151,7 @@ class LdapTargetMappingSettings(FlextConfig):
             return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
 
 
-# TargetLdapConfig class moved to config.py as FlextTargetLdapConfig
+# TargetLdapConfig class moved to config.py as FlextTargetLdapSettings
 # This file now contains only utility functions and backwards compatibility
 
 
@@ -233,7 +233,7 @@ def _extract_target_max_records(config: t.Core.Dict) -> int | None:
 
 def validate_ldap_target_config(
     config: t.Core.Dict,
-) -> FlextResult[FlextTargetLdapConfig]:
+) -> FlextResult[FlextTargetLdapSettings]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
         connection_config = _build_target_connection_config(config)
@@ -270,7 +270,7 @@ def validate_ldap_target_config(
         )
         search_scope = _target_config_to_str(config.get("search_scope", "SUBTREE"))
 
-        validated_config = FlextTargetLdapConfig(
+        validated_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=base_dn,
             batch_size=batch_size,
@@ -288,14 +288,14 @@ def validate_ldap_target_config(
             validated_config.validate_business_rules()
         )
         if not validation_result.is_success:
-            return FlextResult[FlextTargetLdapConfig].fail(
+            return FlextResult[FlextTargetLdapSettings].fail(
                 validation_result.error or "Invalid configuration",
             )
 
-        return FlextResult[FlextTargetLdapConfig].ok(validated_config)
+        return FlextResult[FlextTargetLdapSettings].ok(validated_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[FlextTargetLdapConfig].fail(
+        return FlextResult[FlextTargetLdapSettings].fail(
             f"Configuration validation failed: {e}",
         )
 
@@ -306,7 +306,7 @@ def create_default_ldap_target_config(
     *,
     port: int = 389,
     use_ssl: bool = False,
-) -> FlextResult[FlextTargetLdapConfig]:
+) -> FlextResult[FlextTargetLdapSettings]:
     """Create default LDAP target configuration with minimal parameters."""
     try:
         # Create connection config
@@ -318,7 +318,7 @@ def create_default_ldap_target_config(
         )
 
         # Create target config
-        target_config = FlextTargetLdapConfig(
+        target_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=base_dn,
             batch_size=1000,
@@ -330,14 +330,14 @@ def create_default_ldap_target_config(
         # Validate business rules
         validation_result: FlextResult[object] = target_config.validate_business_rules()
         if not validation_result.is_success:
-            return FlextResult[FlextTargetLdapConfig].fail(
+            return FlextResult[FlextTargetLdapSettings].fail(
                 validation_result.error or "Invalid configuration",
             )
 
-        return FlextResult[FlextTargetLdapConfig].ok(target_config)
+        return FlextResult[FlextTargetLdapSettings].ok(target_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[FlextTargetLdapConfig].fail(
+        return FlextResult[FlextTargetLdapSettings].fail(
             f"Default configuration creation failed: {e}",
         )
 
@@ -345,8 +345,8 @@ def create_default_ldap_target_config(
 # Import the new standardized config class and create backwards compatibility alias
 
 # Backward compatibility aliases
-TargetLDAPConfig = FlextTargetLdapConfig
-TargetLdapConfig = FlextTargetLdapConfig  # Also provide intermediate alias
+TargetLDAPConfig = FlextTargetLdapSettings
+TargetLdapConfig = FlextTargetLdapSettings  # Also provide intermediate alias
 LDAPConnectionSettings = LdapTargetConnectionSettings
 LDAPOperationSettings = LdapTargetOperationSettings
 
