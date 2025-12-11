@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Self
 
-from flext_core import FlextConfig, FlextModels, FlextResult
+from flext_core import FlextModels, FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
@@ -23,7 +23,7 @@ from flext_target_ldap.constants import c
 from flext_target_ldap.typings import t
 
 
-class FlextTargetLdapConfig(FlextConfig):
+class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration using consolidated patterns with FLEXT standards."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
@@ -100,7 +100,7 @@ class FlextTargetLdapConfig(FlextConfig):
 
     @classmethod
     def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        """Get the global singleton instance using enhanced FlextSettings pattern."""
         return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
 
     @classmethod
@@ -280,14 +280,14 @@ def _extract_object_classes(
 
 def validate_ldap_config(
     config: t.Core.Dict,
-) -> FlextResult[FlextTargetLdapConfig]:
+) -> FlextResult[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:
         connection_config = _build_connection_config(config)
         attribute_mapping = _extract_attribute_mapping(config)
         object_classes = _extract_object_classes(config)
 
-        validated_config = FlextTargetLdapConfig(
+        validated_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=_to_str(config.get("base_dn", "")),
             search_filter=_to_str(config.get("search_filter", "(objectClass=*)")),
@@ -330,8 +330,8 @@ def validate_ldap_config(
             attribute_mapping=attribute_mapping,
             object_classes=object_classes,
         )
-        return FlextResult[FlextTargetLdapConfig].ok(validated_config)
+        return FlextResult[FlextTargetLdapSettings].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[FlextTargetLdapConfig].fail(
+        return FlextResult[FlextTargetLdapSettings].fail(
             f"Configuration validation failed: {e}",
         )
