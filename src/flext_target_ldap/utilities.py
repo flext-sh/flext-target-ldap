@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 from typing import ClassVar, override
 
 from flext_core import FlextResult
-from flext_core.utilities import FlextUtilities as u_core
+from flext_core.utilities import u_core
 
 from flext_target_ldap.constants import c
 
