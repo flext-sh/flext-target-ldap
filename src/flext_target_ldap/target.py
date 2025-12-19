@@ -19,9 +19,9 @@ from flext_core import FlextContainer, FlextLogger
 from flext_meltano import Sink, Target
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
-from flext_target_ldap.config import FlextTargetLdapSettings
 from flext_target_ldap.constants import c
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
+from flext_target_ldap.settings import FlextTargetLdapSettings
 from flext_target_ldap.sinks import (
     LDAPBaseSink,
 )
