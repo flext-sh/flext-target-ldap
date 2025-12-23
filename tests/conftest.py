@@ -10,17 +10,12 @@ from __future__ import annotations
 import json
 import pathlib
 from collections.abc import Generator
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
+from flext_tests import FlextTestsDocker
 
 from flext_target_ldap import LDAPClient
-
-# Import centralized Docker fixtures
-
-if TYPE_CHECKING:
-    from flext_tests import FlextTestsDocker
 
 
 @pytest.fixture(scope="session")
