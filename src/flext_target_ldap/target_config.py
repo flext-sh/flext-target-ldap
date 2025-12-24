@@ -14,10 +14,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_core import FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
-from flext import FlextResult, FlextSettings
 from flext_target_ldap.config import FlextTargetLdapSettings
 from flext_target_ldap.typings import t
 

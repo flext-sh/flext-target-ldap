@@ -12,9 +12,9 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
+from flext_core import FlextResult
 from flext_core.utilities import FlextUtilities as u_core
 
-from flext import FlextResult
 from flext_target_ldap.constants import c
 
 
@@ -837,14 +837,22 @@ class FlextTargetLdapUtilities(u_core):
             # Import here to avoid circular imports
             from flext_ldap import FlextLdapModels
 
-            server = FlextTargetLdapUtilities.TypeConversion.to_str(config.get("host", "localhost"), "localhost")
+            server = FlextTargetLdapUtilities.TypeConversion.to_str(
+                config.get("host", "localhost"), "localhost"
+            )
             port = FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
                 c.TargetLdap.Connection.DEFAULT_PORT,
             )
-            use_ssl = FlextTargetLdapUtilities.TypeConversion.to_bool(config.get("use_ssl", False), default=False)
-            bind_dn = FlextTargetLdapUtilities.TypeConversion.to_str(config.get("bind_dn", ""), "")
-            bind_password = FlextTargetLdapUtilities.TypeConversion.to_str(config.get("password", ""), "")
+            use_ssl = FlextTargetLdapUtilities.TypeConversion.to_bool(
+                config.get("use_ssl", False), default=False
+            )
+            bind_dn = FlextTargetLdapUtilities.TypeConversion.to_str(
+                config.get("bind_dn", ""), ""
+            )
+            bind_password = FlextTargetLdapUtilities.TypeConversion.to_str(
+                config.get("password", ""), ""
+            )
             timeout = FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("timeout", c.Network.DEFAULT_TIMEOUT),
                 c.Network.DEFAULT_TIMEOUT,
@@ -951,15 +959,33 @@ class FlextTargetLdapUtilities(u_core):
             from flext_target_ldap.settings import FlextTargetLdapSettings
 
             try:
-                connection_config = FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
-                attribute_mapping = FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
-                object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(config)
+                connection_config = (
+                    FlextTargetLdapUtilities.TypeConversion.build_connection_config(
+                        config
+                    )
+                )
+                attribute_mapping = (
+                    FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(
+                        config
+                    )
+                )
+                object_classes = (
+                    FlextTargetLdapUtilities.TypeConversion.extract_object_classes(
+                        config
+                    )
+                )
 
                 validated_config = FlextTargetLdapSettings(
                     connection=connection_config,
-                    base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("base_dn", "")),
-                    search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_filter", "(objectClass=*)")),
-                    search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_scope", "SUBTREE")),
+                    base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(
+                        config.get("base_dn", "")
+                    ),
+                    search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(
+                        config.get("search_filter", "(objectClass=*)")
+                    ),
+                    search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(
+                        config.get("search_scope", "SUBTREE")
+                    ),
                     connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
                         config.get(
                             "connect_timeout",
@@ -975,7 +1001,9 @@ class FlextTargetLdapUtilities(u_core):
                         config.get("batch_size", c.Performance.DEFAULT_BATCH_SIZE),
                         c.Performance.DEFAULT_BATCH_SIZE,
                     ),
-                    max_records=FlextTargetLdapUtilities.TypeConversion.to_int(config.get("max_records", 0), 0),
+                    max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
+                        config.get("max_records", 0), 0
+                    ),
                     create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
                         config.get("create_missing_entries", True), default=True
                     ),

@@ -11,7 +11,7 @@ from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
 from typing import override
 
-from flext import FlextContainer,
+from flext_core import  FlextContainer,
     FlextLogger,
     FlextResult
 from flext_ldap import FlextLdap, FlextLdapClients, FlextLdapModels

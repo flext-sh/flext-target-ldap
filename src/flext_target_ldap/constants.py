@@ -80,7 +80,7 @@ class FlextTargetLdapConstants(FlextLdapConstants):
             class Ldaps:
                 """Secure LDAP connection settings."""
 
-                DEFAULT_PORT: Final[int] = c.Ldap.ConnectionDefaults.PORT_SSL
+                DEFAULT_PORT: Final[int] = 636
 
         class Processing:
             """Singer target data processing configuration.
@@ -111,7 +111,7 @@ class FlextTargetLdapConstants(FlextLdapConstants):
                     c.Ldap.OperationType.ADD,
                     c.Ldap.OperationType.MODIFY,
                     c.Ldap.OperationType.DELETE,
-                    c.Ldap.OperationType.MODIFY_DN,
+                    c.Ldap.OperationType.MODIFY,
                 )
             )
 

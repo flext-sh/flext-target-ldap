@@ -14,10 +14,10 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Self
 
+from flext_core import FlextModels, FlextResult
 from flext_core.utilities import u
 from pydantic import Field, field_validator
 
-from flext import FlextModels, FlextResult
 from flext_target_ldap.constants import c
 from flext_target_ldap.typings import t
 
@@ -80,7 +80,8 @@ class FlextTargetLdapModels(FlextModels):
             try:
                 # Validate field name format
                 if (
-                    not self.singer_field_name.replace("_", "")
+                    not self.singer_field_name
+                    .replace("_", "")
                     .replace("-", "")
                     .isalnum()
                 ):
