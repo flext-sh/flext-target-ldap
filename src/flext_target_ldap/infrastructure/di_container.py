@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT.
 
 from __future__ import annotations
 
-from flext_core import FlextContainer
+from flext import FlextContainer
 
 get_flext_target_ldap_container = FlextContainer.get_global()
 

@@ -10,9 +10,9 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Protocol, override
 
-from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdap
 
+from flext import FlextLogger, FlextResult
 from flext_target_ldap import target_client as target_client_module
 from flext_target_ldap.target_config import (
     TargetLdapConfig,

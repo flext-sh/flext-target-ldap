@@ -13,8 +13,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
-
+from flext import FlextLogger, FlextResult
 from flext_target_ldap.typings import t
 
 logger: FlextLogger = FlextLogger(__name__)

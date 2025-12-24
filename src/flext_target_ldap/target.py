@@ -15,9 +15,9 @@ from pathlib import Path
 from typing import override
 
 from flext_cli import flext_cli_create_helper
-from flext_core import FlextContainer, FlextLogger
 from flext_meltano import Sink, Target
 
+from flext import FlextContainer, FlextLogger
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.config import FlextTargetLdapSettings
 from flext_target_ldap.constants import c
