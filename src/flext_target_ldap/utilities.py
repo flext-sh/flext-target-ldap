@@ -881,6 +881,7 @@ class FlextTargetLdapUtilities(u_core):
 
             Returns:
                 dict[str, str]: Validated attribute mapping or empty dict
+
             """
             raw_attr_map = config.get("attribute_mapping")
             if isinstance(raw_attr_map, dict):
@@ -908,11 +909,90 @@ class FlextTargetLdapUtilities(u_core):
 
             Returns:
                 list[str]: List of object classes or ["top"] default
+
             """
             raw_object_classes = config.get("object_classes")
             if isinstance(raw_object_classes, list):
                 return [str(v) for v in raw_object_classes]
             return ["top"]
+
+        @staticmethod
+        def validate_ldap_config(
+            config: dict[str, object],
+        ) -> FlextResult[FlextTargetLdapSettings]:
+            """Validate and build LDAP target configuration.
+
+            Business Rule: Complete LDAP Configuration Validation
+            ===================================================
+            This method provides comprehensive validation for LDAP target configurations,
+            combining connection settings, attribute mappings, and operational parameters
+            into a fully validated FlextTargetLdapSettings instance.
+
+            Validation Chain:
+            1. Build connection configuration with type conversion
+            2. Extract attribute mappings with validation
+            3. Extract object classes with defaults
+            4. Apply all configuration parameters with proper type conversion
+            5. Create and validate FlextTargetLdapSettings instance
+
+            Type Safety:
+            - All parameters converted to correct types with safe defaults
+            - Invalid configurations result in FlextResult.fail with details
+            - Successful validation returns fully configured settings object
+
+            Args:
+                config: Raw configuration dictionary from any source
+
+            Returns:
+                FlextResult[FlextTargetLdapSettings]: Validated config or error
+
+            """
+            # Import here to avoid circular imports
+            from flext_target_ldap.settings import FlextTargetLdapSettings
+
+            try:
+                connection_config = FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
+                attribute_mapping = FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
+                object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(config)
+
+                validated_config = FlextTargetLdapSettings(
+                    connection=connection_config,
+                    base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("base_dn", "")),
+                    search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_filter", "(objectClass=*)")),
+                    search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_scope", "SUBTREE")),
+                    connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
+                        config.get(
+                            "connect_timeout",
+                            c.Network.DEFAULT_TIMEOUT // 3,
+                        ),
+                        c.Network.DEFAULT_TIMEOUT // 3,
+                    ),
+                    receive_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
+                        config.get("receive_timeout", c.Network.DEFAULT_TIMEOUT),
+                        c.Network.DEFAULT_TIMEOUT,
+                    ),
+                    batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
+                        config.get("batch_size", c.Performance.DEFAULT_BATCH_SIZE),
+                        c.Performance.DEFAULT_BATCH_SIZE,
+                    ),
+                    max_records=FlextTargetLdapUtilities.TypeConversion.to_int(config.get("max_records", 0), 0),
+                    create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
+                        config.get("create_missing_entries", True), default=True
+                    ),
+                    update_existing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
+                        config.get("update_existing_entries", True), default=True
+                    ),
+                    delete_removed_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
+                        config.get("delete_removed_entries", False), default=False
+                    ),
+                    attribute_mapping=attribute_mapping,
+                    object_classes=object_classes,
+                )
+
+                return FlextResult.ok(validated_config)
+
+            except Exception as e:
+                return FlextResult.fail(f"LDAP configuration validation failed: {e}")
 
 
 __all__ = [

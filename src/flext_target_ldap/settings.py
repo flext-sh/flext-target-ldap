@@ -205,70 +205,44 @@ class LDAPOperationSettings(FlextModels):
     return str(value) if value is not None else default
 
 
-
-
-def _extract_attribute_mapping(
-    config: t.Core.Dict,
-) -> t.Core.Headers:
-    """Extract attribute mapping from config."""
-    raw_attr_map = config.get("attribute_mapping")
-    if isinstance(raw_attr_map, dict):
-        return {str(k): str(v) for k, v in raw_attr_map.items()}
-    return {}
-
-
-def _extract_object_classes(
-    config: t.Core.Dict,
-) -> t.Core.StringList:
-    """Extract object classes from config."""
-    raw_object_classes = config.get("object_classes")
-    if isinstance(raw_object_classes, list):
-        return [str(v) for v in raw_object_classes]
-    return ["top"]
-
-
 def validate_ldap_config(
     config: t.Core.Dict,
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:
         connection_config = FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
-        attribute_mapping = _extract_attribute_mapping(config)
-        object_classes = _extract_object_classes(config)
+        attribute_mapping = FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
+        object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(config)
 
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
-            base_dn=_to_str(config.get("base_dn", "")),
-            search_filter=_to_str(config.get("search_filter", "(objectClass=*)")),
-            search_scope=_to_str(config.get("search_scope", "SUBTREE")),
-            connect_timeout=_to_int(
+            base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("base_dn", "")),
+            search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_filter", "(objectClass=*)")),
+            search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_scope", "SUBTREE")),
+            connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get(
                     "connect_timeout",
                     c.Network.DEFAULT_TIMEOUT // 3,
                 ),
                 c.Network.DEFAULT_TIMEOUT // 3,
             ),
-            receive_timeout=_to_int(
+            receive_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("receive_timeout", c.Network.DEFAULT_TIMEOUT),
                 c.Network.DEFAULT_TIMEOUT,
             ),
-            batch_size=_to_int(
+            batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get(
                     "batch_size",
-                    c.Performance.BatchProcessing.DEFAULT_SIZE,
+                    c.Performance.DEFAULT_BATCH_SIZE,
                 ),
-                c.Performance.BatchProcessing.DEFAULT_SIZE,
+                c.Performance.DEFAULT_BATCH_SIZE,
             ),
-            max_records=(
-                _to_int(config.get("max_records"), 0)
-                if config.get("max_records") is not None
-                else None
-            ),
-            create_missing_entries=_to_bool(
+            max_records=FlextTargetLdapUtilities.TypeConversion.to_int(config.get("max_records"), 0),
+            create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
                 config.get("create_missing_entries", True),
                 default=True,
             ),
-            update_existing_entries=_to_bool(
+            update_existing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
                 config.get("update_existing_entries", True),
                 default=True,
             ),
