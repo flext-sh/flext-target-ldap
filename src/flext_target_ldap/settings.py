@@ -14,11 +14,11 @@ from __future__ import annotations
 
 from typing import Self
 
+from flext_core import FlextModels, FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
-from flext import FlextModels, FlextResult, FlextSettings
 from flext_target_ldap.constants import c
 from flext_target_ldap.typings import t
 from flext_target_ldap.utilities import FlextTargetLdapUtilities
@@ -210,15 +210,27 @@ def validate_ldap_config(
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:
-        connection_config = FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
-        attribute_mapping = FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
-        object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(config)
+        connection_config = (
+            FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
+        )
+        attribute_mapping = (
+            FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
+        )
+        object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(
+            config
+        )
 
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
-            base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("base_dn", "")),
-            search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_filter", "(objectClass=*)")),
-            search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(config.get("search_scope", "SUBTREE")),
+            base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(
+                config.get("base_dn", "")
+            ),
+            search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(
+                config.get("search_filter", "(objectClass=*)")
+            ),
+            search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(
+                config.get("search_scope", "SUBTREE")
+            ),
             connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get(
                     "connect_timeout",
@@ -237,7 +249,9 @@ def validate_ldap_config(
                 ),
                 c.Performance.DEFAULT_BATCH_SIZE,
             ),
-            max_records=FlextTargetLdapUtilities.TypeConversion.to_int(config.get("max_records"), 0),
+            max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
+                config.get("max_records"), 0
+            ),
             create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
                 config.get("create_missing_entries", True),
                 default=True,

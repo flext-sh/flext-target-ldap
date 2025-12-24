@@ -7,25 +7,35 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext import FlextLogger, FlextModels, FlextResult
-from flext_target_ldap.__version__ import __version__, __version_info__
-from flext_target_ldap.config import FlextTargetLdapSettings as FlextTargetLDAPSettings
-from flext_target_ldap.models import FlextTargetLdapModels, m, m_target_ldap
-from flext_target_ldap.protocols import FlextTargetLdapProtocols
+# from flext_core import  FlextLogger, FlextModels, FlextResult  # Temporarily disabled
+from flext_target_ldap.__version__ import (
+    __version__ as __version__,
+    __version_info__ as __version_info__,
+)
+
+# from flext_target_ldap.config import FlextTargetLdapSettings as FlextTargetLDAPSettings  # Temporarily disabled
+from flext_target_ldap.models import (
+    FlextTargetLdapModels as FlextTargetLdapModels,
+    m as m,
+    m_target_ldap as m_target_ldap,
+)
+from flext_target_ldap.protocols import (
+    FlextTargetLdapProtocols as FlextTargetLdapProtocols,
+)
 from flext_target_ldap.sinks import (
-    GroupsSink,
-    LDAPBaseSink,
-    LDAPProcessingResult,
-    OrganizationalUnitsSink,
-    Sink,
-    Target,
-    UsersSink,
+    GroupsSink as GroupsSink,
+    LDAPBaseSink as LDAPBaseSink,
+    LDAPProcessingResult as LDAPProcessingResult,
+    OrganizationalUnitsSink as OrganizationalUnitsSink,
+    Sink as Sink,
+    Target as Target,
+    UsersSink as UsersSink,
 )
 from flext_target_ldap.target_client import (
-    LDAPClient,
+    LDAPClient as LDAPClient,
     LdapTargetClient as LDAPTargetClient,
-    TargetLDAP,
-    TargetLdap,
+    TargetLDAP as TargetLDAP,
+    TargetLdap as TargetLdap,
 )
 from flext_target_ldap.target_exceptions import (
     FlextTargetLdapConnectionError as FlextTargetLDAPConnectionError,
@@ -38,43 +48,45 @@ from flext_target_ldap.target_models import (
 )
 from flext_target_ldap.target_services import (
     LdapTargetApiService as FlextTargetLDAPService,
-    LdapTransformationService,
-    LdapTransformationServiceProtocol,
+    LdapTransformationService as LdapTransformationService,
+    LdapTransformationServiceProtocol as LdapTransformationServiceProtocol,
 )
-from flext_target_ldap.typings import FlextTargetLdapTypes
-from flext_target_ldap.utilities import FlextTargetLdapUtilities
+from flext_target_ldap.typings import FlextTargetLdapTypes as FlextTargetLdapTypes
+from flext_target_ldap.utilities import (
+    FlextTargetLdapUtilities as FlextTargetLdapUtilities,
+)
 
-__all__ = [
-    "FlextLogger",
-    "FlextModels",
-    "FlextResult",
-    "FlextTargetLDAPConnectionError",
-    "FlextTargetLDAPError",
-    "FlextTargetLDAPService",
-    "FlextTargetLDAPSettings",
-    "FlextTargetLDAPValidationError",
-    "FlextTargetLdapModels",
-    "FlextTargetLdapProtocols",
-    "FlextTargetLdapTypes",
-    "FlextTargetLdapUtilities",
-    "GroupsSink",
-    "LDAPBaseSink",
-    "LDAPClient",
-    "LDAPProcessingResult",
-    "LDAPTargetClient",
-    "LDAPTargetModel",
-    "LDAPTargetRecord",
-    "LdapTransformationService",
-    "LdapTransformationServiceProtocol",
-    "OrganizationalUnitsSink",
-    "Sink",
-    "Target",
-    "TargetLDAP",
-    "TargetLdap",
-    "UsersSink",
-    "__version__",
-    "__version_info__",
-    "dict[str, object]",
-    "m",
-    "m_target_ldap",
-]
+# __all__ temporarily disabled due to import issues
+# __all__ = [
+#     "FlextModels",
+#     "FlextResult",
+#     "FlextTargetLDAPConnectionError",
+#     "FlextTargetLDAPError",
+#     "FlextTargetLDAPService",
+#     "FlextTargetLDAPSettings",
+#     "FlextTargetLDAPValidationError",
+#     "FlextTargetLdapModels",
+#     "FlextTargetLdapProtocols",
+#     "FlextTargetLdapTypes",
+#     "FlextTargetLdapUtilities",
+#     "GroupsSink",
+#     "LDAPBaseSink",
+#     "LDAPClient",
+#     "LDAPProcessingResult",
+#     "LDAPTargetClient",
+#     "LDAPTargetModel",
+#     "LDAPTargetRecord",
+#     "LdapTransformationService",
+#     "LdapTransformationServiceProtocol",
+#     "OrganizationalUnitsSink",
+#     "Sink",
+#     "Target",
+#     "TargetLDAP",
+#     "TargetLdap",
+#     "UsersSink",
+#     "__version__",
+#     "__version_info__",
+#     "dict[str, object]",
+#     "m",
+#     "m_target_ldap",
+# ]
