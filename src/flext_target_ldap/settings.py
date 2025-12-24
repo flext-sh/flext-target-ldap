@@ -21,6 +21,7 @@ from pydantic_settings import SettingsConfigDict
 from flext import FlextModels, FlextResult, FlextSettings
 from flext_target_ldap.constants import c
 from flext_target_ldap.typings import t
+from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
 
 class FlextTargetLdapSettings(FlextSettings):
@@ -200,62 +201,10 @@ class LDAPOperationSettings(FlextModels):
         description="Delete removed entries",
     )
 
-
-def _to_int(value: object, default: int) -> int:
-    """Convert value to int."""
-    if isinstance(value, bool):
-        return default
-    if isinstance(value, int):
-        return value
-    if isinstance(value, str):
-        try:
-            return int(value)
-        except ValueError:
-            return default
-    return default
-
-
-def _to_bool(value: object, *, default: bool) -> bool:
-    """Convert value to bool."""
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, int):
-        return value != 0
-    if isinstance(value, str):
-        return value.strip().lower() in {"1", "true", "yes", "on"}
-    return default
-
-
-def _to_str(value: object, default: str = "") -> str:
     """Convert value to string."""
     return str(value) if value is not None else default
 
 
-def _build_connection_config(
-    config: t.Core.Dict,
-) -> FlextLdapModels.ConnectionConfig:
-    """Build connection configuration from config dict."""
-    server = _to_str(config.get("host", "localhost"), "localhost")
-    port = _to_int(
-        config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
-        c.TargetLdap.Connection.DEFAULT_PORT,
-    )
-    use_ssl = _to_bool(config.get("use_ssl", False), default=False)
-    bind_dn = _to_str(config.get("bind_dn", ""), "")
-    bind_password = _to_str(config.get("password", ""), "")
-    timeout = _to_int(
-        config.get("timeout", c.Network.DEFAULT_TIMEOUT),
-        c.Network.DEFAULT_TIMEOUT,
-    )
-
-    return FlextLdapModels.ConnectionConfig(
-        server=server,
-        port=port,
-        use_ssl=use_ssl,
-        bind_dn=bind_dn,
-        bind_password=bind_password,
-        timeout=timeout,
-    )
 
 
 def _extract_attribute_mapping(
@@ -283,7 +232,7 @@ def validate_ldap_config(
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:
-        connection_config = _build_connection_config(config)
+        connection_config = FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
         attribute_mapping = _extract_attribute_mapping(config)
         object_classes = _extract_object_classes(config)
 

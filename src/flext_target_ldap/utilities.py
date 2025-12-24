@@ -710,6 +710,210 @@ class FlextTargetLdapUtilities(u_core):
             last_processed_record,
         )
 
+    class TypeConversion:
+        """Type conversion utilities for configuration parsing."""
+
+        @staticmethod
+        def to_int(value: object, default: int) -> int:
+            """Convert value to int with safe defaults.
+
+            Business Rule: Safe Type Conversion
+            ===================================
+            Configuration values can come from various sources (env vars, config files,
+            command line args) and may not have the expected type. This method provides
+            safe conversion with sensible defaults to prevent runtime errors.
+
+            Conversion Rules:
+            - bool values return default (avoid 0/1 confusion)
+            - int values pass through unchanged
+            - str values attempt int() conversion, fallback to default on error
+            - All other types return default
+
+            Args:
+                value: Value to convert (from any source)
+                default: Default value if conversion fails
+
+            Returns:
+                int: Converted value or default
+
+            """
+            if isinstance(value, bool):
+                return default
+            if isinstance(value, int):
+                return value
+            if isinstance(value, str):
+                try:
+                    return int(value)
+                except ValueError:
+                    return default
+            return default
+
+        @staticmethod
+        def to_bool(value: object, *, default: bool) -> bool:
+            """Convert value to bool with safe defaults.
+
+            Business Rule: Boolean Configuration Conversion
+            ==============================================
+            Boolean configuration values can come as strings ("true", "1", "yes"),
+            integers (0/1), or actual booleans. This method standardizes conversion
+            with clear rules to avoid ambiguity.
+
+            Conversion Rules:
+            - bool values pass through unchanged
+            - int values: non-zero = True, zero = False
+            - str values: case-insensitive check for "1", "true", "yes", "on"
+            - All other types return default
+
+            Args:
+                value: Value to convert
+                default: Default value if conversion fails
+
+            Returns:
+                bool: Converted value or default
+
+            """
+            if isinstance(value, bool):
+                return value
+            if isinstance(value, int):
+                return value != 0
+            if isinstance(value, str):
+                return value.strip().lower() in {"1", "true", "yes", "on"}
+            return default
+
+        @staticmethod
+        def to_str(value: object, default: str = "") -> str:
+            """Convert value to str with safe defaults.
+
+            Business Rule: String Configuration Conversion
+            =============================================
+            String configuration values need consistent handling regardless of source.
+            This method ensures all values can be safely converted to strings.
+
+            Conversion Rules:
+            - str values pass through unchanged
+            - None becomes empty string (unless default provided)
+            - All other types use str() conversion
+
+            Args:
+                value: Value to convert
+                default: Default value if value is None
+
+            Returns:
+                str: Converted string or default for None
+
+            """
+            if value is None:
+                return default
+            if isinstance(value, str):
+                return value
+            return str(value)
+
+        @staticmethod
+        def build_connection_config(
+            config: dict[str, object],
+        ) -> FlextLdapModels.ConnectionConfig:
+            """Build LDAP connection configuration from config dict.
+
+            Business Rule: Configuration Builder Pattern
+            ===========================================
+            LDAP connection configuration can come from various sources (config files,
+            environment variables, command line args). This method provides a standardized
+            way to build connection config objects with proper type conversion and defaults.
+
+            Type Conversion Rules:
+            - Host: string with localhost default
+            - Port: int with DEFAULT_PORT default
+            - use_ssl: bool with False default
+            - bind_dn/password: strings with empty defaults
+            - timeout: int with DEFAULT_TIMEOUT default
+
+            Args:
+                config: Raw configuration dictionary from any source
+
+            Returns:
+                FlextLdapModels.ConnectionConfig: Validated connection config
+
+            """
+            # Import here to avoid circular imports
+            from flext_ldap import FlextLdapModels
+
+            server = FlextTargetLdapUtilities.TypeConversion.to_str(config.get("host", "localhost"), "localhost")
+            port = FlextTargetLdapUtilities.TypeConversion.to_int(
+                config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
+                c.TargetLdap.Connection.DEFAULT_PORT,
+            )
+            use_ssl = FlextTargetLdapUtilities.TypeConversion.to_bool(config.get("use_ssl", False), default=False)
+            bind_dn = FlextTargetLdapUtilities.TypeConversion.to_str(config.get("bind_dn", ""), "")
+            bind_password = FlextTargetLdapUtilities.TypeConversion.to_str(config.get("password", ""), "")
+            timeout = FlextTargetLdapUtilities.TypeConversion.to_int(
+                config.get("timeout", c.Network.DEFAULT_TIMEOUT),
+                c.Network.DEFAULT_TIMEOUT,
+            )
+
+            return FlextLdapModels.ConnectionConfig(
+                server=server,
+                port=port,
+                use_ssl=use_ssl,
+                bind_dn=bind_dn,
+                bind_password=bind_password,
+                timeout=timeout,
+            )
+
+        @staticmethod
+        def extract_attribute_mapping(
+            config: dict[str, object],
+        ) -> dict[str, str]:
+            """Extract attribute mapping from configuration dict.
+
+            Business Rule: Attribute Mapping Extraction
+            ==========================================
+            LDAP attribute mappings define how Singer record fields map to LDAP
+            attributes. This method safely extracts and validates attribute mappings
+            from configuration, ensuring type safety.
+
+            Validation Rules:
+            - Must be a dictionary
+            - Keys and values converted to strings
+            - Invalid mappings are silently ignored (empty dict returned)
+
+            Args:
+                config: Configuration dictionary containing attribute_mapping
+
+            Returns:
+                dict[str, str]: Validated attribute mapping or empty dict
+            """
+            raw_attr_map = config.get("attribute_mapping")
+            if isinstance(raw_attr_map, dict):
+                return {str(k): str(v) for k, v in raw_attr_map.items()}
+            return {}
+
+        @staticmethod
+        def extract_object_classes(
+            config: dict[str, object],
+        ) -> list[str]:
+            """Extract object classes from configuration dict.
+
+            Business Rule: Object Classes Configuration
+            ==========================================
+            LDAP object classes define the schema for directory entries. This method
+            extracts object class lists from configuration with safe defaults.
+
+            Validation Rules:
+            - Must be a list
+            - All items converted to strings
+            - Default to ["top"] if invalid or missing
+
+            Args:
+                config: Configuration dictionary containing object_classes
+
+            Returns:
+                list[str]: List of object classes or ["top"] default
+            """
+            raw_object_classes = config.get("object_classes")
+            if isinstance(raw_object_classes, list):
+                return [str(v) for v in raw_object_classes]
+            return ["top"]
+
 
 __all__ = [
     "FlextTargetLdapUtilities",
