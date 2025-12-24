@@ -14,11 +14,11 @@ from __future__ import annotations
 
 from typing import Self
 
-from flext_core import FlextModels, FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
+from flext import FlextModels, FlextResult, FlextSettings
 from flext_target_ldap.constants import c
 from flext_target_ldap.typings import t
 

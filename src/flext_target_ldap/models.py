@@ -12,13 +12,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import StrEnum
 from typing import Self
 
-from flext_core import FlextModels, FlextResult
 from flext_core.utilities import u
 from pydantic import Field, field_validator
 
+from flext import FlextModels, FlextResult
+from flext_target_ldap.constants import c
 from flext_target_ldap.typings import t
 
 
@@ -38,34 +38,8 @@ class FlextTargetLdapModels(FlextModels):
             "Subclassing FlextTargetLdapModels is deprecated. Use FlextModels directly with composition instead.",
         )
 
-    class ObjectClass(StrEnum):
-        """Standard LDAP object classes for target operations.
-
-        Defines the common object classes used in enterprise LDAP directories
-        for users, groups, and organizational structures.
-        """
-
-        # Base object classes
-        TOP = "top"
-
-        # Person object classes
-        PERSON = "person"
-        ORGANIZATIONAL_PERSON = "organizationalPerson"
-        INET_ORG_PERSON = "inetOrgPerson"
-
-        # Group object classes
-        GROUP_OF_NAMES = "groupOfNames"
-        GROUP_OF_UNIQUE_NAMES = "groupOfUniqueNames"
-        POSIX_GROUP = "posixGroup"
-
-        # Organizational object classes
-        ORGANIZATION = "organization"
-        ORGANIZATIONAL_UNIT = "organizationalUnit"
-        ORGANIZATIONAL_ROLE = "organizationalRole"
-
-        # System object classes
-        DOMAIN = "domain"
-        DOMAIN_COMPONENT = "dcObject"
+    # ObjectClass moved to constants.py as c.TargetLdap.ObjectClass (DRY pattern)
+    ObjectClass = c.TargetLdap.ObjectClass
 
     class AttributeMapping(FlextModels.Entity):
         """LDAP attribute mapping configuration with validation.

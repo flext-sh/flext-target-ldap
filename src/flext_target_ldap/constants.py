@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Final
 
 from flext_ldap import c
@@ -34,6 +35,39 @@ class FlextTargetLdapConstants(FlextLdapConstants):
 
     class TargetLdap:
         """Target LDAP domain-specific constants namespace."""
+
+        class ObjectClass(StrEnum):
+            """Standard LDAP object classes for target operations.
+
+            Defines the common object classes used in enterprise LDAP directories
+            for users, groups, and organizational structures.
+
+            DRY Pattern:
+                StrEnum is the single source of truth. Use ObjectClass.PERSON.value
+                or ObjectClass.PERSON directly - no base strings needed.
+            """
+
+            # Base object classes
+            TOP = "top"
+
+            # Person object classes
+            PERSON = "person"
+            ORGANIZATIONAL_PERSON = "organizationalPerson"
+            INET_ORG_PERSON = "inetOrgPerson"
+
+            # Group object classes
+            GROUP_OF_NAMES = "groupOfNames"
+            GROUP_OF_UNIQUE_NAMES = "groupOfUniqueNames"
+            POSIX_GROUP = "posixGroup"
+
+            # Organizational object classes
+            ORGANIZATION = "organization"
+            ORGANIZATIONAL_UNIT = "organizationalUnit"
+            ORGANIZATIONAL_ROLE = "organizationalRole"
+
+            # System object classes
+            DOMAIN = "domain"
+            DOMAIN_COMPONENT = "dcObject"
 
         class Connection:
             """LDAP connection configuration constants for target operations."""

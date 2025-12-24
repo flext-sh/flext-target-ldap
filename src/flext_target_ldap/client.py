@@ -15,13 +15,13 @@ from contextlib import _GeneratorContextManager, contextmanager, suppress
 from typing import Protocol, override
 
 import ldap3
-from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdap,
     FlextLdapClients,
     FlextLdapModels,
 )
 
+from flext import FlextLogger, FlextResult
 from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)

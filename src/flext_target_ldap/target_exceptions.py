@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextExceptions
+from flext import FlextExceptions
 
 
 # DIRECT EXCEPTION CLASSES: Use direct inheritance instead of factory pattern

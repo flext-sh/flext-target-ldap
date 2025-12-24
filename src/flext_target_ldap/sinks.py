@@ -10,8 +10,7 @@ from __future__ import annotations
 from asyncio import run
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
-
+from flext import FlextLogger, FlextResult
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.typings import t
 

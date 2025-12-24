@@ -46,7 +46,7 @@ class FlextTargetLdapProtocols(p_meltano, p_ldap):
                 """Protocol for LDAP target operations."""
 
                 def process_record(
-                    self, record: dict[str, object]
+                    self, record: dict[str, object],
                 ) -> p_meltano.Result[bool]:
                     """Process a single record."""
                     ...
@@ -78,7 +78,7 @@ class FlextTargetLdapProtocols(p_meltano, p_ldap):
                 """Protocol for LDAP connection management."""
 
                 def connect(
-                    self, config: dict[str, object]
+                    self, config: dict[str, object],
                 ) -> p_meltano.Result[object]:
                     """Connect to LDAP server."""
                     ...
