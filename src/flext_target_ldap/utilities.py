@@ -811,7 +811,7 @@ class FlextTargetLdapUtilities(u_core):
         @staticmethod
         def build_connection_config(
             config: dict[str, object],
-        ) -> FlextLdapModels.ConnectionConfig:
+        ) -> FlextLdapModels.ConnectionConfig:  # noqa: F821
             """Build LDAP connection configuration from config dict.
 
             Business Rule: Configuration Builder Pattern
@@ -835,7 +835,7 @@ class FlextTargetLdapUtilities(u_core):
 
             """
             # Import here to avoid circular imports
-            from flext_ldap import FlextLdapModels
+            from flext_ldap import FlextLdapModels  # noqa: PLC0415
 
             server = FlextTargetLdapUtilities.TypeConversion.to_str(
                 config.get("host", "localhost"), "localhost"
@@ -927,7 +927,7 @@ class FlextTargetLdapUtilities(u_core):
         @staticmethod
         def validate_ldap_config(
             config: dict[str, object],
-        ) -> FlextResult[FlextTargetLdapSettings]:
+        ) -> FlextResult[FlextTargetLdapSettings]:  # noqa: F821
             """Validate and build LDAP target configuration.
 
             Business Rule: Complete LDAP Configuration Validation
@@ -956,7 +956,9 @@ class FlextTargetLdapUtilities(u_core):
 
             """
             # Import here to avoid circular imports
-            from flext_target_ldap.settings import FlextTargetLdapSettings
+            from flext_target_ldap.settings import (  # noqa: PLC0415
+                FlextTargetLdapSettings,
+            )
 
             try:
                 connection_config = (
