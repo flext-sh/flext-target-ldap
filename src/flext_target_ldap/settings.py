@@ -201,9 +201,6 @@ class LDAPOperationSettings(FlextModels):
         description="Delete removed entries",
     )
 
-    """Convert value to string."""
-    return str(value) if value is not None else default
-
 
 def validate_ldap_config(
     config: t.Core.Dict,
@@ -260,7 +257,7 @@ def validate_ldap_config(
                 config.get("update_existing_entries", True),
                 default=True,
             ),
-            delete_removed_entries=_to_bool(
+            delete_removed_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
                 config.get("delete_removed_entries", False),
                 default=False,
             ),
