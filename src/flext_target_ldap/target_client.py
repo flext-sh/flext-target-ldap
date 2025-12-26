@@ -11,10 +11,12 @@ from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
 from typing import override
 
-from flext_core import  FlextContainer,
+from flext_core import (
+    FlextContainer,
     FlextLogger,
-    FlextResult
-from flext_ldap import FlextLdap, FlextLdapClients, FlextLdapModels
+    FlextResult,
+)
+from flext_ldap import FlextLdap, FlextLdapModels
 
 from flext_target_ldap.constants import c
 from flext_target_ldap.sinks import Sink, Target
@@ -84,7 +86,7 @@ class _LdapConnectionWrapper:
     @override
     def __init__(
         self,
-        api: FlextLdapClients,
+        api: FlextLdap,
         server_url: str,
         bind_dn: str | None,
         password: str | None,
@@ -231,8 +233,7 @@ class LdapTargetClient:
             self._password = ""
 
         # Create API instance using flext-ldap
-        api = FlextLdap()
-        self._api: FlextLdapClients = api.client
+        self._api: FlextLdap = FlextLdap()
         self._current_session_id: str | None = None
 
         logger.info(
@@ -314,7 +315,7 @@ class LdapTargetClient:
 
     def _create_connection_wrapper(
         self,
-        api: FlextLdapClients,
+        api: FlextLdap,
         server_url: str,
     ) -> object:
         """Create LDAP connection wrapper for delegation."""
