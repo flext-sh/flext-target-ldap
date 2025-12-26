@@ -28,7 +28,7 @@ class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration using consolidated patterns with FLEXT standards."""
 
     # Use real LDAP connection config from flext-ldap - no duplications
-    connection: FlextLdapModels.ConnectionConfig = Field(
+    connection: FlextLdapModels.Ldap.ConnectionConfig = Field(
         ...,
         description="LDAP connection configuration",
     )

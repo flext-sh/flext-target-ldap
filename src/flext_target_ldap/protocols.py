@@ -1,4 +1,10 @@
-"""Target LDAP protocols for FLEXT ecosystem."""
+"""Target LDAP protocols for FLEXT ecosystem.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
+from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
@@ -46,7 +52,8 @@ class FlextTargetLdapProtocols(p_meltano, p_ldap):
                 """Protocol for LDAP target operations."""
 
                 def process_record(
-                    self, record: dict[str, object],
+                    self,
+                    record: dict[str, object],
                 ) -> p_meltano.Result[bool]:
                     """Process a single record."""
                     ...
@@ -78,7 +85,8 @@ class FlextTargetLdapProtocols(p_meltano, p_ldap):
                 """Protocol for LDAP connection management."""
 
                 def connect(
-                    self, config: dict[str, object],
+                    self,
+                    config: dict[str, object],
                 ) -> p_meltano.Result[object]:
                     """Connect to LDAP server."""
                     ...

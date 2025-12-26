@@ -11,7 +11,7 @@ from flext_core import FlextExceptions
 
 
 # DIRECT EXCEPTION CLASSES: Use direct inheritance instead of factory pattern
-class FlextTargetLdapError(FlextExceptions.Error):
+class FlextTargetLdapError(FlextExceptions.BaseError):
     """Generic LDAP target errors."""
 
 
@@ -23,7 +23,7 @@ class FlextTargetLdapSettingsurationError(FlextExceptions.ConfigurationError):
     """LDAP target configuration-specific errors."""
 
 
-class FlextTargetLdapProcessingError(FlextExceptions.ProcessingError):
+class FlextTargetLdapProcessingError(FlextExceptions.OperationError):
     """LDAP target processing-specific errors."""
 
 

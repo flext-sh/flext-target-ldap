@@ -18,7 +18,6 @@ import ldap3
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdap,
-    FlextLdapClients,
     FlextLdapModels,
 )
 
@@ -113,7 +112,7 @@ class LDAPClient:
             self._password = ""
 
         # Defer API instantiation to avoid heavy config requirements in unit tests
-        self._api: FlextLdapClients | None = None
+        self._api: FlextLdap | None = None
 
         logger.info(
             "Initialized LDAP client using flext-ldap API for %s:%d",
@@ -210,11 +209,10 @@ class LDAPClient:
         except (RuntimeError, ValueError, TypeError) as e:
             return FlextResult[str].fail(f"Connection test error: {e}")
 
-    def _get_api(self: object) -> FlextLdapClients:
-        """Instantiate and cache FlextLdapClients lazily."""
+    def _get_api(self: object) -> FlextLdap:
+        """Instantiate and cache FlextLdap lazily."""
         if self._api is None:
-            api = FlextLdap()
-            self._api = api.client
+            self._api = FlextLdap()
         return self._api
 
     def connect_sync(self: object) -> FlextResult[None]:
@@ -487,11 +485,11 @@ class LDAPClient:
 
 
 # Backward compatibility classes with real inheritance
-class LDAPConnectionConfig(FlextLdapModels.ConnectionConfig):
+class LDAPConnectionConfig(FlextLdapModels.Ldap.ConnectionConfig):
     """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
 
 
-class LDAPEntry(FlextLdapModels.Entry):
+class LDAPEntry(FlextLdapModels.Ldif.Entry):
     """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
 
 

@@ -12,6 +12,7 @@ from typing import Final
 
 from flext_ldap import c
 from flext_ldap.constants import FlextLdapConstants
+from flext_ldif.constants import FlextLdifConstants as ldif_c
 
 
 class FlextTargetLdapConstants(FlextLdapConstants):
@@ -129,7 +130,7 @@ class FlextTargetLdapConstants(FlextLdapConstants):
             """
 
             # Validation constants from flext-ldif (parent of flext-ldap)
-            MAX_DN_LENGTH: Final[int] = c.Ldif.LdifValidation.MAX_DN_LENGTH
+            MAX_DN_LENGTH: Final[int] = ldif_c.Ldif.LdifValidation.MAX_DN_LENGTH
 
 
 c = FlextTargetLdapConstants
