@@ -55,7 +55,7 @@ class Target:
     @override
     def __init__(self, config: t.Core.Dict) -> None:
         """Initialize target with configuration."""
-        self.config: dict[str, object] = config
+        self.config: dict[str, t.GeneralValueType] = config
 
 
 logger = FlextLogger(__name__)
@@ -112,7 +112,7 @@ class LDAPBaseSink(Sink):
     def setup_client(self) -> FlextResult[LDAPClient]:
         """Set up LDAP client connection."""
         try:
-            # Create dict[str, object] configuration for LDAPClient compatibility
+            # Create dict[str, t.GeneralValueType] configuration for LDAPClient compatibility
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
                 "port": self._target.config.get("port", 389),
@@ -154,9 +154,11 @@ class LDAPBaseSink(Sink):
             return
 
         try:
-            records_raw: list[object] = _context.get("records", [])
+            records_raw: list[t.GeneralValueType] = _context.get("records", [])
 
-            records: list[object] = records_raw if isinstance(records_raw, list) else []
+            records: list[t.GeneralValueType] = (
+                records_raw if isinstance(records_raw, list) else []
+            )
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -312,7 +314,7 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, object] = self._target.config.get(
+        mapping_obj: dict[str, t.GeneralValueType] = self._target.config.get(
             "attribute_mapping",
             {},
         )
@@ -428,7 +430,7 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, object] = self._target.config.get(
+        mapping_obj: dict[str, t.GeneralValueType] = self._target.config.get(
             "attribute_mapping",
             {},
         )
@@ -531,7 +533,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, object] = self._target.config.get(
+        mapping_obj: dict[str, t.GeneralValueType] = self._target.config.get(
             "attribute_mapping",
             {},
         )

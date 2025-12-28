@@ -18,7 +18,7 @@ from flext_target_ldap.typings import FlextTargetLdapTypes
 __all__: list[str] = [
     "FlextTargetLdapTypes",
     "configure_flext_target_ldap_dependencies",
-    "dict[str, object]",
+    "dict[str, t.GeneralValueType]",
     "get_flext_target_ldap_container",
     "get_flext_target_ldap_service",
 ]

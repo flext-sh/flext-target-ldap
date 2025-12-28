@@ -34,7 +34,7 @@ class SingerTargetLDAP:
         object: Description of return value.
 
         """
-        self.config: dict[str, object] = config or {}
+        self.config: dict[str, t.GeneralValueType] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
@@ -90,7 +90,7 @@ class SingerTargetLDAP:
                 if field not in self.config:
                     return FlextResult[bool].fail(f"Missing required field: {field}")
 
-            return FlextResult[bool].ok(data=True)
+            return FlextResult[bool].ok(True)
         except Exception as e:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 

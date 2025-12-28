@@ -107,7 +107,7 @@ class FlextTargetLdapSettings(FlextSettings):
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: dict[str, object] = {
+        dev_overrides: dict[str, t.GeneralValueType] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 2,
             "receive_timeout": c.Network.DEFAULT_TIMEOUT + 15,
             "batch_size": c.Performance.BatchProcessing.DEFAULT_SIZE // 20,
@@ -123,7 +123,7 @@ class FlextTargetLdapSettings(FlextSettings):
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: dict[str, object] = {
+        prod_overrides: dict[str, t.GeneralValueType] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 3,
             "receive_timeout": c.Network.DEFAULT_TIMEOUT,
             "batch_size": c.Performance.BatchProcessing.DEFAULT_SIZE,
@@ -140,7 +140,7 @@ class FlextTargetLdapSettings(FlextSettings):
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: dict[str, object] = {
+        test_overrides: dict[str, t.GeneralValueType] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 6,
             "receive_timeout": c.Network.DEFAULT_TIMEOUT // 2,
             "batch_size": c.Performance.BatchProcessing.DEFAULT_SIZE // 100,

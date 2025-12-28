@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+from flext_core import FlextTypes as t
 
 import json
 from pathlib import Path
@@ -31,7 +32,7 @@ class TestTargetLDAPIntegration:
     def config_file(
         self,
         tmp_path: Path,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: dict[str, t.GeneralValueType],
     ) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
@@ -236,7 +237,7 @@ class TestTargetLDAPIntegration:
         self,
         runner: Mock,
         tmp_path: Path,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: dict[str, t.GeneralValueType],
     ) -> None:
         """Test DN template usage for record processing."""
         # Add DN template to config

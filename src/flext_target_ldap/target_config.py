@@ -255,7 +255,9 @@ def validate_ldap_target_config(
             default=False,
         )
 
-        raw_attr_map: dict[str, object] = config.get("attribute_mapping", {})
+        raw_attr_map: dict[str, t.GeneralValueType] = config.get(
+            "attribute_mapping", {}
+        )
         attribute_mapping: t.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map.items()}
             if isinstance(raw_attr_map, dict)

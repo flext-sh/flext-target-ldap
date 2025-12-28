@@ -73,7 +73,7 @@ class DataTransformationEngine:
     ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: dict[str, object] = data.copy()
+            transformed_data: dict[str, t.GeneralValueType] = data.copy()
             applied_rules: t.Core.StringList = []
 
             for rule in self.rules:

@@ -21,5 +21,5 @@ __all__: list[str] = [
     "LDAPEntryManager",
     "LDAPSchemaMapper",
     "LDAPTypeConverter",
-    "dict[str, object]",
+    "dict[str, t.GeneralValueType]",
 ]

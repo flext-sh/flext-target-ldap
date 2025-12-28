@@ -30,7 +30,7 @@ class LDAPConnectionProtocol(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: list[object]
+    entries: list[t.GeneralValueType]
 
     def bind(self: object) -> bool:
         """Bind to LDAP server."""
@@ -42,11 +42,11 @@ class LDAPConnectionProtocol(Protocol):
         self,
         dn: str,
         object_classes: list[str],
-        attributes: dict[str, object],
+        attributes: dict[str, t.GeneralValueType],
     ) -> bool:
         """Add LDAP entry."""
 
-    def modify(self, dn: str, changes: dict[str, object]) -> bool:
+    def modify(self, dn: str, changes: dict[str, t.GeneralValueType]) -> bool:
         """Modify LDAP entry."""
 
     def delete(self, dn: str) -> bool:
@@ -85,11 +85,11 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.ConnectionConfig | dict[str, object],
+        config: FlextLdapModels.ConnectionConfig | dict[str, t.GeneralValueType],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict[str, object] to proper FlextLdapModels.ConnectionConfig
+            # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
             self.config: FlextLdapModels.ConnectionConfig = (
                 FlextLdapModels.ConnectionConfig(
                     server=str(config.get("host", "localhost")),
@@ -258,7 +258,7 @@ class LDAPClient:
             def __init__(self, session_id: str) -> None:
                 self.session_id = session_id
                 self.bound = True
-                self.entries: list[object] = []
+                self.entries: list[t.GeneralValueType] = []
 
             def bind(self: object) -> bool:
                 return True
@@ -270,11 +270,11 @@ class LDAPClient:
                 self,
                 _dn: str,
                 _object_classes: list[str],
-                _attributes: dict[str, object],
+                _attributes: dict[str, t.GeneralValueType],
             ) -> bool:
                 return True
 
-            def modify(self, _dn: str, _changes: dict[str, object]) -> bool:
+            def modify(self, _dn: str, _changes: dict[str, t.GeneralValueType]) -> bool:
                 return True
 
             def delete(self, _dn: str) -> bool:
@@ -410,11 +410,11 @@ class LDAPClient:
             with self.get_connection() as conn:
                 # conn is now properly typed as LDAPConnectionProtocol
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: list[object] = getattr(conn, "entries", [])
+                raw_entries: list[t.GeneralValueType] = getattr(conn, "entries", [])
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     dn = getattr(raw, "entry_dn", "")
-                    attr_names: list[object] = (
+                    attr_names: list[t.GeneralValueType] = (
                         getattr(raw, "entry_attributes", []) or []
                     )
                     attrs: t.Core.Dict = {}
