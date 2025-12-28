@@ -80,8 +80,7 @@ class FlextTargetLdapModels(FlextModels):
             try:
                 # Validate field name format
                 if (
-                    not self.singer_field_name
-                    .replace("_", "")
+                    not self.singer_field_name.replace("_", "")
                     .replace("-", "")
                     .isalnum()
                 ):
