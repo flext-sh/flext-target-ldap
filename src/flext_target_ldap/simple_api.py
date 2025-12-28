@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import FlextResult
-from flext_ldap import FlextLdapModels, get_flext_ldap_api
+from flext_ldap import FlextLdapModels
 
 from flext_target_ldap.target import TargetLDAP
 from flext_target_ldap.typings import t
@@ -36,7 +36,7 @@ def load_users_to_ldap(
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
     target_result: FlextResult[object] = create_ldap_target(config)
-    if not target_result.success:
+    if not target_result.is_success:
         return FlextResult[int].fail(f"Target creation failed: {target_result.error}")
 
     try:
@@ -46,7 +46,7 @@ def load_users_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink: dict[str, object] = target.get_sink_class("users")(
+        sink = target.get_sink_class("users")(
             target,
             "users",
             {},
@@ -70,7 +70,7 @@ def load_groups_to_ldap(
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
     target_result: FlextResult[object] = create_ldap_target(config)
-    if not target_result.success:
+    if not target_result.is_success:
         return FlextResult[int].fail(f"Target creation failed: {target_result.error}")
 
     try:
@@ -80,7 +80,7 @@ def load_groups_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink: dict[str, object] = target.get_sink_class("groups")(
+        sink = target.get_sink_class("groups")(
             target,
             "groups",
             {},
@@ -115,12 +115,9 @@ def test_ldap_connection(
             else 30,
         )
 
-        # Use real flext-ldap API and perform a lightweight test
-        api = get_flext_ldap_api()
-        # Intentionally not constructing URL or awaiting here to avoid blocking in sync path.
-        # This method only validates config structure.
-        _ = api  # keep reference to avoid unused warning in some linters
-        return FlextResult[bool].ok(data=True)
+        # Config validation is lightweight - just check structure
+        # Real LDAP connection testing is done at runtime
+        return FlextResult[bool].ok(True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[bool].fail(f"Connection test error: {e}")

@@ -23,7 +23,7 @@ class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
     # Type annotations for pyrefly
-    config: dict[str, object]
+    config: dict[str, t.GeneralValueType]
 
     @override
     def __init__(self, config: t.Core.Dict | None = None) -> None:
@@ -36,7 +36,7 @@ class LDAPTargetOrchestrator:
         object: Description of return value.
 
         """
-        self.config: dict[str, object] = config or {}
+        self.config: dict[str, t.GeneralValueType] = config or {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
@@ -89,7 +89,7 @@ class LDAPTargetOrchestrator:
                 if field not in self.config:
                     return FlextResult[bool].fail(f"Missing required field: {field}")
 
-            return FlextResult[bool].ok(data=True)
+            return FlextResult[bool].ok(True)
         except Exception as e:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 

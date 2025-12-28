@@ -97,7 +97,7 @@ class _LdapConnectionWrapper:
         self.bind_dn = bind_dn
         self.password = password
         self.bound = True
-        self.entries: list[object] = []
+        self.entries: list[t.GeneralValueType] = []
 
     def bind(self) -> bool:
         """Bind to LDAP server."""
@@ -210,7 +210,7 @@ class LdapTargetClient:
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
-            # Convert dict[str, object] to proper FlextLdapModels.ConnectionConfig
+            # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
             self.config = FlextLdapModels.ConnectionConfig(
                 server=str(
                     config.get("host", "localhost"),
@@ -390,15 +390,18 @@ class LdapTargetClient:
 
             try:
                 # Use create_group when objectClass indicates group, else create_user
-                is_group: list[object] = "groupOfNames" in ldap_attributes.get(
-                    "objectClass",
-                    [],
+                is_group: list[t.GeneralValueType] = (
+                    "groupOfNames"
+                    in ldap_attributes.get(
+                        "objectClass",
+                        [],
+                    )
                 )
                 if is_group:
                     # Minimal group creation via API
-                    cn_values: list[object] = ldap_attributes.get("cn", [])
+                    cn_values: list[t.GeneralValueType] = ldap_attributes.get("cn", [])
                     cn = str(cn_values[0]) if cn_values else "group"
-                    members: list[object] = [
+                    members: list[t.GeneralValueType] = [
                         str(m) for m in ldap_attributes.get("member", [])
                     ]
                     result = self._api.create_group(
@@ -653,7 +656,7 @@ class LdapBaseSink(Sink):
     def setup_client(self) -> FlextResult[LdapTargetClient]:
         """Set up LDAP client connection."""
         try:
-            # Create dict[str, object] configuration for LdapTargetClient compatibility
+            # Create dict[str, t.GeneralValueType] configuration for LdapTargetClient compatibility
             connection_config = {
                 "host": self._target.config.get(
                     "host",
@@ -704,9 +707,11 @@ class LdapBaseSink(Sink):
             return
 
         try:
-            records_raw: list[object] = _context.get("records", [])
+            records_raw: list[t.GeneralValueType] = _context.get("records", [])
 
-            records: list[object] = records_raw if isinstance(records_raw, list) else []
+            records: list[t.GeneralValueType] = (
+                records_raw if isinstance(records_raw, list) else []
+            )
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -727,8 +732,8 @@ class LdapBaseSink(Sink):
 
     def process_record(
         self,
-        record: dict[str, object],
-        _context: dict[str, object],
+        record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> None:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
@@ -755,8 +760,8 @@ class LdapUsersSink(LdapBaseSink):
 
     def process_record(
         self,
-        record: dict[str, object],
-        _context: dict[str, object],
+        record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> None:
         """Process a user record."""
         if not self.client:

@@ -18,5 +18,5 @@ operations, following flext-core architectural patterns and principles.
 __all__: list[str] = [
     "FlextTargetLdapTypes",
     "LDAPTargetOrchestrator",
-    "dict[str, object]",
+    "dict[str, t.GeneralValueType]",
 ]

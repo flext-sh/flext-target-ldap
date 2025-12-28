@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+from flext_core import FlextTypes as t
 
 from unittest.mock import MagicMock, patch
 
@@ -22,7 +23,7 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: dict[str, object]) -> LDAPClient:
+    def client(self, mock_ldap_config: dict[str, t.GeneralValueType]) -> LDAPClient:
         """Create test LDAP client instance."""
         return LDAPClient(config=mock_ldap_config)
 

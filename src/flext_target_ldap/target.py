@@ -225,7 +225,7 @@ def _get_ldap_api() -> object | None:
 
 def _construct_dn(
     stream: str,
-    record: dict[str, object],
+    record: dict[str, t.GeneralValueType],
     base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
@@ -240,7 +240,7 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: dict[str, object],
+    record: dict[str, t.GeneralValueType],
     stream: str,
     cfg: t.Core.Dict,
     api: object | None,
@@ -291,7 +291,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     obj.get("schema") or {}
                     current_stream = obj.get("stream")
                 elif msg_type == "RECORD" and api is not None:
-                    record: dict[str, object] = obj.get("record") or {}
+                    record: dict[str, t.GeneralValueType] = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
                     _process_record_message(record, stream, cfg, api, seen_dns)
             except Exception:

@@ -75,9 +75,13 @@ class LDAPDataTransformer:
                 ldap_key = self._normalize_ldap_attribute_name(key)
 
                 if schema:
-                    properties: dict[str, object] = schema.get("properties", {})
+                    properties: dict[str, t.GeneralValueType] = schema.get(
+                        "properties", {}
+                    )
                     if isinstance(properties, dict):
-                        prop_def: dict[str, object] = properties.get(key, {})
+                        prop_def: dict[str, t.GeneralValueType] = properties.get(
+                            key, {}
+                        )
                         if isinstance(prop_def, dict):
                             singer_type = prop_def.get("type", "string")
                         else:
@@ -167,7 +171,7 @@ class LDAPSchemaMapper:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: t.Core.Headers = {}
-            properties: dict[str, object] = schema.get("properties", {})
+            properties: dict[str, t.GeneralValueType] = schema.get("properties", {})
 
             if isinstance(properties, dict):
                 for prop_name, prop_def in properties.items():
