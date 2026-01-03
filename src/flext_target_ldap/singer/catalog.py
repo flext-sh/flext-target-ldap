@@ -31,25 +31,25 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
     key_properties: ClassVar[t.Core.StringList] = []
     bookmark_properties: ClassVar[t.Core.StringList] = []
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate catalog entry business rules."""
         try:
             if not self.tap_stream_id.strip():
-                return FlextResult[None].fail("tap_stream_id cannot be empty")
+                return FlextResult[bool].fail("tap_stream_id cannot be empty")
             if not self.stream.strip():
-                return FlextResult[None].fail("stream cannot be empty")
+                return FlextResult[bool].fail("stream cannot be empty")
             if not self.stream_schema:
-                return FlextResult[None].fail("stream_schema cannot be empty")
-            return FlextResult[None].ok(None)
+                return FlextResult[bool].fail("stream_schema cannot be empty")
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(f"Catalog entry validation failed: {e}")
+            return FlextResult[bool].fail(f"Catalog entry validation failed: {e}")
 
 
 class SingerLDAPCatalogManager:
     """Manage Singer LDAP catalog operations using flext-core patterns."""
 
     @override
-    def __init__(self: object) -> None:
+    def __init__(self) -> None:
         """Initialize Singer LDAP catalog manager."""
         self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
 
@@ -57,7 +57,7 @@ class SingerLDAPCatalogManager:
         self,
         stream_name: str,
         schema: t.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Add LDAP stream to catalog."""
         try:
             entry = SingerLDAPCatalogEntry(
@@ -67,10 +67,10 @@ class SingerLDAPCatalogManager:
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
-            return FlextResult[None].fail(f"Stream addition failed: {e}")
+            return FlextResult[bool].fail(f"Stream addition failed: {e}")
 
     def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""

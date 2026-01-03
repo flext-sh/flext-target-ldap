@@ -76,7 +76,7 @@ class SingerTargetLDAP:
                 f"Message processing failed: {e}",
             )
 
-    def validate_singer_config(self: object) -> FlextResult[bool]:
+    def validate_singer_config(self) -> FlextResult[bool]:
         """Validate Singer LDAP target configuration.
 
         Returns:

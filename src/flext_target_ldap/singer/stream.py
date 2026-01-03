@@ -30,7 +30,7 @@ class LDAPStreamProcessingStats:
         self.errors: t.Core.StringList = []
 
     @property
-    def success_rate(self: object) -> float:
+    def success_rate(self) -> float:
         """Calculate success rate percentage."""
         if self.records_processed == 0:
             return 0.0
@@ -41,19 +41,19 @@ class SingerLDAPStreamProcessor:
     """Process Singer LDAP streams using flext-core patterns."""
 
     @override
-    def __init__(self: object) -> None:
+    def __init__(self) -> None:
         """Initialize Singer LDAP stream processor."""
         self._stream_stats: dict[str, LDAPStreamProcessingStats] = {}
 
-    def initialize_stream(self, stream_name: str) -> FlextResult[None]:
+    def initialize_stream(self, stream_name: str) -> FlextResult[bool]:
         """Initialize LDAP stream processing."""
         try:
             self._stream_stats[stream_name] = LDAPStreamProcessingStats(stream_name)
             logger.info("Initialized LDAP stream processing: %s", stream_name)
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP stream initialization failed: %s", stream_name)
-            return FlextResult[None].fail(f"Stream initialization failed: {e}")
+            return FlextResult[bool].fail(f"Stream initialization failed: {e}")
 
     def get_stream_stats(
         self,

@@ -14,10 +14,8 @@ from flext_core import FlextLogger, FlextResult
 from flext_ldap import FlextLdap
 
 from flext_target_ldap import target_client as target_client_module
-from flext_target_ldap.target_config import (
-    TargetLdapConfig,
-    validate_ldap_target_config,
-)
+from flext_target_ldap.settings import FlextTargetLdapSettings
+from flext_target_ldap.target_config import validate_ldap_target_config
 from flext_target_ldap.target_models import (
     LdapAttributeMappingModel,
     LdapEntryModel,
@@ -62,7 +60,7 @@ class LdapTransformationServiceProtocol(Protocol):
     def validate_entry(
         self,
         entry: LdapEntryModel,
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Validate LDAP entry against business rules."""
 
 
@@ -72,13 +70,13 @@ class LdapOrchestrationServiceProtocol(Protocol):
     def orchestrate_data_loading(
         self,
         records: list[t.Core.Dict],
-        config: TargetLdapConfig,
+        config: FlextTargetLdapSettings,
     ) -> FlextResult[t.Core.Dict]:
         """Orchestrate batch data loading."""
 
     def validate_target_configuration(
         self,
-        config: TargetLdapConfig,
+        config: FlextTargetLdapSettings,
     ) -> FlextResult[bool]:
         """Validate target configuration."""
 
@@ -87,7 +85,7 @@ class LdapConnectionService:
     """Service for managing LDAP connections and basic operations."""
 
     @override
-    def __init__(self, config: TargetLdapConfig) -> None:
+    def __init__(self, config: FlextTargetLdapSettings) -> None:
         """Initialize connection service."""
         self._config: dict[str, t.GeneralValueType] = config
         api = FlextLdap()
@@ -117,13 +115,13 @@ class LdapConnectionService:
                 # Optionally perform a NOOP or simple bind check if available
                 _ = session  # ensure variable is used for static checkers
             logger.info("LDAP connection test successful")
-            return FlextResult[bool].ok(data=True)
+            return FlextResult[bool].ok(value=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Connection test failed")
             return FlextResult[bool].fail(f"Connection test error: {e}")
 
-    def get_connection_info(self: object) -> t.Core.Dict:
+    def get_connection_info(self) -> t.Core.Dict:
         """Get connection information for logging/monitoring."""
         return {
             "host": self._config.connection.server,
@@ -138,7 +136,7 @@ class LdapTransformationService:
     """Service for transforming Singer records to LDAP entries."""
 
     @override
-    def __init__(self, config: TargetLdapConfig) -> None:
+    def __init__(self, config: FlextTargetLdapSettings) -> None:
         """Initialize transformation service."""
         # Zero Tolerance FIX: Use FlextTargetLdapUtilities for ALL business logic
         self._utilities = FlextTargetLdapUtilities()
@@ -361,13 +359,13 @@ class LdapTransformationService:
             return "organization"
         return "generic"
 
-    def validate_entry(self, entry: LdapEntryModel) -> FlextResult[None]:
+    def validate_entry(self, entry: LdapEntryModel) -> FlextResult[bool]:
         """Validate LDAP entry against business rules."""
         try:
             # Use the entry's own validation
             return entry.validate_business_rules()
         except (RuntimeError, ValueError, TypeError) as e:
-            return FlextResult[None].fail(f"Entry validation failed: {e}")
+            return FlextResult[bool].fail(f"Entry validation failed: {e}")
 
     def get_default_mappings(self, entry_type: str) -> list[LdapAttributeMappingModel]:
         """Get default attribute mappings for entry type."""
@@ -436,7 +434,7 @@ class LdapTargetOrchestrator:
     @override
     def __init__(
         self,
-        config: t.Core.Dict | TargetLdapConfig | None = None,
+        config: t.Core.Dict | FlextTargetLdapSettings | None = None,
     ) -> None:
         """Initialize LDAP target orchestrator."""
         # Zero Tolerance FIX: Use FlextTargetLdapUtilities for ALL business logic
@@ -444,8 +442,8 @@ class LdapTargetOrchestrator:
 
         if isinstance(config, dict):
             self.config: dict[str, t.GeneralValueType] = config
-            self._typed_config: TargetLdapConfig | None = None
-        elif isinstance(config, TargetLdapConfig):
+            self._typed_config: FlextTargetLdapSettings | None = None
+        elif isinstance(config, FlextTargetLdapSettings):
             self._typed_config: dict[str, t.GeneralValueType] = config
             self.config: dict[
                 str, t.GeneralValueType
@@ -460,17 +458,17 @@ class LdapTargetOrchestrator:
 
         logger.debug("Initialized LDAP target orchestrator")
 
-    def get_typed_config(self: object) -> TargetLdapConfig | None:
+    def get_typed_config(self) -> FlextTargetLdapSettings | None:
         """Get typed configuration if available."""
         return self._typed_config
 
-    def get_connection_service(self: object) -> LdapConnectionService | None:
+    def get_connection_service(self) -> LdapConnectionService | None:
         """Get connection service if config is available."""
         if self._typed_config and not self._connection_service:
             self._connection_service = LdapConnectionService(self._typed_config)
         return self._connection_service
 
-    def get_transformation_service(self: object) -> LdapTransformationService | None:
+    def get_transformation_service(self) -> LdapTransformationService | None:
         """Get transformation service if config is available."""
         if self._typed_config and not self._transformation_service:
             self._transformation_service = LdapTransformationService(self._typed_config)
@@ -573,7 +571,7 @@ class LdapTargetOrchestrator:
     def orchestrate_data_loading(
         self,
         records: list[t.Core.Dict],
-        config: TargetLdapConfig | None = None,
+        config: FlextTargetLdapSettings | None = None,
     ) -> FlextResult[t.Core.Dict]:
         """Orchestrate data loading to LDAP target."""
         try:
@@ -631,7 +629,7 @@ class LdapTargetOrchestrator:
 
     def validate_target_configuration(
         self,
-        config: TargetLdapConfig | None = None,
+        config: FlextTargetLdapSettings | None = None,
     ) -> FlextResult[bool]:
         """Validate LDAP target configuration."""
         try:
@@ -685,7 +683,7 @@ class LdapTargetOrchestrator:
                 # Don't fail validation just because connection test fails
                 # The server might not be available during configuration validation
 
-            return FlextResult[bool].ok(data=True)
+            return FlextResult[bool].ok(value=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Configuration validation failed")
@@ -696,7 +694,7 @@ class LdapTargetApiService:
     """Simple API service for LDAP target operations."""
 
     @override
-    def __init__(self: object) -> None:
+    def __init__(self) -> None:
         """Initialize API service."""
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
 
@@ -804,7 +802,7 @@ class LdapTargetApiService:
             if config_result.data is None:
                 return FlextResult[
                     bool
-                ].fail(  # Fixed: FlextResult[None] -> FlextResult[bool]
+                ].fail(  # Fixed: FlextResult[bool] -> FlextResult[bool]
                     "Configuration validation returned no data",
                 )
             connection_service = LdapConnectionService(config_result.data)
