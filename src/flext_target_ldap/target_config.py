@@ -35,18 +35,18 @@ class LdapTargetConnectionSettings(FlextSettings):
     connect_timeout: int = Field(10, description="Connection timeout in seconds", ge=1)
     receive_timeout: int = Field(30, description="Receive timeout in seconds", ge=1)
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate LDAP connection business rules."""
         try:
             # Mutual exclusivity validation
             if self.use_ssl and self.use_tls:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "Cannot use both SSL and TLS simultaneously",
                 )
 
             # Authentication validation
             if self.bind_dn and not self.bind_password:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "Bind password required when bind DN is provided",
                 )
 
@@ -55,17 +55,17 @@ class LdapTargetConnectionSettings(FlextSettings):
             ldaps_standard_port = 636
 
             if self.use_ssl and self.port == ldap_standard_port:
-                return FlextResult[None].fail("SSL typically uses port 636, not 389")
+                return FlextResult[bool].fail("SSL typically uses port 636, not 389")
             if (
                 not self.use_ssl
                 and not self.use_tls
                 and self.port == ldaps_standard_port
             ):
-                return FlextResult[None].fail("Port 636 typically requires SSL")
+                return FlextResult[bool].fail("Port 636 typically requires SSL")
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(f"Connection settings validation failed: {e}")
+            return FlextResult[bool].fail(f"Connection settings validation failed: {e}")
 
 
 class LdapTargetOperationSettings(FlextSettings):
@@ -90,12 +90,12 @@ class LdapTargetOperationSettings(FlextSettings):
         description="Delete entries not in source",
     )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate operation settings business rules."""
         try:
             # Logical consistency validation
             if not self.create_missing_entries and not self.update_existing_entries:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "At least one of create_missing_entries or update_existing_entries must be True",
                 )
 
@@ -104,9 +104,9 @@ class LdapTargetOperationSettings(FlextSettings):
                 # This is a destructive operation - could add additional validation
                 pass
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(f"Operation settings validation failed: {e}")
+            return FlextResult[bool].fail(f"Operation settings validation failed: {e}")
 
 
 class LdapTargetMappingSettings(FlextSettings):
@@ -129,12 +129,12 @@ class LdapTargetMappingSettings(FlextSettings):
         description='Search scope: "BASE", LEVEL, or SUBTREE',
     )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate mapping settings business rules."""
         try:
             # Object class validation
             if not self.object_classes:
-                return FlextResult[None].fail("Object classes cannot be empty")
+                return FlextResult[bool].fail("Object classes cannot be empty")
             if "top" not in self.object_classes:
                 # Add 'top' as it's required for all LDAP entries
                 self.object_classes.append("top")
@@ -142,17 +142,13 @@ class LdapTargetMappingSettings(FlextSettings):
             # Search scope validation
             valid_scopes = {"BASE", "LEVEL", "SUBTREE"}
             if self.search_scope.upper() not in valid_scopes:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     f"Search scope must be one of {valid_scopes}",
                 )
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(f"Mapping settings validation failed: {e}")
-
-
-# TargetLdapConfig class moved to config.py as FlextTargetLdapSettings
-# This file now contains only utility functions and backwards compatibility
+            return FlextResult[bool].fail(f"Mapping settings validation failed: {e}")
 
 
 def _target_config_to_int(value: object, default: int) -> int:
@@ -344,22 +340,10 @@ def create_default_ldap_target_config(
         )
 
 
-# Import the new standardized config class and create backwards compatibility alias
-
-# Backward compatibility aliases
-TargetLDAPConfig = FlextTargetLdapSettings
-TargetLdapConfig = FlextTargetLdapSettings  # Also provide intermediate alias
-LDAPConnectionSettings = LdapTargetConnectionSettings
-LDAPOperationSettings = LdapTargetOperationSettings
-
 __all__ = [
-    "LDAPConnectionSettings",  # Backward compatibility
-    "LDAPOperationSettings",  # Backward compatibility
     "LdapTargetConnectionSettings",
     "LdapTargetMappingSettings",
     "LdapTargetOperationSettings",
-    "TargetLDAPConfig",  # Backward compatibility
-    "TargetLdapConfig",
     "create_default_ldap_target_config",
     "validate_ldap_target_config",
 ]

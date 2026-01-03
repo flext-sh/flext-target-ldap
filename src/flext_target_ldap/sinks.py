@@ -38,15 +38,15 @@ class Sink:
         self,
         _record: t.Core.Dict,
         _context: t.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Process a record using the target."""
         # Implementation will delegate to target's process method
         try:
             # Basic processing - this is a placeholder implementation
             # Real implementation would transform and load the record to LDAP
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(f"Record processing failed: {e}")
+            return FlextResult[bool].fail(f"Record processing failed: {e}")
 
 
 class Target:
@@ -65,7 +65,7 @@ class LDAPProcessingResult:
     """Result of LDAP processing operations - mutable for performance tracking."""
 
     @override
-    def __init__(self: object) -> None:
+    def __init__(self) -> None:
         """Initialize processing result counters."""
         self.processed_count: int = 0
         self.success_count: int = 0
@@ -73,13 +73,13 @@ class LDAPProcessingResult:
         self.errors: t.Core.StringList = []
 
     @property
-    def success_rate(self: object) -> float:
+    def success_rate(self) -> float:
         """Calculate success rate as percentage."""
         if self.processed_count == 0:
             return 0.0
         return (self.success_count / self.processed_count) * 100.0
 
-    def add_success(self: object) -> None:
+    def add_success(self) -> None:
         """Record a successful operation."""
         self.processed_count += 1
         self.success_count += 1
@@ -138,7 +138,7 @@ class LDAPBaseSink(Sink):
             logger.exception(error_msg)
             return FlextResult[LDAPClient].fail(error_msg)
 
-    def teardown_client(self: object) -> None:
+    def teardown_client(self) -> None:
         """Teardown LDAP client connection."""
         if self.client:
             # Disconnect using client API (sync)
@@ -197,7 +197,7 @@ class LDAPBaseSink(Sink):
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
 
-    def get_processing_result(self: object) -> LDAPProcessingResult:
+    def get_processing_result(self) -> LDAPProcessingResult:
         """Get processing results."""
         return self._processing_result
 

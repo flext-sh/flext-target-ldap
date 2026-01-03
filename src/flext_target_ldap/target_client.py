@@ -19,8 +19,8 @@ from flext_core import (
 from flext_ldap import FlextLdap, FlextLdapModels
 
 from flext_target_ldap.constants import c
+from flext_target_ldap.settings import FlextTargetLdapSettings
 from flext_target_ldap.sinks import Sink, Target
-from flext_target_ldap.target_config import TargetLdapConfig
 from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
@@ -412,13 +412,13 @@ class LdapTargetClient:
                     )
                     # Convert to boolean FlextResult
                     if result.is_success:
-                        return FlextResult[bool].ok(data=True)
+                        return FlextResult[bool].ok(value=True)
                     return FlextResult[bool].fail(
                         result.error or "Group creation failed",
                     )
                 # Fallback: create generic entry via modify flow (unsupported path)
                 # Emulate success by returning ok; real implementation would add support if needed
-                return FlextResult[bool].ok(data=True)
+                return FlextResult[bool].ok(value=True)
             finally:
                 # Close the connection
                 self._api.close_connection()
@@ -461,11 +461,11 @@ class LdapTargetClient:
 
             try:
                 # No modify_entry in API; assume success in dry-run mode
-                result: FlextResult[object] = FlextResult[None].ok(data=True)
+                result: FlextResult[object] = FlextResult[bool].ok(value=True)
 
                 if result.is_success:
                     logger.debug("Successfully modified LDAP entry: %s", dn)
-                    return FlextResult[bool].ok(data=True)
+                    return FlextResult[bool].ok(value=True)
             finally:
                 # Close the connection
                 self._api.close_connection()
@@ -548,7 +548,7 @@ class LdapTargetClient:
     def disconnect(self) -> FlextResult[bool]:
         """Disconnect noop (connection is context-managed per operation)."""
         logger.debug("No persistent session to disconnect")
-        return FlextResult[bool].ok(data=True)
+        return FlextResult[bool].ok(value=True)
 
     def delete_entry(self, dn: str) -> FlextResult[bool]:
         """Delete LDAP entry using flext-ldap API."""
@@ -578,7 +578,7 @@ class LdapTargetClient:
                 # Note: This is a placeholder implementation since flext-ldap may not have delete_entry
                 # In a real implementation, you would call the appropriate delete method
                 logger.debug("Successfully deleted LDAP entry: %s", dn)
-                return FlextResult[bool].ok(data=True)
+                return FlextResult[bool].ok(value=True)
             finally:
                 # Close the connection
                 self._api.close_connection()
@@ -605,7 +605,7 @@ class LdapTargetClient:
             if search_result.is_success and search_result.data is not None:
                 return FlextResult[bool].ok(len(search_result.data) > 0)
 
-            return FlextResult[bool].ok(data=False)
+            return FlextResult[bool].ok(value=False)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to check entry existence: %s", dn)
@@ -628,7 +628,7 @@ class LdapTargetClient:
             if search_result.is_success and search_result.data:
                 return FlextResult[LdapSearchEntry | None].ok(search_result.data[0])
 
-            return FlextResult[LdapSearchEntry | None].ok(None)
+            return FlextResult[LdapSearchEntry | None].ok(True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to get entry: %s", dn)
@@ -1082,7 +1082,7 @@ class TargetLdap(Target):
     """
 
     name = "target-ldap"
-    config_class = TargetLdapConfig
+    config_class = FlextTargetLdapSettings
 
     @override
     def __init__(

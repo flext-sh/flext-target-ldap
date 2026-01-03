@@ -114,7 +114,7 @@ class TestLDAPClient:
             attributes={"cn": "Test User", "sn": "User"},
         )
 
-        assert result.success
+        assert result.is_success
         if not (result.data):
             msg: str = f"Expected True, got {result.data}"
             raise AssertionError(msg)
@@ -177,7 +177,7 @@ class TestLDAPClient:
             changes={"mail": "new@test.com", "telephoneNumber": "123-456"},
         )
 
-        assert result.success
+        assert result.is_success
         if not (result.data):
             msg: str = f"Expected True, got {result.data}"
             raise AssertionError(msg)
@@ -205,7 +205,7 @@ class TestLDAPClient:
 
         result = client.delete_entry("uid=test,dc=test,dc=com")
 
-        assert result.success
+        assert result.is_success
         if not (result.data):
             msg: str = f"Expected True, got {result.data}"
             raise AssertionError(msg)
@@ -239,7 +239,7 @@ class TestLDAPClient:
 
         result = client.search_entry("dc=test,dc=com")
 
-        assert result.success
+        assert result.is_success
         entries = result.data
         if len(entries) != 1:
             msg: str = f"Expected {1}, got {len(entries)}"
@@ -276,7 +276,7 @@ class TestLDAPClient:
         mock_pool_class.return_value = mock_pool
 
         result = client.entry_exists("uid=test,dc=test,dc=com")
-        assert result.success
+        assert result.is_success
         if not (result.data):
             msg: str = f"Expected True, got {result.data}"
             raise AssertionError(msg)
@@ -284,7 +284,7 @@ class TestLDAPClient:
         # Test entry doesn't exist
         mock_connection.entries = []
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
-        assert result.success
+        assert result.is_success
         if result.data:
             msg: str = f"Expected False, got {result.data}"
             raise AssertionError(msg)
@@ -317,7 +317,7 @@ class TestLDAPClient:
 
         result = client.get_entry("uid=test,dc=test,dc=com")
 
-        assert result.success
+        assert result.is_success
         entry = result.data
         assert entry is not None
         if entry.dn != "uid=test,dc=test,dc=com":
@@ -328,7 +328,7 @@ class TestLDAPClient:
         # Test entry not found
         mock_connection.entries = []
         result = client.get_entry("uid=notfound,dc=test,dc=com")
-        assert result.success
+        assert result.is_success
         assert result.data is None
 
     def test_connection_error_handling(

@@ -75,7 +75,7 @@ class LDAPTargetOrchestrator:
                 f"Data loading orchestration failed: {e}",
             )
 
-    def validate_target_configuration(self: object) -> FlextResult[bool]:
+    def validate_target_configuration(self) -> FlextResult[bool]:
         """Validate LDAP target configuration.
 
         Returns:

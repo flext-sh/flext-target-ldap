@@ -60,7 +60,7 @@ class TestLDAPBaseSink:
         """Test that build_dn method raises error when not implemented in subclass."""
         record = {"cn": "test"}
         result = sink.build_dn(record)
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "must be implemented in subclass" not in result.error:
             error_msg: str = (
@@ -72,7 +72,7 @@ class TestLDAPBaseSink:
         """Test that build_attributes method raises error when not implemented in subclass."""
         record = {"cn": "test"}
         result = sink.build_attributes(record)
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "must be implemented in subclass" not in result.error:
             error_msg: str = (
@@ -92,7 +92,7 @@ class TestLDAPBaseSink:
         """Test successful validation of LDAP entry with valid DN, attributes, and object classes."""
         # Mock the private _client attribute since client is a property
         mock_client = MagicMock()
-        mock_client.validate_dn.return_value.success = True
+        mock_client.validate_dn.return_value.is_success = True
         sink._client = mock_client
 
         result = sink.validate_entry(
@@ -100,12 +100,12 @@ class TestLDAPBaseSink:
             {"cn": ["test"]},
             ["person", "top"],
         )
-        assert result.success
+        assert result.is_success
 
     def test_validate_entry_empty_dn(self, sink: LDAPBaseSink) -> None:
         """Test validation failure when DN is empty."""
         result = sink.validate_entry("", {"cn": ["test"]}, ["person"])
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "DN cannot be empty" not in result.error:
             dn_error_msg: str = f"Expected {'DN cannot be empty'} in {result.error}"
@@ -114,7 +114,7 @@ class TestLDAPBaseSink:
     def test_validate_entry_empty_attributes(self, sink: LDAPBaseSink) -> None:
         """Test validation failure when attributes are empty."""
         result = sink.validate_entry("cn=test,dc=example,dc=com", {}, ["person"])
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "Attributes cannot be empty" not in result.error:
             attr_error_msg: str = (
@@ -125,7 +125,7 @@ class TestLDAPBaseSink:
     def test_validate_entry_empty_object_classes(self, sink: LDAPBaseSink) -> None:
         """Test validation failure when object classes are empty."""
         result = sink.validate_entry("cn=test,dc=example,dc=com", {"cn": ["test"]}, [])
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "Object classes cannot be empty" not in result.error:
             obj_classes_error_msg: str = (
@@ -168,7 +168,7 @@ class TestUsersSink:
         """Test building DN for user with UID attribute."""
         record = {"uid": "testuser", "cn": "Test User"}
         result = users_sink.build_dn(record)
-        assert result.success
+        assert result.is_success
         if result.data != "uid=testuser,dc=example,dc=com":
             dn_result_msg: str = (
                 f"Expected {'uid=testuser,dc=example,dc=com'}, got {result.data}"
@@ -179,7 +179,7 @@ class TestUsersSink:
         """Test building DN failure when UID attribute is missing."""
         record = {"cn": "Test User"}
         result = users_sink.build_dn(record)
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "No value found for RDN attribute 'uid'" not in result.error:
             msg = (
@@ -197,7 +197,7 @@ class TestUsersSink:
             "givenName": "Test",
         }
         result = users_sink.build_attributes(record)
-        assert result.success
+        assert result.is_success
         assert result.data is not None
         if result.data["uid"] != ["testuser"]:
             uid_msg: str = f"Expected {['testuser']}, got {result.data['uid']}"
@@ -221,7 +221,7 @@ class TestUsersSink:
             "phone_numbers": ["123-456-7890", "098-765-4321"],
         }
         result = users_sink.build_attributes(record)
-        assert result.success
+        assert result.is_success
         assert result.data is not None
         if result.data["uid"] != ["testuser"]:
             uid_msg2: str = f"Expected {['testuser']}, got {result.data['uid']}"
@@ -307,7 +307,7 @@ class TestGroupsSink:
         """Test building DN for group with CN attribute."""
         record = {"cn": "testgroup", "description": "Test Group"}
         result = groups_sink.build_dn(record)
-        assert result.success
+        assert result.is_success
         if result.data != "cn=testgroup,dc=example,dc=com":
             group_dn_msg: str = (
                 f"Expected {'cn=testgroup,dc=example,dc=com'}, got {result.data}"
@@ -318,7 +318,7 @@ class TestGroupsSink:
         """Test building DN failure when CN attribute is missing."""
         record = {"description": "Test Group"}
         result = groups_sink.build_dn(record)
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "No value found for RDN attribute 'cn'" not in result.error:
             msg = (
@@ -334,7 +334,7 @@ class TestGroupsSink:
             "members": ["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
         }
         result = groups_sink.build_attributes(record)
-        assert result.success
+        assert result.is_success
         assert result.data is not None
         if result.data["cn"] != ["testgroup"]:
             group_cn_msg: str = f"Expected {['testgroup']}, got {result.data['cn']}"
@@ -393,7 +393,7 @@ class TestOrganizationalUnitsSink:
         """Test building DN for organizational unit with OU attribute."""
         record = {"ou": "testou", "description": "Test OU"}
         result = ou_sink.build_dn(record)
-        assert result.success
+        assert result.is_success
         if result.data != "ou=testou,dc=example,dc=com":
             ou_dn_msg: str = (
                 f"Expected {'ou=testou,dc=example,dc=com'}, got {result.data}"
@@ -404,7 +404,7 @@ class TestOrganizationalUnitsSink:
         """Test building DN failure when OU attribute is missing."""
         record = {"description": "Test OU"}
         result = ou_sink.build_dn(record)
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "No OU name found in record" not in result.error:
             ou_error_msg: str = (
@@ -424,7 +424,7 @@ class TestOrganizationalUnitsSink:
             "postalCode": "12345",
         }
         result = ou_sink.build_attributes(record)
-        assert result.success
+        assert result.is_success
         assert result.data is not None
         if result.data["ou"] != ["testou"]:
             ou_attr_msg: str = f"Expected {['testou']}, got {result.data['ou']}"
@@ -490,7 +490,7 @@ class TestLDAPGenericSink:
         """Test building DN using explicit DN field in record."""
         record = {"dn": "cn=test,dc=example,dc=com"}
         result = generic_sink.build_dn(record)
-        assert result.success
+        assert result.is_success
         if result.data != "cn=test,dc=example,dc=com":
             generic_dn_msg: str = (
                 f"Expected {'cn=test,dc=example,dc=com'}, got {result.data}"
@@ -501,7 +501,7 @@ class TestLDAPGenericSink:
         """Test building DN using ID field with CN attribute."""
         record = {"id": "testentry", "cn": "Test Entry"}
         result = generic_sink.build_dn(record)
-        assert result.success
+        assert result.is_success
         if result.data != "cn=testentry,dc=example,dc=com":
             generic_id_msg: str = (
                 f"Expected {'cn=testentry,dc=example,dc=com'}, got {result.data}"
@@ -512,7 +512,7 @@ class TestLDAPGenericSink:
         """Test building DN failure when no identifier is found."""
         record = {"description": "Test Entry"}
         result = generic_sink.build_dn(record)
-        assert not result.success
+        assert not result.is_success
         assert result.error is not None
         if "No ID or name found for generic entry" not in result.error:
             generic_error_msg = (
@@ -530,7 +530,7 @@ class TestLDAPGenericSink:
             "_sdc_received_at": "2023-01-01T00:00:00Z",  # Should be excluded
         }
         result = generic_sink.build_attributes(record)
-        assert result.success
+        assert result.is_success
         assert result.data is not None
         if result.data["id"] != ["testentry"]:
             generic_id_attr_msg: str = (

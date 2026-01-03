@@ -21,7 +21,7 @@ class LDAPTypeConverter:
     """Convert data types for LDAP storage using flext-core patterns."""
 
     @override
-    def __init__(self: object) -> None:
+    def __init__(self) -> None:
         """Initialize LDAP type converter."""
 
     def convert_singer_to_ldap(
@@ -93,7 +93,7 @@ class LDAPDataTransformer:
                         singer_type,
                         value,
                     )
-                    if convert_result.success:
+                    if convert_result.is_success:
                         transformed[ldap_key] = convert_result.data
                     else:
                         transformed[ldap_key] = str(value)
@@ -160,7 +160,7 @@ class LDAPSchemaMapper:
     """Map Singer schemas to LDAP schemas using flext-core patterns."""
 
     @override
-    def __init__(self: object) -> None:
+    def __init__(self) -> None:
         """Initialize LDAP schema mapper."""
 
     def map_singer_schema_to_ldap(
@@ -182,7 +182,7 @@ class LDAPSchemaMapper:
                             object_class,
                         )
 
-                        if ldap_type_result.success:
+                        if ldap_type_result.is_success:
                             # ldap_type_result.data is guaranteed to be str when success is True
                             ldap_attributes[ldap_name] = (
                                 ldap_type_result.data or "DirectoryString"
@@ -243,7 +243,7 @@ class LDAPEntryManager:
     """Manage LDAP entries using flext-core patterns."""
 
     @override
-    def __init__(self: object) -> None:
+    def __init__(self) -> None:
         """Initialize LDAP entry manager."""
 
     def generate_dn(
@@ -370,7 +370,7 @@ class LDAPEntryManager:
                     f"Missing required attributes: {missing_attrs}",
                 )
 
-            return FlextResult[bool].ok(data=True)
+            return FlextResult[bool].ok(value=True)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")

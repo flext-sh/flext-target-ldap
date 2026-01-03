@@ -12,7 +12,8 @@ import re
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import FlextResult, FlextTypes as t
+from flext_core import FlextResult
+from flext_core import FlextTypes as t
 from flext_core.utilities import FlextUtilities as u_core
 from flext_ldap.models import FlextLdapModels
 

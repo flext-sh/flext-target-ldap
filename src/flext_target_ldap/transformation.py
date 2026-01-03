@@ -25,18 +25,18 @@ class TransformationRule(FlextModels.Entity):
     replacement: str
     enabled: bool = True
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate transformation rule business rules."""
         try:
             if not self.name.strip():
-                return FlextResult[None].fail("Rule name cannot be empty")
+                return FlextResult[bool].fail("Rule name cannot be empty")
             if not self.pattern:
-                return FlextResult[None].fail("Pattern cannot be empty")
+                return FlextResult[bool].fail("Pattern cannot be empty")
             # replacement is guaranteed to be str by Pydantic typing
             # Using a domain-specific validation instead
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(f"Transformation rule validation failed: {e}")
+            return FlextResult[bool].fail(f"Transformation rule validation failed: {e}")
 
 
 class TransformationResult(FlextModels.Entity):
@@ -45,16 +45,16 @@ class TransformationResult(FlextModels.Entity):
     transformed_data: t.Core.Dict
     applied_rules: t.Core.StringList = Field(default_factory=list)
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate transformation result business rules."""
         try:
             if not self.transformed_data:
-                return FlextResult[None].fail("transformed_data cannot be empty")
+                return FlextResult[bool].fail("transformed_data cannot be empty")
             if len(self.applied_rules) < 0:  # This check makes sense for business logic
-                return FlextResult[None].fail("applied_rules cannot be negative length")
-            return FlextResult[None].ok(None)
+                return FlextResult[bool].fail("applied_rules cannot be negative length")
+            return FlextResult[bool].ok(True)
         except Exception as e:
-            return FlextResult[None].fail(
+            return FlextResult[bool].fail(
                 f"Transformation result validation failed: {e}",
             )
 
@@ -93,7 +93,7 @@ class DataTransformationEngine:
         except Exception as e:
             return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
 
-    def get_statistics(self: object) -> dict[str, int]:
+    def get_statistics(self) -> dict[str, int]:
         """Get transformation statistics."""
         return {
             "total_rules": len(self.rules),
@@ -153,7 +153,7 @@ class MigrationValidator:
                 self._stats["validation_errors"] += 1
                 return FlextResult[bool].fail(error_msg)
 
-            return FlextResult[bool].ok(data=True)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             self._stats["validation_errors"] += 1
@@ -168,6 +168,6 @@ class MigrationValidator:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
 
-    def get_validation_statistics(self: object) -> dict[str, int]:
+    def get_validation_statistics(self) -> dict[str, int]:
         """Get validation statistics."""
         return self._stats.copy()
