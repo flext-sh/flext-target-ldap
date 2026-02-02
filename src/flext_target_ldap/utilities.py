@@ -37,7 +37,7 @@ class FlextTargetLdapUtilities(u_core):
         """Initialize LDAP target utilities."""
         super().__init__()
 
-    class SingerUtilities:
+    class TargetLdap:
         """Singer protocol utilities for target operations."""
 
         @staticmethod

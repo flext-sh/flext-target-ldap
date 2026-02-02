@@ -36,7 +36,7 @@ class FlextTargetLdapTypes(_t):
     # SINGER TARGET TYPES - Complex Singer target protocol types
     # =========================================================================
 
-    class SingerTarget:
+    class TargetLdap:
         """Singer target protocol complex types."""
 
         type TargetConfiguration = dict[
@@ -268,24 +268,6 @@ class FlextTargetLdapTypes(_t):
             str, bool | str | dict[str, _t.GeneralValueType]
         ]
         type TargetLdapPipelineConfig = dict[str, _t.GeneralValueType]
-
-    class TargetLdap:
-        """Target LDAP types namespace for cross-project access.
-
-        Provides organized access to all Target LDAP types for other FLEXT projects.
-        Usage: Other projects can reference `t.TargetLdap.SingerTarget.*`, `t.TargetLdap.Project.*`, etc.
-        This enables consistent namespace patterns for cross-project type access.
-
-        Examples:
-            from flext_target_ldap.typings import t
-            config: t.TargetLdap.Project.TapLdapProjectConfig = ...
-            message: t.TargetLdap.SingerTarget.TargetConfiguration = ...
-
-        Note: Namespace composition via inheritance - no aliases needed.
-        Access parent namespaces directly through inheritance.
-
-        """
-
 
 # Alias for simplified usage
 t = FlextTargetLdapTypes

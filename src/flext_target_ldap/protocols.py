@@ -42,7 +42,7 @@ class FlextTargetLdapProtocols(p_meltano, p_ldap):
     target_protocol: p.Target.Ldap.TargetProtocol
     """
 
-    class Target:
+    class TargetLdap:
         """Singer Target domain protocols."""
 
         class Ldap:
