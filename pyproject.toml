@@ -72,6 +72,33 @@
     prompt-toolkit = ">=3.0.52"
     sqlparse = ">=0.5.5"
 
+[tool.deptry]
+    known_first_party = [
+        "flext_target_ldap",
+        "flext_core",
+        "flext_ldap",
+        "flext_meltano",
+        "flext_observability",
+    ]
+    pep621_dev_dependency_groups = [
+        "dev",
+        "test",
+        "typings",
+        "security",
+    ]
+
+[tool.deptry.per_rule_ignores]
+    DEP002 = [
+        # CLI tools (invoked from command line, not imported)
+        "bandit",
+        "pyrefly",
+        "ruff",
+        # Runtime deps used indirectly (via pydantic, pytest)
+        "pytest",
+        "pytest-cov",
+        "pytest-mock",
+    ]
+
 [tool.ruff]
     line-length    = 88
     target-version = "py313"
