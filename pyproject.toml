@@ -1,6 +1,6 @@
 [project]
     name        = "flext-target-ldap"
-    version     = "2.1.0"
+    version     = "0.10.0-dev"
     description = "FLEXT Target for LDAP directory loading"
     readme      = "README.md"
     license     = "MIT"
@@ -43,7 +43,7 @@
 
 [tool.poetry]
     name        = "flext-target-ldap"
-    version     = "2.1.0"
+    version     = "0.10.0-dev"
     description = "FLEXT Target for LDAP directory loading"
     authors     = ["Marlon Santa Cruz <marlon@example.com>"]
     readme      = "README.md"
