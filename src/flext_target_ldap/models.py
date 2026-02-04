@@ -211,7 +211,9 @@ class FlextTargetLdapModels(FlextModels):
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has a specific object class."""
-                return object_class.lower() in [oc.lower() for oc in self.object_classes]
+                return object_class.lower() in [
+                    oc.lower() for oc in self.object_classes
+                ]
 
             def get_attribute_values(
                 self,
@@ -388,7 +390,8 @@ class FlextTargetLdapModels(FlextModels):
                 return self.model_copy(
                     update={
                         "current_batch": [],
-                        "total_processed": self.total_processed + len(self.current_batch),
+                        "total_processed": self.total_processed
+                        + len(self.current_batch),
                         "last_processed_at": datetime.now(UTC),
                     },
                 )
@@ -490,7 +493,9 @@ class FlextTargetLdapModels(FlextModels):
                 if self.total_entries_processed == 0:
                     return 0.0
                 successful = (
-                    self.successful_adds + self.successful_updates + self.successful_deletes
+                    self.successful_adds
+                    + self.successful_updates
+                    + self.successful_deletes
                 )
                 return (successful / self.total_entries_processed) * 100.0
 
