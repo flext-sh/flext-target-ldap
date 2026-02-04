@@ -269,6 +269,7 @@ class FlextTargetLdapTypes(_t):
         ]
         type TargetLdapPipelineConfig = dict[str, _t.GeneralValueType]
 
+
 # Alias for simplified usage
 t = FlextTargetLdapTypes
 
