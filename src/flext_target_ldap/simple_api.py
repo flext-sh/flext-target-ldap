@@ -15,19 +15,19 @@ from __future__ import annotations
 from flext_core import FlextResult
 from flext_ldap import FlextLdapModels
 
-from flext_target_ldap.target import TargetLDAP
-from flext_target_ldap.typings import t
+from .target import TargetLDAP
+from .typings import t
 
 
 def create_ldap_target(
     config: t.Core.Dict,
-) -> FlextResult[object]:
+) -> FlextResult[TargetLDAP]:
     """Create LDAP target with configuration."""
     try:
         target = TargetLDAP(config=config)
-        return FlextResult[object].ok(target)
+        return FlextResult[TargetLDAP].ok(target)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[object].fail(f"Failed to create LDAP target: {e}")
+        return FlextResult[TargetLDAP].fail(f"Failed to create LDAP target: {e}")
 
 
 def load_users_to_ldap(
@@ -35,7 +35,7 @@ def load_users_to_ldap(
     config: t.Core.Dict,
 ) -> FlextResult[int]:
     """Load user records to LDAP."""
-    target_result: FlextResult[object] = create_ldap_target(config)
+    target_result: FlextResult[TargetLDAP] = create_ldap_target(config)
     if not target_result.is_success:
         return FlextResult[int].fail(f"Target creation failed: {target_result.error}")
 
@@ -69,7 +69,7 @@ def load_groups_to_ldap(
     config: t.Core.Dict,
 ) -> FlextResult[int]:
     """Load group records to LDAP."""
-    target_result: FlextResult[object] = create_ldap_target(config)
+    target_result: FlextResult[TargetLDAP] = create_ldap_target(config)
     if not target_result.is_success:
         return FlextResult[int].fail(f"Target creation failed: {target_result.error}")
 
@@ -104,8 +104,8 @@ def test_ldap_connection(
     """Test LDAP connection with given configuration."""
     try:
         # Validate connection config by creating it
-        _ = FlextLdapModels.ConnectionConfig(
-            server=str(config.get("host", "localhost")),
+        _ = FlextLdapModels.Ldap.ConnectionConfig(
+            host=str(config.get("host", "localhost")),
             port=int(str(config.get("port", 389)))
             if config.get("port", 389) is not None
             else 389,

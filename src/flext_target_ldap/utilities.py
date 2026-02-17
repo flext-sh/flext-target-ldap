@@ -724,7 +724,7 @@ class FlextTargetLdapUtilities(u_core):
         """Type conversion utilities for configuration parsing."""
 
         @staticmethod
-        def to_int(value: object, default: int) -> int:
+        def to_int(value: t.GeneralValueType, default: int) -> int:
             """Convert value to int with safe defaults.
 
             Business Rule: Safe Type Conversion
@@ -759,7 +759,7 @@ class FlextTargetLdapUtilities(u_core):
             return default
 
         @staticmethod
-        def to_bool(value: object, *, default: bool) -> bool:
+        def to_bool(value: t.GeneralValueType, *, default: bool) -> bool:
             """Convert value to bool with safe defaults.
 
             Business Rule: Boolean Configuration Conversion
@@ -791,7 +791,7 @@ class FlextTargetLdapUtilities(u_core):
             return default
 
         @staticmethod
-        def to_str(value: object, default: str = "") -> str:
+        def to_str(value: t.GeneralValueType, default: str = "") -> str:
             """Convert value to str with safe defaults.
 
             Business Rule: String Configuration Conversion

@@ -18,8 +18,8 @@ from flext_core import FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
-from flext_target_ldap.settings import FlextTargetLdapSettings
-from flext_target_ldap.typings import t
+from .settings import FlextTargetLdapSettings
+from .typings import t
 
 
 class LdapTargetConnectionSettings(FlextSettings):
@@ -151,7 +151,7 @@ class LdapTargetMappingSettings(FlextSettings):
             return FlextResult[bool].fail(f"Mapping settings validation failed: {e}")
 
 
-def _target_config_to_int(value: object, default: int) -> int:
+def _target_config_to_int(value: t.GeneralValueType, default: int) -> int:
     """Convert value to int for target config."""
     if isinstance(value, bool):
         return default
@@ -165,7 +165,11 @@ def _target_config_to_int(value: object, default: int) -> int:
     return default
 
 
-def _target_config_to_bool(value: object, *, default: bool) -> bool:
+def _target_config_to_bool(
+    value: t.GeneralValueType,
+    *,
+    default: bool,
+) -> bool:
     """Convert value to bool for target config."""
     if isinstance(value, bool):
         return value
@@ -176,13 +180,13 @@ def _target_config_to_bool(value: object, *, default: bool) -> bool:
     return default
 
 
-def _target_config_to_str(value: object, default: str = "") -> str:
+def _target_config_to_str(value: t.GeneralValueType, default: str = "") -> str:
     """Convert value to str for target config."""
     return str(value) if value is not None else default
 
 
 def _target_config_to_str_list(
-    value: object,
+    value: t.GeneralValueType,
     default: t.Core.StringList,
 ) -> t.Core.StringList:
     """Convert value to string list."""
@@ -193,7 +197,7 @@ def _target_config_to_str_list(
 
 def _build_target_connection_config(
     config: t.Core.Dict,
-) -> FlextLdapModels.ConnectionConfig:
+) -> FlextLdapModels.Ldap.ConnectionConfig:
     """Build connection config for target."""
     server = _target_config_to_str(config.get("host", "localhost"), "localhost")
     port = _target_config_to_int(config.get("port", 389), 389)
@@ -202,8 +206,8 @@ def _build_target_connection_config(
     bind_password = _target_config_to_str(config.get("password", ""), "")
     timeout = _target_config_to_int(config.get("timeout", 30), 30)
 
-    return FlextLdapModels.ConnectionConfig(
-        server=server,
+    return FlextLdapModels.Ldap.ConnectionConfig(
+        host=server,
         port=port,
         use_ssl=use_ssl,
         bind_dn=bind_dn,
@@ -251,12 +255,10 @@ def validate_ldap_target_config(
             default=False,
         )
 
-        raw_attr_map: dict[str, t.GeneralValueType] = config.get(
-            "attribute_mapping", {}
-        )
+        raw_attr_map_value: t.GeneralValueType = config.get("attribute_mapping", {})
         attribute_mapping: t.Core.Headers = (
-            {str(k): str(v) for k, v in raw_attr_map.items()}
-            if isinstance(raw_attr_map, dict)
+            {str(k): str(v) for k, v in raw_attr_map_value.items()}
+            if isinstance(raw_attr_map_value, dict)
             else {}
         )
         object_classes = _target_config_to_str_list(
@@ -282,14 +284,6 @@ def validate_ldap_target_config(
             search_scope=search_scope,
         )
 
-        validation_result: FlextResult[object] = (
-            validated_config.validate_business_rules()
-        )
-        if not validation_result.is_success:
-            return FlextResult[FlextTargetLdapSettings].fail(
-                validation_result.error or "Invalid configuration",
-            )
-
         return FlextResult[FlextTargetLdapSettings].ok(validated_config)
 
     except (ValueError, TypeError, RuntimeError) as e:
@@ -308,8 +302,8 @@ def create_default_ldap_target_config(
     """Create default LDAP target configuration with minimal parameters."""
     try:
         # Create connection config
-        connection_config = FlextLdapModels.ConnectionConfig(
-            server=host,
+        connection_config = FlextLdapModels.Ldap.ConnectionConfig(
+            host=host,
             port=port,
             use_ssl=use_ssl,
             timeout=30,
@@ -324,13 +318,6 @@ def create_default_ldap_target_config(
             search_filter="(objectClass=*)",
             search_scope="SUBTREE",
         )
-
-        # Validate business rules
-        validation_result: FlextResult[object] = target_config.validate_business_rules()
-        if not validation_result.is_success:
-            return FlextResult[FlextTargetLdapSettings].fail(
-                validation_result.error or "Invalid configuration",
-            )
 
         return FlextResult[FlextTargetLdapSettings].ok(target_config)
 

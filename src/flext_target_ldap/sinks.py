@@ -107,7 +107,7 @@ class LDAPBaseSink(Sink):
         # Store target reference for config access
         self._target = target
         self.client: LDAPClient | None = None
-        self._processing_result: FlextResult[object] = LDAPProcessingResult()
+        self._processing_result: LDAPProcessingResult = LDAPProcessingResult()
 
     def setup_client(self) -> FlextResult[LDAPClient]:
         """Set up LDAP client connection."""
@@ -123,7 +123,7 @@ class LDAPBaseSink(Sink):
             }
 
             self.client = LDAPClient(connection_config)
-            connect_result: FlextResult[object] = self.client.connect()
+            connect_result: FlextResult[str] = self.client.connect()
 
             if not connect_result.is_success:
                 return FlextResult[LDAPClient].fail(
@@ -148,13 +148,13 @@ class LDAPBaseSink(Sink):
 
     def process_batch(self, _context: t.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result: FlextResult[object] = run(self.setup_client())
+        setup_result: FlextResult[LDAPClient] = self.setup_client()
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
 
         try:
-            records_raw: list[t.GeneralValueType] = _context.get("records", [])
+            records_raw = _context.get("records", [])
 
             records: list[t.GeneralValueType] = (
                 records_raw if isinstance(records_raw, list) else []
@@ -166,7 +166,8 @@ class LDAPBaseSink(Sink):
             )
 
             for record in records:
-                self.process_record(record, _context)
+                if isinstance(record, dict):
+                    self.process_record(record, _context)
 
             logger.info(
                 "Batch processing completed. Success: %d, Errors: %d",
@@ -181,21 +182,23 @@ class LDAPBaseSink(Sink):
         self,
         record: t.Core.Dict,
         _context: t.Core.Dict,
-    ) -> None:
+    ) -> FlextResult[bool]:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
-            return
+            return FlextResult[bool].fail("LDAP client not initialized")
 
         try:
             # Generic record processing - log and mark as processed
             logger.debug("Processing record: %s", record)
             self._processing_result.add_success()
+            return FlextResult[bool].ok(True)
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
+            return FlextResult[bool].fail(error_msg)
 
     def get_processing_result(self) -> LDAPProcessingResult:
         """Get processing results."""
@@ -209,18 +212,18 @@ class UsersSink(LDAPBaseSink):
         self,
         record: t.Core.Dict,
         _context: t.Core.Dict,
-    ) -> None:
+    ) -> FlextResult[bool]:
         """Process a user record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
-            return
+            return FlextResult[bool].fail("LDAP client not initialized")
 
         try:
             # Extract user information from record
             username = record.get("username") or record.get("uid") or record.get("cn")
             if not username:
                 self._processing_result.add_error("No username found in record")
-                return
+                return FlextResult[bool].fail("No username found in record")
 
             # Build DN for user
             base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
@@ -234,8 +237,8 @@ class UsersSink(LDAPBaseSink):
                 "objectClass",
                 ["inetOrgPerson", "person"],
             )
-            object_classes = (
-                object_classes_raw
+            object_classes: list[str] = (
+                [str(oc) for oc in object_classes_raw]
                 if isinstance(object_classes_raw, list)
                 else ["inetOrgPerson", "person"]
             )
@@ -250,6 +253,7 @@ class UsersSink(LDAPBaseSink):
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("User entry added successfully: %s", user_dn)
+                return FlextResult[bool].ok(True)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
@@ -259,19 +263,27 @@ class UsersSink(LDAPBaseSink):
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
+                    return FlextResult[bool].ok(True)
                 else:
                     self._processing_result.add_error(
                         f"Failed to modify user {user_dn}: {modify_result.error}",
                     )
+                    return FlextResult[bool].fail(
+                        f"Failed to modify user {user_dn}: {modify_result.error}"
+                    )
             else:
                 self._processing_result.add_error(
                     f"Failed to add user {user_dn}: {add_result.error}",
+                )
+                return FlextResult[bool].fail(
+                    f"Failed to add user {user_dn}: {add_result.error}"
                 )
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing user record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
+            return FlextResult[bool].fail(error_msg)
 
     def build_user_attributes(
         self,
@@ -334,18 +346,18 @@ class GroupsSink(LDAPBaseSink):
         self,
         record: t.Core.Dict,
         _context: t.Core.Dict,
-    ) -> None:
+    ) -> FlextResult[bool]:
         """Process a group record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
-            return
+            return FlextResult[bool].fail("LDAP client not initialized")
 
         try:
             # Extract group information from record
             group_name = record.get("name") or record.get("cn")
             if not group_name:
                 self._processing_result.add_error("No group name found in record")
-                return
+                return FlextResult[bool].fail("No group name found in record")
 
             # Build DN for group
             group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
@@ -355,8 +367,8 @@ class GroupsSink(LDAPBaseSink):
 
             # Extract object classes for the add_entry call
             object_classes_raw = attributes.pop("objectClass", ["groupOfNames"])
-            object_classes = (
-                object_classes_raw
+            object_classes: list[str] = (
+                [str(oc) for oc in object_classes_raw]
                 if isinstance(object_classes_raw, list)
                 else ["groupOfNames"]
             )
@@ -371,6 +383,7 @@ class GroupsSink(LDAPBaseSink):
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
+                return FlextResult[bool].ok(True)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
@@ -380,19 +393,27 @@ class GroupsSink(LDAPBaseSink):
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("Group entry modified successfully: %s", group_dn)
+                    return FlextResult[bool].ok(True)
                 else:
                     self._processing_result.add_error(
                         f"Failed to modify group {group_dn}: {modify_result.error}",
                     )
+                    return FlextResult[bool].fail(
+                        f"Failed to modify group {group_dn}: {modify_result.error}"
+                    )
             else:
                 self._processing_result.add_error(
                     f"Failed to add group {group_dn}: {add_result.error}",
+                )
+                return FlextResult[bool].fail(
+                    f"Failed to add group {group_dn}: {add_result.error}"
                 )
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing group record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
+            return FlextResult[bool].fail(error_msg)
 
     def _build_group_attributes(
         self,
@@ -430,12 +451,12 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, t.GeneralValueType] = self._target.config.get(
-            "attribute_mapping",
-            {},
+        mapping_val = self._target.config.get("attribute_mapping", {})
+        mapping_obj: dict[str, t.GeneralValueType] = (
+            mapping_val if isinstance(mapping_val, dict) else {}
         )
-        if isinstance(mapping_obj, dict):
-            for singer_field, ldap_attr in mapping_obj.items():
+        for singer_field, ldap_attr in mapping_obj.items():
+            if isinstance(ldap_attr, str):
                 value = record.get(singer_field)
                 if value is not None:
                     if isinstance(value, list):
@@ -453,18 +474,18 @@ class OrganizationalUnitsSink(LDAPBaseSink):
         self,
         record: t.Core.Dict,
         _context: t.Core.Dict,
-    ) -> None:
+    ) -> FlextResult[bool]:
         """Process an organizational unit record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
-            return
+            return FlextResult[bool].fail("LDAP client not initialized")
 
         try:
             # Extract OU information from record
             ou_name = record.get("name") or record.get("ou")
             if not ou_name:
                 self._processing_result.add_error("No OU name found in record")
-                return
+                return FlextResult[bool].fail("No OU name found in record")
 
             # Build DN for OU
             ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
@@ -478,6 +499,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
+                return FlextResult[bool].ok(True)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
@@ -487,19 +509,27 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("OU entry modified successfully: %s", ou_dn)
+                    return FlextResult[bool].ok(True)
                 else:
                     self._processing_result.add_error(
                         f"Failed to modify OU {ou_dn}: {modify_result.error}",
                     )
+                    return FlextResult[bool].fail(
+                        f"Failed to modify OU {ou_dn}: {modify_result.error}"
+                    )
             else:
                 self._processing_result.add_error(
                     f"Failed to add OU {ou_dn}: {add_result.error}",
+                )
+                return FlextResult[bool].fail(
+                    f"Failed to add OU {ou_dn}: {add_result.error}"
                 )
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing OU record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
+            return FlextResult[bool].fail(error_msg)
 
     def _build_ou_attributes(
         self,

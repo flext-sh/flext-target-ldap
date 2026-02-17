@@ -27,30 +27,30 @@ class LDAPTypeConverter:
     def convert_singer_to_ldap(
         self,
         singer_type: str,
-        value: object,
-    ) -> FlextResult[object]:
+        value: t.GeneralValueType,
+    ) -> FlextResult[str | None]:
         """Convert Singer type to LDAP-compatible type."""
         try:
             if value is None:
                 result = None
             elif singer_type in {"string", "text"}:
-                result: FlextResult[object] = str(value)
+                result = str(value)
             elif singer_type in {"integer", "number"}:
-                result: FlextResult[object] = str(
+                result = str(
                     value,
                 )  # LDAP stores numbers as strings
             elif singer_type == "boolean":
                 result = "TRUE" if value else "FALSE"
             elif singer_type in {"object", "array"}:
-                result: FlextResult[object] = json.dumps(value)
+                result = json.dumps(value)
             else:
-                result: FlextResult[object] = str(value)
+                result = str(value)
 
-            return FlextResult[object].ok(result)
+            return FlextResult[str | None].ok(result)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.warning("Type conversion failed for %s: %s", singer_type, e)
-            return FlextResult[object].ok(str(value))  # Fallback to string
+            return FlextResult[str | None].ok(str(value))
 
 
 class LDAPDataTransformer:

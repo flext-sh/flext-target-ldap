@@ -19,9 +19,9 @@ from flext_ldap import FlextLdapModels
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
-from flext_target_ldap.constants import c
-from flext_target_ldap.typings import t
-from flext_target_ldap.utilities import FlextTargetLdapUtilities
+from .constants import c
+from .typings import t
+from .utilities import FlextTargetLdapUtilities
 
 
 class FlextTargetLdapSettings(FlextSettings):
@@ -105,7 +105,7 @@ class FlextTargetLdapSettings(FlextSettings):
         return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
 
     @classmethod
-    def create_for_development(cls, **overrides: object) -> Self:
+    def create_for_development(cls, **overrides: t.GeneralValueType) -> Self:
         """Create configuration for development environment."""
         dev_overrides: dict[str, t.GeneralValueType] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 2,
@@ -121,7 +121,7 @@ class FlextTargetLdapSettings(FlextSettings):
         )
 
     @classmethod
-    def create_for_production(cls, **overrides: object) -> Self:
+    def create_for_production(cls, **overrides: t.GeneralValueType) -> Self:
         """Create configuration for production environment."""
         prod_overrides: dict[str, t.GeneralValueType] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 3,
@@ -138,7 +138,7 @@ class FlextTargetLdapSettings(FlextSettings):
         )
 
     @classmethod
-    def create_for_testing(cls, **overrides: object) -> Self:
+    def create_for_testing(cls, **overrides: t.GeneralValueType) -> Self:
         """Create configuration for testing environment."""
         test_overrides: dict[str, t.GeneralValueType] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 6,
@@ -242,9 +242,9 @@ def validate_ldap_config(
             batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get(
                     "batch_size",
-                    c.Performance.DEFAULT_BATCH_SIZE,
+                    c.Performance.BatchProcessing.DEFAULT_SIZE,
                 ),
-                c.Performance.DEFAULT_BATCH_SIZE,
+                c.Performance.BatchProcessing.DEFAULT_SIZE,
             ),
             max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("max_records"), 0
