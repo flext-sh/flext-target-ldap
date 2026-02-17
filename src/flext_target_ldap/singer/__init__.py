@@ -15,5 +15,4 @@ __all__: list[str] = [
     "SingerLDAPCatalogManager",
     "SingerLDAPStreamProcessor",
     "SingerTargetLDAP",
-    "dict[str, t.GeneralValueType]",
 ]

@@ -36,9 +36,8 @@ class LDAPTypeConverter:
             elif singer_type in {"string", "text"}:
                 result = str(value)
             elif singer_type in {"integer", "number"}:
-                result = str(
-                    value,
-                )  # LDAP stores numbers as strings
+                # Ensure value is castable to string, general value type might be anything
+                result = str(value)
             elif singer_type == "boolean":
                 result = "TRUE" if value else "FALSE"
             elif singer_type in {"object", "array"}:
@@ -49,7 +48,10 @@ class LDAPTypeConverter:
             return FlextResult[str | None].ok(result)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("Type conversion failed for %s: %s", singer_type, e)
+            # Cast exception to string for logger arguments compatibility
+            logger.warning(
+                "Type conversion failed for %s: %s", str(singer_type), str(e)
+            )
             return FlextResult[str | None].ok(str(value))
 
 
@@ -75,19 +77,23 @@ class LDAPDataTransformer:
                 ldap_key = self._normalize_ldap_attribute_name(key)
 
                 if schema:
-                    properties: dict[str, t.GeneralValueType] = schema.get(
-                        "properties", {}
+                    from typing import cast
+
+                    # Explicit cast for properties
+                    properties_raw = schema.get("properties", {})
+                    properties: dict[str, t.GeneralValueType] = cast(
+                        dict[str, t.GeneralValueType],
+                        properties_raw if isinstance(properties_raw, dict) else {},
                     )
+                    singer_type = "string"
+
                     if isinstance(properties, dict):
-                        prop_def: dict[str, t.GeneralValueType] = properties.get(
-                            key, {}
-                        )
+                        prop_def = properties.get(key, {})
                         if isinstance(prop_def, dict):
-                            singer_type = prop_def.get("type", "string")
-                        else:
-                            singer_type = "string"
-                    else:
-                        singer_type = "string"
+                            singer_type_raw = prop_def.get("type", "string")
+                            singer_type = (
+                                str(singer_type_raw) if singer_type_raw else "string"
+                            )
 
                     convert_result = self.type_converter.convert_singer_to_ldap(
                         singer_type,
@@ -141,7 +147,8 @@ class LDAPDataTransformer:
                 if value is not None:
                     # Handle multi-valued attributes
                     if isinstance(value, list):
-                        attributes[key] = value
+                        # Use list comprehension to cast to string
+                        attributes[key] = [str(v) for v in value]
                     else:
                         attributes[key] = [str(value)]
 
@@ -171,12 +178,22 @@ class LDAPSchemaMapper:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: t.Core.Headers = {}
-            properties: dict[str, t.GeneralValueType] = schema.get("properties", {})
+            # Cast properties to dict to satisfy type checker given loose dict nature
+            from typing import cast
+
+            # properties assignment with explicit cast to avoid union type errors
+            properties_raw = schema.get("properties", {})
+            properties: dict[str, t.GeneralValueType] = cast(
+                dict[str, t.GeneralValueType],
+                properties_raw if isinstance(properties_raw, dict) else {},
+            )
 
             if isinstance(properties, dict):
                 for prop_name, prop_def in properties.items():
                     if isinstance(prop_def, dict):
                         ldap_name = self._normalize_attribute_name(prop_name)
+                        # Cast to t.Core.Dict to satisfy strict type checker if needed
+                        # prop_def is dict[str, GeneralValueType] which is compatible with t.Core.Dict
                         ldap_type_result = self._map_singer_type_to_ldap(
                             prop_def,
                             object_class,
@@ -235,7 +252,9 @@ class LDAPSchemaMapper:
             return FlextResult[str].ok("DirectoryString")
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("LDAP type mapping failed: %s", e)
+            # Cast exception to string for logger arguments compatibility
+            # Ensure proper string conversion for exception
+            logger.warning("LDAP type mapping failed: %s", str(e))
             return FlextResult[str].ok("DirectoryString")
 
 

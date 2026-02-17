@@ -61,10 +61,20 @@ class LDAPTargetOrchestrator:
                 # Process individual record for LDAP
                 processed_count += 1
 
-            result = {
-                "loaded_records": "processed_count",
+            result_dict = {
+                "loaded_records": processed_count,
                 "status": "completed",
             }
+            # Cast to t.Core.Dict (RootModel) if necessary, or just use dict[str, GeneralValueType]
+            # Since t.Core.Dict is a RootModel in flext-core now (based on typings.py read earlier)
+            # wait, t.Core.Dict definition in typings.py was updated to `dict[str, GeneralValueType]`
+            # but FlextResult[t.Core.Dict] expects that type.
+            # If t.Core.Dict is type alias for dict[str, GeneralValueType], then I need to cast.
+
+            # Using typing.cast to satisfy invariant dict type
+            from typing import cast
+
+            result = cast(dict[str, t.GeneralValueType], result_dict)
 
             logger.info("LDAP data loading completed: %d records", processed_count)
             return FlextResult[t.Core.Dict].ok(result)

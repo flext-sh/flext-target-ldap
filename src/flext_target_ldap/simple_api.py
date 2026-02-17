@@ -46,15 +46,15 @@ def load_users_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink = target.get_sink_class("users")(
-            target,
-            "users",
-            {},
-            ["username"],
-        )
+        # Ensure correct sink instantiation
+        # Use simple object creation matching what sinks.py expects, bypassing Singer SDK check for now
+        sink_cls = target.get_sink_class("users")
+
+        sink = sink_cls(target, "users", {}, ["username"])
 
         # Process records
         for user in users:
+            # sink is typed as Stream by Singer SDK but is actually our Sink class
             sink.process_record(user, {})
 
         # Return count of processed users
@@ -80,15 +80,15 @@ def load_groups_to_ldap(
 
         if not isinstance(target, TargetLDAP):
             return FlextResult[int].fail("Target is not a TargetLDAP instance")
-        sink = target.get_sink_class("groups")(
-            target,
-            "groups",
-            {},
-            ["name"],
-        )
+        # Ensure correct sink instantiation
+        # Use simple object creation matching what sinks.py expects, bypassing Singer SDK check for now
+        sink_cls_group = target.get_sink_class("groups")
+
+        sink = sink_cls_group(target, "groups", {}, ["name"])
 
         # Process records
         for group in groups:
+            # sink is typed as Stream by Singer SDK but is actually our Sink class
             sink.process_record(group, {})
 
         # Return count of processed groups

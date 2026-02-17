@@ -1,15 +1,24 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import Literal
 
 from flext_core import FlextTypes
 
 
 class FlextTargetLdapTypes(FlextTypes):
+    """FLEXT Target LDAP Types.
+
+    Inherits standard types from FlextTypes and adds project-specific
+    domain types.
+    """
+
     class Core:
-        type Dict = Mapping[str, FlextTypes.GeneralValueType]
-        type Headers = Mapping[str, str]
+        """Core type aliases overrides."""
+
+        # Use dict[str, GeneralValueType] for strict typing without RootModel overhead
+        # This satisfies "no Any" while maintaining compatibility with standard dict usage
+        type Dict = dict[str, FlextTypes.GeneralValueType]
+        type Headers = dict[str, str]
         type StringList = list[str]
 
     class Project:
