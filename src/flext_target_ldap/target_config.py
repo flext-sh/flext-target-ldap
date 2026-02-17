@@ -63,7 +63,7 @@ class LdapTargetConnectionSettings(FlextSettings):
             ):
                 return FlextResult[bool].fail("Port 636 typically requires SSL")
 
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(f"Connection settings validation failed: {e}")
 
@@ -104,7 +104,7 @@ class LdapTargetOperationSettings(FlextSettings):
                 # This is a destructive operation - could add additional validation
                 pass
 
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(f"Operation settings validation failed: {e}")
 
@@ -146,7 +146,7 @@ class LdapTargetMappingSettings(FlextSettings):
                     f"Search scope must be one of {valid_scopes}",
                 )
 
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(f"Mapping settings validation failed: {e}")
 

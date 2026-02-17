@@ -90,7 +90,7 @@ class SingerTargetLDAP:
                 if field not in self.config:
                     return FlextResult[bool].fail(f"Missing required field: {field}")
 
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 

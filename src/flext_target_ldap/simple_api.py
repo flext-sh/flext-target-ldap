@@ -117,7 +117,7 @@ def test_ldap_connection(
 
         # Config validation is lightweight - just check structure
         # Real LDAP connection testing is done at runtime
-        return FlextResult[bool].ok(True)
+        return FlextResult[bool].ok(value=True)
 
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[bool].fail(f"Connection test error: {e}")

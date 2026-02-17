@@ -253,7 +253,7 @@ class LDAPClient:
         # Note: This is for backward compatibility only
         # Real connections should use connect()
         logger.info("Sync connect called - using flext-ldap infrastructure")
-        return FlextResult[bool].ok(True)
+        return FlextResult[bool].ok(value=True)
 
     def _try_ldap3_connection(
         self,

@@ -34,7 +34,7 @@ class TransformationRule(FlextModels.Entity):
                 return FlextResult[bool].fail("Pattern cannot be empty")
             # replacement is guaranteed to be str by Pydantic typing
             # Using a domain-specific validation instead
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(f"Transformation rule validation failed: {e}")
 
@@ -52,7 +52,7 @@ class TransformationResult(FlextModels.Entity):
                 return FlextResult[bool].fail("transformed_data cannot be empty")
             if len(self.applied_rules) < 0:  # This check makes sense for business logic
                 return FlextResult[bool].fail("applied_rules cannot be negative length")
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(
                 f"Transformation result validation failed: {e}",
