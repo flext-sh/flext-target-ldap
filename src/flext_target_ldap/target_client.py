@@ -676,7 +676,7 @@ class LdapBaseSink(Sink):
             }
 
             self.client = LdapTargetClient(connection_config)
-            connect_result: FlextResult[object] = self.client.connect()
+            connect_result: FlextResult[bool] = self.client.connect()
 
             if not connect_result.is_success:
                 return FlextResult[LdapTargetClient].fail(
@@ -701,7 +701,7 @@ class LdapBaseSink(Sink):
 
     def process_batch(self, _context: t.Core.Dict) -> None:
         """Process a batch of records."""
-        setup_result: FlextResult[object] = self.setup_client()
+        setup_result: FlextResult[bool] = self.setup_client()
         if not setup_result.is_success:
             logger.error("Cannot process batch: %s", setup_result.error)
             return
@@ -1015,7 +1015,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             attributes = self._build_ou_attributes(record)
 
             # Try to add the OU entry
-            add_result: FlextResult[object] = self.client.add_entry(ou_dn, attributes)
+            add_result: FlextResult[bool] = self.client.add_entry(ou_dn, attributes)
 
             if add_result.is_success:
                 self._processing_result.add_success()

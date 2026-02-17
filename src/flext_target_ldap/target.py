@@ -12,7 +12,7 @@ import sys
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
-from typing import override
+from typing import Protocol, override
 
 from flext_cli import flext_cli_create_helper
 from flext_core import FlextContainer, FlextLogger
@@ -30,6 +30,14 @@ from flext_target_ldap.typings import t
 logger = FlextLogger(__name__)
 
 # Network constants - moved to c.TargetLdap.Connection.MAX_PORT_NUMBER
+
+
+class _LdapApiProtocol(Protocol):
+    def add(self, dn: str, record: t.Core.Dict) -> None: ...
+
+    def modify(self, dn: str, record: t.Core.Dict) -> None: ...
+
+    def delete(self, dn: str) -> None: ...
 
 
 class TargetLDAP(Target):
@@ -214,7 +222,7 @@ def _load_config_from_file(config_path: str) -> t.Core.Dict:
         return {}
 
 
-def _get_ldap_api() -> object | None:
+def _get_ldap_api() -> _LdapApiProtocol | None:
     """Get optional LDAP API module."""
     try:
         client_mod = import_module("flext_target_ldap.client")
@@ -225,7 +233,7 @@ def _get_ldap_api() -> object | None:
 
 def _construct_dn(
     stream: str,
-    record: dict[str, t.GeneralValueType],
+    record: t.Core.Dict,
     base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
@@ -240,20 +248,22 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: dict[str, t.GeneralValueType],
+    record: t.Core.Dict,
     stream: str,
     cfg: t.Core.Dict,
-    api: object | None,
+    api: _LdapApiProtocol | None,
     seen_dns: set[str],
 ) -> None:
     """Process a RECORD message."""
     if api is None:
         return
 
-    dn = record.get("dn")
-    if not dn:
+    dn_value = record.get("dn")
+    if dn_value is None or str(dn_value).strip() == "":
         base_dn = str(cfg.get("base_dn", "dc=test,dc=com"))
         dn = _construct_dn(stream, record, base_dn)
+    else:
+        dn = str(dn_value)
 
     # Delete vs upsert
     if record.get("_sdc_deleted_at"):

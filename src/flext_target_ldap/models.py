@@ -15,11 +15,11 @@ from datetime import UTC, datetime
 from typing import Self
 
 from flext_core import FlextModels, FlextResult
+from flext_core import t as t_core
 from flext_core.utilities import u
 from pydantic import Field, field_validator
 
-from flext_target_ldap.constants import c
-from flext_target_ldap.typings import t
+from .constants import c
 
 
 class FlextTargetLdapModels(FlextModels):
@@ -129,11 +129,11 @@ class FlextTargetLdapModels(FlextModels):
                 min_length=1,
                 max_length=1000,
             )
-            object_classes: t.Core.StringList = Field(
+            object_classes: list[str] = Field(
                 default_factory=list,
                 description="LDAP object classes",
             )
-            attributes: dict[str, t.Core.StringList] = Field(
+            attributes: dict[str, list[str]] = Field(
                 default_factory=dict,
                 description="LDAP attributes with values",
             )
@@ -151,8 +151,8 @@ class FlextTargetLdapModels(FlextModels):
             @classmethod
             def validate_object_classes(
                 cls,
-                v: t.Core.StringList,
-            ) -> t.Core.StringList:
+                v: list[str],
+            ) -> list[str]:
                 """Validate object classes contain 'top'."""
                 if "top" not in v:
                     v.append("top")
@@ -161,7 +161,7 @@ class FlextTargetLdapModels(FlextModels):
             def validate_business_rules(self) -> FlextResult[bool]:
                 """Validate LDAP entry business rules."""
                 try:
-                    errors: t.Core.StringList = []
+                    errors: list[str] = []
 
                     # Validate DN format
                     if (
@@ -218,7 +218,7 @@ class FlextTargetLdapModels(FlextModels):
             def get_attribute_values(
                 self,
                 attribute_name: str,
-            ) -> t.Core.StringList:
+            ) -> list[str]:
                 """Get values for a specific attribute."""
                 return self.attributes.get(attribute_name, [])
 
@@ -229,19 +229,21 @@ class FlextTargetLdapModels(FlextModels):
             for LDAP target operations.
             """
 
-            original_record: t.Core.Dict = Field(
+            original_record: dict[str, t_core.GeneralValueType] = Field(
                 ...,
                 description="Original Singer record before transformation",
             )
-            transformed_entry: FlextTargetLdapModels.Entry = Field(
+            transformed_entry: FlextTargetLdapModels.TargetLdap.Entry = Field(
                 ...,
                 description="Resulting LDAP entry after transformation",
             )
-            applied_mappings: list[FlextTargetLdapModels.AttributeMapping] = Field(
+            applied_mappings: list[
+                FlextTargetLdapModels.TargetLdap.AttributeMapping
+            ] = Field(
                 default_factory=list,
                 description="Attribute mappings that were applied",
             )
-            transformation_errors: t.Core.StringList = Field(
+            transformation_errors: list[str] = Field(
                 default_factory=list,
                 description="object errors encountered during transformation",
             )
@@ -308,7 +310,7 @@ class FlextTargetLdapModels(FlextModels):
                 gt=0,
                 le=10000,
             )
-            current_batch: list[FlextTargetLdapModels.Entry] = Field(
+            current_batch: list[FlextTargetLdapModels.TargetLdap.Entry] = Field(
                 default_factory=list,
                 description="Current batch of LDAP entries",
             )
@@ -374,7 +376,10 @@ class FlextTargetLdapModels(FlextModels):
                     return 0.0
                 return (self.successful_operations / total_ops) * 100.0
 
-            def add_entry(self, entry: FlextTargetLdapModels.Entry) -> Self:
+            def add_entry(
+                self,
+                entry: FlextTargetLdapModels.TargetLdap.Entry,
+            ) -> Self:
                 """Add entry to current batch (immutable operation)."""
                 new_batch = self.current_batch.copy()
                 new_batch.append(entry)
