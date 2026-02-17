@@ -59,8 +59,8 @@ class SingerTargetLDAP:
                 # Process individual Singer message
                 processed_count += 1
 
-            result = {
-                "processed_messages": "processed_count",
+            result: t.Core.Dict = {
+                "processed_messages": processed_count,
                 "status": "completed",
             }
 

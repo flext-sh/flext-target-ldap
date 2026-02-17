@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from asyncio import run
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
@@ -178,9 +177,10 @@ class LDAPBaseSink(Sink):
         finally:
             self.teardown_client()
 
+    @override
     def process_record(
         self,
-        record: t.Core.Dict,
+        _record: t.Core.Dict,
         _context: t.Core.Dict,
     ) -> FlextResult[bool]:
         """Process a single record. Override in subclasses."""
@@ -191,7 +191,7 @@ class LDAPBaseSink(Sink):
 
         try:
             # Generic record processing - log and mark as processed
-            logger.debug("Processing record: %s", record)
+            logger.debug("Processing record: %s", _record)
             self._processing_result.add_success()
             return FlextResult[bool].ok(True)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -208,9 +208,10 @@ class LDAPBaseSink(Sink):
 class UsersSink(LDAPBaseSink):
     """LDAP sink for user entries."""
 
+    @override
     def process_record(
         self,
-        record: t.Core.Dict,
+        _record: t.Core.Dict,
         _context: t.Core.Dict,
     ) -> FlextResult[bool]:
         """Process a user record."""
@@ -220,7 +221,9 @@ class UsersSink(LDAPBaseSink):
 
         try:
             # Extract user information from record
-            username = record.get("username") or record.get("uid") or record.get("cn")
+            username = (
+                _record.get("username") or _record.get("uid") or _record.get("cn")
+            )
             if not username:
                 self._processing_result.add_error("No username found in record")
                 return FlextResult[bool].fail("No username found in record")
@@ -230,23 +233,32 @@ class UsersSink(LDAPBaseSink):
             user_dn = f"uid={username},{base_dn}"
 
             # Build LDAP attributes from record
-            attributes = self.build_user_attributes(record)
+            attributes = self.build_user_attributes(_record)
 
-            # Extract object classes for the add_entry call
-            object_classes_raw = attributes.pop(
+            # Extract object classes
+            object_classes_raw = attributes.get(
                 "objectClass",
                 ["inetOrgPerson", "person"],
             )
+
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
                 if isinstance(object_classes_raw, list)
                 else ["inetOrgPerson", "person"]
             )
 
+            attributes_dict: dict[str, t.GeneralValueType] = {}
+            for k, v in attributes.items():
+                if k != "objectClass":
+                    if isinstance(v, list):
+                        attributes_dict[k] = [str(i) for i in v]
+                    else:
+                        attributes_dict[k] = [str(v)]
+
             # Try to add the user entry
             add_result: FlextResult[bool] = self.client.add_entry(
                 user_dn,
-                attributes,
+                attributes_dict,
                 object_classes,
             )
 
@@ -258,8 +270,9 @@ class UsersSink(LDAPBaseSink):
             elif self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
                     user_dn,
-                    attributes,
+                    attributes_dict,
                 )
+
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
@@ -294,13 +307,12 @@ class UsersSink(LDAPBaseSink):
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: t.Core.Dict = {
+        attributes: dict[str, t.GeneralValueType] = {
             "objectClass": object_classes.copy()
             if isinstance(object_classes, list)
             else ["inetOrgPerson", "person"],
         }
 
-        # Add person-specific object classes
         obj_classes = attributes.get("objectClass")
         if isinstance(obj_classes, list):
             if "person" not in obj_classes:
@@ -308,7 +320,6 @@ class UsersSink(LDAPBaseSink):
             if "inetOrgPerson" not in obj_classes:
                 obj_classes.append("inetOrgPerson")
 
-        # Map Singer fields to LDAP attributes
         field_mapping = {
             "username": "uid",
             "email": "mail",
@@ -325,13 +336,16 @@ class UsersSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
 
-        # Apply custom attribute mapping
-        mapping_obj: dict[str, t.GeneralValueType] = self._target.config.get(
+        mapping_val = self._target.config.get(
             "attribute_mapping",
             {},
         )
-        if isinstance(mapping_obj, dict):
-            for singer_field, ldap_attr in mapping_obj.items():
+        mapping_obj: dict[str, t.GeneralValueType] = (
+            mapping_val if isinstance(mapping_val, dict) else {}
+        )
+
+        for singer_field, ldap_attr in mapping_obj.items():
+            if isinstance(ldap_attr, str):
                 value = record.get(singer_field)
                 if value is not None:
                     attributes[ldap_attr] = [str(value)]
@@ -342,9 +356,10 @@ class UsersSink(LDAPBaseSink):
 class GroupsSink(LDAPBaseSink):
     """LDAP sink for group entries."""
 
+    @override
     def process_record(
         self,
-        record: t.Core.Dict,
+        _record: t.Core.Dict,
         _context: t.Core.Dict,
     ) -> FlextResult[bool]:
         """Process a group record."""
@@ -353,30 +368,34 @@ class GroupsSink(LDAPBaseSink):
             return FlextResult[bool].fail("LDAP client not initialized")
 
         try:
-            # Extract group information from record
-            group_name = record.get("name") or record.get("cn")
+            group_name = _record.get("name") or _record.get("cn")
             if not group_name:
                 self._processing_result.add_error("No group name found in record")
                 return FlextResult[bool].fail("No group name found in record")
 
-            # Build DN for group
             group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
 
-            # Build LDAP attributes from record
-            attributes = self._build_group_attributes(record)
+            attributes = self._build_group_attributes(_record)
 
-            # Extract object classes for the add_entry call
-            object_classes_raw = attributes.pop("objectClass", ["groupOfNames"])
+            object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
                 if isinstance(object_classes_raw, list)
                 else ["groupOfNames"]
             )
 
-            # Try to add the group entry
+            attributes_dict: dict[str, t.GeneralValueType] = {}
+            for k, v in attributes.items():
+                if k != "objectClass":
+                    # Deep copy list values if any
+                    if isinstance(v, list):
+                        attributes_dict[k] = list(v)
+                    else:
+                        attributes_dict[k] = v
+
             add_result: FlextResult[bool] = self.client.add_entry(
                 group_dn,
-                attributes,
+                attributes_dict,
                 object_classes,
             )
 
@@ -384,11 +403,10 @@ class GroupsSink(LDAPBaseSink):
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
                 return FlextResult[bool].ok(True)
-            # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
                     group_dn,
-                    attributes,
+                    attributes_dict,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -470,9 +488,10 @@ class GroupsSink(LDAPBaseSink):
 class OrganizationalUnitsSink(LDAPBaseSink):
     """LDAP sink for organizational unit entries."""
 
+    @override
     def process_record(
         self,
-        record: t.Core.Dict,
+        _record: t.Core.Dict,
         _context: t.Core.Dict,
     ) -> FlextResult[bool]:
         """Process an organizational unit record."""
@@ -481,30 +500,34 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             return FlextResult[bool].fail("LDAP client not initialized")
 
         try:
-            # Extract OU information from record
-            ou_name = record.get("name") or record.get("ou")
+            ou_name = _record.get("name") or _record.get("ou")
             if not ou_name:
                 self._processing_result.add_error("No OU name found in record")
                 return FlextResult[bool].fail("No OU name found in record")
 
-            # Build DN for OU
             ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
 
-            # Build LDAP attributes from record
-            attributes = self._build_ou_attributes(record)
+            attributes = self._build_ou_attributes(_record)
 
-            # Try to add the OU entry
-            add_result: FlextResult[bool] = self.client.add_entry(ou_dn, attributes)
+            attributes_dict: dict[str, t.GeneralValueType] = {}
+            for k, v in attributes.items():
+                if isinstance(v, list):
+                    attributes_dict[k] = list(v)
+                else:
+                    attributes_dict[k] = v
+
+            add_result: FlextResult[bool] = self.client.add_entry(
+                ou_dn, attributes_dict
+            )
 
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
                 return FlextResult[bool].ok(True)
-            # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
                     ou_dn,
-                    attributes,
+                    attributes_dict,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
@@ -563,12 +586,16 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
 
         # Apply custom attribute mapping
-        mapping_obj: dict[str, t.GeneralValueType] = self._target.config.get(
+        mapping_val = self._target.config.get(
             "attribute_mapping",
             {},
         )
-        if isinstance(mapping_obj, dict):
-            for singer_field, ldap_attr in mapping_obj.items():
+        mapping_obj: dict[str, t.GeneralValueType] = (
+            mapping_val if isinstance(mapping_val, dict) else {}
+        )
+
+        for singer_field, ldap_attr in mapping_obj.items():
+            if isinstance(ldap_attr, str):
                 value = record.get(singer_field)
                 if value is not None:
                     attributes[ldap_attr] = [str(value)]

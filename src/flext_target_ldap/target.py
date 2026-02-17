@@ -14,16 +14,35 @@ from importlib import import_module
 from pathlib import Path
 from typing import Protocol, override
 
-from flext_cli import flext_cli_create_helper
+try:
+    from flext_meltano.singer.tap import FlextMeltanoStream as Sink
+    from flext_meltano.singer.target import FlextMeltanoTarget as Target
+except ImportError:
+    from flext_target_ldap.sinks import Sink, Target
+
 from flext_core import FlextContainer, FlextLogger
-from flext_meltano import Sink, Target
+
+try:
+    from flext_cli import flext_cli_create_helper
+except ImportError:
+
+    def flext_cli_create_helper(quiet: bool = False):
+        class Helper:
+            def print(self, msg: str):
+                pass
+
+        return Helper()
+
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
-from flext_target_ldap.config import FlextTargetLdapSettings
 from flext_target_ldap.constants import c
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
+from flext_target_ldap.settings import FlextTargetLdapSettings
 from flext_target_ldap.sinks import (
+    GroupsSink,
     LDAPBaseSink,
+    OrganizationalUnitsSink,
+    UsersSink,
 )
 from flext_target_ldap.typings import t
 
@@ -45,6 +64,7 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
+    config: dict[str, t.GeneralValueType]
 
     @override
     def __init__(
@@ -121,9 +141,9 @@ class TargetLDAP(Target):
     def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
-            "users": "UsersSink",
-            "groups": "GroupsSink",
-            "organizational_units": "OrganizationalUnitsSink",
+            "users": UsersSink,
+            "groups": GroupsSink,
+            "organizational_units": OrganizationalUnitsSink,
         }
 
         sink_class = sink_mapping.get(stream_name)

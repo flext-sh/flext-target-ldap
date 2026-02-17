@@ -18,8 +18,12 @@ import ldap3
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdap,
+    FlextLdapConnection,
     FlextLdapModels,
+    FlextLdapOperations,
 )
+from flext_ldap.settings import FlextLdapSettings
+from flext_ldif import FlextLdif
 
 from flext_target_ldap.typings import t
 
@@ -34,9 +38,11 @@ class LDAPConnectionProtocol(Protocol):
 
     def bind(self) -> bool:
         """Bind to LDAP server."""
+        ...
 
     def unbind(self) -> None:
         """Unbind from LDAP server."""
+        ...
 
     def add(
         self,
@@ -45,12 +51,15 @@ class LDAPConnectionProtocol(Protocol):
         attributes: dict[str, t.GeneralValueType],
     ) -> bool:
         """Add LDAP entry."""
+        ...
 
     def modify(self, dn: str, changes: dict[str, t.GeneralValueType]) -> bool:
         """Modify LDAP entry."""
+        ...
 
     def delete(self, dn: str) -> bool:
         """Delete LDAP entry."""
+        ...
 
     def search(
         self,
@@ -59,6 +68,7 @@ class LDAPConnectionProtocol(Protocol):
         attributes: list[str] | None = None,
     ) -> bool:
         """Search LDAP entries."""
+        ...
 
 
 class LDAPSearchEntry:
@@ -85,14 +95,14 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.ConnectionConfig | dict[str, t.GeneralValueType],
+        config: FlextLdapModels.Ldap.ConnectionConfig | dict[str, t.GeneralValueType],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, dict):
             # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
-            self.config: FlextLdapModels.ConnectionConfig = (
-                FlextLdapModels.ConnectionConfig(
-                    server=str(config.get("host", "localhost")),
+            self.config: FlextLdapModels.Ldap.ConnectionConfig = (
+                FlextLdapModels.Ldap.ConnectionConfig(
+                    host=str(config.get("host", "localhost")),
                     port=int(str(config.get("port", 389)))
                     if config.get("port", 389) is not None
                     else 389,
@@ -106,7 +116,7 @@ class LDAPClient:
             self._bind_dn: str = str(config.get("bind_dn", ""))
             self._password: str = str(config.get("password", ""))
         else:
-            self.config: FlextLdapModels.ConnectionConfig = config
+            self.config: FlextLdapModels.Ldap.ConnectionConfig = config
             # Default authentication credentials when using FlextLdapModels.ConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
@@ -116,7 +126,7 @@ class LDAPClient:
 
         logger.info(
             "Initialized LDAP client using flext-ldap API for %s:%d",
-            self.config.server,
+            self.config.host,
             self.config.port,
         )
 
@@ -124,7 +134,7 @@ class LDAPClient:
     @property
     def host(self) -> str:
         """Get server host."""
-        return self.config.server
+        return self.config.host
 
     @property
     def port(self) -> int:
@@ -160,7 +170,7 @@ class LDAPClient:
     def server_uri(self) -> str:
         """Get server URI."""
         protocol = "ldaps" if self.config.use_ssl else "ldap"
-        return f"{protocol}://{self.config.server}:{self.config.port}"
+        return f"{protocol}://{self.config.host}:{self.config.port}"
 
     def connect(self) -> FlextResult[str]:
         """Test connectivity via ldap3 if available; otherwise use flext-ldap API.
@@ -172,14 +182,11 @@ class LDAPClient:
 
         """
         try:
-            protocol = "ldaps" if self.config.use_ssl else "ldap"
-            server_url = f"{protocol}://{self.config.server}:{self.config.port}"
-
             # Prefer ldap3 path if module (or monkeypatch) is available
             server_pool_cls = getattr(ldap3, "ServerPool", None)
             connection_cls = getattr(ldap3, "Connection", None)
             if server_pool_cls is not None and connection_cls is not None:
-                server = server_pool_cls([self.config.server])
+                server = server_pool_cls([self.config.host])
                 conn = connection_cls(
                     server,
                     user=self._bind_dn or None,
@@ -198,12 +205,15 @@ class LDAPClient:
             # Use a short-lived context just to validate
 
             def _validate() -> FlextResult[str]:
-                with api.connection(
-                    server_url,
-                    self._bind_dn or "",
-                    self._password or "",
-                ):
-                    return FlextResult[str].ok("validated")
+                # Temporary connection config for validation
+                conn_config = FlextLdapSettings(
+                    host=self.config.host,
+                    port=self.config.port,
+                    use_ssl=self.config.use_ssl,
+                    bind_dn=self._bind_dn,
+                    bind_password=self._password,
+                )
+                return api.connect(conn_config).map(lambda _: "validated")
 
             return _validate()
         except (RuntimeError, ValueError, TypeError) as e:
@@ -212,7 +222,30 @@ class LDAPClient:
     def _get_api(self) -> FlextLdap:
         """Instantiate and cache FlextLdap lazily."""
         if self._api is None:
-            self._api = FlextLdap()
+            # Create required services with current config
+            # Convert internal config to FlextLdapSettings for services
+            ldap_settings = FlextLdapSettings(
+                host=self.config.host,
+                port=self.config.port,
+                use_ssl=self.config.use_ssl,
+                use_tls=self.config.use_tls,
+                bind_dn=self._bind_dn,
+                bind_password=self._password,
+                timeout=self.config.timeout,
+                auto_bind=self.config.auto_bind,
+                auto_range=self.config.auto_range,
+            )
+
+            # Instantiate services
+            connection = FlextLdapConnection(config=ldap_settings)
+            operations = FlextLdapOperations(connection=connection)
+
+            # Create facade with dependencies
+            self._api = FlextLdap(
+                connection=connection,
+                operations=operations,
+                ldif=FlextLdif(),
+            )
         return self._api
 
     def connect_sync(self) -> FlextResult[bool]:
@@ -224,7 +257,7 @@ class LDAPClient:
 
     def _try_ldap3_connection(
         self,
-    ) -> tuple[bool, object | None]:
+    ) -> tuple[bool, LDAPConnectionProtocol | None]:
         """Try to create ldap3 connection if available.
 
         Returns:
@@ -236,25 +269,24 @@ class LDAPClient:
         if server_pool_cls is None or connection_cls is None:
             return False, None
 
-        server_pool = server_pool_cls([self.config.server])
+        server_pool = server_pool_cls([self.config.host])
         conn = connection_cls(
             server_pool,
             user=self._bind_dn or None,
             password=self._password or None,
         )
+        # Runtime cast to protocol for type safety
         return True, conn
 
     def _get_flext_ldap_wrapper(
         self,
-    ) -> object:
+    ) -> LDAPConnectionProtocol:
         """Create a connection wrapper using flext-ldap API."""
         api = self._get_api()
-        protocol = "ldaps" if self.config.use_ssl else "ldap"
-        server_url = f"{protocol}://{self.config.server}:{self.config.port}"
 
         # Create a sync wrapper for the connection
+
         class ConnectionWrapper:
-            @override
             def __init__(self, session_id: str) -> None:
                 self.session_id = session_id
                 self.bound = True
@@ -268,34 +300,41 @@ class LDAPClient:
 
             def add(
                 self,
-                _dn: str,
-                _object_classes: list[str],
-                _attributes: dict[str, t.GeneralValueType],
+                dn: str,
+                object_classes: list[str],
+                attributes: dict[str, t.GeneralValueType],
             ) -> bool:
                 return True
 
-            def modify(self, _dn: str, _changes: dict[str, t.GeneralValueType]) -> bool:
+            def modify(self, dn: str, changes: dict[str, t.GeneralValueType]) -> bool:
                 return True
 
-            def delete(self, _dn: str) -> bool:
+            def delete(self, dn: str) -> bool:
                 return True
 
             def search(
                 self,
-                _base_dn: str,
-                _search_filter: str,
-                _attributes: list[str] | None = None,
+                base_dn: str,
+                search_filter: str,
+                attributes: list[str] | None = None,
             ) -> bool:
                 self.entries = []
                 return True
 
         def _get_session() -> str:
-            with api.connection(
-                server_url,
-                self._bind_dn or "",
-                self._password or "",
-            ) as session:
-                return str(session) if session else "default_session"
+            # Temporary connection config for session
+            conn_config = FlextLdapSettings(
+                host=self.config.host,
+                port=self.config.port,
+                use_ssl=self.config.use_ssl,
+                bind_dn=self._bind_dn,
+                bind_password=self._password,
+            )
+            # Try to connect
+            result = api.connect(conn_config)
+            if result.is_success:
+                return "default_session"
+            return ""
 
         try:
             session_id = _get_session()
@@ -349,7 +388,7 @@ class LDAPClient:
                     object_classes = []
                 try:
                     # conn is now properly typed as LDAPConnectionProtocol
-                    _ = conn.add(dn, object_classes, attributes)
+                    _ = conn.add(dn, object_classes, dict(attributes))
                 except (
                     Exception
                 ) as e:  # Handle specific ldap3 exceptions if raised by mock
@@ -371,7 +410,7 @@ class LDAPClient:
         try:
             with self.get_connection() as conn:
                 # conn is now properly typed as LDAPConnectionProtocol
-                _ = conn.modify(dn, changes)
+                _ = conn.modify(dn, dict(changes))
                 return FlextResult[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to modify entry %s", dn)
@@ -419,12 +458,13 @@ class LDAPClient:
                     )
                     attrs: t.Core.Dict = {}
                     for name in attr_names:
+                        name_str = str(name)
                         try:
-                            attrs[name] = list(getattr(raw, name))
+                            attrs[name_str] = list(getattr(raw, name_str))
                         except Exception:
-                            val = getattr(raw, name, None)
-                            attrs[name] = [str(val)] if val is not None else []
-                    entries.append(LDAPSearchEntry(dn=dn, attributes=attrs))
+                            val = getattr(raw, name_str, None)
+                            attrs[name_str] = [str(val)] if val is not None else []
+                    entries.append(LDAPSearchEntry(dn=str(dn), attributes=attrs))
                 return FlextResult[list[LDAPSearchEntry]].ok(entries)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
@@ -460,14 +500,15 @@ class LDAPClient:
                 return FlextResult[LDAPSearchEntry | None].fail("DN required")
 
             logger.info("Getting LDAP entry: %s", dn)
-            search_result: FlextResult[object] = self.search_entry(
+            search_result: FlextResult[list[LDAPSearchEntry]] = self.search_entry(
                 dn,
                 "(objectClass=*)",
                 attributes,
             )
-            if search_result.is_success and search_result.data:
-                return FlextResult[LDAPSearchEntry | None].ok(search_result.data[0])
-            return FlextResult[LDAPSearchEntry | None].ok(True)
+            if search_result.is_success and search_result.value:
+                # search_result.value is list[LDAPSearchEntry]
+                return FlextResult[LDAPSearchEntry | None].ok(search_result.value[0])
+            return FlextResult[LDAPSearchEntry | None].ok(None)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to get entry: %s", dn)

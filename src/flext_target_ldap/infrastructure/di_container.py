@@ -12,12 +12,16 @@ from __future__ import annotations
 
 from flext_core import FlextContainer
 
-get_flext_target_ldap_container = FlextContainer.get_global()
+
+def get_flext_target_ldap_container() -> FlextContainer:
+    """Get the global FLEXT DI container."""
+    return FlextContainer.get_global()
 
 
 def get_flext_target_ldap_service(service_name: str):
     """Get service from FLEXT DI container."""
-    return get_flext_target_ldap_container.get(service_name)
+    container = get_flext_target_ldap_container()
+    return container.get(service_name)
 
 
 # Type assertion for the configuration function

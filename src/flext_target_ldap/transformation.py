@@ -114,7 +114,7 @@ class MigrationValidator:
             "validation_warnings": 0,
         }
 
-    @override
+    # @override - removed to fix type error, parent class does not define validate
     def validate(
         self,
         data: t.Core.Dict | str,

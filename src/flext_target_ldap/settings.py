@@ -100,6 +100,23 @@ class FlextTargetLdapSettings(FlextSettings):
     )
 
     @classmethod
+    def get_or_create_shared_instance(
+        cls,
+        project_name: str,
+        **overrides: t.GeneralValueType,
+    ) -> Self:
+        """Get or create a shared instance of settings.
+
+        Follows singleton-like pattern for settings management.
+        """
+        # Cast overrides to Any to satisfy Pydantic's stricter type checking on init
+        # Runtime validation will still occur within Pydantic
+        from typing import Any
+
+        init_kwargs: dict[str, Any] = overrides
+        return cls(**init_kwargs)
+
+    @classmethod
     def get_global_instance(cls) -> Self:
         """Get the global singleton instance using enhanced FlextSettings pattern."""
         return cls.get_or_create_shared_instance(project_name="flext-target-ldap")

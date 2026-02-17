@@ -383,7 +383,7 @@ class FlextTargetLdapUtilities(u_core):
                 return FlextResult[bool].fail("Stream name and schema are required")
 
             # Check if schema has required properties
-            properties = schema.get("properties", {})
+            properties: dict[str, t.GeneralValueType] = schema.get("properties", {})
             if not properties:
                 return FlextResult[bool].fail("Schema must have properties")
 
@@ -459,6 +459,10 @@ class FlextTargetLdapUtilities(u_core):
 
             # Validate bind DN format
             bind_dn = config["bind_dn"]
+            if not isinstance(bind_dn, str):
+                return FlextResult[dict[str, t.GeneralValueType]].fail(
+                    "Bind DN must be a string",
+                )
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
                 return FlextResult[dict[str, t.GeneralValueType]].fail(
                     f"Invalid bind DN format: {bind_dn}",
@@ -466,7 +470,20 @@ class FlextTargetLdapUtilities(u_core):
 
             # Validate base DN format
             base_dn = config["base_dn"]
+            if not isinstance(base_dn, str):
+                return FlextResult[dict[str, t.GeneralValueType]].fail(
+                    "Base DN must be a string",
+                )
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
+                return FlextResult[dict[str, t.GeneralValueType]].fail(
+                    f"Invalid base DN format: {base_dn}",
+                )
+
+            # Validate base DN format
+            base_dn = config["base_dn"]
+            if not isinstance(
+                base_dn, str
+            ) or not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
                 return FlextResult[dict[str, t.GeneralValueType]].fail(
                     f"Invalid base DN format: {base_dn}",
                 )
@@ -559,7 +576,14 @@ class FlextTargetLdapUtilities(u_core):
             dict[str, t.GeneralValueType]: Stream state
 
             """
-            return state.get("bookmarks", {}).get(stream_name, {})
+            bookmarks = state.get("bookmarks")
+            if not isinstance(bookmarks, dict):
+                return {}
+
+            stream_state_data = bookmarks.get(stream_name)
+            if isinstance(stream_state_data, dict):
+                return stream_state_data
+            return {}
 
         @staticmethod
         def set_target_state(
@@ -578,10 +602,12 @@ class FlextTargetLdapUtilities(u_core):
             dict[str, t.GeneralValueType]: Updated state
 
             """
-            if "bookmarks" not in state:
-                state["bookmarks"] = {}
+            bookmarks = state.get("bookmarks")
+            if not isinstance(bookmarks, dict):
+                bookmarks = {}
+                state["bookmarks"] = bookmarks
 
-            state["bookmarks"][stream_name] = stream_state
+            bookmarks[stream_name] = stream_state
             return state
 
         @staticmethod
@@ -643,14 +669,22 @@ class FlextTargetLdapUtilities(u_core):
                 stream_name,
             )
 
-            current_count = stream_state.get("records_processed", 0)
+            current_count_val = stream_state.get("records_processed", 0)
+            current_count: int = (
+                current_count_val if isinstance(current_count_val, int) else 0
+            )
             new_count = current_count + records_count
+
+            batch_count_val = stream_state.get("batch_count", 0)
+            batch_count: int = (
+                batch_count_val if isinstance(batch_count_val, int) else 0
+            )
 
             updated_stream_state: dict[str, t.GeneralValueType] = {
                 **stream_state,
                 "records_processed": new_count,
                 "last_updated": datetime.now(UTC).isoformat(),
-                "batch_count": stream_state.get("batch_count", 0) + 1,
+                "batch_count": batch_count + 1,
             }
 
             return FlextTargetLdapUtilities.StateManagement.set_target_state(
@@ -664,8 +698,8 @@ class FlextTargetLdapUtilities(u_core):
     def parse_singer_message(
         cls, line: str
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
-        """Proxy method for SingerUtilities.parse_singer_message()."""
-        return cls.SingerUtilities.parse_singer_message(line)
+        """Proxy method for TargetLdap.parse_singer_message()."""
+        return cls.TargetLdap.parse_singer_message(line)
 
     @classmethod
     def build_ldap_dn(
@@ -821,27 +855,14 @@ class FlextTargetLdapUtilities(u_core):
         @staticmethod
         def build_connection_config(
             config: dict[str, t.GeneralValueType],
-        ) -> FlextLdapModels.ConnectionConfig:
+        ) -> FlextLdapModels.Ldap.ConnectionConfig:
             """Build LDAP connection configuration from config dict.
-
-            Business Rule: Configuration Builder Pattern
-            ===========================================
-            LDAP connection configuration can come from various sources (config files,
-            environment variables, command line args). This method provides a standardized
-            way to build connection config objects with proper type conversion and defaults.
-
-            Type Conversion Rules:
-            - Host: string with localhost default
-            - Port: int with DEFAULT_PORT default
-            - use_ssl: bool with False default
-            - bind_dn/password: strings with empty defaults
-            - timeout: int with DEFAULT_TIMEOUT default
 
             Args:
                 config: Raw configuration dictionary from any source
 
             Returns:
-                FlextLdapModels.ConnectionConfig: Validated connection config
+                FlextLdapModels.Ldap.ConnectionConfig: Validated connection config
 
             """
             # Import here to avoid circular imports
@@ -867,8 +888,8 @@ class FlextTargetLdapUtilities(u_core):
                 c.Network.DEFAULT_TIMEOUT,
             )
 
-            return FlextLdapModels.ConnectionConfig(
-                server=server,
+            return FlextLdapModels.Ldap.ConnectionConfig(
+                host=server,
                 port=port,
                 use_ssl=use_ssl,
                 bind_dn=bind_dn,
