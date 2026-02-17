@@ -398,7 +398,7 @@ class FlextTargetLdapUtilities(u_core):
                     "Schema must have either 'dn' field or identifier fields (id, uid, cn, username, email)",
                 )
 
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
 
         @staticmethod
         def generate_ldap_stream_metadata(

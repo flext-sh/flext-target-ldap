@@ -332,7 +332,7 @@ class LdapTargetClient:
                 self.config.host,
                 self.config.port,
             )
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             error_msg = f"Connection error: {e}"
@@ -791,7 +791,7 @@ class LdapBaseSink(Sink):
             # Generic record processing - log and mark as processed
             logger.debug("Processing record: %s", _record)
             self._processing_result.add_success()
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing record: {e}"
             logger.exception(error_msg)
@@ -853,14 +853,14 @@ class LdapUsersSink(LdapBaseSink):
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("User entry added successfully: %s", user_dn)
-                return FlextResult[bool].ok(True)
+                return FlextResult[bool].ok(value=True)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(user_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 else:
                     self._processing_result.add_error(
                         f"Failed to modify user {user_dn}: {modify_result.error}",
@@ -980,14 +980,14 @@ class LdapGroupsSink(LdapBaseSink):
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
-                return FlextResult[bool].ok(True)
+                return FlextResult[bool].ok(value=True)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(group_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("Group entry modified successfully: %s", group_dn)
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 else:
                     self._processing_result.add_error(
                         f"Failed to modify group {group_dn}: {modify_result.error}",
@@ -1099,14 +1099,14 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             if add_result.is_success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
-                return FlextResult[bool].ok(True)
+                return FlextResult[bool].ok(value=True)
             # If add failed, try to modify existing entry
             elif self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(ou_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
                     logger.debug("OU entry modified successfully: %s", ou_dn)
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 else:
                     self._processing_result.add_error(
                         f"Failed to modify OU {ou_dn}: {modify_result.error}",

@@ -40,7 +40,7 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
                 return FlextResult[bool].fail("stream cannot be empty")
             if not self.stream_schema:
                 return FlextResult[bool].fail("stream_schema cannot be empty")
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             return FlextResult[bool].fail(f"Catalog entry validation failed: {e}")
 
@@ -67,7 +67,7 @@ class SingerLDAPCatalogManager:
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
             return FlextResult[bool].fail(f"Stream addition failed: {e}")

@@ -52,7 +52,7 @@ class LdapConnectionService:
             return FlextResult[bool].fail("LDAP host is required")
         if not self._config.base_dn:
             return FlextResult[bool].fail("Base DN is required")
-        return FlextResult[bool].ok(True)
+        return FlextResult[bool].ok(value=True)
 
     def get_connection_info(self) -> dict[str, t.GeneralValueType]:
         return {

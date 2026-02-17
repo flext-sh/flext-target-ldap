@@ -110,7 +110,7 @@ class FlextTargetLdapModels(FlextModels):
                                 f"Invalid transformation rule. Must be one of {valid_transformations}",
                             )
 
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 except Exception as e:
                     return FlextResult[bool].fail(
                         f"Attribute mapping validation failed: {e}",
@@ -196,7 +196,7 @@ class FlextTargetLdapModels(FlextModels):
 
                     if errors:
                         return FlextResult[bool].fail("; ".join(errors))
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 except Exception as e:
                     return FlextResult[bool].fail(f"LDAP entry validation failed: {e}")
 
@@ -271,7 +271,7 @@ class FlextTargetLdapModels(FlextModels):
                             f"Transformed entry is invalid: {entry_validation.error}",
                         )
 
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 except Exception as e:
                     return FlextResult[bool].fail(
                         f"Transformation result validation failed: {e}",
@@ -352,7 +352,7 @@ class FlextTargetLdapModels(FlextModels):
                             "Operation counters exceed total processed count",
                         )
 
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 except Exception as e:
                     return FlextResult[bool].fail(
                         f"Batch processing validation failed: {e}",
@@ -486,7 +486,7 @@ class FlextTargetLdapModels(FlextModels):
                             "End time cannot be before start time",
                         )
 
-                    return FlextResult[bool].ok(True)
+                    return FlextResult[bool].ok(value=True)
                 except Exception as e:
                     return FlextResult[bool].fail(
                         f"Operation statistics validation failed: {e}",

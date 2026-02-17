@@ -50,7 +50,7 @@ class SingerLDAPStreamProcessor:
         try:
             self._stream_stats[stream_name] = LDAPStreamProcessingStats(stream_name)
             logger.info("Initialized LDAP stream processing: %s", stream_name)
-            return FlextResult[bool].ok(True)
+            return FlextResult[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP stream initialization failed: %s", stream_name)
             return FlextResult[bool].fail(f"Stream initialization failed: {e}")
