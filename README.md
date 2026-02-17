@@ -6,7 +6,7 @@
 
 **FLEXT-Target-LDAP** is a Singer-compliant target for loading data into LDAP directories. It enables specialized loading workflows for Active Directory and OpenLDAP, ensuring data integrity and correct schema mapping.
 
-Part of the [FLEXT](https://github.com/flext/flext) ecosystem.
+Part of the [FLEXT](https://github.com/flext-sh/flext) ecosystem.
 
 ## 🚀 Key Features
 
