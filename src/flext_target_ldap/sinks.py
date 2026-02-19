@@ -52,7 +52,7 @@ class Target:
     """Placeholder Target base class for Singer protocol compatibility."""
 
     @override
-    def __init__(self, config: t.Core.Dict) -> None:
+    def __init__(self, config: t.Core.Dict, **kwargs: object) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, t.GeneralValueType] = config
 
@@ -267,7 +267,7 @@ class UsersSink(LDAPBaseSink):
                 logger.debug("User entry added successfully: %s", user_dn)
                 return FlextResult[bool].ok(value=True)
             # If add failed, try to modify existing entry
-            elif self._target.config.get("update_existing_entries", False):
+            if self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
                     user_dn,
                     attributes_dict,
@@ -277,20 +277,18 @@ class UsersSink(LDAPBaseSink):
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
                     return FlextResult[bool].ok(value=True)
-                else:
-                    self._processing_result.add_error(
-                        f"Failed to modify user {user_dn}: {modify_result.error}",
-                    )
-                    return FlextResult[bool].fail(
-                        f"Failed to modify user {user_dn}: {modify_result.error}"
-                    )
-            else:
                 self._processing_result.add_error(
-                    f"Failed to add user {user_dn}: {add_result.error}",
+                    f"Failed to modify user {user_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to add user {user_dn}: {add_result.error}"
+                    f"Failed to modify user {user_dn}: {modify_result.error}"
                 )
+            self._processing_result.add_error(
+                f"Failed to add user {user_dn}: {add_result.error}",
+            )
+            return FlextResult[bool].fail(
+                f"Failed to add user {user_dn}: {add_result.error}"
+            )
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing user record: {e}"
@@ -403,7 +401,7 @@ class GroupsSink(LDAPBaseSink):
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
                 return FlextResult[bool].ok(value=True)
-            elif self._target.config.get("update_existing_entries", False):
+            if self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
                     group_dn,
                     attributes_dict,
@@ -412,20 +410,18 @@ class GroupsSink(LDAPBaseSink):
                     self._processing_result.add_success()
                     logger.debug("Group entry modified successfully: %s", group_dn)
                     return FlextResult[bool].ok(value=True)
-                else:
-                    self._processing_result.add_error(
-                        f"Failed to modify group {group_dn}: {modify_result.error}",
-                    )
-                    return FlextResult[bool].fail(
-                        f"Failed to modify group {group_dn}: {modify_result.error}"
-                    )
-            else:
                 self._processing_result.add_error(
-                    f"Failed to add group {group_dn}: {add_result.error}",
+                    f"Failed to modify group {group_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to add group {group_dn}: {add_result.error}"
+                    f"Failed to modify group {group_dn}: {modify_result.error}"
                 )
+            self._processing_result.add_error(
+                f"Failed to add group {group_dn}: {add_result.error}",
+            )
+            return FlextResult[bool].fail(
+                f"Failed to add group {group_dn}: {add_result.error}"
+            )
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing group record: {e}"
@@ -524,7 +520,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
                 return FlextResult[bool].ok(value=True)
-            elif self._target.config.get("update_existing_entries", False):
+            if self._target.config.get("update_existing_entries", False):
                 modify_result: FlextResult[bool] = self.client.modify_entry(
                     ou_dn,
                     attributes_dict,
@@ -533,20 +529,18 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                     self._processing_result.add_success()
                     logger.debug("OU entry modified successfully: %s", ou_dn)
                     return FlextResult[bool].ok(value=True)
-                else:
-                    self._processing_result.add_error(
-                        f"Failed to modify OU {ou_dn}: {modify_result.error}",
-                    )
-                    return FlextResult[bool].fail(
-                        f"Failed to modify OU {ou_dn}: {modify_result.error}"
-                    )
-            else:
                 self._processing_result.add_error(
-                    f"Failed to add OU {ou_dn}: {add_result.error}",
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to add OU {ou_dn}: {add_result.error}"
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}"
                 )
+            self._processing_result.add_error(
+                f"Failed to add OU {ou_dn}: {add_result.error}",
+            )
+            return FlextResult[bool].fail(
+                f"Failed to add OU {ou_dn}: {add_result.error}"
+            )
 
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"Error processing OU record: {e}"

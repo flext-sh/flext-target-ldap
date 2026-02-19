@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import override
+from typing import cast, override
 
 from flext_core import FlextLogger, FlextResult
 
@@ -71,10 +71,7 @@ class LDAPTargetOrchestrator:
             # but FlextResult[t.Core.Dict] expects that type.
             # If t.Core.Dict is type alias for dict[str, GeneralValueType], then I need to cast.
 
-            # Using typing.cast to satisfy invariant dict type
-            from typing import cast
-
-            result = cast(dict[str, t.GeneralValueType], result_dict)
+            result = cast("dict[str, t.GeneralValueType]", result_dict)
 
             logger.info("LDAP data loading completed: %d records", processed_count)
             return FlextResult[t.Core.Dict].ok(result)

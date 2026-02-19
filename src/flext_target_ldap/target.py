@@ -12,27 +12,18 @@ import sys
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
-from typing import Protocol, override
+from typing import TYPE_CHECKING, Protocol, override
 
-try:
-    from flext_meltano.singer.tap import FlextMeltanoStream as Sink
-    from flext_meltano.singer.target import FlextMeltanoTarget as Target
-except ImportError:
+if TYPE_CHECKING:
     from flext_target_ldap.sinks import Sink, Target
+else:
+    try:
+        from flext_meltano.singer.tap import FlextMeltanoStream as Sink
+        from flext_meltano.singer.target import FlextMeltanoTarget as Target
+    except ImportError:
+        from flext_target_ldap.sinks import Sink, Target
 
 from flext_core import FlextContainer, FlextLogger
-
-try:
-    from flext_cli import flext_cli_create_helper
-except ImportError:
-
-    def flext_cli_create_helper(quiet: bool = False):
-        class Helper:
-            def print(self, msg: str):
-                pass
-
-        return Helper()
-
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c
@@ -45,6 +36,24 @@ from flext_target_ldap.sinks import (
     UsersSink,
 )
 from flext_target_ldap.typings import t
+
+
+def _default_cli_helper(*, quiet: bool = False):  # noqa: ARG001
+    class Helper:
+        def print(self, msg: str) -> None:
+            pass
+
+    return Helper()
+
+
+try:
+    _cli_mod = import_module("flext_cli")
+    flext_cli_create_helper = getattr(
+        _cli_mod, "flext_cli_create_helper", _default_cli_helper
+    )
+except ImportError:
+    flext_cli_create_helper = _default_cli_helper
+
 
 logger = FlextLogger(__name__)
 
@@ -74,7 +83,7 @@ class TargetLDAP(Target):
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
-        super().__init__(config=config, validate_config=validate_config)
+        super().__init__(config=config or {}, validate_config=validate_config)
 
         # Initialize orchestrator with new modular architecture
         self._orchestrator: LDAPTargetOrchestrator | None = None
@@ -279,7 +288,7 @@ def _process_record_message(
         return
 
     dn_value = record.get("dn")
-    if dn_value is None or str(dn_value).strip() == "":
+    if dn_value is None or not str(dn_value).strip():
         base_dn = str(cfg.get("base_dn", "dc=test,dc=com"))
         dn = _construct_dn(stream, record, base_dn)
     else:

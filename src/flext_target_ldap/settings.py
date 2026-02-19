@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Self
+from typing import Any, Self
 
 from flext_core import FlextModels, FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
@@ -109,10 +109,7 @@ class FlextTargetLdapSettings(FlextSettings):
 
         Follows singleton-like pattern for settings management.
         """
-        # Cast overrides to Any to satisfy Pydantic's stricter type checking on init
-        # Runtime validation will still occur within Pydantic
-        from typing import Any
-
+        _ = project_name
         init_kwargs: dict[str, Any] = overrides
         return cls(**init_kwargs)
 

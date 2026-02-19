@@ -11,11 +11,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import math
 from datetime import UTC, datetime
 from typing import Self
 
-from flext_core import FlextModels, FlextResult
-from flext_core import t as t_core
+from flext_core import FlextModels, FlextResult, t as t_core
 from flext_core.utilities import u
 from pydantic import Field, field_validator
 
@@ -83,7 +83,8 @@ class FlextTargetLdapModels(FlextModels):
                 try:
                     # Validate field name format
                     if (
-                        not self.singer_field_name.replace("_", "")
+                        not self.singer_field_name
+                        .replace("_", "")
                         .replace("-", "")
                         .isalnum()
                     ):
@@ -515,7 +516,7 @@ class FlextTargetLdapModels(FlextModels):
             def operations_per_second(self) -> float:
                 """Calculate operations per second throughput."""
                 duration = self.total_duration_seconds
-                if duration == 0.0:
+                if math.isclose(duration, 0.0):
                     return 0.0
                 return self.total_entries_processed / duration
 
