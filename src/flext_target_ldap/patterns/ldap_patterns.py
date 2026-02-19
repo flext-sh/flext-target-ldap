@@ -49,7 +49,7 @@ class LDAPTypeConverter:
 
         except (RuntimeError, ValueError, TypeError) as e:
             # Cast exception to string for logger arguments compatibility
-            logger.warning("Type conversion failed for %s: %s", singer_type, str(e))
+            logger.warning(f"Type conversion failed for {singer_type}: {e}")
             return FlextResult[str | None].ok(str(value))
 
 
@@ -248,7 +248,7 @@ class LDAPSchemaMapper:
         except (RuntimeError, ValueError, TypeError) as e:
             # Cast exception to string for logger arguments compatibility
             # Ensure proper string conversion for exception
-            logger.warning("LDAP type mapping failed: %s", str(e))
+            logger.warning(f"LDAP type mapping failed: {e}")
             return FlextResult[str].ok("DirectoryString")
 
 
