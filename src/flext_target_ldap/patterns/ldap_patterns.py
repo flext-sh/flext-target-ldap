@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
-from typing import override
+from typing import cast, override
 
 from flext_core import FlextLogger, FlextResult
 
@@ -49,9 +49,7 @@ class LDAPTypeConverter:
 
         except (RuntimeError, ValueError, TypeError) as e:
             # Cast exception to string for logger arguments compatibility
-            logger.warning(
-                "Type conversion failed for %s: %s", str(singer_type), str(e)
-            )
+            logger.warning("Type conversion failed for %s: %s", singer_type, str(e))
             return FlextResult[str | None].ok(str(value))
 
 
@@ -77,12 +75,10 @@ class LDAPDataTransformer:
                 ldap_key = self._normalize_ldap_attribute_name(key)
 
                 if schema:
-                    from typing import cast
-
                     # Explicit cast for properties
                     properties_raw = schema.get("properties", {})
                     properties: dict[str, t.GeneralValueType] = cast(
-                        dict[str, t.GeneralValueType],
+                        "dict[str, t.GeneralValueType]",
                         properties_raw if isinstance(properties_raw, dict) else {},
                     )
                     singer_type = "string"
@@ -179,12 +175,10 @@ class LDAPSchemaMapper:
         try:
             ldap_attributes: t.Core.Headers = {}
             # Cast properties to dict to satisfy type checker given loose dict nature
-            from typing import cast
-
             # properties assignment with explicit cast to avoid union type errors
             properties_raw = schema.get("properties", {})
             properties: dict[str, t.GeneralValueType] = cast(
-                dict[str, t.GeneralValueType],
+                "dict[str, t.GeneralValueType]",
                 properties_raw if isinstance(properties_raw, dict) else {},
             )
 

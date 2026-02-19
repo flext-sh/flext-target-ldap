@@ -1,5 +1,17 @@
 # FLEXT-Target-LDAP
 
+
+<!-- TOC START -->
+- [🚀 Key Features](#-key-features)
+- [📦 Installation](#-installation)
+- [🛠️ Usage](#-usage)
+  - [Basic Execution](#basic-execution)
+  - [Configuration](#configuration)
+- [🏗️ Architecture](#-architecture)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+<!-- TOC END -->
+
 [![Singer SDK](https://img.shields.io/badge/singer--sdk-compliant-brightgreen.svg)](https://sdk.meltano.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)

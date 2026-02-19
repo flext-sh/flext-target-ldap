@@ -12,8 +12,7 @@ import re
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import FlextResult
-from flext_core import FlextTypes as t
+from flext_core import FlextResult, FlextTypes as t
 from flext_core.utilities import FlextUtilities as u_core
 from flext_ldap.models import FlextLdapModels
 
@@ -383,7 +382,10 @@ class FlextTargetLdapUtilities(u_core):
                 return FlextResult[bool].fail("Stream name and schema are required")
 
             # Check if schema has required properties
-            properties: dict[str, t.GeneralValueType] = schema.get("properties", {})
+            raw_props = schema.get("properties", {})
+            properties: dict[str, t.GeneralValueType] = (
+                raw_props if isinstance(raw_props, dict) else {}
+            )
             if not properties:
                 return FlextResult[bool].fail("Schema must have properties")
 

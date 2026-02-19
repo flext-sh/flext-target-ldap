@@ -1,3 +1,5 @@
+"""Type aliases and project-specific types for the LDAP target."""
+
 from __future__ import annotations
 
 from typing import Literal
@@ -22,6 +24,8 @@ class FlextTargetLdapTypes(FlextTypes):
         type StringList = list[str]
 
     class Project:
+        """Project-specific type aliases for target-ldap."""
+
         type TargetLdapProjectType = Literal[
             "library",
             "application",

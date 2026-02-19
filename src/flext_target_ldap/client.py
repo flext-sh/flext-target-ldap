@@ -304,12 +304,15 @@ class LDAPClient:
                 object_classes: list[str],
                 attributes: dict[str, t.GeneralValueType],
             ) -> bool:
+                _ = dn, object_classes, attributes
                 return True
 
             def modify(self, dn: str, changes: dict[str, t.GeneralValueType]) -> bool:
+                _ = dn, changes
                 return True
 
             def delete(self, dn: str) -> bool:
+                _ = dn
                 return True
 
             def search(
@@ -318,6 +321,7 @@ class LDAPClient:
                 search_filter: str,
                 attributes: list[str] | None = None,
             ) -> bool:
+                _ = base_dn, search_filter, attributes
                 self.entries = []
                 return True
 

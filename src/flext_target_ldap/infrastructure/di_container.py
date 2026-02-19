@@ -18,7 +18,7 @@ def get_flext_target_ldap_container() -> FlextContainer:
     return FlextContainer.get_global()
 
 
-def get_flext_target_ldap_service(service_name: str):
+def get_flext_target_ldap_service(service_name: str) -> object:
     """Get service from FLEXT DI container."""
     container = get_flext_target_ldap_container()
     return container.get(service_name)

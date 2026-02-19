@@ -1,3 +1,5 @@
+"""LDAP target services: connection, transformation, orchestration, and API facade."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -17,37 +19,53 @@ from .typings import t
 
 
 class LdapTargetServiceProtocol(Protocol):
+    """Protocol for LDAP target creation and record loading."""
+
     def create_target(
         self,
         config: t.Core.Dict,
-    ) -> FlextResult[target_client_module.TargetLdap]: ...
+    ) -> FlextResult[target_client_module.TargetLdap]:
+        """Create an LDAP target from config."""
+        ...
 
     def load_records(
         self,
         records: list[dict[str, t.GeneralValueType]],
         config: t.Core.Dict,
         stream_type: str = "users",
-    ) -> FlextResult[int]: ...
+    ) -> FlextResult[int]:
+        """Load records into the LDAP target."""
+        ...
 
 
 class LdapTransformationServiceProtocol(Protocol):
+    """Protocol for transforming and validating LDAP entries."""
+
     def transform_record(
         self,
         record: dict[str, t.GeneralValueType],
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
-    ) -> FlextResult[LdapTransformationResultModel]: ...
+    ) -> FlextResult[LdapTransformationResultModel]:
+        """Transform a record for LDAP storage."""
+        ...
 
-    def validate_entry(self, entry: LdapEntryModel) -> FlextResult[bool]: ...
+    def validate_entry(self, entry: LdapEntryModel) -> FlextResult[bool]:
+        """Validate an LDAP entry against business rules."""
+        ...
 
 
 class LdapConnectionService:
+    """Service for testing and querying LDAP connection settings."""
+
     @override
     def __init__(self, config: FlextTargetLdapSettings) -> None:
+        """Initialize with LDAP target settings."""
         self._config = config
 
     def test_connection(self) -> FlextResult[bool]:
+        """Verify LDAP host and base_dn are configured and connection is valid."""
         if not self._config.connection.host:
             return FlextResult[bool].fail("LDAP host is required")
         if not self._config.base_dn:
@@ -55,6 +73,7 @@ class LdapConnectionService:
         return FlextResult[bool].ok(value=True)
 
     def get_connection_info(self) -> dict[str, t.GeneralValueType]:
+        """Return connection parameters as a dict for logging or debugging."""
         return {
             "host": self._config.connection.host,
             "port": self._config.connection.port,
@@ -65,8 +84,11 @@ class LdapConnectionService:
 
 
 class LdapTransformationService:
+    """Transform Singer records into LDAP entries with attribute mappings."""
+
     @override
     def __init__(self, config: FlextTargetLdapSettings) -> None:
+        """Initialize with LDAP target settings."""
         self._config = config
 
     def transform_record(
@@ -76,6 +98,7 @@ class LdapTransformationService:
         object_classes: list[str],
         base_dn: str,
     ) -> FlextResult[LdapTransformationResultModel]:
+        """Transform a single record into an LDAP entry using mappings."""
         mapping_errors: list[str] = []
         ldap_attributes: dict[str, list[str]] = {}
         applied_mappings: list[LdapAttributeMappingModel] = []
@@ -124,9 +147,11 @@ class LdapTransformationService:
         return FlextResult[LdapTransformationResultModel].ok(result)
 
     def validate_entry(self, entry: LdapEntryModel) -> FlextResult[bool]:
+        """Run business-rule validation on an LDAP entry."""
         return entry.validate_business_rules()
 
     def get_default_mappings(self, entry_type: str) -> list[LdapAttributeMappingModel]:
+        """Return default attribute mappings for the given entry type (e.g. users, groups)."""
         if entry_type == "users":
             return [
                 LdapAttributeMappingModel(
@@ -183,19 +208,25 @@ class LdapTransformationService:
 
 
 class LdapTargetOrchestrator:
+    """Orchestrates connection, transformation, and data loading for the LDAP target."""
+
     @override
     def __init__(self, config: FlextTargetLdapSettings | None = None) -> None:
+        """Initialize with optional LDAP target settings."""
         self._typed_config = config
 
     def get_typed_config(self) -> FlextTargetLdapSettings | None:
+        """Return the current typed settings, if any."""
         return self._typed_config
 
     def get_connection_service(self) -> LdapConnectionService | None:
+        """Return a connection service instance if config is set."""
         if self._typed_config is None:
             return None
         return LdapConnectionService(self._typed_config)
 
     def get_transformation_service(self) -> LdapTransformationService | None:
+        """Return a transformation service instance if config is set."""
         if self._typed_config is None:
             return None
         return LdapTransformationService(self._typed_config)
@@ -205,6 +236,7 @@ class LdapTargetOrchestrator:
         records: list[dict[str, t.GeneralValueType]],
         config: FlextTargetLdapSettings | None = None,
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
+        """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
             return FlextResult[dict[str, t.GeneralValueType]].fail(
@@ -243,6 +275,7 @@ class LdapTargetOrchestrator:
         self,
         config: FlextTargetLdapSettings | None = None,
     ) -> FlextResult[bool]:
+        """Validate target configuration and test connection."""
         working = config or self._typed_config
         if working is None:
             return FlextResult[bool].fail("Configuration is required")
@@ -250,14 +283,18 @@ class LdapTargetOrchestrator:
 
 
 class LdapTargetApiService:
+    """API facade for creating targets and loading users/groups to LDAP."""
+
     @override
     def __init__(self) -> None:
+        """Initialize the API service and internal orchestrator cache."""
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
 
     def create_ldap_target(
         self,
         config: t.Core.Dict,
     ) -> FlextResult[target_client_module.TargetLdap]:
+        """Create an LDAP target from raw config dict."""
         try:
             return FlextResult[target_client_module.TargetLdap].ok(
                 target_client_module.TargetLdap(config=config),
@@ -270,6 +307,7 @@ class LdapTargetApiService:
         users: list[dict[str, t.GeneralValueType]],
         config: t.Core.Dict,
     ) -> FlextResult[int]:
+        """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
         if target_result.is_failure or target_result.value is None:
             return FlextResult[int].fail(
@@ -286,6 +324,7 @@ class LdapTargetApiService:
         groups: list[dict[str, t.GeneralValueType]],
         config: t.Core.Dict,
     ) -> FlextResult[int]:
+        """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
         if target_result.is_failure or target_result.value is None:
             return FlextResult[int].fail(
@@ -298,6 +337,7 @@ class LdapTargetApiService:
         return FlextResult[int].ok(len(groups))
 
     def test_ldap_connection(self, config: t.Core.Dict) -> FlextResult[bool]:
+        """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
         if validated.is_failure or validated.value is None:
             return FlextResult[bool].fail(
@@ -312,6 +352,7 @@ _default_api_service = LdapTargetApiService()
 def create_ldap_target(
     config: t.Core.Dict,
 ) -> FlextResult[target_client_module.TargetLdap]:
+    """Create an LDAP target from config using the default API service."""
     return _default_api_service.create_ldap_target(config)
 
 
@@ -319,6 +360,7 @@ def load_users_to_ldap(
     users: list[dict[str, t.GeneralValueType]],
     config: t.Core.Dict,
 ) -> FlextResult[int]:
+    """Load user records to LDAP using the default API service."""
     return _default_api_service.load_users_to_ldap(users, config)
 
 
@@ -326,10 +368,12 @@ def load_groups_to_ldap(
     groups: list[dict[str, t.GeneralValueType]],
     config: t.Core.Dict,
 ) -> FlextResult[int]:
+    """Load group records to LDAP using the default API service."""
     return _default_api_service.load_groups_to_ldap(groups, config)
 
 
 def test_ldap_connection(config: t.Core.Dict) -> FlextResult[bool]:
+    """Validate config and test LDAP connection via the default API service."""
     return _default_api_service.test_ldap_connection(config)
 
 
