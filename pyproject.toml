@@ -76,7 +76,17 @@ per_rule_ignores.DEP002 = [
 [tool.pytest]
 ini_options.testpaths = [ "tests" ]
 ini_options.markers = [ "unit: Unit tests", "integration: Integration tests" ]
-ini_options.addopts = "-v --tb=short"
+ini_options.addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--tb=short",
+  "-p no:sugar",
+  "-q",
+  "-ra",
+  "--timeout=30",
+  "--timeout-method=signal",
+  "--durations=0",
+]
 
 [tool.coverage]
 run.source = [ "src/flext_target_ldap" ]
