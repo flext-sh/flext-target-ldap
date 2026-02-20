@@ -4,7 +4,7 @@ requires = [ "poetry-core>=2.0", "poetry-core>=2" ]
 
 [project]
 name = "flext-target-ldap"
-version = "0.11.0"
+version = "0.12.0-dev"
 description = "FLEXT Target for LDAP directory loading"
 readme = "README.md"
 keywords = [ "data-integration", "etl", "flext", "ldap", "singer", "target" ]
