@@ -32,22 +32,20 @@ from flext_target_ldap.sinks import (
     UsersSink,
 )
 from flext_target_ldap.target_client import (
-    LDAPClient,
-    LdapTargetClient as LDAPTargetClient,
-    TargetLDAP,
+    LdapTargetClient,
     TargetLdap,
 )
 from flext_target_ldap.target_exceptions import (
-    FlextTargetLdapConnectionError as FlextTargetLDAPConnectionError,
-    FlextTargetLdapError as FlextTargetLDAPError,
-    FlextTargetLdapValidationError as FlextTargetLDAPValidationError,
+    FlextTargetLdapConnectionError,
+    FlextTargetLdapError,
+    FlextTargetLdapValidationError,
 )
 from flext_target_ldap.target_models import (
-    LdapBatchProcessingModel as LDAPTargetRecord,
-    LdapEntryModel as LDAPTargetModel,
+    LdapBatchProcessingModel,
+    LdapEntryModel,
 )
 from flext_target_ldap.target_services import (
-    LdapTargetApiService as FlextTargetLDAPService,
+    LdapTargetApiService,
     LdapTransformationService,
     LdapTransformationServiceProtocol,
 )
@@ -57,27 +55,25 @@ from flext_target_ldap.utilities import (
 )
 
 __all__ = [
-    "FlextTargetLDAPConnectionError",
-    "FlextTargetLDAPError",
-    "FlextTargetLDAPService",
-    "FlextTargetLDAPValidationError",
+    "FlextTargetLdapConnectionError",
+    "FlextTargetLdapError",
     "FlextTargetLdapModels",
     "FlextTargetLdapProtocols",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
+    "FlextTargetLdapValidationError",
     "GroupsSink",
     "LDAPBaseSink",
-    "LDAPClient",
     "LDAPProcessingResult",
-    "LDAPTargetClient",
-    "LDAPTargetModel",
-    "LDAPTargetRecord",
+    "LdapBatchProcessingModel",
+    "LdapEntryModel",
+    "LdapTargetApiService",
+    "LdapTargetClient",
     "LdapTransformationService",
     "LdapTransformationServiceProtocol",
     "OrganizationalUnitsSink",
     "Sink",
     "Target",
-    "TargetLDAP",
     "TargetLdap",
     "UsersSink",
     "__version__",

@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from ldap3.core import exceptions as ldap3_exceptions
 
-from flext_target_ldap import LDAPClient
+from flext_target_ldap import LdapTargetClient
 
 # Constants
 EXPECTED_DATA_COUNT = 3
@@ -23,11 +23,13 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: dict[str, t.GeneralValueType]) -> LDAPClient:
+    def client(
+        self, mock_ldap_config: dict[str, t.GeneralValueType]
+    ) -> LdapTargetClient:
         """Create test LDAP client instance."""
-        return LDAPClient(config=mock_ldap_config)
+        return LdapTargetClient(config=mock_ldap_config)
 
-    def test_client_initialization(self, client: LDAPClient) -> None:
+    def test_client_initialization(self, client: LdapTargetClient) -> None:
         """Test LDAP client initialization with configuration values."""
         if client.host != "test.ldap.com":
             msg: str = f"Expected {'test.ldap.com'}, got {client.host}"
@@ -42,7 +44,7 @@ class TestLDAPClient:
             msg: str = f"Expected {30}, got {client.timeout}"
             raise AssertionError(msg)
 
-    def test_server_uri_construction(self, client: LDAPClient) -> None:
+    def test_server_uri_construction(self, client: LdapTargetClient) -> None:
         """Test server URI construction with and without SSL."""
         if client.server_uri != "ldap://test.ldap.com:389":
             msg: str = f"Expected {'ldap://test.ldap.com:389'}, got {client.server_uri}"

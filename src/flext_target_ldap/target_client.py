@@ -1333,22 +1333,7 @@ def main() -> None:
     target.cli()
 
 
-# Backward compatibility aliases
-TargetLDAP = TargetLdap
-LDAPClient = LdapTargetClient
-LDAPSearchEntry = LdapSearchEntry
-LDAPProcessingResult = LdapProcessingResult
-UsersSink = LdapUsersSink
-GroupsSink = LdapGroupsSink
-OrganizationalUnitsSink = LdapOrganizationalUnitsSink
-LDAPBaseSink = LdapBaseSink
-
 __all__ = [
-    "GroupsSink",
-    "LDAPBaseSink",
-    "LDAPClient",
-    "LDAPProcessingResult",
-    "LDAPSearchEntry",
     "LdapBaseSink",
     "LdapGroupsSink",
     "LdapOrganizationalUnitsSink",
@@ -1356,9 +1341,6 @@ __all__ = [
     "LdapSearchEntry",
     "LdapTargetClient",
     "LdapUsersSink",
-    "OrganizationalUnitsSink",
-    "TargetLDAP",
     "TargetLdap",
-    "UsersSink",
     "main",
 ]

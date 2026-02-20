@@ -6,11 +6,14 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
+
 # PYTHON_VERSION_GUARD — Do not remove. Managed by scripts/maintenance/enforce_python_version.py
 import sys as _sys
 
 if _sys.version_info[:2] != (3, 13):
-    _v = f"{_sys.version_info.major}.{_sys.version_info.minor}.{_sys.version_info.micro}"
+    _v = (
+        f"{_sys.version_info.major}.{_sys.version_info.minor}.{_sys.version_info.micro}"
+    )
     raise RuntimeError(
         f"\n{'=' * 72}\n"
         f"FATAL: Python {_v} detected — this project requires Python 3.13.\n"
@@ -38,7 +41,7 @@ import pytest
 from flext_core import FlextTypes as t
 from flext_tests import FlextTestsDocker
 
-from flext_target_ldap import LDAPClient
+from flext_target_ldap import LdapTargetClient
 
 
 @pytest.fixture(scope="session")
@@ -177,7 +180,7 @@ def singer_message_state() -> str:
 @pytest.fixture
 def mock_ldap_client() -> MagicMock:
     """Create mock LDAP configuration for testing."""
-    client = MagicMock(spec=LDAPClient)
+    client = MagicMock(spec=LdapTargetClient)
     client.validate_dn.return_value = True
     client.entry_exists.return_value = False
     client.add_entry.return_value = True

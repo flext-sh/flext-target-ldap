@@ -346,37 +346,6 @@ class LdapTargetApiService:
         return LdapConnectionService(validated.value).test_connection()
 
 
-_default_api_service = LdapTargetApiService()
-
-
-def create_ldap_target(
-    config: t.Core.Dict,
-) -> FlextResult[target_client_module.TargetLdap]:
-    """Create an LDAP target from config using the default API service."""
-    return _default_api_service.create_ldap_target(config)
-
-
-def load_users_to_ldap(
-    users: list[dict[str, t.GeneralValueType]],
-    config: t.Core.Dict,
-) -> FlextResult[int]:
-    """Load user records to LDAP using the default API service."""
-    return _default_api_service.load_users_to_ldap(users, config)
-
-
-def load_groups_to_ldap(
-    groups: list[dict[str, t.GeneralValueType]],
-    config: t.Core.Dict,
-) -> FlextResult[int]:
-    """Load group records to LDAP using the default API service."""
-    return _default_api_service.load_groups_to_ldap(groups, config)
-
-
-def test_ldap_connection(config: t.Core.Dict) -> FlextResult[bool]:
-    """Validate config and test LDAP connection via the default API service."""
-    return _default_api_service.test_ldap_connection(config)
-
-
 __all__ = [
     "LdapConnectionService",
     "LdapTargetApiService",
@@ -384,8 +353,4 @@ __all__ = [
     "LdapTargetServiceProtocol",
     "LdapTransformationService",
     "LdapTransformationServiceProtocol",
-    "create_ldap_target",
-    "load_groups_to_ldap",
-    "load_users_to_ldap",
-    "test_ldap_connection",
 ]

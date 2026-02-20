@@ -12,9 +12,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from flext_target_ldap import GroupsSink, LDAPBaseSink, TargetLDAP, UsersSink
+from flext_target_ldap import (
+    LdapBaseSink,
+    LdapGroupsSink,
+    LdapUsersSink,
+    TargetLdap,
+)
 
-GenericSink = LDAPBaseSink
+GenericSink = LdapBaseSink
 
 
 class TestTargetLDAPUnit:
@@ -35,7 +40,7 @@ class TestTargetLDAPUnit:
 
     def test_target_initialization(self, config: dict[str, t.GeneralValueType]) -> None:
         """Test target LDAP initialization with name and config."""
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         if target.name != "target-ldap":
             msg: str = f"Expected {'target-ldap'}, got {target.name}"
             raise AssertionError(msg)
@@ -43,29 +48,31 @@ class TestTargetLDAPUnit:
 
     def test_get_sink_class_users(self, config: dict[str, t.GeneralValueType]) -> None:
         """Test getting users sink class."""
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         sink_class = target.get_sink_class("users")
 
         # Create a sink instance with mock data
 
-        if sink_class != UsersSink:
-            msg: str = f"Expected {UsersSink}, got {sink_class}"
+        if sink_class != LdapUsersSink:
+            msg: str = f"Expected {LdapUsersSink}, got {sink_class}"
             raise AssertionError(msg)
 
     def test_get_sink_class_groups(self, config: dict[str, t.GeneralValueType]) -> None:
         """Test getting groups sink class."""
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         sink_class = target.get_sink_class("groups")
 
         # Create a sink instance with mock data
 
-        if sink_class != GroupsSink:
-            msg: str = f"Expected {GroupsSink}, got {sink_class}"
+        if sink_class != LdapGroupsSink:
+            msg: str = f"Expected {LdapGroupsSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_class_generic(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_get_sink_class_generic(
+        self, config: dict[str, t.GeneralValueType]
+    ) -> None:
         """Test getting generic sink class for unknown stream."""
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         sink_class = target.get_sink_class("custom_stream")
 
         # Should return the default sink class
@@ -74,22 +81,26 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {GenericSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_dn_template_processing(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_dn_template_processing(
+        self, config: dict[str, t.GeneralValueType]
+    ) -> None:
         """Test DN template configuration processing."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
 
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         target.get_sink("users")
 
         assert (
             target.config["users_dn_template"] == "uid={uid},ou=people,dc=test,dc=com"
         )
 
-    def test_object_classes_processing(self, config: dict[str, t.GeneralValueType]) -> None:
+    def test_object_classes_processing(
+        self, config: dict[str, t.GeneralValueType]
+    ) -> None:
         """Test default object classes configuration processing."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
 
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         target.get_sink("users")
 
         if target.config["users_object_classes"] != ["customPerson", "top"]:
@@ -108,7 +119,7 @@ class TestTargetLDAPUnit:
         mock_client.upsert_entry.return_value = (True, "add")
         mock_client_class.return_value = mock_client
 
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         sink = target.get_sink("users")
 
         record = {
@@ -146,7 +157,7 @@ class TestTargetLDAPUnit:
         mock_client.delete_entry.return_value = True
         mock_client_class.return_value = mock_client
 
-        target = TargetLDAP(config=config)
+        target = TargetLdap(config=config)
         sink = target.get_sink("users")
 
         record = {
