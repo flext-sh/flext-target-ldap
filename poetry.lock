@@ -1104,7 +1104,7 @@ url = "../flext-core"
 
 [[package]]
 name = "flext-ldap"
-version = "0.10.0-dev"
+version = "0.10.0"
 description = "Enterprise LDAP Operations Library for FLEXT Framework"
 optional = false
 python-versions = ">=3.13,<3.14"
@@ -1127,7 +1127,7 @@ url = "../flext-ldap"
 
 [[package]]
 name = "flext-meltano"
-version = "0.10.0-dev"
+version = "0.10.0"
 description = "FLEXT Meltano - Enterprise Data Integration Platform"
 optional = false
 python-versions = ">=3.13,<3.14"
@@ -1166,7 +1166,7 @@ url = "../flext-meltano"
 
 [[package]]
 name = "flext-observability"
-version = "0.10.0-dev"
+version = "0.10.0"
 description = "FLEXT Observability - Enterprise Monitoring, Metrics & Telemetry"
 optional = false
 python-versions = ">=3.13,<3.14"
