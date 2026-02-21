@@ -49,7 +49,7 @@ from flext_target_ldap.target_services import (
     LdapTransformationService,
     LdapTransformationServiceProtocol,
 )
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap.typings import FlextTargetLdapTypes, t
 from flext_target_ldap.utilities import (
     FlextTargetLdapUtilities,
 )
@@ -80,4 +80,5 @@ __all__ = [
     "__version_info__",
     "m",
     "m_target_ldap",
+    "t",
 ]

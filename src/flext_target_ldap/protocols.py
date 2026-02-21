@@ -9,9 +9,10 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Protocol, runtime_checkable
 
-from flext_core import FlextTypes as t
 from flext_ldap.protocols import FlextLdapProtocols as p_ldap
 from flext_meltano.protocols import FlextMeltanoProtocols as p_meltano
+
+from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapProtocols(p_meltano, p_ldap):

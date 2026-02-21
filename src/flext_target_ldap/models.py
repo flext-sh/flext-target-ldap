@@ -15,9 +15,10 @@ import math
 from datetime import UTC, datetime
 from typing import Self
 
-from flext_core import FlextModels, FlextResult, t as t_core
-from flext_core.utilities import u
+from flext.utilities import u
 from pydantic import Field, field_validator
+
+from flext import FlextModels, FlextResult, t
 
 from .constants import c
 
@@ -230,7 +231,7 @@ class FlextTargetLdapModels(FlextModels):
             for LDAP target operations.
             """
 
-            original_record: dict[str, t_core.GeneralValueType] = Field(
+            original_record: dict[str, t.GeneralValueType] = Field(
                 ...,
                 description="Original Singer record before transformation",
             )

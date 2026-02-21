@@ -12,14 +12,14 @@ import re
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import FlextResult, FlextTypes as t
-from flext_core.utilities import FlextUtilities as u_core
+from flext_core import FlextResult, t
+from flext_core.utilities import u
 from flext_ldap.models import FlextLdapModels
 
 from flext_target_ldap.constants import c
 
 
-class FlextTargetLdapUtilities(u_core):
+class FlextTargetLdapUtilities(u):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for

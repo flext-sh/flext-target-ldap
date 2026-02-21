@@ -13,7 +13,7 @@ from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
-from flext_core import FlextTypes as t
+from flext_target_ldap import t
 from flext_tests import FlextTestsDocker
 
 from flext_target_ldap import LdapTargetClient
