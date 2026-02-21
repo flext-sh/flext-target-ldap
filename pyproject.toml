@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = [ "poetry-core>=2.0", "poetry-core>=2" ]
+requires = [ "poetry-core>=2" ]
 
 [project]
 name = "flext-target-ldap"
@@ -9,32 +9,32 @@ description = "FLEXT Target for LDAP directory loading"
 readme = "README.md"
 keywords = [ "data-integration", "etl", "flext", "ldap", "singer", "target" ]
 license = "MIT"
-authors = [ {name = "Marlon Santa Cruz", email = "marlon@example.com"} ]
+authors = [ { name = "Marlon Santa Cruz", email = "marlon@example.com" } ]
 requires-python = ">=3.13,<3.14"
 classifiers = [
   "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.13",
-  "Topic :: Software Development :: Libraries :: Python Modules",
-  "Typing :: Typed",
-  "Development Status :: 5 - Production/Stable",
   "Topic :: Database",
+  "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: System :: Systems Administration :: Authentication/Directory :: LDAP",
+  "Typing :: Typed",
 ]
-dependencies = [  ]
+dependencies = []
 urls.Documentation = "https://github.com/client-atech/flext#readme"
 urls.Homepage = "https://github.com/client-atech/flext"
 urls.Repository = "https://github.com/client-atech/flext"
 
 [tool.poetry]
-packages = [ {include = "flext_target_ldap", from = "src"} ]
+packages = [ { include = "flext_target_ldap", from = "src" } ]
 dependencies.python = ">=3.13,<3.14"
-dependencies.flext-core = {path = "../flext-core", develop = true}
-dependencies.flext-ldap = {path = "../flext-ldap", develop = true}
-dependencies.flext-meltano = {path = "../flext-meltano", develop = true}
-dependencies.flext-observability = {path = "../flext-observability", develop = true}
+dependencies.flext-core = { path = "../flext-core", develop = true }
+dependencies.flext-ldap = { path = "../flext-ldap", develop = true }
+dependencies.flext-meltano = { path = "../flext-meltano", develop = true }
+dependencies.flext-observability = { path = "../flext-observability", develop = true }
 group.dev.dependencies.pytest = "^9.0.2"
 group.dev.dependencies.pytest-cov = "^7.0.0"
 group.dev.dependencies.pytest-mock = ">=3.0"
@@ -92,10 +92,10 @@ ini_options.addopts = [
 ]
 
 [tool.coverage]
+run.source = [ "src/flext_target_ldap" ]
 report.exclude_lines = [ "if TYPE_CHECKING:", "pragma: no cover", "raise NotImplementedError" ]
 report.fail_under = 100
 report.precision = 2
-run.source = [ "src/flext_target_ldap" ]
 
 [tool.pyrefly]
 project-excludes = [ "**/*_pb2*.py", "**/*_pb2_grpc*.py" ]
