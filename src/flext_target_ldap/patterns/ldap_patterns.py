@@ -68,7 +68,7 @@ class LDAPDataTransformer:
     ) -> FlextResult[t.Core.Dict]:
         """Transform Singer record for LDAP storage."""
         try:
-            transformed = {}
+            transformed: dict[str, t.GeneralValueType] = {}
 
             for key, value in record.items():
                 # LDAP-specific attribute naming

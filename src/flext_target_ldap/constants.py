@@ -10,9 +10,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Final
 
-from flext_ldap import c
 from flext_ldap.constants import FlextLdapConstants
-from flext_ldif.constants import FlextLdifConstants as ldif_c
 
 
 class FlextTargetLdapConstants(FlextLdapConstants):
@@ -73,9 +71,11 @@ class FlextTargetLdapConstants(FlextLdapConstants):
         class Connection:
             """LDAP connection configuration constants for target operations."""
 
-            DEFAULT_HOST: Final[str] = c.Platform.DEFAULT_HOST
-            DEFAULT_PORT: Final[int] = c.Ldap.ConnectionDefaults.PORT
-            DEFAULT_TIMEOUT: Final[int] = c.Ldap.ConnectionDefaults.TIMEOUT
+            DEFAULT_HOST: Final[str] = FlextLdapConstants.Platform.DEFAULT_HOST
+            DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
+            DEFAULT_TIMEOUT: Final[int] = (
+                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+            )
             MAX_PORT_NUMBER: Final[int] = 65535
 
             class Ldaps:
@@ -89,9 +89,15 @@ class FlextTargetLdapConstants(FlextLdapConstants):
             Note: Does not override parent Processing class to avoid inheritance conflicts.
             """
 
-            DEFAULT_BATCH_SIZE: Final[int] = c.Performance.BatchProcessing.DEFAULT_SIZE
-            MAX_BATCH_SIZE: Final[int] = c.Performance.BatchProcessing.MAX_ITEMS
-            DEFAULT_PAGE_SIZE: Final[int] = c.Pagination.DEFAULT_PAGE_SIZE
+            DEFAULT_BATCH_SIZE: Final[int] = (
+                FlextLdapConstants.Performance.BatchProcessing.DEFAULT_SIZE
+            )
+            MAX_BATCH_SIZE: Final[int] = (
+                FlextLdapConstants.Performance.BatchProcessing.MAX_ITEMS
+            )
+            DEFAULT_PAGE_SIZE: Final[int] = (
+                FlextLdapConstants.Pagination.DEFAULT_PAGE_SIZE
+            )
 
         class Operations:
             """LDAP operation types and commands.
@@ -109,19 +115,25 @@ class FlextTargetLdapConstants(FlextLdapConstants):
             TYPES: Final[tuple[str, ...]] = tuple(
                 member.name
                 for member in (
-                    c.Ldap.OperationType.ADD,
-                    c.Ldap.OperationType.MODIFY,
-                    c.Ldap.OperationType.DELETE,
-                    c.Ldap.OperationType.MODIFY,
+                    FlextLdapConstants.Ldap.OperationType.ADD,
+                    FlextLdapConstants.Ldap.OperationType.MODIFY,
+                    FlextLdapConstants.Ldap.OperationType.DELETE,
+                    FlextLdapConstants.Ldap.OperationType.MODIFY,
                 )
             )
 
         class Loading:
             """Target-specific loading configuration."""
 
-            DEFAULT_LOAD_TIMEOUT: Final[int] = c.Ldap.ConnectionDefaults.TIMEOUT
-            MAX_LOAD_RETRIES: Final[int] = c.Reliability.MAX_RETRY_ATTEMPTS
-            LOAD_RETRY_DELAY: Final[float] = c.Reliability.DEFAULT_RETRY_DELAY_SECONDS
+            DEFAULT_LOAD_TIMEOUT: Final[int] = (
+                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+            )
+            MAX_LOAD_RETRIES: Final[int] = (
+                FlextLdapConstants.Reliability.MAX_RETRY_ATTEMPTS
+            )
+            LOAD_RETRY_DELAY: Final[float] = (
+                FlextLdapConstants.Reliability.DEFAULT_RETRY_DELAY_SECONDS
+            )
 
         class Validation:
             """Target-specific validation configuration.
@@ -130,7 +142,9 @@ class FlextTargetLdapConstants(FlextLdapConstants):
             """
 
             # Validation constants from flext-ldif (parent of flext-ldap)
-            MAX_DN_LENGTH: Final[int] = ldif_c.Ldif.LdifValidation.MAX_DN_LENGTH
+            MAX_DN_LENGTH: Final[int] = (
+                FlextLdapConstants.Ldif.LdifValidation.MAX_DN_LENGTH
+            )
 
 
 c = FlextTargetLdapConstants

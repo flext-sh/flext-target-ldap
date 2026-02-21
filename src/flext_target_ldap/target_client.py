@@ -171,7 +171,10 @@ class _LdapConnectionWrapper:
 
             if search_result.is_success and search_result.value:
                 # search_result.value is SearchResult object
-                entries = search_result.value.entries
+                search_res = cast(
+                    FlextLdapModels.Ldap.SearchResult, search_result.value
+                )
+                entries = search_res.entries
                 self.entries = []
                 for entry in entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
@@ -197,8 +200,11 @@ class _LdapConnectionWrapper:
                     elif hasattr(entry, "dn"):
                         # Fallback for other objects
                         dn = str(getattr(entry, "dn", ""))
-                        attrs_obj = getattr(entry, "attributes", {})
-                        compat_entry = _CompatibleEntry(dn, attrs_obj)
+                        attrs_raw = getattr(entry, "attributes", {})
+                        attrs_val2: dict[str, t.GeneralValueType] = (
+                            attrs_raw if isinstance(attrs_raw, dict) else {}
+                        )
+                        compat_entry = _CompatibleEntry(dn, attrs_val2)
                         self.entries.append(compat_entry)
             else:
                 self.entries = []
@@ -569,7 +575,8 @@ class LdapTargetClient:
             if result.is_success and result.value:
                 # Convert search results to LdapSearchEntry for backward compatibility
                 entries = []
-                for entry in result.value.entries:
+                search_res = cast(FlextLdapModels.Ldap.SearchResult, result.value)
+                for entry in search_res.entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
                     if isinstance(entry, dict):
                         dn = str(entry.get("dn", ""))
@@ -577,9 +584,10 @@ class LdapTargetClient:
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
                     elif hasattr(entry, "dn"):
-                        dn = entry.dn
-                        attrs = entry.attributes if hasattr(entry, "attributes") else {}
-                        compat_entry = LdapSearchEntry(str(dn), attrs)
+                        dn = str(getattr(entry, "dn", ""))
+                        attrs_raw = getattr(entry, "attributes", {})
+                        attrs = attrs_raw if isinstance(attrs_raw, dict) else {}
+                        compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
 
                 logger.debug("Successfully found %d LDAP entries", len(entries))
@@ -651,7 +659,8 @@ class LdapTargetClient:
             )
 
             if search_result.is_success and search_result.data is not None:
-                return FlextResult[bool].ok(len(search_result.data) > 0)
+                search_data = cast(list[LdapSearchEntry], search_result.data)
+                return FlextResult[bool].ok(len(search_data) > 0)
 
             return FlextResult[bool].ok(value=False)
 
@@ -674,7 +683,8 @@ class LdapTargetClient:
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
 
             if search_result.is_success and search_result.data:
-                return FlextResult[LdapSearchEntry | None].ok(search_result.data[0])
+                search_data = cast(list[LdapSearchEntry], search_result.data)
+                return FlextResult[LdapSearchEntry | None].ok(search_data[0])
 
             return FlextResult[LdapSearchEntry | None].ok(None)
 
@@ -929,14 +939,15 @@ class LdapUsersSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping_obj: dict[str, t.GeneralValueType] = (
-            mapping_val if isinstance(mapping_val, dict) else {}
-        )
-        for singer_field, ldap_attr in mapping_obj.items():
-            if isinstance(ldap_attr, str):
-                value = record.get(singer_field)
-                if value is not None:
-                    attributes[ldap_attr] = [str(value)]
+        mapping: dict[str, str] = {
+            k: str(v)
+            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
+            if isinstance(v, str)
+        }
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = [str(value)]
 
         return attributes
 
@@ -1049,18 +1060,19 @@ class LdapGroupsSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping_obj: dict[str, t.GeneralValueType] = (
-            mapping_val if isinstance(mapping_val, dict) else {}
-        )
+        mapping: dict[str, str] = {
+            k: str(v)
+            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
+            if isinstance(v, str)
+        }
 
-        for singer_field, ldap_attr in mapping_obj.items():
-            if isinstance(ldap_attr, str):
-                value = record.get(singer_field)
-                if value is not None:
-                    if isinstance(value, list):
-                        attributes[ldap_attr] = value
-                    else:
-                        attributes[ldap_attr] = [str(value)]
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                if isinstance(value, list):
+                    attributes[mapped_attr] = value
+                else:
+                    attributes[mapped_attr] = [str(value)]
 
         return attributes
 
@@ -1151,15 +1163,16 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping_obj: dict[str, t.GeneralValueType] = (
-            mapping_val if isinstance(mapping_val, dict) else {}
-        )
+        mapping: dict[str, str] = {
+            k: str(v)
+            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
+            if isinstance(v, str)
+        }
 
-        for singer_field, ldap_attr in mapping_obj.items():
-            if isinstance(ldap_attr, str):
-                value = record.get(singer_field)
-                if value is not None:
-                    attributes[ldap_attr] = [str(value)]
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = [str(value)]
 
         return attributes
 

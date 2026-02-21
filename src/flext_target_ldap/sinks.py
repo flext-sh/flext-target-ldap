@@ -338,15 +338,16 @@ class UsersSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping_obj: dict[str, t.GeneralValueType] = (
-            mapping_val if isinstance(mapping_val, dict) else {}
-        )
+        mapping: dict[str, str] = {
+            k: str(v)
+            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
+            if isinstance(v, str)
+        }
 
-        for singer_field, ldap_attr in mapping_obj.items():
-            if isinstance(ldap_attr, str):
-                value = record.get(singer_field)
-                if value is not None:
-                    attributes[ldap_attr] = [str(value)]
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = [str(value)]
 
         return attributes
 
@@ -466,17 +467,18 @@ class GroupsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_val = self._target.config.get("attribute_mapping", {})
-        mapping_obj: dict[str, t.GeneralValueType] = (
-            mapping_val if isinstance(mapping_val, dict) else {}
-        )
-        for singer_field, ldap_attr in mapping_obj.items():
-            if isinstance(ldap_attr, str):
-                value = record.get(singer_field)
-                if value is not None:
-                    if isinstance(value, list):
-                        attributes[ldap_attr] = value
-                    else:
-                        attributes[ldap_attr] = [str(value)]
+        mapping: dict[str, str] = {
+            k: str(v)
+            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
+            if isinstance(v, str)
+        }
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                if isinstance(value, list):
+                    attributes[mapped_attr] = value
+                else:
+                    attributes[mapped_attr] = [str(value)]
 
         return attributes
 
@@ -584,14 +586,15 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping_obj: dict[str, t.GeneralValueType] = (
-            mapping_val if isinstance(mapping_val, dict) else {}
-        )
+        mapping: dict[str, str] = {
+            k: str(v)
+            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
+            if isinstance(v, str)
+        }
 
-        for singer_field, ldap_attr in mapping_obj.items():
-            if isinstance(ldap_attr, str):
-                value = record.get(singer_field)
-                if value is not None:
-                    attributes[ldap_attr] = [str(value)]
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = [str(value)]
 
         return attributes

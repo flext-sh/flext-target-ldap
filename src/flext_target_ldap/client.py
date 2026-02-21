@@ -116,7 +116,7 @@ class LDAPClient:
             self._bind_dn: str = str(config.get("bind_dn", ""))
             self._password: str = str(config.get("password", ""))
         else:
-            self.config: FlextLdapModels.Ldap.ConnectionConfig = config
+            self.config = config
             # Default authentication credentials when using FlextLdapModels.ConnectionConfig directly
             self._bind_dn = ""
             self._password = ""
