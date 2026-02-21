@@ -171,9 +171,7 @@ class _LdapConnectionWrapper:
 
             if search_result.is_success and search_result.value:
                 # search_result.value is SearchResult object
-                search_res = cast(
-                    "FlextLdapModels.Ldap.SearchResult", search_result.value
-                )
+                search_res = search_result.value
                 entries = search_res.entries
                 self.entries = []
                 for entry in entries:
@@ -575,7 +573,7 @@ class LdapTargetClient:
             if result.is_success and result.value:
                 # Convert search results to LdapSearchEntry for backward compatibility
                 entries = []
-                search_res = cast("FlextLdapModels.Ldap.SearchResult", result.value)
+                search_res = result.value
                 for entry in search_res.entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
                     if isinstance(entry, dict):
@@ -659,8 +657,7 @@ class LdapTargetClient:
             )
 
             if search_result.is_success and search_result.data is not None:
-                search_data = cast("list[LdapSearchEntry]", search_result.data)
-                return FlextResult[bool].ok(len(search_data) > 0)
+                return FlextResult[bool].ok(len(search_result.data) > 0)
 
             return FlextResult[bool].ok(value=False)
 
@@ -683,8 +680,7 @@ class LdapTargetClient:
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
 
             if search_result.is_success and search_result.data:
-                search_data = cast("list[LdapSearchEntry]", search_result.data)
-                return FlextResult[LdapSearchEntry | None].ok(search_data[0])
+                return FlextResult[LdapSearchEntry | None].ok(search_result.data[0])
 
             return FlextResult[LdapSearchEntry | None].ok(None)
 

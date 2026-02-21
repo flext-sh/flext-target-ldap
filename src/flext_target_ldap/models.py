@@ -15,10 +15,8 @@ import math
 from datetime import UTC, datetime
 from typing import Self
 
-from flext.utilities import u
+from flext_core import FlextModels, FlextResult, FlextUtilities, t
 from pydantic import Field, field_validator
-
-from flext import FlextModels, FlextResult, t
 
 from .constants import c
 
@@ -34,7 +32,7 @@ class FlextTargetLdapModels(FlextModels):
     def __init_subclass__(cls, **kwargs: object) -> None:
         """Warn when FlextTargetLdapModels is subclassed directly."""
         super().__init_subclass__(**kwargs)
-        u.Deprecation.warn_once(
+        FlextUtilities.Deprecation.warn_once(
             f"subclass:{cls.__name__}",
             "Subclassing FlextTargetLdapModels is deprecated. Use FlextModels directly with composition instead.",
         )
@@ -532,10 +530,8 @@ class FlextTargetLdapModels(FlextModels):
 
 # Export the unified models class
 m = FlextTargetLdapModels
-m_target_ldap = FlextTargetLdapModels
 
 __all__: list[str] = [
     "FlextTargetLdapModels",
     "m",
-    "m_target_ldap",
 ]

@@ -17,7 +17,6 @@ from flext_target_ldap.__version__ import (
 from flext_target_ldap.models import (
     FlextTargetLdapModels,
     m,
-    m_target_ldap,
 )
 from flext_target_ldap.protocols import (
     FlextTargetLdapProtocols,
@@ -79,6 +78,5 @@ __all__ = [
     "__version__",
     "__version_info__",
     "m",
-    "m_target_ldap",
     "t",
 ]
