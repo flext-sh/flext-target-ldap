@@ -52,10 +52,7 @@ lint.isort.known-first-party = [ "flext_target_ldap" ]
 
 [tool.codespell]
 ignore-words-list = "dn,cn,ou,uid,sn,aci,acl,ldif,flext,FLEXT,dbt,oic,wms,grpc,meltano,protobuf,creds,assertIn"
-skip = """\
-  .git,*.lock,*.egg-info,dist,build,.venv,__pycache__,.mypy_cache,.pytest_cache,.ruff_cache,node_modules,vendor,*.pb2*.\
-  py\
-  """
+skip = ".git,*.lock,*.egg-info,dist,build,.venv,__pycache__,.mypy_cache,.pytest_cache,.ruff_cache,node_modules,typings,vendor,*.pb2*.py"
 
 [tool.deptry]
 known_first_party = [
@@ -95,6 +92,7 @@ exclude = [
   "reports",
   "scripts",
   "tests",
+  "typings",
   "vendor",
   "venv",
 ]
@@ -212,6 +210,7 @@ exclude = [
   "build/",
   "dist/",
   "node_modules/",
+  "typings/",
   "vendor/",
 ]
 extra_checks = true
@@ -295,6 +294,7 @@ exclude = [
   "dist/",
   "node_modules/",
   "target/",
+  "typings/",
 ]
 pythonPlatform = "Linux"
 pythonVersion = "3.13"
@@ -377,6 +377,7 @@ exclude_dirs = [
   "dist",
   "node_modules",
   "tests",
+  "typings",
   "vendor",
 ]
 
@@ -400,6 +401,7 @@ exclude = [
   "dist/",
   "node_modules/",
   "tests/",
+  "typings/",
   "vendor/",
 ]
 min_confidence = 80
