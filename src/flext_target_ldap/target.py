@@ -13,18 +13,10 @@ from collections.abc import Callable
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Protocol, override
-
-if TYPE_CHECKING:
-    from flext_target_ldap.sinks import Sink, Target
-else:
-    try:
-        from flext_meltano.singer.tap import FlextMeltanoStream as Sink
-        from flext_meltano.singer.target import FlextMeltanoTarget as Target
-    except ImportError:
-        from flext_target_ldap.sinks import Sink, Target
+from typing import ClassVar, Protocol, override
 
 from flext_core import FlextContainer, FlextLogger
+from flext_target_ldap.sinks import Sink, Target
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c
@@ -47,13 +39,7 @@ def _default_cli_helper(*, quiet: bool = False):  # noqa: ARG001
     return Helper()
 
 
-try:
-    _cli_mod = import_module("flext_cli")
-    flext_cli_create_helper = getattr(
-        _cli_mod, "flext_cli_create_helper", _default_cli_helper
-    )
-except ImportError:
-    flext_cli_create_helper = _default_cli_helper
+flext_cli_create_helper = _default_cli_helper
 
 
 logger = FlextLogger(__name__)
@@ -74,7 +60,7 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: dict[str, t.GeneralValueType]
+    config: t.Core.Dict
     cli: ClassVar[Callable[..., None] | None] = None
 
     @override
@@ -95,7 +81,17 @@ class TargetLDAP(Target):
     def orchestrator(self) -> LDAPTargetOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            self._orchestrator = LDAPTargetOrchestrator(dict(self.config))
+            normalized_config: dict[str, str | int | bool] = {}
+            for key, value in self.config.items():
+                if type(value) is bool:
+                    normalized_config[key] = value
+                elif type(value) is int:
+                    normalized_config[key] = value
+                elif type(value) is str:
+                    normalized_config[key] = value
+                else:
+                    normalized_config[key] = str(value)
+            self._orchestrator = LDAPTargetOrchestrator(normalized_config)
         return self._orchestrator
 
     @property
@@ -183,16 +179,9 @@ class TargetLDAP(Target):
             raise ValueError(msg)
 
         port_obj = self.config.get("port", 389)
-        if isinstance(port_obj, bool):
-            port = 389
-        elif isinstance(port_obj, int):
-            port = port_obj
-        elif isinstance(port_obj, str):
-            try:
-                port = int(port_obj)
-            except ValueError:
-                port = 389
-        else:
+        try:
+            port = int(str(port_obj))
+        except (TypeError, ValueError):
             port = 389
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
@@ -332,7 +321,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     _schema = obj.get("schema") or {}
                     current_stream = obj.get("stream")
                 elif msg_type == "RECORD" and api is not None:
-                    record: dict[str, t.GeneralValueType] = obj.get("record") or {}
+                    record: t.Core.Dict = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
                     _process_record_message(record, stream, cfg, api, seen_dns)
             except Exception:

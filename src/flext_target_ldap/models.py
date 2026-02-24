@@ -229,7 +229,7 @@ class FlextTargetLdapModels(FlextModels):
             for LDAP target operations.
             """
 
-            original_record: dict[str, t.GeneralValueType] = Field(
+            original_record: dict[str, t.JsonValue] = Field(
                 ...,
                 description="Original Singer record before transformation",
             )
@@ -245,7 +245,7 @@ class FlextTargetLdapModels(FlextModels):
             )
             transformation_errors: list[str] = Field(
                 default_factory=list,
-                description="object errors encountered during transformation",
+                description="schema errors encountered during transformation",
             )
             processing_time_ms: int = Field(
                 default=0,
