@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import override
 
 from flext_core import FlextLogger, FlextModels, FlextResult
@@ -78,7 +79,7 @@ class DataTransformationEngine:
 
             for rule in self.rules:
                 for key, value in transformed_data.items():
-                    if isinstance(value, str) and rule.pattern in value:
+                    if u.Guards._is_str(value) and rule.pattern in value:
                         transformed_data[key] = value.replace(
                             rule.pattern,
                             rule.replacement,
@@ -93,7 +94,7 @@ class DataTransformationEngine:
         except Exception as e:
             return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
 
-    def get_statistics(self) -> dict[str, int]:
+    def get_statistics(self) -> Mapping[str, int]:
         """Get transformation statistics."""
         return {
             "total_rules": len(self.rules),
@@ -127,7 +128,7 @@ class MigrationValidator:
             error_msg = None
 
             # Handle different call patterns
-            if isinstance(data, str):
+            if u.Guards._is_str(data):
                 # Called with validate(dn, attributes, object_classes)
                 dn = data
                 attrs = attributes or {}
@@ -168,6 +169,6 @@ class MigrationValidator:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
 
-    def get_validation_statistics(self) -> dict[str, int]:
+    def get_validation_statistics(self) -> Mapping[str, int]:
         """Get validation statistics."""
         return self._stats.copy()

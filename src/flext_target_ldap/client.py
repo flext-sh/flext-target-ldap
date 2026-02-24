@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from contextlib import _GeneratorContextManager, contextmanager, suppress
 from typing import Protocol, override
 
@@ -48,12 +48,12 @@ class LDAPConnectionProtocol(Protocol):
         self,
         dn: str,
         object_classes: list[str],
-        attributes: dict[str, t.GeneralValueType],
+        attributes: Mapping[str, t.GeneralValueType],
     ) -> bool:
         """Add LDAP entry."""
         ...
 
-    def modify(self, dn: str, changes: dict[str, t.GeneralValueType]) -> bool:
+    def modify(self, dn: str, changes: Mapping[str, t.GeneralValueType]) -> bool:
         """Modify LDAP entry."""
         ...
 
@@ -95,10 +95,11 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.Ldap.ConnectionConfig | dict[str, t.GeneralValueType],
+        config: FlextLdapModels.Ldap.ConnectionConfig
+        | Mapping[str, t.GeneralValueType],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        if isinstance(config, dict):
+        if isinstance(config, Mapping):
             # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
             self.config: FlextLdapModels.Ldap.ConnectionConfig = (
                 FlextLdapModels.Ldap.ConnectionConfig(
@@ -302,12 +303,14 @@ class LDAPClient:
                 self,
                 dn: str,
                 object_classes: list[str],
-                attributes: dict[str, t.GeneralValueType],
+                attributes: Mapping[str, t.GeneralValueType],
             ) -> bool:
                 _ = dn, object_classes, attributes
                 return True
 
-            def modify(self, dn: str, changes: dict[str, t.GeneralValueType]) -> bool:
+            def modify(
+                self, dn: str, changes: Mapping[str, t.GeneralValueType]
+            ) -> bool:
                 _ = dn, changes
                 return True
 

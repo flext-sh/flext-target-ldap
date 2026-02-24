@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
@@ -99,7 +100,7 @@ class LDAPDataTransformer:
         self,
         record: SingerRecord,
         schema: SingerSchemaDefinition
-        | dict[str, dict[str, dict[str, str] | str]]
+        | Mapping[str, Mapping[str, Mapping[str, str] | str]]
         | None = None,
     ) -> FlextResult[TransformedRecord]:
         """Transform Singer record for LDAP storage."""
@@ -187,9 +188,10 @@ class LDAPSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: SingerSchemaDefinition | dict[str, dict[str, dict[str, str] | str]],
+        schema: SingerSchemaDefinition
+        | Mapping[str, Mapping[str, Mapping[str, str] | str]],
         object_class: str = "inetOrgPerson",
-    ) -> FlextResult[dict[str, str]]:
+    ) -> FlextResult[Mapping[str, str]]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: dict[str, str] = {}
@@ -207,11 +209,11 @@ class LDAPSchemaMapper:
                     else "DirectoryString"
                 )
 
-            return FlextResult[dict[str, str]].ok(ldap_attributes)
+            return FlextResult[Mapping[str, str]].ok(ldap_attributes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP schema mapping failed")
-            return FlextResult[dict[str, str]].fail(
+            return FlextResult[Mapping[str, str]].fail(
                 f"Schema mapping failed: {e}",
             )
 
@@ -381,8 +383,8 @@ class LDAPEntryManager:
 
     def prepare_modify_changes(
         self,
-        current_attrs: dict[str, str | list[str] | None],
-        new_attrs: dict[str, str | list[str] | None],
+        current_attrs: Mapping[str, str | list[str] | None],
+        new_attrs: Mapping[str, str | list[str] | None],
     ) -> FlextResult[ModifyMap]:
         """Prepare modification changes for LDAP entry."""
         try:

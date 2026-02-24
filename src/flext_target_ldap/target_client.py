@@ -9,12 +9,16 @@ from __future__ import annotations
 import sys
 from collections.abc import Generator
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import cast, override
+from typing import override
 
 from flext_core import (
+    x,
+    u,
+    u,
     FlextContainer,
     FlextLogger,
     FlextResult,
+    FlextRuntime,
 )
 from flext_ldap import (
     FlextLdap,
@@ -177,30 +181,35 @@ class _LdapConnectionWrapper:
                 for entry in entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
                     # Convert to _CompatibleEntry
-                    if isinstance(entry, dict):
+                    if u.Guards._is_dict(entry):
                         dn = str(entry.get("dn", ""))
                         attrs = {k: v for k, v in entry.items() if k != "dn"}
                         compat_entry = _CompatibleEntry(dn, attrs)
                         self.entries.append(compat_entry)
-                    elif isinstance(entry, FlextLdapModels.Ldif.Entry):
+                    elif x.is_base_model(entry):
                         dn = str(entry.dn)
                         attrs_obj = entry.attributes
                         attrs_val: dict[str, t.GeneralValueType] = {}
-                        if attrs_obj and hasattr(attrs_obj, "attributes"):
-                            raw = getattr(attrs_obj, "attributes", {})
-                            attrs_val = (
-                                cast("dict[str, t.GeneralValueType]", raw)
-                                if isinstance(raw, dict)
-                                else {}
+                        if attrs_obj is not None:
+                            raw = FlextRuntime.safe_get_attribute(
+                                attrs_obj,
+                                "attributes",
+                                {},
                             )
+                            if u.Guards._is_dict(raw):
+                                attrs_val = raw
+                            elif u.Guards._is_mapping(raw):
+                                attrs_val = {str(k): v for k, v in raw.items()}
                         compat_entry = _CompatibleEntry(dn, attrs_val)
                         self.entries.append(compat_entry)
-                    elif hasattr(entry, "dn"):
+                    elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         # Fallback for other objects
                         dn = str(getattr(entry, "dn", ""))
                         attrs_raw = getattr(entry, "attributes", {})
                         attrs_val2: dict[str, t.GeneralValueType] = (
-                            attrs_raw if isinstance(attrs_raw, dict) else {}
+                            attrs_raw
+                            if u.Guards._is_dict(attrs_raw)
+                            else {}
                         )
                         compat_entry = _CompatibleEntry(dn, attrs_val2)
                         self.entries.append(compat_entry)
@@ -225,7 +234,7 @@ class LdapTargetClient:
         config: FlextLdapModels.Ldap.ConnectionConfig | t.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        if isinstance(config, dict):
+        if u.Guards._is_dict(config):
             # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
                 host=str(
@@ -399,7 +408,7 @@ class LdapTargetClient:
 
             # Process attributes
             for key, value in attributes.items():
-                if isinstance(value, list):
+                if u.Guards.is_list(value):
                     ldap_attributes[key] = [str(v) for v in value]
                 else:
                     ldap_attributes[key] = [str(value)]
@@ -486,7 +495,7 @@ class LdapTargetClient:
             ldap_changes: dict[str, t.Core.StringList] = {}
 
             for key, value in changes.items():
-                if isinstance(value, list):
+                if u.Guards.is_list(value):
                     ldap_changes[key] = [str(v) for v in value]
                 else:
                     ldap_changes[key] = [str(value)]
@@ -576,15 +585,19 @@ class LdapTargetClient:
                 search_res = result.value
                 for entry in search_res.entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
-                    if isinstance(entry, dict):
+                    if u.Guards._is_dict(entry):
                         dn = str(entry.get("dn", ""))
                         attrs = {k: v for k, v in entry.items() if k != "dn"}
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
-                    elif hasattr(entry, "dn"):
+                    elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         dn = str(getattr(entry, "dn", ""))
                         attrs_raw = getattr(entry, "attributes", {})
-                        attrs = attrs_raw if isinstance(attrs_raw, dict) else {}
+                        attrs = (
+                            attrs_raw
+                            if u.Guards._is_dict(attrs_raw)
+                            else {}
+                        )
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
 
@@ -764,7 +777,7 @@ class LdapBaseSink(Sink):
             records_raw = _context.get("records", [])
 
             records: list[t.GeneralValueType] = (
-                records_raw if isinstance(records_raw, list) else []
+                records_raw if u.Guards.is_list(records_raw) else []
             )
             logger.info(
                 "Processing batch of %d records for stream: %s",
@@ -773,7 +786,7 @@ class LdapBaseSink(Sink):
             )
 
             for record in records:
-                if isinstance(record, dict):
+                if u.Guards._is_dict(record):
                     self.process_record(record, _context)
 
             logger.info(
@@ -853,7 +866,7 @@ class LdapUsersSink(LdapBaseSink):
             )
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if isinstance(object_classes_raw, list)
+                if u.Guards.is_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
 
@@ -901,13 +914,13 @@ class LdapUsersSink(LdapBaseSink):
         )
         attributes: t.Core.Dict = {
             "objectClass": object_classes.copy()
-            if isinstance(object_classes, list)
+            if u.Guards.is_list(object_classes)
             else ["inetOrgPerson", "person"],
         }
 
         # Add person-specific object classes
         obj_classes = attributes.get("objectClass")
-        if isinstance(obj_classes, list):
+        if u.Guards.is_list(obj_classes):
             if "person" not in obj_classes:
                 obj_classes.append("person")
             if "inetOrgPerson" not in obj_classes:
@@ -937,8 +950,10 @@ class LdapUsersSink(LdapBaseSink):
         )
         mapping: dict[str, str] = {
             k: str(v)
-            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
-            if isinstance(v, str)
+            for k, v in (
+                mapping_val if u.Guards._is_dict(mapping_val) else {}
+            ).items()
+            if u.Guards._is_str(v)
         }
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
@@ -979,7 +994,7 @@ class LdapGroupsSink(LdapBaseSink):
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if isinstance(object_classes_raw, list)
+                if u.Guards.is_list(object_classes_raw)
                 else ["groupOfNames"]
             )
 
@@ -1027,13 +1042,16 @@ class LdapGroupsSink(LdapBaseSink):
         )
         attributes: dict[str, t.GeneralValueType] = {
             "objectClass": object_classes.copy()
-            if isinstance(object_classes, list)
+            if u.Guards.is_list(object_classes)
             else ["groupOfNames"],
         }
 
         # Add group-specific object classes
         obj_classes = attributes.get("objectClass")
-        if isinstance(obj_classes, list) and "groupOfNames" not in obj_classes:
+        if (
+            u.Guards.is_list(obj_classes)
+            and "groupOfNames" not in obj_classes
+        ):
             obj_classes.append("groupOfNames")
 
         # Map Singer fields to LDAP attributes
@@ -1046,7 +1064,7 @@ class LdapGroupsSink(LdapBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if isinstance(value, list):
+                if u.Guards.is_list(value):
                     attributes[ldap_attr] = value
                 else:
                     attributes[ldap_attr] = [str(value)]
@@ -1058,14 +1076,16 @@ class LdapGroupsSink(LdapBaseSink):
         )
         mapping: dict[str, str] = {
             k: str(v)
-            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
-            if isinstance(v, str)
+            for k, v in (
+                mapping_val if u.Guards._is_dict(mapping_val) else {}
+            ).items()
+            if u.Guards._is_str(v)
         }
 
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if isinstance(value, list):
+                if u.Guards.is_list(value):
                     attributes[mapped_attr] = value
                 else:
                     attributes[mapped_attr] = [str(value)]
@@ -1161,8 +1181,10 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
         )
         mapping: dict[str, str] = {
             k: str(v)
-            for k, v in (mapping_val if isinstance(mapping_val, dict) else {}).items()
-            if isinstance(v, str)
+            for k, v in (
+                mapping_val if u.Guards._is_dict(mapping_val) else {}
+            ).items()
+            if u.Guards._is_str(v)
         }
 
         for singer_field, mapped_attr in mapping.items():
@@ -1289,11 +1311,11 @@ class TargetLdap(Target):
             raise ValueError(msg)
 
         port_obj = self.config.get("port", 389)
-        if isinstance(port_obj, bool):
+        if u.Guards._is_bool(port_obj):
             port = 389
-        elif isinstance(port_obj, int):
+        elif u.Guards._is_int(port_obj):
             port = port_obj
-        elif isinstance(port_obj, str):
+        elif u.Guards._is_str(port_obj):
             try:
                 port = int(port_obj)
             except ValueError:

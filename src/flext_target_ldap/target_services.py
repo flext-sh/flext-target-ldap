@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import Protocol, override
 
@@ -30,7 +31,7 @@ class LdapTargetServiceProtocol(Protocol):
 
     def load_records(
         self,
-        records: list[dict[str, t.GeneralValueType]],
+        records: list[Mapping[str, t.GeneralValueType]],
         config: t.Core.Dict,
         stream_type: str = "users",
     ) -> FlextResult[int]:
@@ -43,7 +44,7 @@ class LdapTransformationServiceProtocol(Protocol):
 
     def transform_record(
         self,
-        record: dict[str, t.GeneralValueType],
+        record: Mapping[str, t.GeneralValueType],
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
@@ -72,7 +73,7 @@ class LdapConnectionService:
             return FlextResult[bool].fail("Base DN is required")
         return FlextResult[bool].ok(value=True)
 
-    def get_connection_info(self) -> dict[str, t.GeneralValueType]:
+    def get_connection_info(self) -> Mapping[str, t.GeneralValueType]:
         """Return connection parameters as a dict for logging or debugging."""
         return {
             "host": self._config.connection.host,
@@ -93,7 +94,7 @@ class LdapTransformationService:
 
     def transform_record(
         self,
-        record: dict[str, t.GeneralValueType],
+        record: Mapping[str, t.GeneralValueType],
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
@@ -137,7 +138,7 @@ class LdapTransformationService:
         )
 
         result = LdapTransformationResultModel(
-            original_record=record,
+            original_record=dict(record),
             transformed_entry=entry,
             applied_mappings=applied_mappings,
             transformation_errors=mapping_errors,
@@ -233,13 +234,13 @@ class LdapTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[dict[str, t.GeneralValueType]],
+        records: list[Mapping[str, t.GeneralValueType]],
         config: FlextTargetLdapSettings | None = None,
-    ) -> FlextResult[dict[str, t.GeneralValueType]]:
+    ) -> FlextResult[Mapping[str, t.GeneralValueType]]:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
+            return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                 "Configuration is required",
             )
 
@@ -269,7 +270,7 @@ class LdapTargetOrchestrator:
             "transformation_errors": errors,
             "status": "completed" if not errors else "completed_with_errors",
         }
-        return FlextResult[dict[str, t.GeneralValueType]].ok(result)
+        return FlextResult[Mapping[str, t.GeneralValueType]].ok(result)
 
     def validate_target_configuration(
         self,
@@ -304,7 +305,7 @@ class LdapTargetApiService:
 
     def load_users_to_ldap(
         self,
-        users: list[dict[str, t.GeneralValueType]],
+        users: list[Mapping[str, t.GeneralValueType]],
         config: t.Core.Dict,
     ) -> FlextResult[int]:
         """Load user records into LDAP using the default users sink."""
@@ -316,12 +317,12 @@ class LdapTargetApiService:
         target = target_result.value
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
         for user in users:
-            sink.process_record(user, {})
+            sink.process_record(dict(user), {})
         return FlextResult[int].ok(len(users))
 
     def load_groups_to_ldap(
         self,
-        groups: list[dict[str, t.GeneralValueType]],
+        groups: list[Mapping[str, t.GeneralValueType]],
         config: t.Core.Dict,
     ) -> FlextResult[int]:
         """Load group records into LDAP using the default groups sink."""
@@ -333,7 +334,7 @@ class LdapTargetApiService:
         target = target_result.value
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
         for group in groups:
-            sink.process_record(group, {})
+            sink.process_record(dict(group), {})
         return FlextResult[int].ok(len(groups))
 
     def test_ldap_connection(self, config: t.Core.Dict) -> FlextResult[bool]:

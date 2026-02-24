@@ -153,11 +153,11 @@ class LdapTargetMappingSettings(FlextSettings):
 
 def _target_config_to_int(value: t.GeneralValueType, default: int) -> int:
     """Convert value to int for target config."""
-    if isinstance(value, bool):
+    if u.Guards._is_bool(value):
         return default
-    if isinstance(value, int):
+    if u.Guards._is_int(value):
         return value
-    if isinstance(value, str):
+    if u.Guards._is_str(value):
         try:
             return int(value)
         except ValueError:
@@ -171,11 +171,11 @@ def _target_config_to_bool(
     default: bool,
 ) -> bool:
     """Convert value to bool for target config."""
-    if isinstance(value, bool):
+    if u.Guards._is_bool(value):
         return value
-    if isinstance(value, int):
+    if u.Guards._is_int(value):
         return value != 0
-    if isinstance(value, str):
+    if u.Guards._is_str(value):
         return value.strip().lower() in {"1", "true", "yes", "on"}
     return default
 
@@ -190,7 +190,7 @@ def _target_config_to_str_list(
     default: t.Core.StringList,
 ) -> t.Core.StringList:
     """Convert value to string list."""
-    if isinstance(value, list):
+    if u.Guards.is_list(value):
         return [str(v) for v in value]
     return default
 
@@ -219,11 +219,11 @@ def _build_target_connection_config(
 def _extract_target_max_records(config: t.Core.Dict) -> int | None:
     """Extract max records from config."""
     max_records_val = config.get("max_records")
-    if isinstance(max_records_val, bool):
+    if u.Guards._is_bool(max_records_val):
         return None
-    if isinstance(max_records_val, int):
+    if u.Guards._is_int(max_records_val):
         return max_records_val
-    if isinstance(max_records_val, str):
+    if u.Guards._is_str(max_records_val):
         try:
             return int(max_records_val)
         except ValueError:
@@ -258,7 +258,7 @@ def validate_ldap_target_config(
         raw_attr_map_value: t.GeneralValueType = config.get("attribute_mapping", {})
         attribute_mapping: t.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map_value.items()}
-            if isinstance(raw_attr_map_value, dict)
+            if u.Guards._is_dict(raw_attr_map_value)
             else {}
         )
         object_classes = _target_config_to_str_list(

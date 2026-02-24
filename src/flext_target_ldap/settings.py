@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Any, Self
+from typing import Self
 
 from flext_core import FlextModels, FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
@@ -110,7 +110,7 @@ class FlextTargetLdapSettings(FlextSettings):
         Follows singleton-like pattern for settings management.
         """
         _ = project_name
-        init_kwargs: dict[str, Any] = overrides
+        init_kwargs: dict[str, t.GeneralValueType] = overrides
         return cls(**init_kwargs)
 
     @classmethod

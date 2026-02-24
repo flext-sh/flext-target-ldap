@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
@@ -24,20 +25,23 @@ class LDAPTargetOrchestrator:
     config: dict[str, str | int | bool]
 
     @override
-    def __init__(self, config: dict[str, str | int | bool] | None = None) -> None:
+    def __init__(
+        self,
+        config: Mapping[str, str | int | bool] | None = None,
+    ) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
         config: Configuration dictionary
 
         """
-        self.config = config or {}
+        self.config = dict(config) if config is not None else {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
         self,
-        records: list[dict[str, str | int | float | bool | None]],
-    ) -> FlextResult[dict[str, str | int]]:
+        records: list[Mapping[str, str | int | float | bool | None]],
+    ) -> FlextResult[Mapping[str, str | int]]:
         """Orchestrate data loading to LDAP target.
 
         Args:
@@ -61,11 +65,11 @@ class LDAPTargetOrchestrator:
                 "status": "completed",
             }
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return FlextResult[dict[str, str | int]].ok(result_dict)
+            return FlextResult[Mapping[str, str | int]].ok(result_dict)
 
         except Exception as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[dict[str, str | int]].fail(
+            return FlextResult[Mapping[str, str | int]].fail(
                 f"Data loading orchestration failed: {e}",
             )
 
