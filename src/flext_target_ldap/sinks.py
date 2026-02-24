@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, u
 
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.typings import t
@@ -165,7 +165,7 @@ class LDAPBaseSink(Sink):
             )
 
             for record in records:
-                if u.Guards._is_dict(record):
+                if u.is_dict_like(record):
                     self.process_record(record, _context)
 
             logger.info(
@@ -338,13 +338,14 @@ class UsersSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping: dict[str, str] = {
-            k: str(v)
-            for k, v in (
-                mapping_val if u.Guards._is_dict(mapping_val) else {}
-            ).items()
-            if u.Guards._is_str(v)
-        }
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        mapping: dict[str, str] = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
 
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
@@ -449,10 +450,7 @@ class GroupsSink(LDAPBaseSink):
 
         # Add group-specific object classes
         obj_classes = attributes.get("objectClass")
-        if (
-            u.Guards.is_list(obj_classes)
-            and "groupOfNames" not in obj_classes
-        ):
+        if u.Guards.is_list(obj_classes) and "groupOfNames" not in obj_classes:
             obj_classes.append("groupOfNames")
 
         # Map Singer fields to LDAP attributes
@@ -472,13 +470,14 @@ class GroupsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_val = self._target.config.get("attribute_mapping", {})
-        mapping: dict[str, str] = {
-            k: str(v)
-            for k, v in (
-                mapping_val if u.Guards._is_dict(mapping_val) else {}
-            ).items()
-            if u.Guards._is_str(v)
-        }
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        mapping: dict[str, str] = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
@@ -574,10 +573,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
         # Add OU-specific object classes
         obj_classes = attributes.get("objectClass")
-        if (
-            u.Guards.is_list(obj_classes)
-            and "organizationalUnit" not in obj_classes
-        ):
+        if u.Guards.is_list(obj_classes) and "organizationalUnit" not in obj_classes:
             obj_classes.append("organizationalUnit")
 
         # Map Singer fields to LDAP attributes
@@ -596,13 +592,14 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping: dict[str, str] = {
-            k: str(v)
-            for k, v in (
-                mapping_val if u.Guards._is_dict(mapping_val) else {}
-            ).items()
-            if u.Guards._is_str(v)
-        }
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        mapping: dict[str, str] = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
 
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)

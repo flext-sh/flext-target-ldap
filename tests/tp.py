@@ -1,6 +1,6 @@
 """Test protocols module for flext-target-ldap.
 
-Provides tp alias for test protocols with namespace p.Ldap.Tests.* pattern.
+Provides p alias for test protocols with namespace p.Ldap.Tests.* pattern.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT

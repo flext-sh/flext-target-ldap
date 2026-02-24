@@ -17,9 +17,9 @@ class TestsFlextTargetLdapProtocols(FlextTestsProtocols, FlextTargetLdapProtocol
     """Test protocols combining FlextTestsProtocols and FlextTargetLdapProtocols.
 
     Provides access to:
-    - tp.Tests.Docker.* (from FlextTestsProtocols)
-    - tp.Tests.Factory.* (from FlextTestsProtocols)
-    - tp.TargetLdap.* (from FlextTargetLdapProtocols)
+    - p.Tests.Docker.* (from FlextTestsProtocols)
+    - p.Tests.Factory.* (from FlextTestsProtocols)
+    - p.TargetLdap.* (from FlextTargetLdapProtocols)
     """
 
     class Tests:
@@ -34,6 +34,6 @@ class TestsFlextTargetLdapProtocols(FlextTestsProtocols, FlextTargetLdapProtocol
 
 # Runtime aliases
 p = TestsFlextTargetLdapProtocols
-tp = TestsFlextTargetLdapProtocols
+p = TestsFlextTargetLdapProtocols
 
-__all__ = ["TestsFlextTargetLdapProtocols", "p", "tp"]
+__all__ = ["TestsFlextTargetLdapProtocols", "p"]

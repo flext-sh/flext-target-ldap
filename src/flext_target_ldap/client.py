@@ -99,28 +99,29 @@ class LDAPClient:
         | Mapping[str, t.GeneralValueType],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        if isinstance(config, Mapping):
-            # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
-            self.config: FlextLdapModels.Ldap.ConnectionConfig = (
-                FlextLdapModels.Ldap.ConnectionConfig(
-                    host=str(config.get("host", "localhost")),
-                    port=int(str(config.get("port", 389)))
-                    if config.get("port", 389) is not None
-                    else 389,
-                    use_ssl=bool(config.get("use_ssl", False)),
-                    timeout=int(str(config.get("timeout", 30)))
-                    if config.get("timeout", 30) is not None
-                    else 30,
+        match config:
+            case Mapping():
+                # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
+                self.config: FlextLdapModels.Ldap.ConnectionConfig = (
+                    FlextLdapModels.Ldap.ConnectionConfig(
+                        host=str(config.get("host", "localhost")),
+                        port=int(str(config.get("port", 389)))
+                        if config.get("port", 389) is not None
+                        else 389,
+                        use_ssl=bool(config.get("use_ssl", False)),
+                        timeout=int(str(config.get("timeout", 30)))
+                        if config.get("timeout", 30) is not None
+                        else 30,
+                    )
                 )
-            )
-            # Store authentication credentials separately
-            self._bind_dn: str = str(config.get("bind_dn", ""))
-            self._password: str = str(config.get("password", ""))
-        else:
-            self.config = config
-            # Default authentication credentials when using FlextLdapModels.ConnectionConfig directly
-            self._bind_dn = ""
-            self._password = ""
+                # Store authentication credentials separately
+                self._bind_dn: str = str(config.get("bind_dn", ""))
+                self._password: str = str(config.get("password", ""))
+            case _:
+                self.config = config
+                # Default authentication credentials when using FlextLdapModels.ConnectionConfig directly
+                self._bind_dn = ""
+                self._password = ""
 
         # Defer API instantiation to avoid heavy config requirements in unit tests
         self._api: FlextLdap | None = None

@@ -79,12 +79,15 @@ class DataTransformationEngine:
 
             for rule in self.rules:
                 for key, value in transformed_data.items():
-                    if u.Guards._is_str(value) and rule.pattern in value:
-                        transformed_data[key] = value.replace(
-                            rule.pattern,
-                            rule.replacement,
-                        )
-                        applied_rules.append(rule.name)
+                    match value:
+                        case str() as text if rule.pattern in text:
+                            transformed_data[key] = text.replace(
+                                rule.pattern,
+                                rule.replacement,
+                            )
+                            applied_rules.append(rule.name)
+                        case _:
+                            pass
 
             result = TransformationResult(
                 transformed_data=transformed_data,
@@ -128,27 +131,27 @@ class MigrationValidator:
             error_msg = None
 
             # Handle different call patterns
-            if u.Guards._is_str(data):
-                # Called with validate(dn, attributes, object_classes)
-                dn = data
-                attrs = attributes or {}
-                obj_classes = object_classes or []
+            match data:
+                case str() as dn:
+                    # Called with validate(dn, attributes, object_classes)
+                    attrs = attributes or {}
+                    obj_classes = object_classes or []
 
-                # Validate DN
-                if not dn or not dn.strip():
-                    error_msg = "DN cannot be empty or whitespace"
-                # Validate object classes
-                elif not obj_classes:
-                    error_msg = "Object classes must be a non-empty list"
-                # Basic attribute validation for person object class
-                elif "person" in obj_classes and "sn" not in attrs:
-                    self._stats["validation_warnings"] += 1
-                    if self.strict_mode:
-                        error_msg = "person object class requires 'sn' attribute"
-
-            # Called with validate(data_dict)
-            elif not data:
-                error_msg = "Data is empty"
+                    # Validate DN
+                    if not dn or not dn.strip():
+                        error_msg = "DN cannot be empty or whitespace"
+                    # Validate object classes
+                    elif not obj_classes:
+                        error_msg = "Object classes must be a non-empty list"
+                    # Basic attribute validation for person object class
+                    elif "person" in obj_classes and "sn" not in attrs:
+                        self._stats["validation_warnings"] += 1
+                        if self.strict_mode:
+                            error_msg = "person object class requires 'sn' attribute"
+                case _:
+                    # Called with validate(data_dict)
+                    if not data:
+                        error_msg = "Data is empty"
 
             if error_msg:
                 self._stats["validation_errors"] += 1

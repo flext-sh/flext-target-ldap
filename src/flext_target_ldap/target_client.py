@@ -7,18 +7,17 @@ SPDX-License-Identifier: MIT.
 from __future__ import annotations
 
 import sys
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from contextlib import _GeneratorContextManager, contextmanager
 from typing import override
 
 from flext_core import (
-    x,
-    u,
-    u,
     FlextContainer,
     FlextLogger,
     FlextResult,
     FlextRuntime,
+    u,
+    x,
 )
 from flext_ldap import (
     FlextLdap,
@@ -181,7 +180,7 @@ class _LdapConnectionWrapper:
                 for entry in entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
                     # Convert to _CompatibleEntry
-                    if u.Guards._is_dict(entry):
+                    if u.is_dict_like(entry):
                         dn = str(entry.get("dn", ""))
                         attrs = {k: v for k, v in entry.items() if k != "dn"}
                         compat_entry = _CompatibleEntry(dn, attrs)
@@ -196,10 +195,14 @@ class _LdapConnectionWrapper:
                                 "attributes",
                                 {},
                             )
-                            if u.Guards._is_dict(raw):
+                            if u.is_dict_like(raw):
                                 attrs_val = raw
-                            elif u.Guards._is_mapping(raw):
-                                attrs_val = {str(k): v for k, v in raw.items()}
+                            else:
+                                match raw:
+                                    case Mapping():
+                                        attrs_val = {str(k): v for k, v in raw.items()}
+                                    case _:
+                                        pass
                         compat_entry = _CompatibleEntry(dn, attrs_val)
                         self.entries.append(compat_entry)
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
@@ -207,9 +210,7 @@ class _LdapConnectionWrapper:
                         dn = str(getattr(entry, "dn", ""))
                         attrs_raw = getattr(entry, "attributes", {})
                         attrs_val2: dict[str, t.GeneralValueType] = (
-                            attrs_raw
-                            if u.Guards._is_dict(attrs_raw)
-                            else {}
+                            attrs_raw if u.is_dict_like(attrs_raw) else {}
                         )
                         compat_entry = _CompatibleEntry(dn, attrs_val2)
                         self.entries.append(compat_entry)
@@ -234,7 +235,7 @@ class LdapTargetClient:
         config: FlextLdapModels.Ldap.ConnectionConfig | t.Core.Dict,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        if u.Guards._is_dict(config):
+        if u.is_dict_like(config):
             # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
                 host=str(
@@ -585,7 +586,7 @@ class LdapTargetClient:
                 search_res = result.value
                 for entry in search_res.entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
-                    if u.Guards._is_dict(entry):
+                    if u.is_dict_like(entry):
                         dn = str(entry.get("dn", ""))
                         attrs = {k: v for k, v in entry.items() if k != "dn"}
                         compat_entry = LdapSearchEntry(dn, attrs)
@@ -593,11 +594,7 @@ class LdapTargetClient:
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         dn = str(getattr(entry, "dn", ""))
                         attrs_raw = getattr(entry, "attributes", {})
-                        attrs = (
-                            attrs_raw
-                            if u.Guards._is_dict(attrs_raw)
-                            else {}
-                        )
+                        attrs = attrs_raw if u.is_dict_like(attrs_raw) else {}
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
 
@@ -786,7 +783,7 @@ class LdapBaseSink(Sink):
             )
 
             for record in records:
-                if u.Guards._is_dict(record):
+                if u.is_dict_like(record):
                     self.process_record(record, _context)
 
             logger.info(
@@ -948,13 +945,14 @@ class LdapUsersSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping: dict[str, str] = {
-            k: str(v)
-            for k, v in (
-                mapping_val if u.Guards._is_dict(mapping_val) else {}
-            ).items()
-            if u.Guards._is_str(v)
-        }
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        mapping: dict[str, str] = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
@@ -1048,10 +1046,7 @@ class LdapGroupsSink(LdapBaseSink):
 
         # Add group-specific object classes
         obj_classes = attributes.get("objectClass")
-        if (
-            u.Guards.is_list(obj_classes)
-            and "groupOfNames" not in obj_classes
-        ):
+        if u.Guards.is_list(obj_classes) and "groupOfNames" not in obj_classes:
             obj_classes.append("groupOfNames")
 
         # Map Singer fields to LDAP attributes
@@ -1074,13 +1069,14 @@ class LdapGroupsSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping: dict[str, str] = {
-            k: str(v)
-            for k, v in (
-                mapping_val if u.Guards._is_dict(mapping_val) else {}
-            ).items()
-            if u.Guards._is_str(v)
-        }
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        mapping: dict[str, str] = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
 
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
@@ -1179,13 +1175,14 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        mapping: dict[str, str] = {
-            k: str(v)
-            for k, v in (
-                mapping_val if u.Guards._is_dict(mapping_val) else {}
-            ).items()
-            if u.Guards._is_str(v)
-        }
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        mapping: dict[str, str] = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
 
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
@@ -1311,17 +1308,18 @@ class TargetLdap(Target):
             raise ValueError(msg)
 
         port_obj = self.config.get("port", 389)
-        if u.Guards._is_bool(port_obj):
-            port = 389
-        elif u.Guards._is_int(port_obj):
-            port = port_obj
-        elif u.Guards._is_str(port_obj):
-            try:
-                port = int(port_obj)
-            except ValueError:
+        match port_obj:
+            case bool():
                 port = 389
-        else:
-            port = 389
+            case int():
+                port = port_obj
+            case str():
+                try:
+                    port = int(port_obj)
+                except ValueError:
+                    port = 389
+            case _:
+                port = 389
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)

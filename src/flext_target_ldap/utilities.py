@@ -60,7 +60,7 @@ class FlextTargetLdapUtilities(u):
 
             try:
                 message = json.loads(line.strip())
-                if not u.Guards._is_dict(message):
+                if not u.is_dict_like(message):
                     return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                         "Message must be a JSON object",
                     )
@@ -103,7 +103,7 @@ class FlextTargetLdapUtilities(u):
                     )
 
             record = message["record"]
-            if not u.Guards._is_dict(record):
+            if not u.is_dict_like(record):
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                     "Record data must be a dictionary",
                 )
@@ -136,7 +136,7 @@ class FlextTargetLdapUtilities(u):
                     )
 
             schema = message["schema"]
-            if not u.Guards._is_dict(schema):
+            if not u.is_dict_like(schema):
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                     "Schema data must be a dictionary",
                 )
@@ -385,7 +385,7 @@ class FlextTargetLdapUtilities(u):
             # Check if schema has required properties
             raw_props = schema.get("properties", {})
             properties: dict[str, t.GeneralValueType] = (
-                raw_props if u.Guards._is_dict(raw_props) else {}
+                raw_props if u.is_dict_like(raw_props) else {}
             )
             if not properties:
                 return FlextResult[bool].fail("Schema must have properties")
@@ -455,17 +455,23 @@ class FlextTargetLdapUtilities(u):
 
             # Validate host format
             host = config["host"]
-            if not u.Guards._is_str(host) or not host.strip():
-                return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                    "Host must be a non-empty string",
-                )
+            match host:
+                case str() if host.strip():
+                    pass
+                case _:
+                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                        "Host must be a non-empty string",
+                    )
 
             # Validate bind DN format
             bind_dn = config["bind_dn"]
-            if not u.Guards._is_str(bind_dn):
-                return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                    "Bind DN must be a string",
-                )
+            match bind_dn:
+                case str():
+                    pass
+                case _:
+                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                        "Bind DN must be a string",
+                    )
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                     f"Invalid bind DN format: {bind_dn}",
@@ -473,10 +479,13 @@ class FlextTargetLdapUtilities(u):
 
             # Validate base DN format
             base_dn = config["base_dn"]
-            if not u.Guards._is_str(base_dn):
-                return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                    "Base DN must be a string",
-                )
+            match base_dn:
+                case str():
+                    pass
+                case _:
+                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                        "Base DN must be a string",
+                    )
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
                     f"Invalid base DN format: {base_dn}",
@@ -484,24 +493,30 @@ class FlextTargetLdapUtilities(u):
 
             # Validate base DN format
             base_dn = config["base_dn"]
-            if not u.Guards._is_str(
-                base_dn
-            ) or not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
-                return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                    f"Invalid base DN format: {base_dn}",
-                )
+            match base_dn:
+                case str() if FlextTargetLdapUtilities.LdapDataProcessing.split(
+                    base_dn
+                ):
+                    pass
+                case _:
+                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                        f"Invalid base DN format: {base_dn}",
+                    )
 
             # Validate port if provided
             if "port" in config:
                 port = config["port"]
-                if (
-                    not u.Guards._is_int(port)
-                    or port <= 0
-                    or port > c.TargetLdap.Connection.MAX_PORT_NUMBER
-                ):
-                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                        "Port must be a valid integer between 1 and 65535",
-                    )
+                match port:
+                    case bool():
+                        return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                            "Port must be a valid integer between 1 and 65535",
+                        )
+                    case int() if 0 < port <= c.TargetLdap.Connection.MAX_PORT_NUMBER:
+                        pass
+                    case _:
+                        return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                            "Port must be a valid integer between 1 and 65535",
+                        )
 
             # Validate SSL settings
             use_ssl = config.get("use_ssl", False)
@@ -544,20 +559,30 @@ class FlextTargetLdapUtilities(u):
             # Validate DN template if provided
             if "dn_template" in config:
                 dn_template = config["dn_template"]
-                if not u.Guards._is_str(dn_template) or not dn_template.strip():
-                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                        "DN template must be a non-empty string",
-                    )
+                match dn_template:
+                    case str() if dn_template.strip():
+                        pass
+                    case _:
+                        return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                            "DN template must be a non-empty string",
+                        )
 
             # Validate batch size
             batch_size = config.get(
                 "batch_size",
                 c.TargetLdap.Processing.DEFAULT_BATCH_SIZE,
             )
-            if not u.Guards._is_int(batch_size) or batch_size <= 0:
-                return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                    "Batch size must be a positive integer",
-                )
+            match batch_size:
+                case bool():
+                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                        "Batch size must be a positive integer",
+                    )
+                case int() if batch_size > 0:
+                    pass
+                case _:
+                    return FlextResult[Mapping[str, t.GeneralValueType]].fail(
+                        "Batch size must be a positive integer",
+                    )
 
             return FlextResult[Mapping[str, t.GeneralValueType]].ok(config)
 
@@ -580,11 +605,11 @@ class FlextTargetLdapUtilities(u):
 
             """
             bookmarks = state.get("bookmarks")
-            if not u.Guards._is_dict(bookmarks):
+            if not u.is_dict_like(bookmarks):
                 return {}
 
             stream_state_data = bookmarks.get(stream_name)
-            if u.Guards._is_dict(stream_state_data):
+            if u.is_dict_like(stream_state_data):
                 return stream_state_data
             return {}
 
@@ -607,7 +632,7 @@ class FlextTargetLdapUtilities(u):
             """
             state_dict = dict(state)
             bookmarks = state_dict.get("bookmarks")
-            if not u.Guards._is_dict(bookmarks):
+            if not u.is_dict_like(bookmarks):
                 bookmarks = {}
                 state_dict["bookmarks"] = bookmarks
 
@@ -674,15 +699,23 @@ class FlextTargetLdapUtilities(u):
             )
 
             current_count_val = stream_state.get("records_processed", 0)
-            current_count: int = (
-                current_count_val if u.Guards._is_int(current_count_val) else 0
-            )
+            match current_count_val:
+                case bool():
+                    current_count = 0
+                case int():
+                    current_count = current_count_val
+                case _:
+                    current_count = 0
             new_count = current_count + records_count
 
             batch_count_val = stream_state.get("batch_count", 0)
-            batch_count: int = (
-                batch_count_val if u.Guards._is_int(batch_count_val) else 0
-            )
+            match batch_count_val:
+                case bool():
+                    batch_count = 0
+                case int():
+                    batch_count = batch_count_val
+                case _:
+                    batch_count = 0
 
             updated_stream_state: dict[str, t.GeneralValueType] = {
                 **stream_state,
@@ -785,16 +818,18 @@ class FlextTargetLdapUtilities(u):
                 int: Converted value or default
 
             """
-            if u.Guards._is_bool(value):
-                return default
-            if u.Guards._is_int(value):
-                return value
-            if u.Guards._is_str(value):
-                try:
-                    return int(value)
-                except ValueError:
+            match value:
+                case bool():
                     return default
-            return default
+                case int():
+                    return value
+                case str():
+                    try:
+                        return int(value)
+                    except ValueError:
+                        return default
+                case _:
+                    return default
 
         @staticmethod
         def to_bool(value: t.GeneralValueType, *, default: bool) -> bool:
@@ -820,13 +855,15 @@ class FlextTargetLdapUtilities(u):
                 bool: Converted value or default
 
             """
-            if u.Guards._is_bool(value):
-                return value
-            if u.Guards._is_int(value):
-                return value != 0
-            if u.Guards._is_str(value):
-                return value.strip().lower() in {"1", "true", "yes", "on"}
-            return default
+            match value:
+                case bool():
+                    return value
+                case int():
+                    return value != 0
+                case str():
+                    return value.strip().lower() in {"1", "true", "yes", "on"}
+                case _:
+                    return default
 
         @staticmethod
         def to_str(value: t.GeneralValueType, default: str = "") -> str:
@@ -852,8 +889,11 @@ class FlextTargetLdapUtilities(u):
             """
             if value is None:
                 return default
-            if u.Guards._is_str(value):
-                return value
+            match value:
+                case str():
+                    return value
+                case _:
+                    pass
             return str(value)
 
         @staticmethod
@@ -926,7 +966,7 @@ class FlextTargetLdapUtilities(u):
 
             """
             raw_attr_map = config.get("attribute_mapping")
-            if u.Guards._is_dict(raw_attr_map):
+            if u.is_dict_like(raw_attr_map):
                 return {str(k): str(v) for k, v in raw_attr_map.items()}
             return {}
 

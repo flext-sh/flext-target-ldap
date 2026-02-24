@@ -56,9 +56,10 @@ class LDAPTypeConverter:
         try:
             if value is None:
                 result = None
-            elif singer_type in {"string", "text"}:
-                result = str(value)
-            elif singer_type in {"integer", "number"}:
+            elif singer_type in {"string", "text"} or singer_type in {
+                "integer",
+                "number",
+            }:
                 result = str(value)
             elif singer_type == "boolean":
                 result = self._normalize_bool(value)
@@ -246,7 +247,7 @@ class LDAPSchemaMapper:
                 return FlextResult[str].ok("Integer")
             if prop_type == "boolean":
                 return FlextResult[str].ok("Boolean")
-            if prop_type in {LDAPTypeConverter._COMPLEX_KIND, "array"}:
+            if prop_type in {"object", "array"}:
                 return FlextResult[str].ok("OctetString")
             return FlextResult[str].ok("DirectoryString")
 

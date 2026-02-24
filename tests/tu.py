@@ -1,6 +1,6 @@
 """Test utilities module for flext-target-ldap.
 
-Provides tu alias for test utilities with namespace u.Ldap.Tests.* pattern.
+Provides u alias for test utilities with namespace u.Ldap.Tests.* pattern.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT

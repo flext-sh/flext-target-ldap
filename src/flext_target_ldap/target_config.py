@@ -14,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextResult, FlextSettings
+from flext_core import FlextResult, FlextSettings, u
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
@@ -153,16 +153,18 @@ class LdapTargetMappingSettings(FlextSettings):
 
 def _target_config_to_int(value: t.GeneralValueType, default: int) -> int:
     """Convert value to int for target config."""
-    if u.Guards._is_bool(value):
-        return default
-    if u.Guards._is_int(value):
-        return value
-    if u.Guards._is_str(value):
-        try:
-            return int(value)
-        except ValueError:
+    match value:
+        case bool():
             return default
-    return default
+        case int():
+            return value
+        case str():
+            try:
+                return int(value)
+            except ValueError:
+                return default
+        case _:
+            return default
 
 
 def _target_config_to_bool(
@@ -171,13 +173,15 @@ def _target_config_to_bool(
     default: bool,
 ) -> bool:
     """Convert value to bool for target config."""
-    if u.Guards._is_bool(value):
-        return value
-    if u.Guards._is_int(value):
-        return value != 0
-    if u.Guards._is_str(value):
-        return value.strip().lower() in {"1", "true", "yes", "on"}
-    return default
+    match value:
+        case bool():
+            return value
+        case int():
+            return value != 0
+        case str():
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        case _:
+            return default
 
 
 def _target_config_to_str(value: t.GeneralValueType, default: str = "") -> str:
@@ -219,16 +223,18 @@ def _build_target_connection_config(
 def _extract_target_max_records(config: t.Core.Dict) -> int | None:
     """Extract max records from config."""
     max_records_val = config.get("max_records")
-    if u.Guards._is_bool(max_records_val):
-        return None
-    if u.Guards._is_int(max_records_val):
-        return max_records_val
-    if u.Guards._is_str(max_records_val):
-        try:
-            return int(max_records_val)
-        except ValueError:
+    match max_records_val:
+        case bool():
             return None
-    return None
+        case int():
+            return max_records_val
+        case str():
+            try:
+                return int(max_records_val)
+            except ValueError:
+                return None
+        case _:
+            return None
 
 
 def validate_ldap_target_config(
@@ -258,7 +264,7 @@ def validate_ldap_target_config(
         raw_attr_map_value: t.GeneralValueType = config.get("attribute_mapping", {})
         attribute_mapping: t.Core.Headers = (
             {str(k): str(v) for k, v in raw_attr_map_value.items()}
-            if u.Guards._is_dict(raw_attr_map_value)
+            if u.is_dict_like(raw_attr_map_value)
             else {}
         )
         object_classes = _target_config_to_str_list(

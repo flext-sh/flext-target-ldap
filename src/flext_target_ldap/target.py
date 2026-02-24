@@ -15,8 +15,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, Protocol, override
 
-from flext_core import FlextContainer, FlextLogger, u
-from flext_target_ldap.sinks import Sink, Target
+from flext_core import FlextContainer, FlextLogger
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c
@@ -26,6 +25,8 @@ from flext_target_ldap.sinks import (
     GroupsSink,
     LDAPBaseSink,
     OrganizationalUnitsSink,
+    Sink,
+    Target,
     UsersSink,
 )
 from flext_target_ldap.typings import t
@@ -83,14 +84,11 @@ class TargetLDAP(Target):
         if self._orchestrator is None:
             normalized_config: dict[str, str | int | bool] = {}
             for key, value in self.config.items():
-                if u.Guards._is_bool(value):
-                    normalized_config[key] = value
-                elif u.Guards._is_int(value):
-                    normalized_config[key] = value
-                elif u.Guards._is_str(value):
-                    normalized_config[key] = value
-                else:
-                    normalized_config[key] = str(value)
+                match value:
+                    case bool() | int() | str():
+                        normalized_config[key] = value
+                    case _:
+                        normalized_config[key] = str(value)
             self._orchestrator = LDAPTargetOrchestrator(normalized_config)
         return self._orchestrator
 
