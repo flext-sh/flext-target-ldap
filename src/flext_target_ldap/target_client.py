@@ -125,7 +125,15 @@ class _LdapConnectionWrapper:
                 return False
             self.api.disconnect()
             return True
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             return False
 
     def modify(self, _dn: str, _changes: dict) -> bool:
@@ -136,7 +144,15 @@ class _LdapConnectionWrapper:
                 return False
             self.api.disconnect()
             return True
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             return False
 
     def delete(self, _dn: str) -> bool:
@@ -147,7 +163,15 @@ class _LdapConnectionWrapper:
                 return False
             self.api.disconnect()
             return True
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             return False
 
     def search(
@@ -217,7 +241,15 @@ class _LdapConnectionWrapper:
             else:
                 self.entries = []
             return True
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             self.entries = []
             return False
 
@@ -352,7 +384,15 @@ class LdapTargetClient:
             )
             return FlextResult[bool].ok(value=True)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             error_msg = f"Connection error: {e}"
             logger.exception(error_msg)
             return FlextResult[bool].fail(error_msg)

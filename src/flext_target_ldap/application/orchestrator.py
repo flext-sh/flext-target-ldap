@@ -67,7 +67,15 @@ class LDAPTargetOrchestrator:
             logger.info("LDAP data loading completed: %d records", processed_count)
             return FlextResult[Mapping[str, str | int]].ok(result_dict)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             logger.exception("LDAP data loading orchestration failed")
             return FlextResult[Mapping[str, str | int]].fail(
                 f"Data loading orchestration failed: {e}",
@@ -88,7 +96,15 @@ class LDAPTargetOrchestrator:
                     return FlextResult[bool].fail(f"Missing required field: {field}")
 
             return FlextResult[bool].ok(value=True)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 

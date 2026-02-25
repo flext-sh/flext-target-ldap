@@ -204,7 +204,15 @@ class FlextTargetLdapUtilities(u):
 
                 return FlextResult[str].ok(full_dn)
 
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 return FlextResult[str].fail(f"Error building DN: {e}")
 
         @staticmethod
@@ -275,7 +283,15 @@ class FlextTargetLdapUtilities(u):
 
                 return FlextResult[Mapping[str, list[bytes]]].ok(ldap_attrs)
 
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ) as e:
                 return FlextResult[Mapping[str, list[bytes]]].fail(
                     f"Error converting to LDAP attributes: {e}",
                 )

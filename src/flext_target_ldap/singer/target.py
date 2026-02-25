@@ -70,7 +70,15 @@ class SingerTargetLDAP:
             )
             return FlextResult[t.Core.Dict].ok(result)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             logger.exception("Singer message processing failed")
             return FlextResult[t.Core.Dict].fail(
                 f"Message processing failed: {e}",
@@ -91,7 +99,15 @@ class SingerTargetLDAP:
                     return FlextResult[bool].fail(f"Missing required field: {field}")
 
             return FlextResult[bool].ok(value=True)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             return FlextResult[bool].fail(f"Configuration validation failed: {e}")
 
 

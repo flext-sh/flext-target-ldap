@@ -103,7 +103,15 @@ class FlextTargetLdapModels(FlextModels):
                             )
 
                     return FlextResult[bool].ok(value=True)
-                except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
                     return FlextResult[bool].fail(
                         f"Attribute mapping validation failed: {e}",
                     )
@@ -189,7 +197,15 @@ class FlextTargetLdapModels(FlextModels):
                     if errors:
                         return FlextResult[bool].fail("; ".join(errors))
                     return FlextResult[bool].ok(value=True)
-                except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
                     return FlextResult[bool].fail(f"LDAP entry validation failed: {e}")
 
             def get_rdn(self) -> str:
@@ -264,7 +280,15 @@ class FlextTargetLdapModels(FlextModels):
                         )
 
                     return FlextResult[bool].ok(value=True)
-                except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
                     return FlextResult[bool].fail(
                         f"Transformation result validation failed: {e}",
                     )
@@ -345,7 +369,15 @@ class FlextTargetLdapModels(FlextModels):
                         )
 
                     return FlextResult[bool].ok(value=True)
-                except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
                     return FlextResult[bool].fail(
                         f"Batch processing validation failed: {e}",
                     )
@@ -479,7 +511,15 @@ class FlextTargetLdapModels(FlextModels):
                         )
 
                     return FlextResult[bool].ok(value=True)
-                except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
                     return FlextResult[bool].fail(
                         f"Operation statistics validation failed: {e}",
                     )

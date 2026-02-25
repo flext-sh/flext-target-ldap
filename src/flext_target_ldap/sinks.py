@@ -15,9 +15,9 @@ from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.typings import t
 
 
-# Placeholder classes until flext-meltano provides proper Singer protocol classes
+# Base Singer protocol classes for LDAP target sink compatibility
 class Sink:
-    """Placeholder Sink base class for Singer protocol compatibility."""
+    """Base Sink class for Singer protocol compatibility."""
 
     @override
     def __init__(
@@ -66,12 +66,20 @@ class Sink:
             return FlextResult[bool].fail(
                 "Target does not provide process_record/process handlers",
             )
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             return FlextResult[bool].fail(f"Record processing failed: {e}")
 
 
 class Target:
-    """Placeholder Target base class for Singer protocol compatibility."""
+    """Base Target class for Singer protocol compatibility."""
 
     @override
     def __init__(self, config: t.Core.Dict, **kwargs: object) -> None:

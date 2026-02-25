@@ -36,7 +36,15 @@ class TransformationRule(FlextModels.Entity):
             # replacement is guaranteed to be str by Pydantic typing
             # Using a domain-specific validation instead
             return FlextResult[bool].ok(value=True)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             return FlextResult[bool].fail(f"Transformation rule validation failed: {e}")
 
 
@@ -54,7 +62,15 @@ class TransformationResult(FlextModels.Entity):
             if len(self.applied_rules) < 0:  # This check makes sense for business logic
                 return FlextResult[bool].fail("applied_rules cannot be negative length")
             return FlextResult[bool].ok(value=True)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             return FlextResult[bool].fail(
                 f"Transformation result validation failed: {e}",
             )
@@ -94,7 +110,15 @@ class DataTransformationEngine:
                 applied_rules=applied_rules,
             )
             return FlextResult[TransformationResult].ok(result)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
 
     def get_statistics(self) -> Mapping[str, int]:
@@ -159,7 +183,15 @@ class MigrationValidator:
 
             return FlextResult[bool].ok(value=True)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self._stats["validation_errors"] += 1
             return FlextResult[bool].fail(f"Validation failed: {e}")
 

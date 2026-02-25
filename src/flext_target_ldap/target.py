@@ -241,7 +241,15 @@ def _load_config_from_file(config_path: str) -> t.Core.Dict:
     try:
         with Path(config_path).open(encoding="utf-8") as f:
             return json.load(f)
-    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ):
         return {}
 
 
@@ -304,7 +312,15 @@ def _process_record_message(
             else:
                 api.add(dn, record)
                 seen_dns.add(dn)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             with suppress(Exception):
                 api.modify(dn, record)
 
@@ -332,10 +348,26 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     record: t.Core.Dict = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
                     _process_record_message(record, stream, cfg, api, seen_dns)
-            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ):
                 logger.debug("Malformed input line skipped in CLI", exc_info=True)
                 continue
-    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ):
         logger.debug("Unexpected error in CLI suppressed", exc_info=True)
 
 
