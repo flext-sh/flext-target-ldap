@@ -32,7 +32,7 @@ from flext_target_ldap.sinks import (
 from flext_target_ldap.typings import t
 
 
-def _default_cli_helper(*, quiet: bool = False):  # noqa: ARG001
+def _default_cli_helper(*, quiet: bool = False):
     class Helper:
         def print(self, msg: str) -> None:
             pass
