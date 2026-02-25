@@ -15,7 +15,7 @@ import math
 from datetime import UTC, datetime
 from typing import Self
 
-from flext_core import FlextModels, FlextResult, FlextUtilities, t
+from flext_core import FlextModels, FlextResult, t
 from pydantic import Field, field_validator
 
 from .constants import c
@@ -28,14 +28,6 @@ class FlextTargetLdapModels(FlextModels):
     for composition and validation reuse, following the [Project]Models standard.
     Integrates with flext-core patterns for enterprise LDAP data loading.
     """
-
-    def __init_subclass__(cls, **kwargs: object) -> None:
-        """Warn when FlextTargetLdapModels is subclassed directly."""
-        super().__init_subclass__(**kwargs)
-        FlextUtilities.Deprecation.warn_once(
-            f"subclass:{cls.__name__}",
-            "Subclassing FlextTargetLdapModels is deprecated. Use FlextModels directly with composition instead.",
-        )
 
     # ObjectClass moved to constants.py as c.TargetLdap.ObjectClass (DRY pattern)
     ObjectClass = c.TargetLdap.ObjectClass

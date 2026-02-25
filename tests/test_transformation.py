@@ -7,8 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-
-
+from flext_target_ldap.transformation import (
     DataTransformationEngine,
     MigrationValidator,
     TransformationRule,
@@ -190,23 +189,32 @@ class TestDataTransformationEngine:
     def test_transformation_statistics(self) -> None:
         """Test method."""
         """Test transformation statistics function."""
-        # Create engine with empty rules list
-        engine = DataTransformationEngine([])
+        rule = TransformationRule(
+            name="orcl_to_inetorgperson",
+            pattern="orclUser",
+            replacement="inetOrgPerson",
+        )
+        engine = DataTransformationEngine([rule])
 
-        # Process several entries
         entries = [
             {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
             {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
             {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
         ]
 
+        applied_rules_count = 0
         for entry in entries:
             result = engine.transform(entry)
             assert result.is_success
+            transform_result = result.data
+            assert transform_result is not None
+            applied_rules_count += len(transform_result.applied_rules)
 
-        # Test completed successfully - DataTransformationEngine works
-        # Note: get_statistics() method not implemented yet
-        assert len(entries) == 3  # Verify entries were processed
+        assert applied_rules_count >= 2
+
+        stats = engine.get_statistics()
+        assert stats["total_rules"] == 1
+        assert stats["transformations_applied"] == 0
 
 
 class TestMigrationValidator:
