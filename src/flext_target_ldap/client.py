@@ -185,8 +185,8 @@ class LDAPClient:
         """
         try:
             # Prefer ldap3 path if module (or monkeypatch) is available
-            server_pool_cls = getattr(ldap3, "ServerPool", None)
-            connection_cls = getattr(ldap3, "Connection", None)
+            server_pool_cls = ldap3.ServerPool if hasattr(ldap3, "ServerPool") else None
+            connection_cls = ldap3.Connection if hasattr(ldap3, "Connection") else None
             if server_pool_cls is not None and connection_cls is not None:
                 server = server_pool_cls([self.config.host])
                 conn = connection_cls(
@@ -266,8 +266,8 @@ class LDAPClient:
             Tuple of (success, connection) where connection is None if ldap3 unavailable.
 
         """
-        server_pool_cls = getattr(ldap3, "ServerPool", None)
-        connection_cls = getattr(ldap3, "Connection", None)
+        server_pool_cls = ldap3.ServerPool if hasattr(ldap3, "ServerPool") else None
+        connection_cls = ldap3.Connection if hasattr(ldap3, "Connection") else None
         if server_pool_cls is None or connection_cls is None:
             return False, None
 
@@ -470,12 +470,14 @@ class LDAPClient:
             with self.get_connection() as conn:
                 # conn is now properly typed as LDAPConnectionProtocol
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: list[t.GeneralValueType] = getattr(conn, "entries", [])
+                raw_entries: list[t.GeneralValueType] = (
+                    conn.entries if hasattr(conn, "entries") else []
+                )
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
-                    dn = getattr(raw, "entry_dn", "")
+                    dn = raw.entry_dn if hasattr(raw, "entry_dn") else ""
                     attr_names: list[t.GeneralValueType] = (
-                        getattr(raw, "entry_attributes", []) or []
+                        raw.entry_attributes if hasattr(raw, "entry_attributes") else []
                     )
                     attrs: t.Core.Dict = {}
                     for name in attr_names:

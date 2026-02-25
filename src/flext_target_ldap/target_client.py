@@ -231,8 +231,10 @@ class _LdapConnectionWrapper:
                         self.entries.append(compat_entry)
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         # Fallback for other objects
-                        dn = str(getattr(entry, "dn", ""))
-                        attrs_raw = getattr(entry, "attributes", {})
+                        dn = str(entry.dn if hasattr(entry, "dn") else "")
+                        attrs_raw = (
+                            entry.attributes if hasattr(entry, "attributes") else {}
+                        )
                         attrs_val2: dict[str, t.GeneralValueType] = (
                             attrs_raw if u.is_dict_like(attrs_raw) else {}
                         )
@@ -632,8 +634,10 @@ class LdapTargetClient:
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
-                        dn = str(getattr(entry, "dn", ""))
-                        attrs_raw = getattr(entry, "attributes", {})
+                        dn = str(entry.dn if hasattr(entry, "dn") else "")
+                        attrs_raw = (
+                            entry.attributes if hasattr(entry, "attributes") else {}
+                        )
                         attrs = attrs_raw if u.is_dict_like(attrs_raw) else {}
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
