@@ -14,6 +14,7 @@ import pytest
 from ldap3.core import exceptions as ldap3_exceptions
 
 from flext_target_ldap import LdapTargetClient
+from flext_target_ldap.client import LDAPClient
 
 # Constants
 EXPECTED_DATA_COUNT = 3
@@ -349,3 +350,25 @@ class TestLDAPClient:
 
         with pytest.raises(ldap3_exceptions.LDAPError), client.get_connection():
             pass
+
+
+def test_connection_wrapper_unbind_cleans_state_and_disconnects() -> None:
+    class _ConnectResult:
+        is_success = True
+
+    fake_api = MagicMock()
+    fake_api.connect.return_value = _ConnectResult()
+
+    client = LDAPClient({"host": "ldap.local", "port": 389})
+    client._api = fake_api
+
+    wrapper = client._get_flext_ldap_wrapper()
+    wrapper.entries = ["entry"]
+    wrapper.unbind()
+
+    assert wrapper.bound is False
+    assert wrapper.entries == []
+    fake_api.disconnect.assert_called_once()
+
+    wrapper.unbind()
+    fake_api.disconnect.assert_called_once()

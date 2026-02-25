@@ -18,6 +18,8 @@ from flext_target_ldap import (
     LdapUsersSink,
     TargetLdap,
 )
+from flext_target_ldap.sinks import Sink, Target
+from flext_target_ldap.target import _default_cli_helper
 
 GenericSink = LdapBaseSink
 
@@ -174,3 +176,38 @@ class TestTargetLDAPUnit:
         mock_client.delete_entry.assert_called_once_with(
             "uid=jdoe,ou=users,dc=test,dc=com",
         )
+
+
+def test_default_cli_helper_logs_with_flext_logger() -> None:
+    mock_logger = MagicMock()
+    with patch("flext_target_ldap.target.FlextLogger", return_value=mock_logger):
+        helper = _default_cli_helper(quiet=False)
+        helper.print("state-line")
+
+    mock_logger.info.assert_called_once_with("%s", "state-line")
+
+
+def test_sink_process_record_delegates_to_target_handler() -> None:
+    class _ProcessTarget(Target):
+        def __init__(self) -> None:
+            super().__init__({"base_dn": "dc=test,dc=com"})
+            self.calls: list[tuple[dict[str, str], dict[str, str]]] = []
+
+        def process_record(
+            self, record: dict[str, str], context: dict[str, str]
+        ) -> bool:
+            self.calls.append((record, context))
+            return True
+
+    target = _ProcessTarget()
+    sink = Sink(
+        target=target,
+        stream_name="users",
+        schema={"type": "object"},
+        key_properties=["id"],
+    )
+
+    result = sink.process_record({"id": "42"}, {"batch": "1"})
+
+    assert result.is_success
+    assert target.calls == [({"id": "42"}, {"batch": "1"})]

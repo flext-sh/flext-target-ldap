@@ -298,7 +298,12 @@ class LDAPClient:
                 return True
 
             def unbind(self) -> None:
-                pass
+                if not self.bound:
+                    return
+                self.bound = False
+                self.entries.clear()
+                with suppress(Exception):
+                    api.disconnect()
 
             def add(
                 self,
@@ -347,7 +352,7 @@ class LDAPClient:
         try:
             session_id = _get_session()
             return ConnectionWrapper(session_id)
-        except Exception:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
             return ConnectionWrapper("test_session")
 
     def get_connection(
@@ -469,7 +474,7 @@ class LDAPClient:
                         name_str = str(name)
                         try:
                             attrs[name_str] = list(getattr(raw, name_str))
-                        except Exception:
+                        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
                             val = getattr(raw, name_str, None)
                             attrs[name_str] = [str(val)] if val is not None else []
                     entries.append(LDAPSearchEntry(dn=str(dn), attributes=attrs))

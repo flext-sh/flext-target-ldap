@@ -39,12 +39,34 @@ class Sink:
         _context: t.Core.Dict,
     ) -> FlextResult[bool]:
         """Process a record using the target."""
-        # Implementation will delegate to target's process method
         try:
-            # Basic processing - this is a placeholder implementation
-            # Real implementation would transform and load the record to LDAP
-            return FlextResult[bool].ok(value=True)
-        except Exception as e:
+            if not u.is_dict_like(_record):
+                return FlextResult[bool].fail("Record must be a mapping")
+
+            process_record = getattr(self.target, "process_record", None)
+            if callable(process_record):
+                result = process_record(_record, _context)
+                if isinstance(result, FlextResult):
+                    return result
+                if isinstance(result, bool):
+                    if result:
+                        return FlextResult[bool].ok(value=True)
+                    return FlextResult[bool].fail("Target rejected record")
+
+            process = getattr(self.target, "process", None)
+            if callable(process):
+                result = process(self.stream_name, _record, _context)
+                if isinstance(result, FlextResult):
+                    return result
+                if isinstance(result, bool):
+                    if result:
+                        return FlextResult[bool].ok(value=True)
+                    return FlextResult[bool].fail("Target rejected record")
+
+            return FlextResult[bool].fail(
+                "Target does not provide process_record/process handlers",
+            )
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             return FlextResult[bool].fail(f"Record processing failed: {e}")
 
 
@@ -344,8 +366,6 @@ class UsersSink(LDAPBaseSink):
             match v:
                 case str():
                     mapping[k] = str(v)
-                case _:
-                    pass
 
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
@@ -476,8 +496,6 @@ class GroupsSink(LDAPBaseSink):
             match v:
                 case str():
                     mapping[k] = str(v)
-                case _:
-                    pass
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
@@ -598,8 +616,6 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             match v:
                 case str():
                     mapping[k] = str(v)
-                case _:
-                    pass
 
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)

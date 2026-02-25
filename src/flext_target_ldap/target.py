@@ -34,8 +34,13 @@ from flext_target_ldap.typings import t
 
 def _default_cli_helper(*, quiet: bool = False):
     class Helper:
+        _logger = FlextLogger(__name__)
+
         def print(self, msg: str) -> None:
-            pass
+            if quiet:
+                self._logger.debug("%s", msg)
+                return
+            self._logger.info("%s", msg)
 
     return Helper()
 
@@ -236,7 +241,7 @@ def _load_config_from_file(config_path: str) -> t.Core.Dict:
     try:
         with Path(config_path).open(encoding="utf-8") as f:
             return json.load(f)
-    except Exception:
+    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
         return {}
 
 
@@ -245,7 +250,12 @@ def _get_ldap_api() -> _LdapApiProtocol | None:
     try:
         client_mod = import_module("flext_target_ldap.client")
         return client_mod.get_flext_ldap_api()
-    except Exception:
+    except (ImportError, AttributeError) as exc:
+        logger.warning(
+            "Failed to load optional LDAP API module",
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
         return None
 
 
@@ -294,7 +304,7 @@ def _process_record_message(
             else:
                 api.add(dn, record)
                 seen_dns.add(dn)
-        except Exception:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
             with suppress(Exception):
                 api.modify(dn, record)
 
@@ -322,10 +332,10 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     record: t.Core.Dict = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
                     _process_record_message(record, stream, cfg, api, seen_dns)
-            except Exception:
+            except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
                 logger.debug("Malformed input line skipped in CLI", exc_info=True)
                 continue
-    except Exception:
+    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
         logger.debug("Unexpected error in CLI suppressed", exc_info=True)
 
 

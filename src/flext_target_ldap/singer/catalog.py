@@ -41,7 +41,7 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
             if not self.stream_schema:
                 return FlextResult[bool].fail("stream_schema cannot be empty")
             return FlextResult[bool].ok(value=True)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             return FlextResult[bool].fail(f"Catalog entry validation failed: {e}")
 
 

@@ -64,7 +64,7 @@ class LdapTargetConnectionSettings(FlextSettings):
                 return FlextResult[bool].fail("Port 636 typically requires SSL")
 
             return FlextResult[bool].ok(value=True)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             return FlextResult[bool].fail(f"Connection settings validation failed: {e}")
 
 
@@ -105,7 +105,7 @@ class LdapTargetOperationSettings(FlextSettings):
                 pass
 
             return FlextResult[bool].ok(value=True)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             return FlextResult[bool].fail(f"Operation settings validation failed: {e}")
 
 
@@ -147,7 +147,7 @@ class LdapTargetMappingSettings(FlextSettings):
                 )
 
             return FlextResult[bool].ok(value=True)
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             return FlextResult[bool].fail(f"Mapping settings validation failed: {e}")
 
 
