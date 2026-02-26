@@ -390,8 +390,7 @@ class LDAPClient:
                 return
 
             # Fallback: Use flext-ldap API with wrapper
-            wrapper = self._get_flext_ldap_wrapper()
-            yield wrapper
+            yield self._get_flext_ldap_wrapper()
 
         return connection_context()
 

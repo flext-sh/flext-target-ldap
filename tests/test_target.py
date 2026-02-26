@@ -6,17 +6,16 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_target_ldap import t
 
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from flext_target_ldap import (
     LdapBaseSink,
     LdapGroupsSink,
     LdapUsersSink,
     TargetLdap,
+    t,
 )
 from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target import _default_cli_helper

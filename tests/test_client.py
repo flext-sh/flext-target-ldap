@@ -6,15 +6,13 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_target_ldap import t
 
 from unittest.mock import MagicMock, patch
 
 import pytest
-from ldap3.core import exceptions as ldap3_exceptions
-
-from flext_target_ldap import LdapTargetClient
+from flext_target_ldap import LdapTargetClient, t
 from flext_target_ldap.client import LDAPClient
+from ldap3.core import exceptions as ldap3_exceptions
 
 # Constants
 EXPECTED_DATA_COUNT = 3

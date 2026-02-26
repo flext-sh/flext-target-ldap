@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextResult, u
 
@@ -248,7 +248,7 @@ class LDAPBaseSink(Sink):
         )
 
     def build_attributes(
-        self, record: Mapping[str, t.GeneralValueType]
+        self, _record: Mapping[str, t.GeneralValueType]
     ) -> FlextResult[t.Core.Dict]:
         """Build LDAP attributes from record. Override in subclasses."""
         return FlextResult[t.Core.Dict].fail(
@@ -299,7 +299,7 @@ class LDAPBaseSink(Sink):
 class UsersSink(LDAPBaseSink):
     """LDAP sink for user entries."""
 
-    _USER_FIELD_MAP: dict[str, str] = {
+    _USER_FIELD_MAP: ClassVar[dict[str, str]] = {
         "emails": "mail",
         "phone_numbers": "telephoneNumber",
     }
