@@ -177,7 +177,7 @@ class LDAPBaseSink(Sink):
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
-    def process_batch(self, _context: t.Core.Dict) -> None:
+    def process_batch(self, _context: Mapping[str, t.GeneralValueType]) -> None:
         """Process a batch of records."""
         setup_result: FlextResult[LDAPClient] = self.setup_client()
         if not setup_result.is_success:
@@ -247,13 +247,15 @@ class LDAPBaseSink(Sink):
             "build_dn must be implemented in subclass: No ID or name found for generic entry",
         )
 
-    def build_attributes(self, record: t.Core.Dict) -> FlextResult[t.Core.Dict]:
+    def build_attributes(
+        self, record: Mapping[str, t.GeneralValueType]
+    ) -> FlextResult[t.Core.Dict]:
         """Build LDAP attributes from record. Override in subclasses."""
         return FlextResult[t.Core.Dict].fail(
             "build_attributes must be implemented in subclass",
         )
 
-    def get_object_classes(self, record: t.Core.Dict) -> list[str]:
+    def get_object_classes(self, record: Mapping[str, t.GeneralValueType]) -> list[str]:
         """Get object classes for entry."""
         # Check record for object classes
         record_classes = record.get("object_classes")
@@ -303,7 +305,7 @@ class UsersSink(LDAPBaseSink):
     }
 
     @override
-    def build_dn(self, record: t.Core.Dict) -> FlextResult[str]:
+    def build_dn(self, record: Mapping[str, t.GeneralValueType]) -> FlextResult[str]:
         """Build DN for user entry."""
         rdn_attr = str(self._target.config.get("user_rdn_attribute", "uid"))
         uid = record.get(rdn_attr)
@@ -315,7 +317,9 @@ class UsersSink(LDAPBaseSink):
         return FlextResult[str].ok(f"{rdn_attr}={uid},{base_dn}")
 
     @override
-    def build_attributes(self, record: t.Core.Dict) -> FlextResult[t.Core.Dict]:
+    def build_attributes(
+        self, record: Mapping[str, t.GeneralValueType]
+    ) -> FlextResult[t.Core.Dict]:
         """Build LDAP attributes for user entry."""
         attrs: t.Core.Dict = {}
         for k, v in record.items():
@@ -327,7 +331,7 @@ class UsersSink(LDAPBaseSink):
         return FlextResult[t.Core.Dict].ok(attrs)
 
     @override
-    def get_object_classes(self, record: t.Core.Dict) -> list[str]:
+    def get_object_classes(self, record: Mapping[str, t.GeneralValueType]) -> list[str]:
         """Get object classes for user entry."""
         configured = self._target.config.get("users_object_classes")
         if u.Guards.is_list(configured):
@@ -337,8 +341,8 @@ class UsersSink(LDAPBaseSink):
     @override
     def process_record(
         self,
-        _record: t.Core.Dict,
-        _context: t.Core.Dict,
+        _record: Mapping[str, t.GeneralValueType],
+        _context: Mapping[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Process a user record."""
         if not self.client:
@@ -483,7 +487,7 @@ class GroupsSink(LDAPBaseSink):
     """LDAP sink for group entries."""
 
     @override
-    def build_dn(self, record: t.Core.Dict) -> FlextResult[str]:
+    def build_dn(self, record: Mapping[str, t.GeneralValueType]) -> FlextResult[str]:
         """Build DN for group entry."""
         rdn_attr = str(self._target.config.get("group_rdn_attribute", "cn"))
         cn = record.get(rdn_attr)
