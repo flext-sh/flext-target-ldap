@@ -110,8 +110,7 @@ class FlextTargetLdapSettings(FlextSettings):
         Follows singleton-like pattern for settings management.
         """
         _ = project_name
-        init_kwargs: dict[str, t.GeneralValueType] = overrides
-        return cls(**init_kwargs)
+        return cls.model_validate(overrides)
 
     @classmethod
     def get_global_instance(cls) -> Self:

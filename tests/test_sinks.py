@@ -12,8 +12,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-
-
+from flext_target_ldap import (
     GroupsSink,
     LDAPBaseSink,
     OrganizationalUnitsSink,
