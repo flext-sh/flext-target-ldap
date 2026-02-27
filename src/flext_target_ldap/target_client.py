@@ -9,13 +9,14 @@ from __future__ import annotations
 import sys
 from collections.abc import Generator, Mapping
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import override
+from typing import cast, override
 
 from flext_core import (
     FlextContainer,
     FlextLogger,
     FlextResult,
     FlextRuntime,
+    t,
     u,
     x,
 )
@@ -42,7 +43,7 @@ class LdapSearchEntry:
     """LDAP search result entry for backward compatibility."""
 
     @override
-    def __init__(self, dn: str, attributes: t.Core.Dict) -> None:
+    def __init__(self, dn: str, attributes: dict[str, t.GeneralValueType]) -> None:
         """Initialize search entry."""
         self.dn = dn
         self.attributes = attributes
@@ -57,7 +58,7 @@ class LdapProcessingResult:
         self.processed_count: int = 0
         self.success_count: int = 0
         self.error_count: int = 0
-        self.errors: t.Core.StringList = []
+        self.errors: list[str] = []
 
     @property
     def success_rate(self) -> float:
@@ -82,7 +83,7 @@ class _CompatibleEntry:
     """Compatible LDAP entry object."""
 
     @override
-    def __init__(self, dn: str, attrs: t.Core.Dict) -> None:
+    def __init__(self, dn: str, attrs: dict[str, t.GeneralValueType]) -> None:
         """Initialize compatible entry."""
         self.entry_dn = dn
         self.entry_attributes = list(attrs.keys())
@@ -116,7 +117,7 @@ class _LdapConnectionWrapper:
         self,
         _dn: str,
         _object_classes: list[str],
-        _attributes: dict,
+        _attributes: dict[str, t.GeneralValueType],
     ) -> bool:
         """Add entry to LDAP."""
         try:
@@ -136,7 +137,7 @@ class _LdapConnectionWrapper:
         ):
             return False
 
-    def modify(self, _dn: str, _changes: dict) -> bool:
+    def modify(self, _dn: str, _changes: dict[str, t.GeneralValueType]) -> bool:
         """Modify entry in LDAP."""
         try:
             connect_result = self.api.connect(self.config)
@@ -233,10 +234,10 @@ class _LdapConnectionWrapper:
                         # Fallback for other objects
                         dn = str(entry.dn if hasattr(entry, "dn") else "")
                         attrs_raw = (
-                            entry.attributes if hasattr(entry, "attributes") else {}
+                            entry.attributes if hasattr(entry, "attributes") else cast(dict[str, t.GeneralValueType], {})
                         )
                         attrs_val2: dict[str, t.GeneralValueType] = (
-                            attrs_raw if u.is_dict_like(attrs_raw) else {}
+                            attrs_raw if u.is_dict_like(attrs_raw) else cast(dict[str, t.GeneralValueType], {})
                         )
                         compat_entry = _CompatibleEntry(dn, attrs_val2)
                         self.entries.append(compat_entry)
@@ -266,7 +267,7 @@ class LdapTargetClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.Ldap.ConnectionConfig | t.Core.Dict,
+        config: FlextLdapModels.Ldap.ConnectionConfig | dict[str, t.GeneralValueType],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if u.is_dict_like(config):
@@ -441,13 +442,13 @@ class LdapTargetClient:
     def add_entry(
         self,
         dn: str,
-        attributes: t.Core.Dict,
+        attributes: dict[str, t.GeneralValueType],
         object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
             # Prepare attributes for flext-ldap
-            ldap_attributes: dict[str, t.Core.StringList] = {}
+            ldap_attributes: dict[str, list[str]] = {}
 
             # Process attributes
             for key, value in attributes.items():
@@ -530,12 +531,12 @@ class LdapTargetClient:
     def modify_entry(
         self,
         dn: str,
-        changes: t.Core.Dict,
+        changes: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             # Prepare changes for flext-ldap
-            ldap_changes: dict[str, t.Core.StringList] = {}
+            ldap_changes: dict[str, list[str]] = {}
 
             for key, value in changes.items():
                 if u.Guards.is_list(value):
@@ -636,9 +637,9 @@ class LdapTargetClient:
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         dn = str(entry.dn if hasattr(entry, "dn") else "")
                         attrs_raw = (
-                            entry.attributes if hasattr(entry, "attributes") else {}
+                            entry.attributes if hasattr(entry, "attributes") else cast(dict[str, t.GeneralValueType], {})
                         )
-                        attrs = attrs_raw if u.is_dict_like(attrs_raw) else {}
+                        attrs = attrs_raw if u.is_dict_like(attrs_raw) else cast(dict[str, t.GeneralValueType], {})
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
 
@@ -751,7 +752,7 @@ class LdapBaseSink(Sink):
         self,
         target: Target,
         stream_name: str,
-        schema: t.Core.Dict,
+        schema: dict[str, t.GeneralValueType],
         key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
@@ -807,7 +808,7 @@ class LdapBaseSink(Sink):
             self.client = None
             logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
-    def process_batch(self, _context: t.Core.Dict) -> None:
+    def process_batch(self, _context: dict[str, t.GeneralValueType]) -> None:
         """Process a batch of records."""
         setup_result: FlextResult[LdapTargetClient] = self.setup_client()
         if not setup_result.is_success:
@@ -842,8 +843,8 @@ class LdapBaseSink(Sink):
     @override
     def process_record(
         self,
-        _record: t.Core.Dict,
-        _context: t.Core.Dict,
+        _record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Process a single record. Override in subclasses."""
         # Base implementation - can be overridden in subclasses for specific behavior
@@ -873,8 +874,8 @@ class LdapUsersSink(LdapBaseSink):
     @override
     def process_record(
         self,
-        _record: t.Core.Dict,
-        _context: t.Core.Dict,
+        _record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Process a user record."""
         if not self.client:
@@ -946,14 +947,14 @@ class LdapUsersSink(LdapBaseSink):
 
     def build_user_attributes(
         self,
-        record: t.Core.Dict,
-    ) -> t.Core.Dict:
+        record: dict[str, t.GeneralValueType],
+    ) -> dict[str, t.GeneralValueType]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: t.Core.Dict = {
+        attributes: dict[str, t.GeneralValueType] = {
             "objectClass": object_classes.copy()
             if u.Guards.is_list(object_classes)
             else ["inetOrgPerson", "person"],
@@ -989,7 +990,7 @@ class LdapUsersSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -1011,8 +1012,8 @@ class LdapGroupsSink(LdapBaseSink):
     @override
     def process_record(
         self,
-        _record: t.Core.Dict,
-        _context: t.Core.Dict,
+        _record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Process a group record."""
         if not self.client:
@@ -1075,8 +1076,8 @@ class LdapGroupsSink(LdapBaseSink):
 
     def _build_group_attributes(
         self,
-        record: t.Core.Dict,
-    ) -> t.Core.Dict:
+        record: dict[str, t.GeneralValueType],
+    ) -> dict[str, t.GeneralValueType]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
@@ -1113,7 +1114,7 @@ class LdapGroupsSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -1139,8 +1140,8 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
     @override
     def process_record(
         self,
-        _record: t.Core.Dict,
-        _context: t.Core.Dict,
+        _record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Process an organizational unit record."""
         if not self.client:
@@ -1196,8 +1197,8 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: t.Core.Dict,
-    ) -> t.Core.Dict:
+        record: dict[str, t.GeneralValueType],
+    ) -> dict[str, t.GeneralValueType]:
         """Build LDAP attributes for OU entry."""
         attributes: dict[str, t.GeneralValueType] = {
             "objectClass": ["organizationalUnit"],
@@ -1219,7 +1220,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -1250,7 +1251,7 @@ class TargetLdap(Target):
     def __init__(
         self,
         *,
-        config: t.Core.Dict | None = None,
+        config: dict[str, t.GeneralValueType] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -1262,7 +1263,7 @@ class TargetLdap(Target):
         self._container: FlextContainer | None = None
 
     @property
-    def singer_catalog(self) -> t.Core.Dict:
+    def singer_catalog(self) -> dict[str, t.GeneralValueType]:
         """Return the Singer catalog for this target."""
         return {
             "streams": [

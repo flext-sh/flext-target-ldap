@@ -8,9 +8,9 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import ClassVar, override
+from typing import ClassVar, cast, override
 
-from flext_core import FlextLogger, FlextResult, u
+from flext_core import FlextLogger, FlextResult, t, u
 
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.typings import t
@@ -26,7 +26,7 @@ class Sink:
         target: Target,
         stream_name: str,
         schema: Mapping[str, t.GeneralValueType],
-        key_properties: t.Core.StringList,
+        key_properties: list[str],
     ) -> None:
         """Initialize sink with Singer protocol parameters."""
         self.target = target
@@ -83,7 +83,7 @@ class Target:
     """Base Target class for Singer protocol compatibility."""
 
     @override
-    def __init__(self, config: t.Core.Dict, **kwargs: object) -> None:
+    def __init__(self, config: dict[str, t.GeneralValueType], **kwargs: object) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, t.GeneralValueType] = config
 
@@ -100,7 +100,7 @@ class LDAPProcessingResult:
         self.processed_count: int = 0
         self.success_count: int = 0
         self.error_count: int = 0
-        self.errors: t.Core.StringList = []
+        self.errors: list[str] = []
 
     @property
     def success_rate(self) -> float:
@@ -130,7 +130,7 @@ class LDAPBaseSink(Sink):
         target: Target,
         stream_name: str,
         schema: Mapping[str, t.GeneralValueType],
-        key_properties: t.Core.StringList,
+        key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
@@ -249,9 +249,9 @@ class LDAPBaseSink(Sink):
 
     def build_attributes(
         self, _record: Mapping[str, t.GeneralValueType]
-    ) -> FlextResult[t.Core.Dict]:
+    ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return FlextResult[t.Core.Dict].fail(
+        return FlextResult[dict[str, t.GeneralValueType]].fail(
             "build_attributes must be implemented in subclass",
         )
 
@@ -272,7 +272,7 @@ class LDAPBaseSink(Sink):
     def validate_entry(
         self,
         dn: str,
-        attributes: t.Core.Dict,
+        attributes: dict[str, t.GeneralValueType],
         object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate LDAP entry before writing."""
@@ -319,16 +319,16 @@ class UsersSink(LDAPBaseSink):
     @override
     def build_attributes(
         self, record: Mapping[str, t.GeneralValueType]
-    ) -> FlextResult[t.Core.Dict]:
+    ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Build LDAP attributes for user entry."""
-        attrs: t.Core.Dict = {}
+        attrs: dict[str, t.GeneralValueType] = {}
         for k, v in record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
             if u.Guards.is_list(v):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return FlextResult[t.Core.Dict].ok(attrs)
+        return FlextResult[dict[str, t.GeneralValueType]].ok(attrs)
 
     @override
     def get_object_classes(self, record: Mapping[str, t.GeneralValueType]) -> list[str]:
@@ -428,8 +428,8 @@ class UsersSink(LDAPBaseSink):
 
     def build_user_attributes(
         self,
-        record: t.Core.Dict,
-    ) -> t.Core.Dict:
+        record: dict[str, t.GeneralValueType],
+    ) -> dict[str, t.GeneralValueType]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
@@ -468,7 +468,7 @@ class UsersSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -499,9 +499,9 @@ class GroupsSink(LDAPBaseSink):
         return FlextResult[str].ok(f"{rdn_attr}={cn},{base_dn}")
 
     @override
-    def build_attributes(self, record: t.Core.Dict) -> FlextResult[t.Core.Dict]:
+    def build_attributes(self, record: Mapping[str, t.GeneralValueType]) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Build LDAP attributes for group entry."""
-        attrs: t.Core.Dict = {}
+        attrs: dict[str, t.GeneralValueType] = {}
         field_map = {"members": "member"}
         for k, v in record.items():
             target_key = field_map.get(k, k)
@@ -509,10 +509,10 @@ class GroupsSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return FlextResult[t.Core.Dict].ok(attrs)
+        return FlextResult[dict[str, t.GeneralValueType]].ok(attrs)
 
     @override
-    def get_object_classes(self, record: t.Core.Dict) -> list[str]:
+    def get_object_classes(self, record: Mapping[str, t.GeneralValueType]) -> list[str]:
         """Get object classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
         if u.Guards.is_list(configured):
@@ -522,8 +522,8 @@ class GroupsSink(LDAPBaseSink):
     @override
     def process_record(
         self,
-        _record: t.Core.Dict,
-        _context: t.Core.Dict,
+        _record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Process a group record."""
         if not self.client:
@@ -596,14 +596,14 @@ class GroupsSink(LDAPBaseSink):
 
     def _build_group_attributes(
         self,
-        record: t.Core.Dict,
-    ) -> t.Core.Dict:
+        record: dict[str, t.GeneralValueType],
+    ) -> dict[str, t.GeneralValueType]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes: t.Core.Dict = {
+        attributes: dict[str, t.GeneralValueType] = {
             "objectClass": object_classes.copy()
             if u.Guards.is_list(object_classes)
             else ["groupOfNames"],
@@ -631,7 +631,7 @@ class GroupsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -654,8 +654,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
     @override
     def process_record(
         self,
-        _record: t.Core.Dict,
-        _context: t.Core.Dict,
+        _record: dict[str, t.GeneralValueType],
+        _context: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Process an organizational unit record."""
         if not self.client:
@@ -717,14 +717,14 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: t.Core.Dict,
-    ) -> t.Core.Dict:
+        record: dict[str, t.GeneralValueType],
+    ) -> dict[str, t.GeneralValueType]:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(
             "object_classes",
             ["organizationalUnit"],
         )
-        attributes: t.Core.Dict = {
+        attributes: dict[str, t.GeneralValueType] = {
             "objectClass": default_classes.copy()
             if u.Guards.is_list(default_classes)
             else ["organizationalUnit"],
@@ -751,7 +751,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else {}
+        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:

@@ -15,7 +15,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, Protocol, override
 
-from flext_core import FlextContainer, FlextLogger
+from flext_core import FlextResult, FlextContainer, FlextLogger
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c
@@ -32,7 +32,7 @@ from flext_target_ldap.sinks import (
 from flext_target_ldap.typings import t
 
 
-def _default_cli_helper(*, quiet: bool = False):
+def _default_cli_helper(*, quiet: bool = False) -> object:
     class Helper:
         _logger = FlextLogger(__name__)
 
@@ -54,9 +54,9 @@ logger = FlextLogger(__name__)
 
 
 class _LdapApiProtocol(Protocol):
-    def add(self, dn: str, record: t.Core.Dict) -> None: ...
+    def add(self, dn: str, record: dict[str, t.GeneralValueType]) -> None: ...
 
-    def modify(self, dn: str, record: t.Core.Dict) -> None: ...
+    def modify(self, dn: str, record: dict[str, t.GeneralValueType]) -> None: ...
 
     def delete(self, dn: str) -> None: ...
 
@@ -66,14 +66,14 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: t.Core.Dict
+    config: dict[str, t.GeneralValueType]
     cli: ClassVar[Callable[..., None] | None] = None
 
     @override
     def __init__(
         self,
         *,
-        config: t.Core.Dict | None = None,
+        config: dict[str, t.GeneralValueType] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -98,7 +98,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> t.Core.Dict:
+    def singer_catalog(self) -> dict[str, t.GeneralValueType]:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -236,7 +236,7 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> t.Core.Dict:
+def _load_config_from_file(config_path: str) -> dict[str, t.GeneralValueType]:
     """Load configuration from JSON file."""
     try:
         with Path(config_path).open(encoding="utf-8") as f:
@@ -269,7 +269,7 @@ def _get_ldap_api() -> _LdapApiProtocol | None:
 
 def _construct_dn(
     stream: str,
-    record: t.Core.Dict,
+    record: dict[str, t.GeneralValueType],
     base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
@@ -284,9 +284,9 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: t.Core.Dict,
+    record: dict[str, t.GeneralValueType],
     stream: str,
-    cfg: t.Core.Dict,
+    cfg: dict[str, t.GeneralValueType],
     api: _LdapApiProtocol | None,
     seen_dns: set[str],
 ) -> None:
@@ -345,7 +345,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     _schema = obj.get("schema") or {}
                     current_stream = obj.get("stream")
                 elif msg_type == "RECORD" and api is not None:
-                    record: t.Core.Dict = obj.get("record") or {}
+                    record: dict[str, t.GeneralValueType] = obj.get("record") or {}
                     stream = obj.get("stream") or current_stream or "users"
                     _process_record_message(record, stream, cfg, api, seen_dns)
             except (

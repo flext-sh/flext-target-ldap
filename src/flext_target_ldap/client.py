@@ -75,7 +75,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    def __init__(self, dn: str, attributes: t.Core.Dict) -> None:
+    def __init__(self, dn: str, attributes: dict[str, t.GeneralValueType]) -> None:
         """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
@@ -397,8 +397,8 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: t.Core.Dict,
-        object_classes: t.Core.StringList | None = None,
+        attributes: dict[str, t.GeneralValueType],
+        object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -424,7 +424,7 @@ class LDAPClient:
     def modify_entry(
         self,
         dn: str,
-        changes: t.Core.Dict,
+        changes: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
@@ -455,7 +455,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: t.Core.StringList | None = None,
+        attributes: list[str] | None = None,
     ) -> FlextResult[list[LDAPSearchEntry]]:
         """Search LDAP entries using ldap3-compatible connection for tests."""
         try:
@@ -478,7 +478,7 @@ class LDAPClient:
                     attr_names: list[t.GeneralValueType] = (
                         raw.entry_attributes if hasattr(raw, "entry_attributes") else []
                     )
-                    attrs: t.Core.Dict = {}
+                    attrs: dict[str, t.GeneralValueType] = {}
                     for name in attr_names:
                         name_str = str(name)
                         try:
@@ -522,7 +522,7 @@ class LDAPClient:
     def get_entry(
         self,
         dn: str,
-        attributes: t.Core.StringList | None = None,
+        attributes: list[str] | None = None,
     ) -> FlextResult[LDAPSearchEntry | None]:
         """Get LDAP entry using ldap3-compatible connection for tests."""
         try:

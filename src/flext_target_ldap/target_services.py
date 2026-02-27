@@ -24,7 +24,7 @@ class LdapTargetServiceProtocol(Protocol):
 
     def create_target(
         self,
-        config: t.Core.Dict,
+        config: dict[str, t.GeneralValueType],
     ) -> FlextResult[target_client_module.TargetLdap]:
         """Create an LDAP target from config."""
         ...
@@ -32,7 +32,7 @@ class LdapTargetServiceProtocol(Protocol):
     def load_records(
         self,
         records: list[Mapping[str, t.GeneralValueType]],
-        config: t.Core.Dict,
+        config: dict[str, t.GeneralValueType],
         stream_type: str = "users",
     ) -> FlextResult[int]:
         """Load records into the LDAP target."""
@@ -293,7 +293,7 @@ class LdapTargetApiService:
 
     def create_ldap_target(
         self,
-        config: t.Core.Dict,
+        config: dict[str, t.GeneralValueType],
     ) -> FlextResult[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
         try:
@@ -306,7 +306,7 @@ class LdapTargetApiService:
     def load_users_to_ldap(
         self,
         users: list[Mapping[str, t.GeneralValueType]],
-        config: t.Core.Dict,
+        config: dict[str, t.GeneralValueType],
     ) -> FlextResult[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
@@ -323,7 +323,7 @@ class LdapTargetApiService:
     def load_groups_to_ldap(
         self,
         groups: list[Mapping[str, t.GeneralValueType]],
-        config: t.Core.Dict,
+        config: dict[str, t.GeneralValueType],
     ) -> FlextResult[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
@@ -337,7 +337,7 @@ class LdapTargetApiService:
             sink.process_record(dict(group), {})
         return FlextResult[int].ok(len(groups))
 
-    def test_ldap_connection(self, config: t.Core.Dict) -> FlextResult[bool]:
+    def test_ldap_connection(self, config: dict[str, t.GeneralValueType]) -> FlextResult[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
         if validated.is_failure or validated.value is None:

@@ -52,6 +52,11 @@ from flext_target_ldap.utilities import (
     FlextTargetLdapUtilities,
 )
 
+# Backward compatibility aliases
+LdapBaseSink = LDAPBaseSink
+LdapGroupsSink = GroupsSink
+LdapUsersSink = UsersSink
+
 __all__ = [
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapError",
@@ -63,12 +68,15 @@ __all__ = [
     "GroupsSink",
     "LDAPBaseSink",
     "LDAPProcessingResult",
+    "LdapBaseSink",
     "LdapBatchProcessingModel",
     "LdapEntryModel",
+    "LdapGroupsSink",
     "LdapTargetApiService",
     "LdapTargetClient",
     "LdapTransformationService",
     "LdapTransformationServiceProtocol",
+    "LdapUsersSink",
     "OrganizationalUnitsSink",
     "Sink",
     "Target",

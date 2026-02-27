@@ -27,7 +27,7 @@ class LDAPStreamProcessingStats:
         self.records_processed = 0
         self.records_success = 0
         self.records_failed = 0
-        self.errors: t.Core.StringList = []
+        self.errors: list[str] = []
 
     @property
     def success_rate(self) -> float:

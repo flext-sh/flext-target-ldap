@@ -23,13 +23,13 @@ class SingerLDAPCatalogEntry(FlextModels.Entity):
 
     tap_stream_id: str
     stream: str
-    stream_schema: t.Core.Dict = Field(
+    stream_schema: dict[str, t.GeneralValueType] = Field(
         ...,
         description="Singer stream schema",
     )
-    metadata: list[t.Core.Dict] = Field(default_factory=list)
-    key_properties: ClassVar[t.Core.StringList] = []
-    bookmark_properties: ClassVar[t.Core.StringList] = []
+    metadata: list[dict[str, t.GeneralValueType]] = Field(default_factory=list)
+    key_properties: ClassVar[list[str]] = []
+    bookmark_properties: ClassVar[list[str]] = []
 
     def validate_business_rules(self) -> FlextResult[bool]:
         """Validate catalog entry business rules."""
@@ -64,7 +64,7 @@ class SingerLDAPCatalogManager:
     def add_stream(
         self,
         stream_name: str,
-        schema: t.Core.Dict,
+        schema: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Add LDAP stream to catalog."""
         try:

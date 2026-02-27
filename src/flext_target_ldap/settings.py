@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Self
+from typing import Self, override
 
 from flext_core import FlextModels, FlextResult, FlextSettings
 from flext_ldap import FlextLdapModels
@@ -79,11 +79,11 @@ class FlextTargetLdapSettings(FlextSettings):
     )
 
     # Mapping and transformation
-    attribute_mapping: t.Core.Headers = Field(
+    attribute_mapping: dict[str, str] = Field(
         default_factory=dict,
         description="Mapping from Singer field names to LDAP attributes",
     )
-    object_classes: t.Core.StringList = Field(
+    object_classes: list[str] = Field(
         default_factory=lambda: ["top"],
         description="Default object classes for new entries",
     )
@@ -113,6 +113,7 @@ class FlextTargetLdapSettings(FlextSettings):
         return cls.model_validate(overrides)
 
     @classmethod
+    @override
     def get_global_instance(cls) -> Self:
         """Get the global singleton instance using enhanced FlextSettings pattern."""
         return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
@@ -216,7 +217,7 @@ class LDAPOperationSettings(FlextModels):
 
 
 def validate_ldap_config(
-    config: t.Core.Dict,
+    config: dict[str, t.GeneralValueType],
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:

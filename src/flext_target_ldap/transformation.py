@@ -51,8 +51,8 @@ class TransformationRule(FlextModels.Entity):
 class TransformationResult(FlextModels.Entity):
     """Result of data transformation."""
 
-    transformed_data: t.Core.Dict
-    applied_rules: t.Core.StringList = Field(default_factory=list)
+    transformed_data: dict[str, t.GeneralValueType]
+    applied_rules: list[str] = Field(default_factory=list)
 
     def validate_business_rules(self) -> FlextResult[bool]:
         """Validate transformation result business rules."""
@@ -86,12 +86,12 @@ class DataTransformationEngine:
 
     def transform(
         self,
-        data: t.Core.Dict,
+        data: dict[str, t.GeneralValueType],
     ) -> FlextResult[TransformationResult]:
         """Transform data using rules."""
         try:
             transformed_data: dict[str, t.GeneralValueType] = data.copy()
-            applied_rules: t.Core.StringList = []
+            applied_rules: list[str] = []
 
             for rule in self.rules:
                 for key, value in transformed_data.items():
@@ -145,9 +145,9 @@ class MigrationValidator:
     # @override - removed to fix type error, parent class does not define validate
     def validate(
         self,
-        data: t.Core.Dict | str,
-        attributes: t.Core.Dict | None = None,
-        object_classes: t.Core.StringList | None = None,
+        data: dict[str, t.GeneralValueType] | str,
+        attributes: dict[str, t.GeneralValueType] | None = None,
+        object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Validate migration data."""
         try:
@@ -198,8 +198,8 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: t.Core.Dict,
-        object_classes: t.Core.StringList,
+        attributes: dict[str, t.GeneralValueType],
+        object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
