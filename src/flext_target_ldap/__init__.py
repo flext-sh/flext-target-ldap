@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-# from flext_core import  FlextLogger, FlextModels, FlextResult  # Temporarily disabled
 from flext_target_ldap.__version__ import (
     __version__,
     __version_info__,
