@@ -12,6 +12,8 @@ from flext_target_ldap.__version__ import (
     __version_info__,
 )
 
+from flext_target_ldap.constants import FlextTargetLdapConstants, c
+# from flext_target_ldap.config import FlextTargetLdapSettings as FlextTargetLDAPSettings  # Temporarily disabled
 # from flext_target_ldap.config import FlextTargetLdapSettings as FlextTargetLDAPSettings  # Temporarily disabled
 from flext_target_ldap.models import (
     FlextTargetLdapModels,
@@ -58,6 +60,7 @@ LdapGroupsSink = GroupsSink
 LdapUsersSink = UsersSink
 
 __all__ = [
+    "FlextTargetLdapConstants",
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapError",
     "FlextTargetLdapModels",
@@ -84,6 +87,7 @@ __all__ = [
     "UsersSink",
     "__version__",
     "__version_info__",
+    "c",
     "m",
     "t",
 ]

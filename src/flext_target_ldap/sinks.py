@@ -468,7 +468,11 @@ class UsersSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
+        raw_mapping = (
+            mapping_val
+            if u.is_dict_like(mapping_val)
+            else cast("dict[str, t.GeneralValueType]", {})
+        )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -499,7 +503,9 @@ class GroupsSink(LDAPBaseSink):
         return FlextResult[str].ok(f"{rdn_attr}={cn},{base_dn}")
 
     @override
-    def build_attributes(self, record: Mapping[str, t.GeneralValueType]) -> FlextResult[dict[str, t.GeneralValueType]]:
+    def build_attributes(
+        self, record: Mapping[str, t.GeneralValueType]
+    ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Build LDAP attributes for group entry."""
         attrs: dict[str, t.GeneralValueType] = {}
         field_map = {"members": "member"}
@@ -631,7 +637,11 @@ class GroupsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
+        raw_mapping = (
+            mapping_val
+            if u.is_dict_like(mapping_val)
+            else cast("dict[str, t.GeneralValueType]", {})
+        )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -751,7 +761,11 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = mapping_val if u.is_dict_like(mapping_val) else cast(dict[str, t.GeneralValueType], {})
+        raw_mapping = (
+            mapping_val
+            if u.is_dict_like(mapping_val)
+            else cast("dict[str, t.GeneralValueType]", {})
+        )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:

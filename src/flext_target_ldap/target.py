@@ -15,7 +15,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, Protocol, override
 
-from flext_core import FlextResult, FlextContainer, FlextLogger
+from flext_core import FlextContainer, FlextLogger
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c

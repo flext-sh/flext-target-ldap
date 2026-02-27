@@ -337,7 +337,9 @@ class LdapTargetApiService:
             sink.process_record(dict(group), {})
         return FlextResult[int].ok(len(groups))
 
-    def test_ldap_connection(self, config: dict[str, t.GeneralValueType]) -> FlextResult[bool]:
+    def test_ldap_connection(
+        self, config: dict[str, t.GeneralValueType]
+    ) -> FlextResult[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
         if validated.is_failure or validated.value is None:
