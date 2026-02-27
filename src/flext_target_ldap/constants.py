@@ -10,10 +10,11 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Final
 
-from flext_ldap.constants import FlextLdapConstants
+from flext_ldap import FlextLdapConstants
+from flext_meltano import FlextMeltanoConstants
 
 
-class FlextTargetLdapConstants(FlextLdapConstants):
+class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     """LDAP target loading-specific constants following FLEXT unified pattern with nested domains.
 
     Extends FlextLdapConstants to inherit all LDAP and LDIF constants, adding
