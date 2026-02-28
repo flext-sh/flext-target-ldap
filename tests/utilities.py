@@ -26,6 +26,4 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
 
 
 u = TestsFlextTargetLdapUtilities
-u = TestsFlextTargetLdapUtilities
-
 __all__ = ["TestsFlextTargetLdapUtilities", "u"]
