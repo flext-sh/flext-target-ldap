@@ -13,7 +13,6 @@ from typing import ClassVar, cast, override
 from flext_core import FlextLogger, FlextResult, t, u
 
 from flext_target_ldap.client import LDAPClient
-from flext_target_ldap.typings import t
 
 
 # Base Singer protocol classes for LDAP target sink compatibility

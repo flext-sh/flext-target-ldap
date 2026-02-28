@@ -32,7 +32,6 @@ from flext_ldif import FlextLdif
 from flext_target_ldap.constants import c
 from flext_target_ldap.settings import FlextTargetLdapSettings
 from flext_target_ldap.sinks import Sink, Target
-from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
 

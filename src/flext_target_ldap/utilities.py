@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from typing import override
 
 from flext_core import FlextResult, t
+from flext_ldap import FlextLdapModels
 from flext_ldap.utilities import FlextLdapUtilities
 from flext_meltano.utilities import FlextMeltanoUtilities
 

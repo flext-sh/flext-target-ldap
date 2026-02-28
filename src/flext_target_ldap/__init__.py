@@ -57,25 +57,55 @@ if TYPE_CHECKING:
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "FlextTargetLdapConnectionError": ("flext_target_ldap.target_exceptions", "FlextTargetLdapConnectionError"),
-    "FlextTargetLdapConstants": ("flext_target_ldap.constants", "FlextTargetLdapConstants"),
-    "FlextTargetLdapError": ("flext_target_ldap.target_exceptions", "FlextTargetLdapError"),
+    "FlextTargetLdapConnectionError": (
+        "flext_target_ldap.target_exceptions",
+        "FlextTargetLdapConnectionError",
+    ),
+    "FlextTargetLdapConstants": (
+        "flext_target_ldap.constants",
+        "FlextTargetLdapConstants",
+    ),
+    "FlextTargetLdapError": (
+        "flext_target_ldap.target_exceptions",
+        "FlextTargetLdapError",
+    ),
     "FlextTargetLdapModels": ("flext_target_ldap.models", "FlextTargetLdapModels"),
-    "FlextTargetLdapProtocols": ("flext_target_ldap.protocols", "FlextTargetLdapProtocols"),
+    "FlextTargetLdapProtocols": (
+        "flext_target_ldap.protocols",
+        "FlextTargetLdapProtocols",
+    ),
     "FlextTargetLdapTypes": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
-    "FlextTargetLdapUtilities": ("flext_target_ldap.utilities", "FlextTargetLdapUtilities"),
-    "FlextTargetLdapValidationError": ("flext_target_ldap.target_exceptions", "FlextTargetLdapValidationError"),
+    "FlextTargetLdapUtilities": (
+        "flext_target_ldap.utilities",
+        "FlextTargetLdapUtilities",
+    ),
+    "FlextTargetLdapValidationError": (
+        "flext_target_ldap.target_exceptions",
+        "FlextTargetLdapValidationError",
+    ),
     "GroupsSink": ("flext_target_ldap.sinks", "GroupsSink"),
     "LDAPBaseSink": ("flext_target_ldap.sinks", "LDAPBaseSink"),
     "LDAPProcessingResult": ("flext_target_ldap.sinks", "LDAPProcessingResult"),
     "LdapBaseSink": ("flext_target_ldap.sinks", "LDAPBaseSink"),
-    "LdapBatchProcessingModel": ("flext_target_ldap.target_models", "LdapBatchProcessingModel"),
+    "LdapBatchProcessingModel": (
+        "flext_target_ldap.target_models",
+        "LdapBatchProcessingModel",
+    ),
     "LdapEntryModel": ("flext_target_ldap.target_models", "LdapEntryModel"),
     "LdapGroupsSink": ("flext_target_ldap.sinks", "GroupsSink"),
-    "LdapTargetApiService": ("flext_target_ldap.target_services", "LdapTargetApiService"),
+    "LdapTargetApiService": (
+        "flext_target_ldap.target_services",
+        "LdapTargetApiService",
+    ),
     "LdapTargetClient": ("flext_target_ldap.target_client", "LdapTargetClient"),
-    "LdapTransformationService": ("flext_target_ldap.target_services", "LdapTransformationService"),
-    "LdapTransformationServiceProtocol": ("flext_target_ldap.target_services", "LdapTransformationServiceProtocol"),
+    "LdapTransformationService": (
+        "flext_target_ldap.target_services",
+        "LdapTransformationService",
+    ),
+    "LdapTransformationServiceProtocol": (
+        "flext_target_ldap.target_services",
+        "LdapTransformationServiceProtocol",
+    ),
     "LdapUsersSink": ("flext_target_ldap.sinks", "UsersSink"),
     "OrganizationalUnitsSink": ("flext_target_ldap.sinks", "OrganizationalUnitsSink"),
     "Sink": ("flext_target_ldap.sinks", "Sink"),
