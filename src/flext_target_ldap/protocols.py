@@ -38,10 +38,10 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     entry: p.Ldap.EntryProtocol
 
     # Meltano protocols (inherited)
-    target: p.Meltano.TargetProtocol
+    target: p.Meltano.Target
 
     # Target LDAP-specific protocols
-    target_protocol: p.Target.Ldap.TargetProtocol
+    target_protocol: p.Target.Ldap.Target
     """
 
     class TargetLdap:
@@ -51,7 +51,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             """Singer Target LDAP domain protocols for LDAP directory loading."""
 
             @runtime_checkable
-            class TargetProtocol(
+            class Target(
                 FlextLdapProtocols.Service[t.GeneralValueType],
                 Protocol,
             ):

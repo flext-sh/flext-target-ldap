@@ -5,9 +5,11 @@ from __future__ import annotations
 from typing import Literal
 
 from flext_core import FlextTypes
+from flext_ldap import FlextLdapTypes
+from flext_meltano import FlextMeltanoTypes
 
 
-class FlextTargetLdapTypes(FlextTypes):
+class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     """FLEXT Target LDAP Types.
 
     Inherits standard types from FlextTypes and adds project-specific
