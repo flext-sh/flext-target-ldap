@@ -38,6 +38,7 @@ logger = FlextLogger(__name__)
 # Network constants - moved to c.TargetLdap.Connection.MAX_PORT_NUMBER
 
 
+class LdapSearchEntry:
     """LDAP search result entry for backward compatibility."""
 
     @override
@@ -77,6 +78,7 @@ class LdapProcessingResult:
         self.errors.append(error_message)
 
 
+class _CompatibleEntry:
     """Compatible LDAP entry object."""
 
     @override
@@ -87,8 +89,10 @@ class LdapProcessingResult:
         for key, values in attrs.items():
             setattr(self, key, values)
 
-
     """LDAP connection wrapper delegating to flext-ldap API."""
+
+
+class _LdapConnectionWrapper:
 
     @override
     def __init__(
@@ -200,7 +204,6 @@ class LdapProcessingResult:
                 self.entries = []
                 for entry in entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
-                    # Convert to _CompatibleEntry
                     if u.is_dict_like(entry):
                         dn = str(entry.get("dn", ""))
                         attrs = {k: v for k, v in entry.items() if k != "dn"}
@@ -257,6 +260,7 @@ class LdapProcessingResult:
             return False
 
 
+class LdapTargetClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
 
     This client provides backward compatibility while delegating all LDAP operations
@@ -398,6 +402,7 @@ class LdapProcessingResult:
             logger.exception(error_msg)
             return FlextResult[bool].fail(error_msg)
 
+    def _create_connection_wrapper(
         self,
         api: FlextLdap,
     ) -> _LdapConnectionWrapper:
@@ -416,6 +421,7 @@ class LdapProcessingResult:
         )
         return _LdapConnectionWrapper(api, ldap_settings)
 
+    def get_connection(self) -> _GeneratorContextManager[object]:
         """Get LDAP connection context manager (compatibility method).
 
         Returns a real LDAP connection wrapper compatible with the existing interface.
@@ -583,6 +589,7 @@ class LdapProcessingResult:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: list[str] | None = None,
+    ) -> FlextResult[list[LdapSearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:
@@ -619,8 +626,7 @@ class LdapProcessingResult:
                 self._api.disconnect()
 
             if result.is_success and result.value:
-                # Convert search results to LdapSearchEntry for backward compatibility
-                entries = []
+                                entries = []
                 search_res = result.value
                 for entry in search_res.entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
@@ -766,7 +772,6 @@ class LdapBaseSink(Sink):
     def setup_client(self) -> FlextResult[LdapTargetClient]:
         """Set up LDAP client connection."""
         try:
-            # Create dict[str, t.GeneralValueType] configuration for LdapTargetClient compatibility
             connection_config = {
                 "host": self._target.config.get(
                     "host",

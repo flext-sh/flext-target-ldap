@@ -16,7 +16,6 @@ from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.constants import c
 
 
-# Base Singer protocol classes for LDAP target sink compatibility
 class Sink:
     """Base Sink class for Singer protocol compatibility."""
 
@@ -143,7 +142,6 @@ class LDAPBaseSink(Sink):
     def setup_client(self) -> FlextResult[LDAPClient]:
         """Set up LDAP client connection."""
         try:
-            # Create dict[str, t.GeneralValueType] configuration for LDAPClient compatibility
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
                 "port": self._target.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),

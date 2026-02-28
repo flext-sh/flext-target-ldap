@@ -30,6 +30,7 @@ from flext_target_ldap.typings import t
 logger = FlextLogger(__name__)
 
 
+class LDAPConnectionProtocol(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
@@ -70,6 +71,7 @@ logger = FlextLogger(__name__)
         ...
 
 
+class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
@@ -79,6 +81,7 @@ logger = FlextLogger(__name__)
         self.attributes = attributes
 
 
+class LDAPClient:
     """Backward-compatible LDAP client using flext-ldap API for all operations.
 
     This class provides compatibility with existing flext-target-ldap code while
@@ -205,12 +208,13 @@ logger = FlextLogger(__name__)
             )
         return self._api
 
+    def sync_connect(self) -> FlextResult[bool]:
         """Sync connect method for backward compatibility."""
-        # Note: This is for backward compatibility only
-        # Real connections should use connect()
+                # Real connections should use connect()
         logger.info("Sync connect called - using flext-ldap infrastructure")
         return FlextResult[bool].ok(value=True)
 
+    def _try_ldap3_connection(
         self,
     ) -> tuple[bool, LDAPConnectionProtocol | None]:
         """Try to create ldap3 connection if available.
@@ -233,8 +237,8 @@ logger = FlextLogger(__name__)
         # ldap3.Connection implements the required interface
         return True, conn
 
-    def _get_flext_ldap_wrapper(
-    ) -> LDAPConnectionProtocol:
+    def _get_flext_ldap_wrapper(self
+) -> LDAPConnectionProtocol:
         """Create a connection wrapper using flext-ldap API."""
         api = self._get_api()
 
@@ -315,6 +319,7 @@ logger = FlextLogger(__name__)
         ):
             return ConnectionWrapper("test_session")
 
+    def get_connection(
         self,
     ) -> _GeneratorContextManager[LDAPConnectionProtocol]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
@@ -354,7 +359,6 @@ logger = FlextLogger(__name__)
         """Add LDAP entry using ldap3-compatible connection for tests."""
         try:
             with self.get_connection() as conn:
-                # Basic call compatible with tests; arguments shape is not validated
                 if object_classes is None:
                     object_classes = []
                 try:
@@ -402,6 +406,7 @@ logger = FlextLogger(__name__)
             logger.exception("Failed to delete entry %s", dn)
             return FlextResult[bool].fail(f"Delete entry failed: {e}")
 
+    def search_entry(
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
@@ -469,6 +474,7 @@ logger = FlextLogger(__name__)
             logger.exception("Failed to check entry existence: %s", dn)
             return FlextResult[bool].fail(f"Entry exists check failed: {e}")
 
+    def get_entry(
         self,
         dn: str,
         attributes: list[str] | None = None,

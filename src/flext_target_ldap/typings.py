@@ -18,7 +18,6 @@ class FlextTargetLdapTypes(FlextTypes):
         """Core type aliases overrides."""
 
         # Use dict[str, GeneralValueType] for strict typing without RootModel overhead
-        # This satisfies "no Any" while maintaining compatibility with standard dict usage
         type Dict = dict[str, FlextTypes.GeneralValueType]
         type Headers = dict[str, str]
         type StringList = list[str]
