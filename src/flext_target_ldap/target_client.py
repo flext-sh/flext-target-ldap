@@ -9,7 +9,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Generator, Mapping
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import cast, override
+from typing import override
 
 from flext_core import (
     FlextContainer,

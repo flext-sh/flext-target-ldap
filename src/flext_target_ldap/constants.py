@@ -113,18 +113,6 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
                 string duplication. The StrEnum is the single source of truth.
             """
 
-            # Generate tuple from OperationType StrEnum members (eliminates string duplication)
-            # Only include operations relevant for target operations: ADD, MODIFY, DELETE, MODIFY_DN
-            TYPES: Final[tuple[str, ...]] = tuple(
-                member.name
-                for member in (
-                    FlextLdapConstants.Ldap.OperationType.ADD,
-                    FlextLdapConstants.Ldap.OperationType.MODIFY,
-                    FlextLdapConstants.Ldap.OperationType.DELETE,
-                    FlextLdapConstants.Ldap.OperationType.MODIFY,
-                )
-            )
-
         class Loading:
             """Target-specific loading configuration."""
 
