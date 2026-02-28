@@ -13,8 +13,7 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import FlextResult, t
-from flext_core.utilities import u
+from flext_core import FlextResult, t, u
 from flext_ldap.models import FlextLdapModels
 
 from flext_target_ldap.constants import c
