@@ -501,7 +501,7 @@ class LdapTargetClient:
                     group_entry = FlextLdapModels.Ldif.Entry(
                         dn=FlextLdapModels.Ldif.DN(value=dn),
                         attributes=FlextLdapModels.Ldif.Attributes(
-                            attributes=group_attrs
+                            attributes=group_attrs,
                         ),
                     )
                     result_op = self._operations.add(group_entry)
@@ -927,13 +927,13 @@ class LdapUsersSink(LdapBaseSink):
                     f"Failed to modify user {user_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to modify user {user_dn}: {modify_result.error}"
+                    f"Failed to modify user {user_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
                 f"Failed to add user {user_dn}: {add_result.error}",
             )
             return FlextResult[bool].fail(
-                f"Failed to add user {user_dn}: {add_result.error}"
+                f"Failed to add user {user_dn}: {add_result.error}",
             )
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -1058,13 +1058,13 @@ class LdapGroupsSink(LdapBaseSink):
                     f"Failed to modify group {group_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to modify group {group_dn}: {modify_result.error}"
+                    f"Failed to modify group {group_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
                 f"Failed to add group {group_dn}: {add_result.error}",
             )
             return FlextResult[bool].fail(
-                f"Failed to add group {group_dn}: {add_result.error}"
+                f"Failed to add group {group_dn}: {add_result.error}",
             )
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -1179,13 +1179,13 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
                     f"Failed to modify OU {ou_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to modify OU {ou_dn}: {modify_result.error}"
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
                 f"Failed to add OU {ou_dn}: {add_result.error}",
             )
             return FlextResult[bool].fail(
-                f"Failed to add OU {ou_dn}: {add_result.error}"
+                f"Failed to add OU {ou_dn}: {add_result.error}",
             )
 
         except (RuntimeError, ValueError, TypeError) as e:

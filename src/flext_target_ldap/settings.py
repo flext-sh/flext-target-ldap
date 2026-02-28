@@ -228,19 +228,19 @@ def validate_ldap_config(
             FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
         )
         object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(
-            config
+            config,
         )
 
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("base_dn", "")
+                config.get("base_dn", ""),
             ),
             search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_filter", "(objectClass=*)")
+                config.get("search_filter", "(objectClass=*)"),
             ),
             search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_scope", "SUBTREE")
+                config.get("search_scope", "SUBTREE"),
             ),
             connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get(
@@ -261,7 +261,8 @@ def validate_ldap_config(
                 c.Performance.BatchProcessing.DEFAULT_SIZE,
             ),
             max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("max_records"), 0
+                config.get("max_records"),
+                0,
             ),
             create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
                 config.get("create_missing_entries", True),

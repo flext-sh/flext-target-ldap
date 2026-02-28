@@ -194,7 +194,7 @@ class LdapTransformationService:
                 singer_field_name="name",
                 ldap_attribute_name="cn",
                 is_required=True,
-            )
+            ),
         ]
 
     def _determine_entry_type(self, object_classes: list[str]) -> str:
@@ -312,7 +312,7 @@ class LdapTargetApiService:
         target_result = self.create_ldap_target(config)
         if target_result.is_failure or target_result.value is None:
             return FlextResult[int].fail(
-                target_result.error or "Target creation failed"
+                target_result.error or "Target creation failed",
             )
         target = target_result.value
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
@@ -329,7 +329,7 @@ class LdapTargetApiService:
         target_result = self.create_ldap_target(config)
         if target_result.is_failure or target_result.value is None:
             return FlextResult[int].fail(
-                target_result.error or "Target creation failed"
+                target_result.error or "Target creation failed",
             )
         target = target_result.value
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
@@ -338,7 +338,8 @@ class LdapTargetApiService:
         return FlextResult[int].ok(len(groups))
 
     def test_ldap_connection(
-        self, config: dict[str, t.GeneralValueType]
+        self,
+        config: dict[str, t.GeneralValueType],
     ) -> FlextResult[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)

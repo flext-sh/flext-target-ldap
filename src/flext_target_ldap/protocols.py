@@ -52,7 +52,8 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             @runtime_checkable
             class TargetProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for LDAP target operations."""
 
@@ -65,7 +66,8 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             @runtime_checkable
             class TransformationProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for Singer to LDAP transformation."""
 
@@ -78,7 +80,8 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             @runtime_checkable
             class OrchestrationProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for LDAP loading orchestration."""
 
@@ -91,7 +94,8 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             @runtime_checkable
             class ConnectionProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for LDAP connection management."""
 
@@ -104,7 +108,8 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             @runtime_checkable
             class SingerProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for Singer message handling."""
 
@@ -117,19 +122,22 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             @runtime_checkable
             class PerformanceProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for LDAP loading performance."""
 
                 def optimize_batch(
-                    self, batch_size: int
+                    self,
+                    batch_size: int,
                 ) -> FlextMeltanoProtocols.Result[int]:
                     """Optimize batch size for LDAP loading."""
                     ...
 
             @runtime_checkable
             class SecurityProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for LDAP security operations."""
 
@@ -142,12 +150,14 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
             @runtime_checkable
             class MonitoringProtocol(
-                FlextLdapProtocols.Service[t.GeneralValueType], Protocol
+                FlextLdapProtocols.Service[t.GeneralValueType],
+                Protocol,
             ):
                 """Protocol for LDAP loading monitoring."""
 
                 def track_load_progress(
-                    self, records: int
+                    self,
+                    records: int,
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Track LDAP loading progress."""
                     ...

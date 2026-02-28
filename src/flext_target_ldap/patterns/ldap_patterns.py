@@ -71,7 +71,7 @@ class LDAPTypeConverter:
             return FlextResult[str | None].ok(result)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning(f"Type conversion failed for {singer_type}: {e}")
+            logger.warning("Type conversion failed for %s: %s", singer_type, e)
             return FlextResult[str | None].ok(str(value))
 
     def _normalize_bool(self, value: SingerValue) -> str:
@@ -252,7 +252,7 @@ class LDAPSchemaMapper:
             return FlextResult[str].ok("DirectoryString")
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning(f"LDAP type mapping failed: {e}")
+            logger.warning("LDAP type mapping failed: %s", e)
             return FlextResult[str].ok("DirectoryString")
 
 

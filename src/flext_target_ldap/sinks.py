@@ -83,7 +83,9 @@ class Target:
 
     @override
     def __init__(
-        self, config: dict[str, t.GeneralValueType], **kwargs: t.GeneralValueType
+        self,
+        config: dict[str, t.GeneralValueType],
+        **kwargs: t.GeneralValueType,
     ) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, t.GeneralValueType] = config
@@ -147,7 +149,8 @@ class LDAPBaseSink(Sink):
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
                 "port": self._target.config.get(
-                    "port", c.TargetLdap.Connection.DEFAULT_PORT
+                    "port",
+                    c.TargetLdap.Connection.DEFAULT_PORT,
                 ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
@@ -250,7 +253,8 @@ class LDAPBaseSink(Sink):
         )
 
     def build_attributes(
-        self, _record: Mapping[str, t.GeneralValueType]
+        self,
+        _record: Mapping[str, t.GeneralValueType],
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Build LDAP attributes from record. Override in subclasses."""
         return FlextResult[dict[str, t.GeneralValueType]].fail(
@@ -320,7 +324,8 @@ class UsersSink(LDAPBaseSink):
 
     @override
     def build_attributes(
-        self, record: Mapping[str, t.GeneralValueType]
+        self,
+        record: Mapping[str, t.GeneralValueType],
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Build LDAP attributes for user entry."""
         attrs: dict[str, t.GeneralValueType] = {}
@@ -413,13 +418,13 @@ class UsersSink(LDAPBaseSink):
                     f"Failed to modify user {user_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to modify user {user_dn}: {modify_result.error}"
+                    f"Failed to modify user {user_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
                 f"Failed to add user {user_dn}: {add_result.error}",
             )
             return FlextResult[bool].fail(
-                f"Failed to add user {user_dn}: {add_result.error}"
+                f"Failed to add user {user_dn}: {add_result.error}",
             )
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -504,7 +509,8 @@ class GroupsSink(LDAPBaseSink):
 
     @override
     def build_attributes(
-        self, record: Mapping[str, t.GeneralValueType]
+        self,
+        record: Mapping[str, t.GeneralValueType],
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Build LDAP attributes for group entry."""
         attrs: dict[str, t.GeneralValueType] = {}
@@ -585,13 +591,13 @@ class GroupsSink(LDAPBaseSink):
                     f"Failed to modify group {group_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to modify group {group_dn}: {modify_result.error}"
+                    f"Failed to modify group {group_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
                 f"Failed to add group {group_dn}: {add_result.error}",
             )
             return FlextResult[bool].fail(
-                f"Failed to add group {group_dn}: {add_result.error}"
+                f"Failed to add group {group_dn}: {add_result.error}",
             )
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -688,7 +694,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                     attributes_dict[k] = v
 
             add_result: FlextResult[bool] = self.client.add_entry(
-                ou_dn, attributes_dict
+                ou_dn,
+                attributes_dict,
             )
 
             if add_result.is_success:
@@ -708,13 +715,13 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                     f"Failed to modify OU {ou_dn}: {modify_result.error}",
                 )
                 return FlextResult[bool].fail(
-                    f"Failed to modify OU {ou_dn}: {modify_result.error}"
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
                 f"Failed to add OU {ou_dn}: {add_result.error}",
             )
             return FlextResult[bool].fail(
-                f"Failed to add OU {ou_dn}: {add_result.error}"
+                f"Failed to add OU {ou_dn}: {add_result.error}",
             )
 
         except (RuntimeError, ValueError, TypeError) as e:

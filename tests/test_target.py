@@ -68,7 +68,8 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_get_sink_class_generic(
-        self, config: dict[str, t.GeneralValueType]
+        self,
+        config: dict[str, t.GeneralValueType],
     ) -> None:
         """Test getting generic sink class for unknown stream."""
         target = TargetLdap(config=config)
@@ -81,7 +82,8 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_dn_template_processing(
-        self, config: dict[str, t.GeneralValueType]
+        self,
+        config: dict[str, t.GeneralValueType],
     ) -> None:
         """Test DN template configuration processing."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
@@ -94,7 +96,8 @@ class TestTargetLDAPUnit:
         )
 
     def test_object_classes_processing(
-        self, config: dict[str, t.GeneralValueType]
+        self,
+        config: dict[str, t.GeneralValueType],
     ) -> None:
         """Test default object classes configuration processing."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
@@ -191,7 +194,9 @@ def test_sink_process_record_delegates_to_target_handler() -> None:
             self.calls: list[tuple[dict[str, str], dict[str, str]]] = []
 
         def process_record(
-            self, record: dict[str, str], context: dict[str, str]
+            self,
+            record: dict[str, str],
+            context: dict[str, str],
         ) -> bool:
             self.calls.append((record, context))
             return True

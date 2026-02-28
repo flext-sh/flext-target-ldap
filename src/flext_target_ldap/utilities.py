@@ -55,7 +55,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if not line or not line.strip():
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                    "Empty input line"
+                    "Empty input line",
                 )
 
             try:
@@ -74,7 +74,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             except json.JSONDecodeError as e:
                 return FlextResult[Mapping[str, t.GeneralValueType]].fail(
-                    f"Invalid JSON: {e}"
+                    f"Invalid JSON: {e}",
                 )
 
         @staticmethod
@@ -511,7 +511,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             base_dn = config["base_dn"]
             match base_dn:
                 case str() if FlextTargetLdapUtilities.LdapDataProcessing.split(
-                    base_dn
+                    base_dn,
                 ):
                     pass
                 case _:
@@ -748,7 +748,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
     @classmethod
     def parse_singer_message(
-        cls, line: str
+        cls,
+        line: str,
     ) -> FlextResult[Mapping[str, t.GeneralValueType]]:
         """Proxy method for TargetLdap.parse_singer_message()."""
         return cls.TargetLdap.parse_singer_message(line)
@@ -927,20 +928,24 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             # Import here to avoid circular imports
 
             server = FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("host", "localhost"), "localhost"
+                config.get("host", "localhost"),
+                "localhost",
             )
             port = FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
                 c.TargetLdap.Connection.DEFAULT_PORT,
             )
             use_ssl = FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("use_ssl", False), default=False
+                config.get("use_ssl", False),
+                default=False,
             )
             bind_dn = FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("bind_dn", ""), ""
+                config.get("bind_dn", ""),
+                "",
             )
             bind_password = FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("password", ""), ""
+                config.get("password", ""),
+                "",
             )
             timeout = FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("timeout", c.Network.DEFAULT_TIMEOUT),

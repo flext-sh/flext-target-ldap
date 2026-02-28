@@ -270,7 +270,9 @@ class LDAPClient:
                 return True
 
             def modify(
-                self, dn: str, changes: Mapping[str, t.GeneralValueType]
+                self,
+                dn: str,
+                changes: Mapping[str, t.GeneralValueType],
             ) -> bool:
                 _ = dn, changes
                 return True
