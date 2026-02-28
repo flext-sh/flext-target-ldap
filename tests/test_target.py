@@ -20,8 +20,6 @@ from flext_target_ldap import (
 from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target import _default_cli_helper
 
-GenericSink = LdapBaseSink
-
 
 class TestTargetLDAPUnit:
     """Unit tests for TargetLDAP."""
@@ -78,8 +76,8 @@ class TestTargetLDAPUnit:
 
         # Should return the default sink class
 
-        if sink_class != GenericSink:
-            msg: str = f"Expected {GenericSink}, got {sink_class}"
+        if sink_class != LdapBaseSink:
+            msg: str = f"Expected {LdapBaseSink}, got {sink_class}"
             raise AssertionError(msg)
 
     def test_dn_template_processing(

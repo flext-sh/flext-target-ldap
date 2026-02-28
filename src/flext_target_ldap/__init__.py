@@ -151,7 +151,7 @@ __all__ = [
     "c",
     "m",
     "t",
-    "u",
+    "u", "LDAPProcessingResult",
 ]
 
 

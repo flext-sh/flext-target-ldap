@@ -28,6 +28,7 @@ from flext_ldap import (
 )
 from flext_ldap.settings import FlextLdapSettings
 from flext_ldif import FlextLdif
+from pydantic import BaseModel, ConfigDict, Field
 
 from flext_target_ldap.constants import c
 from flext_target_ldap.settings import FlextTargetLdapSettings
@@ -78,16 +79,13 @@ class LdapProcessingResult:
         self.errors.append(error_message)
 
 
-class _CompatibleEntry:
-    """Compatible LDAP entry object."""
+class CompatibleEntry(BaseModel):
+    """Compatible LDAP entry object as Pydantic model."""
 
-    @override
-    def __init__(self, dn: str, attrs: dict[str, t.GeneralValueType]) -> None:
-        """Initialize compatible entry."""
-        self.entry_dn = dn
-        self.entry_attributes = list(attrs.keys())
-        for key, values in attrs.items():
-            setattr(self, key, values)
+    model_config = ConfigDict(extra="allow")
+
+    entry_dn: str = Field(default="", description="Entry DN")
+    entry_attributes: list[str] = Field(default_factory=list, description="Attribute keys")
 
 
 class _LdapConnectionWrapper:
@@ -103,7 +101,7 @@ class _LdapConnectionWrapper:
         self.api = api
         self.config = config
         self.bound = True
-        self.entries: list[_CompatibleEntry] = []
+        self.entries: list[CompatibleEntry] = []
 
     def bind(self) -> bool:
         """Bind to LDAP server."""
@@ -203,11 +201,11 @@ class _LdapConnectionWrapper:
                 self.entries = []
                 for entry in entries:
                     # Entry is m.Ldif.Entry (BaseModel) or dict
-                    # Convert to _CompatibleEntry
+                    # Convert to CompatibleEntry
                     if u.is_dict_like(entry):
                         dn = str(entry.get("dn", ""))
                         attrs = {k: v for k, v in entry.items() if k != "dn"}
-                        compat_entry = _CompatibleEntry(dn, attrs)
+                        compat_entry = CompatibleEntry(entry_dn=dn, entry_attributes=list(attrs.keys()), **attrs)
                         self.entries.append(compat_entry)
                     elif x.is_base_model(entry):
                         dn = str(entry.dn)
@@ -227,7 +225,7 @@ class _LdapConnectionWrapper:
                                         attrs_val = {str(k): v for k, v in raw.items()}
                                     case _:
                                         pass
-                        compat_entry = _CompatibleEntry(dn, attrs_val)
+                        compat_entry = CompatibleEntry(entry_dn=dn, entry_attributes=list(attrs_val.keys()), **attrs_val)
                         self.entries.append(compat_entry)
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         # Fallback for other objects
@@ -242,7 +240,7 @@ class _LdapConnectionWrapper:
                             if u.is_dict_like(attrs_raw)
                             else cast("dict[str, t.GeneralValueType]", {})
                         )
-                        compat_entry = _CompatibleEntry(dn, attrs_val2)
+                        compat_entry = CompatibleEntry(entry_dn=dn, entry_attributes=list(attrs_val2.keys()), **attrs_val2)
                         self.entries.append(compat_entry)
             else:
                 self.entries = []
@@ -325,43 +323,6 @@ class LdapTargetClient:
             self.config.host,
             self.config.port,
         )
-
-    # Compatibility properties for old API
-    @property
-    def host(self) -> str:
-        """Get server host."""
-        return self.config.host
-
-    @property
-    def port(self) -> int:
-        """Get server port."""
-        return self.config.port
-
-    @property
-    def use_ssl(self) -> bool:
-        """Get SSL usage."""
-        return self.config.use_ssl
-
-    @property
-    def timeout(self) -> int:
-        """Get timeout."""
-        return self.config.timeout
-
-    @property
-    def bind_dn(self) -> str:
-        """Get bind DN."""
-        return self._bind_dn
-
-    @property
-    def password(self) -> str:
-        """Get password."""
-        return self._password
-
-    @property
-    def server_uri(self) -> str:
-        """Get server URI."""
-        protocol = "ldaps" if self.config.use_ssl else "ldap"
-        return f"{protocol}://{self.config.host}:{self.config.port}"
 
     def connect(self) -> FlextResult[bool]:
         """Validate connectivity to LDAP server using flext-ldap API."""

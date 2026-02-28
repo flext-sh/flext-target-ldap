@@ -132,48 +132,6 @@ class LDAPClient:
             self.config.port,
         )
 
-    # Compatibility properties for old API
-    @property
-    def host(self) -> str:
-        """Get server host."""
-        return self.config.host
-
-    @property
-    def port(self) -> int:
-        """Get server port."""
-        return self.config.port
-
-    @property
-    def use_ssl(self) -> bool:
-        """Get SSL usage."""
-        return self.config.use_ssl
-
-    @use_ssl.setter
-    def use_ssl(self, value: bool) -> None:
-        """Set SSL usage (test convenience)."""
-        self.config.use_ssl = bool(value)
-
-    @property
-    def timeout(self) -> int:
-        """Get timeout."""
-        return self.config.timeout
-
-    @property
-    def bind_dn(self) -> str:
-        """Get bind DN."""
-        return self._bind_dn
-
-    @property
-    def password(self) -> str:
-        """Get password."""
-        return self._password
-
-    @property
-    def server_uri(self) -> str:
-        """Get server URI."""
-        protocol = "ldaps" if self.config.use_ssl else "ldap"
-        return f"{protocol}://{self.config.host}:{self.config.port}"
-
     def connect(self) -> FlextResult[str]:
         """Test connectivity via ldap3 if available; otherwise use flext-ldap API.
 
@@ -555,17 +513,6 @@ class LDAPClient:
             return FlextResult[bool].fail(f"Disconnect failed: {e}")
 
 
-# Backward compatibility classes with real inheritance
-class LDAPConnectionConfig(FlextLdapModels.Ldap.ConnectionConfig):
-    """LDAPConnectionConfig - real inheritance from FlextLdapModels.ConnectionConfig."""
-
-
-class LDAPEntry(FlextLdapModels.Ldif.Entry):
-    """LDAPEntry - real inheritance from FlextLdapModels.Entry."""
-
-
 __all__: list[str] = [
     "LDAPClient",
-    "LDAPConnectionConfig",
-    "LDAPEntry",
 ]
