@@ -232,15 +232,15 @@ class _LdapConnectionWrapper:
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         # Fallback for other objects
                         dn = str(entry.dn if hasattr(entry, "dn") else "")
-                        attrs_raw = (
+                        attrs_raw: dict[str, t.GeneralValueType] = (
                             entry.attributes
                             if hasattr(entry, "attributes")
-                            else cast("dict[str, t.GeneralValueType]", {})
+                            else {}
                         )
                         attrs_val2: dict[str, t.GeneralValueType] = (
                             attrs_raw
                             if u.is_dict_like(attrs_raw)
-                            else cast("dict[str, t.GeneralValueType]", {})
+                            else {}
                         )
                         compat_entry = _CompatibleEntry(dn, attrs_val2)
                         self.entries.append(compat_entry)
@@ -639,15 +639,15 @@ class LdapTargetClient:
                         entries.append(compat_entry)
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         dn = str(entry.dn if hasattr(entry, "dn") else "")
-                        attrs_raw = (
+                        attrs_raw: dict[str, t.GeneralValueType] = (
                             entry.attributes
                             if hasattr(entry, "attributes")
-                            else cast("dict[str, t.GeneralValueType]", {})
+                            else {}
                         )
-                        attrs = (
+                        attrs: dict[str, t.GeneralValueType] = (
                             attrs_raw
                             if u.is_dict_like(attrs_raw)
-                            else cast("dict[str, t.GeneralValueType]", {})
+                            else {}
                         )
                         compat_entry = LdapSearchEntry(dn, attrs)
                         entries.append(compat_entry)
@@ -999,10 +999,10 @@ class LdapUsersSink(LdapBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = (
+        raw_mapping: dict[str, t.GeneralValueType] = (
             mapping_val
             if u.is_dict_like(mapping_val)
-            else cast("dict[str, t.GeneralValueType]", {})
+            else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
@@ -1130,7 +1130,7 @@ class LdapGroupsSink(LdapBaseSink):
         raw_mapping = (
             mapping_val
             if u.is_dict_like(mapping_val)
-            else cast("dict[str, t.GeneralValueType]", {})
+            else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
@@ -1240,7 +1240,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
         raw_mapping = (
             mapping_val
             if u.is_dict_like(mapping_val)
-            else cast("dict[str, t.GeneralValueType]", {})
+            else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
