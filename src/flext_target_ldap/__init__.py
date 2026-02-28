@@ -50,7 +50,10 @@ if TYPE_CHECKING:
         FlextTargetLdapTypes,
         FlextTargetLdapTypes as t,
     )
-    from flext_target_ldap.utilities import FlextTargetLdapUtilities
+    from flext_target_ldap.utilities import (
+        FlextTargetLdapUtilities,
+        FlextTargetLdapUtilities as u,
+    )
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
@@ -84,6 +87,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "c": ("flext_target_ldap.constants", "FlextTargetLdapConstants"),
     "m": ("flext_target_ldap.models", "FlextTargetLdapModels"),
     "t": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
+    "u": ("flext_target_ldap.utilities", "FlextTargetLdapUtilities"),
 }
 
 __all__ = [
@@ -117,6 +121,7 @@ __all__ = [
     "c",
     "m",
     "t",
+    "u",
 ]
 
 

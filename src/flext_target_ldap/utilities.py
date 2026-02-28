@@ -13,13 +13,14 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import FlextResult, t, u
-from flext_ldap.models import FlextLdapModels
+from flext_core import FlextResult, t
+from flext_ldap.utilities import FlextLdapUtilities
+from flext_meltano.utilities import FlextMeltanoUtilities
 
 from flext_target_ldap.constants import c
 
 
-class FlextTargetLdapUtilities(u):
+class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for
@@ -1013,6 +1014,8 @@ class FlextTargetLdapUtilities(u):
                 return [str(v) for v in raw_object_classes]
             return ["top"]
 
+
+u = FlextTargetLdapUtilities
 
 __all__ = [
     "FlextTargetLdapUtilities",
