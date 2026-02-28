@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from flext_core import cleanup_submodule_namespace, lazy_getattr
+from flext_core._utilities.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_target_ldap.__version__ import __version__, __version_info__
@@ -21,7 +21,10 @@ if TYPE_CHECKING:
         FlextTargetLdapModels,
         FlextTargetLdapModels as m,
     )
-    from flext_target_ldap.protocols import FlextTargetLdapProtocols
+    from flext_target_ldap.protocols import (
+        FlextTargetLdapProtocols,
+        FlextTargetLdapProtocols as p,
+    )
     from flext_target_ldap.sinks import (
         GroupsSink,
         GroupsSink as LdapGroupsSink,
@@ -86,6 +89,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "__version_info__": ("flext_target_ldap.__version__", "__version_info__"),
     "c": ("flext_target_ldap.constants", "FlextTargetLdapConstants"),
     "m": ("flext_target_ldap.models", "FlextTargetLdapModels"),
+    "p": ("flext_target_ldap.protocols", "FlextTargetLdapProtocols"),
     "t": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
     "u": ("flext_target_ldap.utilities", "FlextTargetLdapUtilities"),
 }
@@ -120,6 +124,7 @@ __all__ = [
     "__version_info__",
     "c",
     "m",
+    "p",
     "t",
     "u",
 ]
