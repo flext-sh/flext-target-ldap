@@ -472,9 +472,6 @@ class UsersSink(LDAPBaseSink):
             mapping_val
             if u.is_dict_like(mapping_val)
             else {}
-            mapping_val
-            if u.is_dict_like(mapping_val)
-            else cast("dict[str, t.GeneralValueType]", {})
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
@@ -767,7 +764,10 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = (
+        raw_mapping: dict[str, t.GeneralValueType] = (
+            mapping_val
+            if u.is_dict_like(mapping_val)
+            else {}
             mapping_val
             if u.is_dict_like(mapping_val)
             else cast("dict[str, t.GeneralValueType]", {})

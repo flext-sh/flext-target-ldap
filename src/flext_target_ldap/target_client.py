@@ -9,7 +9,7 @@ from __future__ import annotations
 import sys
 from collections.abc import Generator, Mapping
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import cast, override
+from typing import override
 
 from flext_core import (
     FlextContainer,
@@ -230,12 +230,18 @@ class _LdapConnectionWrapper:
                     elif FlextRuntime.safe_get_attribute(entry, "dn", None) is not None:
                         # Fallback for other objects
                         dn = str(entry.dn if hasattr(entry, "dn") else "")
-                        attrs_raw = (
+                        attrs_raw: dict[str, t.GeneralValueType] = (
+                            entry.attributes
+                            if hasattr(entry, "attributes")
+                            else {}
                             entry.attributes
                             if hasattr(entry, "attributes")
                             else cast("dict[str, t.GeneralValueType]", {})
                         )
                         attrs_val2: dict[str, t.GeneralValueType] = (
+                            attrs_raw
+                            if u.is_dict_like(attrs_raw)
+                            else {}
                             attrs_raw
                             if u.is_dict_like(attrs_raw)
                             else cast("dict[str, t.GeneralValueType]", {})
