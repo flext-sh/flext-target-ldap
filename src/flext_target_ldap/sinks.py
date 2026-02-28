@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import ClassVar, cast, override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextResult, t, u
 
@@ -83,7 +83,7 @@ class Target:
     """Base Target class for Singer protocol compatibility."""
 
     @override
-    def __init__(self, config: dict[str, t.GeneralValueType], **kwargs: object) -> None:
+    def __init__(self, config: dict[str, t.GeneralValueType], **kwargs: t.GeneralValueType) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, t.GeneralValueType] = config
 
@@ -137,7 +137,7 @@ class LDAPBaseSink(Sink):
         # Store target reference for config access
         self._target = target
         self.client: LDAPClient | None = None
-        self._client: object | None = None
+        self._client: LDAPClient | None = None
         self._processing_result: LDAPProcessingResult = LDAPProcessingResult()
 
     def setup_client(self) -> FlextResult[LDAPClient]:
@@ -468,7 +468,10 @@ class UsersSink(LDAPBaseSink):
             "attribute_mapping",
             {},
         )
-        raw_mapping = (
+        raw_mapping: dict[str, t.GeneralValueType] = (
+            mapping_val
+            if u.is_dict_like(mapping_val)
+            else {}
             mapping_val
             if u.is_dict_like(mapping_val)
             else cast("dict[str, t.GeneralValueType]", {})
@@ -637,7 +640,10 @@ class GroupsSink(LDAPBaseSink):
 
         # Apply custom attribute mapping
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = (
+        raw_mapping: dict[str, t.GeneralValueType] = (
+            mapping_val
+            if u.is_dict_like(mapping_val)
+            else {}
             mapping_val
             if u.is_dict_like(mapping_val)
             else cast("dict[str, t.GeneralValueType]", {})

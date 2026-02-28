@@ -32,7 +32,7 @@ from flext_target_ldap.sinks import (
 from flext_target_ldap.typings import t
 
 
-def _default_cli_helper(*, quiet: bool = False) -> object:
+def _default_cli_helper(*, quiet: bool = False) -> t.GeneralValueType:
     class Helper:
         _logger = FlextLogger(__name__)
 
