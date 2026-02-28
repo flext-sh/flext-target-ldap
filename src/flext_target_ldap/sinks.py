@@ -82,7 +82,9 @@ class Target:
     """Base Target class for Singer protocol compatibility."""
 
     @override
-    def __init__(self, config: dict[str, t.GeneralValueType], **kwargs: t.GeneralValueType) -> None:
+    def __init__(
+        self, config: dict[str, t.GeneralValueType], **kwargs: t.GeneralValueType
+    ) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, t.GeneralValueType] = config
 
@@ -144,7 +146,9 @@ class LDAPBaseSink(Sink):
         try:
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
-                "port": self._target.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
+                "port": self._target.config.get(
+                    "port", c.TargetLdap.Connection.DEFAULT_PORT
+                ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),
@@ -467,9 +471,7 @@ class UsersSink(LDAPBaseSink):
             {},
         )
         raw_mapping: dict[str, t.GeneralValueType] = (
-            mapping_val
-            if u.is_dict_like(mapping_val)
-            else {}
+            mapping_val if u.is_dict_like(mapping_val) else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
@@ -636,9 +638,7 @@ class GroupsSink(LDAPBaseSink):
         # Apply custom attribute mapping
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping: dict[str, t.GeneralValueType] = (
-            mapping_val
-            if u.is_dict_like(mapping_val)
-            else {}
+            mapping_val if u.is_dict_like(mapping_val) else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
@@ -760,9 +760,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             {},
         )
         raw_mapping: dict[str, t.GeneralValueType] = (
-            mapping_val
-            if u.is_dict_like(mapping_val)
-            else {}
+            mapping_val if u.is_dict_like(mapping_val) else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():

@@ -27,14 +27,27 @@ class LdapTargetConnectionSettings(FlextSettings):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
-    port: int = Field(c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port", ge=1, le=65535)
+    port: int = Field(
+        c.TargetLdap.Connection.DEFAULT_PORT,
+        description="LDAP server port",
+        ge=1,
+        le=65535,
+    )
     use_ssl: bool = Field(default=False, description="Use SSL connection")
     use_tls: bool = Field(default=False, description="Use TLS connection")
     bind_dn: str | None = Field(None, description="Bind DN for authentication")
     bind_password: str | None = Field(None, description="Bind password")
     base_dn: str = Field(..., description="Base DN for operations", min_length=1)
-    connect_timeout: int = Field(c.TargetLdap.Connection.CONNECT_TIMEOUT, description="Connection timeout in seconds", ge=1)
-    receive_timeout: int = Field(c.TargetLdap.Connection.RECEIVE_TIMEOUT, description="Receive timeout in seconds", ge=1)
+    connect_timeout: int = Field(
+        c.TargetLdap.Connection.CONNECT_TIMEOUT,
+        description="Connection timeout in seconds",
+        ge=1,
+    )
+    receive_timeout: int = Field(
+        c.TargetLdap.Connection.RECEIVE_TIMEOUT,
+        description="Receive timeout in seconds",
+        ge=1,
+    )
 
     def validate_business_rules(self) -> FlextResult[bool]:
         """Validate LDAP connection business rules."""
@@ -80,7 +93,11 @@ class LdapTargetConnectionSettings(FlextSettings):
 class LdapTargetOperationSettings(FlextSettings):
     """LDAP operation settings domain model with business validation."""
 
-    batch_size: int = Field(c.TargetLdap.Processing.DEFAULT_BATCH_SIZE, description="Batch size for bulk operations", ge=1)
+    batch_size: int = Field(
+        c.TargetLdap.Processing.DEFAULT_BATCH_SIZE,
+        description="Batch size for bulk operations",
+        ge=1,
+    )
     max_records: int | None = Field(
         None,
         description="Maximum records to process (None for unlimited)",

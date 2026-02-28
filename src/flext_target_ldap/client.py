@@ -21,8 +21,8 @@ from flext_ldap import (
     FlextLdapConnection,
     FlextLdapModels,
     FlextLdapOperations,
+    FlextLdapSettings,
 )
-from flext_ldap.settings import FlextLdapSettings
 from flext_ldif import FlextLdif
 
 from flext_target_ldap.typings import t
@@ -210,7 +210,7 @@ class LDAPClient:
 
     def sync_connect(self) -> FlextResult[bool]:
         """Sync connect method for backward compatibility."""
-                # Real connections should use connect()
+        # Real connections should use connect()
         logger.info("Sync connect called - using flext-ldap infrastructure")
         return FlextResult[bool].ok(value=True)
 
@@ -237,8 +237,7 @@ class LDAPClient:
         # ldap3.Connection implements the required interface
         return True, conn
 
-    def _get_flext_ldap_wrapper(self
-) -> LDAPConnectionProtocol:
+    def _get_flext_ldap_wrapper(self) -> LDAPConnectionProtocol:
         """Create a connection wrapper using flext-ldap API."""
         api = self._get_api()
 
