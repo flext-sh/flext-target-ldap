@@ -38,7 +38,6 @@ logger = FlextLogger(__name__)
 # Network constants - moved to c.TargetLdap.Connection.MAX_PORT_NUMBER
 
 
-class LdapSearchEntry:
     """LDAP search result entry for backward compatibility."""
 
     @override
@@ -78,7 +77,6 @@ class LdapProcessingResult:
         self.errors.append(error_message)
 
 
-class _CompatibleEntry:
     """Compatible LDAP entry object."""
 
     @override
@@ -90,7 +88,6 @@ class _CompatibleEntry:
             setattr(self, key, values)
 
 
-class _LdapConnectionWrapper:
     """LDAP connection wrapper delegating to flext-ldap API."""
 
     @override
@@ -260,7 +257,6 @@ class _LdapConnectionWrapper:
             return False
 
 
-class LdapTargetClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
 
     This client provides backward compatibility while delegating all LDAP operations
@@ -326,7 +322,6 @@ class LdapTargetClient:
             self.config.port,
         )
 
-    # Compatibility properties for old API
     @property
     def host(self) -> str:
         """Get server host."""
@@ -403,7 +398,6 @@ class LdapTargetClient:
             logger.exception(error_msg)
             return FlextResult[bool].fail(error_msg)
 
-    def _create_connection_wrapper(
         self,
         api: FlextLdap,
     ) -> _LdapConnectionWrapper:
@@ -422,7 +416,6 @@ class LdapTargetClient:
         )
         return _LdapConnectionWrapper(api, ldap_settings)
 
-    def get_connection(self) -> _GeneratorContextManager[object]:
         """Get LDAP connection context manager (compatibility method).
 
         Returns a real LDAP connection wrapper compatible with the existing interface.
@@ -590,7 +583,6 @@ class LdapTargetClient:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: list[str] | None = None,
-    ) -> FlextResult[list[LdapSearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:

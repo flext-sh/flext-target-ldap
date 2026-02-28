@@ -30,7 +30,6 @@ from flext_target_ldap.typings import t
 logger = FlextLogger(__name__)
 
 
-class LDAPConnectionProtocol(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
@@ -71,7 +70,6 @@ class LDAPConnectionProtocol(Protocol):
         ...
 
 
-class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
@@ -81,7 +79,6 @@ class LDAPSearchEntry:
         self.attributes = attributes
 
 
-class LDAPClient:
     """Backward-compatible LDAP client using flext-ldap API for all operations.
 
     This class provides compatibility with existing flext-target-ldap code while
@@ -208,14 +205,12 @@ class LDAPClient:
             )
         return self._api
 
-    def connect_sync(self) -> FlextResult[bool]:
         """Sync connect method for backward compatibility."""
         # Note: This is for backward compatibility only
         # Real connections should use connect()
         logger.info("Sync connect called - using flext-ldap infrastructure")
         return FlextResult[bool].ok(value=True)
 
-    def _try_ldap3_connection(
         self,
     ) -> tuple[bool, LDAPConnectionProtocol | None]:
         """Try to create ldap3 connection if available.
@@ -235,11 +230,10 @@ class LDAPClient:
             user=self._bind_dn or None,
             password=self._password or None,
         )
-        # Runtime cast to protocol for type safety
+        # ldap3.Connection implements the required interface
         return True, conn
 
     def _get_flext_ldap_wrapper(
-        self,
     ) -> LDAPConnectionProtocol:
         """Create a connection wrapper using flext-ldap API."""
         api = self._get_api()
@@ -321,7 +315,6 @@ class LDAPClient:
         ):
             return ConnectionWrapper("test_session")
 
-    def get_connection(
         self,
     ) -> _GeneratorContextManager[LDAPConnectionProtocol]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
@@ -409,7 +402,6 @@ class LDAPClient:
             logger.exception("Failed to delete entry %s", dn)
             return FlextResult[bool].fail(f"Delete entry failed: {e}")
 
-    def search_entry(
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
@@ -477,7 +469,6 @@ class LDAPClient:
             logger.exception("Failed to check entry existence: %s", dn)
             return FlextResult[bool].fail(f"Entry exists check failed: {e}")
 
-    def get_entry(
         self,
         dn: str,
         attributes: list[str] | None = None,

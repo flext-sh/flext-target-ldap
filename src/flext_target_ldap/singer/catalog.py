@@ -91,7 +91,6 @@ class SingerLDAPCatalogManager:
         )
 
 
-# Re-export for backward compatibility
 __all__: list[str] = [
     "SingerLDAPCatalogEntry",
     "SingerLDAPCatalogManager",

@@ -747,7 +747,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 updated_stream_state,
             )
 
-    # Proxy methods for backward compatibility
     @classmethod
     def parse_singer_message(
         cls, line: str

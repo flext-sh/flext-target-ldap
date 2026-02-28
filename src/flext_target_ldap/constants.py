@@ -105,8 +105,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Operations:
             """LDAP operation types and commands.
 
-            Note: For type-safe operation handling, use c.Ldap.OperationType
-            StrEnum instead of this list. This list is kept for backward compatibility.
+            Note: For type-safe operation handling, use c.Ldap.OperationType StrEnum.
 
             DRY Pattern:
                 TYPES tuple is generated from OperationType StrEnum members to eliminate

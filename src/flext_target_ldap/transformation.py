@@ -195,7 +195,6 @@ class MigrationValidator:
             self._stats["validation_errors"] += 1
             return FlextResult[bool].fail(f"Validation failed: {e}")
 
-    def validate_entry(
         self,
         dn: str,
         attributes: dict[str, t.GeneralValueType],
