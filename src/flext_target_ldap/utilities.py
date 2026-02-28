@@ -1020,4 +1020,5 @@ u = FlextTargetLdapUtilities
 
 __all__ = [
     "FlextTargetLdapUtilities",
+    "u",
 ]
