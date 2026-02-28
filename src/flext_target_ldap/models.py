@@ -15,13 +15,15 @@ import math
 from datetime import UTC, datetime
 from typing import Self
 
-from flext_core import FlextModels, FlextResult, t
+from flext_core import FlextResult, t
+from flext_ldap import FlextLdapModels
+from flext_meltano import FlextMeltanoModels
 from pydantic import Field, field_validator
 
 from .constants import c
 
 
-class FlextTargetLdapModels(FlextModels):
+class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
@@ -35,7 +37,7 @@ class FlextTargetLdapModels(FlextModels):
     class TargetLdap:
         """TargetLdap domain namespace."""
 
-        class AttributeMapping(FlextModels.Entity):
+        class AttributeMapping(FlextLdapModels.Entity):
             """LDAP attribute mapping configuration with validation.
 
             Immutable value object defining how Singer fields map to LDAP attributes
@@ -116,7 +118,7 @@ class FlextTargetLdapModels(FlextModels):
                         f"Attribute mapping validation failed: {e}",
                     )
 
-        class Entry(FlextModels.Entity):
+        class Entry(FlextLdapModels.Entity):
             """LDAP entry representation with validation and business rules.
 
             Immutable value object representing a complete LDAP entry with
@@ -230,7 +232,7 @@ class FlextTargetLdapModels(FlextModels):
                 """Get values for a specific attribute."""
                 return self.attributes.get(attribute_name, [])
 
-        class TransformationResult(FlextModels.Entity):
+        class TransformationResult(FlextLdapModels.Entity):
             """Result of LDAP data transformation operations.
 
             Tracks transformation statistics, applied rules, and processing metrics
@@ -307,7 +309,7 @@ class FlextTargetLdapModels(FlextModels):
                 """Check if transformation has any errors."""
                 return bool(self.transformation_errors)
 
-        class BatchProcessing(FlextModels.Entity):
+        class BatchProcessing(FlextLdapModels.Entity):
             """LDAP batch processing configuration and state tracking.
 
             Manages batching of LDAP operations for optimal performance,
@@ -441,7 +443,7 @@ class FlextTargetLdapModels(FlextModels):
                     },
                 )
 
-        class OperationStatistics(FlextModels.Entity):
+        class OperationStatistics(FlextLdapModels.Entity):
             """LDAP operation statistics and performance metrics.
 
             Complete tracking of LDAP target operations for performance

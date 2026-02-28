@@ -18,6 +18,7 @@ from flext_core import FlextResult, FlextSettings, u
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
+from .constants import c
 from .settings import FlextTargetLdapSettings
 from .typings import t
 
@@ -26,14 +27,14 @@ class LdapTargetConnectionSettings(FlextSettings):
     """LDAP connection settings domain model with business validation."""
 
     host: str = Field(..., description="LDAP server host", min_length=1)
-    port: int = Field(389, description="LDAP server port", ge=1, le=65535)
+    port: int = Field(c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port", ge=1, le=65535)
     use_ssl: bool = Field(default=False, description="Use SSL connection")
     use_tls: bool = Field(default=False, description="Use TLS connection")
     bind_dn: str | None = Field(None, description="Bind DN for authentication")
     bind_password: str | None = Field(None, description="Bind password")
     base_dn: str = Field(..., description="Base DN for operations", min_length=1)
-    connect_timeout: int = Field(10, description="Connection timeout in seconds", ge=1)
-    receive_timeout: int = Field(30, description="Receive timeout in seconds", ge=1)
+    connect_timeout: int = Field(c.TargetLdap.Connection.CONNECT_TIMEOUT, description="Connection timeout in seconds", ge=1)
+    receive_timeout: int = Field(c.TargetLdap.Connection.RECEIVE_TIMEOUT, description="Receive timeout in seconds", ge=1)
 
     def validate_business_rules(self) -> FlextResult[bool]:
         """Validate LDAP connection business rules."""
@@ -51,8 +52,8 @@ class LdapTargetConnectionSettings(FlextSettings):
                 )
 
             # Port validation for protocol
-            ldap_standard_port = 389
-            ldaps_standard_port = 636
+            ldap_standard_port = c.TargetLdap.Connection.DEFAULT_PORT
+            ldaps_standard_port = c.TargetLdap.Connection.Ldaps.DEFAULT_PORT
 
             if self.use_ssl and self.port == ldap_standard_port:
                 return FlextResult[bool].fail("SSL typically uses port 636, not 389")
@@ -79,7 +80,7 @@ class LdapTargetConnectionSettings(FlextSettings):
 class LdapTargetOperationSettings(FlextSettings):
     """LDAP operation settings domain model with business validation."""
 
-    batch_size: int = Field(1000, description="Batch size for bulk operations", ge=1)
+    batch_size: int = Field(c.TargetLdap.Processing.DEFAULT_BATCH_SIZE, description="Batch size for bulk operations", ge=1)
     max_records: int | None = Field(
         None,
         description="Maximum records to process (None for unlimited)",
@@ -326,7 +327,7 @@ def create_default_ldap_target_config(
     host: str,
     base_dn: str,
     *,
-    port: int = 389,
+    port: int = c.TargetLdap.Connection.DEFAULT_PORT,
     use_ssl: bool = False,
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Create default LDAP target configuration with minimal parameters."""

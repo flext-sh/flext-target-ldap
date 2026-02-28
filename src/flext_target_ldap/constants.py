@@ -77,6 +77,10 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             DEFAULT_TIMEOUT: Final[int] = (
                 FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
             )
+            CONNECT_TIMEOUT: Final[int] = 10
+            RECEIVE_TIMEOUT: Final[int] = (
+                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
+            )
             MAX_PORT_NUMBER: Final[int] = 65535
 
             class Ldaps:
@@ -90,9 +94,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             Note: Does not override parent Processing class to avoid inheritance conflicts.
             """
 
-            DEFAULT_BATCH_SIZE: Final[int] = (
-                FlextLdapConstants.Performance.BatchProcessing.DEFAULT_SIZE
-            )
+            DEFAULT_BATCH_SIZE: Final[int] = 1000
             MAX_BATCH_SIZE: Final[int] = (
                 FlextLdapConstants.Performance.BatchProcessing.MAX_ITEMS
             )

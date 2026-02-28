@@ -181,11 +181,11 @@ class TargetLDAP(Target):
             msg = "LDAP base DN is required"
             raise ValueError(msg)
 
-        port_obj = self.config.get("port", 389)
+        port_obj = self.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT)
         try:
             port = int(str(port_obj))
         except (TypeError, ValueError):
-            port = 389
+            port = c.TargetLdap.Connection.DEFAULT_PORT
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)

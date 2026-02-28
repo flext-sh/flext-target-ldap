@@ -13,6 +13,7 @@ from typing import ClassVar, cast, override
 from flext_core import FlextLogger, FlextResult, t, u
 
 from flext_target_ldap.client import LDAPClient
+from flext_target_ldap.constants import c
 
 
 # Base Singer protocol classes for LDAP target sink compatibility
@@ -145,7 +146,7 @@ class LDAPBaseSink(Sink):
             # Create dict[str, t.GeneralValueType] configuration for LDAPClient compatibility
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
-                "port": self._target.config.get("port", 389),
+                "port": self._target.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),

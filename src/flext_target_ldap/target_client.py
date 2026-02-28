@@ -279,9 +279,9 @@ class LdapTargetClient:
                 host=str(
                     config.get("host", "localhost"),
                 ),
-                port=int(str(config.get("port", 389)))
-                if config.get("port", 389) is not None
-                else 389,
+                port=int(str(config.get("port", c.TargetLdap.Connection.DEFAULT_PORT)))
+                if config.get("port", c.TargetLdap.Connection.DEFAULT_PORT) is not None
+                else c.TargetLdap.Connection.DEFAULT_PORT,
                 use_ssl=bool(config.get("use_ssl", False)),
                 timeout=int(str(config.get("timeout", 30)))
                 if config.get("timeout", 30) is not None
@@ -1373,19 +1373,19 @@ class TargetLdap(Target):
             msg = "LDAP base DN is required"
             raise ValueError(msg)
 
-        port_obj = self.config.get("port", 389)
+        port_obj = self.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT)
         match port_obj:
             case bool():
-                port = 389
+                port = c.TargetLdap.Connection.DEFAULT_PORT
             case int():
                 port = port_obj
             case str():
                 try:
                     port = int(port_obj)
                 except ValueError:
-                    port = 389
+                    port = c.TargetLdap.Connection.DEFAULT_PORT
             case _:
-                port = 389
+                port = c.TargetLdap.Connection.DEFAULT_PORT
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)
