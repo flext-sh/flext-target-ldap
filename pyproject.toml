@@ -29,7 +29,7 @@ classifiers = [
   "Topic :: System :: Systems Administration :: Authentication/Directory :: LDAP",
   "Typing :: Typed",
 ]
-dependencies = [ "flext-core @ file://../flext-core", "flext-ldap @ file://../flext-ldap", "flext-meltano @ file://../flext-meltano" ]
+dependencies = [ "flext-core @ file:../flext-core", "flext-ldap @ file:../flext-ldap", "flext-meltano @ file:../flext-meltano" ]
 # [MANAGED] consolidated development dependencies
 # [AUTO] merged from dev/docs/security/test/typings
 optional-dependencies.dev = [
