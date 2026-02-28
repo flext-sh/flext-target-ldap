@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from flext_core import cleanup_submodule_namespace, lazy_getattr
 
@@ -57,55 +57,25 @@ if TYPE_CHECKING:
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "FlextTargetLdapConnectionError": (
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapConnectionError",
-    ),
-    "FlextTargetLdapConstants": (
-        "flext_target_ldap.constants",
-        "FlextTargetLdapConstants",
-    ),
-    "FlextTargetLdapError": (
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapError",
-    ),
+    "FlextTargetLdapConnectionError": ("flext_target_ldap.target_exceptions", "FlextTargetLdapConnectionError"),
+    "FlextTargetLdapConstants": ("flext_target_ldap.constants", "FlextTargetLdapConstants"),
+    "FlextTargetLdapError": ("flext_target_ldap.target_exceptions", "FlextTargetLdapError"),
     "FlextTargetLdapModels": ("flext_target_ldap.models", "FlextTargetLdapModels"),
-    "FlextTargetLdapProtocols": (
-        "flext_target_ldap.protocols",
-        "FlextTargetLdapProtocols",
-    ),
+    "FlextTargetLdapProtocols": ("flext_target_ldap.protocols", "FlextTargetLdapProtocols"),
     "FlextTargetLdapTypes": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
-    "FlextTargetLdapUtilities": (
-        "flext_target_ldap.utilities",
-        "FlextTargetLdapUtilities",
-    ),
-    "FlextTargetLdapValidationError": (
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapValidationError",
-    ),
+    "FlextTargetLdapUtilities": ("flext_target_ldap.utilities", "FlextTargetLdapUtilities"),
+    "FlextTargetLdapValidationError": ("flext_target_ldap.target_exceptions", "FlextTargetLdapValidationError"),
     "GroupsSink": ("flext_target_ldap.sinks", "GroupsSink"),
     "LDAPBaseSink": ("flext_target_ldap.sinks", "LDAPBaseSink"),
     "LDAPProcessingResult": ("flext_target_ldap.sinks", "LDAPProcessingResult"),
     "LdapBaseSink": ("flext_target_ldap.sinks", "LDAPBaseSink"),
-    "LdapBatchProcessingModel": (
-        "flext_target_ldap.target_models",
-        "LdapBatchProcessingModel",
-    ),
+    "LdapBatchProcessingModel": ("flext_target_ldap.target_models", "LdapBatchProcessingModel"),
     "LdapEntryModel": ("flext_target_ldap.target_models", "LdapEntryModel"),
     "LdapGroupsSink": ("flext_target_ldap.sinks", "GroupsSink"),
-    "LdapTargetApiService": (
-        "flext_target_ldap.target_services",
-        "LdapTargetApiService",
-    ),
+    "LdapTargetApiService": ("flext_target_ldap.target_services", "LdapTargetApiService"),
     "LdapTargetClient": ("flext_target_ldap.target_client", "LdapTargetClient"),
-    "LdapTransformationService": (
-        "flext_target_ldap.target_services",
-        "LdapTransformationService",
-    ),
-    "LdapTransformationServiceProtocol": (
-        "flext_target_ldap.target_services",
-        "LdapTransformationServiceProtocol",
-    ),
+    "LdapTransformationService": ("flext_target_ldap.target_services", "LdapTransformationService"),
+    "LdapTransformationServiceProtocol": ("flext_target_ldap.target_services", "LdapTransformationServiceProtocol"),
     "LdapUsersSink": ("flext_target_ldap.sinks", "UsersSink"),
     "OrganizationalUnitsSink": ("flext_target_ldap.sinks", "OrganizationalUnitsSink"),
     "Sink": ("flext_target_ldap.sinks", "Sink"),
@@ -155,7 +125,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> t.GeneralValueType:
+def __getattr__(name: str) -> Any:  # noqa: ANN401
     """Lazy-load module attributes on first access (PEP 562)."""
     return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
 
