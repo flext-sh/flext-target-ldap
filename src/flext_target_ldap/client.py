@@ -216,7 +216,7 @@ class LDAPClient:
 
     def _try_ldap3_connection(
         self,
-    ) -> tuple[bool, LDAPConnectionProtocol | None]:
+    ) -> tuple[bool, ldap3.Connection | None]:
         """Try to create ldap3 connection if available.
 
         Returns:

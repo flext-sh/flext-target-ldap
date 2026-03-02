@@ -284,7 +284,7 @@ class TestLDAPClient:
             raise AssertionError(msg)
 
         # Test entry doesn't exist
-        mock_connection.entries = []
+        mock_connection.entries: list[object] = []
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
         assert result.is_success
         if result.data:
@@ -328,7 +328,7 @@ class TestLDAPClient:
         assert entry.attributes["cn"] == ["Test User"]
 
         # Test entry not found
-        mock_connection.entries = []
+        mock_connection.entries: list[object] = []
         result = client.get_entry("uid=notfound,dc=test,dc=com")
         assert result.is_success
         assert result.data is None

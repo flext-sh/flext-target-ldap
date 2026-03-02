@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap.tests.protocols import TestsFlextTargetLdapProtocols
+from tests.protocols import TestsFlextTargetLdapProtocols
 
 # Runtime alias for test protocols
 p = TestsFlextTargetLdapProtocols

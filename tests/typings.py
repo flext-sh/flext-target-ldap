@@ -18,7 +18,7 @@ from flext_tests import FlextTestsTypes
 class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
     """Test types for flext-target-ldap extending both test and project types."""
 
-    class TargetLdap(FlextTargetLdapTypes.TargetLdap):
+    class TargetLdap:
         """TargetLdap test namespace."""
 
         class Tests:

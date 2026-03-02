@@ -32,17 +32,25 @@ from flext_target_ldap.sinks import (
 from flext_target_ldap.typings import t
 
 
-def _default_cli_helper(*, quiet: bool = False) -> t.GeneralValueType:
-    class Helper:
-        _logger = FlextLogger(__name__)
+class _DefaultCliHelper:
+    """Default CLI helper for printing output."""
 
-        def print(self, msg: str) -> None:
-            if quiet:
+    _logger = FlextLogger(__name__)
+
+    def print(self, msg: str) -> None:
+        """Print a message."""
+        self._logger.info("%s", msg)
+
+
+def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
+    """Create a default CLI helper."""
+    if quiet:
+        class _QuietHelper(_DefaultCliHelper):
+            @override
+            def print(self, msg: str) -> None:
                 self._logger.debug("%s", msg)
-                return
-            self._logger.info("%s", msg)
-
-    return Helper()
+        return _QuietHelper()
+    return _DefaultCliHelper()
 
 
 flext_cli_create_helper = _default_cli_helper

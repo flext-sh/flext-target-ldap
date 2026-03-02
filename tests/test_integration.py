@@ -69,7 +69,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = []  # No existing entries
+        mock_conn_instance.entries: list[object] = []  # No existing entries
         mock_conn_instance.add.return_value = True
         # Wire patched API to use our mock connection instance
         with patch("flext_target_ldap.client.get_ldap_api") as mock_api:
@@ -136,7 +136,7 @@ class TestTargetLDAPIntegration:
         # First call: entry doesn't exist
         # Second call: entry exists
         mock_conn_instance.search.side_effect = [True, True]
-        mock_conn_instance.entries = []
+        mock_conn_instance.entries: list[object] = []
         mock_conn_instance.add.return_value = True
         mock_conn_instance.modify.return_value = True
 
@@ -144,7 +144,7 @@ class TestTargetLDAPIntegration:
             # First search: no entry
             # Second search: entry exists
             if mock_conn_instance.search.call_count <= 1:
-                mock_conn_instance.entries = []
+                mock_conn_instance.entries: list[object] = []
             else:
                 mock_conn_instance.entries = [MagicMock()]
             return True
@@ -269,7 +269,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = []
+        mock_conn_instance.entries: list[object] = []
         mock_conn_instance.add.return_value = True
         # Mock LDAP API is already configured
         # Run target
@@ -357,7 +357,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = []
+        mock_conn_instance.entries: list[object] = []
         mock_conn_instance.add.return_value = True
         # Mock LDAP API is already configured
         # Run target
