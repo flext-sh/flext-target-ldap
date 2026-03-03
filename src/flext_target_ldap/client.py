@@ -95,8 +95,7 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.Ldap.ConnectionConfig
-        | t.ConfigurationMapping,
+        config: FlextLdapModels.Ldap.ConnectionConfig | t.ConfigurationMapping,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         match config:

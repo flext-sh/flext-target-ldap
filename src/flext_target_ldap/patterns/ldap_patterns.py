@@ -16,15 +16,6 @@ from pydantic import BaseModel, Field
 logger = FlextLogger(__name__)
 
 
-
-
-
-
-
-
-
-
-
 class SingerPropertyDefinition(BaseModel):
     """Singer field descriptor with normalized typing."""
 
