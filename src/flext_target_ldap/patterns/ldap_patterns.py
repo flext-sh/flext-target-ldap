@@ -15,14 +15,14 @@ from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
 
-type Primitive = t.JsonPrimitive | None
-type SingerValue = Primitive | list[Primitive] | dict[str, Primitive | list[Primitive]]
-type SingerRecord = dict[str, SingerValue]
-type TransformedRecord = dict[str, str | None]
-type LdapAttributeMap = dict[str, list[str]]
-type ModifyValues = list[str]
-type ModifyAction = tuple[str, ModifyValues]
-type ModifyMap = dict[str, list[ModifyAction]]
+
+
+
+
+
+
+
+
 
 
 class SingerPropertyDefinition(BaseModel):
@@ -50,7 +50,7 @@ class LDAPTypeConverter:
     def convert_singer_to_ldap(
         self,
         singer_type: str,
-        value: SingerValue,
+        value: t.JsonValue,
     ) -> FlextResult[str | None]:
         """Convert Singer scalar/list/map values for LDAP persistence."""
         try:
@@ -74,7 +74,7 @@ class LDAPTypeConverter:
             logger.warning("Type conversion failed for %s: %s", singer_type, str(e))  # noqa: RUF065
             return FlextResult[str | None].ok(str(value))
 
-    def _normalize_bool(self, value: SingerValue) -> str:
+    def _normalize_bool(self, value: t.JsonValue) -> str:
         """Normalize multiple boolean-like forms to LDAP literals."""
         match value:
             case bool() as flag:
@@ -99,14 +99,14 @@ class LDAPDataTransformer:
 
     def transform_record(
         self,
-        record: SingerRecord,
+        record: dict[str, t.JsonValue],
         schema: SingerSchemaDefinition
         | Mapping[str, Mapping[str, Mapping[str, str] | str]]
         | None = None,
-    ) -> FlextResult[TransformedRecord]:
+    ) -> FlextResult[dict[str, str | None]]:
         """Transform Singer record for LDAP storage."""
         try:
-            transformed: TransformedRecord = {}
+            transformed: dict[str, str | None] = {}
             schema_model = SingerSchemaDefinition.model_validate(schema or {})
 
             for key, value in record.items():
@@ -122,11 +122,11 @@ class LDAPDataTransformer:
                     convert_result.data if convert_result.is_success else str(value)
                 )
 
-            return FlextResult[TransformedRecord].ok(transformed)
+            return FlextResult[dict[str, str | None]].ok(transformed)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
-            return FlextResult[TransformedRecord].fail(
+            return FlextResult[dict[str, str | None]].fail(
                 f"Record transformation failed: {e}",
             )
 
@@ -148,9 +148,9 @@ class LDAPDataTransformer:
 
     def prepare_ldap_attributes(
         self,
-        record: SingerRecord,
+        record: dict[str, t.JsonValue],
         object_classes: list[str],
-    ) -> FlextResult[LdapAttributeMap]:
+    ) -> FlextResult[dict[str, list[str]]]:
         """Prepare attributes for LDAP entry creation."""
         try:
             attributes: dict[str, list[str]] = {}
@@ -161,17 +161,17 @@ class LDAPDataTransformer:
                 if value is not None:
                     attributes[key] = self._to_ldap_values(value)
 
-            return FlextResult[LdapAttributeMap].ok(
+            return FlextResult[dict[str, list[str]]].ok(
                 attributes,
             )
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return FlextResult[LdapAttributeMap].fail(
+            return FlextResult[dict[str, list[str]]].fail(
                 f"Attribute preparation failed: {e}",
             )
 
-    def _to_ldap_values(self, value: SingerValue) -> list[str]:
+    def _to_ldap_values(self, value: t.JsonValue) -> list[str]:
         """Normalize incoming Singer value to LDAP list values."""
         match value:
             case list() as values:
@@ -265,7 +265,7 @@ class LDAPEntryManager:
 
     def generate_dn(
         self,
-        record: SingerRecord,
+        record: dict[str, t.JsonValue],
         base_dn: str,
         rdn_attribute: str = "cn",
     ) -> FlextResult[str]:
@@ -320,7 +320,7 @@ class LDAPEntryManager:
 
     def determine_object_classes(
         self,
-        record: SingerRecord,
+        record: dict[str, t.JsonValue],
         stream_name: str,
     ) -> FlextResult[list[str]]:
         """Determine appropriate object classes for LDAP entry."""
@@ -355,7 +355,7 @@ class LDAPEntryManager:
 
     def validate_entry_attributes(
         self,
-        attributes: LdapAttributeMap,
+        attributes: dict[str, list[str]],
         object_classes: list[str],
     ) -> FlextResult[bool]:
         """Validate LDAP entry attributes against object class requirements."""
@@ -386,10 +386,10 @@ class LDAPEntryManager:
         self,
         current_attrs: Mapping[str, str | list[str] | None],
         new_attrs: Mapping[str, str | list[str] | None],
-    ) -> FlextResult[ModifyMap]:
+    ) -> FlextResult[dict[str, list[tuple[str, list[str]]]]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: ModifyMap = {}
+            changes: dict[str, list[tuple[str, list[str]]]] = {}
 
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
 
@@ -407,11 +407,11 @@ class LDAPEntryManager:
                         values = self._normalize_modify_values(new_value)
                         changes[attr] = [("MODIFY_REPLACE", values)]
 
-            return FlextResult[ModifyMap].ok(changes)
+            return FlextResult[dict[str, list[tuple[str, list[str]]]]].ok(changes)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return FlextResult[ModifyMap].fail(
+            return FlextResult[dict[str, list[tuple[str, list[str]]]]].fail(
                 f"Modify changes preparation failed: {e}",
             )
 
