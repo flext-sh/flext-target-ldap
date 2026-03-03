@@ -10,6 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from flext_target_ldap import (
     LdapBaseSink,
     LdapGroupsSink,

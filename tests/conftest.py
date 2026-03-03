@@ -13,8 +13,9 @@ from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
-from flext_target_ldap import LdapTargetClient, t
 from flext_tests import FlextTestsDocker
+
+from flext_target_ldap import LdapTargetClient, t
 
 
 @pytest.fixture(scope="session")

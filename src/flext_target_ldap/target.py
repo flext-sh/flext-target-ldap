@@ -45,10 +45,12 @@ class _DefaultCliHelper:
 def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
     """Create a default CLI helper."""
     if quiet:
+
         class _QuietHelper(_DefaultCliHelper):
             @override
             def print(self, msg: str) -> None:
                 self._logger.debug("%s", msg)
+
         return _QuietHelper()
     return _DefaultCliHelper()
 
