@@ -257,7 +257,7 @@ class LDAPBaseSink(Sink):
         _record: Mapping[str, t.ContainerValue],
     ) -> FlextResult[dict[str, t.ContainerValue]]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return FlextResult[dict[str, t.ContainerValue]].fail(
+        return FlextResult[t.ConfigurationMapping].fail(
             "build_attributes must be implemented in subclass",
         )
 
@@ -335,7 +335,7 @@ class UsersSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return FlextResult[dict[str, t.ContainerValue]].ok(attrs)
+        return FlextResult[t.ConfigurationMapping].ok(attrs)
 
     @override
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
@@ -521,7 +521,7 @@ class GroupsSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return FlextResult[dict[str, t.ContainerValue]].ok(attrs)
+        return FlextResult[t.ConfigurationMapping].ok(attrs)
 
     @override
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:

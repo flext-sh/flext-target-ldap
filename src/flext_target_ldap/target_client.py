@@ -265,7 +265,7 @@ class LdapTargetClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.Ldap.ConnectionConfig | dict[str, t.ContainerValue],
+        config: FlextLdapModels.Ldap.ConnectionConfig | t.ConfigurationMapping,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if u.is_dict_like(config):

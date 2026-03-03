@@ -68,7 +68,7 @@ class SingerTargetLDAP:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return FlextResult[dict[str, t.ContainerValue]].ok(result)
+            return FlextResult[t.ConfigurationMapping].ok(result)
 
         except (
             ValueError,
@@ -80,7 +80,7 @@ class SingerTargetLDAP:
             ImportError,
         ) as e:
             logger.exception("Singer message processing failed")
-            return FlextResult[dict[str, t.ContainerValue]].fail(
+            return FlextResult[t.ConfigurationMapping].fail(
                 f"Message processing failed: {e}",
             )
 
