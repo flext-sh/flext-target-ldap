@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
 
-type Primitive = str | int | float | bool | None
+type Primitive = t.JsonPrimitive | None
 type SingerValue = Primitive | list[Primitive] | dict[str, Primitive | list[Primitive]]
 type SingerRecord = dict[str, SingerValue]
 type TransformedRecord = dict[str, str | None]

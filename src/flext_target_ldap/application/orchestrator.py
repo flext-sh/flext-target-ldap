@@ -40,7 +40,7 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[Mapping[str, str | int | float | bool | None]],
+        records: list[Mapping[str, t.JsonPrimitive | None]],
     ) -> FlextResult[Mapping[str, str | int]]:
         """Orchestrate data loading to LDAP target.
 

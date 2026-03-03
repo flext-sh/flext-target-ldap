@@ -193,7 +193,7 @@ class LdapTargetMappingSettings(FlextSettings):
             return FlextResult[bool].fail(f"Mapping settings validation failed: {e}")
 
 
-def _target_config_to_int(value: t.GeneralValueType, default: int) -> int:
+def _target_config_to_int(value: t.ContainerValue, default: int) -> int:
     """Convert value to int for target config."""
     match value:
         case bool():
@@ -210,7 +210,7 @@ def _target_config_to_int(value: t.GeneralValueType, default: int) -> int:
 
 
 def _target_config_to_bool(
-    value: t.GeneralValueType,
+    value: t.ContainerValue,
     *,
     default: bool,
 ) -> bool:
@@ -226,13 +226,13 @@ def _target_config_to_bool(
             return default
 
 
-def _target_config_to_str(value: t.GeneralValueType, default: str = "") -> str:
+def _target_config_to_str(value: t.ContainerValue, default: str = "") -> str:
     """Convert value to str for target config."""
     return str(value) if value is not None else default
 
 
 def _target_config_to_str_list(
-    value: t.GeneralValueType,
+    value: t.ContainerValue,
     default: list[str],
 ) -> list[str]:
     """Convert value to string list."""
@@ -242,7 +242,7 @@ def _target_config_to_str_list(
 
 
 def _build_target_connection_config(
-    config: dict[str, t.GeneralValueType],
+    config: dict[str, t.ContainerValue],
 ) -> FlextLdapModels.Ldap.ConnectionConfig:
     """Build connection config for target."""
     server = _target_config_to_str(config.get("host", "localhost"), "localhost")
@@ -262,7 +262,7 @@ def _build_target_connection_config(
     )
 
 
-def _extract_target_max_records(config: dict[str, t.GeneralValueType]) -> int | None:
+def _extract_target_max_records(config: dict[str, t.ContainerValue]) -> int | None:
     """Extract max records from config."""
     max_records_val = config.get("max_records")
     match max_records_val:
@@ -280,7 +280,7 @@ def _extract_target_max_records(config: dict[str, t.GeneralValueType]) -> int | 
 
 
 def validate_ldap_target_config(
-    config: dict[str, t.GeneralValueType],
+    config: dict[str, t.ContainerValue],
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
@@ -303,7 +303,7 @@ def validate_ldap_target_config(
             default=False,
         )
 
-        raw_attr_map_value: t.GeneralValueType = config.get("attribute_mapping", {})
+        raw_attr_map_value: t.ContainerValue = config.get("attribute_mapping", {})
         attribute_mapping: dict[str, str] = (
             {str(k): str(v) for k, v in raw_attr_map_value.items()}
             if u.is_dict_like(raw_attr_map_value)

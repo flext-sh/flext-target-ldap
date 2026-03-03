@@ -103,7 +103,7 @@ class FlextTargetLdapSettings(FlextSettings):
     def get_or_create_shared_instance(
         cls,
         project_name: str,
-        **overrides: t.GeneralValueType,
+        **overrides: t.ContainerValue,
     ) -> Self:
         """Get or create a shared instance of settings.
 
@@ -119,9 +119,9 @@ class FlextTargetLdapSettings(FlextSettings):
         return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
 
     @classmethod
-    def create_for_development(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_development(cls, **overrides: t.ContainerValue) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: dict[str, t.GeneralValueType] = {
+        dev_overrides: dict[str, t.ContainerValue] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 2,
             "receive_timeout": c.Network.DEFAULT_TIMEOUT + 15,
             "batch_size": c.Performance.BatchProcessing.DEFAULT_SIZE // 20,
@@ -135,9 +135,9 @@ class FlextTargetLdapSettings(FlextSettings):
         )
 
     @classmethod
-    def create_for_production(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_production(cls, **overrides: t.ContainerValue) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: dict[str, t.GeneralValueType] = {
+        prod_overrides: dict[str, t.ContainerValue] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 3,
             "receive_timeout": c.Network.DEFAULT_TIMEOUT,
             "batch_size": c.Performance.BatchProcessing.DEFAULT_SIZE,
@@ -152,9 +152,9 @@ class FlextTargetLdapSettings(FlextSettings):
         )
 
     @classmethod
-    def create_for_testing(cls, **overrides: t.GeneralValueType) -> Self:
+    def create_for_testing(cls, **overrides: t.ContainerValue) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: dict[str, t.GeneralValueType] = {
+        test_overrides: dict[str, t.ContainerValue] = {
             "connect_timeout": c.Network.DEFAULT_TIMEOUT // 6,
             "receive_timeout": c.Network.DEFAULT_TIMEOUT // 2,
             "batch_size": c.Performance.BatchProcessing.DEFAULT_SIZE // 100,
@@ -217,7 +217,7 @@ class LDAPOperationSettings(FlextModels):
 
 
 def validate_ldap_config(
-    config: dict[str, t.GeneralValueType],
+    config: dict[str, t.ContainerValue],
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:

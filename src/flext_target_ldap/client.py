@@ -34,7 +34,7 @@ class LDAPConnectionProtocol(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: list[t.GeneralValueType]
+    entries: list[t.ContainerValue]
 
     def bind(self) -> bool:
         """Bind to LDAP server."""
@@ -48,12 +48,12 @@ class LDAPConnectionProtocol(Protocol):
         self,
         dn: str,
         object_classes: list[str],
-        attributes: Mapping[str, t.GeneralValueType],
+        attributes: Mapping[str, t.ContainerValue],
     ) -> bool:
         """Add LDAP entry."""
         ...
 
-    def modify(self, dn: str, changes: Mapping[str, t.GeneralValueType]) -> bool:
+    def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
         """Modify LDAP entry."""
         ...
 
@@ -75,7 +75,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    def __init__(self, dn: str, attributes: dict[str, t.GeneralValueType]) -> None:
+    def __init__(self, dn: str, attributes: dict[str, t.ContainerValue]) -> None:
         """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
@@ -96,12 +96,12 @@ class LDAPClient:
     def __init__(
         self,
         config: FlextLdapModels.Ldap.ConnectionConfig
-        | Mapping[str, t.GeneralValueType],
+        | t.ConfigurationMapping,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         match config:
             case Mapping():
-                # Convert dict[str, t.GeneralValueType] to proper FlextLdapModels.ConnectionConfig
+                # Convert dict[str, t.ContainerValue] to proper FlextLdapModels.ConnectionConfig
                 self.config: FlextLdapModels.Ldap.ConnectionConfig = (
                     FlextLdapModels.Ldap.ConnectionConfig(
                         host=str(config.get("host", "localhost")),
@@ -247,7 +247,7 @@ class LDAPClient:
             def __init__(self, session_id: str) -> None:
                 self.session_id = session_id
                 self.bound = True
-                self.entries: list[t.GeneralValueType] = []
+                self.entries: list[t.ContainerValue] = []
 
             def bind(self) -> bool:
                 return True
@@ -264,7 +264,7 @@ class LDAPClient:
                 self,
                 dn: str,
                 object_classes: list[str],
-                attributes: Mapping[str, t.GeneralValueType],
+                attributes: Mapping[str, t.ContainerValue],
             ) -> bool:
                 _ = dn, object_classes, attributes
                 return True
@@ -272,7 +272,7 @@ class LDAPClient:
             def modify(
                 self,
                 dn: str,
-                changes: Mapping[str, t.GeneralValueType],
+                changes: Mapping[str, t.ContainerValue],
             ) -> bool:
                 _ = dn, changes
                 return True
@@ -354,7 +354,7 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, t.GeneralValueType],
+        attributes: dict[str, t.ContainerValue],
         object_classes: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
@@ -380,7 +380,7 @@ class LDAPClient:
     def modify_entry(
         self,
         dn: str,
-        changes: dict[str, t.GeneralValueType],
+        changes: dict[str, t.ContainerValue],
     ) -> FlextResult[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
@@ -425,16 +425,16 @@ class LDAPClient:
             with self.get_connection() as conn:
                 # conn is now properly typed as LDAPConnectionProtocol
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: list[t.GeneralValueType] = (
+                raw_entries: list[t.ContainerValue] = (
                     conn.entries if hasattr(conn, "entries") else []
                 )
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     dn = raw.entry_dn if hasattr(raw, "entry_dn") else ""
-                    attr_names: list[t.GeneralValueType] = (
+                    attr_names: list[t.ContainerValue] = (
                         raw.entry_attributes if hasattr(raw, "entry_attributes") else []
                     )
-                    attrs: dict[str, t.GeneralValueType] = {}
+                    attrs: dict[str, t.ContainerValue] = {}
                     for name in attr_names:
                         name_str = str(name)
                         try:

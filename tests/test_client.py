@@ -25,7 +25,7 @@ class TestLDAPClient:
     @pytest.fixture
     def client(
         self,
-        mock_ldap_config: dict[str, t.GeneralValueType],
+        mock_ldap_config: dict[str, t.ContainerValue],
     ) -> LdapTargetClient:
         """Create test LDAP client instance."""
         return LdapTargetClient(config=mock_ldap_config)

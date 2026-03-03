@@ -24,7 +24,7 @@ class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
     @override
-    def __init__(self, config: dict[str, t.GeneralValueType] | None = None) -> None:
+    def __init__(self, config: dict[str, t.ContainerValue] | None = None) -> None:
         """Initialize Singer LDAP target.
 
         Args:
@@ -34,13 +34,13 @@ class SingerTargetLDAP:
         object: Description of return value.
 
         """
-        self.config: dict[str, t.GeneralValueType] = config or {}
+        self.config: dict[str, t.ContainerValue] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, t.GeneralValueType]],
-    ) -> FlextResult[dict[str, t.GeneralValueType]]:
+        messages: list[dict[str, t.ContainerValue]],
+    ) -> FlextResult[dict[str, t.ContainerValue]]:
         """Process Singer messages for LDAP target.
 
         Args:
@@ -59,7 +59,7 @@ class SingerTargetLDAP:
                 # Process individual Singer message
                 processed_count += 1
 
-            result: dict[str, t.GeneralValueType] = {
+            result: dict[str, t.ContainerValue] = {
                 "processed_messages": processed_count,
                 "status": "completed",
             }
@@ -68,7 +68,7 @@ class SingerTargetLDAP:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return FlextResult[dict[str, t.GeneralValueType]].ok(result)
+            return FlextResult[dict[str, t.ContainerValue]].ok(result)
 
         except (
             ValueError,
@@ -80,7 +80,7 @@ class SingerTargetLDAP:
             ImportError,
         ) as e:
             logger.exception("Singer message processing failed")
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
+            return FlextResult[dict[str, t.ContainerValue]].fail(
                 f"Message processing failed: {e}",
             )
 

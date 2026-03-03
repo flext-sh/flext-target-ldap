@@ -33,7 +33,7 @@ class TestTargetLDAPIntegration:
     def config_file(
         self,
         tmp_path: Path,
-        mock_ldap_config: dict[str, t.GeneralValueType],
+        mock_ldap_config: dict[str, t.ContainerValue],
     ) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
@@ -238,7 +238,7 @@ class TestTargetLDAPIntegration:
         self,
         runner: Mock,
         tmp_path: Path,
-        mock_ldap_config: dict[str, t.GeneralValueType],
+        mock_ldap_config: dict[str, t.ContainerValue],
     ) -> None:
         """Test DN template usage for record processing."""
         # Add DN template to config
