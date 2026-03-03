@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from typing import override
+from typing import cast, override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, t
 from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
@@ -109,9 +109,12 @@ class LDAPDataTransformer:
                     singer_type,
                     value,
                 )
-                transformed[ldap_key] = (
-                    convert_result.data if convert_result.is_success else str(value)
+                converted_value: str | None = (
+                    cast("str | None", convert_result.value)
+                    if convert_result.is_success
+                    else str(value)
                 )
+                transformed[ldap_key] = converted_value
 
             return FlextResult[dict[str, str | None]].ok(transformed)
 
@@ -195,11 +198,12 @@ class LDAPSchemaMapper:
                     prop_def,
                     object_class,
                 )
-                ldap_attributes[ldap_name] = (
-                    ldap_type_result.data
-                    if ldap_type_result.is_success and ldap_type_result.data
+                mapped_type: str = (
+                    str(ldap_type_result.value)
+                    if ldap_type_result.is_success and ldap_type_result.value
                     else "DirectoryString"
                 )
+                ldap_attributes[ldap_name] = mapped_type
 
             return FlextResult[Mapping[str, str]].ok(ldap_attributes)
 

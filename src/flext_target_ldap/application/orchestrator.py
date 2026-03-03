@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, t
 
 logger: FlextLogger = FlextLogger(__name__)
 
@@ -40,7 +40,7 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[Mapping[str, t.JsonPrimitive | None]],
+        records: list[Mapping[str, t.Scalar | None]],
     ) -> FlextResult[Mapping[str, str | int]]:
         """Orchestrate data loading to LDAP target.
 
