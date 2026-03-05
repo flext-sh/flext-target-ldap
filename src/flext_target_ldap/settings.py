@@ -24,6 +24,7 @@ from .typings import t
 from .utilities import FlextTargetLdapUtilities
 
 
+@FlextSettings.auto_register("target_ldap")
 class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration using consolidated patterns with FLEXT standards."""
 
