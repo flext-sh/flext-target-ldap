@@ -112,16 +112,16 @@ class LDAPProcessingResult:
             return 0.0
         return (self.success_count / self.processed_count) * 100.0
 
-    def add_success(self) -> None:
-        """Record a successful operation."""
-        self.processed_count += 1
-        self.success_count += 1
-
     def add_error(self, error_message: str) -> None:
         """Record a failed operation."""
         self.processed_count += 1
         self.error_count += 1
         self.errors.append(error_message)
+
+    def add_success(self) -> None:
+        """Record a successful operation."""
+        self.processed_count += 1
+        self.success_count += 1
 
 
 class LDAPBaseSink(Sink):
@@ -143,44 +143,47 @@ class LDAPBaseSink(Sink):
         self._client: LDAPClient | None = None
         self._processing_result: LDAPProcessingResult = LDAPProcessingResult()
 
-    def setup_client(self) -> FlextResult[LDAPClient]:
-        """Set up LDAP client connection."""
-        try:
-            connection_config = {
-                "host": self._target.config.get("host", "localhost"),
-                "port": self._target.config.get(
-                    "port",
-                    c.TargetLdap.Connection.DEFAULT_PORT,
-                ),
-                "use_ssl": self._target.config.get("use_ssl", False),
-                "bind_dn": self._target.config.get("bind_dn", ""),
-                "password": self._target.config.get("password", ""),
-                "timeout": self._target.config.get("timeout", 30),
-            }
+    def build_attributes(
+        self,
+        _record: Mapping[str, t.ContainerValue],
+    ) -> FlextResult[dict[str, t.ContainerValue]]:
+        """Build LDAP attributes from record. Override in subclasses."""
+        return FlextResult[t.ConfigurationMapping].fail(
+            "build_attributes must be implemented in subclass",
+        )
 
-            self.client = LDAPClient(connection_config)
-            connect_result: FlextResult[str] = self.client.connect()
+    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> FlextResult[str]:
+        """Build distinguished name from record. Override in subclasses."""
+        # Generic: try explicit dn field first
+        dn = record.get("dn")
+        if isinstance(dn, str) and dn:
+            return FlextResult[str].ok(dn)
+        # Try id or cn fields
+        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+        entry_id = record.get("id") or record.get("cn") or record.get("name")
+        if isinstance(entry_id, str) and entry_id:
+            return FlextResult[str].ok(f"cn={entry_id},{base_dn}")
+        return FlextResult[str].fail(
+            "build_dn must be implemented in subclass: No ID or name found for generic entry",
+        )
 
-            if not connect_result.is_success:
-                return FlextResult[LDAPClient].fail(
-                    f"LDAP connection failed: {connect_result.error}",
-                )
+    def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
+        """Get object classes for entry."""
+        # Check record for object classes
+        record_classes = record.get("object_classes")
+        if u.Guards.is_list(record_classes):
+            return [str(c) for c in record_classes]
+        if isinstance(record_classes, str):
+            return [record_classes]
+        # Check config for custom classes
+        configured_classes = self._target.config.get("generic_object_classes")
+        if u.Guards.is_list(configured_classes):
+            return [str(c) for c in configured_classes]
+        return ["top"]
 
-            logger.info("LDAP client setup successful for stream: %s", self.stream_name)
-            return FlextResult[LDAPClient].ok(self.client)
-
-        except (RuntimeError, ValueError, TypeError) as e:
-            error_msg: str = f"LDAP client setup failed: {e}"
-            logger.exception(error_msg)
-            return FlextResult[LDAPClient].fail(error_msg)
-
-    def teardown_client(self) -> None:
-        """Teardown LDAP client connection."""
-        if self.client:
-            # Disconnect using client API (sync)
-            _ = self.client.disconnect()
-            self.client = None
-            logger.info("LDAP client disconnected for stream: %s", self.stream_name)
+    def get_processing_result(self) -> LDAPProcessingResult:
+        """Get processing results."""
+        return self._processing_result
 
     def process_batch(self, _context: Mapping[str, t.ContainerValue]) -> None:
         """Process a batch of records."""
@@ -237,43 +240,44 @@ class LDAPBaseSink(Sink):
             self._processing_result.add_error(error_msg)
             return FlextResult[bool].fail(error_msg)
 
-    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> FlextResult[str]:
-        """Build distinguished name from record. Override in subclasses."""
-        # Generic: try explicit dn field first
-        dn = record.get("dn")
-        if isinstance(dn, str) and dn:
-            return FlextResult[str].ok(dn)
-        # Try id or cn fields
-        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
-        entry_id = record.get("id") or record.get("cn") or record.get("name")
-        if isinstance(entry_id, str) and entry_id:
-            return FlextResult[str].ok(f"cn={entry_id},{base_dn}")
-        return FlextResult[str].fail(
-            "build_dn must be implemented in subclass: No ID or name found for generic entry",
-        )
+    def setup_client(self) -> FlextResult[LDAPClient]:
+        """Set up LDAP client connection."""
+        try:
+            connection_config = {
+                "host": self._target.config.get("host", "localhost"),
+                "port": self._target.config.get(
+                    "port",
+                    c.TargetLdap.Connection.DEFAULT_PORT,
+                ),
+                "use_ssl": self._target.config.get("use_ssl", False),
+                "bind_dn": self._target.config.get("bind_dn", ""),
+                "password": self._target.config.get("password", ""),
+                "timeout": self._target.config.get("timeout", 30),
+            }
 
-    def build_attributes(
-        self,
-        _record: Mapping[str, t.ContainerValue],
-    ) -> FlextResult[dict[str, t.ContainerValue]]:
-        """Build LDAP attributes from record. Override in subclasses."""
-        return FlextResult[t.ConfigurationMapping].fail(
-            "build_attributes must be implemented in subclass",
-        )
+            self.client = LDAPClient(connection_config)
+            connect_result: FlextResult[str] = self.client.connect()
 
-    def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
-        """Get object classes for entry."""
-        # Check record for object classes
-        record_classes = record.get("object_classes")
-        if u.Guards.is_list(record_classes):
-            return [str(c) for c in record_classes]
-        if isinstance(record_classes, str):
-            return [record_classes]
-        # Check config for custom classes
-        configured_classes = self._target.config.get("generic_object_classes")
-        if u.Guards.is_list(configured_classes):
-            return [str(c) for c in configured_classes]
-        return ["top"]
+            if not connect_result.is_success:
+                return FlextResult[LDAPClient].fail(
+                    f"LDAP connection failed: {connect_result.error}",
+                )
+
+            logger.info("LDAP client setup successful for stream: %s", self.stream_name)
+            return FlextResult[LDAPClient].ok(self.client)
+
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg: str = f"LDAP client setup failed: {e}"
+            logger.exception(error_msg)
+            return FlextResult[LDAPClient].fail(error_msg)
+
+    def teardown_client(self) -> None:
+        """Teardown LDAP client connection."""
+        if self.client:
+            # Disconnect using client API (sync)
+            _ = self.client.disconnect()
+            self.client = None
+            logger.info("LDAP client disconnected for stream: %s", self.stream_name)
 
     def validate_entry(
         self,
@@ -297,10 +301,6 @@ class LDAPBaseSink(Sink):
                     return FlextResult[bool].fail(f"Invalid DN: {dn}")
         return FlextResult[bool].ok(value=True)
 
-    def get_processing_result(self) -> LDAPProcessingResult:
-        """Get processing results."""
-        return self._processing_result
-
 
 class UsersSink(LDAPBaseSink):
     """LDAP sink for user entries."""
@@ -309,18 +309,6 @@ class UsersSink(LDAPBaseSink):
         "emails": "mail",
         "phone_numbers": "telephoneNumber",
     }
-
-    @override
-    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> FlextResult[str]:
-        """Build DN for user entry."""
-        rdn_attr = str(self._target.config.get("user_rdn_attribute", "uid"))
-        uid = record.get(rdn_attr)
-        if not uid:
-            return FlextResult[str].fail(
-                f"No value found for RDN attribute '{rdn_attr}'",
-            )
-        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
-        return FlextResult[str].ok(f"{rdn_attr}={uid},{base_dn}")
 
     @override
     def build_attributes(
@@ -336,6 +324,76 @@ class UsersSink(LDAPBaseSink):
             elif v is not None:
                 attrs[target_key] = [str(v)]
         return FlextResult[t.ConfigurationMapping].ok(attrs)
+
+    @override
+    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> FlextResult[str]:
+        """Build DN for user entry."""
+        rdn_attr = str(self._target.config.get("user_rdn_attribute", "uid"))
+        uid = record.get(rdn_attr)
+        if not uid:
+            return FlextResult[str].fail(
+                f"No value found for RDN attribute '{rdn_attr}'",
+            )
+        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+        return FlextResult[str].ok(f"{rdn_attr}={uid},{base_dn}")
+
+    def build_user_attributes(
+        self,
+        record: Mapping[str, t.ContainerValue],
+    ) -> dict[str, t.ContainerValue]:
+        """Build LDAP attributes for user entry."""
+        object_classes = self._target.config.get(
+            "object_classes",
+            ["inetOrgPerson", "person"],
+        )
+        attributes: dict[str, t.ContainerValue] = {
+            "objectClass": object_classes.copy()
+            if u.Guards.is_list(object_classes)
+            else ["inetOrgPerson", "person"],
+        }
+
+        obj_classes = attributes.get("objectClass")
+        if u.Guards.is_list(obj_classes):
+            if "person" not in obj_classes:
+                obj_classes.append("person")
+            if "inetOrgPerson" not in obj_classes:
+                obj_classes.append("inetOrgPerson")
+
+        field_mapping = {
+            "username": "uid",
+            "email": "mail",
+            "first_name": "givenName",
+            "last_name": "sn",
+            "full_name": "cn",
+            "phone": "telephoneNumber",
+            "department": "departmentNumber",
+            "title": "title",
+        }
+
+        for singer_field, ldap_attr in field_mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[ldap_attr] = [str(value)]
+
+        mapping_val = self._target.config.get(
+            "attribute_mapping",
+            {},
+        )
+        raw_mapping: dict[str, t.ContainerValue] = (
+            dict(mapping_val) if u.is_dict_like(mapping_val) else {}
+        )
+        mapping: dict[str, str] = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = [str(value)]
+
+        return attributes
 
     @override
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
@@ -433,79 +491,9 @@ class UsersSink(LDAPBaseSink):
             self._processing_result.add_error(error_msg)
             return FlextResult[bool].fail(error_msg)
 
-    def build_user_attributes(
-        self,
-        record: Mapping[str, t.ContainerValue],
-    ) -> dict[str, t.ContainerValue]:
-        """Build LDAP attributes for user entry."""
-        object_classes = self._target.config.get(
-            "object_classes",
-            ["inetOrgPerson", "person"],
-        )
-        attributes: dict[str, t.ContainerValue] = {
-            "objectClass": object_classes.copy()
-            if u.Guards.is_list(object_classes)
-            else ["inetOrgPerson", "person"],
-        }
-
-        obj_classes = attributes.get("objectClass")
-        if u.Guards.is_list(obj_classes):
-            if "person" not in obj_classes:
-                obj_classes.append("person")
-            if "inetOrgPerson" not in obj_classes:
-                obj_classes.append("inetOrgPerson")
-
-        field_mapping = {
-            "username": "uid",
-            "email": "mail",
-            "first_name": "givenName",
-            "last_name": "sn",
-            "full_name": "cn",
-            "phone": "telephoneNumber",
-            "department": "departmentNumber",
-            "title": "title",
-        }
-
-        for singer_field, ldap_attr in field_mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = [str(value)]
-
-        mapping_val = self._target.config.get(
-            "attribute_mapping",
-            {},
-        )
-        raw_mapping: dict[str, t.ContainerValue] = (
-            dict(mapping_val) if u.is_dict_like(mapping_val) else {}
-        )
-        mapping: dict[str, str] = {}
-        for k, v in raw_mapping.items():
-            match v:
-                case str():
-                    mapping[k] = str(v)
-
-        for singer_field, mapped_attr in mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[mapped_attr] = [str(value)]
-
-        return attributes
-
 
 class GroupsSink(LDAPBaseSink):
     """LDAP sink for group entries."""
-
-    @override
-    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> FlextResult[str]:
-        """Build DN for group entry."""
-        rdn_attr = str(self._target.config.get("group_rdn_attribute", "cn"))
-        cn = record.get(rdn_attr)
-        if not cn:
-            return FlextResult[str].fail(
-                f"No value found for RDN attribute '{rdn_attr}'",
-            )
-        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
-        return FlextResult[str].ok(f"{rdn_attr}={cn},{base_dn}")
 
     @override
     def build_attributes(
@@ -522,6 +510,18 @@ class GroupsSink(LDAPBaseSink):
             elif v is not None:
                 attrs[target_key] = [str(v)]
         return FlextResult[t.ConfigurationMapping].ok(attrs)
+
+    @override
+    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> FlextResult[str]:
+        """Build DN for group entry."""
+        rdn_attr = str(self._target.config.get("group_rdn_attribute", "cn"))
+        cn = record.get(rdn_attr)
+        if not cn:
+            return FlextResult[str].fail(
+                f"No value found for RDN attribute '{rdn_attr}'",
+            )
+        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+        return FlextResult[str].ok(f"{rdn_attr}={cn},{base_dn}")
 
     @override
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:

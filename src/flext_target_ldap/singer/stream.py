@@ -43,16 +43,6 @@ class SingerLDAPStreamProcessor:
         """Initialize Singer LDAP stream processor."""
         self._stream_stats: dict[str, LDAPStreamProcessingStats] = {}
 
-    def initialize_stream(self, stream_name: str) -> FlextResult[bool]:
-        """Initialize LDAP stream processing."""
-        try:
-            self._stream_stats[stream_name] = LDAPStreamProcessingStats(stream_name)
-            logger.info("Initialized LDAP stream processing: %s", stream_name)
-            return FlextResult[bool].ok(value=True)
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("LDAP stream initialization failed: %s", stream_name)
-            return FlextResult[bool].fail(f"Stream initialization failed: {e}")
-
     def get_stream_stats(
         self,
         stream_name: str,
@@ -65,6 +55,16 @@ class SingerLDAPStreamProcessor:
         return FlextResult[LDAPStreamProcessingStats].ok(
             self._stream_stats[stream_name],
         )
+
+    def initialize_stream(self, stream_name: str) -> FlextResult[bool]:
+        """Initialize LDAP stream processing."""
+        try:
+            self._stream_stats[stream_name] = LDAPStreamProcessingStats(stream_name)
+            logger.info("Initialized LDAP stream processing: %s", stream_name)
+            return FlextResult[bool].ok(value=True)
+        except (RuntimeError, ValueError, TypeError) as e:
+            logger.exception("LDAP stream initialization failed: %s", stream_name)
+            return FlextResult[bool].fail(f"Stream initialization failed: {e}")
 
 
 __all__: list[str] = [

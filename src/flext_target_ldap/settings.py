@@ -101,25 +101,6 @@ class FlextTargetLdapSettings(FlextSettings):
     )
 
     @classmethod
-    def get_or_create_shared_instance(
-        cls,
-        project_name: str,
-        **overrides: t.ContainerValue,
-    ) -> Self:
-        """Get or create a shared instance of settings.
-
-        Follows singleton-like pattern for settings management.
-        """
-        _ = project_name
-        return cls.model_validate(overrides)
-
-    @classmethod
-    @override
-    def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextSettings pattern."""
-        return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
-
-    @classmethod
     def create_for_development(cls, **overrides: t.ContainerValue) -> Self:
         """Create configuration for development environment."""
         dev_overrides: dict[str, t.ContainerValue] = {
@@ -168,6 +149,25 @@ class FlextTargetLdapSettings(FlextSettings):
             project_name="flext-target-ldap",
             **test_overrides,
         )
+
+    @classmethod
+    @override
+    def get_global_instance(cls) -> Self:
+        """Get the global singleton instance using enhanced FlextSettings pattern."""
+        return cls.get_or_create_shared_instance(project_name="flext-target-ldap")
+
+    @classmethod
+    def get_or_create_shared_instance(
+        cls,
+        project_name: str,
+        **overrides: t.ContainerValue,
+    ) -> Self:
+        """Get or create a shared instance of settings.
+
+        Follows singleton-like pattern for settings management.
+        """
+        _ = project_name
+        return cls.model_validate(overrides)
 
     # Use SettingsConfigDict for Settings configuration
 

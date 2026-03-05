@@ -160,6 +160,28 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     v.append("top")
                 return v
 
+            def get_attribute_values(
+                self,
+                attribute_name: str,
+            ) -> list[str]:
+                """Get values for a specific attribute."""
+                return self.attributes.get(attribute_name, [])
+
+            def get_parent_dn(self) -> str:
+                """Get the parent DN by removing the RDN."""
+                parts = self.distinguished_name.split(",", 1)
+                return parts[1].strip() if len(parts) > 1 else ""
+
+            def get_rdn(self) -> str:
+                """Get the Relative Distinguished Name (RDN) from the DN."""
+                return self.distinguished_name.split(",")[0].strip()
+
+            def has_object_class(self, object_class: str) -> bool:
+                """Check if entry has a specific object class."""
+                return object_class.lower() in [
+                    oc.lower() for oc in self.object_classes
+                ]
+
             def validate_business_rules(self) -> FlextResult[bool]:
                 """Validate LDAP entry business rules."""
                 try:
@@ -210,28 +232,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ) as e:
                     return FlextResult[bool].fail(f"LDAP entry validation failed: {e}")
 
-            def get_rdn(self) -> str:
-                """Get the Relative Distinguished Name (RDN) from the DN."""
-                return self.distinguished_name.split(",")[0].strip()
-
-            def get_parent_dn(self) -> str:
-                """Get the parent DN by removing the RDN."""
-                parts = self.distinguished_name.split(",", 1)
-                return parts[1].strip() if len(parts) > 1 else ""
-
-            def has_object_class(self, object_class: str) -> bool:
-                """Check if entry has a specific object class."""
-                return object_class.lower() in [
-                    oc.lower() for oc in self.object_classes
-                ]
-
-            def get_attribute_values(
-                self,
-                attribute_name: str,
-            ) -> list[str]:
-                """Get values for a specific attribute."""
-                return self.attributes.get(attribute_name, [])
-
         class TransformationResult(FlextLdapModels.Entity):
             """Result of LDAP data transformation operations.
 
@@ -267,6 +267,20 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 description="When transformation was performed",
             )
 
+            @property
+            def success_rate(self) -> float:
+                """Calculate transformation success rate."""
+                total_mappings = len(self.applied_mappings)
+                if total_mappings == 0:
+                    return 0.0
+
+                error_count = len(self.transformation_errors)
+                return ((total_mappings - error_count) / total_mappings) * 100.0
+
+            def has_errors(self) -> bool:
+                """Check if transformation has any errors."""
+                return bool(self.transformation_errors)
+
             def validate_business_rules(self) -> FlextResult[bool]:
                 """Validate transformation result business rules."""
                 try:
@@ -294,20 +308,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     return FlextResult[bool].fail(
                         f"Transformation result validation failed: {e}",
                     )
-
-            @property
-            def success_rate(self) -> float:
-                """Calculate transformation success rate."""
-                total_mappings = len(self.applied_mappings)
-                if total_mappings == 0:
-                    return 0.0
-
-                error_count = len(self.transformation_errors)
-                return ((total_mappings - error_count) / total_mappings) * 100.0
-
-            def has_errors(self) -> bool:
-                """Check if transformation has any errors."""
-                return bool(self.transformation_errors)
 
         class BatchProcessing(FlextLdapModels.Entity):
             """LDAP batch processing configuration and state tracking.
@@ -352,47 +352,15 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 description="Timestamp of last batch processing",
             )
 
-            def validate_business_rules(self) -> FlextResult[bool]:
-                """Validate batch processing business rules."""
-                try:
-                    # Validate batch size doesn't exceed current batch
-                    if len(self.current_batch) > self.batch_size:
-                        return FlextResult[bool].fail(
-                            f"Current batch size ({len(self.current_batch)}) exceeds maximum ({self.batch_size})",
-                        )
-
-                    # Validate counters are consistent
-                    if (
-                        self.successful_operations + self.failed_operations
-                        > self.total_processed
-                    ):
-                        return FlextResult[bool].fail(
-                            "Operation counters exceed total processed count",
-                        )
-
-                    return FlextResult[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
-                    return FlextResult[bool].fail(
-                        f"Batch processing validation failed: {e}",
-                    )
+            @property
+            def current_batch_size(self) -> int:
+                """Get current batch size."""
+                return len(self.current_batch)
 
             @property
             def is_batch_full(self) -> bool:
                 """Check if current batch is full."""
                 return len(self.current_batch) >= self.batch_size
-
-            @property
-            def current_batch_size(self) -> int:
-                """Get current batch size."""
-                return len(self.current_batch)
 
             @property
             def success_rate(self) -> float:
@@ -427,6 +395,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     },
                 )
 
+            def record_failure(self, count: int = 1) -> Self:
+                """Record failed operations (immutable operation)."""
+                return self.model_copy(
+                    update={
+                        "failed_operations": self.failed_operations + count,
+                    },
+                )
+
             def record_success(self, count: int = 1) -> Self:
                 """Record successful operations (immutable operation)."""
                 return self.model_copy(
@@ -435,13 +411,37 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     },
                 )
 
-            def record_failure(self, count: int = 1) -> Self:
-                """Record failed operations (immutable operation)."""
-                return self.model_copy(
-                    update={
-                        "failed_operations": self.failed_operations + count,
-                    },
-                )
+            def validate_business_rules(self) -> FlextResult[bool]:
+                """Validate batch processing business rules."""
+                try:
+                    # Validate batch size doesn't exceed current batch
+                    if len(self.current_batch) > self.batch_size:
+                        return FlextResult[bool].fail(
+                            f"Current batch size ({len(self.current_batch)}) exceeds maximum ({self.batch_size})",
+                        )
+
+                    # Validate counters are consistent
+                    if (
+                        self.successful_operations + self.failed_operations
+                        > self.total_processed
+                    ):
+                        return FlextResult[bool].fail(
+                            "Operation counters exceed total processed count",
+                        )
+
+                    return FlextResult[bool].ok(value=True)
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    return FlextResult[bool].fail(
+                        f"Batch processing validation failed: {e}",
+                    )
 
         class OperationStatistics(FlextLdapModels.Entity):
             """LDAP operation statistics and performance metrics.
@@ -489,6 +489,41 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 description="When processing completed",
             )
 
+            @property
+            def operations_per_second(self) -> float:
+                """Calculate operations per second throughput."""
+                duration = self.total_duration_seconds
+                if math.isclose(duration, 0.0):
+                    return 0.0
+                return self.total_entries_processed / duration
+
+            @property
+            def success_rate(self) -> float:
+                """Calculate overall success rate percentage."""
+                if self.total_entries_processed == 0:
+                    return 0.0
+                successful = (
+                    self.successful_adds
+                    + self.successful_updates
+                    + self.successful_deletes
+                )
+                return (successful / self.total_entries_processed) * 100.0
+
+            @property
+            def total_duration_seconds(self) -> float:
+                """Calculate total processing duration in seconds."""
+                if not self.end_time:
+                    return 0.0
+                return (self.end_time - self.start_time).total_seconds()
+
+            def complete_processing(self) -> Self:
+                """Mark processing as completed (immutable operation)."""
+                return self.model_copy(
+                    update={
+                        "end_time": datetime.now(UTC),
+                    },
+                )
+
             def validate_business_rules(self) -> FlextResult[bool]:
                 """Validate operation statistics business rules."""
                 try:
@@ -525,41 +560,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     return FlextResult[bool].fail(
                         f"Operation statistics validation failed: {e}",
                     )
-
-            @property
-            def success_rate(self) -> float:
-                """Calculate overall success rate percentage."""
-                if self.total_entries_processed == 0:
-                    return 0.0
-                successful = (
-                    self.successful_adds
-                    + self.successful_updates
-                    + self.successful_deletes
-                )
-                return (successful / self.total_entries_processed) * 100.0
-
-            @property
-            def total_duration_seconds(self) -> float:
-                """Calculate total processing duration in seconds."""
-                if not self.end_time:
-                    return 0.0
-                return (self.end_time - self.start_time).total_seconds()
-
-            @property
-            def operations_per_second(self) -> float:
-                """Calculate operations per second throughput."""
-                duration = self.total_duration_seconds
-                if math.isclose(duration, 0.0):
-                    return 0.0
-                return self.total_entries_processed / duration
-
-            def complete_processing(self) -> Self:
-                """Mark processing as completed (immutable operation)."""
-                return self.model_copy(
-                    update={
-                        "end_time": datetime.now(UTC),
-                    },
-                )
 
 
 # Export the unified models class

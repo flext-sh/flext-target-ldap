@@ -65,14 +65,6 @@ class LdapConnectionService:
         """Initialize with LDAP target settings."""
         self._config = config
 
-    def test_connection(self) -> FlextResult[bool]:
-        """Verify LDAP host and base_dn are configured and connection is valid."""
-        if not self._config.connection.host:
-            return FlextResult[bool].fail("LDAP host is required")
-        if not self._config.base_dn:
-            return FlextResult[bool].fail("Base DN is required")
-        return FlextResult[bool].ok(value=True)
-
     def get_connection_info(self) -> Mapping[str, t.ContainerValue]:
         """Return connection parameters as a dict for logging or debugging."""
         return {
@@ -83,6 +75,14 @@ class LdapConnectionService:
             "timeout": self._config.connection.timeout,
         }
 
+    def test_connection(self) -> FlextResult[bool]:
+        """Verify LDAP host and base_dn are configured and connection is valid."""
+        if not self._config.connection.host:
+            return FlextResult[bool].fail("LDAP host is required")
+        if not self._config.base_dn:
+            return FlextResult[bool].fail("Base DN is required")
+        return FlextResult[bool].ok(value=True)
+
 
 class LdapTransformationService:
     """Transform Singer records into LDAP entries with attribute mappings."""
@@ -91,6 +91,52 @@ class LdapTransformationService:
     def __init__(self, config: FlextTargetLdapSettings) -> None:
         """Initialize with LDAP target settings."""
         self._config = config
+
+    def get_default_mappings(self, entry_type: str) -> list[LdapAttributeMappingModel]:
+        """Return default attribute mappings for the given entry type (e.g. users, groups)."""
+        if entry_type == "users":
+            return [
+                LdapAttributeMappingModel(
+                    singer_field_name="username",
+                    ldap_attribute_name="uid",
+                    is_required=True,
+                ),
+                LdapAttributeMappingModel(
+                    singer_field_name="full_name",
+                    ldap_attribute_name="cn",
+                    is_required=True,
+                ),
+                LdapAttributeMappingModel(
+                    singer_field_name="last_name",
+                    ldap_attribute_name="sn",
+                    is_required=True,
+                ),
+                LdapAttributeMappingModel(
+                    singer_field_name="email",
+                    ldap_attribute_name="mail",
+                    is_required=False,
+                ),
+            ]
+        if entry_type == "groups":
+            return [
+                LdapAttributeMappingModel(
+                    singer_field_name="name",
+                    ldap_attribute_name="cn",
+                    is_required=True,
+                ),
+                LdapAttributeMappingModel(
+                    singer_field_name="description",
+                    ldap_attribute_name="description",
+                    is_required=False,
+                ),
+            ]
+        return [
+            LdapAttributeMappingModel(
+                singer_field_name="name",
+                ldap_attribute_name="cn",
+                is_required=True,
+            ),
+        ]
 
     def transform_record(
         self,
@@ -151,52 +197,6 @@ class LdapTransformationService:
         """Run business-rule validation on an LDAP entry."""
         return entry.validate_business_rules()
 
-    def get_default_mappings(self, entry_type: str) -> list[LdapAttributeMappingModel]:
-        """Return default attribute mappings for the given entry type (e.g. users, groups)."""
-        if entry_type == "users":
-            return [
-                LdapAttributeMappingModel(
-                    singer_field_name="username",
-                    ldap_attribute_name="uid",
-                    is_required=True,
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="full_name",
-                    ldap_attribute_name="cn",
-                    is_required=True,
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="last_name",
-                    ldap_attribute_name="sn",
-                    is_required=True,
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="email",
-                    ldap_attribute_name="mail",
-                    is_required=False,
-                ),
-            ]
-        if entry_type == "groups":
-            return [
-                LdapAttributeMappingModel(
-                    singer_field_name="name",
-                    ldap_attribute_name="cn",
-                    is_required=True,
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="description",
-                    ldap_attribute_name="description",
-                    is_required=False,
-                ),
-            ]
-        return [
-            LdapAttributeMappingModel(
-                singer_field_name="name",
-                ldap_attribute_name="cn",
-                is_required=True,
-            ),
-        ]
-
     def _determine_entry_type(self, object_classes: list[str]) -> str:
         normalized = {oc.lower() for oc in object_classes}
         if "person" in normalized or "inetorgperson" in normalized:
@@ -216,10 +216,6 @@ class LdapTargetOrchestrator:
         """Initialize with optional LDAP target settings."""
         self._typed_config = config
 
-    def get_typed_config(self) -> FlextTargetLdapSettings | None:
-        """Return the current typed settings, if any."""
-        return self._typed_config
-
     def get_connection_service(self) -> LdapConnectionService | None:
         """Return a connection service instance if config is set."""
         if self._typed_config is None:
@@ -231,6 +227,10 @@ class LdapTargetOrchestrator:
         if self._typed_config is None:
             return None
         return LdapTransformationService(self._typed_config)
+
+    def get_typed_config(self) -> FlextTargetLdapSettings | None:
+        """Return the current typed settings, if any."""
+        return self._typed_config
 
     def orchestrate_data_loading(
         self,
@@ -303,23 +303,6 @@ class LdapTargetApiService:
         except (RuntimeError, ValueError, TypeError) as exc:
             return FlextResult[target_client_module.TargetLdap].fail(str(exc))
 
-    def load_users_to_ldap(
-        self,
-        users: list[Mapping[str, t.ContainerValue]],
-        config: dict[str, t.ContainerValue],
-    ) -> FlextResult[int]:
-        """Load user records into LDAP using the default users sink."""
-        target_result = self.create_ldap_target(config)
-        if target_result.is_failure or target_result.value is None:
-            return FlextResult[int].fail(
-                target_result.error or "Target creation failed",
-            )
-        target = target_result.value
-        sink = target.get_sink_class("users")(target, "users", {}, ["username"])
-        for user in users:
-            sink.process_record(dict(user), {})
-        return FlextResult[int].ok(len(users))
-
     def load_groups_to_ldap(
         self,
         groups: list[Mapping[str, t.ContainerValue]],
@@ -336,6 +319,23 @@ class LdapTargetApiService:
         for group in groups:
             sink.process_record(dict(group), {})
         return FlextResult[int].ok(len(groups))
+
+    def load_users_to_ldap(
+        self,
+        users: list[Mapping[str, t.ContainerValue]],
+        config: dict[str, t.ContainerValue],
+    ) -> FlextResult[int]:
+        """Load user records into LDAP using the default users sink."""
+        target_result = self.create_ldap_target(config)
+        if target_result.is_failure or target_result.value is None:
+            return FlextResult[int].fail(
+                target_result.error or "Target creation failed",
+            )
+        target = target_result.value
+        sink = target.get_sink_class("users")(target, "users", {}, ["username"])
+        for user in users:
+            sink.process_record(dict(user), {})
+        return FlextResult[int].ok(len(users))
 
     def test_ldap_connection(
         self,

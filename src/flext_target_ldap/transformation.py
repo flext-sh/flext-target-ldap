@@ -84,6 +84,13 @@ class DataTransformationEngine:
         """Initialize transformation engine."""
         self.rules = rules
 
+    def get_statistics(self) -> Mapping[str, int]:
+        """Get transformation statistics."""
+        return {
+            "total_rules": len(self.rules),
+            "transformations_applied": 0,  # Would track in real implementation
+        }
+
     def transform(
         self,
         data: dict[str, t.ContainerValue],
@@ -121,13 +128,6 @@ class DataTransformationEngine:
         ) as e:
             return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
 
-    def get_statistics(self) -> Mapping[str, int]:
-        """Get transformation statistics."""
-        return {
-            "total_rules": len(self.rules),
-            "transformations_applied": 0,  # Would track in real implementation
-        }
-
 
 class MigrationValidator:
     """Validator for migration data."""
@@ -141,6 +141,10 @@ class MigrationValidator:
             "validation_errors": 0,
             "validation_warnings": 0,
         }
+
+    def get_validation_statistics(self) -> Mapping[str, int]:
+        """Get validation statistics."""
+        return self._stats.copy()
 
     # @override - removed to fix type error, parent class does not define validate
     def validate(
@@ -203,7 +207,3 @@ class MigrationValidator:
     ) -> FlextResult[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
-
-    def get_validation_statistics(self) -> Mapping[str, int]:
-        """Get validation statistics."""
-        return self._stats.copy()

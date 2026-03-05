@@ -88,6 +88,31 @@ class LDAPDataTransformer:
         """Initialize LDAP data transformer."""
         self.type_converter = type_converter or LDAPTypeConverter()
 
+    def prepare_ldap_attributes(
+        self,
+        record: dict[str, t.JsonValue],
+        object_classes: list[str],
+    ) -> FlextResult[dict[str, list[str]]]:
+        """Prepare attributes for LDAP entry creation."""
+        try:
+            attributes: dict[str, list[str]] = {}
+
+            attributes["objectClass"] = object_classes
+
+            for key, value in record.items():
+                if value is not None:
+                    attributes[key] = self._to_ldap_values(value)
+
+            return FlextResult[dict[str, list[str]]].ok(
+                attributes,
+            )
+
+        except (RuntimeError, ValueError, TypeError) as e:
+            logger.exception("LDAP attribute preparation failed")
+            return FlextResult[dict[str, list[str]]].fail(
+                f"Attribute preparation failed: {e}",
+            )
+
     def transform_record(
         self,
         record: dict[str, t.JsonValue],
@@ -140,31 +165,6 @@ class LDAPDataTransformer:
 
         return normalized
 
-    def prepare_ldap_attributes(
-        self,
-        record: dict[str, t.JsonValue],
-        object_classes: list[str],
-    ) -> FlextResult[dict[str, list[str]]]:
-        """Prepare attributes for LDAP entry creation."""
-        try:
-            attributes: dict[str, list[str]] = {}
-
-            attributes["objectClass"] = object_classes
-
-            for key, value in record.items():
-                if value is not None:
-                    attributes[key] = self._to_ldap_values(value)
-
-            return FlextResult[dict[str, list[str]]].ok(
-                attributes,
-            )
-
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("LDAP attribute preparation failed")
-            return FlextResult[dict[str, list[str]]].fail(
-                f"Attribute preparation failed: {e}",
-            )
-
     def _to_ldap_values(self, value: t.JsonValue) -> list[str]:
         """Normalize incoming Singer value to LDAP list values."""
         match value:
@@ -213,19 +213,6 @@ class LDAPSchemaMapper:
                 f"Schema mapping failed: {e}",
             )
 
-    def _normalize_attribute_name(self, name: str) -> str:
-        """Normalize attribute name for LDAP."""
-        # Convert to camelCase for LDAP attributes
-        if "_" in name or "-" in name:
-            parts = name.replace("-", "_").split("_")
-            normalized = parts[0].lower() + "".join(
-                word.capitalize() for word in parts[1:]
-            )
-        else:
-            normalized = name.lower()
-
-        return normalized
-
     def _map_singer_type_to_ldap(
         self,
         prop_def: SingerPropertyDefinition,
@@ -250,6 +237,19 @@ class LDAPSchemaMapper:
             logger.warning("LDAP type mapping failed: %s", str(e))  # noqa: RUF065
             return FlextResult[str].ok("DirectoryString")
 
+    def _normalize_attribute_name(self, name: str) -> str:
+        """Normalize attribute name for LDAP."""
+        # Convert to camelCase for LDAP attributes
+        if "_" in name or "-" in name:
+            parts = name.replace("-", "_").split("_")
+            normalized = parts[0].lower() + "".join(
+                word.capitalize() for word in parts[1:]
+            )
+        else:
+            normalized = name.lower()
+
+        return normalized
+
 
 class LDAPEntryManager:
     """Manage entry DN, class selection, and modify payloads."""
@@ -257,61 +257,6 @@ class LDAPEntryManager:
     @override
     def __init__(self) -> None:
         """Initialize LDAP entry manager."""
-
-    def generate_dn(
-        self,
-        record: dict[str, t.JsonValue],
-        base_dn: str,
-        rdn_attribute: str = "cn",
-    ) -> FlextResult[str]:
-        """Generate Distinguished Name for LDAP entry."""
-        try:
-            rdn_value = record.get(rdn_attribute)
-            if not rdn_value:
-                alternatives = ["commonName", "cn", "uid", "name", "id"]
-                for alt in alternatives:
-                    if record.get(alt):
-                        rdn_value = record[alt]
-                        rdn_attribute = alt
-                        break
-
-                if not rdn_value:
-                    return FlextResult[str].fail(
-                        f"No value found for RDN attribute: {rdn_attribute}",
-                    )
-
-            escaped_value = self._escape_dn_value(str(rdn_value))
-            dn = f"{rdn_attribute}={escaped_value},{base_dn}"
-
-            return FlextResult[str].ok(dn)
-
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("DN generation failed")
-            return FlextResult[str].fail(f"DN generation failed: {e}")
-
-    def _escape_dn_value(self, value: str) -> str:
-        """Escape special characters in DN values."""
-        special_chars = {
-            ",": "\\,",
-            "+": "\\+",
-            '"': "\\'",
-            "\\": "\\",
-            "<": "\\<",
-            ">": "\\>",
-            ";": "\\;",
-            "=": "\\=",
-        }
-
-        escaped = value
-        for char, escaped_char in special_chars.items():
-            escaped = escaped.replace(char, escaped_char)
-
-        if escaped.startswith(" "):
-            escaped = "\\ " + escaped[1:]
-        if escaped.endswith(" "):
-            escaped = escaped[:-1] + "\\ "
-
-        return escaped
 
     def determine_object_classes(
         self,
@@ -348,34 +293,36 @@ class LDAPEntryManager:
                 f"Object class determination failed: {e}",
             )
 
-    def validate_entry_attributes(
+    def generate_dn(
         self,
-        attributes: dict[str, list[str]],
-        object_classes: list[str],
-    ) -> FlextResult[bool]:
-        """Validate LDAP entry attributes against object class requirements."""
+        record: dict[str, t.JsonValue],
+        base_dn: str,
+        rdn_attribute: str = "cn",
+    ) -> FlextResult[str]:
+        """Generate Distinguished Name for LDAP entry."""
         try:
-            required_attrs = set()
+            rdn_value = record.get(rdn_attribute)
+            if not rdn_value:
+                alternatives = ["commonName", "cn", "uid", "name", "id"]
+                for alt in alternatives:
+                    if record.get(alt):
+                        rdn_value = record[alt]
+                        rdn_attribute = alt
+                        break
 
-            for obj_class in object_classes:
-                if obj_class in {"person", "organizationalPerson", "inetOrgPerson"}:
-                    required_attrs.update({"cn", "sn"})
-                elif obj_class == "groupOfNames":
-                    required_attrs.add("member")
-                elif obj_class == "organizationalUnit":
-                    required_attrs.add("ou")
+                if not rdn_value:
+                    return FlextResult[str].fail(
+                        f"No value found for RDN attribute: {rdn_attribute}",
+                    )
 
-            missing_attrs = required_attrs - set(attributes.keys())
-            if missing_attrs:
-                return FlextResult[bool].fail(
-                    f"Missing required attributes: {missing_attrs}",
-                )
+            escaped_value = self._escape_dn_value(str(rdn_value))
+            dn = f"{rdn_attribute}={escaped_value},{base_dn}"
 
-            return FlextResult[bool].ok(value=True)
+            return FlextResult[str].ok(dn)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("Entry validation failed")
-            return FlextResult[bool].fail(f"Entry validation failed: {e}")
+            logger.exception("DN generation failed")
+            return FlextResult[str].fail(f"DN generation failed: {e}")
 
     def prepare_modify_changes(
         self,
@@ -409,6 +356,59 @@ class LDAPEntryManager:
             return FlextResult[dict[str, list[tuple[str, list[str]]]]].fail(
                 f"Modify changes preparation failed: {e}",
             )
+
+    def validate_entry_attributes(
+        self,
+        attributes: dict[str, list[str]],
+        object_classes: list[str],
+    ) -> FlextResult[bool]:
+        """Validate LDAP entry attributes against object class requirements."""
+        try:
+            required_attrs = set()
+
+            for obj_class in object_classes:
+                if obj_class in {"person", "organizationalPerson", "inetOrgPerson"}:
+                    required_attrs.update({"cn", "sn"})
+                elif obj_class == "groupOfNames":
+                    required_attrs.add("member")
+                elif obj_class == "organizationalUnit":
+                    required_attrs.add("ou")
+
+            missing_attrs = required_attrs - set(attributes.keys())
+            if missing_attrs:
+                return FlextResult[bool].fail(
+                    f"Missing required attributes: {missing_attrs}",
+                )
+
+            return FlextResult[bool].ok(value=True)
+
+        except (RuntimeError, ValueError, TypeError) as e:
+            logger.exception("Entry validation failed")
+            return FlextResult[bool].fail(f"Entry validation failed: {e}")
+
+    def _escape_dn_value(self, value: str) -> str:
+        """Escape special characters in DN values."""
+        special_chars = {
+            ",": "\\,",
+            "+": "\\+",
+            '"': "\\'",
+            "\\": "\\",
+            "<": "\\<",
+            ">": "\\>",
+            ";": "\\;",
+            "=": "\\=",
+        }
+
+        escaped = value
+        for char, escaped_char in special_chars.items():
+            escaped = escaped.replace(char, escaped_char)
+
+        if escaped.startswith(" "):
+            escaped = "\\ " + escaped[1:]
+        if escaped.endswith(" "):
+            escaped = escaped[:-1] + "\\ "
+
+        return escaped
 
     def _normalize_modify_values(self, value: str | list[str] | None) -> list[str]:
         """Normalize modify payload values to LDAP list representation."""

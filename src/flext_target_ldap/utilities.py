@@ -216,27 +216,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 return FlextResult[str].fail(f"Error building DN: {e}")
 
         @staticmethod
-        def split(dn: str) -> bool:
-            """Validate LDAP Distinguished Name format.
-
-            Args:
-            dn: Distinguished Name to validate
-
-            Returns:
-            bool: True if valid, False otherwise
-
-            """
-            if not dn:
-                return False
-
-            # Basic DN format validation
-            # Should contain at least one RDN component (attr=value)
-            dn_pattern = (
-                r"^[a-zA-Z][\w\-]*\s*=\s*[^,]+(?:\s*,\s*[a-zA-Z][\w\-]*\s*=\s*[^,]+)*$"
-            )
-            return bool(re.match(dn_pattern, dn.strip()))
-
-        @staticmethod
         def convert_record_to_ldap_attributes(
             record: Mapping[str, t.ContainerValue],
             attribute_mapping: Mapping[str, str] | None = None,
@@ -297,6 +276,36 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 )
 
         @staticmethod
+        def extract_object_classes(
+            record: Mapping[str, t.ContainerValue],
+            default_object_classes: list[str] | None = None,
+        ) -> list[str]:
+            """Extract object classes for LDAP entry.
+
+            Args:
+            record: Singer record data
+            default_object_classes: Default object classes if not in record
+
+            Returns:
+            list[str]: List of object classes
+
+            """
+            # Check for object classes in record
+            object_classes = record.get("objectClass") or record.get("objectclass")
+
+            if object_classes:
+                if u.Guards.is_list(object_classes):
+                    return [str(oc) for oc in object_classes if oc]
+                return [str(object_classes)]
+
+            # Use defaults if provided
+            if default_object_classes:
+                return default_object_classes
+
+            # Fallback to basic object classes
+            return ["top"]
+
+        @staticmethod
         def sanitize_ldap_value(value: str) -> str:
             """Sanitize value for LDAP attribute insertion.
 
@@ -327,34 +336,25 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             return sanitized.strip()
 
         @staticmethod
-        def extract_object_classes(
-            record: Mapping[str, t.ContainerValue],
-            default_object_classes: list[str] | None = None,
-        ) -> list[str]:
-            """Extract object classes for LDAP entry.
+        def split(dn: str) -> bool:
+            """Validate LDAP Distinguished Name format.
 
             Args:
-            record: Singer record data
-            default_object_classes: Default object classes if not in record
+            dn: Distinguished Name to validate
 
             Returns:
-            list[str]: List of object classes
+            bool: True if valid, False otherwise
 
             """
-            # Check for object classes in record
-            object_classes = record.get("objectClass") or record.get("objectclass")
+            if not dn:
+                return False
 
-            if object_classes:
-                if u.Guards.is_list(object_classes):
-                    return [str(oc) for oc in object_classes if oc]
-                return [str(object_classes)]
-
-            # Use defaults if provided
-            if default_object_classes:
-                return default_object_classes
-
-            # Fallback to basic object classes
-            return ["top"]
+            # Basic DN format validation
+            # Should contain at least one RDN component (attr=value)
+            dn_pattern = (
+                r"^[a-zA-Z][\w\-]*\s*=\s*[^,]+(?:\s*,\s*[a-zA-Z][\w\-]*\s*=\s*[^,]+)*$"
+            )
+            return bool(re.match(dn_pattern, dn.strip()))
 
     class StreamUtilities:
         """Stream processing utilities for Singer targets."""
@@ -379,6 +379,32 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             calculated_size = max(1, record_count // target_batches)
             return min(calculated_size, c.TargetLdap.Processing.DEFAULT_BATCH_SIZE)
+
+        @staticmethod
+        def generate_ldap_stream_metadata(
+            stream_name: str,
+            record_count: int,
+            processing_time: float,
+        ) -> Mapping[str, t.ContainerValue]:
+            """Generate metadata for LDAP stream processing.
+
+            Args:
+            stream_name: Name of the stream
+            record_count: Number of records processed
+            processing_time: Time taken for processing
+
+            Returns:
+            dict[str, t.ContainerValue]: Stream metadata
+
+            """
+            return {
+                "stream_name": stream_name,
+                "records_processed": record_count,
+                "processing_time_seconds": processing_time,
+                "records_per_second": record_count / max(processing_time, 0.001),
+                "processing_timestamp": datetime.now(UTC).isoformat(),
+                "target_type": "ldap",
+            }
 
         @staticmethod
         def validate_stream_compatibility(
@@ -418,32 +444,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 )
 
             return FlextResult[bool].ok(value=True)
-
-        @staticmethod
-        def generate_ldap_stream_metadata(
-            stream_name: str,
-            record_count: int,
-            processing_time: float,
-        ) -> Mapping[str, t.ContainerValue]:
-            """Generate metadata for LDAP stream processing.
-
-            Args:
-            stream_name: Name of the stream
-            record_count: Number of records processed
-            processing_time: Time taken for processing
-
-            Returns:
-            dict[str, t.ContainerValue]: Stream metadata
-
-            """
-            return {
-                "stream_name": stream_name,
-                "records_processed": record_count,
-                "processing_time_seconds": processing_time,
-                "records_per_second": record_count / max(processing_time, 0.001),
-                "processing_timestamp": datetime.now(UTC).isoformat(),
-                "target_type": "ldap",
-            }
 
     class ConfigValidation:
         """Configuration validation utilities."""
@@ -606,6 +606,43 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         """State management utilities for target operations."""
 
         @staticmethod
+        def create_processing_state(
+            stream_name: str,
+            records_processed: int,
+            last_processed_record: Mapping[str, t.ContainerValue] | None = None,
+        ) -> Mapping[str, t.ContainerValue]:
+            """Create processing state for target stream.
+
+            Args:
+            stream_name: Name of the stream
+            records_processed: Number of records processed
+            last_processed_record: Last processed record for checkpointing
+
+            Returns:
+            dict[str, t.ContainerValue]: Processing state
+
+            """
+            state: dict[str, t.ContainerValue] = {
+                "stream_name": stream_name,
+                "records_processed": records_processed,
+                "last_updated": datetime.now(UTC).isoformat(),
+                "target_type": "ldap",
+            }
+
+            if last_processed_record:
+                # Store minimal checkpoint information
+                checkpoint_data = {
+                    "id": last_processed_record.get("id"),
+                    "dn": last_processed_record.get("dn"),
+                    "timestamp": last_processed_record.get("_timestamp"),
+                }
+                state["checkpoint"] = {
+                    k: v for k, v in checkpoint_data.items() if v is not None
+                }
+
+            return state
+
+        @staticmethod
         def get_target_state(
             state: Mapping[str, t.ContainerValue],
             stream_name: str,
@@ -654,43 +691,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             bookmarks[stream_name] = stream_state
             return state_dict
-
-        @staticmethod
-        def create_processing_state(
-            stream_name: str,
-            records_processed: int,
-            last_processed_record: Mapping[str, t.ContainerValue] | None = None,
-        ) -> Mapping[str, t.ContainerValue]:
-            """Create processing state for target stream.
-
-            Args:
-            stream_name: Name of the stream
-            records_processed: Number of records processed
-            last_processed_record: Last processed record for checkpointing
-
-            Returns:
-            dict[str, t.ContainerValue]: Processing state
-
-            """
-            state: dict[str, t.ContainerValue] = {
-                "stream_name": stream_name,
-                "records_processed": records_processed,
-                "last_updated": datetime.now(UTC).isoformat(),
-                "target_type": "ldap",
-            }
-
-            if last_processed_record:
-                # Store minimal checkpoint information
-                checkpoint_data = {
-                    "id": last_processed_record.get("id"),
-                    "dn": last_processed_record.get("dn"),
-                    "timestamp": last_processed_record.get("_timestamp"),
-                }
-                state["checkpoint"] = {
-                    k: v for k, v in checkpoint_data.items() if v is not None
-                }
-
-            return state
 
         @staticmethod
         def update_processing_progress(
@@ -747,14 +747,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             )
 
     @classmethod
-    def parse_singer_message(
-        cls,
-        line: str,
-    ) -> FlextResult[Mapping[str, t.ContainerValue]]:
-        """Proxy method for TargetLdap.parse_singer_message()."""
-        return cls.TargetLdap.parse_singer_message(line)
-
-    @classmethod
     def build_ldap_dn(
         cls,
         record: Mapping[str, t.ContainerValue],
@@ -777,23 +769,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         )
 
     @classmethod
-    def validate_ldap_connection_config(
-        cls,
-        config: Mapping[str, t.ContainerValue],
-    ) -> FlextResult[Mapping[str, t.ContainerValue]]:
-        """Proxy method for ConfigValidation.validate_ldap_connection_config()."""
-        return cls.ConfigValidation.validate_ldap_connection_config(config)
-
-    @classmethod
-    def get_target_state(
-        cls,
-        state: Mapping[str, t.ContainerValue],
-        stream_name: str,
-    ) -> Mapping[str, t.ContainerValue]:
-        """Proxy method for StateManagement.get_target_state()."""
-        return cls.StateManagement.get_target_state(state, stream_name)
-
-    @classmethod
     def create_processing_state(
         cls,
         stream_name: str,
@@ -807,110 +782,33 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             last_processed_record,
         )
 
+    @classmethod
+    def get_target_state(
+        cls,
+        state: Mapping[str, t.ContainerValue],
+        stream_name: str,
+    ) -> Mapping[str, t.ContainerValue]:
+        """Proxy method for StateManagement.get_target_state()."""
+        return cls.StateManagement.get_target_state(state, stream_name)
+
+    @classmethod
+    def parse_singer_message(
+        cls,
+        line: str,
+    ) -> FlextResult[Mapping[str, t.ContainerValue]]:
+        """Proxy method for TargetLdap.parse_singer_message()."""
+        return cls.TargetLdap.parse_singer_message(line)
+
+    @classmethod
+    def validate_ldap_connection_config(
+        cls,
+        config: Mapping[str, t.ContainerValue],
+    ) -> FlextResult[Mapping[str, t.ContainerValue]]:
+        """Proxy method for ConfigValidation.validate_ldap_connection_config()."""
+        return cls.ConfigValidation.validate_ldap_connection_config(config)
+
     class TypeConversion:
         """Type conversion utilities for configuration parsing."""
-
-        @staticmethod
-        def to_int(value: t.ContainerValue, default: int) -> int:
-            """Convert value to int with safe defaults.
-
-            Business Rule: Safe Type Conversion
-            ===================================
-            Configuration values can come from various sources (env vars, config files,
-            command line args) and may not have the expected type. This method provides
-            safe conversion with sensible defaults to prevent runtime errors.
-
-            Conversion Rules:
-            - bool values return default (avoid 0/1 confusion)
-            - int values pass through unchanged
-            - str values attempt int() conversion, fallback to default on error
-            - All other types return default
-
-            Args:
-                value: Value to convert (from any source)
-                default: Default value if conversion fails
-
-            Returns:
-                int: Converted value or default
-
-            """
-            match value:
-                case bool():
-                    return default
-                case int():
-                    return value
-                case str():
-                    try:
-                        return int(value)
-                    except ValueError:
-                        return default
-                case _:
-                    return default
-
-        @staticmethod
-        def to_bool(value: t.ContainerValue, *, default: bool) -> bool:
-            """Convert value to bool with safe defaults.
-
-            Business Rule: Boolean Configuration Conversion
-            ==============================================
-            Boolean configuration values can come as strings ("true", "1", "yes"),
-            integers (0/1), or actual booleans. This method standardizes conversion
-            with clear rules to avoid ambiguity.
-
-            Conversion Rules:
-            - bool values pass through unchanged
-            - int values: non-zero = True, zero = False
-            - str values: case-insensitive check for "1", "true", "yes", "on"
-            - All other types return default
-
-            Args:
-                value: Value to convert
-                default: Default value if conversion fails
-
-            Returns:
-                bool: Converted value or default
-
-            """
-            match value:
-                case bool():
-                    return value
-                case int():
-                    return value != 0
-                case str():
-                    return value.strip().lower() in {"1", "true", "yes", "on"}
-                case _:
-                    return default
-
-        @staticmethod
-        def to_str(value: t.ContainerValue, default: str = "") -> str:
-            """Convert value to str with safe defaults.
-
-            Business Rule: String Configuration Conversion
-            =============================================
-            String configuration values need consistent handling regardless of source.
-            This method ensures all values can be safely converted to strings.
-
-            Conversion Rules:
-            - str values pass through unchanged
-            - None becomes empty string (unless default provided)
-            - All other types use str() conversion
-
-            Args:
-                value: Value to convert
-                default: Default value if value is None
-
-            Returns:
-                str: Converted string or default for None
-
-            """
-            if value is None:
-                return default
-            match value:
-                case str():
-                    return value
-                case _:
-                    pass
-            return str(value)
 
         @staticmethod
         def build_connection_config(
@@ -1017,6 +915,108 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             if u.Guards.is_list(raw_object_classes):
                 return [str(v) for v in raw_object_classes]
             return ["top"]
+
+        @staticmethod
+        def to_bool(value: t.ContainerValue, *, default: bool) -> bool:
+            """Convert value to bool with safe defaults.
+
+            Business Rule: Boolean Configuration Conversion
+            ==============================================
+            Boolean configuration values can come as strings ("true", "1", "yes"),
+            integers (0/1), or actual booleans. This method standardizes conversion
+            with clear rules to avoid ambiguity.
+
+            Conversion Rules:
+            - bool values pass through unchanged
+            - int values: non-zero = True, zero = False
+            - str values: case-insensitive check for "1", "true", "yes", "on"
+            - All other types return default
+
+            Args:
+                value: Value to convert
+                default: Default value if conversion fails
+
+            Returns:
+                bool: Converted value or default
+
+            """
+            match value:
+                case bool():
+                    return value
+                case int():
+                    return value != 0
+                case str():
+                    return value.strip().lower() in {"1", "true", "yes", "on"}
+                case _:
+                    return default
+
+        @staticmethod
+        def to_int(value: t.ContainerValue, default: int) -> int:
+            """Convert value to int with safe defaults.
+
+            Business Rule: Safe Type Conversion
+            ===================================
+            Configuration values can come from various sources (env vars, config files,
+            command line args) and may not have the expected type. This method provides
+            safe conversion with sensible defaults to prevent runtime errors.
+
+            Conversion Rules:
+            - bool values return default (avoid 0/1 confusion)
+            - int values pass through unchanged
+            - str values attempt int() conversion, fallback to default on error
+            - All other types return default
+
+            Args:
+                value: Value to convert (from any source)
+                default: Default value if conversion fails
+
+            Returns:
+                int: Converted value or default
+
+            """
+            match value:
+                case bool():
+                    return default
+                case int():
+                    return value
+                case str():
+                    try:
+                        return int(value)
+                    except ValueError:
+                        return default
+                case _:
+                    return default
+
+        @staticmethod
+        def to_str(value: t.ContainerValue, default: str = "") -> str:
+            """Convert value to str with safe defaults.
+
+            Business Rule: String Configuration Conversion
+            =============================================
+            String configuration values need consistent handling regardless of source.
+            This method ensures all values can be safely converted to strings.
+
+            Conversion Rules:
+            - str values pass through unchanged
+            - None becomes empty string (unless default provided)
+            - All other types use str() conversion
+
+            Args:
+                value: Value to convert
+                default: Default value if value is None
+
+            Returns:
+                str: Converted string or default for None
+
+            """
+            if value is None:
+                return default
+            match value:
+                case str():
+                    return value
+                case _:
+                    pass
+            return str(value)
 
 
 u = FlextTargetLdapUtilities

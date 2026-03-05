@@ -66,9 +66,9 @@ logger = FlextLogger(__name__)
 class _LdapApiProtocol(Protocol):
     def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
-    def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
-
     def delete(self, dn: str) -> None: ...
+
+    def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
 
 class TargetLDAP(Target):
@@ -178,6 +178,33 @@ class TargetLDAP(Target):
         logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
         return sink_class
 
+    def setup(self) -> None:
+        """Set up the LDAP target."""
+        # Initialize orchestrator
+        _ = self.orchestrator  # Ensure orchestrator is created
+        logger.info("Orchestrator initialized successfully")
+
+        # Initialize DI container
+        self._container = get_flext_target_ldap_container()
+        logger.info("DI container initialized successfully")
+
+        host = self.config.get("host", "localhost")
+        logger.info("LDAP target setup completed for host: %s", host)
+
+    def teardown(self) -> None:
+        """Teardown the LDAP target."""
+        # Cleanup orchestrator
+        if self._orchestrator:
+            self._orchestrator = None
+            logger.info("Orchestrator cleaned up")
+
+        # Cleanup container
+        if self._container is not None:
+            self._container = None
+            logger.info("DI container cleaned up")
+
+        logger.info("LDAP target teardown completed")
+
     def validate_config(self) -> None:
         """Validate the target configuration."""
         # Additional LDAP-specific validation
@@ -207,33 +234,6 @@ class TargetLDAP(Target):
             raise ValueError(msg)
 
         logger.info("LDAP target configuration validated successfully")
-
-    def setup(self) -> None:
-        """Set up the LDAP target."""
-        # Initialize orchestrator
-        _ = self.orchestrator  # Ensure orchestrator is created
-        logger.info("Orchestrator initialized successfully")
-
-        # Initialize DI container
-        self._container = get_flext_target_ldap_container()
-        logger.info("DI container initialized successfully")
-
-        host = self.config.get("host", "localhost")
-        logger.info("LDAP target setup completed for host: %s", host)
-
-    def teardown(self) -> None:
-        """Teardown the LDAP target."""
-        # Cleanup orchestrator
-        if self._orchestrator:
-            self._orchestrator = None
-            logger.info("Orchestrator cleaned up")
-
-        # Cleanup container
-        if self._container is not None:
-            self._container = None
-            logger.info("DI container cleaned up")
-
-        logger.info("LDAP target teardown completed")
 
 
 def main() -> None:
