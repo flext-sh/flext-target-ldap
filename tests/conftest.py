@@ -21,19 +21,13 @@ from flext_target_ldap import LdapTargetClient, t
 @pytest.fixture(scope="session")
 def shared_ldap_container(flext_docker: FlextTestsDocker) -> Generator[str]:
     """Managed LDAP container using centralized FlextTestsDocker with docker-compose."""
-    # Use centralized docker-compose file for OpenLDAP
     compose_file = pathlib.Path(
-        "~/flext/docker/docker-compose.openldap.yml",
+        "~/flext/docker/docker-compose.openldap.yml"
     ).expanduser()
-
-    # Start OpenLDAP stack using docker-compose
     start_result = flext_docker.start_compose_stack(str(compose_file))
     if start_result.is_failure:
         pytest.skip(f"OpenLDAP container failed to start: {start_result.error}")
-
     return "flext-openldap-test"
-
-    # Cleanup handled by FlextTestsDocker automatically
 
 
 @pytest.fixture
@@ -144,8 +138,8 @@ def singer_message_state() -> str:
                 "users": {
                     "replication_key": "modifyTimestamp",
                     "replication_key_value": "20240101120000Z",
-                },
-            },
+                }
+            }
         },
     }
     return json.dumps(message)

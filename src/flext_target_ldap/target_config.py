@@ -38,11 +38,7 @@ def _target_config_to_int(value: t.ContainerValue, default: int) -> int:
             return default
 
 
-def _target_config_to_bool(
-    value: t.ContainerValue,
-    *,
-    default: bool,
-) -> bool:
+def _target_config_to_bool(value: t.ContainerValue, *, default: bool) -> bool:
     """Convert value to bool for target config."""
     match value:
         case bool():
@@ -61,8 +57,7 @@ def _target_config_to_str(value: t.ContainerValue, default: str = "") -> str:
 
 
 def _target_config_to_str_list(
-    value: t.ContainerValue,
-    default: list[str],
+    value: t.ContainerValue, default: list[str]
 ) -> list[str]:
     """Convert value to string list."""
     if u.Guards.is_list(value):
@@ -80,7 +75,6 @@ def _build_target_connection_config(
     bind_dn = _target_config_to_str(config.get("bind_dn", ""), "")
     bind_password = _target_config_to_str(config.get("password", ""), "")
     timeout = _target_config_to_int(config.get("timeout", 30), 30)
-
     return FlextLdapModels.Ldap.ConnectionConfig(
         host=server,
         port=port,
@@ -114,24 +108,18 @@ def validate_ldap_target_config(
     """Validate and create LDAP target configuration with proper error handling."""
     try:
         connection_config = _build_target_connection_config(config)
-
         base_dn = _target_config_to_str(config.get("base_dn", ""))
         batch_size = _target_config_to_int(config.get("batch_size", 1000), 1000)
         max_records = _extract_target_max_records(config)
-
         create_missing_entries = _target_config_to_bool(
-            config.get("create_missing_entries", True),
-            default=True,
+            config.get("create_missing_entries", True), default=True
         )
         update_existing_entries = _target_config_to_bool(
-            config.get("update_existing_entries", True),
-            default=True,
+            config.get("update_existing_entries", True), default=True
         )
         delete_removed_entries = _target_config_to_bool(
-            config.get("delete_removed_entries", False),
-            default=False,
+            config.get("delete_removed_entries", False), default=False
         )
-
         raw_attr_map_value: t.ContainerValue = config.get("attribute_mapping", {})
         attribute_mapping: dict[str, str] = (
             {str(k): str(v) for k, v in raw_attr_map_value.items()}
@@ -139,14 +127,12 @@ def validate_ldap_target_config(
             else {}
         )
         object_classes = _target_config_to_str_list(
-            config.get("object_classes", ["top"]),
-            ["top"],
+            config.get("object_classes", ["top"]), ["top"]
         )
         search_filter = _target_config_to_str(
-            config.get("search_filter", "(objectClass=*)"),
+            config.get("search_filter", "(objectClass=*)")
         )
         search_scope = _target_config_to_str(config.get("search_scope", "SUBTREE"))
-
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=base_dn,
@@ -160,12 +146,10 @@ def validate_ldap_target_config(
             search_filter=search_filter,
             search_scope=search_scope,
         )
-
         return FlextResult[FlextTargetLdapSettings].ok(validated_config)
-
     except (ValueError, TypeError, RuntimeError) as e:
         return FlextResult[FlextTargetLdapSettings].fail(
-            f"Configuration validation failed: {e}",
+            f"Configuration validation failed: {e}"
         )
 
 
@@ -178,15 +162,9 @@ def create_default_ldap_target_config(
 ) -> FlextResult[FlextTargetLdapSettings]:
     """Create default LDAP target configuration with minimal parameters."""
     try:
-        # Create connection config
         connection_config = FlextLdapModels.Ldap.ConnectionConfig(
-            host=host,
-            port=port,
-            use_ssl=use_ssl,
-            timeout=30,
+            host=host, port=port, use_ssl=use_ssl, timeout=30
         )
-
-        # Create target config
         target_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=base_dn,
@@ -195,12 +173,10 @@ def create_default_ldap_target_config(
             search_filter="(objectClass=*)",
             search_scope="SUBTREE",
         )
-
         return FlextResult[FlextTargetLdapSettings].ok(target_config)
-
     except (ValueError, TypeError, RuntimeError) as e:
         return FlextResult[FlextTargetLdapSettings].fail(
-            f"Default configuration creation failed: {e}",
+            f"Default configuration creation failed: {e}"
         )
 
 

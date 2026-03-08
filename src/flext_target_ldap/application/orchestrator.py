@@ -21,14 +21,10 @@ logger: FlextLogger = FlextLogger(__name__)
 class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    # Type annotations for pyrefly
     config: dict[str, str | int | bool]
 
     @override
-    def __init__(
-        self,
-        config: Mapping[str, str | int | bool] | None = None,
-    ) -> None:
+    def __init__(self, config: Mapping[str, str | int | bool] | None = None) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
@@ -39,8 +35,7 @@ class LDAPTargetOrchestrator:
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
-        self,
-        records: list[Mapping[str, t.Scalar | None]],
+        self, records: list[Mapping[str, t.Scalar | None]]
     ) -> FlextResult[Mapping[str, str | int]]:
         """Orchestrate data loading to LDAP target.
 
@@ -53,20 +48,15 @@ class LDAPTargetOrchestrator:
         """
         try:
             logger.info("Starting LDAP data loading orchestration")
-
-            # Process records for LDAP loading
             processed_count = 0
             for _record in records:
-                # Process individual record for LDAP
                 processed_count += 1
-
             result_dict: dict[str, str | int] = {
                 "loaded_records": processed_count,
                 "status": "completed",
             }
             logger.info("LDAP data loading completed: %d records", processed_count)
             return FlextResult[Mapping[str, str | int]].ok(result_dict)
-
         except (
             ValueError,
             TypeError,
@@ -78,7 +68,7 @@ class LDAPTargetOrchestrator:
         ) as e:
             logger.exception("LDAP data loading orchestration failed")
             return FlextResult[Mapping[str, str | int]].fail(
-                f"Data loading orchestration failed: {e}",
+                f"Data loading orchestration failed: {e}"
             )
 
     def validate_target_configuration(self) -> FlextResult[bool]:
@@ -89,12 +79,10 @@ class LDAPTargetOrchestrator:
 
         """
         try:
-            # Basic validation
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
                     return FlextResult[bool].fail(f"Missing required field: {field}")
-
             return FlextResult[bool].ok(value=True)
         except (
             ValueError,

@@ -14,7 +14,6 @@ from flext_core import FlextLogger, FlextResult
 logger = FlextLogger(__name__)
 
 
-# Local LDAP stream processing classes (no fallbacks - real implementation)
 class LDAPStreamProcessingStats:
     """LDAP stream processing statistics - mutable for performance."""
 
@@ -32,7 +31,7 @@ class LDAPStreamProcessingStats:
         """Calculate success rate percentage."""
         if self.records_processed == 0:
             return 0.0
-        return (self.records_success / self.records_processed) * 100.0
+        return self.records_success / self.records_processed * 100.0
 
 
 class SingerLDAPStreamProcessor:
@@ -44,16 +43,15 @@ class SingerLDAPStreamProcessor:
         self._stream_stats: dict[str, LDAPStreamProcessingStats] = {}
 
     def get_stream_stats(
-        self,
-        stream_name: str,
+        self, stream_name: str
     ) -> FlextResult[LDAPStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
             return FlextResult[LDAPStreamProcessingStats].fail(
-                f"LDAP stream not found: {stream_name}",
+                f"LDAP stream not found: {stream_name}"
             )
         return FlextResult[LDAPStreamProcessingStats].ok(
-            self._stream_stats[stream_name],
+            self._stream_stats[stream_name]
         )
 
     def initialize_stream(self, stream_name: str) -> FlextResult[bool]:
@@ -67,7 +65,4 @@ class SingerLDAPStreamProcessor:
             return FlextResult[bool].fail(f"Stream initialization failed: {e}")
 
 
-__all__: list[str] = [
-    "LDAPStreamProcessingStats",
-    "SingerLDAPStreamProcessor",
-]
+__all__: list[str] = ["LDAPStreamProcessingStats", "SingerLDAPStreamProcessor"]

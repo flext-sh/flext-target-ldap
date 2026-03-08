@@ -47,25 +47,16 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
                 or ObjectClass.PERSON directly - no base strings needed.
             """
 
-            # Base object classes
             TOP = "top"
-
-            # Person object classes
             PERSON = "person"
             ORGANIZATIONAL_PERSON = "organizationalPerson"
             INET_ORG_PERSON = "inetOrgPerson"
-
-            # Group object classes
             GROUP_OF_NAMES = "groupOfNames"
             GROUP_OF_UNIQUE_NAMES = "groupOfUniqueNames"
             POSIX_GROUP = "posixGroup"
-
-            # Organizational object classes
             ORGANIZATION = "organization"
             ORGANIZATIONAL_UNIT = "organizationalUnit"
             ORGANIZATIONAL_ROLE = "organizationalRole"
-
-            # System object classes
             DOMAIN = "domain"
             DOMAIN_COMPONENT = "dcObject"
 
@@ -131,12 +122,10 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             Note: Does not override parent Validation class to avoid inheritance conflicts.
             """
 
-            # Validation constants from flext-ldif (parent of flext-ldap)
             MAX_DN_LENGTH: Final[int] = (
                 FlextLdapConstants.Ldif.LdifValidation.MAX_DN_LENGTH
             )
 
 
 c = FlextTargetLdapConstants
-
 __all__ = ["FlextTargetLdapConstants", "c"]

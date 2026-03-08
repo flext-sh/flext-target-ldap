@@ -26,11 +26,8 @@ def get_flext_target_ldap_service(
     return container.get(service_name)
 
 
-# Type assertion for the configuration function
-# configure_flext_target_ldap_dependencies: Callable[[], None] = _configure_func
 def configure_flext_target_ldap_dependencies() -> None:
     """Fallback configuration function."""
 
 
-# Initialize flext_target_ldap dependencies on module import
 configure_flext_target_ldap_dependencies()

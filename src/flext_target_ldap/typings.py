@@ -19,7 +19,6 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     class Core:
         """Core type aliases overrides."""
 
-        # Use dict[str, ContainerValue] for strict typing without RootModel overhead
         type Dict = dict[str, FlextTypes.ContainerValue]
         type Headers = dict[str, str]
         type StringList = list[str]
@@ -51,5 +50,4 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
 
 t = FlextTargetLdapTypes
-
 __all__ = ["FlextTargetLdapTypes", "t"]

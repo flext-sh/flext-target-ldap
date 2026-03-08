@@ -23,8 +23,7 @@ class LdapTargetServiceProtocol(Protocol):
     """Protocol for LDAP target creation and record loading."""
 
     def create_target(
-        self,
-        config: dict[str, t.ContainerValue],
+        self, config: dict[str, t.ContainerValue]
     ) -> FlextResult[target_client_module.TargetLdap]:
         """Create an LDAP target from config."""
         ...
@@ -120,9 +119,7 @@ class LdapTransformationService:
         if entry_type == "groups":
             return [
                 LdapAttributeMappingModel(
-                    singer_field_name="name",
-                    ldap_attribute_name="cn",
-                    is_required=True,
+                    singer_field_name="name", ldap_attribute_name="cn", is_required=True
                 ),
                 LdapAttributeMappingModel(
                     singer_field_name="description",
@@ -132,10 +129,8 @@ class LdapTransformationService:
             ]
         return [
             LdapAttributeMappingModel(
-                singer_field_name="name",
-                ldap_attribute_name="cn",
-                is_required=True,
-            ),
+                singer_field_name="name", ldap_attribute_name="cn", is_required=True
+            )
         ]
 
     def transform_record(
@@ -149,7 +144,6 @@ class LdapTransformationService:
         mapping_errors: list[str] = []
         ldap_attributes: dict[str, list[str]] = {}
         applied_mappings: list[LdapAttributeMappingModel] = []
-
         for mapping in mappings:
             value = record.get(mapping.singer_field_name)
             if value is None and mapping.default_value is not None:
@@ -157,10 +151,9 @@ class LdapTransformationService:
             if value is None:
                 if mapping.is_required:
                     mapping_errors.append(
-                        f"Missing required field: {mapping.singer_field_name}",
+                        f"Missing required field: {mapping.singer_field_name}"
                     )
                 continue
-
             text_value = str(value)
             if mapping.transformation_rule == "lowercase":
                 text_value = text_value.lower()
@@ -170,10 +163,8 @@ class LdapTransformationService:
                 text_value = text_value.strip()
             elif mapping.transformation_rule == "normalize":
                 text_value = text_value.strip().lower()
-
             ldap_attributes[mapping.ldap_attribute_name] = [text_value]
             applied_mappings.append(mapping)
-
         entry_name = str(record.get("username", record.get("name", "unknown")))
         dn = f"cn={entry_name},{base_dn}"
         entry = LdapEntryModel(
@@ -182,7 +173,6 @@ class LdapTransformationService:
             attributes=ldap_attributes,
             entry_type=self._determine_entry_type(object_classes),
         )
-
         result = LdapTransformationResultModel(
             original_record=dict(record),
             transformed_entry=entry,
@@ -240,16 +230,12 @@ class LdapTargetOrchestrator:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return FlextResult[t.ConfigurationMapping].fail(
-                "Configuration is required",
-            )
-
+            return FlextResult[t.ConfigurationMapping].fail("Configuration is required")
         transformation = LdapTransformationService(working)
         object_classes = working.object_classes
         base_dn = working.base_dn
         stream_type = "users"
         mappings = transformation.get_default_mappings(stream_type)
-
         processed = 0
         errors: list[str] = []
         for record in records:
@@ -263,7 +249,6 @@ class LdapTargetOrchestrator:
                 processed += 1
             else:
                 errors.append(transformed.error or "Transformation failed")
-
         result: dict[str, t.ContainerValue] = {
             "processed_records": processed,
             "total_records": len(records),
@@ -273,8 +258,7 @@ class LdapTargetOrchestrator:
         return FlextResult[t.ConfigurationMapping].ok(result)
 
     def validate_target_configuration(
-        self,
-        config: FlextTargetLdapSettings | None = None,
+        self, config: FlextTargetLdapSettings | None = None
     ) -> FlextResult[bool]:
         """Validate target configuration and test connection."""
         working = config or self._typed_config
@@ -292,13 +276,12 @@ class LdapTargetApiService:
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
 
     def create_ldap_target(
-        self,
-        config: dict[str, t.ContainerValue],
+        self, config: dict[str, t.ContainerValue]
     ) -> FlextResult[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
         try:
             return FlextResult[target_client_module.TargetLdap].ok(
-                target_client_module.TargetLdap(config=config),
+                target_client_module.TargetLdap(config=config)
             )
         except (RuntimeError, ValueError, TypeError) as exc:
             return FlextResult[target_client_module.TargetLdap].fail(str(exc))
@@ -312,7 +295,7 @@ class LdapTargetApiService:
         target_result = self.create_ldap_target(config)
         if target_result.is_failure or target_result.value is None:
             return FlextResult[int].fail(
-                target_result.error or "Target creation failed",
+                target_result.error or "Target creation failed"
             )
         target = target_result.value
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
@@ -329,7 +312,7 @@ class LdapTargetApiService:
         target_result = self.create_ldap_target(config)
         if target_result.is_failure or target_result.value is None:
             return FlextResult[int].fail(
-                target_result.error or "Target creation failed",
+                target_result.error or "Target creation failed"
             )
         target = target_result.value
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
@@ -338,14 +321,13 @@ class LdapTargetApiService:
         return FlextResult[int].ok(len(users))
 
     def test_ldap_connection(
-        self,
-        config: dict[str, t.ContainerValue],
+        self, config: dict[str, t.ContainerValue]
     ) -> FlextResult[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
         if validated.is_failure or validated.value is None:
             return FlextResult[bool].fail(
-                validated.error or "Configuration validation failed",
+                validated.error or "Configuration validation failed"
             )
         return LdapConnectionService(validated.value).test_connection()
 

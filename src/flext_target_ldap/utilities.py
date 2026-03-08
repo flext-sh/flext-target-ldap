@@ -54,28 +54,20 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if not line or not line.strip():
-                return FlextResult[t.ConfigurationMapping].fail(
-                    "Empty input line",
-                )
-
+                return FlextResult[t.ConfigurationMapping].fail("Empty input line")
             try:
                 message = json.loads(line.strip())
                 if not u.is_dict_like(message):
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Message must be a JSON object",
+                        "Message must be a JSON object"
                     )
-
                 if "type" not in message:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Message missing required 'type' field",
+                        "Message missing required 'type' field"
                     )
-
                 return FlextResult[t.ConfigurationMapping].ok(message)
-
             except json.JSONDecodeError as e:
-                return FlextResult[t.ConfigurationMapping].fail(
-                    f"Invalid JSON: {e}",
-                )
+                return FlextResult[t.ConfigurationMapping].fail(f"Invalid JSON: {e}")
 
         @staticmethod
         def validate_record_message(
@@ -92,22 +84,19 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if message.get("type") != "RECORD":
                 return FlextResult[t.ConfigurationMapping].fail(
-                    "Message type must be RECORD",
+                    "Message type must be RECORD"
                 )
-
             required_fields = ["stream", "record"]
             for field in required_fields:
                 if field not in message:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        f"RECORD message missing '{field}' field",
+                        f"RECORD message missing '{field}' field"
                     )
-
             record = message["record"]
             if not u.is_dict_like(record):
                 return FlextResult[t.ConfigurationMapping].fail(
-                    "Record data must be a dictionary",
+                    "Record data must be a dictionary"
                 )
-
             return FlextResult[t.ConfigurationMapping].ok(message)
 
         @staticmethod
@@ -125,22 +114,19 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if message.get("type") != "SCHEMA":
                 return FlextResult[t.ConfigurationMapping].fail(
-                    "Message type must be SCHEMA",
+                    "Message type must be SCHEMA"
                 )
-
             required_fields = ["stream", "schema"]
             for field in required_fields:
                 if field not in message:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        f"SCHEMA message missing '{field}' field",
+                        f"SCHEMA message missing '{field}' field"
                     )
-
             schema = message["schema"]
             if not u.is_dict_like(schema):
                 return FlextResult[t.ConfigurationMapping].fail(
-                    "Schema data must be a dictionary",
+                    "Schema data must be a dictionary"
                 )
-
             return FlextResult[t.ConfigurationMapping].ok(message)
 
         @staticmethod
@@ -157,9 +143,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def build_ldap_dn(
-            record: Mapping[str, t.ContainerValue],
-            dn_template: str,
-            base_dn: str,
+            record: Mapping[str, t.ContainerValue], dn_template: str, base_dn: str
         ) -> FlextResult[str]:
             """Build LDAP Distinguished Name from record data.
 
@@ -172,38 +156,28 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             FlextResult[str]: Built DN or error
 
             """
-            if not record or not dn_template or not base_dn:
+            if not record or not dn_template or (not base_dn):
                 return FlextResult[str].fail(
-                    "Record, DN template, and base DN are required",
+                    "Record, DN template, and base DN are required"
                 )
-
             try:
-                # Replace placeholders in DN template
                 dn_rdn = dn_template
                 for key, value in record.items():
                     placeholder = f"{{{key}}}"
                     if placeholder in dn_rdn:
                         if value is None:
                             return FlextResult[str].fail(
-                                f"Cannot build DN: {key} is null",
+                                f"Cannot build DN: {key} is null"
                             )
                         dn_rdn = dn_rdn.replace(placeholder, str(value))
-
-                # Check if all placeholders were replaced
                 if "{" in dn_rdn and "}" in dn_rdn:
                     return FlextResult[str].fail(
-                        f"Unresolved placeholders in DN: {dn_rdn}",
+                        f"Unresolved placeholders in DN: {dn_rdn}"
                     )
-
-                # Combine with base DN
                 full_dn = f"{dn_rdn},{base_dn}"
-
-                # Validate DN format
                 if not FlextTargetLdapUtilities.LdapDataProcessing.split(full_dn):
                     return FlextResult[str].fail(f"Invalid DN format: {full_dn}")
-
                 return FlextResult[str].ok(full_dn)
-
             except (
                 ValueError,
                 TypeError,
@@ -232,23 +206,16 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if not record:
                 return FlextResult[Mapping[str, list[bytes]]].fail(
-                    "Record cannot be empty",
+                    "Record cannot be empty"
                 )
-
             try:
                 ldap_attrs: dict[str, list[bytes]] = {}
                 mapping = attribute_mapping or {}
-
                 for key, value in record.items():
                     if value is None:
-                        continue  # Skip null values
-
-                    # Get LDAP attribute name (use mapping or original key)
+                        continue
                     ldap_attr = mapping.get(key, key)
-
-                    # Convert value to LDAP format
                     if u.Guards.is_list(value):
-                        # Multi-value attribute
                         ldap_values = [
                             str(item).encode("utf-8")
                             for item in value
@@ -257,11 +224,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         if ldap_values:
                             ldap_attrs[ldap_attr] = ldap_values
                     else:
-                        # Single-value attribute
                         ldap_attrs[ldap_attr] = [str(value).encode("utf-8")]
-
                 return FlextResult[Mapping[str, list[bytes]]].ok(ldap_attrs)
-
             except (
                 ValueError,
                 TypeError,
@@ -272,7 +236,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 ImportError,
             ) as e:
                 return FlextResult[Mapping[str, list[bytes]]].fail(
-                    f"Error converting to LDAP attributes: {e}",
+                    f"Error converting to LDAP attributes: {e}"
                 )
 
         @staticmethod
@@ -290,19 +254,13 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             list[str]: List of object classes
 
             """
-            # Check for object classes in record
             object_classes = record.get("objectClass") or record.get("objectclass")
-
             if object_classes:
                 if u.Guards.is_list(object_classes):
                     return [str(oc) for oc in object_classes if oc]
                 return [str(object_classes)]
-
-            # Use defaults if provided
             if default_object_classes:
                 return default_object_classes
-
-            # Fallback to basic object classes
             return ["top"]
 
         @staticmethod
@@ -318,8 +276,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if not value:
                 return ""
-
-            # Escape special LDAP characters
             ldap_escapes = {
                 "\\": "\\5c",
                 "*": "\\2a",
@@ -327,12 +283,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 ")": "\\29",
                 "\x00": "\\00",
             }
-
             sanitized = value
             for char, escape in ldap_escapes.items():
                 sanitized = sanitized.replace(char, escape)
-
-            # Remove leading/trailing whitespace
             return sanitized.strip()
 
         @staticmethod
@@ -348,12 +301,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if not dn:
                 return False
-
-            # Basic DN format validation
-            # Should contain at least one RDN component (attr=value)
-            dn_pattern = (
-                r"^[a-zA-Z][\w\-]*\s*=\s*[^,]+(?:\s*,\s*[a-zA-Z][\w\-]*\s*=\s*[^,]+)*$"
-            )
+            dn_pattern = "^[a-zA-Z][\\w\\-]*\\s*=\\s*[^,]+(?:\\s*,\\s*[a-zA-Z][\\w\\-]*\\s*=\\s*[^,]+)*$"
             return bool(re.match(dn_pattern, dn.strip()))
 
     class StreamUtilities:
@@ -361,8 +309,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def calculate_ldap_batch_size(
-            record_count: int,
-            target_batches: int = 10,
+            record_count: int, target_batches: int = 10
         ) -> int:
             """Calculate optimal batch size for LDAP operations.
 
@@ -376,15 +323,12 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if record_count <= 0:
                 return c.TargetLdap.Processing.DEFAULT_BATCH_SIZE
-
             calculated_size = max(1, record_count // target_batches)
             return min(calculated_size, c.TargetLdap.Processing.DEFAULT_BATCH_SIZE)
 
         @staticmethod
         def generate_ldap_stream_metadata(
-            stream_name: str,
-            record_count: int,
-            processing_time: float,
+            stream_name: str, record_count: int, processing_time: float
         ) -> Mapping[str, t.ContainerValue]:
             """Generate metadata for LDAP stream processing.
 
@@ -408,8 +352,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def validate_stream_compatibility(
-            stream_name: str,
-            schema: Mapping[str, t.ContainerValue],
+            stream_name: str, schema: Mapping[str, t.ContainerValue]
         ) -> FlextResult[bool]:
             """Validate stream compatibility with LDAP operations.
 
@@ -423,26 +366,20 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if not stream_name or not schema:
                 return FlextResult[bool].fail("Stream name and schema are required")
-
-            # Check if schema has required properties
             raw_props = schema.get("properties", {})
             properties: dict[str, t.ContainerValue] = (
                 raw_props if u.is_dict_like(raw_props) else {}
             )
             if not properties:
                 return FlextResult[bool].fail("Schema must have properties")
-
-            # Check for DN building capability
             has_dn_field = "dn" in properties
             has_id_fields = any(
                 key in properties for key in ["id", "uid", "cn", "username", "email"]
             )
-
-            if not has_dn_field and not has_id_fields:
+            if not has_dn_field and (not has_id_fields):
                 return FlextResult[bool].fail(
-                    "Schema must have either 'dn' field or identifier fields (id, uid, cn, username, email)",
+                    "Schema must have either 'dn' field or identifier fields (id, uid, cn, username, email)"
                 )
-
             return FlextResult[bool].ok(value=True)
 
     class ConfigValidation:
@@ -463,85 +400,71 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
             missing_fields = [field for field in required_fields if field not in config]
-
             if missing_fields:
                 return FlextResult[t.ConfigurationMapping].fail(
-                    f"Missing required LDAP connection fields: {', '.join(missing_fields)}",
+                    f"Missing required LDAP connection fields: {', '.join(missing_fields)}"
                 )
-
-            # Validate host format
             host = config["host"]
             match host:
                 case str() if host.strip():
                     pass
                 case _:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Host must be a non-empty string",
+                        "Host must be a non-empty string"
                     )
-
-            # Validate bind DN format
             bind_dn = config["bind_dn"]
             match bind_dn:
                 case str():
                     pass
                 case _:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Bind DN must be a string",
+                        "Bind DN must be a string"
                     )
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
                 return FlextResult[t.ConfigurationMapping].fail(
-                    f"Invalid bind DN format: {bind_dn}",
+                    f"Invalid bind DN format: {bind_dn}"
                 )
-
-            # Validate base DN format
             base_dn = config["base_dn"]
             match base_dn:
                 case str():
                     pass
                 case _:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Base DN must be a string",
+                        "Base DN must be a string"
                     )
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
                 return FlextResult[t.ConfigurationMapping].fail(
-                    f"Invalid base DN format: {base_dn}",
+                    f"Invalid base DN format: {base_dn}"
                 )
-
-            # Validate base DN format
             base_dn = config["base_dn"]
             match base_dn:
                 case str() if FlextTargetLdapUtilities.LdapDataProcessing.split(
-                    base_dn,
+                    base_dn
                 ):
                     pass
                 case _:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        f"Invalid base DN format: {base_dn}",
+                        f"Invalid base DN format: {base_dn}"
                     )
-
-            # Validate port if provided
             if "port" in config:
                 port = config["port"]
                 match port:
                     case bool():
                         return FlextResult[t.ConfigurationMapping].fail(
-                            "Port must be a valid integer between 1 and 65535",
+                            "Port must be a valid integer between 1 and 65535"
                         )
                     case int() if 0 < port <= c.TargetLdap.Connection.MAX_PORT_NUMBER:
                         pass
                     case _:
                         return FlextResult[t.ConfigurationMapping].fail(
-                            "Port must be a valid integer between 1 and 65535",
+                            "Port must be a valid integer between 1 and 65535"
                         )
-
-            # Validate SSL settings
             use_ssl = config.get("use_ssl", False)
             use_tls = config.get("use_tls", False)
             if use_ssl and use_tls:
                 return FlextResult[t.ConfigurationMapping].fail(
-                    "Cannot use both SSL and TLS simultaneously",
+                    "Cannot use both SSL and TLS simultaneously"
                 )
-
             return FlextResult[t.ConfigurationMapping].ok(config)
 
         @staticmethod
@@ -557,22 +480,17 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             FlextResult[dict[str, t.ContainerValue]]: Validated config or error
 
             """
-            # Validate LDAP connection
             ldap_result = FlextTargetLdapUtilities.ConfigValidation.validate_ldap_connection_config(
-                config,
+                config
             )
             if ldap_result.is_failure:
                 return ldap_result
-
-            # Validate operation mode
             operation_mode = config.get("operation_mode", "upsert")
             valid_modes = ["insert", "update", "upsert", "delete"]
             if operation_mode not in valid_modes:
                 return FlextResult[t.ConfigurationMapping].fail(
-                    f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}",
+                    f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}"
                 )
-
-            # Validate DN template if provided
             if "dn_template" in config:
                 dn_template = config["dn_template"]
                 match dn_template:
@@ -580,26 +498,22 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         pass
                     case _:
                         return FlextResult[t.ConfigurationMapping].fail(
-                            "DN template must be a non-empty string",
+                            "DN template must be a non-empty string"
                         )
-
-            # Validate batch size
             batch_size = config.get(
-                "batch_size",
-                c.TargetLdap.Processing.DEFAULT_BATCH_SIZE,
+                "batch_size", c.TargetLdap.Processing.DEFAULT_BATCH_SIZE
             )
             match batch_size:
                 case bool():
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Batch size must be a positive integer",
+                        "Batch size must be a positive integer"
                     )
                 case int() if batch_size > 0:
                     pass
                 case _:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Batch size must be a positive integer",
+                        "Batch size must be a positive integer"
                     )
-
             return FlextResult[t.ConfigurationMapping].ok(config)
 
     class StateManagement:
@@ -628,9 +542,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 "last_updated": datetime.now(UTC).isoformat(),
                 "target_type": "ldap",
             }
-
             if last_processed_record:
-                # Store minimal checkpoint information
                 checkpoint_data = {
                     "id": last_processed_record.get("id"),
                     "dn": last_processed_record.get("dn"),
@@ -639,13 +551,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 state["checkpoint"] = {
                     k: v for k, v in checkpoint_data.items() if v is not None
                 }
-
             return state
 
         @staticmethod
         def get_target_state(
-            state: Mapping[str, t.ContainerValue],
-            stream_name: str,
+            state: Mapping[str, t.ContainerValue], stream_name: str
         ) -> Mapping[str, t.ContainerValue]:
             """Get state for a specific target stream.
 
@@ -660,7 +570,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             bookmarks = state.get("bookmarks")
             if not u.is_dict_like(bookmarks):
                 return {}
-
             stream_state_data = bookmarks.get(stream_name)
             if u.is_dict_like(stream_state_data):
                 return stream_state_data
@@ -688,15 +597,12 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             if not u.is_dict_like(bookmarks):
                 bookmarks = {}
                 state_dict["bookmarks"] = bookmarks
-
             bookmarks[stream_name] = stream_state
             return state_dict
 
         @staticmethod
         def update_processing_progress(
-            state: Mapping[str, t.ContainerValue],
-            stream_name: str,
-            records_count: int,
+            state: Mapping[str, t.ContainerValue], stream_name: str, records_count: int
         ) -> Mapping[str, t.ContainerValue]:
             """Update processing progress in state.
 
@@ -710,10 +616,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             stream_state = FlextTargetLdapUtilities.StateManagement.get_target_state(
-                state,
-                stream_name,
+                state, stream_name
             )
-
             current_count_val = stream_state.get("records_processed", 0)
             match current_count_val:
                 case bool():
@@ -723,7 +627,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case _:
                     current_count = 0
             new_count = current_count + records_count
-
             batch_count_val = stream_state.get("batch_count", 0)
             match batch_count_val:
                 case bool():
@@ -732,26 +635,19 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     batch_count = batch_count_val
                 case _:
                     batch_count = 0
-
             updated_stream_state: dict[str, t.ContainerValue] = {
                 **stream_state,
                 "records_processed": new_count,
                 "last_updated": datetime.now(UTC).isoformat(),
                 "batch_count": batch_count + 1,
             }
-
             return FlextTargetLdapUtilities.StateManagement.set_target_state(
-                state,
-                stream_name,
-                updated_stream_state,
+                state, stream_name, updated_stream_state
             )
 
     @classmethod
     def build_ldap_dn(
-        cls,
-        record: Mapping[str, t.ContainerValue],
-        dn_template: str,
-        base_dn: str,
+        cls, record: Mapping[str, t.ContainerValue], dn_template: str, base_dn: str
     ) -> FlextResult[str]:
         """Proxy method for LdapDataProcessing.build_ldap_dn()."""
         return cls.LdapDataProcessing.build_ldap_dn(record, dn_template, base_dn)
@@ -764,8 +660,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     ) -> FlextResult[Mapping[str, list[bytes]]]:
         """Proxy method for LdapDataProcessing.convert_record_to_ldap_attributes()."""
         return cls.LdapDataProcessing.convert_record_to_ldap_attributes(
-            record,
-            attribute_mapping,
+            record, attribute_mapping
         )
 
     @classmethod
@@ -777,32 +672,26 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     ) -> Mapping[str, t.ContainerValue]:
         """Proxy method for StateManagement.create_processing_state()."""
         return cls.StateManagement.create_processing_state(
-            stream_name,
-            records_processed,
-            last_processed_record,
+            stream_name, records_processed, last_processed_record
         )
 
     @classmethod
     def get_target_state(
-        cls,
-        state: Mapping[str, t.ContainerValue],
-        stream_name: str,
+        cls, state: Mapping[str, t.ContainerValue], stream_name: str
     ) -> Mapping[str, t.ContainerValue]:
         """Proxy method for StateManagement.get_target_state()."""
         return cls.StateManagement.get_target_state(state, stream_name)
 
     @classmethod
     def parse_singer_message(
-        cls,
-        line: str,
+        cls, line: str
     ) -> FlextResult[Mapping[str, t.ContainerValue]]:
         """Proxy method for TargetLdap.parse_singer_message()."""
         return cls.TargetLdap.parse_singer_message(line)
 
     @classmethod
     def validate_ldap_connection_config(
-        cls,
-        config: Mapping[str, t.ContainerValue],
+        cls, config: Mapping[str, t.ContainerValue]
     ) -> FlextResult[Mapping[str, t.ContainerValue]]:
         """Proxy method for ConfigValidation.validate_ldap_connection_config()."""
         return cls.ConfigValidation.validate_ldap_connection_config(config)
@@ -823,33 +712,26 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 FlextLdapModels.Ldap.ConnectionConfig: Validated connection config
 
             """
-            # Import here to avoid circular imports
-
             server = FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("host", "localhost"),
-                "localhost",
+                config.get("host", "localhost"), "localhost"
             )
             port = FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
                 c.TargetLdap.Connection.DEFAULT_PORT,
             )
             use_ssl = FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("use_ssl", False),
-                default=False,
+                config.get("use_ssl", False), default=False
             )
             bind_dn = FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("bind_dn", ""),
-                "",
+                config.get("bind_dn", ""), ""
             )
             bind_password = FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("password", ""),
-                "",
+                config.get("password", ""), ""
             )
             timeout = FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("timeout", c.Network.DEFAULT_TIMEOUT),
                 c.Network.DEFAULT_TIMEOUT,
             )
-
             return FlextLdapModels.Ldap.ConnectionConfig(
                 host=server,
                 port=port,
@@ -889,9 +771,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             return {}
 
         @staticmethod
-        def extract_object_classes(
-            config: Mapping[str, t.ContainerValue],
-        ) -> list[str]:
+        def extract_object_classes(config: Mapping[str, t.ContainerValue]) -> list[str]:
             """Extract object classes from configuration dict.
 
             Business Rule: Object Classes Configuration
@@ -1020,8 +900,4 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
 
 u = FlextTargetLdapUtilities
-
-__all__ = [
-    "FlextTargetLdapUtilities",
-    "u",
-]
+__all__ = ["FlextTargetLdapUtilities", "u"]

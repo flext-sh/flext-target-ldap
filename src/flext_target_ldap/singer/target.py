@@ -38,8 +38,7 @@ class SingerTargetLDAP:
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
-        self,
-        messages: list[dict[str, t.ContainerValue]],
+        self, messages: list[dict[str, t.ContainerValue]]
     ) -> FlextResult[dict[str, t.ContainerValue]]:
         """Process Singer messages for LDAP target.
 
@@ -52,24 +51,17 @@ class SingerTargetLDAP:
         """
         try:
             logger.info("Processing Singer messages for LDAP target")
-
-            # Process Singer messages
             processed_count = 0
             for _message in messages:
-                # Process individual Singer message
                 processed_count += 1
-
             result: dict[str, t.ContainerValue] = {
                 "processed_messages": processed_count,
                 "status": "completed",
             }
-
             logger.info(
-                "Singer message processing completed: %d messages",
-                processed_count,
+                "Singer message processing completed: %d messages", processed_count
             )
             return FlextResult[t.ConfigurationMapping].ok(result)
-
         except (
             ValueError,
             TypeError,
@@ -81,7 +73,7 @@ class SingerTargetLDAP:
         ) as e:
             logger.exception("Singer message processing failed")
             return FlextResult[t.ConfigurationMapping].fail(
-                f"Message processing failed: {e}",
+                f"Message processing failed: {e}"
             )
 
     def validate_singer_config(self) -> FlextResult[bool]:
@@ -92,12 +84,10 @@ class SingerTargetLDAP:
 
         """
         try:
-            # Basic validation
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
                     return FlextResult[bool].fail(f"Missing required field: {field}")
-
             return FlextResult[bool].ok(value=True)
         except (
             ValueError,

@@ -56,11 +56,7 @@ def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
 
 
 flext_cli_create_helper = _default_cli_helper
-
-
 logger = FlextLogger(__name__)
-
-# Network constants - moved to c.TargetLdap.Connection.MAX_PORT_NUMBER
 
 
 class _LdapApiProtocol(Protocol):
@@ -88,8 +84,6 @@ class TargetLDAP(Target):
     ) -> None:
         """Initialize LDAP target."""
         super().__init__(config=config or {}, validate_config=validate_config)
-
-        # Initialize orchestrator with new modular architecture
         self._orchestrator: LDAPTargetOrchestrator | None = None
         self._container: FlextContainer | None = None
 
@@ -136,10 +130,7 @@ class TargetLDAP(Target):
                         "properties": {
                             "name": {"type": "string"},
                             "description": {"type": "string"},
-                            "members": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                            },
+                            "members": {"type": "array", "items": {"type": "string"}},
                         },
                         "required": ["name"],
                     },
@@ -155,7 +146,7 @@ class TargetLDAP(Target):
                         "required": ["name"],
                     },
                 },
-            ],
+            ]
         }
 
     def get_sink_class(self, stream_name: str) -> type[Sink]:
@@ -165,59 +156,44 @@ class TargetLDAP(Target):
             "groups": GroupsSink,
             "organizational_units": OrganizationalUnitsSink,
         }
-
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
             logger.warning(
-                "No specific sink found for stream '%s', using base sink",
-                stream_name,
+                "No specific sink found for stream '%s', using base sink", stream_name
             )
-            # Return LDAPBaseSink as default for generic streams
             return LDAPBaseSink
-
         logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
         return sink_class
 
     def setup(self) -> None:
         """Set up the LDAP target."""
-        # Initialize orchestrator
-        _ = self.orchestrator  # Ensure orchestrator is created
+        _ = self.orchestrator
         logger.info("Orchestrator initialized successfully")
-
-        # Initialize DI container
         self._container = get_flext_target_ldap_container()
         logger.info("DI container initialized successfully")
-
         host = self.config.get("host", "localhost")
         logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""
-        # Cleanup orchestrator
         if self._orchestrator:
             self._orchestrator = None
             logger.info("Orchestrator cleaned up")
-
-        # Cleanup container
         if self._container is not None:
             self._container = None
             logger.info("DI container cleaned up")
-
         logger.info("LDAP target teardown completed")
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        # Additional LDAP-specific validation
         host = self.config.get("host")
         if not host:
             msg = "LDAP host is required"
             raise ValueError(msg)
-
         base_dn = self.config.get("base_dn")
         if not base_dn:
             msg = "LDAP base DN is required"
             raise ValueError(msg)
-
         port_obj = self.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT)
         try:
             port = int(str(port_obj))
@@ -226,19 +202,16 @@ class TargetLDAP(Target):
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)
-
         use_ssl = self.config.get("use_ssl", False)
         use_tls = self.config.get("use_tls", False)
         if use_ssl and use_tls:
             msg = "Cannot use both SSL and TLS simultaneously"
             raise ValueError(msg)
-
         logger.info("LDAP target configuration validated successfully")
 
 
 def main() -> None:
     """CLI entry point for target-ldap."""
-    # Delegate to FLEXT-CLI command for tests
     _target_ldap_flext_cli()
 
 
@@ -278,9 +251,7 @@ def _get_ldap_api() -> _LdapApiProtocol | None:
 
 
 def _construct_dn(
-    stream: str,
-    record: dict[str, t.ContainerValue],
-    base_dn: str,
+    stream: str, record: dict[str, t.ContainerValue], base_dn: str
 ) -> str:
     """Construct DN from record based on stream type."""
     if stream == "users":
@@ -303,15 +274,12 @@ def _process_record_message(
     """Process a RECORD message."""
     if api is None:
         return
-
     dn_value = record.get("dn")
     if dn_value is None or not str(dn_value).strip():
         base_dn = str(cfg.get("base_dn", "dc=test,dc=com"))
         dn = _construct_dn(stream, record, base_dn)
     else:
         dn = str(dn_value)
-
-    # Delete vs upsert
     if record.get("_sdc_deleted_at"):
         with suppress(Exception):
             api.delete(dn)
@@ -335,7 +303,6 @@ def _process_record_message(
                 api.modify(dn, record)
 
 
-# FLEXT-CLI implementation for tests (echoes STATE lines)
 def _target_ldap_flext_cli(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
@@ -343,7 +310,6 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         current_stream: str | None = None
         api = _get_ldap_api()
         seen_dns: set[str] = set()
-
         for line in sys.stdin:
             try:
                 obj = json.loads(line)
@@ -381,5 +347,4 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         logger.debug("Unexpected error in CLI suppressed", exc_info=True)
 
 
-# Expose CLI command via class attribute for tests expecting TargetLDAP.cli
 TargetLDAP.cli = _target_ldap_flext_cli

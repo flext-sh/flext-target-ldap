@@ -28,5 +28,4 @@ class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
 
 t = TestsFlextTargetLdapTypes
 tt = TestsFlextTargetLdapTypes
-
 __all__ = ["TestsFlextTargetLdapTypes", "t", "tt"]

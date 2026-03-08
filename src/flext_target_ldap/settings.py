@@ -19,16 +19,13 @@ from .constants import c
 from .typings import t
 from .utilities import FlextTargetLdapUtilities
 
-# Use SettingsConfigDict for Settings configuration
-
 
 class LDAPConnectionSettings(FlextModels):
     """LDAP connection settings model."""
 
     host: str = Field(..., description="LDAP server host")
     port: int = Field(
-        c.TargetLdap.Connection.DEFAULT_PORT,
-        description="LDAP server port",
+        c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port"
     )
     use_ssl: bool = Field(default=False, description="Use SSL connection")
     use_tls: bool = Field(default=False, description="Use TLS connection")
@@ -36,12 +33,10 @@ class LDAPConnectionSettings(FlextModels):
     bind_password: str | None = Field(None, description="Bind password")
     base_dn: str = Field(..., description="Base DN")
     connect_timeout: int = Field(
-        c.Network.DEFAULT_TIMEOUT // 3,
-        description="Connection timeout",
+        c.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout"
     )
     receive_timeout: int = Field(
-        c.Network.DEFAULT_TIMEOUT,
-        description="Receive timeout",
+        c.Network.DEFAULT_TIMEOUT, description="Receive timeout"
     )
 
 
@@ -49,21 +44,17 @@ class LDAPOperationSettings(FlextModels):
     """LDAP operation settings model."""
 
     batch_size: int = Field(
-        c.Performance.BatchProcessing.DEFAULT_SIZE,
-        description="Batch size",
+        c.Performance.BatchProcessing.DEFAULT_SIZE, description="Batch size"
     )
     max_records: int | None = Field(None, description="Maximum records")
     create_missing_entries: bool = Field(
-        default=True,
-        description="Create missing entries",
+        default=True, description="Create missing entries"
     )
     update_existing_entries: bool = Field(
-        default=True,
-        description="Update existing entries",
+        default=True, description="Update existing entries"
     )
     delete_removed_entries: bool = Field(
-        default=False,
-        description="Delete removed entries",
+        default=False, description="Delete removed entries"
     )
 
 
@@ -79,25 +70,21 @@ def validate_ldap_config(
             FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
         )
         object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(
-            config,
+            config
         )
-
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("base_dn", ""),
+                config.get("base_dn", "")
             ),
             search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_filter", "(objectClass=*)"),
+                config.get("search_filter", "(objectClass=*)")
             ),
             search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_scope", "SUBTREE"),
+                config.get("search_scope", "SUBTREE")
             ),
             connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get(
-                    "connect_timeout",
-                    c.Network.DEFAULT_TIMEOUT // 3,
-                ),
+                config.get("connect_timeout", c.Network.DEFAULT_TIMEOUT // 3),
                 c.Network.DEFAULT_TIMEOUT // 3,
             ),
             receive_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
@@ -105,27 +92,20 @@ def validate_ldap_config(
                 c.Network.DEFAULT_TIMEOUT,
             ),
             batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get(
-                    "batch_size",
-                    c.Performance.BatchProcessing.DEFAULT_SIZE,
-                ),
+                config.get("batch_size", c.Performance.BatchProcessing.DEFAULT_SIZE),
                 c.Performance.BatchProcessing.DEFAULT_SIZE,
             ),
             max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("max_records"),
-                0,
+                config.get("max_records"), 0
             ),
             create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("create_missing_entries", True),
-                default=True,
+                config.get("create_missing_entries", True), default=True
             ),
             update_existing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("update_existing_entries", True),
-                default=True,
+                config.get("update_existing_entries", True), default=True
             ),
             delete_removed_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("delete_removed_entries", False),
-                default=False,
+                config.get("delete_removed_entries", False), default=False
             ),
             attribute_mapping=attribute_mapping,
             object_classes=object_classes,
@@ -133,5 +113,5 @@ def validate_ldap_config(
         return FlextResult[FlextTargetLdapSettings].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return FlextResult[FlextTargetLdapSettings].fail(
-            f"Configuration validation failed: {e}",
+            f"Configuration validation failed: {e}"
         )

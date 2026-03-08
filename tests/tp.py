@@ -11,9 +11,5 @@ from __future__ import annotations
 
 from tests.protocols import TestsFlextTargetLdapProtocols
 
-# Runtime alias for test protocols
 p = TestsFlextTargetLdapProtocols
-
-__all__ = [
-    "p",
-]
+__all__ = ["p"]

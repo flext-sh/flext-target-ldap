@@ -33,8 +33,6 @@ class TestsFlextTargetLdapProtocols(FlextTestsProtocols, FlextTargetLdapProtocol
             """TargetLdap-specific test protocols."""
 
 
-# Runtime aliases
 p = TestsFlextTargetLdapProtocols
 p = TestsFlextTargetLdapProtocols
-
 __all__ = ["TestsFlextTargetLdapProtocols", "p"]
