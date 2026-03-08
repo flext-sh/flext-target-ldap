@@ -7,10 +7,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar, override
+from typing import override
 
-from flext_core import FlextLogger, FlextModels, FlextResult
-from pydantic import Field
+from flext_core import FlextLogger, FlextResult
 
 from flext_target_ldap.typings import t
 
@@ -18,39 +17,6 @@ logger = FlextLogger(__name__)
 
 
 # Local LDAP catalog classes (no fallbacks - real implementation)
-class SingerLDAPCatalogEntry(FlextModels.Entity):
-    """Singer LDAP catalog entry using flext-core patterns."""
-
-    tap_stream_id: str
-    stream: str
-    stream_schema: dict[str, t.ContainerValue] = Field(
-        ...,
-        description="Singer stream schema",
-    )
-    metadata: list[dict[str, t.ContainerValue]] = Field(default_factory=list)
-    key_properties: ClassVar[list[str]] = []
-    bookmark_properties: ClassVar[list[str]] = []
-
-    def validate_business_rules(self) -> FlextResult[bool]:
-        """Validate catalog entry business rules."""
-        try:
-            if not self.tap_stream_id.strip():
-                return FlextResult[bool].fail("tap_stream_id cannot be empty")
-            if not self.stream.strip():
-                return FlextResult[bool].fail("stream cannot be empty")
-            if not self.stream_schema:
-                return FlextResult[bool].fail("stream_schema cannot be empty")
-            return FlextResult[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
-            return FlextResult[bool].fail(f"Catalog entry validation failed: {e}")
 
 
 class SingerLDAPCatalogManager:

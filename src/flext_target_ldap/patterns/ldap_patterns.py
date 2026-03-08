@@ -11,22 +11,8 @@ from collections.abc import Mapping
 from typing import cast, override
 
 from flext_core import FlextLogger, FlextResult, t
-from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
-
-
-class SingerPropertyDefinition(BaseModel):
-    """Singer field descriptor with normalized typing."""
-
-    type: str = "string"
-    format: str | None = None
-
-
-class SingerSchemaDefinition(BaseModel):
-    """Singer schema shape used by LDAP mapping."""
-
-    properties: dict[str, SingerPropertyDefinition] = Field(default_factory=dict)
 
 
 class LDAPTypeConverter:

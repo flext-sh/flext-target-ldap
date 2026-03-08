@@ -10,70 +10,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextLogger, FlextModels, FlextResult
-from pydantic import Field
+from flext_core import FlextLogger, FlextResult
 
 from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
-
-
-class TransformationRule(FlextModels.Entity):
-    """Transformation rule for data transformation."""
-
-    name: str
-    pattern: str
-    replacement: str
-    enabled: bool = True
-
-    def validate_business_rules(self) -> FlextResult[bool]:
-        """Validate transformation rule business rules."""
-        try:
-            if not self.name.strip():
-                return FlextResult[bool].fail("Rule name cannot be empty")
-            if not self.pattern:
-                return FlextResult[bool].fail("Pattern cannot be empty")
-            # replacement is guaranteed to be str by Pydantic typing
-            # Using a domain-specific validation instead
-            return FlextResult[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
-            return FlextResult[bool].fail(f"Transformation rule validation failed: {e}")
-
-
-class TransformationResult(FlextModels.Entity):
-    """Result of data transformation."""
-
-    transformed_data: dict[str, t.ContainerValue]
-    applied_rules: list[str] = Field(default_factory=list)
-
-    def validate_business_rules(self) -> FlextResult[bool]:
-        """Validate transformation result business rules."""
-        try:
-            if not self.transformed_data:
-                return FlextResult[bool].fail("transformed_data cannot be empty")
-            if len(self.applied_rules) < 0:  # This check makes sense for business logic
-                return FlextResult[bool].fail("applied_rules cannot be negative length")
-            return FlextResult[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
-            return FlextResult[bool].fail(
-                f"Transformation result validation failed: {e}",
-            )
 
 
 class DataTransformationEngine:
