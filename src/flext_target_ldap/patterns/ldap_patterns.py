@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from typing import cast, override
+from typing import override
 
 from flext_core import FlextLogger, FlextResult, t
 
@@ -106,9 +106,7 @@ class LDAPDataTransformer:
                     singer_type, value
                 )
                 converted_value: str | None = (
-                    cast("str | None", convert_result.value)
-                    if convert_result.is_success
-                    else str(value)
+                    convert_result.value if convert_result.is_success else str(value)
                 )
                 transformed[ldap_key] = converted_value
             return FlextResult[dict[str, str | None]].ok(transformed)
