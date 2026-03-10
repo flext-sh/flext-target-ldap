@@ -1,0 +1,23 @@
+src/flext_target_ldap/patterns/ldap_patterns.py
+  47eea5715f396576 115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "8f23552da510f2eaa32d3dffc83708aa296e3837",
+  "prompts": {
+    "47eea5715f396576": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_326bd4560ffeXYpQ6VzVbr6dJy",
+        "model": "anthropic/claude-opus-4-6"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 3,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
