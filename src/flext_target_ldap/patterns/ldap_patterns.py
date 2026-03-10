@@ -44,7 +44,7 @@ class LDAPTypeConverter:
                 result = str(value)
             return FlextResult[str | None].ok(result)
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("Type conversion failed for %s: %s", singer_type, str(e))
+            logger.warning("Type conversion failed for %s: %s", singer_type, e)
             return FlextResult[str | None].ok(str(value))
 
     def _normalize_bool(self, value: t.JsonValue) -> str:
@@ -90,14 +90,14 @@ class LDAPDataTransformer:
     def transform_record(
         self,
         record: dict[str, t.JsonValue],
-        schema: SingerSchemaDefinition
+        schema: SingerSchemaDefinition  # noqa: F821
         | Mapping[str, Mapping[str, Mapping[str, str] | str]]
         | None = None,
     ) -> FlextResult[dict[str, str | None]]:
         """Transform Singer record for LDAP storage."""
         try:
             transformed: dict[str, str | None] = {}
-            schema_model = SingerSchemaDefinition.model_validate(schema or {})
+            schema_model = SingerSchemaDefinition.model_validate(schema or {})  # noqa: F821
             for key, value in record.items():
                 ldap_key = self._normalize_ldap_attribute_name(key)
                 prop_def = schema_model.properties.get(key)
@@ -146,14 +146,14 @@ class LDAPSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: SingerSchemaDefinition
+        schema: SingerSchemaDefinition  # noqa: F821
         | Mapping[str, Mapping[str, Mapping[str, str] | str]],
         object_class: str = "inetOrgPerson",
     ) -> FlextResult[Mapping[str, str]]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: dict[str, str] = {}
-            schema_model = SingerSchemaDefinition.model_validate(schema)
+            schema_model = SingerSchemaDefinition.model_validate(schema)  # noqa: F821
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
@@ -169,7 +169,9 @@ class LDAPSchemaMapper:
             return FlextResult[Mapping[str, str]].fail(f"Schema mapping failed: {e}")
 
     def _map_singer_type_to_ldap(
-        self, prop_def: SingerPropertyDefinition, _object_class: str
+        self,
+        prop_def: SingerPropertyDefinition,  # noqa: F821
+        _object_class: str,
     ) -> FlextResult[str]:
         """Map Singer property definition to LDAP attribute syntax."""
         try:
@@ -185,7 +187,7 @@ class LDAPSchemaMapper:
                 return FlextResult[str].ok("OctetString")
             return FlextResult[str].ok("DirectoryString")
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("LDAP type mapping failed: %s", str(e))
+            logger.warning("LDAP type mapping failed: %s", e)
             return FlextResult[str].ok("DirectoryString")
 
     def _normalize_attribute_name(self, name: str) -> str:

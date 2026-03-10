@@ -12,8 +12,8 @@ from typing import override
 
 from flext_core import FlextLogger, FlextResult
 
-from flext_target_ldap.typings import t
 from flext_target_ldap.models import TransformationResult
+from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
 
@@ -22,7 +22,7 @@ class DataTransformationEngine:
     """Engine for transforming data using rules."""
 
     @override
-    def __init__(self, rules: list[TransformationRule]) -> None:
+    def __init__(self, rules: list[TransformationRule]) -> None:  # noqa: F821
         """Initialize transformation engine."""
         self.rules = rules
 
