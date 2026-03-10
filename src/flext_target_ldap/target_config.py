@@ -14,6 +14,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 from flext_core import FlextResult, u
 from flext_ldap import FlextLdapModels
 
@@ -120,12 +122,14 @@ def validate_ldap_target_config(
         delete_removed_entries = _target_config_to_bool(
             config.get("delete_removed_entries", False), default=False
         )
-        raw_attr_map_value: t.ContainerValue = config.get("attribute_mapping", {})
-        attribute_mapping: dict[str, str] = (
-            {str(k): str(v) for k, v in raw_attr_map_value.items()}
-            if u.is_dict_like(raw_attr_map_value)
-            else {}
-        )
+        attribute_mapping: dict[str, str] = {}
+        raw_attr_map_obj = config.get("attribute_mapping")
+        match raw_attr_map_obj:
+            case Mapping() as mapping_value:
+                for k, v in mapping_value.items():
+                    attribute_mapping[str(k)] = str(v)
+            case _:
+                pass
         object_classes = _target_config_to_str_list(
             config.get("object_classes", ["top"]), ["top"]
         )
@@ -181,9 +185,6 @@ def create_default_ldap_target_config(
 
 
 __all__ = [
-    "LdapTargetConnectionSettings",  # noqa: F822
-    "LdapTargetMappingSettings",  # noqa: F822
-    "LdapTargetOperationSettings",  # noqa: F822
     "create_default_ldap_target_config",
     "validate_ldap_target_config",
 ]

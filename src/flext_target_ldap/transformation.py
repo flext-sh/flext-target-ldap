@@ -11,18 +11,29 @@ from collections.abc import Mapping
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
+from pydantic import BaseModel, Field
 
-from flext_target_ldap.models import TransformationResult
 from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
+
+
+class TransformationRule(BaseModel):
+    name: str = Field(min_length=1)
+    pattern: str = Field(min_length=1)
+    replacement: str
+
+
+class TransformationResult(BaseModel):
+    transformed_data: dict[str, t.ContainerValue] = Field(default_factory=dict)
+    applied_rules: list[str] = Field(default_factory=list)
 
 
 class DataTransformationEngine:
     """Engine for transforming data using rules."""
 
     @override
-    def __init__(self, rules: list[TransformationRule]) -> None:  # noqa: F821
+    def __init__(self, rules: list[TransformationRule]) -> None:
         """Initialize transformation engine."""
         self.rules = rules
 

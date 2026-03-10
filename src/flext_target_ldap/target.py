@@ -318,7 +318,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    _schema = obj.get("schema") or {}
+                    _schema: dict[str, t.ContainerValue] = {}
                     current_stream = obj.get("stream")
                 elif msg_type == "RECORD" and api is not None:
                     record: dict[str, t.ContainerValue] = obj.get("record") or {}

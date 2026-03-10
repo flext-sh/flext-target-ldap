@@ -46,7 +46,11 @@ class Sink:
             if callable(process_record):
                 result = process_record(_record, _context)
                 if isinstance(result, FlextResult):
-                    return result
+                    if result.is_success:
+                        return FlextResult[bool].ok(value=True)
+                    return FlextResult[bool].fail(
+                        result.error or "Target rejected record"
+                    )
                 if isinstance(result, bool):
                     if result:
                         return FlextResult[bool].ok(value=True)
@@ -55,7 +59,11 @@ class Sink:
             if callable(process):
                 result = process(self.stream_name, _record, _context)
                 if isinstance(result, FlextResult):
-                    return result
+                    if result.is_success:
+                        return FlextResult[bool].ok(value=True)
+                    return FlextResult[bool].fail(
+                        result.error or "Target rejected record"
+                    )
                 if isinstance(result, bool):
                     if result:
                         return FlextResult[bool].ok(value=True)
@@ -141,7 +149,7 @@ class LDAPBaseSink(Sink):
         self, _record: Mapping[str, t.ContainerValue]
     ) -> FlextResult[dict[str, t.ContainerValue]]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return FlextResult[t.ConfigurationMapping].fail(
+        return FlextResult[dict[str, t.ContainerValue]].fail(
             "build_attributes must be implemented in subclass"
         )
 
@@ -191,8 +199,11 @@ class LDAPBaseSink(Sink):
                 self.stream_name,
             )
             for record in records:
-                if u.is_dict_like(record):
-                    self.process_record(record, _context)
+                if isinstance(record, Mapping):
+                    normalized_record: dict[str, t.ContainerValue] = {
+                        str(k): v for k, v in record.items()
+                    }
+                    self.process_record(normalized_record, _context)
             logger.info(
                 "Batch processing completed. Success: %d, Errors: %d",
                 self._processing_result.success_count,
@@ -271,7 +282,7 @@ class LDAPBaseSink(Sink):
             validate_dn = getattr(self._client, "validate_dn", None)
             if callable(validate_dn):
                 dn_result = validate_dn(dn)
-                if hasattr(dn_result, "is_success") and (not dn_result.is_success):
+                if isinstance(dn_result, FlextResult) and dn_result.is_failure:
                     return FlextResult[bool].fail(f"Invalid DN: {dn}")
         return FlextResult[bool].ok(value=True)
 
@@ -344,13 +355,17 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping: dict[str, t.ContainerValue] = (
-            dict(mapping_val) if u.is_dict_like(mapping_val) else {}
+            {str(k): v for k, v in mapping_val.items()}
+            if isinstance(mapping_val, Mapping)
+            else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
                     mapping[k] = str(v)
+                case _:
+                    pass
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
@@ -564,13 +579,17 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping: dict[str, t.ContainerValue] = (
-            dict(mapping_val) if u.is_dict_like(mapping_val) else {}
+            {str(k): v for k, v in mapping_val.items()}
+            if isinstance(mapping_val, Mapping)
+            else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
                     mapping[k] = str(v)
+                case _:
+                    pass
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
@@ -662,13 +681,17 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping: dict[str, t.ContainerValue] = (
-            dict(mapping_val) if u.is_dict_like(mapping_val) else {}
+            {str(k): v for k, v in mapping_val.items()}
+            if isinstance(mapping_val, Mapping)
+            else {}
         )
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
                     mapping[k] = str(v)
+                case _:
+                    pass
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:

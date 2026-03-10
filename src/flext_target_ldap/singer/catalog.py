@@ -10,10 +10,17 @@ from __future__ import annotations
 from typing import override
 
 from flext_core import FlextLogger, FlextResult
+from pydantic import BaseModel, Field
 
 from flext_target_ldap.typings import t
 
 logger = FlextLogger(__name__)
+
+
+class SingerLDAPCatalogEntry(BaseModel):
+    tap_stream_id: str = Field(min_length=1)
+    stream: str = Field(min_length=1)
+    stream_schema: dict[str, t.ContainerValue] = Field(default_factory=dict)
 
 
 class SingerLDAPCatalogManager:
@@ -22,14 +29,14 @@ class SingerLDAPCatalogManager:
     @override
     def __init__(self) -> None:
         """Initialize Singer LDAP catalog manager."""
-        self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}  # noqa: F821
+        self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
 
     def add_stream(
         self, stream_name: str, schema: dict[str, t.ContainerValue]
     ) -> FlextResult[bool]:
         """Add LDAP stream to catalog."""
         try:
-            entry = SingerLDAPCatalogEntry(  # noqa: F821
+            entry = SingerLDAPCatalogEntry(
                 tap_stream_id=stream_name, stream=stream_name, stream_schema=schema
             )
             self._catalog_entries[stream_name] = entry
@@ -39,15 +46,15 @@ class SingerLDAPCatalogManager:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
             return FlextResult[bool].fail(f"Stream addition failed: {e}")
 
-    def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:  # noqa: F821
+    def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
-            return FlextResult[SingerLDAPCatalogEntry].fail(  # noqa: F821
+            return FlextResult[SingerLDAPCatalogEntry].fail(
                 f"LDAP stream not found: {stream_name}"
             )
-        return FlextResult[SingerLDAPCatalogEntry].ok(  # noqa: F821
+        return FlextResult[SingerLDAPCatalogEntry].ok(
             self._catalog_entries[stream_name]
         )
 
 
-__all__: list[str] = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]  # noqa: F822
+__all__: list[str] = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]

@@ -173,8 +173,11 @@ class LdapTransformationService:
             attributes=ldap_attributes,
             entry_type=self._determine_entry_type(object_classes),
         )
+        original_record_json: dict[str, t.JsonValue] = {
+            str(key): str(value) for key, value in record.items()
+        }
         result = LdapTransformationResultModel(
-            original_record=dict(record),
+            original_record=original_record_json,
             transformed_entry=entry,
             applied_mappings=applied_mappings,
             transformation_errors=mapping_errors,
@@ -293,7 +296,7 @@ class LdapTargetApiService:
     ) -> FlextResult[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
-        if target_result.is_failure or target_result.value is None:
+        if target_result.is_failure:
             return FlextResult[int].fail(
                 target_result.error or "Target creation failed"
             )
@@ -310,7 +313,7 @@ class LdapTargetApiService:
     ) -> FlextResult[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
-        if target_result.is_failure or target_result.value is None:
+        if target_result.is_failure:
             return FlextResult[int].fail(
                 target_result.error or "Target creation failed"
             )
@@ -325,7 +328,7 @@ class LdapTargetApiService:
     ) -> FlextResult[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
-        if validated.is_failure or validated.value is None:
+        if validated.is_failure:
             return FlextResult[bool].fail(
                 validated.error or "Configuration validation failed"
             )

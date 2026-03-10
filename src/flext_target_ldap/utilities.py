@@ -130,7 +130,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             return FlextResult[t.ConfigurationMapping].ok(message)
 
         @staticmethod
-        def write_state_message(state: Mapping[str, t.ContainerValue]) -> None:
+        def write_state_message(_state: Mapping[str, t.ContainerValue]) -> None:
             """Write Singer state message to stdout.
 
             Args:
@@ -367,9 +367,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             if not stream_name or not schema:
                 return FlextResult[bool].fail("Stream name and schema are required")
             raw_props = schema.get("properties", {})
-            properties: dict[str, t.ContainerValue] = (
-                raw_props if u.is_dict_like(raw_props) else {}
-            )
+            properties: dict[str, t.ContainerValue] = {}
+            if isinstance(raw_props, Mapping):
+                for k, v in raw_props.items():
+                    properties[str(k)] = v
             if not properties:
                 return FlextResult[bool].fail("Schema must have properties")
             has_dn_field = "dn" in properties
@@ -568,11 +569,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             bookmarks = state.get("bookmarks")
-            if not u.is_dict_like(bookmarks):
+            if not isinstance(bookmarks, Mapping):
                 return {}
-            stream_state_data = bookmarks.get(stream_name)
-            if u.is_dict_like(stream_state_data):
-                return stream_state_data
+            bookmarks_map: Mapping[str, t.ContainerValue] = {
+                str(k): v for k, v in bookmarks.items()
+            }
+            stream_state_data = bookmarks_map.get(stream_name)
+            if isinstance(stream_state_data, Mapping):
+                return {str(k): v for k, v in stream_state_data.items()}
             return {}
 
         @staticmethod
@@ -594,10 +598,12 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             state_dict = dict(state)
             bookmarks = state_dict.get("bookmarks")
-            if not u.is_dict_like(bookmarks):
-                bookmarks = {}
-                state_dict["bookmarks"] = bookmarks
-            bookmarks[stream_name] = stream_state
+            bookmarks_dict: dict[str, t.ContainerValue] = {}
+            if isinstance(bookmarks, Mapping):
+                for k, v in bookmarks.items():
+                    bookmarks_dict[str(k)] = v
+            bookmarks_dict[stream_name] = dict(stream_state)
+            state_dict["bookmarks"] = bookmarks_dict
             return state_dict
 
         @staticmethod
@@ -766,8 +772,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             raw_attr_map = config.get("attribute_mapping")
-            if u.is_dict_like(raw_attr_map):
-                return {str(k): str(v) for k, v in raw_attr_map.items()}
+            if isinstance(raw_attr_map, Mapping):
+                extracted_mapping: dict[str, str] = {}
+                for k, v in raw_attr_map.items():
+                    extracted_mapping[str(k)] = str(v)
+                return extracted_mapping
             return {}
 
         @staticmethod

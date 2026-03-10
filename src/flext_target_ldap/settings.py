@@ -13,16 +13,31 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import FlextModels, FlextResult
+from flext_ldap import FlextLdapModels
 from pydantic import Field
-
-from flext_target_ldap.target_exceptions import FlextTargetLdapSettings
 
 from .constants import c
 from .typings import t
 from .utilities import FlextTargetLdapUtilities
 
 
-class LDAPConnectionSettings(FlextModels):
+class FlextTargetLdapSettings(FlextModels.Entity):
+    connection: FlextLdapModels.Ldap.ConnectionConfig
+    base_dn: str
+    search_filter: str = "(objectClass=*)"
+    search_scope: str = "SUBTREE"
+    connect_timeout: int = c.Network.DEFAULT_TIMEOUT // 3
+    receive_timeout: int = c.Network.DEFAULT_TIMEOUT
+    batch_size: int = c.Performance.BatchProcessing.DEFAULT_SIZE
+    max_records: int | None = None
+    create_missing_entries: bool = True
+    update_existing_entries: bool = True
+    delete_removed_entries: bool = False
+    attribute_mapping: dict[str, str] = Field(default_factory=dict)
+    object_classes: list[str] = Field(default_factory=lambda: ["top"])
+
+
+class LDAPConnectionSettings(FlextModels.Entity):
     """LDAP connection settings model."""
 
     host: str = Field(..., description="LDAP server host")
@@ -42,7 +57,7 @@ class LDAPConnectionSettings(FlextModels):
     )
 
 
-class LDAPOperationSettings(FlextModels):
+class LDAPOperationSettings(FlextModels.Entity):
     """LDAP operation settings model."""
 
     batch_size: int = Field(
@@ -109,7 +124,7 @@ def validate_ldap_config(
             delete_removed_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
                 config.get("delete_removed_entries", False), default=False
             ),
-            attribute_mapping=attribute_mapping,
+            attribute_mapping=dict(attribute_mapping),
             object_classes=object_classes,
         )
         return FlextResult[FlextTargetLdapSettings].ok(validated_config)
