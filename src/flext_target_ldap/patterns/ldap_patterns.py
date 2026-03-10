@@ -17,11 +17,15 @@ logger = FlextLogger(__name__)
 
 
 class SingerPropertyDefinition(BaseModel):
+    """Singer property definition for LDAP schema mapping."""
+
     type: str = "string"
     format: str | None = None
 
 
 class SingerSchemaDefinition(BaseModel):
+    """Singer schema definition mapping properties to LDAP attributes."""
+
     properties: dict[str, SingerPropertyDefinition] = Field(default_factory=dict)
 
 
@@ -52,7 +56,7 @@ class LDAPTypeConverter:
                 result = str(value)
             return FlextResult[str | None].ok(result)
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("Type conversion failed for %s: %s", singer_type, str(e))
+            logger.warning("Type conversion failed for %s: %s", singer_type, e)
             return FlextResult[str | None].ok(str(value))
 
     def _normalize_bool(self, value: t.JsonValue) -> str:
@@ -192,7 +196,7 @@ class LDAPSchemaMapper:
                 return FlextResult[str].ok("OctetString")
             return FlextResult[str].ok("DirectoryString")
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("LDAP type mapping failed: %s", str(e))
+            logger.warning("LDAP type mapping failed: %s", e)
             return FlextResult[str].ok("DirectoryString")
 
     def _normalize_attribute_name(self, name: str) -> str:
