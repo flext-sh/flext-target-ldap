@@ -11,10 +11,9 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Generator, Mapping
-from contextlib import _GeneratorContextManager, contextmanager, suppress
+from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import Protocol, override
 
-import ldap3
 from flext_core import FlextLogger, FlextResult
 from flext_ldap import (
     FlextLdap,
@@ -153,31 +152,10 @@ class LDAPClient:
 
         """
         try:
-            server_pool_cls = ldap3.ServerPool if hasattr(ldap3, "ServerPool") else None
-            connection_cls = ldap3.Connection if hasattr(ldap3, "Connection") else None
-            if server_pool_cls is not None and connection_cls is not None:
-                server = server_pool_cls([self.config.host])
-                conn = connection_cls(
-                    server, user=self._bind_dn or None, password=self._password or None
-                )
-                try:
-                    if not conn.bind():
-                        return FlextResult[str].fail("Bind failed")
-                    return FlextResult[str].ok("validated")
-                finally:
-                    with suppress(Exception):
-                        conn.unbind()
             api = self._api or self._get_api()
 
             def _validate() -> FlextResult[str]:
-                conn_config = FlextLdapSettings(
-                    host=self.config.host,
-                    port=self.config.port,
-                    use_ssl=self.config.use_ssl,
-                    bind_dn=self._bind_dn,
-                    bind_password=self._password,
-                )
-                return api.connect(conn_config).map(lambda _: "validated")
+                return api.connect(self.config).map(lambda _: "validated")
 
             return _validate()
         except (RuntimeError, ValueError, TypeError) as e:
@@ -214,14 +192,14 @@ class LDAPClient:
             search_result = self.search_entry(
                 base_dn=dn, search_filter="(objectClass=*)", attributes=["dn"]
             )
-            if search_result.is_success and search_result.data is not None:
-                return FlextResult[bool].ok(len(search_result.data) > 0)
+            if search_result.is_success:
+                return FlextResult[bool].ok(len(search_result.value) > 0)
             return FlextResult[bool].ok(value=False)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to check entry existence: %s", dn)
             return FlextResult[bool].fail(f"Entry exists check failed: {e}")
 
-    def get_connection(self) -> _GeneratorContextManager[LDAPConnectionProtocol]:
+    def get_connection(self) -> AbstractContextManager[LDAPConnectionProtocol]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
 
         Returns a real LDAP connection for production use.
@@ -233,16 +211,6 @@ class LDAPClient:
 
         @contextmanager
         def connection_context() -> Generator[LDAPConnectionProtocol]:
-            success, conn = self._try_ldap3_connection()
-            if success and conn is not None:
-                try:
-                    conn.bind()
-                    conn.bound = True
-                    yield conn
-                finally:
-                    with suppress(Exception):
-                        conn.unbind()
-                return
             yield self._get_flext_ldap_wrapper()
 
         return connection_context()
@@ -292,20 +260,19 @@ class LDAPClient:
             )
             with self.get_connection() as conn:
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: list[t.ContainerValue] = (
-                    conn.entries if hasattr(conn, "entries") else []
-                )
+                raw_entries: list[t.ContainerValue] = conn.entries
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
-                    dn = raw.entry_dn if hasattr(raw, "entry_dn") else ""
-                    attr_names: list[t.ContainerValue] = (
-                        raw.entry_attributes if hasattr(raw, "entry_attributes") else []
-                    )
+                    if not isinstance(raw, LDAPSearchEntry):
+                        continue
+                    dn = raw.dn
+                    attr_names: list[str] = list(raw.attributes.keys())
                     attrs: dict[str, t.ContainerValue] = {}
                     for name in attr_names:
-                        name_str = str(name)
+                        name_str = name
                         try:
-                            attrs[name_str] = list(getattr(raw, name_str))
+                            raw_value = raw.attributes.get(name_str)
+                            attrs[name_str] = raw_value if raw_value is not None else ""
                         except (
                             ValueError,
                             TypeError,
@@ -315,7 +282,7 @@ class LDAPClient:
                             RuntimeError,
                             ImportError,
                         ):
-                            val = getattr(raw, name_str, None)
+                            val = raw.attributes.get(name_str)
                             attrs[name_str] = [str(val)] if val is not None else []
                     entries.append(LDAPSearchEntry(dn=str(dn), attributes=attrs))
                 return FlextResult[list[LDAPSearchEntry]].ok(entries)
@@ -398,14 +365,7 @@ class LDAPClient:
                     api.disconnect()
 
         def _get_session() -> str:
-            conn_config = FlextLdapSettings(
-                host=self.config.host,
-                port=self.config.port,
-                use_ssl=self.config.use_ssl,
-                bind_dn=self._bind_dn,
-                bind_password=self._password,
-            )
-            result = api.connect(conn_config)
+            result = api.connect(self.config)
             if result.is_success:
                 return "default_session"
             return ""
@@ -423,23 +383,6 @@ class LDAPClient:
             ImportError,
         ):
             return ConnectionWrapper("test_session")
-
-    def _try_ldap3_connection(self) -> tuple[bool, ldap3.Connection | None]:
-        """Try to create ldap3 connection if available.
-
-        Returns:
-            Tuple of (success, connection) where connection is None if ldap3 unavailable.
-
-        """
-        server_pool_cls = ldap3.ServerPool if hasattr(ldap3, "ServerPool") else None
-        connection_cls = ldap3.Connection if hasattr(ldap3, "Connection") else None
-        if server_pool_cls is None or connection_cls is None:
-            return (False, None)
-        server_pool = server_pool_cls([self.config.host])
-        conn = connection_cls(
-            server_pool, user=self._bind_dn or None, password=self._password or None
-        )
-        return (True, conn)
 
 
 __all__: list[str] = ["LDAPClient"]
