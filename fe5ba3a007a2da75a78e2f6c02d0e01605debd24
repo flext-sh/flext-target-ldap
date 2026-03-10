@@ -1,0 +1,29 @@
+src/flext_target_ldap/transformation.py
+  6f987395d82abdd3 22-23,30-31
+src/flext_target_ldap/patterns/ldap_patterns.py
+  6f987395d82abdd3 59,199
+src/flext_target_ldap/settings.py
+  6f987395d82abdd3 25-26
+src/flext_target_ldap/singer/catalog.py
+  6f987395d82abdd3 21-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "fe5ba3a007a2da75a78e2f6c02d0e01605debd24",
+  "prompts": {
+    "6f987395d82abdd3": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_32698f205ffertojVBFhA1i3VB",
+        "model": "anthropic/claude-haiku-4-5"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 12,
+      "total_deletions": 4,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    }
+  }
+}
