@@ -22,6 +22,8 @@ from .utilities import FlextTargetLdapUtilities
 
 
 class FlextTargetLdapSettings(FlextModels.Entity):
+    """LDAP target configuration with connection and operation settings."""
+
     connection: FlextLdapModels.Ldap.ConnectionConfig
     base_dn: str
     search_filter: str = "(objectClass=*)"

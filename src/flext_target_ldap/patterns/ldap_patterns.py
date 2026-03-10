@@ -55,8 +55,8 @@ class LDAPTypeConverter:
             else:
                 result = str(value)
             return FlextResult[str | None].ok(result)
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("Type conversion failed for %s: %s", singer_type, e)
+        except (RuntimeError, ValueError, TypeError):
+            logger.exception("Type conversion failed for %s", singer_type)
             return FlextResult[str | None].ok(str(value))
 
     def _normalize_bool(self, value: t.JsonValue) -> str:
@@ -195,8 +195,8 @@ class LDAPSchemaMapper:
             if prop_type in {"object", "array"}:
                 return FlextResult[str].ok("OctetString")
             return FlextResult[str].ok("DirectoryString")
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.warning("LDAP type mapping failed: %s", e)
+        except (RuntimeError, ValueError, TypeError):
+            logger.exception("LDAP type mapping failed")
             return FlextResult[str].ok("DirectoryString")
 
     def _normalize_attribute_name(self, name: str) -> str:
