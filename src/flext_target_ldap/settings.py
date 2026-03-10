@@ -18,6 +18,7 @@ from pydantic import Field
 from .constants import c
 from .typings import t
 from .utilities import FlextTargetLdapUtilities
+from flext_target_ldap.target_exceptions import FlextTargetLdapSettings
 
 
 class LDAPConnectionSettings(FlextModels):

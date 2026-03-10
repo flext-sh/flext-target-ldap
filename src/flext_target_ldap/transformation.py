@@ -13,6 +13,7 @@ from typing import override
 from flext_core import FlextLogger, FlextResult
 
 from flext_target_ldap.typings import t
+from flext_target_ldap.models import TransformationResult
 
 logger = FlextLogger(__name__)
 
