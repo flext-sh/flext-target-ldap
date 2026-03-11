@@ -16,6 +16,7 @@ from typing import override
 from flext_core import FlextResult, t
 from flext_ldap import FlextLdapModels, FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
+from pydantic import TypeAdapter
 
 from flext_target_ldap.constants import c
 
@@ -58,16 +59,21 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             try:
                 message = json.loads(line.strip())
                 if not u.is_dict_like(message):
-                    return FlextResult[t.ConfigurationMapping].fail(
+                    return FlextResult[Mapping[str, t.ContainerValue]].fail(
                         "Message must be a JSON object"
                     )
                 if "type" not in message:
-                    return FlextResult[t.ConfigurationMapping].fail(
+                    return FlextResult[Mapping[str, t.ContainerValue]].fail(
                         "Message missing required 'type' field"
                     )
-                return FlextResult[t.ConfigurationMapping].ok(message)
+                validated: Mapping[str, t.ContainerValue] = TypeAdapter(
+                    Mapping[str, t.ContainerValue]
+                ).validate_python(message)
+                return FlextResult[Mapping[str, t.ContainerValue]].ok(validated)
             except json.JSONDecodeError as e:
-                return FlextResult[t.ConfigurationMapping].fail(f"Invalid JSON: {e}")
+                return FlextResult[Mapping[str, t.ContainerValue]].fail(
+                    f"Invalid JSON: {e}"
+                )
 
         @staticmethod
         def validate_record_message(

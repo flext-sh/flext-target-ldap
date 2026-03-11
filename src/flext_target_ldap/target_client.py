@@ -231,8 +231,8 @@ class LdapTargetClient:
             self._bind_dn = ""
             self._password = ""
         else:
-            config_map: t.ConfigurationMapping = (
-                config if u.is_dict_like(config) else {}
+            config_map: dict[str, t.ContainerValue] = (
+                dict(config) if u.is_dict_like(config) else {}
             )
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
                 host=str(config_map.get("host", "localhost")),
@@ -242,7 +242,7 @@ class LdapTargetClient:
                 if config_map.get("port", c.TargetLdap.Connection.DEFAULT_PORT)
                 is not None
                 else c.TargetLdap.Connection.DEFAULT_PORT,
-                use_ssl=bool(config_map.get("use_ssl", False)),
+                use_ssl=bool(config_map.get("use_ssl")),
                 timeout=int(str(config_map.get("timeout", 30)))
                 if config_map.get("timeout", 30) is not None
                 else 30,
