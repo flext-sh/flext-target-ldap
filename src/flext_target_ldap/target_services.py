@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import Protocol, override
 
-from flext_core import FlextResult
+from flext_core import FlextResult, u
 
 from . import target_client as target_client_module
 from .settings import FlextTargetLdapSettings
@@ -282,12 +282,10 @@ class LdapTargetApiService:
         self, config: dict[str, t.ContainerValue]
     ) -> FlextResult[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
-        try:
-            return FlextResult[target_client_module.TargetLdap].ok(
-                target_client_module.TargetLdap(config=config)
-            )
-        except (RuntimeError, ValueError, TypeError) as exc:
-            return FlextResult[target_client_module.TargetLdap].fail(str(exc))
+        return u.try_(
+            lambda: target_client_module.TargetLdap(config=config),
+            catch=(RuntimeError, ValueError, TypeError),
+        ).map_error(lambda exc: str(exc))
 
     def load_groups_to_ldap(
         self,
