@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, r
 
 from flext_target_ldap.typings import t
 
@@ -39,14 +39,14 @@ class SingerTargetLDAP:
 
     def process_singer_messages(
         self, messages: list[dict[str, t.ContainerValue]]
-    ) -> FlextResult[dict[str, t.ContainerValue]]:
+    ) -> r[dict[str, t.ContainerValue]]:
         """Process Singer messages for LDAP target.
 
         Args:
         messages: Singer messages to process
 
         Returns:
-        FlextResult with processing status
+        r with processing status
 
         """
         try:
@@ -61,7 +61,7 @@ class SingerTargetLDAP:
             logger.info(
                 "Singer message processing completed: %d messages", processed_count
             )
-            return FlextResult[dict[str, t.ContainerValue]].ok(result)
+            return r[dict[str, t.ContainerValue]].ok(result)
         except (
             ValueError,
             TypeError,
@@ -72,23 +72,23 @@ class SingerTargetLDAP:
             ImportError,
         ) as e:
             logger.exception("Singer message processing failed")
-            return FlextResult[dict[str, t.ContainerValue]].fail(
+            return r[dict[str, t.ContainerValue]].fail(
                 f"Message processing failed: {e}"
             )
 
-    def validate_singer_config(self) -> FlextResult[bool]:
+    def validate_singer_config(self) -> r[bool]:
         """Validate Singer LDAP target configuration.
 
         Returns:
-        FlextResult indicating validation success
+        r indicating validation success
 
         """
         try:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
-                    return FlextResult[bool].fail(f"Missing required field: {field}")
-            return FlextResult[bool].ok(value=True)
+                    return r[bool].fail(f"Missing required field: {field}")
+            return r[bool].ok(value=True)
         except (
             ValueError,
             TypeError,
@@ -98,7 +98,7 @@ class SingerTargetLDAP:
             RuntimeError,
             ImportError,
         ) as e:
-            return FlextResult[bool].fail(f"Configuration validation failed: {e}")
+            return r[bool].fail(f"Configuration validation failed: {e}")
 
 
 __all__: list[str] = ["SingerTargetLDAP"]

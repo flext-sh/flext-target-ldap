@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import Protocol, override
 
-from flext_core import FlextResult, u
+from flext_core import r, u
 
 from . import target_client as target_client_module
 from .settings import FlextTargetLdapSettings
@@ -24,7 +24,7 @@ class LdapTargetServiceProtocol(Protocol):
 
     def create_target(
         self, config: dict[str, t.ContainerValue]
-    ) -> FlextResult[target_client_module.TargetLdap]:
+    ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from config."""
         ...
 
@@ -33,7 +33,7 @@ class LdapTargetServiceProtocol(Protocol):
         records: list[Mapping[str, t.ContainerValue]],
         config: dict[str, t.ContainerValue],
         stream_type: str = "users",
-    ) -> FlextResult[int]:
+    ) -> r[int]:
         """Load records into the LDAP target."""
         ...
 
@@ -47,11 +47,11 @@ class LdapTransformationServiceProtocol(Protocol):
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
-    ) -> FlextResult[LdapTransformationResultModel]:
+    ) -> r[LdapTransformationResultModel]:
         """Transform a record for LDAP storage."""
         ...
 
-    def validate_entry(self, entry: LdapEntryModel) -> FlextResult[bool]:
+    def validate_entry(self, entry: LdapEntryModel) -> r[bool]:
         """Validate an LDAP entry against business rules."""
         ...
 
@@ -74,13 +74,13 @@ class LdapConnectionService:
             "timeout": self._config.connection.timeout,
         }
 
-    def test_connection(self) -> FlextResult[bool]:
+    def test_connection(self) -> r[bool]:
         """Verify LDAP host and base_dn are configured and connection is valid."""
         if not self._config.connection.host:
-            return FlextResult[bool].fail("LDAP host is required")
+            return r[bool].fail("LDAP host is required")
         if not self._config.base_dn:
-            return FlextResult[bool].fail("Base DN is required")
-        return FlextResult[bool].ok(value=True)
+            return r[bool].fail("Base DN is required")
+        return r[bool].ok(value=True)
 
 
 class LdapTransformationService:
@@ -139,7 +139,7 @@ class LdapTransformationService:
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
-    ) -> FlextResult[LdapTransformationResultModel]:
+    ) -> r[LdapTransformationResultModel]:
         """Transform a single record into an LDAP entry using mappings."""
         mapping_errors: list[str] = []
         ldap_attributes: dict[str, list[str]] = {}
@@ -184,9 +184,9 @@ class LdapTransformationService:
             processing_time_ms=0,
             transformation_timestamp=datetime.now(UTC),
         )
-        return FlextResult[LdapTransformationResultModel].ok(result)
+        return r[LdapTransformationResultModel].ok(result)
 
-    def validate_entry(self, entry: LdapEntryModel) -> FlextResult[bool]:
+    def validate_entry(self, entry: LdapEntryModel) -> r[bool]:
         """Run business-rule validation on an LDAP entry."""
         return entry.validate_business_rules()
 
@@ -229,11 +229,11 @@ class LdapTargetOrchestrator:
         self,
         records: list[Mapping[str, t.ContainerValue]],
         config: FlextTargetLdapSettings | None = None,
-    ) -> FlextResult[Mapping[str, t.ContainerValue]]:
+    ) -> r[Mapping[str, t.ContainerValue]]:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return FlextResult[t.ConfigurationMapping].fail("Configuration is required")
+            return r[t.ConfigurationMapping].fail("Configuration is required")
         transformation = LdapTransformationService(working)
         object_classes = working.object_classes
         base_dn = working.base_dn
@@ -258,15 +258,15 @@ class LdapTargetOrchestrator:
             "transformation_errors": errors,
             "status": "completed" if not errors else "completed_with_errors",
         }
-        return FlextResult[t.ConfigurationMapping].ok(result)
+        return r[t.ConfigurationMapping].ok(result)
 
     def validate_target_configuration(
         self, config: FlextTargetLdapSettings | None = None
-    ) -> FlextResult[bool]:
+    ) -> r[bool]:
         """Validate target configuration and test connection."""
         working = config or self._typed_config
         if working is None:
-            return FlextResult[bool].fail("Configuration is required")
+            return r[bool].fail("Configuration is required")
         return LdapConnectionService(working).test_connection()
 
 
@@ -280,7 +280,7 @@ class LdapTargetApiService:
 
     def create_ldap_target(
         self, config: dict[str, t.ContainerValue]
-    ) -> FlextResult[target_client_module.TargetLdap]:
+    ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(
             lambda: target_client_module.TargetLdap(config=config),
@@ -291,45 +291,37 @@ class LdapTargetApiService:
         self,
         groups: list[Mapping[str, t.ContainerValue]],
         config: dict[str, t.ContainerValue],
-    ) -> FlextResult[int]:
+    ) -> r[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
         if target_result.is_failure:
-            return FlextResult[int].fail(
-                target_result.error or "Target creation failed"
-            )
+            return r[int].fail(target_result.error or "Target creation failed")
         target = target_result.value
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
         for group in groups:
             sink.process_record(dict(group), {})
-        return FlextResult[int].ok(len(groups))
+        return r[int].ok(len(groups))
 
     def load_users_to_ldap(
         self,
         users: list[Mapping[str, t.ContainerValue]],
         config: dict[str, t.ContainerValue],
-    ) -> FlextResult[int]:
+    ) -> r[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
         if target_result.is_failure:
-            return FlextResult[int].fail(
-                target_result.error or "Target creation failed"
-            )
+            return r[int].fail(target_result.error or "Target creation failed")
         target = target_result.value
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
         for user in users:
             sink.process_record(dict(user), {})
-        return FlextResult[int].ok(len(users))
+        return r[int].ok(len(users))
 
-    def test_ldap_connection(
-        self, config: dict[str, t.ContainerValue]
-    ) -> FlextResult[bool]:
+    def test_ldap_connection(self, config: dict[str, t.ContainerValue]) -> r[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
         if validated.is_failure:
-            return FlextResult[bool].fail(
-                validated.error or "Configuration validation failed"
-            )
+            return r[bool].fail(validated.error or "Configuration validation failed")
         return LdapConnectionService(validated.value).test_connection()
 
 

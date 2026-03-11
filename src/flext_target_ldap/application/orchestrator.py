@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextLogger, FlextResult, t
+from flext_core import FlextLogger, r, t
 
 logger: FlextLogger = FlextLogger(__name__)
 
@@ -36,14 +36,14 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self, records: list[Mapping[str, t.Scalar | None]]
-    ) -> FlextResult[Mapping[str, str | int]]:
+    ) -> r[Mapping[str, str | int]]:
         """Orchestrate data loading to LDAP target.
 
         Args:
         records: Records to load to LDAP
 
         Returns:
-        FlextResult with loading status
+        r with loading status
 
         """
         try:
@@ -56,7 +56,7 @@ class LDAPTargetOrchestrator:
                 "status": "completed",
             }
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return FlextResult[Mapping[str, str | int]].ok(result_dict)
+            return r[Mapping[str, str | int]].ok(result_dict)
         except (
             ValueError,
             TypeError,
@@ -67,23 +67,23 @@ class LDAPTargetOrchestrator:
             ImportError,
         ) as e:
             logger.exception("LDAP data loading orchestration failed")
-            return FlextResult[Mapping[str, str | int]].fail(
+            return r[Mapping[str, str | int]].fail(
                 f"Data loading orchestration failed: {e}"
             )
 
-    def validate_target_configuration(self) -> FlextResult[bool]:
+    def validate_target_configuration(self) -> r[bool]:
         """Validate LDAP target configuration.
 
         Returns:
-        FlextResult indicating validation success
+        r indicating validation success
 
         """
         try:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
-                    return FlextResult[bool].fail(f"Missing required field: {field}")
-            return FlextResult[bool].ok(value=True)
+                    return r[bool].fail(f"Missing required field: {field}")
+            return r[bool].ok(value=True)
         except (
             ValueError,
             TypeError,
@@ -93,7 +93,7 @@ class LDAPTargetOrchestrator:
             RuntimeError,
             ImportError,
         ) as e:
-            return FlextResult[bool].fail(f"Configuration validation failed: {e}")
+            return r[bool].fail(f"Configuration validation failed: {e}")
 
 
 __all__: list[str] = ["LDAPTargetOrchestrator"]

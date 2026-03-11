@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
 
 from flext_target_ldap.typings import t
@@ -45,9 +45,7 @@ class DataTransformationEngine:
         """Get transformation statistics."""
         return {"total_rules": len(self.rules), "transformations_applied": 0}
 
-    def transform(
-        self, data: dict[str, t.ContainerValue]
-    ) -> FlextResult[TransformationResult]:
+    def transform(self, data: dict[str, t.ContainerValue]) -> r[TransformationResult]:
         """Transform data using rules."""
         try:
             transformed_data: dict[str, t.ContainerValue] = data.copy()
@@ -65,7 +63,7 @@ class DataTransformationEngine:
             result = TransformationResult(
                 transformed_data=transformed_data, applied_rules=applied_rules
             )
-            return FlextResult[TransformationResult].ok(result)
+            return r[TransformationResult].ok(result)
         except (
             ValueError,
             TypeError,
@@ -75,7 +73,7 @@ class DataTransformationEngine:
             RuntimeError,
             ImportError,
         ) as e:
-            return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
+            return r[TransformationResult].fail(f"Transformation failed: {e}")
 
 
 class MigrationValidator:
@@ -100,7 +98,7 @@ class MigrationValidator:
         data: dict[str, t.ContainerValue] | str,
         attributes: dict[str, t.ContainerValue] | None = None,
         object_classes: list[str] | None = None,
-    ) -> FlextResult[bool]:
+    ) -> r[bool]:
         """Validate migration data."""
         try:
             self._stats["entries_validated"] += 1
@@ -122,8 +120,8 @@ class MigrationValidator:
                         error_msg = "Data is empty"
             if error_msg:
                 self._stats["validation_errors"] += 1
-                return FlextResult[bool].fail(error_msg)
-            return FlextResult[bool].ok(value=True)
+                return r[bool].fail(error_msg)
+            return r[bool].ok(value=True)
         except (
             ValueError,
             TypeError,
@@ -134,13 +132,13 @@ class MigrationValidator:
             ImportError,
         ) as e:
             self._stats["validation_errors"] += 1
-            return FlextResult[bool].fail(f"Validation failed: {e}")
+            return r[bool].fail(f"Validation failed: {e}")
 
     def validate_entry(
         self,
         dn: str,
         attributes: dict[str, t.ContainerValue],
         object_classes: list[str],
-    ) -> FlextResult[bool]:
+    ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)

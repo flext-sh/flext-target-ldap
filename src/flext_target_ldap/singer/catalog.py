@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
 
 from flext_target_ldap.typings import t
@@ -35,7 +35,7 @@ class SingerLDAPCatalogManager:
 
     def add_stream(
         self, stream_name: str, schema: dict[str, t.ContainerValue]
-    ) -> FlextResult[bool]:
+    ) -> r[bool]:
         """Add LDAP stream to catalog."""
         try:
             entry = SingerLDAPCatalogEntry(
@@ -43,20 +43,18 @@ class SingerLDAPCatalogManager:
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)
-            return FlextResult[bool].ok(value=True)
+            return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
-            return FlextResult[bool].fail(f"Stream addition failed: {e}")
+            return r[bool].fail(f"Stream addition failed: {e}")
 
-    def get_stream(self, stream_name: str) -> FlextResult[SingerLDAPCatalogEntry]:
+    def get_stream(self, stream_name: str) -> r[SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
-            return FlextResult[SingerLDAPCatalogEntry].fail(
+            return r[SingerLDAPCatalogEntry].fail(
                 f"LDAP stream not found: {stream_name}"
             )
-        return FlextResult[SingerLDAPCatalogEntry].ok(
-            self._catalog_entries[stream_name]
-        )
+        return r[SingerLDAPCatalogEntry].ok(self._catalog_entries[stream_name])
 
 
 __all__: list[str] = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]

@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextModels, FlextResult
+from flext_core import FlextModels, r
 from flext_ldap import FlextLdapModels
 from pydantic import Field
 
@@ -79,7 +79,7 @@ class LDAPOperationSettings(FlextModels.Entity):
 
 def validate_ldap_config(
     config: dict[str, t.ContainerValue],
-) -> FlextResult[FlextTargetLdapSettings]:
+) -> r[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:
         connection_config = (
@@ -129,8 +129,6 @@ def validate_ldap_config(
             attribute_mapping=dict(attribute_mapping),
             object_classes=object_classes,
         )
-        return FlextResult[FlextTargetLdapSettings].ok(validated_config)
+        return r[FlextTargetLdapSettings].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
-        return FlextResult[FlextTargetLdapSettings].fail(
-            f"Configuration validation failed: {e}"
-        )
+        return r[FlextTargetLdapSettings].fail(f"Configuration validation failed: {e}")

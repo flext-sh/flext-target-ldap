@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT.
 
 from __future__ import annotations
 
-from flext_core import FlextContainer, FlextResult, t
+from flext_core import FlextContainer, r, t
 
 
 def get_flext_target_ldap_container() -> FlextContainer:
@@ -20,7 +20,7 @@ def get_flext_target_ldap_container() -> FlextContainer:
 
 def get_flext_target_ldap_service(
     service_name: str,
-) -> FlextResult[t.RegisterableService]:
+) -> r[t.RegisterableService]:
     """Get service from FLEXT DI container."""
     container = get_flext_target_ldap_container()
     return container.get(service_name)

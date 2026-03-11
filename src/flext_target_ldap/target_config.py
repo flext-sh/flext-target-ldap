@@ -4,7 +4,7 @@ This module consolidates all LDAP target configuration classes with descriptive 
 removing duplication and using proper flext-core + flext-ldap integration.
 
 Architecture: Clean Architecture configuration layer
-Patterns: "FlextSettings", FlextModels, FlextResult validation
+Patterns: "FlextSettings", FlextModels, r validation
 Integration: Complete flext-ldap connection config reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from flext_core import FlextResult, u
+from flext_core import r, u
 from flext_ldap import FlextLdapModels
 
 from .constants import c
@@ -106,7 +106,7 @@ def _extract_target_max_records(config: dict[str, t.ContainerValue]) -> int | No
 
 def validate_ldap_target_config(
     config: dict[str, t.ContainerValue],
-) -> FlextResult[FlextTargetLdapSettings]:
+) -> r[FlextTargetLdapSettings]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
         connection_config = _build_target_connection_config(config)
@@ -150,11 +150,9 @@ def validate_ldap_target_config(
             search_filter=search_filter,
             search_scope=search_scope,
         )
-        return FlextResult[FlextTargetLdapSettings].ok(validated_config)
+        return r[FlextTargetLdapSettings].ok(validated_config)
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[FlextTargetLdapSettings].fail(
-            f"Configuration validation failed: {e}"
-        )
+        return r[FlextTargetLdapSettings].fail(f"Configuration validation failed: {e}")
 
 
 def create_default_ldap_target_config(
@@ -163,7 +161,7 @@ def create_default_ldap_target_config(
     *,
     port: int = c.TargetLdap.Connection.DEFAULT_PORT,
     use_ssl: bool = False,
-) -> FlextResult[FlextTargetLdapSettings]:
+) -> r[FlextTargetLdapSettings]:
     """Create default LDAP target configuration with minimal parameters."""
     try:
         connection_config = FlextLdapModels.Ldap.ConnectionConfig(
@@ -177,9 +175,9 @@ def create_default_ldap_target_config(
             search_filter="(objectClass=*)",
             search_scope="SUBTREE",
         )
-        return FlextResult[FlextTargetLdapSettings].ok(target_config)
+        return r[FlextTargetLdapSettings].ok(target_config)
     except (ValueError, TypeError, RuntimeError) as e:
-        return FlextResult[FlextTargetLdapSettings].fail(
+        return r[FlextTargetLdapSettings].fail(
             f"Default configuration creation failed: {e}"
         )
 
