@@ -56,6 +56,35 @@ def mock_ldap_config() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
+def _mock_ldap_config() -> dict[str, t.ContainerValue]:
+    """Create mock LDAP configuration for internal sink testing.
+
+    Provides a valid LDAP configuration dictionary for use in sink fixtures.
+    This fixture is used by sink test classes to initialize target configurations.
+    """
+    return {
+        "host": "test.ldap.com",
+        "port": 389,
+        "bind_dn": "cn=admin,dc=test,dc=com",
+        "password": "test_password",
+        "base_dn": "dc=test,dc=com",
+        "use_ssl": False,
+        "timeout": 30,
+        "validate_records": True,
+        "user_rdn_attribute": "uid",
+        "group_rdn_attribute": "cn",
+        "dn_templates": {
+            "users": "uid={uid},ou=users,dc=test,dc=com",
+            "groups": "cn={cn},ou=groups,dc=test,dc=com",
+        },
+        "default_object_classes": {
+            "users": ["inetOrgPerson", "person", "top"],
+            "groups": ["groupOfNames", "top"],
+        },
+    }
+
+
+@pytest.fixture
 def sample_user_record() -> dict[str, t.ContainerValue]:
     """Create mock LDAP configuration for testing."""
     return {
