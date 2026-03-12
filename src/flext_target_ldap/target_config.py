@@ -59,7 +59,7 @@ def _target_config_to_str(value: object, default: str = "") -> str:
 
 def _target_config_to_str_list(value: object, default: list[str]) -> list[str]:
     """Convert value to string list."""
-    if u.Guards.is_list(value):
+    if u.is_list(value):
         return [str(v) for v in value]
     return default
 

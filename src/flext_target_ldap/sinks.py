@@ -161,12 +161,12 @@ class LDAPBaseSink(Sink):
     def get_object_classes(self, record: Mapping[str, object]) -> list[str]:
         """Get object classes for entry."""
         record_classes = record.get("object_classes")
-        if u.Guards.is_list(record_classes):
+        if u.is_list(record_classes):
             return [str(c) for c in record_classes]
         if isinstance(record_classes, str):
             return [record_classes]
         configured_classes = self._target.config.get("generic_object_classes")
-        if u.Guards.is_list(configured_classes):
+        if u.is_list(configured_classes):
             return [str(c) for c in configured_classes]
         return ["top"]
 
@@ -182,7 +182,7 @@ class LDAPBaseSink(Sink):
             return
         try:
             records_raw = _context.get("records", [])
-            records: list[object] = records_raw if u.Guards.is_list(records_raw) else []
+            records: list[object] = records_raw if u.is_list(records_raw) else []
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -291,7 +291,7 @@ class UsersSink(LDAPBaseSink):
         attrs: dict[str, object] = {}
         for k, v in _record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
-            if u.Guards.is_list(v):
+            if u.is_list(v):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
@@ -314,11 +314,11 @@ class UsersSink(LDAPBaseSink):
         )
         attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
-            if u.Guards.is_list(object_classes)
+            if u.is_list(object_classes)
             else ["inetOrgPerson", "person"]
         }
         obj_classes = attributes.get("objectClass")
-        if u.Guards.is_list(obj_classes):
+        if u.is_list(obj_classes):
             if "person" not in obj_classes:
                 obj_classes.append("person")
             if "inetOrgPerson" not in obj_classes:
@@ -360,7 +360,7 @@ class UsersSink(LDAPBaseSink):
     def get_object_classes(self, record: Mapping[str, object]) -> list[str]:
         """Get object classes for user entry."""
         configured = self._target.config.get("users_object_classes")
-        if u.Guards.is_list(configured):
+        if u.is_list(configured):
             return [str(c) for c in configured]
         return ["inetOrgPerson", "organizationalPerson", "person", "top"]
 
@@ -389,13 +389,13 @@ class UsersSink(LDAPBaseSink):
             )
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.Guards.is_list(object_classes_raw)
+                if u.is_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
             attributes_dict: dict[str, object] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
-                    if u.Guards.is_list(v):
+                    if u.is_list(v):
                         attributes_dict[k] = [str(i) for i in v]
                     else:
                         attributes_dict[k] = [str(v)]
@@ -441,7 +441,7 @@ class GroupsSink(LDAPBaseSink):
         field_map = {"members": "member"}
         for k, v in _record.items():
             target_key = field_map.get(k, k)
-            if u.Guards.is_list(v):
+            if u.is_list(v):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
@@ -461,7 +461,7 @@ class GroupsSink(LDAPBaseSink):
     def get_object_classes(self, record: Mapping[str, object]) -> list[str]:
         """Get object classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
-        if u.Guards.is_list(configured):
+        if u.is_list(configured):
             return [str(c) for c in configured]
         return ["groupOfNames", "top"]
 
@@ -485,13 +485,13 @@ class GroupsSink(LDAPBaseSink):
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.Guards.is_list(object_classes_raw)
+                if u.is_list(object_classes_raw)
                 else ["groupOfNames"]
             )
             attributes_dict: dict[str, object] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
-                    if u.Guards.is_list(v):
+                    if u.is_list(v):
                         attributes_dict[k] = list(v)
                     else:
                         attributes_dict[k] = v
@@ -535,11 +535,11 @@ class GroupsSink(LDAPBaseSink):
         )
         attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
-            if u.Guards.is_list(object_classes)
+            if u.is_list(object_classes)
             else ["groupOfNames"]
         }
         obj_classes = attributes.get("objectClass")
-        if u.Guards.is_list(obj_classes) and "groupOfNames" not in obj_classes:
+        if u.is_list(obj_classes) and "groupOfNames" not in obj_classes:
             obj_classes.append("groupOfNames")
         field_mapping = {
             "name": "cn",
@@ -549,7 +549,7 @@ class GroupsSink(LDAPBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.Guards.is_list(value):
+                if u.is_list(value):
                     attributes[ldap_attr] = value
                 else:
                     attributes[ldap_attr] = [str(value)]
@@ -569,7 +569,7 @@ class GroupsSink(LDAPBaseSink):
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.Guards.is_list(value):
+                if u.is_list(value):
                     attributes[mapped_attr] = value
                 else:
                     attributes[mapped_attr] = [str(value)]
@@ -598,7 +598,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             attributes = self._build_ou_attributes(_record)
             attributes_dict: dict[str, object] = {}
             for k, v in attributes.items():
-                if u.Guards.is_list(v):
+                if u.is_list(v):
                     attributes_dict[k] = list(v)
                 else:
                     attributes_dict[k] = v
@@ -638,11 +638,11 @@ class OrganizationalUnitsSink(LDAPBaseSink):
         )
         attributes: dict[str, object] = {
             "objectClass": default_classes.copy()
-            if u.Guards.is_list(default_classes)
+            if u.is_list(default_classes)
             else ["organizationalUnit"]
         }
         obj_classes = attributes.get("objectClass")
-        if u.Guards.is_list(obj_classes) and "organizationalUnit" not in obj_classes:
+        if u.is_list(obj_classes) and "organizationalUnit" not in obj_classes:
             obj_classes.append("organizationalUnit")
         field_mapping = {"name": "ou", "description": "description"}
         for singer_field, ldap_attr in field_mapping.items():

@@ -317,7 +317,7 @@ class LdapTargetClient:
         try:
             ldap_attributes: dict[str, list[str]] = {}
             for key, value in attributes.items():
-                if u.Guards.is_list(value):
+                if u.is_list(value):
                     ldap_attributes[key] = [str(v) for v in value]
                 else:
                     ldap_attributes[key] = [str(value)]
@@ -471,7 +471,7 @@ class LdapTargetClient:
         try:
             ldap_changes: dict[str, list[str]] = {}
             for key, value in changes.items():
-                if u.Guards.is_list(value):
+                if u.is_list(value):
                     ldap_changes[key] = [str(v) for v in value]
                 else:
                     ldap_changes[key] = [str(value)]
@@ -573,7 +573,7 @@ class LdapBaseSink(Sink):
             return
         try:
             records_raw = _context.get("records", [])
-            records: list[object] = records_raw if u.Guards.is_list(records_raw) else []
+            records: list[object] = records_raw if u.is_list(records_raw) else []
             logger.info(
                 "Processing batch of %d records for stream: %s",
                 len(records),
@@ -658,11 +658,11 @@ class LdapUsersSink(LdapBaseSink):
         )
         attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
-            if u.Guards.is_list(object_classes)
+            if u.is_list(object_classes)
             else ["inetOrgPerson", "person"]
         }
         obj_classes = attributes.get("objectClass")
-        if u.Guards.is_list(obj_classes):
+        if u.is_list(obj_classes):
             if "person" not in obj_classes:
                 obj_classes.append("person")
             if "inetOrgPerson" not in obj_classes:
@@ -721,7 +721,7 @@ class LdapUsersSink(LdapBaseSink):
             )
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.Guards.is_list(object_classes_raw)
+                if u.is_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
             add_result = self.client.add_entry(user_dn, attributes, object_classes)
@@ -775,7 +775,7 @@ class LdapGroupsSink(LdapBaseSink):
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.Guards.is_list(object_classes_raw)
+                if u.is_list(object_classes_raw)
                 else ["groupOfNames"]
             )
             add_result = self.client.add_entry(group_dn, attributes, object_classes)
@@ -814,11 +814,11 @@ class LdapGroupsSink(LdapBaseSink):
         )
         attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
-            if u.Guards.is_list(object_classes)
+            if u.is_list(object_classes)
             else ["groupOfNames"]
         }
         obj_classes = attributes.get("objectClass")
-        if u.Guards.is_list(obj_classes) and "groupOfNames" not in obj_classes:
+        if u.is_list(obj_classes) and "groupOfNames" not in obj_classes:
             obj_classes.append("groupOfNames")
         field_mapping = {
             "name": "cn",
@@ -828,7 +828,7 @@ class LdapGroupsSink(LdapBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.Guards.is_list(value):
+                if u.is_list(value):
                     attributes[ldap_attr] = value
                 else:
                     attributes[ldap_attr] = [str(value)]
@@ -844,7 +844,7 @@ class LdapGroupsSink(LdapBaseSink):
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.Guards.is_list(value):
+                if u.is_list(value):
                     attributes[mapped_attr] = value
                 else:
                     attributes[mapped_attr] = [str(value)]

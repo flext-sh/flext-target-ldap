@@ -197,7 +197,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     if value is None:
                         continue
                     ldap_attr = mapping.get(key, key)
-                    if u.Guards.is_list(value):
+                    if u.is_list(value):
                         ldap_values = [
                             str(item).encode("utf-8")
                             for item in value
@@ -238,7 +238,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             object_classes = record.get("objectClass") or record.get("objectclass")
             if object_classes:
-                if u.Guards.is_list(object_classes):
+                if u.is_list(object_classes):
                     return [str(oc) for oc in object_classes if oc]
                 return [str(object_classes)]
             if default_object_classes:
@@ -761,7 +761,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             raw_object_classes = config.get("object_classes")
-            if u.Guards.is_list(raw_object_classes):
+            if u.is_list(raw_object_classes):
                 return [str(v) for v in raw_object_classes]
             return ["top"]
 
