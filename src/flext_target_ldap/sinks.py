@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, r, u
+from flext_core import FlextLogger, r, t, u
 
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.constants import c
@@ -83,7 +83,7 @@ class Target:
     """Base Target class for Singer protocol compatibility."""
 
     @override
-    def __init__(self, config: dict[str, object], **kwargs: object) -> None:
+    def __init__(self, config: dict[str, object], **kwargs: t.Scalar) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, object] = config
 
