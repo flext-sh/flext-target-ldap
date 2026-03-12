@@ -239,7 +239,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             for LDAP target operations.
             """
 
-            original_record: dict[str, objectield(
+            original_record: dict[str, t.Scalar] = Field(
                 ...,
                 description="Original Singer record before transformation",
             )
