@@ -295,7 +295,7 @@ class UsersSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return r[t.ConfigurationMapping].ok(attrs)
+        return r[object].ok(attrs)
 
     @override
     def build_dn(self, record: Mapping[str, object]) -> r[str]:
@@ -445,7 +445,7 @@ class GroupsSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return r[t.ConfigurationMapping].ok(attrs)
+        return r[object].ok(attrs)
 
     @override
     def build_dn(self, record: Mapping[str, object]) -> r[str]:

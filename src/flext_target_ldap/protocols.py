@@ -66,7 +66,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
                 def transform_to_ldap(
                     self, record: Mapping[str, object]
-                ) -> FlextMeltanoProtocols.Result[t.ConfigurationMapping]:
+                ) -> FlextMeltanoProtocols.Result[object]:
                     """Transform record to LDAP format."""
                     ...
 

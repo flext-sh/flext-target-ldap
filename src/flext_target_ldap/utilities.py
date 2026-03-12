@@ -55,7 +55,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if not line or not line.strip():
-                return r[t.ConfigurationMapping].fail("Empty input line")
+                return r[object].fail("Empty input line")
             try:
                 message = json.loads(line.strip())
                 if not u.is_dict_like(message):
@@ -85,19 +85,19 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if message.get("type") != "RECORD":
-                return r[t.ConfigurationMapping].fail("Message type must be RECORD")
+                return r[object].fail("Message type must be RECORD")
             required_fields = ["stream", "record"]
             for field in required_fields:
                 if field not in message:
-                    return r[t.ConfigurationMapping].fail(
+                    return r[object].fail(
                         f"RECORD message missing '{field}' field"
                     )
             record = message["record"]
             if not u.is_dict_like(record):
-                return r[t.ConfigurationMapping].fail(
+                return r[object].fail(
                     "Record data must be a dictionary"
                 )
-            return r[t.ConfigurationMapping].ok(message)
+            return r[object].ok(message)
 
         @staticmethod
         def validate_schema_message(
@@ -113,19 +113,19 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if message.get("type") != "SCHEMA":
-                return r[t.ConfigurationMapping].fail("Message type must be SCHEMA")
+                return r[object].fail("Message type must be SCHEMA")
             required_fields = ["stream", "schema"]
             for field in required_fields:
                 if field not in message:
-                    return r[t.ConfigurationMapping].fail(
+                    return r[object].fail(
                         f"SCHEMA message missing '{field}' field"
                     )
             schema = message["schema"]
             if not u.is_dict_like(schema):
-                return r[t.ConfigurationMapping].fail(
+                return r[object].fail(
                     "Schema data must be a dictionary"
                 )
-            return r[t.ConfigurationMapping].ok(message)
+            return r[object].ok(message)
 
         @staticmethod
         def write_state_message(_state: Mapping[str, object]) -> None:
@@ -392,7 +392,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
             missing_fields = [field for field in required_fields if field not in config]
             if missing_fields:
-                return r[t.ConfigurationMapping].fail(
+                return r[object].fail(
                     f"Missing required LDAP connection fields: {', '.join(missing_fields)}"
                 )
             host = config["host"]
@@ -400,7 +400,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case str() if host.strip():
                     pass
                 case _:
-                    return r[t.ConfigurationMapping].fail(
+                    return r[object].fail(
                         "Host must be a non-empty string"
                     )
             bind_dn = config["bind_dn"]
@@ -408,9 +408,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case str():
                     pass
                 case _:
-                    return r[t.ConfigurationMapping].fail("Bind DN must be a string")
+                    return r[object].fail("Bind DN must be a string")
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
-                return r[t.ConfigurationMapping].fail(
+                return r[object].fail(
                     f"Invalid bind DN format: {bind_dn}"
                 )
             base_dn = config["base_dn"]
@@ -418,9 +418,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case str():
                     pass
                 case _:
-                    return r[t.ConfigurationMapping].fail("Base DN must be a string")
+                    return r[object].fail("Base DN must be a string")
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
-                return r[t.ConfigurationMapping].fail(
+                return r[object].fail(
                     f"Invalid base DN format: {base_dn}"
                 )
             base_dn = config["base_dn"]
@@ -430,29 +430,29 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 ):
                     pass
                 case _:
-                    return r[t.ConfigurationMapping].fail(
+                    return r[object].fail(
                         f"Invalid base DN format: {base_dn}"
                     )
             if "port" in config:
                 port = config["port"]
                 match port:
                     case bool():
-                        return r[t.ConfigurationMapping].fail(
+                        return r[object].fail(
                             "Port must be a valid integer between 1 and 65535"
                         )
                     case int() if 0 < port <= c.TargetLdap.Connection.MAX_PORT_NUMBER:
                         pass
                     case _:
-                        return r[t.ConfigurationMapping].fail(
+                        return r[object].fail(
                             "Port must be a valid integer between 1 and 65535"
                         )
             use_ssl = config.get("use_ssl", False)
             use_tls = config.get("use_tls", False)
             if use_ssl and use_tls:
-                return r[t.ConfigurationMapping].fail(
+                return r[object].fail(
                     "Cannot use both SSL and TLS simultaneously"
                 )
-            return r[t.ConfigurationMapping].ok(config)
+            return r[object].ok(config)
 
         @staticmethod
         def validate_target_config(
@@ -475,7 +475,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             operation_mode = config.get("operation_mode", "upsert")
             valid_modes = ["insert", "update", "upsert", "delete"]
             if operation_mode not in valid_modes:
-                return r[t.ConfigurationMapping].fail(
+                return r[object].fail(
                     f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}"
                 )
             if "dn_template" in config:
@@ -484,7 +484,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     case str() if dn_template.strip():
                         pass
                     case _:
-                        return r[t.ConfigurationMapping].fail(
+                        return r[object].fail(
                             "DN template must be a non-empty string"
                         )
             batch_size = config.get(
@@ -492,16 +492,16 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             )
             match batch_size:
                 case bool():
-                    return r[t.ConfigurationMapping].fail(
+                    return r[object].fail(
                         "Batch size must be a positive integer"
                     )
                 case int() if batch_size > 0:
                     pass
                 case _:
-                    return r[t.ConfigurationMapping].fail(
+                    return r[object].fail(
                         "Batch size must be a positive integer"
                     )
-            return r[t.ConfigurationMapping].ok(config)
+            return r[object].ok(config)
 
     class StateManagement:
         """State management utilities for target operations."""

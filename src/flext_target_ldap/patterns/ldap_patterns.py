@@ -39,7 +39,7 @@ class LDAPTypeConverter:
         """Initialize LDAP type converter."""
 
     def convert_singer_to_ldap(
-        self, singer_type: str, value: t.JsonValue
+        self, singer_type: str, value: object
     ) -> r[str | None]:
         """Convert Singer scalar/list/map values for LDAP persistence."""
         try:
@@ -59,7 +59,7 @@ class LDAPTypeConverter:
             logger.exception("Type conversion failed for %s", singer_type)
             return r[str | None].ok(str(value))
 
-    def _normalize_bool(self, value: t.JsonValue) -> str:
+    def _normalize_bool(self, value: objectstr:
         """Normalize multiple boolean-like forms to LDAP literals."""
         match value:
             case bool() as flag:
@@ -83,7 +83,7 @@ class LDAPDataTransformer:
         self.type_converter = type_converter or LDAPTypeConverter()
 
     def prepare_ldap_attributes(
-        self, record: dict[str, t.JsonValue], object_classes: list[str]
+        self, record: dict[str, objectject_classes: list[str]
     ) -> r[dict[str, list[str]]]:
         """Prepare attributes for LDAP entry creation."""
         try:
@@ -98,7 +98,7 @@ class LDAPDataTransformer:
 
     def transform_record(
         self,
-        record: dict[str, t.JsonValue],
+        record: dict[str, object
         schema: SingerSchemaDefinition
         | Mapping[str, Mapping[str, Mapping[str, str] | str]]
         | None = None,
@@ -133,7 +133,7 @@ class LDAPDataTransformer:
             normalized = name.lower()
         return normalized
 
-    def _to_ldap_values(self, value: t.JsonValue) -> list[str]:
+    def _to_ldap_values(self, value: objectlist[str]:
         """Normalize incoming Singer value to LDAP list values."""
         match value:
             case list() as values:
@@ -215,7 +215,7 @@ class LDAPEntryManager:
         """Initialize LDAP entry manager."""
 
     def determine_object_classes(
-        self, record: dict[str, t.JsonValue], stream_name: str
+        self, record: dict[str, objectream_name: str
     ) -> r[list[str]]:
         """Determine appropriate object classes for LDAP entry."""
         try:
@@ -246,7 +246,7 @@ class LDAPEntryManager:
             return r[list[str]].fail(f"Object class determination failed: {e}")
 
     def generate_dn(
-        self, record: dict[str, t.JsonValue], base_dn: str, rdn_attribute: str = "cn"
+        self, record: dict[str, objectse_dn: str, rdn_attribute: str = "cn"
     ) -> r[str]:
         """Generate Distinguished Name for LDAP entry."""
         try:

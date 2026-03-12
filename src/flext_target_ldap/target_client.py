@@ -222,7 +222,7 @@ class LdapTargetClient:
 
     @override
     def __init__(
-        self, config: FlextLdapModels.Ldap.ConnectionConfig | t.ConfigurationMapping
+        self, config: FlextLdapModels.Ldap.ConnectionConfig | object
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         self.config: FlextLdapModels.Ldap.ConnectionConfig
@@ -628,7 +628,7 @@ class LdapBaseSink(Sink):
                     "timeout", c.TargetLdap.Connection.DEFAULT_TIMEOUT
                 ),
             }
-            typed_connection_config: t.ConfigurationMapping = connection_config
+            typed_connection_config: object = connection_config
             self.client = LdapTargetClient(typed_connection_config)
             connect_result: r[bool] = self.client.connect()
             if not connect_result.is_success:

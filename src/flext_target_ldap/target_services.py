@@ -173,7 +173,7 @@ class LdapTransformationService:
             attributes=ldap_attributes,
             entry_type=self._determine_entry_type(object_classes),
         )
-        original_record_json: dict[str, t.JsonValue] = {
+        original_record_json: dict[str, object
             str(key): str(value) for key, value in record.items()
         }
         result = LdapTransformationResultModel(
@@ -233,7 +233,7 @@ class LdapTargetOrchestrator:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return r[t.ConfigurationMapping].fail("Configuration is required")
+            return r[object].fail("Configuration is required")
         transformation = LdapTransformationService(working)
         object_classes = working.object_classes
         base_dn = working.base_dn
@@ -258,7 +258,7 @@ class LdapTargetOrchestrator:
             "transformation_errors": errors,
             "status": "completed" if not errors else "completed_with_errors",
         }
-        return r[t.ConfigurationMapping].ok(result)
+        return r[object].ok(result)
 
     def validate_target_configuration(
         self, config: FlextTargetLdapSettings | None = None
