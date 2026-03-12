@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import ClassVar, Protocol, override
 
 from flext_core import FlextContainer, FlextLogger
+from flext_meltano import FlextMeltanoModels
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c
@@ -29,6 +30,7 @@ from flext_target_ldap.sinks import (
     Target,
     UsersSink,
 )
+from flext_target_ldap.typings import t
 
 
 class _DefaultCliHelper:
@@ -59,11 +61,11 @@ logger = FlextLogger(__name__)
 
 
 class _LdapApiProtocol(Protocol):
-    def add(self, dn: str, record: dict[str, object]) -> None: ...
+    def add(self, dn: str, record: dict[str, t.Container]) -> None: ...
 
     def delete(self, dn: str) -> None: ...
 
-    def modify(self, dn: str, record: dict[str, object]) -> None: ...
+    def modify(self, dn: str, record: dict[str, t.Container]) -> None: ...
 
 
 class TargetLDAP(Target):
@@ -170,7 +172,7 @@ class TargetLDAP(Target):
         logger.info("Orchestrator initialized successfully")
         self._container = get_flext_target_ldap_container()
         logger.info("DI container initialized successfully")
-        host = self.config.get("host", "localhost")
+        host = str(self.config.get("host", "localhost"))
         logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:
@@ -249,7 +251,7 @@ def _get_ldap_api() -> _LdapApiProtocol | None:
         return None
 
 
-def _construct_dn(stream: str, record: dict[str, object], base_dn: str) -> str:
+def _construct_dn(stream: str, record: dict[str, t.Container], base_dn: str) -> str:
     """Construct DN from record based on stream type."""
     if stream == "users":
         uid = record.get("uid") or record.get("username") or "user"
@@ -262,7 +264,7 @@ def _construct_dn(stream: str, record: dict[str, object], base_dn: str) -> str:
 
 
 def _process_record_message(
-    record: dict[str, object],
+    record: dict[str, t.Container],
     stream: str,
     cfg: dict[str, object],
     api: _LdapApiProtocol | None,
@@ -309,18 +311,19 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         seen_dns: set[str] = set()
         for line in sys.stdin:
             try:
-                obj = json.loads(line)
-                msg_type = obj.get("type")
+                msg_dict = FlextMeltanoModels.Meltano.SingerStateMessage.model_validate_json(line)
+                msg_type = msg_dict.type
                 if msg_type == "STATE":
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
+                    schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(line)
                     _schema: dict[str, object] = {}
-                    current_stream = obj.get("stream")
+                    current_stream = schema_msg.stream
                 elif msg_type == "RECORD" and api is not None:
-                    record: dict[str, object] = obj.get("record") or {}
-                    stream = obj.get("stream") or current_stream or "users"
-                    _process_record_message(record, stream, cfg, api, seen_dns)
+                    record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(line)
+                    stream = record_msg.stream or current_stream or "users"
+                    _process_record_message(record_msg.record, stream, cfg, api, seen_dns)
             except (
                 ValueError,
                 TypeError,
