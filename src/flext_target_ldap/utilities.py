@@ -13,7 +13,7 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import r, t
+from flext_core import r
 from flext_ldap import FlextLdapModels, FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import TypeAdapter
@@ -89,14 +89,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             required_fields = ["stream", "record"]
             for field in required_fields:
                 if field not in message:
-                    return r[object].fail(
-                        f"RECORD message missing '{field}' field"
-                    )
+                    return r[object].fail(f"RECORD message missing '{field}' field")
             record = message["record"]
             if not u.is_dict_like(record):
-                return r[object].fail(
-                    "Record data must be a dictionary"
-                )
+                return r[object].fail("Record data must be a dictionary")
             return r[object].ok(message)
 
         @staticmethod
@@ -117,14 +113,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             required_fields = ["stream", "schema"]
             for field in required_fields:
                 if field not in message:
-                    return r[object].fail(
-                        f"SCHEMA message missing '{field}' field"
-                    )
+                    return r[object].fail(f"SCHEMA message missing '{field}' field")
             schema = message["schema"]
             if not u.is_dict_like(schema):
-                return r[object].fail(
-                    "Schema data must be a dictionary"
-                )
+                return r[object].fail("Schema data must be a dictionary")
             return r[object].ok(message)
 
         @staticmethod
@@ -400,9 +392,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case str() if host.strip():
                     pass
                 case _:
-                    return r[object].fail(
-                        "Host must be a non-empty string"
-                    )
+                    return r[object].fail("Host must be a non-empty string")
             bind_dn = config["bind_dn"]
             match bind_dn:
                 case str():
@@ -410,9 +400,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case _:
                     return r[object].fail("Bind DN must be a string")
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
-                return r[object].fail(
-                    f"Invalid bind DN format: {bind_dn}"
-                )
+                return r[object].fail(f"Invalid bind DN format: {bind_dn}")
             base_dn = config["base_dn"]
             match base_dn:
                 case str():
@@ -420,9 +408,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case _:
                     return r[object].fail("Base DN must be a string")
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
-                return r[object].fail(
-                    f"Invalid base DN format: {base_dn}"
-                )
+                return r[object].fail(f"Invalid base DN format: {base_dn}")
             base_dn = config["base_dn"]
             match base_dn:
                 case str() if FlextTargetLdapUtilities.LdapDataProcessing.split(
@@ -430,9 +416,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 ):
                     pass
                 case _:
-                    return r[object].fail(
-                        f"Invalid base DN format: {base_dn}"
-                    )
+                    return r[object].fail(f"Invalid base DN format: {base_dn}")
             if "port" in config:
                 port = config["port"]
                 match port:
@@ -449,9 +433,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             use_ssl = config.get("use_ssl", False)
             use_tls = config.get("use_tls", False)
             if use_ssl and use_tls:
-                return r[object].fail(
-                    "Cannot use both SSL and TLS simultaneously"
-                )
+                return r[object].fail("Cannot use both SSL and TLS simultaneously")
             return r[object].ok(config)
 
         @staticmethod
@@ -484,23 +466,17 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     case str() if dn_template.strip():
                         pass
                     case _:
-                        return r[object].fail(
-                            "DN template must be a non-empty string"
-                        )
+                        return r[object].fail("DN template must be a non-empty string")
             batch_size = config.get(
                 "batch_size", c.TargetLdap.Processing.DEFAULT_BATCH_SIZE
             )
             match batch_size:
                 case bool():
-                    return r[object].fail(
-                        "Batch size must be a positive integer"
-                    )
+                    return r[object].fail("Batch size must be a positive integer")
                 case int() if batch_size > 0:
                     pass
                 case _:
-                    return r[object].fail(
-                        "Batch size must be a positive integer"
-                    )
+                    return r[object].fail("Batch size must be a positive integer")
             return r[object].ok(config)
 
     class StateManagement:

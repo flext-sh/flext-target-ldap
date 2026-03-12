@@ -24,8 +24,6 @@ from flext_ldap import (
 )
 from flext_ldif import FlextLdif
 
-from flext_target_ldap.typings import t
-
 logger = FlextLogger(__name__)
 
 
@@ -89,9 +87,7 @@ class LDAPClient:
     """
 
     @override
-    def __init__(
-        self, config: FlextLdapModels.Ldap.ConnectionConfig | object
-    ) -> None:
+    def __init__(self, config: FlextLdapModels.Ldap.ConnectionConfig | object) -> None:
         """Initialize LDAP client with connection configuration."""
         match config:
             case Mapping():

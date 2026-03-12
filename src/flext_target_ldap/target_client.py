@@ -11,7 +11,7 @@ from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager
 from typing import override
 
-from flext_core import FlextContainer, FlextLogger, r, t, u
+from flext_core import FlextContainer, FlextLogger, r, u
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -221,9 +221,7 @@ class LdapTargetClient:
     """
 
     @override
-    def __init__(
-        self, config: FlextLdapModels.Ldap.ConnectionConfig | object
-    ) -> None:
+    def __init__(self, config: FlextLdapModels.Ldap.ConnectionConfig | object) -> None:
         """Initialize LDAP client with connection configuration."""
         self.config: FlextLdapModels.Ldap.ConnectionConfig
         if isinstance(config, FlextLdapModels.Ldap.ConnectionConfig):

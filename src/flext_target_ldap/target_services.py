@@ -173,7 +173,7 @@ class LdapTransformationService:
             attributes=ldap_attributes,
             entry_type=self._determine_entry_type(object_classes),
         )
-        original_record_json: dict[str, object
+        original_record_json: dict[str, t.Scalar] = {
             str(key): str(value) for key, value in record.items()
         }
         result = LdapTransformationResultModel(

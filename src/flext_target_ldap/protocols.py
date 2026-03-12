@@ -12,8 +12,6 @@ from typing import Protocol, runtime_checkable
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoProtocols
 
-from flext_target_ldap.typings import t
-
 
 class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     """Singer Target LDAP protocols extending LDAP and Meltano protocols.

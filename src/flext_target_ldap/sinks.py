@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, r, t, u
+from flext_core import FlextLogger, r, u
 
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.constants import c
