@@ -13,8 +13,6 @@ from typing import override
 from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
 
-from flext_target_ldap.typings import t
-
 logger = FlextLogger(__name__)
 
 
@@ -29,7 +27,7 @@ class TransformationRule(BaseModel):
 class TransformationResult(BaseModel):
     """Result of data transformation with applied rules."""
 
-    transformed_data: dict[str, t.ContainerValue] = Field(default_factory=dict)
+    transformed_data: dict[str, object] = Field(default_factory=dict)
     applied_rules: list[str] = Field(default_factory=list)
 
 
@@ -45,10 +43,10 @@ class DataTransformationEngine:
         """Get transformation statistics."""
         return {"total_rules": len(self.rules), "transformations_applied": 0}
 
-    def transform(self, data: dict[str, t.ContainerValue]) -> r[TransformationResult]:
+    def transform(self, data: dict[str, object]) -> r[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: dict[str, t.ContainerValue] = data.copy()
+            transformed_data: dict[str, object] = data.copy()
             applied_rules: list[str] = []
             for rule in self.rules:
                 for key, value in transformed_data.items():
@@ -95,8 +93,8 @@ class MigrationValidator:
 
     def validate(
         self,
-        data: dict[str, t.ContainerValue] | str,
-        attributes: dict[str, t.ContainerValue] | None = None,
+        data: dict[str, object] | str,
+        attributes: dict[str, object] | None = None,
         object_classes: list[str] | None = None,
     ) -> r[bool]:
         """Validate migration data."""
@@ -137,7 +135,7 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: dict[str, t.ContainerValue],
+        attributes: dict[str, object],
         object_classes: list[str],
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""

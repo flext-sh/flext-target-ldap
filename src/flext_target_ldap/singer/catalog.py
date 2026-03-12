@@ -12,8 +12,6 @@ from typing import override
 from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
 
-from flext_target_ldap.typings import t
-
 logger = FlextLogger(__name__)
 
 
@@ -22,7 +20,7 @@ class SingerLDAPCatalogEntry(BaseModel):
 
     tap_stream_id: str = Field(min_length=1)
     stream: str = Field(min_length=1)
-    stream_schema: dict[str, t.ContainerValue] = Field(default_factory=dict)
+    stream_schema: dict[str, object] = Field(default_factory=dict)
 
 
 class SingerLDAPCatalogManager:
@@ -33,9 +31,7 @@ class SingerLDAPCatalogManager:
         """Initialize Singer LDAP catalog manager."""
         self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
 
-    def add_stream(
-        self, stream_name: str, schema: dict[str, t.ContainerValue]
-    ) -> r[bool]:
+    def add_stream(self, stream_name: str, schema: dict[str, object]) -> r[bool]:
         """Add LDAP stream to catalog."""
         try:
             entry = SingerLDAPCatalogEntry(

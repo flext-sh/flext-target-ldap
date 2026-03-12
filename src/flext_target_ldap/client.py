@@ -33,13 +33,13 @@ class LDAPConnectionProtocol(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: list[t.ContainerValue]
+    entries: list[object]
 
     def add(
         self,
         dn: str,
         object_classes: list[str],
-        attributes: Mapping[str, t.ContainerValue],
+        attributes: Mapping[str, object],
     ) -> bool:
         """Add LDAP entry."""
         ...
@@ -52,7 +52,7 @@ class LDAPConnectionProtocol(Protocol):
         """Delete LDAP entry."""
         ...
 
-    def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
+    def modify(self, dn: str, changes: Mapping[str, object]) -> bool:
         """Modify LDAP entry."""
         ...
 
@@ -71,7 +71,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    def __init__(self, dn: str, attributes: dict[str, t.ContainerValue]) -> None:
+    def __init__(self, dn: str, attributes: dict[str, object]) -> None:
         """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
@@ -123,7 +123,7 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, t.ContainerValue],
+        attributes: dict[str, object],
         object_classes: list[str] | None = None,
     ) -> r[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
@@ -233,7 +233,7 @@ class LDAPClient:
             logger.exception("Failed to get entry: %s", dn)
             return r[LDAPSearchEntry | None].fail(f"Get entry failed: {e}")
 
-    def modify_entry(self, dn: str, changes: dict[str, t.ContainerValue]) -> r[bool]:
+    def modify_entry(self, dn: str, changes: dict[str, object]) -> r[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
@@ -258,14 +258,14 @@ class LDAPClient:
             )
             with self.get_connection() as conn:
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: list[t.ContainerValue] = conn.entries
+                raw_entries: list[object] = conn.entries
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     if not isinstance(raw, LDAPSearchEntry):
                         continue
                     dn = raw.dn
                     attr_names: list[str] = list(raw.attributes.keys())
-                    attrs: dict[str, t.ContainerValue] = {}
+                    attrs: dict[str, object] = {}
                     for name in attr_names:
                         name_str = name
                         try:
@@ -322,13 +322,13 @@ class LDAPClient:
             def __init__(self, session_id: str) -> None:
                 self.session_id = session_id
                 self.bound = True
-                self.entries: list[t.ContainerValue] = []
+                self.entries: list[object] = []
 
             def add(
                 self,
                 dn: str,
                 object_classes: list[str],
-                attributes: Mapping[str, t.ContainerValue],
+                attributes: Mapping[str, object],
             ) -> bool:
                 _ = (dn, object_classes, attributes)
                 return True
@@ -340,7 +340,7 @@ class LDAPClient:
                 _ = dn
                 return True
 
-            def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
+            def modify(self, dn: str, changes: Mapping[str, object]) -> bool:
                 _ = (dn, changes)
                 return True
 

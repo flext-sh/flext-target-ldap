@@ -17,7 +17,6 @@ from flext_ldap import FlextLdapModels
 from pydantic import Field
 
 from .constants import c
-from .typings import t
 from .utilities import FlextTargetLdapUtilities
 
 
@@ -78,7 +77,7 @@ class LDAPOperationSettings(FlextModels.Entity):
 
 
 def validate_ldap_config(
-    config: dict[str, t.ContainerValue],
+    config: dict[str, object],
 ) -> r[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:

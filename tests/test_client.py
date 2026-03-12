@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from ldap3.core import exceptions as ldap3_exceptions
 
-from flext_target_ldap import LdapTargetClient, t
+from flext_target_ldap import LdapTargetClient
 from flext_target_ldap.client import LDAPClient
 
 EXPECTED_DATA_COUNT = 3
@@ -22,7 +22,7 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: dict[str, t.ContainerValue]) -> LdapTargetClient:
+    def client(self, mock_ldap_config: dict[str, object]) -> LdapTargetClient:
         """Create test LDAP client instance."""
         return LdapTargetClient(config=mock_ldap_config)
 

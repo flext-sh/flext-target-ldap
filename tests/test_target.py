@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from flext_target_ldap import LdapBaseSink, LdapGroupsSink, LdapUsersSink, TargetLdap, t
+from flext_target_ldap import LdapBaseSink, LdapGroupsSink, LdapUsersSink, TargetLdap
 from flext_target_ldap.sinks import Sink, Target
 from flext_target_ldap.target import _default_cli_helper
 
@@ -20,7 +20,7 @@ class TestTargetLDAPUnit:
     """Unit tests for TargetLDAP."""
 
     @pytest.fixture
-    def config(self) -> dict[str, t.ContainerValue]:
+    def config(self) -> dict[str, object]:
         """Create test configuration for LDAP target."""
         return {
             "host": "test.ldap.com",
@@ -32,7 +32,7 @@ class TestTargetLDAPUnit:
             "timeout": 30,
         }
 
-    def test_target_initialization(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_target_initialization(self, config: dict[str, object]) -> None:
         """Test target LDAP initialization with name and config."""
         target = TargetLdap(config=config)
         if target.name != "target-ldap":
@@ -40,7 +40,7 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
         assert target.config == config
 
-    def test_get_sink_class_users(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_get_sink_class_users(self, config: dict[str, object]) -> None:
         """Test getting users sink class."""
         target = TargetLdap(config=config)
         sink_class = target.get_sink_class("users")
@@ -48,7 +48,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {LdapUsersSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_class_groups(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_get_sink_class_groups(self, config: dict[str, object]) -> None:
         """Test getting groups sink class."""
         target = TargetLdap(config=config)
         sink_class = target.get_sink_class("groups")
@@ -56,7 +56,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {LdapGroupsSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_get_sink_class_generic(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_get_sink_class_generic(self, config: dict[str, object]) -> None:
         """Test getting generic sink class for unknown stream."""
         target = TargetLdap(config=config)
         sink_class = target.get_sink_class("custom_stream")
@@ -64,7 +64,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {LdapBaseSink}, got {sink_class}"
             raise AssertionError(msg)
 
-    def test_dn_template_processing(self, config: dict[str, t.ContainerValue]) -> None:
+    def test_dn_template_processing(self, config: dict[str, object]) -> None:
         """Test DN template configuration processing."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
         target = TargetLdap(config=config)
@@ -73,9 +73,7 @@ class TestTargetLDAPUnit:
             target.config["users_dn_template"] == "uid={uid},ou=people,dc=test,dc=com"
         )
 
-    def test_object_classes_processing(
-        self, config: dict[str, t.ContainerValue]
-    ) -> None:
+    def test_object_classes_processing(self, config: dict[str, object]) -> None:
         """Test default object classes configuration processing."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
         target = TargetLdap(config=config)
@@ -86,7 +84,7 @@ class TestTargetLDAPUnit:
 
     @patch("target_ldap.sinks.LDAPClient")
     def test_process_record(
-        self, mock_client_class: MagicMock, config: dict[str, t.ContainerValue]
+        self, mock_client_class: MagicMock, config: dict[str, object]
     ) -> None:
         """Test processing a record through the LDAP target."""
         mock_client = MagicMock()
@@ -115,7 +113,7 @@ class TestTargetLDAPUnit:
 
     @patch("target_ldap.sinks.LDAPClient")
     def test_process_delete_record(
-        self, mock_client_class: MagicMock, config: dict[str, t.ContainerValue]
+        self, mock_client_class: MagicMock, config: dict[str, object]
     ) -> None:
         """Test processing a delete record through the LDAP target."""
         mock_client = MagicMock()

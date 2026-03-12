@@ -13,8 +13,6 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from flext_target_ldap import t
-
 
 class TestTargetLDAPIntegration:
     """Integration tests for target-ldap."""
@@ -30,9 +28,7 @@ class TestTargetLDAPIntegration:
         return mock_runner
 
     @pytest.fixture
-    def config_file(
-        self, tmp_path: Path, mock_ldap_config: dict[str, t.ContainerValue]
-    ) -> Path:
+    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
         with config_path.open("w", encoding="utf-8") as f:
@@ -205,7 +201,7 @@ class TestTargetLDAPIntegration:
         self,
         runner: Mock,
         tmp_path: Path,
-        mock_ldap_config: dict[str, t.ContainerValue],
+        mock_ldap_config: dict[str, object],
     ) -> None:
         """Test DN template usage for record processing."""
         mock_ldap_config["dn_templates"] = {
