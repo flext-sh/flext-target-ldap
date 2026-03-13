@@ -1,0 +1,23 @@
+src/flext_target_ldap/target.py
+  4d5771422df1b564 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.11",
+  "base_commit_sha": "f6eeb508ede24bbb3738fc24c52463ac9f7c2d38",
+  "prompts": {
+    "4d5771422df1b564": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_3190f51fcffe1Asz9zGx4B7Oe7",
+        "model": "anthropic/claude-opus-4-6"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 1,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
