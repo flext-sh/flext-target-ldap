@@ -311,19 +311,29 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         seen_dns: set[str] = set()
         for line in sys.stdin:
             try:
-                msg_dict = FlextMeltanoModels.Meltano.SingerStateMessage.model_validate_json(line)
+                msg_dict = (
+                    FlextMeltanoModels.Meltano.SingerStateMessage.model_validate_json(
+                        line
+                    )
+                )
                 msg_type = msg_dict.type
                 if msg_type == "STATE":
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(line)
+                    schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(
+                        line
+                    )
                     _schema: dict[str, object] = {}
                     current_stream = schema_msg.stream
                 elif msg_type == "RECORD" and api is not None:
-                    record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(line)
+                    record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(
+                        line
+                    )
                     stream = record_msg.stream or current_stream or "users"
-                    _process_record_message(record_msg.record, stream, cfg, api, seen_dns)
+                    _process_record_message(
+                        record_msg.record, stream, cfg, api, seen_dns
+                    )
             except (
                 ValueError,
                 TypeError,
