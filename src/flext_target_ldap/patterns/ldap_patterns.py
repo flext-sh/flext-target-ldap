@@ -107,7 +107,7 @@ class LDAPDataTransformer:
         """Transform Singer record for LDAP storage."""
         try:
             transformed: dict[str, str | None] = {}
-            schema_model = SingerSchemaDefinition.model_validate(schema or {})
+            schema_model = SingerSchemaDefinition(schema or {})
             for key, value in record.items():
                 ldap_key = self._normalize_ldap_attribute_name(key)
                 prop_def = schema_model.properties.get(key)
@@ -159,7 +159,7 @@ class LDAPSchemaMapper:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: dict[str, str] = {}
-            schema_model = SingerSchemaDefinition.model_validate(schema)
+            schema_model = SingerSchemaDefinition(schema)
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
