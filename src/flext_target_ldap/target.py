@@ -7,13 +7,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 import sys
 from collections.abc import Callable
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, Protocol, override
+
+from pydantic import TypeAdapter, ValidationError
 
 from flext_core import FlextContainer, FlextLogger
 from flext_meltano import FlextMeltanoModels
