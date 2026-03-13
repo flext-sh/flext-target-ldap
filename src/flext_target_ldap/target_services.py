@@ -38,7 +38,7 @@ class LdapTargetService(Protocol):
         ...
 
 
-class LdapTransformationService(Protocol):
+class LdapTransformationServiceProtocol(Protocol):
     """Protocol for transforming and validating LDAP entries."""
 
     def transform_record(
@@ -95,42 +95,46 @@ class LdapTransformationService:
         """Return default attribute mappings for the given entry type (e.g. users, groups)."""
         if entry_type == "users":
             return [
-                LdapAttributeMappingModel(
-                    singer_field_name="username",
-                    ldap_attribute_name="uid",
-                    is_required=True,
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="full_name",
-                    ldap_attribute_name="cn",
-                    is_required=True,
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="last_name",
-                    ldap_attribute_name="sn",
-                    is_required=True,
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="email",
-                    ldap_attribute_name="mail",
-                    is_required=False,
-                ),
+                LdapAttributeMappingModel.model_validate({
+                    "singer_field_name": "username",
+                    "ldap_attribute_name": "uid",
+                    "is_required": True,
+                }),
+                LdapAttributeMappingModel.model_validate({
+                    "singer_field_name": "full_name",
+                    "ldap_attribute_name": "cn",
+                    "is_required": True,
+                }),
+                LdapAttributeMappingModel.model_validate({
+                    "singer_field_name": "last_name",
+                    "ldap_attribute_name": "sn",
+                    "is_required": True,
+                }),
+                LdapAttributeMappingModel.model_validate({
+                    "singer_field_name": "email",
+                    "ldap_attribute_name": "mail",
+                    "is_required": False,
+                }),
             ]
         if entry_type == "groups":
             return [
-                LdapAttributeMappingModel(
-                    singer_field_name="name", ldap_attribute_name="cn", is_required=True
-                ),
-                LdapAttributeMappingModel(
-                    singer_field_name="description",
-                    ldap_attribute_name="description",
-                    is_required=False,
-                ),
+                LdapAttributeMappingModel.model_validate({
+                    "singer_field_name": "name",
+                    "ldap_attribute_name": "cn",
+                    "is_required": True,
+                }),
+                LdapAttributeMappingModel.model_validate({
+                    "singer_field_name": "description",
+                    "ldap_attribute_name": "description",
+                    "is_required": False,
+                }),
             ]
         return [
-            LdapAttributeMappingModel(
-                singer_field_name="name", ldap_attribute_name="cn", is_required=True
-            )
+            LdapAttributeMappingModel.model_validate({
+                "singer_field_name": "name",
+                "ldap_attribute_name": "cn",
+                "is_required": True,
+            })
         ]
 
     def transform_record(
@@ -167,23 +171,23 @@ class LdapTransformationService:
             applied_mappings.append(mapping)
         entry_name = str(record.get("username", record.get("name", "unknown")))
         dn = f"cn={entry_name},{base_dn}"
-        entry = LdapEntryModel(
-            distinguished_name=dn,
-            object_classes=object_classes,
-            attributes=ldap_attributes,
-            entry_type=self._determine_entry_type(object_classes),
-        )
+        entry = LdapEntryModel.model_validate({
+            "distinguished_name": dn,
+            "object_classes": object_classes,
+            "attributes": ldap_attributes,
+            "entry_type": self._determine_entry_type(object_classes),
+        })
         original_record_json: dict[str, t.Scalar] = {
             str(key): str(value) for key, value in record.items()
         }
-        result = LdapTransformationResultModel(
-            original_record=original_record_json,
-            transformed_entry=entry,
-            applied_mappings=applied_mappings,
-            transformation_errors=mapping_errors,
-            processing_time_ms=0,
-            transformation_timestamp=datetime.now(UTC),
-        )
+        result = LdapTransformationResultModel.model_validate({
+            "original_record": original_record_json,
+            "transformed_entry": entry,
+            "applied_mappings": applied_mappings,
+            "transformation_errors": mapping_errors,
+            "processing_time_ms": 0,
+            "transformation_timestamp": datetime.now(UTC),
+        })
         return r[LdapTransformationResultModel].ok(result)
 
     def validate_entry(self, entry: LdapEntryModel) -> r[bool]:
