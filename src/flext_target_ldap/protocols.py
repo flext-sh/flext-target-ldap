@@ -33,7 +33,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     service: p.Service[str]
 
     # LDAP protocols (inherited)
-    entry: p.Ldap.EntryProtocol
+    entry: p.Ldap.Entry
 
     # Meltano protocols (inherited)
     target: p.Meltano.Target
@@ -59,7 +59,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class TransformationProtocol(FlextLdapProtocols.Service[object], Protocol):
+            class Transformation(FlextLdapProtocols.Service[object], Protocol):
                 """Protocol for Singer to LDAP transformation."""
 
                 def transform_to_ldap(
@@ -69,7 +69,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class OrchestrationProtocol(FlextLdapProtocols.Service[object], Protocol):
+            class Orchestration(FlextLdapProtocols.Service[object], Protocol):
                 """Protocol for LDAP loading orchestration."""
 
                 def orchestrate_load(
@@ -79,7 +79,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class ConnectionProtocol(FlextLdapProtocols.Service[object], Protocol):
+            class Connection(FlextLdapProtocols.Service[object], Protocol):
                 """Protocol for LDAP connection management."""
 
                 def connect(
@@ -89,7 +89,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class SingerProtocol(FlextLdapProtocols.Service[object], Protocol):
+            class Singer(FlextLdapProtocols.Service[object], Protocol):
                 """Protocol for Singer message handling."""
 
                 def process_singer_message(
@@ -99,7 +99,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class PerformanceProtocol(FlextLdapProtocols.Service[object], Protocol):
+            class Performance(FlextLdapProtocols.Service[object], Protocol):
                 """Protocol for LDAP loading performance."""
 
                 def optimize_batch(
@@ -109,7 +109,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class SecurityProtocol(FlextLdapProtocols.Service[object], Protocol):
+            class Security(FlextLdapProtocols.Service[object], Protocol):
                 """Protocol for LDAP security operations."""
 
                 def validate_credentials(
@@ -119,7 +119,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class MonitoringProtocol(FlextLdapProtocols.Service[object], Protocol):
+            class Monitoring(FlextLdapProtocols.Service[object], Protocol):
                 """Protocol for LDAP loading monitoring."""
 
                 def track_load_progress(

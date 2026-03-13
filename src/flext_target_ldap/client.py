@@ -27,7 +27,7 @@ from flext_ldif import FlextLdif
 logger = FlextLogger(__name__)
 
 
-class LDAPConnectionProtocol(Protocol):
+class LDAPConnection(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
@@ -201,18 +201,18 @@ class LDAPClient:
             logger.exception("Failed to check entry existence: %s", dn)
             return r[bool].fail(f"Entry exists check failed: {e}")
 
-    def get_connection(self) -> AbstractContextManager[LDAPConnectionProtocol]:
+    def get_connection(self) -> AbstractContextManager[LDAPConnection]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
 
         Returns a real LDAP connection for production use.
 
         Returns:
-        _GeneratorContextManager[LDAPConnectionProtocol]: LDAP connection context manager.
+        _GeneratorContextManager[LDAPConnection]: LDAP connection context manager.
 
         """
 
         @contextmanager
-        def connection_context() -> Generator[LDAPConnectionProtocol]:
+        def connection_context() -> Generator[LDAPConnection]:
             yield self._get_flext_ldap_wrapper()
 
         return connection_context()
@@ -316,7 +316,7 @@ class LDAPClient:
             )
         return self._api
 
-    def _get_flext_ldap_wrapper(self) -> LDAPConnectionProtocol:
+    def _get_flext_ldap_wrapper(self) -> LDAPConnection:
         """Create a connection wrapper using flext-ldap API."""
         api = self._get_api()
 

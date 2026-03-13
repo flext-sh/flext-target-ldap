@@ -60,7 +60,7 @@ flext_cli_create_helper = _default_cli_helper
 logger = FlextLogger(__name__)
 
 
-class _LdapApiProtocol(Protocol):
+class _LdapApi(Protocol):
     def add(self, dn: str, record: dict[str, t.Container]) -> None: ...
 
     def delete(self, dn: str) -> None: ...
@@ -239,7 +239,7 @@ def _load_config_from_file(config_path: str) -> dict[str, object]:
         return {}
 
 
-def _get_ldap_api() -> _LdapApiProtocol | None:
+def _get_ldap_api() -> _LdapApi | None:
     """Get optional LDAP API module."""
     try:
         client_mod = import_module("flext_target_ldap.client")
@@ -269,7 +269,7 @@ def _process_record_message(
     record: dict[str, t.Container],
     stream: str,
     cfg: dict[str, object],
-    api: _LdapApiProtocol | None,
+    api: _LdapApi | None,
     seen_dns: set[str],
 ) -> None:
     """Process a RECORD message."""

@@ -47,7 +47,6 @@ if TYPE_CHECKING:
     from flext_target_ldap.target_services import (
         LdapTargetApiService,
         LdapTransformationService,
-        LdapTransformationServiceProtocol,
     )
     from flext_target_ldap.typings import (
         FlextTargetLdapTypes,
@@ -105,10 +104,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.target_services",
         "LdapTransformationService",
     ),
-    "LdapTransformationServiceProtocol": (
-        "flext_target_ldap.target_services",
-        "LdapTransformationServiceProtocol",
-    ),
     "LdapUsersSink": ("flext_target_ldap.sinks", "UsersSink"),
     "OrganizationalUnitsSink": ("flext_target_ldap.sinks", "OrganizationalUnitsSink"),
     "Sink": ("flext_target_ldap.sinks", "Sink"),
@@ -143,7 +138,6 @@ __all__ = [
     "LdapTargetApiService",
     "LdapTargetClient",
     "LdapTransformationService",
-    "LdapTransformationServiceProtocol",
     "LdapUsersSink",
     "OrganizationalUnitsSink",
     "Sink",

@@ -19,7 +19,7 @@ from .target_models import (
 from .typings import t
 
 
-class LdapTargetServiceProtocol(Protocol):
+class LdapTargetService(Protocol):
     """Protocol for LDAP target creation and record loading."""
 
     def create_target(
@@ -38,7 +38,7 @@ class LdapTargetServiceProtocol(Protocol):
         ...
 
 
-class LdapTransformationServiceProtocol(Protocol):
+class LdapTransformationService(Protocol):
     """Protocol for transforming and validating LDAP entries."""
 
     def transform_record(
@@ -329,7 +329,6 @@ __all__ = [
     "LdapConnectionService",
     "LdapTargetApiService",
     "LdapTargetOrchestrator",
-    "LdapTargetServiceProtocol",
+    "LdapTargetService",
     "LdapTransformationService",
-    "LdapTransformationServiceProtocol",
 ]
