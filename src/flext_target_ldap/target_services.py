@@ -38,7 +38,7 @@ class LdapTargetService(Protocol):
         ...
 
 
-class LdapTransformationServiceProtocol(Protocol):
+class _LdapTransformationServiceProtocol(Protocol):
     """Protocol for transforming and validating LDAP entries."""
 
     def transform_record(
