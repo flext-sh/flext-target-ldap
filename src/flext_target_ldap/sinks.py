@@ -178,7 +178,7 @@ class LDAPBaseSink(Sink):
         """Process a batch of records."""
         setup_result: r[LDAPClient] = self.setup_client()
         if not setup_result.is_success:
-            logger.error("Cannot process batch: %s", setup_result.error)
+            logger.error("Cannot process batch: %s", setup_result.error or "")
             return
         try:
             records_raw = _context.get("records", [])
@@ -189,10 +189,10 @@ class LDAPBaseSink(Sink):
                 self.stream_name,
             )
             for record in records:
-                if isinstance(record, Mapping):
-                    normalized_record: dict[str, object] = {
-                        str(k): v for k, v in record.items()
-                    }
+                if u.is_dict_like(record):
+                    normalized_record: dict[str, object] = {}
+                    for k, v in record.items():
+                        normalized_record[str(k)] = v
                     self.process_record(normalized_record, _context)
             logger.info(
                 "Batch processing completed. Success: %d, Errors: %d",
@@ -213,7 +213,7 @@ class LDAPBaseSink(Sink):
             self._processing_result.add_error("LDAP client not initialized")
             return r[bool].fail("LDAP client not initialized")
         try:
-            logger.debug("Processing record: %s", _record)
+            logger.debug(f"Processing record: {_record!r}")
             self._processing_result.add_success()
             return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -295,7 +295,7 @@ class UsersSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return r[object].ok(attrs)
+        return r[dict[str, object]].ok(attrs)
 
     @override
     def build_dn(self, record: Mapping[str, object]) -> r[str]:
@@ -338,11 +338,10 @@ class UsersSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping: dict[str, object] = (
-            {str(k): v for k, v in mapping_val.items()}
-            if isinstance(mapping_val, Mapping)
-            else {}
-        )
+        raw_mapping: dict[str, object] = {}
+        if u.is_dict_like(mapping_val):
+            for k, v in mapping_val.items():
+                raw_mapping[str(k)] = v
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -445,7 +444,7 @@ class GroupsSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             elif v is not None:
                 attrs[target_key] = [str(v)]
-        return r[object].ok(attrs)
+        return r[dict[str, object]].ok(attrs)
 
     @override
     def build_dn(self, record: Mapping[str, object]) -> r[str]:
@@ -554,11 +553,10 @@ class GroupsSink(LDAPBaseSink):
                 else:
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping: dict[str, object] = (
-            {str(k): v for k, v in mapping_val.items()}
-            if isinstance(mapping_val, Mapping)
-            else {}
-        )
+        raw_mapping: dict[str, object] = {}
+        if u.is_dict_like(mapping_val):
+            for k, v in mapping_val.items():
+                raw_mapping[str(k)] = v
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -650,11 +648,10 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping: dict[str, object] = (
-            {str(k): v for k, v in mapping_val.items()}
-            if isinstance(mapping_val, Mapping)
-            else {}
-        )
+        raw_mapping: dict[str, object] = {}
+        if u.is_dict_like(mapping_val):
+            for k, v in mapping_val.items():
+                raw_mapping[str(k)] = v
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:

@@ -54,7 +54,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if not line or not line.strip():
-                return r[object].fail("Empty input line")
+                return r[Mapping[str, object]].fail("Empty input line")
             message_adapter: TypeAdapter[Mapping[str, object]] = TypeAdapter(
                 Mapping[str, object]
             )
@@ -82,15 +82,17 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if message.get("type") != "RECORD":
-                return r[object].fail("Message type must be RECORD")
+                return r[Mapping[str, object]].fail("Message type must be RECORD")
             required_fields = ["stream", "record"]
             for field in required_fields:
                 if field not in message:
-                    return r[object].fail(f"RECORD message missing '{field}' field")
+                    return r[Mapping[str, object]].fail(
+                        f"RECORD message missing '{field}' field"
+                    )
             record = message["record"]
             if not u.is_dict_like(record):
-                return r[object].fail("Record data must be a dictionary")
-            return r[object].ok(message)
+                return r[Mapping[str, object]].fail("Record data must be a dictionary")
+            return r[Mapping[str, object]].ok(message)
 
         @staticmethod
         def validate_schema_message(
@@ -106,15 +108,17 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if message.get("type") != "SCHEMA":
-                return r[object].fail("Message type must be SCHEMA")
+                return r[Mapping[str, object]].fail("Message type must be SCHEMA")
             required_fields = ["stream", "schema"]
             for field in required_fields:
                 if field not in message:
-                    return r[object].fail(f"SCHEMA message missing '{field}' field")
+                    return r[Mapping[str, object]].fail(
+                        f"SCHEMA message missing '{field}' field"
+                    )
             schema = message["schema"]
             if not u.is_dict_like(schema):
-                return r[object].fail("Schema data must be a dictionary")
-            return r[object].ok(message)
+                return r[Mapping[str, object]].fail("Schema data must be a dictionary")
+            return r[Mapping[str, object]].ok(message)
 
         @staticmethod
         def write_state_message(_state: Mapping[str, object]) -> None:
@@ -347,7 +351,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 return r[bool].fail("Stream name and schema are required")
             raw_props = schema.get("properties", {})
             properties: dict[str, object] = {}
-            if isinstance(raw_props, Mapping):
+            if u.is_dict_like(raw_props):
                 for k, v in raw_props.items():
                     properties[str(k)] = v
             if not properties:
@@ -381,7 +385,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
             missing_fields = [field for field in required_fields if field not in config]
             if missing_fields:
-                return r[object].fail(
+                return r[Mapping[str, object]].fail(
                     f"Missing required LDAP connection fields: {', '.join(missing_fields)}"
                 )
             host = config["host"]
@@ -389,23 +393,29 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 case str() if host.strip():
                     pass
                 case _:
-                    return r[object].fail("Host must be a non-empty string")
+                    return r[Mapping[str, object]].fail(
+                        "Host must be a non-empty string"
+                    )
             bind_dn = config["bind_dn"]
             match bind_dn:
                 case str():
                     pass
                 case _:
-                    return r[object].fail("Bind DN must be a string")
+                    return r[Mapping[str, object]].fail("Bind DN must be a string")
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
-                return r[object].fail(f"Invalid bind DN format: {bind_dn}")
+                return r[Mapping[str, object]].fail(
+                    f"Invalid bind DN format: {bind_dn}"
+                )
             base_dn = config["base_dn"]
             match base_dn:
                 case str():
                     pass
                 case _:
-                    return r[object].fail("Base DN must be a string")
+                    return r[Mapping[str, object]].fail("Base DN must be a string")
             if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
-                return r[object].fail(f"Invalid base DN format: {base_dn}")
+                return r[Mapping[str, object]].fail(
+                    f"Invalid base DN format: {base_dn}"
+                )
             base_dn = config["base_dn"]
             match base_dn:
                 case str() if FlextTargetLdapUtilities.LdapDataProcessing.split(
@@ -413,25 +423,29 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 ):
                     pass
                 case _:
-                    return r[object].fail(f"Invalid base DN format: {base_dn}")
+                    return r[Mapping[str, object]].fail(
+                        f"Invalid base DN format: {base_dn}"
+                    )
             if "port" in config:
                 port = config["port"]
                 match port:
                     case bool():
-                        return r[object].fail(
+                        return r[Mapping[str, object]].fail(
                             "Port must be a valid integer between 1 and 65535"
                         )
                     case int() if 0 < port <= c.TargetLdap.Connection.MAX_PORT_NUMBER:
                         pass
                     case _:
-                        return r[object].fail(
+                        return r[Mapping[str, object]].fail(
                             "Port must be a valid integer between 1 and 65535"
                         )
             use_ssl = config.get("use_ssl", False)
             use_tls = config.get("use_tls", False)
             if use_ssl and use_tls:
-                return r[object].fail("Cannot use both SSL and TLS simultaneously")
-            return r[object].ok(config)
+                return r[Mapping[str, object]].fail(
+                    "Cannot use both SSL and TLS simultaneously"
+                )
+            return r[Mapping[str, object]].ok(config)
 
         @staticmethod
         def validate_target_config(
@@ -454,7 +468,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             operation_mode = config.get("operation_mode", "upsert")
             valid_modes = ["insert", "update", "upsert", "delete"]
             if operation_mode not in valid_modes:
-                return r[object].fail(
+                return r[Mapping[str, object]].fail(
                     f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}"
                 )
             if "dn_template" in config:
@@ -463,18 +477,24 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     case str() if dn_template.strip():
                         pass
                     case _:
-                        return r[object].fail("DN template must be a non-empty string")
+                        return r[Mapping[str, object]].fail(
+                            "DN template must be a non-empty string"
+                        )
             batch_size = config.get(
                 "batch_size", c.TargetLdap.Processing.DEFAULT_BATCH_SIZE
             )
             match batch_size:
                 case bool():
-                    return r[object].fail("Batch size must be a positive integer")
+                    return r[Mapping[str, object]].fail(
+                        "Batch size must be a positive integer"
+                    )
                 case int() if batch_size > 0:
                     pass
                 case _:
-                    return r[object].fail("Batch size must be a positive integer")
-            return r[object].ok(config)
+                    return r[Mapping[str, object]].fail(
+                        "Batch size must be a positive integer"
+                    )
+            return r[Mapping[str, object]].ok(config)
 
     class StateManagement:
         """State management utilities for target operations."""
@@ -528,14 +548,17 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             bookmarks = state.get("bookmarks")
-            if not isinstance(bookmarks, Mapping):
+            if not u.is_dict_like(bookmarks):
                 return {}
-            bookmarks_map: Mapping[str, object] = {
-                str(k): v for k, v in bookmarks.items()
-            }
+            bookmarks_map: dict[str, object] = {}
+            for k, v in bookmarks.items():
+                bookmarks_map[str(k)] = v
             stream_state_data = bookmarks_map.get(stream_name)
-            if isinstance(stream_state_data, Mapping):
-                return {str(k): v for k, v in stream_state_data.items()}
+            if u.is_dict_like(stream_state_data):
+                stream_state: dict[str, object] = {}
+                for k, v in stream_state_data.items():
+                    stream_state[str(k)] = v
+                return stream_state
             return {}
 
         @staticmethod
@@ -558,7 +581,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             state_dict = dict(state)
             bookmarks = state_dict.get("bookmarks")
             bookmarks_dict: dict[str, object] = {}
-            if isinstance(bookmarks, Mapping):
+            if u.is_dict_like(bookmarks):
                 for k, v in bookmarks.items():
                     bookmarks_dict[str(k)] = v
             bookmarks_dict[stream_name] = dict(stream_state)
@@ -729,7 +752,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             raw_attr_map = config.get("attribute_mapping")
-            if isinstance(raw_attr_map, Mapping):
+            if u.is_dict_like(raw_attr_map):
                 extracted_mapping: dict[str, str] = {}
                 for k, v in raw_attr_map.items():
                     extracted_mapping[str(k)] = str(v)

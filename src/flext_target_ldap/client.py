@@ -14,7 +14,7 @@ from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import Protocol, override
 
-from flext_core import FlextLogger, r
+from flext_core import FlextLogger, r, u
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -89,26 +89,32 @@ class LDAPClient:
     @override
     def __init__(self, config: FlextLdapModels.Ldap.ConnectionConfig | object) -> None:
         """Initialize LDAP client with connection configuration."""
-        match config:
-            case Mapping():
-                self.config: FlextLdapModels.Ldap.ConnectionConfig = (
-                    FlextLdapModels.Ldap.ConnectionConfig(
-                        host=str(config.get("host", "localhost")),
-                        port=int(str(config.get("port", 389)))
-                        if config.get("port", 389) is not None
-                        else 389,
-                        use_ssl=bool(config.get("use_ssl", False)),
-                        timeout=int(str(config.get("timeout", 30)))
-                        if config.get("timeout", 30) is not None
-                        else 30,
-                    )
-                )
-                self._bind_dn: str = str(config.get("bind_dn", ""))
-                self._password: str = str(config.get("password", ""))
-            case _:
-                self.config = config
-                self._bind_dn = ""
-                self._password = ""
+        if isinstance(config, FlextLdapModels.Ldap.ConnectionConfig):
+            self.config = config
+            self._bind_dn = ""
+            self._password = ""
+        elif u.is_dict_like(config):
+            self.config = FlextLdapModels.Ldap.ConnectionConfig(
+                host=str(config.get("host", "localhost")),
+                port=int(str(config.get("port", 389)))
+                if config.get("port", 389) is not None
+                else 389,
+                use_ssl=bool(config.get("use_ssl", False)),
+                timeout=int(str(config.get("timeout", 30)))
+                if config.get("timeout", 30) is not None
+                else 30,
+            )
+            self._bind_dn = str(config.get("bind_dn", ""))
+            self._password = str(config.get("password", ""))
+        else:
+            self.config = FlextLdapModels.Ldap.ConnectionConfig(
+                host="localhost",
+                port=389,
+                use_ssl=False,
+                timeout=30,
+            )
+            self._bind_dn = ""
+            self._password = ""
         self._api: FlextLdap | None = None
         logger.info(
             "Initialized LDAP client using flext-ldap API for %s:%d",

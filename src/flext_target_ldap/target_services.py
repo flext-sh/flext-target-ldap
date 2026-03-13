@@ -233,7 +233,7 @@ class LdapTargetOrchestrator:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return r[object].fail("Configuration is required")
+            return r[Mapping[str, object]].fail("Configuration is required")
         transformation = LdapTransformationService(working)
         object_classes = working.object_classes
         base_dn = working.base_dn
@@ -258,7 +258,7 @@ class LdapTargetOrchestrator:
             "transformation_errors": errors,
             "status": "completed" if not errors else "completed_with_errors",
         }
-        return r[object].ok(result)
+        return r[Mapping[str, object]].ok(result)
 
     def validate_target_configuration(
         self, config: FlextTargetLdapSettings | None = None

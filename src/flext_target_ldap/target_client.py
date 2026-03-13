@@ -85,9 +85,7 @@ class _CompatibleEntry:
 def _container_mapping_from_value(
     value: object | None,
 ) -> dict[str, object]:
-    if value is None:
-        return {}
-    if isinstance(value, Mapping):
+    if u.is_dict_like(value):
         return {str(k): v for k, v in value.items()}
     return {}
 
@@ -228,10 +226,8 @@ class LdapTargetClient:
             self.config = config
             self._bind_dn = ""
             self._password = ""
-        else:
-            config_map: dict[str, object] = (
-                dict(config) if u.is_dict_like(config) else {}
-            )
+        elif u.is_dict_like(config):
+            config_map: dict[str, object] = {str(k): v for k, v in config.items()}
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
                 host=str(config_map.get("host", "localhost")),
                 port=int(
@@ -247,6 +243,15 @@ class LdapTargetClient:
             )
             self._bind_dn = str(config_map.get("bind_dn", ""))
             self._password = str(config_map.get("password", ""))
+        else:
+            self.config = FlextLdapModels.Ldap.ConnectionConfig(
+                host="localhost",
+                port=c.TargetLdap.Connection.DEFAULT_PORT,
+                use_ssl=False,
+                timeout=30,
+            )
+            self._bind_dn = ""
+            self._password = ""
         ldap_settings = FlextLdapSettings(
             host=self.config.host,
             port=self.config.port,
@@ -569,7 +574,8 @@ class LdapBaseSink(Sink):
         """Process a batch of records."""
         setup_result: r[LdapTargetClient] = self.setup_client()
         if not setup_result.is_success:
-            logger.error("Cannot process batch: %s", setup_result.error)
+            setup_error = setup_result.error or ""
+            logger.error("Cannot process batch: %s", setup_error)
             return
         try:
             records_raw = _context.get("records", [])
@@ -602,7 +608,7 @@ class LdapBaseSink(Sink):
             self._processing_result.add_error("LDAP client not initialized")
             return r[bool].fail("LDAP client not initialized")
         try:
-            logger.debug("Processing record: %s", _record)
+            logger.debug(f"Processing record: {_record!r}")
             self._processing_result.add_success()
             return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -626,8 +632,7 @@ class LdapBaseSink(Sink):
                     "timeout", c.TargetLdap.Connection.DEFAULT_TIMEOUT
                 ),
             }
-            typed_connection_config: object = connection_config
-            self.client = LdapTargetClient(typed_connection_config)
+            self.client = LdapTargetClient(connection_config)
             connect_result: r[bool] = self.client.connect()
             if not connect_result.is_success:
                 return r[LdapTargetClient].fail(
@@ -1019,7 +1024,8 @@ class TargetLdap(Target):
         self._container = FlextContainer.get_global()
         logger.info("DI container initialized successfully")
         host = self.config.get("host", c.Platform.DEFAULT_HOST)
-        logger.info("LDAP target setup completed for host: %s", host)
+        host_name = host if isinstance(host, str) else c.Platform.DEFAULT_HOST
+        logger.info("LDAP target setup completed for host: %s", host_name)
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""

@@ -113,7 +113,7 @@ class LDAPDataTransformer:
                 convert_result = self.type_converter.convert_singer_to_ldap(
                     singer_type, value
                 )
-                converted_value: str | None = convert_result.value_or(str(value))
+                converted_value: str | None = convert_result.unwrap_or(str(value))
                 transformed[ldap_key] = converted_value
             return r[dict[str, str | None]].ok(transformed)
         except (RuntimeError, ValueError, TypeError) as e:
