@@ -12,6 +12,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from flext_core import FlextModels, r
 from flext_ldap import FlextLdapModels
 from pydantic import Field
@@ -34,46 +36,46 @@ class FlextTargetLdapSettings(FlextModels.Entity):
     create_missing_entries: bool = True
     update_existing_entries: bool = True
     delete_removed_entries: bool = False
-    attribute_mapping: dict[str, str] = Field(default_factory=dict)
-    object_classes: list[str] = Field(default_factory=lambda: ["top"])
+    attribute_mapping: Annotated[dict[str, str], Field(default_factory=dict)]
+    object_classes: Annotated[list[str], Field(default_factory=lambda: ["top"])]
 
 
 class LDAPConnectionSettings(FlextModels.Entity):
     """LDAP connection settings model."""
 
-    host: str = Field(..., description="LDAP server host")
-    port: int = Field(
-        c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port"
-    )
-    use_ssl: bool = Field(default=False, description="Use SSL connection")
-    use_tls: bool = Field(default=False, description="Use TLS connection")
-    bind_dn: str | None = Field(None, description="Bind DN")
-    bind_password: str | None = Field(None, description="Bind password")
-    base_dn: str = Field(..., description="Base DN")
-    connect_timeout: int = Field(
-        c.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout"
-    )
-    receive_timeout: int = Field(
-        c.Network.DEFAULT_TIMEOUT, description="Receive timeout"
-    )
+    host: Annotated[str, Field(..., description="LDAP server host")]
+    port: Annotated[
+        int, Field(c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port")
+    ]
+    use_ssl: Annotated[bool, Field(default=False, description="Use SSL connection")]
+    use_tls: Annotated[bool, Field(default=False, description="Use TLS connection")]
+    bind_dn: Annotated[str | None, Field(None, description="Bind DN")]
+    bind_password: Annotated[str | None, Field(None, description="Bind password")]
+    base_dn: Annotated[str, Field(..., description="Base DN")]
+    connect_timeout: Annotated[
+        int, Field(c.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout")
+    ]
+    receive_timeout: Annotated[
+        int, Field(c.Network.DEFAULT_TIMEOUT, description="Receive timeout")
+    ]
 
 
 class LDAPOperationSettings(FlextModels.Entity):
     """LDAP operation settings model."""
 
-    batch_size: int = Field(
-        c.Performance.BatchProcessing.DEFAULT_SIZE, description="Batch size"
-    )
-    max_records: int | None = Field(None, description="Maximum records")
-    create_missing_entries: bool = Field(
-        default=True, description="Create missing entries"
-    )
-    update_existing_entries: bool = Field(
-        default=True, description="Update existing entries"
-    )
-    delete_removed_entries: bool = Field(
-        default=False, description="Delete removed entries"
-    )
+    batch_size: Annotated[
+        int, Field(c.Performance.BatchProcessing.DEFAULT_SIZE, description="Batch size")
+    ]
+    max_records: Annotated[int | None, Field(None, description="Maximum records")]
+    create_missing_entries: Annotated[
+        bool, Field(default=True, description="Create missing entries")
+    ]
+    update_existing_entries: Annotated[
+        bool, Field(default=True, description="Update existing entries")
+    ]
+    delete_removed_entries: Annotated[
+        bool, Field(default=False, description="Delete removed entries")
+    ]
 
 
 def validate_ldap_config(

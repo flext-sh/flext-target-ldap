@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import override
+from typing import Annotated, override
 
 from flext_core import FlextLogger, r, t
 from pydantic import BaseModel, Field, TypeAdapter
@@ -25,7 +25,9 @@ class SingerPropertyDefinition(BaseModel):
 class SingerSchemaDefinition(BaseModel):
     """Singer schema definition mapping properties to LDAP attributes."""
 
-    properties: dict[str, SingerPropertyDefinition] = Field(default_factory=dict)
+    properties: Annotated[
+        dict[str, SingerPropertyDefinition], Field(default_factory=dict)
+    ]
 
 
 class LDAPTypeConverter:

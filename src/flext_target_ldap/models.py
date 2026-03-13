@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import math
 from datetime import UTC, datetime
-from typing import Self
+from typing import Annotated, Self
 
 from flext_core import r, t
 from flext_ldap import FlextLdapModels
@@ -44,32 +44,47 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             with business rule validation and transformation support.
             """
 
-            singer_field_name: str = Field(
-                ...,
-                description="Singer field name from source data",
-                min_length=1,
-                max_length=255,
-            )
-            ldap_attribute_name: str = Field(
-                ...,
-                description="Target LDAP attribute name",
-                min_length=1,
-                max_length=255,
-            )
-            is_required: bool = Field(
-                default=False,
-                description="Whether this attribute is required for LDAP entry",
-            )
-            transformation_rule: str | None = Field(
-                default=None,
-                description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
-                max_length=100,
-            )
-            default_value: str | None = Field(
-                default=None,
-                description="Default value if source field is missing",
-                max_length=1000,
-            )
+            singer_field_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="Singer field name from source data",
+                    min_length=1,
+                    max_length=255,
+                ),
+            ]
+            ldap_attribute_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="Target LDAP attribute name",
+                    min_length=1,
+                    max_length=255,
+                ),
+            ]
+            is_required: Annotated[
+                bool,
+                Field(
+                    default=False,
+                    description="Whether this attribute is required for LDAP entry",
+                ),
+            ]
+            transformation_rule: Annotated[
+                str | None,
+                Field(
+                    default=None,
+                    description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
+                    max_length=100,
+                ),
+            ]
+            default_value: Annotated[
+                str | None,
+                Field(
+                    default=None,
+                    description="Default value if source field is missing",
+                    max_length=1000,
+                ),
+            ]
 
             def validate_business_rules(self) -> r[bool]:
                 """Validate attribute mapping business rules."""
@@ -125,29 +140,44 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             DN, object classes, and attributes, including validation rules.
             """
 
-            distinguished_name: str = Field(
-                ...,
-                description="LDAP Distinguished Name (DN)",
-                min_length=1,
-                max_length=1000,
-            )
-            object_classes: list[str] = Field(
-                default_factory=list,
-                description="LDAP object classes",
-            )
-            attributes: dict[str, list[str]] = Field(
-                default_factory=dict,
-                description="LDAP attributes with values",
-            )
-            entry_type: str = Field(
-                default="generic",
-                description="Type of LDAP entry (user, group, ou, etc.)",
-                max_length=50,
-            )
-            created_at: datetime = Field(
-                default_factory=lambda: datetime.now(UTC),
-                description="Entry creation timestamp",
-            )
+            distinguished_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="LDAP Distinguished Name (DN)",
+                    min_length=1,
+                    max_length=1000,
+                ),
+            ]
+            object_classes: Annotated[
+                list[str],
+                Field(
+                    default_factory=list,
+                    description="LDAP object classes",
+                ),
+            ]
+            attributes: Annotated[
+                dict[str, list[str]],
+                Field(
+                    default_factory=dict,
+                    description="LDAP attributes with values",
+                ),
+            ]
+            entry_type: Annotated[
+                str,
+                Field(
+                    default="generic",
+                    description="Type of LDAP entry (user, group, ou, etc.)",
+                    max_length=50,
+                ),
+            ]
+            created_at: Annotated[
+                datetime,
+                Field(
+                    default_factory=lambda: datetime.now(UTC),
+                    description="Entry creation timestamp",
+                ),
+            ]
 
             @field_validator("object_classes")
             @classmethod
@@ -239,35 +269,51 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             for LDAP target operations.
             """
 
-            original_record: dict[str, t.Scalar] = Field(
-                ...,
-                description="Original Singer record before transformation",
-            )
-            transformed_entry: FlextTargetLdapModels.TargetLdap.Entry = Field(
-                ...,
-                description="Resulting LDAP entry after transformation",
-            )
-            applied_mappings: list[
-                FlextTargetLdapModels.TargetLdap.AttributeMapping
-            ] = Field(
-                default_factory=lambda: list[
-                    FlextTargetLdapModels.TargetLdap.AttributeMapping
-                ](),
-                description="Attribute mappings that were applied",
-            )
-            transformation_errors: list[str] = Field(
-                default_factory=list,
-                description="schema errors encountered during transformation",
-            )
-            processing_time_ms: int = Field(
-                default=0,
-                description="Processing time in milliseconds",
-                ge=0,
-            )
-            transformation_timestamp: datetime = Field(
-                default_factory=lambda: datetime.now(UTC),
-                description="When transformation was performed",
-            )
+            original_record: Annotated[
+                dict[str, t.Scalar],
+                Field(
+                    ...,
+                    description="Original Singer record before transformation",
+                ),
+            ]
+            transformed_entry: Annotated[
+                FlextTargetLdapModels.TargetLdap.Entry,
+                Field(
+                    ...,
+                    description="Resulting LDAP entry after transformation",
+                ),
+            ]
+            applied_mappings: Annotated[
+                list[FlextTargetLdapModels.TargetLdap.AttributeMapping],
+                Field(
+                    default_factory=lambda: list[
+                        FlextTargetLdapModels.TargetLdap.AttributeMapping
+                    ](),
+                    description="Attribute mappings that were applied",
+                ),
+            ]
+            transformation_errors: Annotated[
+                list[str],
+                Field(
+                    default_factory=list,
+                    description="schema errors encountered during transformation",
+                ),
+            ]
+            processing_time_ms: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Processing time in milliseconds",
+                    ge=0,
+                ),
+            ]
+            transformation_timestamp: Annotated[
+                datetime,
+                Field(
+                    default_factory=lambda: datetime.now(UTC),
+                    description="When transformation was performed",
+                ),
+            ]
 
             @property
             def success_rate(self) -> float:
@@ -318,41 +364,64 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             tracking batch size, processed records, and operation statistics.
             """
 
-            stream_name: str = Field(
-                ...,
-                description="Singer stream being processed",
-                min_length=1,
-                max_length=255,
-            )
-            batch_size: int = Field(
-                ...,
-                description="Maximum records per batch",
-                gt=0,
-                le=10000,
-            )
-            current_batch: list[FlextTargetLdapModels.TargetLdap.Entry] = Field(
-                default_factory=lambda: list[FlextTargetLdapModels.TargetLdap.Entry](),
-                description="Current batch of LDAP entries",
-            )
-            total_processed: int = Field(
-                default=0,
-                description="Total entries processed across all batches",
-                ge=0,
-            )
-            successful_operations: int = Field(
-                default=0,
-                description="Count of successful LDAP operations",
-                ge=0,
-            )
-            failed_operations: int = Field(
-                default=0,
-                description="Count of failed LDAP operations",
-                ge=0,
-            )
-            last_processed_at: datetime | None = Field(
-                default=None,
-                description="Timestamp of last batch processing",
-            )
+            stream_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="Singer stream being processed",
+                    min_length=1,
+                    max_length=255,
+                ),
+            ]
+            batch_size: Annotated[
+                int,
+                Field(
+                    ...,
+                    description="Maximum records per batch",
+                    gt=0,
+                    le=10000,
+                ),
+            ]
+            current_batch: Annotated[
+                list[FlextTargetLdapModels.TargetLdap.Entry],
+                Field(
+                    default_factory=lambda: list[
+                        FlextTargetLdapModels.TargetLdap.Entry
+                    ](),
+                    description="Current batch of LDAP entries",
+                ),
+            ]
+            total_processed: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Total entries processed across all batches",
+                    ge=0,
+                ),
+            ]
+            successful_operations: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Count of successful LDAP operations",
+                    ge=0,
+                ),
+            ]
+            failed_operations: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Count of failed LDAP operations",
+                    ge=0,
+                ),
+            ]
+            last_processed_at: Annotated[
+                datetime | None,
+                Field(
+                    default=None,
+                    description="Timestamp of last batch processing",
+                ),
+            ]
 
             @property
             def current_batch_size(self) -> int:
@@ -452,44 +521,68 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             monitoring, reporting, and optimization analysis.
             """
 
-            total_entries_processed: int = Field(
-                default=0,
-                description="Total LDAP entries processed",
-                ge=0,
-            )
-            successful_adds: int = Field(
-                default=0,
-                description="Successful LDAP add operations",
-                ge=0,
-            )
-            successful_updates: int = Field(
-                default=0,
-                description="Successful LDAP modify operations",
-                ge=0,
-            )
-            successful_deletes: int = Field(
-                default=0,
-                description="Successful LDAP delete operations",
-                ge=0,
-            )
-            failed_operations: int = Field(
-                default=0,
-                description="Total failed operations",
-                ge=0,
-            )
-            average_processing_time_ms: float = Field(
-                default=0.0,
-                description="Average processing time per entry in milliseconds",
-                ge=0.0,
-            )
-            start_time: datetime = Field(
-                default_factory=lambda: datetime.now(UTC),
-                description="When processing started",
-            )
-            end_time: datetime | None = Field(
-                default=None,
-                description="When processing completed",
-            )
+            total_entries_processed: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Total LDAP entries processed",
+                    ge=0,
+                ),
+            ]
+            successful_adds: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Successful LDAP add operations",
+                    ge=0,
+                ),
+            ]
+            successful_updates: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Successful LDAP modify operations",
+                    ge=0,
+                ),
+            ]
+            successful_deletes: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Successful LDAP delete operations",
+                    ge=0,
+                ),
+            ]
+            failed_operations: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Total failed operations",
+                    ge=0,
+                ),
+            ]
+            average_processing_time_ms: Annotated[
+                float,
+                Field(
+                    default=0.0,
+                    description="Average processing time per entry in milliseconds",
+                    ge=0.0,
+                ),
+            ]
+            start_time: Annotated[
+                datetime,
+                Field(
+                    default_factory=lambda: datetime.now(UTC),
+                    description="When processing started",
+                ),
+            ]
+            end_time: Annotated[
+                datetime | None,
+                Field(
+                    default=None,
+                    description="When processing completed",
+                ),
+            ]
 
             @property
             def operations_per_second(self) -> float:
