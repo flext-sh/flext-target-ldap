@@ -7,11 +7,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from pydantic import TypeAdapter
 
 
 class TestTargetLDAPIntegration:
@@ -31,8 +31,10 @@ class TestTargetLDAPIntegration:
     def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
-        with config_path.open("w", encoding="utf-8") as f:
-            json.dump(mock_ldap_config, f)
+        config_path.write_text(
+            TypeAdapter(object).dump_json(mock_ldap_config).decode("utf-8"),
+            encoding="utf-8",
+        )
         return config_path
 
     @pytest.fixture
@@ -109,9 +111,9 @@ class TestTargetLDAPIntegration:
             "record": {"dn": "uid=test,dc=test,dc=com", "cn": "Updated Test User"},
         }
         with input_path.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(schema_msg) + "\n")
-            f.write(json.dumps(record1) + "\n")
-            f.write(json.dumps(record2) + "\n")
+            f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
+            f.write(TypeAdapter(object).dump_json(record1).decode("utf-8") + "\n")
+            f.write(TypeAdapter(object).dump_json(record2).decode("utf-8") + "\n")
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.side_effect = [True, True]
@@ -170,8 +172,8 @@ class TestTargetLDAPIntegration:
             },
         }
         with input_path.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(schema_msg) + "\n")
-            f.write(json.dumps(delete_record) + "\n")
+            f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
+            f.write(TypeAdapter(object).dump_json(delete_record).decode("utf-8") + "\n")
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
@@ -208,8 +210,10 @@ class TestTargetLDAPIntegration:
             "users": "uid={uid},ou=people,dc=test,dc=com"
         }
         config_path = tmp_path / "template_config.json"
-        with config_path.open("w", encoding="utf-8") as f:
-            json.dump(mock_ldap_config, f)
+        config_path.write_text(
+            TypeAdapter(object).dump_json(mock_ldap_config).decode("utf-8"),
+            encoding="utf-8",
+        )
         input_path = tmp_path / "template_input.jsonl"
         schema_msg = {
             "type": "SCHEMA",
@@ -225,8 +229,8 @@ class TestTargetLDAPIntegration:
             "record": {"uid": "testuser", "cn": "Test User"},
         }
         with input_path.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(schema_msg) + "\n")
-            f.write(json.dumps(record) + "\n")
+            f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
+            f.write(TypeAdapter(object).dump_json(record).decode("utf-8") + "\n")
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
@@ -258,8 +262,10 @@ class TestTargetLDAPIntegration:
         """Test error handling for invalid configurations."""
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
-        with config_path.open("w", encoding="utf-8") as f:
-            json.dump(bad_config, f)
+        config_path.write_text(
+            TypeAdapter(object).dump_json(bad_config).decode("utf-8"),
+            encoding="utf-8",
+        )
         mock_result = Mock()
         mock_result.exit_code = 1
         mock_result.output = "Configuration error"
@@ -303,7 +309,10 @@ class TestTargetLDAPIntegration:
             },
         ]
         with input_path.open("w", encoding="utf-8") as f:
-            f.writelines(json.dumps(msg) + "\n" for msg in messages)
+            f.writelines(
+                TypeAdapter(object).dump_json(msg).decode("utf-8") + "\n"
+                for msg in messages
+            )
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True

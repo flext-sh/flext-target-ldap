@@ -14,10 +14,9 @@ from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, Protocol, override
 
-from pydantic import TypeAdapter, ValidationError
-
 from flext_core import FlextContainer, FlextLogger
 from flext_meltano import FlextMeltanoModels
+from pydantic import TypeAdapter, ValidationError
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c
@@ -223,9 +222,10 @@ if __name__ == "__main__":
 
 def _load_config_from_file(config_path: str) -> dict[str, object]:
     """Load configuration from JSON file."""
+    config_adapter: TypeAdapter[dict[str, object]] = TypeAdapter(dict[str, object])
     try:
-        with Path(config_path).open(encoding="utf-8") as f:
-            return json.load(f)
+        content = Path(config_path).read_text(encoding="utf-8")
+        return config_adapter.validate_json(content)
     except (
         ValueError,
         TypeError,
@@ -234,6 +234,7 @@ def _load_config_from_file(config_path: str) -> dict[str, object]:
         OSError,
         RuntimeError,
         ImportError,
+        ValidationError,
     ):
         return {}
 

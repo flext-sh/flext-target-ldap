@@ -6,12 +6,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping
 from typing import override
 
 from flext_core import FlextLogger, r, t
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, TypeAdapter
 
 logger = FlextLogger(__name__)
 
@@ -49,7 +48,7 @@ class LDAPTypeConverter:
             elif singer_type == "boolean":
                 result = self._normalize_bool(value)
             elif singer_type in {self._COMPLEX_KIND, "array"}:
-                result = json.dumps(value)
+                result = TypeAdapter(object).dump_json(value).decode("utf-8")
             else:
                 result = str(value)
             return r[str | None].ok(result)

@@ -7,13 +7,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 import pathlib
 from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
 from flext_tests import FlextTestsDocker
+from pydantic import TypeAdapter
 
 from flext_target_ldap import LdapTargetClient
 
@@ -133,7 +133,7 @@ def singer_message_record(sample_user_record: dict[str, object]) -> str:
         "record": sample_user_record,
         "time_extracted": "2024-01-01T12:00:00Z",
     }
-    return json.dumps(message)
+    return TypeAdapter(object).dump_json(message).decode("utf-8")
 
 
 @pytest.fixture
@@ -154,7 +154,7 @@ def singer_message_schema() -> str:
         },
         "key_properties": ["dn"],
     }
-    return json.dumps(message)
+    return TypeAdapter(object).dump_json(message).decode("utf-8")
 
 
 @pytest.fixture
@@ -171,7 +171,7 @@ def singer_message_state() -> str:
             }
         },
     }
-    return json.dumps(message)
+    return TypeAdapter(object).dump_json(message).decode("utf-8")
 
 
 @pytest.fixture
