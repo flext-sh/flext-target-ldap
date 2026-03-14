@@ -7,56 +7,30 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import override
+from collections.abc import Mapping
+from typing import Annotated, override
 
-from flext_core import FlextLogger, FlextModels, FlextResult
-from pydantic import Field
-
-from flext_target_ldap.typings import t
+from flext_core import FlextLogger, r, t
+from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
 
 
-class TransformationRule(FlextModels.Entity):
-    """Transformation rule for data transformation."""
+class TransformationRule(BaseModel):
+    """Rule for transforming LDAP data with pattern matching and replacement."""
 
-    name: str
-    pattern: str
+    name: Annotated[str, Field(min_length=1)]
+    pattern: Annotated[str, Field(min_length=1)]
     replacement: str
-    enabled: bool = True
-
-    def validate_business_rules(self) -> FlextResult[bool]:
-        """Validate transformation rule business rules."""
-        try:
-            if not self.name.strip():
-                return FlextResult[bool].fail("Rule name cannot be empty")
-            if not self.pattern:
-                return FlextResult[bool].fail("Pattern cannot be empty")
-            # replacement is guaranteed to be str by Pydantic typing
-            # Using a domain-specific validation instead
-            return FlextResult[bool].ok(value=True)
-        except Exception as e:
-            return FlextResult[bool].fail(f"Transformation rule validation failed: {e}")
 
 
-class TransformationResult(FlextModels.Entity):
-    """Result of data transformation."""
+class TransformationResult(BaseModel):
+    """Result of data transformation with applied rules."""
 
-    transformed_data: t.Core.Dict
-    applied_rules: t.Core.StringList = Field(default_factory=list)
-
-    def validate_business_rules(self) -> FlextResult[bool]:
-        """Validate transformation result business rules."""
-        try:
-            if not self.transformed_data:
-                return FlextResult[bool].fail("transformed_data cannot be empty")
-            if len(self.applied_rules) < 0:  # This check makes sense for business logic
-                return FlextResult[bool].fail("applied_rules cannot be negative length")
-            return FlextResult[bool].ok(value=True)
-        except Exception as e:
-            return FlextResult[bool].fail(
-                f"Transformation result validation failed: {e}",
-            )
+    transformed_data: Annotated[
+        dict[str, t.ContainerValue], Field(default_factory=dict)
+    ]
+    applied_rules: Annotated[list[str], Field(default_factory=list)]
 
 
 class DataTransformationEngine:
@@ -67,38 +41,39 @@ class DataTransformationEngine:
         """Initialize transformation engine."""
         self.rules = rules
 
-    def transform(
-        self,
-        data: t.Core.Dict,
-    ) -> FlextResult[TransformationResult]:
+    def get_statistics(self) -> Mapping[str, int]:
+        """Get transformation statistics."""
+        return {"total_rules": len(self.rules), "transformations_applied": 0}
+
+    def transform(self, data: dict[str, t.ContainerValue]) -> r[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: dict[str, t.GeneralValueType] = data.copy()
-            applied_rules: t.Core.StringList = []
-
+            transformed_data: dict[str, t.ContainerValue] = data.copy()
+            applied_rules: list[str] = []
             for rule in self.rules:
                 for key, value in transformed_data.items():
-                    if isinstance(value, str) and rule.pattern in value:
-                        transformed_data[key] = value.replace(
-                            rule.pattern,
-                            rule.replacement,
-                        )
-                        applied_rules.append(rule.name)
-
+                    match value:
+                        case str() as text if rule.pattern in text:
+                            transformed_data[key] = text.replace(
+                                rule.pattern, rule.replacement
+                            )
+                            applied_rules.append(rule.name)
+                        case _:
+                            pass
             result = TransformationResult(
-                transformed_data=transformed_data,
-                applied_rules=applied_rules,
+                transformed_data=transformed_data, applied_rules=applied_rules
             )
-            return FlextResult[TransformationResult].ok(result)
-        except Exception as e:
-            return FlextResult[TransformationResult].fail(f"Transformation failed: {e}")
-
-    def get_statistics(self) -> dict[str, int]:
-        """Get transformation statistics."""
-        return {
-            "total_rules": len(self.rules),
-            "transformations_applied": 0,  # Would track in real implementation
-        }
+            return r[TransformationResult].ok(result)
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
+            return r[TransformationResult].fail(f"Transformation failed: {e}")
 
 
 class MigrationValidator:
@@ -114,60 +89,56 @@ class MigrationValidator:
             "validation_warnings": 0,
         }
 
-    # @override - removed to fix type error, parent class does not define validate
+    def get_validation_statistics(self) -> Mapping[str, int]:
+        """Get validation statistics."""
+        return self._stats.copy()
+
     def validate(
         self,
-        data: t.Core.Dict | str,
-        attributes: t.Core.Dict | None = None,
-        object_classes: t.Core.StringList | None = None,
-    ) -> FlextResult[bool]:
+        data: dict[str, t.ContainerValue] | str,
+        attributes: dict[str, t.ContainerValue] | None = None,
+        object_classes: list[str] | None = None,
+    ) -> r[bool]:
         """Validate migration data."""
         try:
             self._stats["entries_validated"] += 1
             error_msg = None
-
-            # Handle different call patterns
-            if isinstance(data, str):
-                # Called with validate(dn, attributes, object_classes)
-                dn = data
-                attrs = attributes or {}
-                obj_classes = object_classes or []
-
-                # Validate DN
-                if not dn or not dn.strip():
-                    error_msg = "DN cannot be empty or whitespace"
-                # Validate object classes
-                elif not obj_classes:
-                    error_msg = "Object classes must be a non-empty list"
-                # Basic attribute validation for person object class
-                elif "person" in obj_classes and "sn" not in attrs:
-                    self._stats["validation_warnings"] += 1
-                    if self.strict_mode:
-                        error_msg = "person object class requires 'sn' attribute"
-
-            # Called with validate(data_dict)
-            elif not data:
-                error_msg = "Data is empty"
-
+            match data:
+                case str() as dn:
+                    attrs = attributes or {}
+                    obj_classes = object_classes or []
+                    if not dn or not dn.strip():
+                        error_msg = "DN cannot be empty or whitespace"
+                    elif not obj_classes:
+                        error_msg = "Object classes must be a non-empty list"
+                    elif "person" in obj_classes and "sn" not in attrs:
+                        self._stats["validation_warnings"] += 1
+                        if self.strict_mode:
+                            error_msg = "person object class requires 'sn' attribute"
+                case _:
+                    if not data:
+                        error_msg = "Data is empty"
             if error_msg:
                 self._stats["validation_errors"] += 1
-                return FlextResult[bool].fail(error_msg)
-
-            return FlextResult[bool].ok(value=True)
-
-        except Exception as e:
+                return r[bool].fail(error_msg)
+            return r[bool].ok(value=True)
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self._stats["validation_errors"] += 1
-            return FlextResult[bool].fail(f"Validation failed: {e}")
+            return r[bool].fail(f"Validation failed: {e}")
 
     def validate_entry(
         self,
         dn: str,
-        attributes: t.Core.Dict,
-        object_classes: t.Core.StringList,
-    ) -> FlextResult[bool]:
+        attributes: dict[str, t.ContainerValue],
+        object_classes: list[str],
+    ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
-
-    def get_validation_statistics(self) -> dict[str, int]:
-        """Get validation statistics."""
-        return self._stats.copy()

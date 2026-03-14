@@ -6,14 +6,12 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from flext_core import FlextTypes as t
 
 from unittest.mock import MagicMock
 
 import pytest
 
-
-
+from flext_target_ldap import (
     GroupsSink,
     LDAPBaseSink,
     OrganizationalUnitsSink,
@@ -26,19 +24,11 @@ class TestLDAPBaseSink:
 
     @pytest.fixture
     def sink(
-        self,
-        mock_target: MagicMock,
-        mock_ldap_config: dict[str, t.GeneralValueType],
+        self, mock_target: MagicMock, mock_ldap_config: dict[str, object]
     ) -> LDAPBaseSink:
         """Create LDAP base sink fixture for testing."""
-        # Use mock_ldap_config parameter to avoid unused argument warning
-        _mock_ldap_config = mock_ldap_config  # Acknowledge the parameter
-        schema = {
-            "properties": {
-                "dn": {"type": "string"},
-                "cn": {"type": "string"},
-            },
-        }
+        _mock_ldap_config = mock_ldap_config
+        schema = {"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}}
         return LDAPBaseSink(
             target=mock_target,
             stream_name="test_stream",
@@ -82,7 +72,7 @@ class TestLDAPBaseSink:
 
     def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
         """Test that get_object_classes returns default 'top' class."""
-        record: dict[str, t.GeneralValueType] = {}
+        record: dict[str, object] = {}
         classes = sink.get_object_classes(record)
         if classes != ["top"]:
             classes_msg: str = f"Expected {['top']}, got {classes}"
@@ -90,15 +80,11 @@ class TestLDAPBaseSink:
 
     def test_validate_entry_success(self, sink: LDAPBaseSink) -> None:
         """Test successful validation of LDAP entry with valid DN, attributes, and object classes."""
-        # Mock the private _client attribute since client is a property
         mock_client = MagicMock()
         mock_client.validate_dn.return_value.is_success = True
         sink._client = mock_client
-
         result = sink.validate_entry(
-            "cn=test,dc=example,dc=com",
-            {"cn": ["test"]},
-            ["person", "top"],
+            "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
         )
         assert result.is_success
 
@@ -139,23 +125,19 @@ class TestUsersSink:
 
     @pytest.fixture
     def users_sink(
-        self,
-        mock_target: MagicMock,
-        _mock_ldap_config: dict[str, t.GeneralValueType],
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
     ) -> UsersSink:
         """Create users sink fixture for testing."""
-        mock_target.config.update(
-            {
-                "base_dn": "dc=example,dc=com",
-                "user_rdn_attribute": "uid",
-            },
-        )
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "user_rdn_attribute": "uid",
+        })
         schema = {
             "properties": {
                 "uid": {"type": "string"},
                 "cn": {"type": "string"},
                 "mail": {"type": "string"},
-            },
+            }
         }
         return UsersSink(
             target=mock_target,
@@ -182,9 +164,7 @@ class TestUsersSink:
         assert not result.is_success
         assert result.error is not None
         if "No value found for RDN attribute 'uid'" not in result.error:
-            msg = (
-                f"Expected {"No value found for RDN attribute 'uid'"} in {result.error}"
-            )
+            msg = f"""Expected {"No value found for RDN attribute 'uid'"} in {result.error}"""
             raise AssertionError(msg)
 
     def test_users_build_attributes_basic(self, users_sink: UsersSink) -> None:
@@ -233,39 +213,28 @@ class TestUsersSink:
 
     def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
         """Test getting default object classes for user entries."""
-        record: dict[str, t.GeneralValueType] = {}
+        record: dict[str, object] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["inetOrgPerson", "organizationalPerson", "person", "top"]:
             user_classes_msg: str = f"Expected {['inetOrgPerson', 'organizationalPerson', 'person', 'top']}, got {classes}"
             raise AssertionError(user_classes_msg)
 
     @pytest.mark.usefixtures("_mock_ldap_config")
-    def test_get_object_classes_configured(
-        self,
-        mock_target: MagicMock,
-    ) -> None:
+    def test_get_object_classes_configured(self, mock_target: MagicMock) -> None:
         """Test getting configured object classes for user entries."""
-        # Create target with custom config
-        mock_target.config.update(
-            {
-                "base_dn": "dc=example,dc=com",
-                "user_rdn_attribute": "uid",
-                "users_object_classes": ["customUser", "top"],
-            },
-        )
-        schema = {
-            "properties": {
-                "uid": {"type": "string"},
-                "cn": {"type": "string"},
-            },
-        }
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "user_rdn_attribute": "uid",
+            "users_object_classes": ["customUser", "top"],
+        })
+        schema = {"properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}}
         users_sink = UsersSink(
             target=mock_target,
             stream_name="users",
             schema=schema,
             key_properties=["uid"],
         )
-        record: dict[str, t.GeneralValueType] = {}
+        record: dict[str, object] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["customUser", "top"]:
             custom_user_classes_msg: str = (
@@ -279,23 +248,14 @@ class TestGroupsSink:
 
     @pytest.fixture
     def groups_sink(
-        self,
-        mock_target: MagicMock,
-        _mock_ldap_config: dict[str, t.GeneralValueType],
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
     ) -> GroupsSink:
         """Create groups sink fixture for testing."""
-        mock_target.config.update(
-            {
-                "base_dn": "dc=example,dc=com",
-                "group_rdn_attribute": "cn",
-            },
-        )
-        schema = {
-            "properties": {
-                "cn": {"type": "string"},
-                "member": {"type": "array"},
-            },
-        }
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "group_rdn_attribute": "cn",
+        })
+        schema = {"properties": {"cn": {"type": "string"}, "member": {"type": "array"}}}
         return GroupsSink(
             target=mock_target,
             stream_name="groups",
@@ -321,9 +281,7 @@ class TestGroupsSink:
         assert not result.is_success
         assert result.error is not None
         if "No value found for RDN attribute 'cn'" not in result.error:
-            msg = (
-                f"Expected {"No value found for RDN attribute 'cn'"} in {result.error}"
-            )
+            msg = f"""Expected {"No value found for RDN attribute 'cn'"} in {result.error}"""
             raise AssertionError(msg)
 
     def test_groups_build_attributes_basic(self, groups_sink: GroupsSink) -> None:
@@ -352,7 +310,7 @@ class TestGroupsSink:
 
     def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
         """Test getting default object classes for group entries."""
-        record: dict[str, t.GeneralValueType] = {}
+        record: dict[str, object] = {}
         classes = groups_sink.get_object_classes(record)
         if classes != ["groupOfNames", "top"]:
             group_classes_msg: str = (
@@ -366,21 +324,12 @@ class TestOrganizationalUnitsSink:
 
     @pytest.fixture
     def ou_sink(
-        self,
-        mock_target: MagicMock,
-        _mock_ldap_config: dict[str, t.GeneralValueType],
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
     ) -> OrganizationalUnitsSink:
         """Create organizational units sink fixture for testing."""
-        mock_target.config.update(
-            {
-                "base_dn": "dc=example,dc=com",
-            },
-        )
+        mock_target.config.update({"base_dn": "dc=example,dc=com"})
         schema = {
-            "properties": {
-                "ou": {"type": "string"},
-                "description": {"type": "string"},
-            },
+            "properties": {"ou": {"type": "string"}, "description": {"type": "string"}}
         }
         return OrganizationalUnitsSink(
             target=mock_target,
@@ -445,11 +394,10 @@ class TestOrganizationalUnitsSink:
             raise AssertionError(postal_msg)
 
     def test_ou_get_object_classes_default(
-        self,
-        ou_sink: OrganizationalUnitsSink,
+        self, ou_sink: OrganizationalUnitsSink
     ) -> None:
         """Test getting default object classes for organizational unit entries."""
-        record: dict[str, t.GeneralValueType] = {}
+        record: dict[str, object] = {}
         classes = ou_sink.get_object_classes(record)
         if classes != ["organizationalUnit", "top"]:
             ou_classes_msg: str = (
@@ -463,22 +411,11 @@ class TestLDAPGenericSink:
 
     @pytest.fixture
     def generic_sink(
-        self,
-        mock_target: MagicMock,
-        _mock_ldap_config: dict[str, t.GeneralValueType],
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
     ) -> LDAPBaseSink:
         """Create generic LDAP sink fixture for testing."""
-        mock_target.config.update(
-            {
-                "base_dn": "dc=example,dc=com",
-            },
-        )
-        schema = {
-            "properties": {
-                "dn": {"type": "string"},
-                "cn": {"type": "string"},
-            },
-        }
+        mock_target.config.update({"base_dn": "dc=example,dc=com"})
+        schema = {"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}}
         return LDAPBaseSink(
             target=mock_target,
             stream_name="generic",
@@ -526,8 +463,8 @@ class TestLDAPGenericSink:
             "id": "testentry",
             "cn": "Test Entry",
             "description": "A test entry",
-            "_sdc_table_version": 1,  # Should be excluded
-            "_sdc_received_at": "2023-01-01T00:00:00Z",  # Should be excluded
+            "_sdc_table_version": 1,
+            "_sdc_received_at": "2023-01-01T00:00:00Z",
         }
         result = generic_sink.build_attributes(record)
         assert result.is_success
@@ -549,8 +486,7 @@ class TestLDAPGenericSink:
         assert "_sdc_received_at" not in result.data
 
     def test_generic_get_object_classes_from_record(
-        self,
-        generic_sink: LDAPBaseSink,
+        self, generic_sink: LDAPBaseSink
     ) -> None:
         """Test getting object classes from record data."""
         record = {"object_classes": ["customClass", "top"]}
@@ -562,8 +498,7 @@ class TestLDAPGenericSink:
             raise AssertionError(custom_classes_msg)
 
     def test_generic_get_object_classes_single_value(
-        self,
-        generic_sink: LDAPBaseSink,
+        self, generic_sink: LDAPBaseSink
     ) -> None:
         """Test getting object classes from single value in record."""
         record = {"object_classes": "customClass"}
@@ -573,42 +508,30 @@ class TestLDAPGenericSink:
             raise AssertionError(single_class_msg)
 
     def test_generic_get_object_classes_default(
-        self,
-        generic_sink: LDAPBaseSink,
+        self, generic_sink: LDAPBaseSink
     ) -> None:
         """Test getting default object classes for generic entries."""
-        record: dict[str, t.GeneralValueType] = {}
+        record: dict[str, object] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
             default_classes_msg: str = f"Expected {['top']}, got {classes}"
             raise AssertionError(default_classes_msg)
 
     @pytest.mark.usefixtures("_mock_ldap_config")
-    def test_get_object_classes_configured(
-        self,
-        mock_target: MagicMock,
-    ) -> None:
+    def test_get_object_classes_configured(self, mock_target: MagicMock) -> None:
         """Test getting configured object classes for generic entries."""
-        # Create target with custom config
-        mock_target.config.update(
-            {
-                "base_dn": "dc=example,dc=com",
-                "generic_object_classes": ["customGeneric", "top"],
-            },
-        )
-        schema = {
-            "properties": {
-                "dn": {"type": "string"},
-                "cn": {"type": "string"},
-            },
-        }
+        mock_target.config.update({
+            "base_dn": "dc=example,dc=com",
+            "generic_object_classes": ["customGeneric", "top"],
+        })
+        schema = {"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}}
         generic_sink = LDAPBaseSink(
             target=mock_target,
             stream_name="generic",
             schema=schema,
             key_properties=["id"],
         )
-        record: dict[str, t.GeneralValueType] = {}
+        record: dict[str, object] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customGeneric", "top"]:
             configured_classes_msg: str = (

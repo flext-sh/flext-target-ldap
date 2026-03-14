@@ -10,7 +10,6 @@ from __future__ import annotations
 from flext_core import FlextExceptions
 
 
-# DIRECT EXCEPTION CLASSES: Use direct inheritance instead of factory pattern
 class FlextTargetLdapError(FlextExceptions.BaseError):
     """Generic LDAP target errors."""
 
@@ -39,21 +38,12 @@ class FlextTargetLdapTimeoutError(FlextExceptions.TimeoutError):
     """LDAP target timeout-specific errors."""
 
 
-# Create backward-compatible aliases for existing code
-FlextTargetLdapLoadError = FlextTargetLdapProcessingError  # Load errors are processing
-FlextTargetLdapSchemaError = FlextTargetLdapValidationError  # Schema is validation
-FlextTargetLdapWriteError = FlextTargetLdapProcessingError  # Write is processing
-
-
 __all__ = [
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapError",
-    "FlextTargetLdapLoadError",
     "FlextTargetLdapProcessingError",
-    "FlextTargetLdapSchemaError",
     "FlextTargetLdapSettingsurationError",
     "FlextTargetLdapTimeoutError",
     "FlextTargetLdapValidationError",
-    "FlextTargetLdapWriteError",
 ]

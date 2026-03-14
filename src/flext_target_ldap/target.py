@@ -7,23 +7,16 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 import sys
+from collections.abc import Callable
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol, override
-
-if TYPE_CHECKING:
-    from flext_target_ldap.sinks import Sink, Target
-else:
-    try:
-        from flext_meltano.singer.tap import FlextMeltanoStream as Sink
-        from flext_meltano.singer.target import FlextMeltanoTarget as Target
-    except ImportError:
-        from flext_target_ldap.sinks import Sink, Target
+from typing import ClassVar, Protocol, override
 
 from flext_core import FlextContainer, FlextLogger
+from flext_meltano import FlextMeltanoModels
+from pydantic import TypeAdapter, ValidationError
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
 from flext_target_ldap.constants import c
@@ -33,39 +26,46 @@ from flext_target_ldap.sinks import (
     GroupsSink,
     LDAPBaseSink,
     OrganizationalUnitsSink,
+    Sink,
+    Target,
     UsersSink,
 )
 from flext_target_ldap.typings import t
 
 
-def _default_cli_helper(*, quiet: bool = False):  # noqa: ARG001
-    class Helper:
-        def print(self, msg: str) -> None:
-            pass
+class _DefaultCliHelper:
+    """Default CLI helper for printing output."""
 
-    return Helper()
+    _logger = FlextLogger(__name__)
 
-
-try:
-    _cli_mod = import_module("flext_cli")
-    flext_cli_create_helper = getattr(
-        _cli_mod, "flext_cli_create_helper", _default_cli_helper
-    )
-except ImportError:
-    flext_cli_create_helper = _default_cli_helper
+    def print(self, msg: str) -> None:
+        """Print a message."""
+        self._logger.info("%s", msg)
 
 
+def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
+    """Create a default CLI helper."""
+    if quiet:
+
+        class _QuietHelper(_DefaultCliHelper):
+            @override
+            def print(self, msg: str) -> None:
+                self._logger.debug("%s", msg)
+
+        return _QuietHelper()
+    return _DefaultCliHelper()
+
+
+flext_cli_create_helper = _default_cli_helper
 logger = FlextLogger(__name__)
 
-# Network constants - moved to c.TargetLdap.Connection.MAX_PORT_NUMBER
 
-
-class _LdapApiProtocol(Protocol):
-    def add(self, dn: str, record: t.Core.Dict) -> None: ...
-
-    def modify(self, dn: str, record: t.Core.Dict) -> None: ...
+class _LdapApi(Protocol):
+    def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
     def delete(self, dn: str) -> None: ...
+
+    def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
 
 class TargetLDAP(Target):
@@ -73,19 +73,18 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: dict[str, t.GeneralValueType]
+    config: dict[str, t.ContainerValue]
+    cli: ClassVar[Callable[..., None] | None] = None
 
     @override
     def __init__(
         self,
         *,
-        config: t.Core.Dict | None = None,
+        config: dict[str, t.ContainerValue] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
         super().__init__(config=config or {}, validate_config=validate_config)
-
-        # Initialize orchestrator with new modular architecture
         self._orchestrator: LDAPTargetOrchestrator | None = None
         self._container: FlextContainer | None = None
 
@@ -93,11 +92,18 @@ class TargetLDAP(Target):
     def orchestrator(self) -> LDAPTargetOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            self._orchestrator = LDAPTargetOrchestrator(dict(self.config))
+            normalized_config: dict[str, str | int | bool] = {}
+            for key, value in self.config.items():
+                match value:
+                    case bool() | int() | str():
+                        normalized_config[key] = value
+                    case _:
+                        normalized_config[key] = str(value)
+            self._orchestrator = LDAPTargetOrchestrator(normalized_config)
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> t.Core.Dict:
+    def singer_catalog(self) -> dict[str, t.ContainerValue]:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -125,10 +131,7 @@ class TargetLDAP(Target):
                         "properties": {
                             "name": {"type": "string"},
                             "description": {"type": "string"},
-                            "members": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                            },
+                            "members": {"type": "array", "items": {"type": "string"}},
                         },
                         "required": ["name"],
                     },
@@ -144,7 +147,7 @@ class TargetLDAP(Target):
                         "required": ["name"],
                     },
                 },
-            ],
+            ]
         }
 
     def get_sink_class(self, stream_name: str) -> type[Sink]:
@@ -154,87 +157,62 @@ class TargetLDAP(Target):
             "groups": GroupsSink,
             "organizational_units": OrganizationalUnitsSink,
         }
-
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
             logger.warning(
-                "No specific sink found for stream '%s', using base sink",
-                stream_name,
+                "No specific sink found for stream '%s', using base sink", stream_name
             )
-            # Return LDAPBaseSink as default for generic streams
             return LDAPBaseSink
-
         logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
         return sink_class
 
+    def setup(self) -> None:
+        """Set up the LDAP target."""
+        _ = self.orchestrator
+        logger.info("Orchestrator initialized successfully")
+        self._container = get_flext_target_ldap_container()
+        logger.info("DI container initialized successfully")
+        host = str(self.config.get("host", "localhost"))
+        logger.info("LDAP target setup completed for host: %s", host)
+
+    def teardown(self) -> None:
+        """Teardown the LDAP target."""
+        if self._orchestrator:
+            self._orchestrator = None
+            logger.info("Orchestrator cleaned up")
+        if self._container is not None:
+            self._container = None
+            logger.info("DI container cleaned up")
+        logger.info("LDAP target teardown completed")
+
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        # Additional LDAP-specific validation
         host = self.config.get("host")
         if not host:
             msg = "LDAP host is required"
             raise ValueError(msg)
-
         base_dn = self.config.get("base_dn")
         if not base_dn:
             msg = "LDAP base DN is required"
             raise ValueError(msg)
-
-        port_obj = self.config.get("port", 389)
-        if isinstance(port_obj, bool):
-            port = 389
-        elif isinstance(port_obj, int):
-            port = port_obj
-        elif isinstance(port_obj, str):
-            try:
-                port = int(port_obj)
-            except ValueError:
-                port = 389
-        else:
-            port = 389
+        port_obj = self.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT)
+        try:
+            port = int(str(port_obj))
+        except (TypeError, ValueError):
+            port = c.TargetLdap.Connection.DEFAULT_PORT
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)
-
         use_ssl = self.config.get("use_ssl", False)
         use_tls = self.config.get("use_tls", False)
         if use_ssl and use_tls:
             msg = "Cannot use both SSL and TLS simultaneously"
             raise ValueError(msg)
-
         logger.info("LDAP target configuration validated successfully")
-
-    def setup(self) -> None:
-        """Set up the LDAP target."""
-        # Initialize orchestrator
-        _ = self.orchestrator  # Ensure orchestrator is created
-        logger.info("Orchestrator initialized successfully")
-
-        # Initialize DI container
-        self._container = get_flext_target_ldap_container()
-        logger.info("DI container initialized successfully")
-
-        host = self.config.get("host", "localhost")
-        logger.info("LDAP target setup completed for host: %s", host)
-
-    def teardown(self) -> None:
-        """Teardown the LDAP target."""
-        # Cleanup orchestrator
-        if self._orchestrator:
-            self._orchestrator = None
-            logger.info("Orchestrator cleaned up")
-
-        # Cleanup container
-        if self._container is not None:
-            self._container = None
-            logger.info("DI container cleaned up")
-
-        logger.info("LDAP target teardown completed")
 
 
 def main() -> None:
     """CLI entry point for target-ldap."""
-    # Delegate to FLEXT-CLI command for tests
     _target_ldap_flext_cli()
 
 
@@ -242,28 +220,43 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> t.Core.Dict:
+def _load_config_from_file(config_path: str) -> dict[str, t.ContainerValue]:
     """Load configuration from JSON file."""
+    config_adapter: TypeAdapter[dict[str, t.ContainerValue]] = TypeAdapter(
+        dict[str, t.ContainerValue]
+    )
     try:
-        with Path(config_path).open(encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
+        content = Path(config_path).read_text(encoding="utf-8")
+        return config_adapter.validate_json(content)
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+        ValidationError,
+    ):
         return {}
 
 
-def _get_ldap_api() -> _LdapApiProtocol | None:
+def _get_ldap_api() -> _LdapApi | None:
     """Get optional LDAP API module."""
     try:
         client_mod = import_module("flext_target_ldap.client")
         return client_mod.get_flext_ldap_api()
-    except Exception:
+    except (ImportError, AttributeError) as exc:
+        logger.warning(
+            "Failed to load optional LDAP API module",
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
         return None
 
 
 def _construct_dn(
-    stream: str,
-    record: t.Core.Dict,
-    base_dn: str,
+    stream: str, record: dict[str, t.ContainerValue], base_dn: str
 ) -> str:
     """Construct DN from record based on stream type."""
     if stream == "users":
@@ -277,24 +270,21 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: t.Core.Dict,
+    record: dict[str, t.ContainerValue],
     stream: str,
-    cfg: t.Core.Dict,
-    api: _LdapApiProtocol | None,
+    cfg: dict[str, t.ContainerValue],
+    api: _LdapApi | None,
     seen_dns: set[str],
 ) -> None:
     """Process a RECORD message."""
     if api is None:
         return
-
     dn_value = record.get("dn")
     if dn_value is None or not str(dn_value).strip():
         base_dn = str(cfg.get("base_dn", "dc=test,dc=com"))
         dn = _construct_dn(stream, record, base_dn)
     else:
         dn = str(dn_value)
-
-    # Delete vs upsert
     if record.get("_sdc_deleted_at"):
         with suppress(Exception):
             api.delete(dn)
@@ -305,12 +295,19 @@ def _process_record_message(
             else:
                 api.add(dn, record)
                 seen_dns.add(dn)
-        except Exception:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ):
             with suppress(Exception):
                 api.modify(dn, record)
 
 
-# FLEXT-CLI implementation for tests (echoes STATE lines)
 def _target_ldap_flext_cli(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
@@ -318,27 +315,52 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         current_stream: str | None = None
         api = _get_ldap_api()
         seen_dns: set[str] = set()
-
         for line in sys.stdin:
             try:
-                obj = json.loads(line)
-                msg_type = obj.get("type")
+                msg_dict = (
+                    FlextMeltanoModels.Meltano.SingerStateMessage.model_validate_json(
+                        line
+                    )
+                )
+                msg_type = msg_dict.type
                 if msg_type == "STATE":
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    obj.get("schema") or {}
-                    current_stream = obj.get("stream")
+                    schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(
+                        line
+                    )
+                    _schema: dict[str, t.ContainerValue] = {}
+                    current_stream = schema_msg.stream
                 elif msg_type == "RECORD" and api is not None:
-                    record: dict[str, t.GeneralValueType] = obj.get("record") or {}
-                    stream = obj.get("stream") or current_stream or "users"
-                    _process_record_message(record, stream, cfg, api, seen_dns)
-            except Exception:
+                    record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(
+                        line
+                    )
+                    stream = record_msg.stream or current_stream or "users"
+                    _process_record_message(
+                        record_msg.record, stream, cfg, api, seen_dns
+                    )
+            except (
+                ValueError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+                RuntimeError,
+                ImportError,
+            ):
                 logger.debug("Malformed input line skipped in CLI", exc_info=True)
                 continue
-    except Exception:
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ):
         logger.debug("Unexpected error in CLI suppressed", exc_info=True)
 
 
-# Expose CLI command via class attribute for tests expecting TargetLDAP.cli
 TargetLDAP.cli = _target_ldap_flext_cli

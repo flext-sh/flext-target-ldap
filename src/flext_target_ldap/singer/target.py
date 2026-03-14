@@ -13,9 +13,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, FlextResult
-
-from flext_target_ldap.typings import t
+from flext_core import FlextLogger, r, t
 
 logger: FlextLogger = FlextLogger(__name__)
 
@@ -24,7 +22,7 @@ class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
     @override
-    def __init__(self, config: t.Core.Dict | None = None) -> None:
+    def __init__(self, config: dict[str, t.ContainerValue] | None = None) -> None:
         """Initialize Singer LDAP target.
 
         Args:
@@ -34,65 +32,71 @@ class SingerTargetLDAP:
         object: Description of return value.
 
         """
-        self.config: dict[str, t.GeneralValueType] = config or {}
+        self.config: dict[str, t.ContainerValue] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
-        self,
-        messages: list[t.Core.Dict],
-    ) -> FlextResult[t.Core.Dict]:
+        self, messages: list[dict[str, t.ContainerValue]]
+    ) -> r[dict[str, t.ContainerValue]]:
         """Process Singer messages for LDAP target.
 
         Args:
         messages: Singer messages to process
 
         Returns:
-        FlextResult with processing status
+        r with processing status
 
         """
         try:
             logger.info("Processing Singer messages for LDAP target")
-
-            # Process Singer messages
             processed_count = 0
             for _message in messages:
-                # Process individual Singer message
                 processed_count += 1
-
-            result: t.Core.Dict = {
+            result: dict[str, t.ContainerValue] = {
                 "processed_messages": processed_count,
                 "status": "completed",
             }
-
             logger.info(
-                "Singer message processing completed: %d messages",
-                processed_count,
+                "Singer message processing completed: %d messages", processed_count
             )
-            return FlextResult[t.Core.Dict].ok(result)
-
-        except Exception as e:
+            return r[dict[str, t.ContainerValue]].ok(result)
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             logger.exception("Singer message processing failed")
-            return FlextResult[t.Core.Dict].fail(
-                f"Message processing failed: {e}",
+            return r[dict[str, t.ContainerValue]].fail(
+                f"Message processing failed: {e}"
             )
 
-    def validate_singer_config(self) -> FlextResult[bool]:
+    def validate_singer_config(self) -> r[bool]:
         """Validate Singer LDAP target configuration.
 
         Returns:
-        FlextResult indicating validation success
+        r indicating validation success
 
         """
         try:
-            # Basic validation
             required_fields = ["host", "base_dn"]
             for field in required_fields:
                 if field not in self.config:
-                    return FlextResult[bool].fail(f"Missing required field: {field}")
-
-            return FlextResult[bool].ok(value=True)
-        except Exception as e:
-            return FlextResult[bool].fail(f"Configuration validation failed: {e}")
+                    return r[bool].fail(f"Missing required field: {field}")
+            return r[bool].ok(value=True)
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
+            return r[bool].fail(f"Configuration validation failed: {e}")
 
 
 __all__: list[str] = ["SingerTargetLDAP"]

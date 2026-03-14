@@ -9,18 +9,10 @@ LdapEntryModel = FlextTargetLdapModels.TargetLdap.Entry
 LdapTransformationResultModel = FlextTargetLdapModels.TargetLdap.TransformationResult
 LdapBatchProcessingModel = FlextTargetLdapModels.TargetLdap.BatchProcessing
 LdapOperationStatisticsModel = FlextTargetLdapModels.TargetLdap.OperationStatistics
-
-TransformationRule = LdapAttributeMappingModel
-TransformationResult = LdapTransformationResultModel
-LDAPProcessingResult = LdapBatchProcessingModel
-
 __all__ = [
-    "LDAPProcessingResult",
     "LdapAttributeMappingModel",
     "LdapBatchProcessingModel",
     "LdapEntryModel",
     "LdapOperationStatisticsModel",
     "LdapTransformationResultModel",
-    "TransformationResult",
-    "TransformationRule",
 ]

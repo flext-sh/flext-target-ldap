@@ -13,16 +13,17 @@ from __future__ import annotations
 
 import math
 from datetime import UTC, datetime
-from typing import Self
+from typing import Annotated, Self
 
-from flext_core import FlextModels, FlextResult, t as t_core
-from flext_core.utilities import u
+from flext_core import r, t
+from flext_ldap import FlextLdapModels
+from flext_meltano import FlextMeltanoModels
 from pydantic import Field, field_validator
 
 from .constants import c
 
 
-class FlextTargetLdapModels(FlextModels):
+class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
@@ -30,55 +31,62 @@ class FlextTargetLdapModels(FlextModels):
     Integrates with flext-core patterns for enterprise LDAP data loading.
     """
 
-    def __init_subclass__(cls, **kwargs: object) -> None:
-        """Warn when FlextTargetLdapModels is subclassed directly."""
-        super().__init_subclass__(**kwargs)
-        u.Deprecation.warn_once(
-            f"subclass:{cls.__name__}",
-            "Subclassing FlextTargetLdapModels is deprecated. Use FlextModels directly with composition instead.",
-        )
-
     # ObjectClass moved to constants.py as c.TargetLdap.ObjectClass (DRY pattern)
     ObjectClass = c.TargetLdap.ObjectClass
 
     class TargetLdap:
         """TargetLdap domain namespace."""
 
-        class AttributeMapping(FlextModels.Entity):
+        class AttributeMapping(FlextLdapModels.Entity):
             """LDAP attribute mapping configuration with validation.
 
             Immutable value object defining how Singer fields map to LDAP attributes
             with business rule validation and transformation support.
             """
 
-            singer_field_name: str = Field(
-                ...,
-                description="Singer field name from source data",
-                min_length=1,
-                max_length=255,
-            )
-            ldap_attribute_name: str = Field(
-                ...,
-                description="Target LDAP attribute name",
-                min_length=1,
-                max_length=255,
-            )
-            is_required: bool = Field(
-                default=False,
-                description="Whether this attribute is required for LDAP entry",
-            )
-            transformation_rule: str | None = Field(
-                default=None,
-                description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
-                max_length=100,
-            )
-            default_value: str | None = Field(
-                default=None,
-                description="Default value if source field is missing",
-                max_length=1000,
-            )
+            singer_field_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="Singer field name from source data",
+                    min_length=1,
+                    max_length=255,
+                ),
+            ]
+            ldap_attribute_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="Target LDAP attribute name",
+                    min_length=1,
+                    max_length=255,
+                ),
+            ]
+            is_required: Annotated[
+                bool,
+                Field(
+                    default=False,
+                    description="Whether this attribute is required for LDAP entry",
+                ),
+            ]
+            transformation_rule: Annotated[
+                str | None,
+                Field(
+                    default=None,
+                    description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
+                    max_length=100,
+                ),
+            ]
+            default_value: Annotated[
+                str | None,
+                Field(
+                    default=None,
+                    description="Default value if source field is missing",
+                    max_length=1000,
+                ),
+            ]
 
-            def validate_business_rules(self) -> FlextResult[bool]:
+            def validate_business_rules(self) -> r[bool]:
                 """Validate attribute mapping business rules."""
                 try:
                     # Validate field name format
@@ -88,13 +96,13 @@ class FlextTargetLdapModels(FlextModels):
                         .replace("-", "")
                         .isalnum()
                     ):
-                        return FlextResult[bool].fail(
+                        return r[bool].fail(
                             "Singer field name must be alphanumeric with underscores/hyphens",
                         )
 
                     # Validate LDAP attribute format
                     if not self.ldap_attribute_name.replace("-", "").isalnum():
-                        return FlextResult[bool].fail(
+                        return r[bool].fail(
                             "LDAP attribute name must be alphanumeric with hyphens",
                         )
 
@@ -107,46 +115,69 @@ class FlextTargetLdapModels(FlextModels):
                             "normalize",
                         }
                         if self.transformation_rule not in valid_transformations:
-                            return FlextResult[bool].fail(
+                            return r[bool].fail(
                                 f"Invalid transformation rule. Must be one of {valid_transformations}",
                             )
 
-                    return FlextResult[bool].ok(value=True)
-                except Exception as e:
-                    return FlextResult[bool].fail(
+                    return r[bool].ok(value=True)
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    return r[bool].fail(
                         f"Attribute mapping validation failed: {e}",
                     )
 
-        class Entry(FlextModels.Entity):
+        class Entry(FlextLdapModels.Entity):
             """LDAP entry representation with validation and business rules.
 
             Immutable value object representing a complete LDAP entry with
             DN, object classes, and attributes, including validation rules.
             """
 
-            distinguished_name: str = Field(
-                ...,
-                description="LDAP Distinguished Name (DN)",
-                min_length=1,
-                max_length=1000,
-            )
-            object_classes: list[str] = Field(
-                default_factory=list,
-                description="LDAP object classes",
-            )
-            attributes: dict[str, list[str]] = Field(
-                default_factory=dict,
-                description="LDAP attributes with values",
-            )
-            entry_type: str = Field(
-                default="generic",
-                description="Type of LDAP entry (user, group, ou, etc.)",
-                max_length=50,
-            )
-            created_at: datetime = Field(
-                default_factory=lambda: datetime.now(UTC),
-                description="Entry creation timestamp",
-            )
+            distinguished_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="LDAP Distinguished Name (DN)",
+                    min_length=1,
+                    max_length=1000,
+                ),
+            ]
+            object_classes: Annotated[
+                list[str],
+                Field(
+                    default_factory=list,
+                    description="LDAP object classes",
+                ),
+            ]
+            attributes: Annotated[
+                dict[str, list[str]],
+                Field(
+                    default_factory=dict,
+                    description="LDAP attributes with values",
+                ),
+            ]
+            entry_type: Annotated[
+                str,
+                Field(
+                    default="generic",
+                    description="Type of LDAP entry (user, group, ou, etc.)",
+                    max_length=50,
+                ),
+            ]
+            created_at: Annotated[
+                datetime,
+                Field(
+                    default_factory=lambda: datetime.now(UTC),
+                    description="Entry creation timestamp",
+                ),
+            ]
 
             @field_validator("object_classes")
             @classmethod
@@ -159,7 +190,29 @@ class FlextTargetLdapModels(FlextModels):
                     v.append("top")
                 return v
 
-            def validate_business_rules(self) -> FlextResult[bool]:
+            def get_attribute_values(
+                self,
+                attribute_name: str,
+            ) -> list[str]:
+                """Get values for a specific attribute."""
+                return self.attributes.get(attribute_name, [])
+
+            def get_parent_dn(self) -> str:
+                """Get the parent DN by removing the RDN."""
+                parts = self.distinguished_name.split(",", 1)
+                return parts[1].strip() if len(parts) > 1 else ""
+
+            def get_rdn(self) -> str:
+                """Get the Relative Distinguished Name (RDN) from the DN."""
+                return self.distinguished_name.split(",")[0].strip()
+
+            def has_object_class(self, object_class: str) -> bool:
+                """Check if entry has a specific object class."""
+                return object_class.lower() in [
+                    oc.lower() for oc in self.object_classes
+                ]
+
+            def validate_business_rules(self) -> r[bool]:
                 """Validate LDAP entry business rules."""
                 try:
                     errors: list[str] = []
@@ -196,87 +249,71 @@ class FlextTargetLdapModels(FlextModels):
                             )
 
                     if errors:
-                        return FlextResult[bool].fail("; ".join(errors))
-                    return FlextResult[bool].ok(value=True)
-                except Exception as e:
-                    return FlextResult[bool].fail(f"LDAP entry validation failed: {e}")
+                        return r[bool].fail("; ".join(errors))
+                    return r[bool].ok(value=True)
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    return r[bool].fail(f"LDAP entry validation failed: {e}")
 
-            def get_rdn(self) -> str:
-                """Get the Relative Distinguished Name (RDN) from the DN."""
-                return self.distinguished_name.split(",")[0].strip()
-
-            def get_parent_dn(self) -> str:
-                """Get the parent DN by removing the RDN."""
-                parts = self.distinguished_name.split(",", 1)
-                return parts[1].strip() if len(parts) > 1 else ""
-
-            def has_object_class(self, object_class: str) -> bool:
-                """Check if entry has a specific object class."""
-                return object_class.lower() in [
-                    oc.lower() for oc in self.object_classes
-                ]
-
-            def get_attribute_values(
-                self,
-                attribute_name: str,
-            ) -> list[str]:
-                """Get values for a specific attribute."""
-                return self.attributes.get(attribute_name, [])
-
-        class TransformationResult(FlextModels.Entity):
+        class TransformationResult(FlextLdapModels.Entity):
             """Result of LDAP data transformation operations.
 
             Tracks transformation statistics, applied rules, and processing metrics
             for LDAP target operations.
             """
 
-            original_record: dict[str, t_core.GeneralValueType] = Field(
-                ...,
-                description="Original Singer record before transformation",
-            )
-            transformed_entry: FlextTargetLdapModels.TargetLdap.Entry = Field(
-                ...,
-                description="Resulting LDAP entry after transformation",
-            )
-            applied_mappings: list[
-                FlextTargetLdapModels.TargetLdap.AttributeMapping
-            ] = Field(
-                default_factory=list,
-                description="Attribute mappings that were applied",
-            )
-            transformation_errors: list[str] = Field(
-                default_factory=list,
-                description="object errors encountered during transformation",
-            )
-            processing_time_ms: int = Field(
-                default=0,
-                description="Processing time in milliseconds",
-                ge=0,
-            )
-            transformation_timestamp: datetime = Field(
-                default_factory=lambda: datetime.now(UTC),
-                description="When transformation was performed",
-            )
-
-            def validate_business_rules(self) -> FlextResult[bool]:
-                """Validate transformation result business rules."""
-                try:
-                    # Validate we have meaningful data
-                    if not self.original_record:
-                        return FlextResult[bool].fail("Original record cannot be empty")
-
-                    # Validate transformed entry is valid
-                    entry_validation = self.transformed_entry.validate_business_rules()
-                    if not entry_validation.is_success:
-                        return FlextResult[bool].fail(
-                            f"Transformed entry is invalid: {entry_validation.error}",
-                        )
-
-                    return FlextResult[bool].ok(value=True)
-                except Exception as e:
-                    return FlextResult[bool].fail(
-                        f"Transformation result validation failed: {e}",
-                    )
+            original_record: Annotated[
+                dict[str, t.Scalar],
+                Field(
+                    ...,
+                    description="Original Singer record before transformation",
+                ),
+            ]
+            transformed_entry: Annotated[
+                FlextTargetLdapModels.TargetLdap.Entry,
+                Field(
+                    ...,
+                    description="Resulting LDAP entry after transformation",
+                ),
+            ]
+            applied_mappings: Annotated[
+                list[FlextTargetLdapModels.TargetLdap.AttributeMapping],
+                Field(
+                    default_factory=lambda: list[
+                        FlextTargetLdapModels.TargetLdap.AttributeMapping
+                    ](),
+                    description="Attribute mappings that were applied",
+                ),
+            ]
+            transformation_errors: Annotated[
+                list[str],
+                Field(
+                    default_factory=list,
+                    description="schema errors encountered during transformation",
+                ),
+            ]
+            processing_time_ms: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Processing time in milliseconds",
+                    ge=0,
+                ),
+            ]
+            transformation_timestamp: Annotated[
+                datetime,
+                Field(
+                    default_factory=lambda: datetime.now(UTC),
+                    description="When transformation was performed",
+                ),
+            ]
 
             @property
             def success_rate(self) -> float:
@@ -292,82 +329,109 @@ class FlextTargetLdapModels(FlextModels):
                 """Check if transformation has any errors."""
                 return bool(self.transformation_errors)
 
-        class BatchProcessing(FlextModels.Entity):
+            def validate_business_rules(self) -> r[bool]:
+                """Validate transformation result business rules."""
+                try:
+                    # Validate we have meaningful data
+                    if not self.original_record:
+                        return r[bool].fail("Original record cannot be empty")
+
+                    # Validate transformed entry is valid
+                    entry_validation = self.transformed_entry.validate_business_rules()
+                    if not entry_validation.is_success:
+                        return r[bool].fail(
+                            f"Transformed entry is invalid: {entry_validation.error}",
+                        )
+
+                    return r[bool].ok(value=True)
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    return r[bool].fail(
+                        f"Transformation result validation failed: {e}",
+                    )
+
+        class BatchProcessing(FlextLdapModels.Entity):
             """LDAP batch processing configuration and state tracking.
 
             Manages batching of LDAP operations for optimal performance,
             tracking batch size, processed records, and operation statistics.
             """
 
-            stream_name: str = Field(
-                ...,
-                description="Singer stream being processed",
-                min_length=1,
-                max_length=255,
-            )
-            batch_size: int = Field(
-                ...,
-                description="Maximum records per batch",
-                gt=0,
-                le=10000,
-            )
-            current_batch: list[FlextTargetLdapModels.TargetLdap.Entry] = Field(
-                default_factory=list,
-                description="Current batch of LDAP entries",
-            )
-            total_processed: int = Field(
-                default=0,
-                description="Total entries processed across all batches",
-                ge=0,
-            )
-            successful_operations: int = Field(
-                default=0,
-                description="Count of successful LDAP operations",
-                ge=0,
-            )
-            failed_operations: int = Field(
-                default=0,
-                description="Count of failed LDAP operations",
-                ge=0,
-            )
-            last_processed_at: datetime | None = Field(
-                default=None,
-                description="Timestamp of last batch processing",
-            )
-
-            def validate_business_rules(self) -> FlextResult[bool]:
-                """Validate batch processing business rules."""
-                try:
-                    # Validate batch size doesn't exceed current batch
-                    if len(self.current_batch) > self.batch_size:
-                        return FlextResult[bool].fail(
-                            f"Current batch size ({len(self.current_batch)}) exceeds maximum ({self.batch_size})",
-                        )
-
-                    # Validate counters are consistent
-                    if (
-                        self.successful_operations + self.failed_operations
-                        > self.total_processed
-                    ):
-                        return FlextResult[bool].fail(
-                            "Operation counters exceed total processed count",
-                        )
-
-                    return FlextResult[bool].ok(value=True)
-                except Exception as e:
-                    return FlextResult[bool].fail(
-                        f"Batch processing validation failed: {e}",
-                    )
-
-            @property
-            def is_batch_full(self) -> bool:
-                """Check if current batch is full."""
-                return len(self.current_batch) >= self.batch_size
+            stream_name: Annotated[
+                str,
+                Field(
+                    ...,
+                    description="Singer stream being processed",
+                    min_length=1,
+                    max_length=255,
+                ),
+            ]
+            batch_size: Annotated[
+                int,
+                Field(
+                    ...,
+                    description="Maximum records per batch",
+                    gt=0,
+                    le=10000,
+                ),
+            ]
+            current_batch: Annotated[
+                list[FlextTargetLdapModels.TargetLdap.Entry],
+                Field(
+                    default_factory=lambda: list[
+                        FlextTargetLdapModels.TargetLdap.Entry
+                    ](),
+                    description="Current batch of LDAP entries",
+                ),
+            ]
+            total_processed: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Total entries processed across all batches",
+                    ge=0,
+                ),
+            ]
+            successful_operations: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Count of successful LDAP operations",
+                    ge=0,
+                ),
+            ]
+            failed_operations: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Count of failed LDAP operations",
+                    ge=0,
+                ),
+            ]
+            last_processed_at: Annotated[
+                datetime | None,
+                Field(
+                    default=None,
+                    description="Timestamp of last batch processing",
+                ),
+            ]
 
             @property
             def current_batch_size(self) -> int:
                 """Get current batch size."""
                 return len(self.current_batch)
+
+            @property
+            def is_batch_full(self) -> bool:
+                """Check if current batch is full."""
+                return len(self.current_batch) >= self.batch_size
 
             @property
             def success_rate(self) -> float:
@@ -402,14 +466,6 @@ class FlextTargetLdapModels(FlextModels):
                     },
                 )
 
-            def record_success(self, count: int = 1) -> Self:
-                """Record successful operations (immutable operation)."""
-                return self.model_copy(
-                    update={
-                        "successful_operations": self.successful_operations + count,
-                    },
-                )
-
             def record_failure(self, count: int = 1) -> Self:
                 """Record failed operations (immutable operation)."""
                 return self.model_copy(
@@ -418,80 +474,123 @@ class FlextTargetLdapModels(FlextModels):
                     },
                 )
 
-        class OperationStatistics(FlextModels.Entity):
+            def record_success(self, count: int = 1) -> Self:
+                """Record successful operations (immutable operation)."""
+                return self.model_copy(
+                    update={
+                        "successful_operations": self.successful_operations + count,
+                    },
+                )
+
+            def validate_business_rules(self) -> r[bool]:
+                """Validate batch processing business rules."""
+                try:
+                    # Validate batch size doesn't exceed current batch
+                    if len(self.current_batch) > self.batch_size:
+                        return r[bool].fail(
+                            f"Current batch size ({len(self.current_batch)}) exceeds maximum ({self.batch_size})",
+                        )
+
+                    # Validate counters are consistent
+                    if (
+                        self.successful_operations + self.failed_operations
+                        > self.total_processed
+                    ):
+                        return r[bool].fail(
+                            "Operation counters exceed total processed count",
+                        )
+
+                    return r[bool].ok(value=True)
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    return r[bool].fail(
+                        f"Batch processing validation failed: {e}",
+                    )
+
+        class OperationStatistics(FlextLdapModels.Entity):
             """LDAP operation statistics and performance metrics.
 
             Complete tracking of LDAP target operations for performance
             monitoring, reporting, and optimization analysis.
             """
 
-            total_entries_processed: int = Field(
-                default=0,
-                description="Total LDAP entries processed",
-                ge=0,
-            )
-            successful_adds: int = Field(
-                default=0,
-                description="Successful LDAP add operations",
-                ge=0,
-            )
-            successful_updates: int = Field(
-                default=0,
-                description="Successful LDAP modify operations",
-                ge=0,
-            )
-            successful_deletes: int = Field(
-                default=0,
-                description="Successful LDAP delete operations",
-                ge=0,
-            )
-            failed_operations: int = Field(
-                default=0,
-                description="Total failed operations",
-                ge=0,
-            )
-            average_processing_time_ms: float = Field(
-                default=0.0,
-                description="Average processing time per entry in milliseconds",
-                ge=0.0,
-            )
-            start_time: datetime = Field(
-                default_factory=lambda: datetime.now(UTC),
-                description="When processing started",
-            )
-            end_time: datetime | None = Field(
-                default=None,
-                description="When processing completed",
-            )
+            total_entries_processed: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Total LDAP entries processed",
+                    ge=0,
+                ),
+            ]
+            successful_adds: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Successful LDAP add operations",
+                    ge=0,
+                ),
+            ]
+            successful_updates: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Successful LDAP modify operations",
+                    ge=0,
+                ),
+            ]
+            successful_deletes: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Successful LDAP delete operations",
+                    ge=0,
+                ),
+            ]
+            failed_operations: Annotated[
+                int,
+                Field(
+                    default=0,
+                    description="Total failed operations",
+                    ge=0,
+                ),
+            ]
+            average_processing_time_ms: Annotated[
+                float,
+                Field(
+                    default=0.0,
+                    description="Average processing time per entry in milliseconds",
+                    ge=0.0,
+                ),
+            ]
+            start_time: Annotated[
+                datetime,
+                Field(
+                    default_factory=lambda: datetime.now(UTC),
+                    description="When processing started",
+                ),
+            ]
+            end_time: Annotated[
+                datetime | None,
+                Field(
+                    default=None,
+                    description="When processing completed",
+                ),
+            ]
 
-            def validate_business_rules(self) -> FlextResult[bool]:
-                """Validate operation statistics business rules."""
-                try:
-                    # Validate that successful operations don't exceed total
-                    total_successful = (
-                        self.successful_adds
-                        + self.successful_updates
-                        + self.successful_deletes
-                    )
-                    if (
-                        total_successful + self.failed_operations
-                        > self.total_entries_processed
-                    ):
-                        return FlextResult[bool].fail(
-                            "Total operations exceed total entries processed",
-                        )
-
-                    # Validate time range
-                    if self.end_time and self.end_time < self.start_time:
-                        return FlextResult[bool].fail(
-                            "End time cannot be before start time",
-                        )
-
-                    return FlextResult[bool].ok(value=True)
-                except Exception as e:
-                    return FlextResult[bool].fail(
-                        f"Operation statistics validation failed: {e}",
-                    )
+            @property
+            def operations_per_second(self) -> float:
+                """Calculate operations per second throughput."""
+                duration = self.total_duration_seconds
+                if math.isclose(duration, 0.0):
+                    return 0.0
+                return self.total_entries_processed / duration
 
             @property
             def success_rate(self) -> float:
@@ -512,14 +611,6 @@ class FlextTargetLdapModels(FlextModels):
                     return 0.0
                 return (self.end_time - self.start_time).total_seconds()
 
-            @property
-            def operations_per_second(self) -> float:
-                """Calculate operations per second throughput."""
-                duration = self.total_duration_seconds
-                if math.isclose(duration, 0.0):
-                    return 0.0
-                return self.total_entries_processed / duration
-
             def complete_processing(self) -> Self:
                 """Mark processing as completed (immutable operation)."""
                 return self.model_copy(
@@ -528,13 +619,48 @@ class FlextTargetLdapModels(FlextModels):
                     },
                 )
 
+            def validate_business_rules(self) -> r[bool]:
+                """Validate operation statistics business rules."""
+                try:
+                    # Validate that successful operations don't exceed total
+                    total_successful = (
+                        self.successful_adds
+                        + self.successful_updates
+                        + self.successful_deletes
+                    )
+                    if (
+                        total_successful + self.failed_operations
+                        > self.total_entries_processed
+                    ):
+                        return r[bool].fail(
+                            "Total operations exceed total entries processed",
+                        )
+
+                    # Validate time range
+                    if self.end_time and self.end_time < self.start_time:
+                        return r[bool].fail(
+                            "End time cannot be before start time",
+                        )
+
+                    return r[bool].ok(value=True)
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    return r[bool].fail(
+                        f"Operation statistics validation failed: {e}",
+                    )
+
 
 # Export the unified models class
 m = FlextTargetLdapModels
-m_target_ldap = FlextTargetLdapModels
 
 __all__: list[str] = [
     "FlextTargetLdapModels",
     "m",
-    "m_target_ldap",
 ]

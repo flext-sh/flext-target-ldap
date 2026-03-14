@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from typing import Literal
 
-from flext_core import FlextTypes
+from flext_ldap import FlextLdapTypes
+from flext_meltano import FlextMeltanoTypes
 
 
-class FlextTargetLdapTypes(FlextTypes):
+class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     """FLEXT Target LDAP Types.
 
     Inherits standard types from FlextTypes and adds project-specific
@@ -17,9 +18,7 @@ class FlextTargetLdapTypes(FlextTypes):
     class Core:
         """Core type aliases overrides."""
 
-        # Use dict[str, GeneralValueType] for strict typing without RootModel overhead
-        # This satisfies "no Any" while maintaining compatibility with standard dict usage
-        type Dict = dict[str, FlextTypes.GeneralValueType]
+        type Dict = dict[str, FlextMeltanoTypes.NormalizedValue]
         type Headers = dict[str, str]
         type StringList = list[str]
 
@@ -50,5 +49,4 @@ class FlextTargetLdapTypes(FlextTypes):
 
 
 t = FlextTargetLdapTypes
-
 __all__ = ["FlextTargetLdapTypes", "t"]

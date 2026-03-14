@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT.
 
 from __future__ import annotations
 
-from flext_core import FlextContainer
+from flext_core import FlextContainer, r, t
 
 
 def get_flext_target_ldap_container() -> FlextContainer:
@@ -18,17 +18,16 @@ def get_flext_target_ldap_container() -> FlextContainer:
     return FlextContainer.get_global()
 
 
-def get_flext_target_ldap_service(service_name: str) -> object:
+def get_flext_target_ldap_service(
+    service_name: str,
+) -> r[t.RegisterableService]:
     """Get service from FLEXT DI container."""
     container = get_flext_target_ldap_container()
     return container.get(service_name)
 
 
-# Type assertion for the configuration function
-# configure_flext_target_ldap_dependencies: Callable[[], None] = _configure_func
 def configure_flext_target_ldap_dependencies() -> None:
     """Fallback configuration function."""
 
 
-# Initialize flext_target_ldap dependencies on module import
 configure_flext_target_ldap_dependencies()
