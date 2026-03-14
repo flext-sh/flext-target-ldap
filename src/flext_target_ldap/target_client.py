@@ -445,7 +445,7 @@ class LdapTargetClient:
         Returns a real LDAP connection wrapper compatible with the existing interface.
 
         Returns:
-        _GeneratorContextManager[object]: LDAP connection context manager.
+        _GeneratorContextManager: LDAP connection context manager.
 
         """
 
