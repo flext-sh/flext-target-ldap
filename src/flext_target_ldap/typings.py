@@ -18,7 +18,7 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     class Core:
         """Core type aliases overrides."""
 
-        type Dict = dict[str, object]
+        type Dict = dict[str, FlextMeltanoTypes.NormalizedValue]
         type Headers = dict[str, str]
         type StringList = list[str]
 

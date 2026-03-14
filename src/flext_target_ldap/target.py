@@ -61,11 +61,11 @@ logger = FlextLogger(__name__)
 
 
 class _LdapApi(Protocol):
-    def add(self, dn: str, record: dict[str, t.Container]) -> None: ...
+    def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
     def delete(self, dn: str) -> None: ...
 
-    def modify(self, dn: str, record: dict[str, t.Container]) -> None: ...
+    def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
 
 class TargetLDAP(Target):
@@ -73,14 +73,14 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: dict[str, object]
+    config: dict[str, t.ContainerValue]
     cli: ClassVar[Callable[..., None] | None] = None
 
     @override
     def __init__(
         self,
         *,
-        config: dict[str, object] | None = None,
+        config: dict[str, t.ContainerValue] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -103,7 +103,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> dict[str, object]:
+    def singer_catalog(self) -> dict[str, t.ContainerValue]:
         """Return the Singer catalog for this target."""
         return {
             "streams": [
@@ -220,9 +220,11 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> dict[str, object]:
+def _load_config_from_file(config_path: str) -> dict[str, t.ContainerValue]:
     """Load configuration from JSON file."""
-    config_adapter: TypeAdapter[dict[str, object]] = TypeAdapter(dict[str, object])
+    config_adapter: TypeAdapter[dict[str, t.ContainerValue]] = TypeAdapter(
+        dict[str, t.ContainerValue]
+    )
     try:
         content = Path(config_path).read_text(encoding="utf-8")
         return config_adapter.validate_json(content)
@@ -253,7 +255,9 @@ def _get_ldap_api() -> _LdapApi | None:
         return None
 
 
-def _construct_dn(stream: str, record: dict[str, t.Container], base_dn: str) -> str:
+def _construct_dn(
+    stream: str, record: dict[str, t.ContainerValue], base_dn: str
+) -> str:
     """Construct DN from record based on stream type."""
     if stream == "users":
         uid = record.get("uid") or record.get("username") or "user"
@@ -266,9 +270,9 @@ def _construct_dn(stream: str, record: dict[str, t.Container], base_dn: str) -> 
 
 
 def _process_record_message(
-    record: dict[str, t.Container],
+    record: dict[str, t.ContainerValue],
     stream: str,
-    cfg: dict[str, object],
+    cfg: dict[str, t.ContainerValue],
     api: _LdapApi | None,
     seen_dns: set[str],
 ) -> None:
@@ -326,7 +330,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(
                         line
                     )
-                    _schema: dict[str, object] = {}
+                    _schema: dict[str, t.ContainerValue] = {}
                     current_stream = schema_msg.stream
                 elif msg_type == "RECORD" and api is not None:
                     record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(

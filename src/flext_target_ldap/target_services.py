@@ -23,27 +23,27 @@ class LdapTargetService(Protocol):
     """Protocol for LDAP target creation and record loading."""
 
     def create_target(
-        self, config: dict[str, object]
+        self, config: dict[str, t.ContainerValue]
     ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from config."""
         ...
 
     def load_records(
         self,
-        records: list[Mapping[str, object]],
-        config: dict[str, object],
+        records: list[Mapping[str, t.ContainerValue]],
+        config: dict[str, t.ContainerValue],
         stream_type: str = "users",
     ) -> r[int]:
         """Load records into the LDAP target."""
         ...
 
 
-class _LdapTransformationServiceProtocol(Protocol):
+class LdapTransformationServiceProtocol(Protocol):
     """Protocol for transforming and validating LDAP entries."""
 
     def transform_record(
         self,
-        record: Mapping[str, object],
+        record: Mapping[str, t.ContainerValue],
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
@@ -64,7 +64,7 @@ class LdapConnectionService:
         """Initialize with LDAP target settings."""
         self._config = config
 
-    def get_connection_info(self) -> Mapping[str, object]:
+    def get_connection_info(self) -> Mapping[str, t.ContainerValue]:
         """Return connection parameters as a dict for logging or debugging."""
         return {
             "host": self._config.connection.host,
@@ -139,7 +139,7 @@ class LdapTransformationService:
 
     def transform_record(
         self,
-        record: Mapping[str, object],
+        record: Mapping[str, t.ContainerValue],
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
@@ -231,13 +231,13 @@ class LdapTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[Mapping[str, object]],
+        records: list[Mapping[str, t.ContainerValue]],
         config: FlextTargetLdapSettings | None = None,
-    ) -> r[Mapping[str, object]]:
+    ) -> r[Mapping[str, t.ContainerValue]]:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return r[Mapping[str, object]].fail("Configuration is required")
+            return r[Mapping[str, t.ContainerValue]].fail("Configuration is required")
         transformation = LdapTransformationService(working)
         object_classes = working.object_classes
         base_dn = working.base_dn
@@ -256,13 +256,13 @@ class LdapTargetOrchestrator:
                 processed += 1
             else:
                 errors.append(transformed.error or "Transformation failed")
-        result: dict[str, object] = {
+        result: dict[str, t.ContainerValue] = {
             "processed_records": processed,
             "total_records": len(records),
             "transformation_errors": errors,
             "status": "completed" if not errors else "completed_with_errors",
         }
-        return r[Mapping[str, object]].ok(result)
+        return r[Mapping[str, t.ContainerValue]].ok(result)
 
     def validate_target_configuration(
         self, config: FlextTargetLdapSettings | None = None
@@ -283,7 +283,7 @@ class LdapTargetApiService:
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
 
     def create_ldap_target(
-        self, config: dict[str, object]
+        self, config: dict[str, t.ContainerValue]
     ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(
@@ -293,8 +293,8 @@ class LdapTargetApiService:
 
     def load_groups_to_ldap(
         self,
-        groups: list[Mapping[str, object]],
-        config: dict[str, object],
+        groups: list[Mapping[str, t.ContainerValue]],
+        config: dict[str, t.ContainerValue],
     ) -> r[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
@@ -308,8 +308,8 @@ class LdapTargetApiService:
 
     def load_users_to_ldap(
         self,
-        users: list[Mapping[str, object]],
-        config: dict[str, object],
+        users: list[Mapping[str, t.ContainerValue]],
+        config: dict[str, t.ContainerValue],
     ) -> r[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
@@ -321,7 +321,7 @@ class LdapTargetApiService:
             sink.process_record(dict(user), {})
         return r[int].ok(len(users))
 
-    def test_ldap_connection(self, config: dict[str, object]) -> r[bool]:
+    def test_ldap_connection(self, config: dict[str, t.ContainerValue]) -> r[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
         if validated.is_failure:

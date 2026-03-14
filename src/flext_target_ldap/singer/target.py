@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, r
+from flext_core import FlextLogger, r, t
 
 logger: FlextLogger = FlextLogger(__name__)
 
@@ -22,7 +22,7 @@ class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
     @override
-    def __init__(self, config: dict[str, object] | None = None) -> None:
+    def __init__(self, config: dict[str, t.ContainerValue] | None = None) -> None:
         """Initialize Singer LDAP target.
 
         Args:
@@ -32,12 +32,12 @@ class SingerTargetLDAP:
         object: Description of return value.
 
         """
-        self.config: dict[str, object] = config or {}
+        self.config: dict[str, t.ContainerValue] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
-        self, messages: list[dict[str, object]]
-    ) -> r[dict[str, object]]:
+        self, messages: list[dict[str, t.ContainerValue]]
+    ) -> r[dict[str, t.ContainerValue]]:
         """Process Singer messages for LDAP target.
 
         Args:
@@ -52,14 +52,14 @@ class SingerTargetLDAP:
             processed_count = 0
             for _message in messages:
                 processed_count += 1
-            result: dict[str, object] = {
+            result: dict[str, t.ContainerValue] = {
                 "processed_messages": processed_count,
                 "status": "completed",
             }
             logger.info(
                 "Singer message processing completed: %d messages", processed_count
             )
-            return r[dict[str, object]].ok(result)
+            return r[dict[str, t.ContainerValue]].ok(result)
         except (
             ValueError,
             TypeError,
@@ -70,7 +70,9 @@ class SingerTargetLDAP:
             ImportError,
         ) as e:
             logger.exception("Singer message processing failed")
-            return r[dict[str, object]].fail(f"Message processing failed: {e}")
+            return r[dict[str, t.ContainerValue]].fail(
+                f"Message processing failed: {e}"
+            )
 
     def validate_singer_config(self) -> r[bool]:
         """Validate Singer LDAP target configuration.

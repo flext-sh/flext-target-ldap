@@ -9,6 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Protocol, runtime_checkable
 
+from flext_core import t
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoProtocols
 
@@ -49,57 +50,61 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             """Singer Target LDAP domain protocols for LDAP directory loading."""
 
             @runtime_checkable
-            class Target(FlextLdapProtocols.Service[object], Protocol):
+            class Target(FlextLdapProtocols.Service[t.ContainerValue], Protocol):
                 """Protocol for LDAP target operations."""
 
                 def process_record(
-                    self, record: Mapping[str, object]
+                    self, record: Mapping[str, t.ContainerValue]
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Process a single record."""
                     ...
 
             @runtime_checkable
-            class Transformation(FlextLdapProtocols.Service[object], Protocol):
+            class Transformation(
+                FlextLdapProtocols.Service[t.ContainerValue], Protocol
+            ):
                 """Protocol for Singer to LDAP transformation."""
 
                 def transform_to_ldap(
-                    self, record: Mapping[str, object]
-                ) -> FlextMeltanoProtocols.Result[object]:
+                    self, record: Mapping[str, t.ContainerValue]
+                ) -> FlextMeltanoProtocols.Result[t.ContainerValue]:
                     """Transform record to LDAP format."""
                     ...
 
             @runtime_checkable
-            class Orchestration(FlextLdapProtocols.Service[object], Protocol):
+            class Orchestration(
+                FlextLdapProtocols.Service[t.ContainerValue], Protocol
+            ):
                 """Protocol for LDAP loading orchestration."""
 
                 def orchestrate_load(
-                    self, records: Sequence[Mapping[str, object]]
+                    self, records: Sequence[Mapping[str, t.ContainerValue]]
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Orchestrate loading of records."""
                     ...
 
             @runtime_checkable
-            class Connection(FlextLdapProtocols.Service[object], Protocol):
+            class Connection(FlextLdapProtocols.Service[t.ContainerValue], Protocol):
                 """Protocol for LDAP connection management."""
 
                 def connect(
-                    self, config: Mapping[str, object]
-                ) -> FlextMeltanoProtocols.Result[object]:
+                    self, config: Mapping[str, t.ContainerValue]
+                ) -> FlextMeltanoProtocols.Result[t.ContainerValue]:
                     """Connect to LDAP server."""
                     ...
 
             @runtime_checkable
-            class Singer(FlextLdapProtocols.Service[object], Protocol):
+            class Singer(FlextLdapProtocols.Service[t.ContainerValue], Protocol):
                 """Protocol for Singer message handling."""
 
                 def process_singer_message(
-                    self, message: Mapping[str, object]
+                    self, message: Mapping[str, t.ContainerValue]
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Process a Singer protocol message."""
                     ...
 
             @runtime_checkable
-            class Performance(FlextLdapProtocols.Service[object], Protocol):
+            class Performance(FlextLdapProtocols.Service[t.ContainerValue], Protocol):
                 """Protocol for LDAP loading performance."""
 
                 def optimize_batch(
@@ -109,17 +114,17 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class Security(FlextLdapProtocols.Service[object], Protocol):
+            class Security(FlextLdapProtocols.Service[t.ContainerValue], Protocol):
                 """Protocol for LDAP security operations."""
 
                 def validate_credentials(
-                    self, config: Mapping[str, object]
+                    self, config: Mapping[str, t.ContainerValue]
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Validate LDAP credentials."""
                     ...
 
             @runtime_checkable
-            class Monitoring(FlextLdapProtocols.Service[object], Protocol):
+            class Monitoring(FlextLdapProtocols.Service[t.ContainerValue], Protocol):
                 """Protocol for LDAP loading monitoring."""
 
                 def track_load_progress(
