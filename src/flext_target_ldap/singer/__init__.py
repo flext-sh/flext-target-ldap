@@ -25,12 +25,23 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.singer.target import SingerTargetLDAP, logger
 
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "LDAPStreamProcessingStats": ("flext_target_ldap.singer.stream", "LDAPStreamProcessingStats"),
-    "SingerLDAPCatalogEntry": ("flext_target_ldap.singer.catalog", "SingerLDAPCatalogEntry"),
-    "SingerLDAPCatalogManager": ("flext_target_ldap.singer.catalog", "SingerLDAPCatalogManager"),
-    "SingerLDAPStreamProcessor": ("flext_target_ldap.singer.stream", "SingerLDAPStreamProcessor"),
+    "LDAPStreamProcessingStats": (
+        "flext_target_ldap.singer.stream",
+        "LDAPStreamProcessingStats",
+    ),
+    "SingerLDAPCatalogEntry": (
+        "flext_target_ldap.singer.catalog",
+        "SingerLDAPCatalogEntry",
+    ),
+    "SingerLDAPCatalogManager": (
+        "flext_target_ldap.singer.catalog",
+        "SingerLDAPCatalogManager",
+    ),
+    "SingerLDAPStreamProcessor": (
+        "flext_target_ldap.singer.stream",
+        "SingerLDAPStreamProcessor",
+    ),
     "SingerTargetLDAP": ("flext_target_ldap.singer.target", "SingerTargetLDAP"),
     "logger": ("flext_target_ldap.singer.target", "logger"),
 }
