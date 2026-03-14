@@ -83,9 +83,7 @@ class Target:
     """Base Target class for Singer protocol compatibility."""
 
     @override
-    def __init__(
-        self, config: dict[str, t.ContainerValue], **kwargs: t.Scalar
-    ) -> None:
+    def __init__(self, config: dict[str, t.ContainerValue], **kwargs: t.Scalar) -> None:
         """Initialize target with configuration."""
         self.config: dict[str, t.ContainerValue] = config
 

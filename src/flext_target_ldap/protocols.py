@@ -72,9 +72,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                     ...
 
             @runtime_checkable
-            class Orchestration(
-                FlextLdapProtocols.Service[t.ContainerValue], Protocol
-            ):
+            class Orchestration(FlextLdapProtocols.Service[t.ContainerValue], Protocol):
                 """Protocol for LDAP loading orchestration."""
 
                 def orchestrate_load(
