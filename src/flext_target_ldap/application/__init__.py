@@ -26,10 +26,7 @@ if TYPE_CHECKING:
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "LDAPTargetOrchestrator": (
-        "flext_target_ldap.application.orchestrator",
-        "LDAPTargetOrchestrator",
-    ),
+    "LDAPTargetOrchestrator": ("flext_target_ldap.application.orchestrator", "LDAPTargetOrchestrator"),
     "logger": ("flext_target_ldap.application.orchestrator", "logger"),
 }
 

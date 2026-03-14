@@ -29,30 +29,12 @@ if TYPE_CHECKING:
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "LDAPDataTransformer": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPDataTransformer",
-    ),
-    "LDAPEntryManager": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPEntryManager",
-    ),
-    "LDAPSchemaMapper": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPSchemaMapper",
-    ),
-    "LDAPTypeConverter": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPTypeConverter",
-    ),
-    "SingerPropertyDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerPropertyDefinition",
-    ),
-    "SingerSchemaDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerSchemaDefinition",
-    ),
+    "LDAPDataTransformer": ("flext_target_ldap.patterns.ldap_patterns", "LDAPDataTransformer"),
+    "LDAPEntryManager": ("flext_target_ldap.patterns.ldap_patterns", "LDAPEntryManager"),
+    "LDAPSchemaMapper": ("flext_target_ldap.patterns.ldap_patterns", "LDAPSchemaMapper"),
+    "LDAPTypeConverter": ("flext_target_ldap.patterns.ldap_patterns", "LDAPTypeConverter"),
+    "SingerPropertyDefinition": ("flext_target_ldap.patterns.ldap_patterns", "SingerPropertyDefinition"),
+    "SingerSchemaDefinition": ("flext_target_ldap.patterns.ldap_patterns", "SingerSchemaDefinition"),
     "logger": ("flext_target_ldap.patterns.ldap_patterns", "logger"),
 }
 
