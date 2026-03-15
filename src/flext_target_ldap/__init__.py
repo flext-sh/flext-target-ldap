@@ -1,12 +1,7 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
 # Regenerate with: make codegen
 #
-"""FLEXT LDAP Target for Meltano.
-
-Enterprise LDAP target for loading data into LDAP directories with FLEXT ecosystem integration.
-
-SPDX-License-Identifier: MIT
-"""
+"""Flext target ldap package."""
 
 from __future__ import annotations
 
@@ -17,6 +12,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
+    from flext_target_ldap import application, infrastructure, patterns, singer
     from flext_target_ldap.__version__ import (
         __all__,
         __author__,
@@ -290,6 +286,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "__url__": ("flext_target_ldap.__version__", "__url__"),
     "__version__": ("flext_target_ldap.__version__", "__version__"),
     "__version_info__": ("flext_target_ldap.__version__", "__version_info__"),
+    "application": ("flext_target_ldap.application", ""),
     "c": ("flext_target_ldap.constants", "c"),
     "configure_flext_target_ldap_dependencies": (
         "flext_target_ldap.infrastructure.di_container",
@@ -308,12 +305,15 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.infrastructure.di_container",
         "get_flext_target_ldap_service",
     ),
+    "infrastructure": ("flext_target_ldap.infrastructure", ""),
     "logger": ("flext_target_ldap.transformation", "logger"),
     "m": ("flext_target_ldap.models", "m"),
     "main": ("flext_target_ldap.target_client", "main"),
     "p": ("flext_target_ldap.protocols", "p"),
+    "patterns": ("flext_target_ldap.patterns", ""),
     "r": ("flext_target_ldap.sinks", "LDAPProcessingResult"),
     "s": ("flext_target_ldap.target_services", "LdapConnectionService"),
+    "singer": ("flext_target_ldap.singer", ""),
     "t": ("flext_target_ldap.typings", "t"),
     "u": ("flext_target_ldap.utilities", "u"),
     "validate_ldap_config": ("flext_target_ldap.settings", "validate_ldap_config"),
@@ -393,18 +393,22 @@ __all__ = [
     "__url__",
     "__version__",
     "__version_info__",
+    "application",
     "c",
     "configure_flext_target_ldap_dependencies",
     "create_default_ldap_target_config",
     "flext_cli_create_helper",
     "get_flext_target_ldap_container",
     "get_flext_target_ldap_service",
+    "infrastructure",
     "logger",
     "m",
     "main",
     "p",
+    "patterns",
     "r",
     "s",
+    "singer",
     "t",
     "u",
     "validate_ldap_config",
