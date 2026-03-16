@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import StrEnum, unique
 from typing import Final
 
 from flext_ldap import FlextLdapConstants
@@ -36,6 +36,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     class TargetLdap:
         """Target LDAP domain-specific constants namespace."""
 
+        @unique
         class ObjectClass(StrEnum):
             """Standard LDAP object classes for target operations.
 
@@ -125,6 +126,28 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             MAX_DN_LENGTH: Final[int] = (
                 FlextLdapConstants.Ldif.LdifValidation.MAX_DN_LENGTH
             )
+
+    @unique
+    class TargetLdapProjectType(StrEnum):
+        LIBRARY = "library"
+        APPLICATION = "application"
+        SERVICE = "service"
+        SINGER_TARGET = "singer-target"
+        LDAP_LOADER = "ldap-loader"
+        DIRECTORY_LOADER = "directory-loader"
+        SINGER_TARGET_LDAP = "singer-target-ldap"
+        TARGET_LDAP = "target-ldap"
+        LDAP_CONNECTOR = "ldap-connector"
+        DIRECTORY_CONNECTOR = "directory-connector"
+        SINGER_PROTOCOL = "singer-protocol"
+        LDAP_INTEGRATION = "ldap-integration"
+        DIRECTORY_SERVICE = "directory-service"
+        LDAP_TARGET = "ldap-target"
+        SINGER_STREAM = "singer-stream"
+        ETL_TARGET = "etl-target"
+        DATA_PIPELINE = "data-pipeline"
+        LDAP_SINK = "ldap-sink"
+        SINGER_INTEGRATION = "singer-integration"
 
 
 c = FlextTargetLdapConstants

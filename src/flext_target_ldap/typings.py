@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Literal
-
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
+
+from flext_target_ldap import c
 
 
 class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
@@ -25,27 +25,7 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     class Project:
         """Project-specific type aliases for target-ldap."""
 
-        type TargetLdapProjectType = Literal[
-            "library",
-            "application",
-            "service",
-            "singer-target",
-            "ldap-loader",
-            "directory-loader",
-            "singer-target-ldap",
-            "target-ldap",
-            "ldap-connector",
-            "directory-connector",
-            "singer-protocol",
-            "ldap-integration",
-            "directory-service",
-            "ldap-target",
-            "singer-stream",
-            "etl-target",
-            "data-pipeline",
-            "ldap-sink",
-            "singer-integration",
-        ]
+        type TargetLdapProjectType = c.TargetLdapProjectType
 
 
 t = FlextTargetLdapTypes
