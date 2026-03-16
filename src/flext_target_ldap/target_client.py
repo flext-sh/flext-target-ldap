@@ -11,7 +11,7 @@ from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager
 from typing import override
 
-from flext_core import FlextContainer, FlextLogger, r, t, u
+from flext_core import FlextContainer, FlextLogger, p, r, t, u
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -961,7 +961,7 @@ class TargetLdap(Target):
         super().__init__(config=config or {})
         if validate_config:
             self.validate_config()
-        self._container: FlextContainer | None = None
+        self._container: p.Container | None = None
 
     @property
     def singer_catalog(self) -> dict[str, t.ContainerValue]:

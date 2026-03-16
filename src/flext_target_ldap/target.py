@@ -14,7 +14,7 @@ from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, Protocol, override
 
-from flext_core import FlextContainer, FlextLogger
+from flext_core import FlextLogger, p
 from flext_meltano import FlextMeltanoModels
 from pydantic import TypeAdapter, ValidationError
 
@@ -86,7 +86,7 @@ class TargetLDAP(Target):
         """Initialize LDAP target."""
         super().__init__(config=config or {}, validate_config=validate_config)
         self._orchestrator: LDAPTargetOrchestrator | None = None
-        self._container: FlextContainer | None = None
+        self._container: p.Container | None = None
 
     @property
     def orchestrator(self) -> LDAPTargetOrchestrator:

@@ -13,9 +13,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger, p, r, t
 
-logger: FlextLogger = FlextLogger(__name__)
+logger: p.Logger = FlextLogger(__name__)
 
 
 class LDAPTargetOrchestrator:
