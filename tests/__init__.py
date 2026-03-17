@@ -17,7 +17,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from tests.conftest import (
+    from .conftest import (
         mock_ldap_client,
         mock_ldap_config,
         mock_target,
@@ -29,40 +29,40 @@ if TYPE_CHECKING:
         singer_message_schema,
         singer_message_state,
     )
-    from tests.constants import (
+    from .constants import (
         TestsFlextTargetLdapConstants,
         TestsFlextTargetLdapConstants as c,
     )
-    from tests.models import TestsFlextTargetLdapModels, tm
-    from tests.protocols import TestsFlextTargetLdapProtocols
-    from tests.test_client import (
+    from .models import TestsFlextTargetLdapModels, tm
+    from .protocols import TestsFlextTargetLdapProtocols
+    from .test_client import (
         TestLDAPClient,
         test_connection_wrapper_unbind_cleans_state_and_disconnects,
     )
-    from tests.test_integration import TestTargetLDAPIntegration
-    from tests.test_sinks import (
+    from .test_integration import TestTargetLDAPIntegration
+    from .test_sinks import (
         TestGroupsSink,
         TestLDAPBaseSink,
         TestLDAPGenericSink,
         TestOrganizationalUnitsSink,
         TestUsersSink,
     )
-    from tests.test_target import (
+    from .test_target import (
         TestTargetLDAPUnit,
         test_default_cli_helper_logs_with_flext_logger,
         test_sink_process_record_delegates_to_target_handler,
     )
-    from tests.test_transformation import (
+    from .test_transformation import (
         EXPECTED_DATA_COUNT,
         TestDataTransformationEngine,
         TestIntegratedTransformation,
         TestMigrationValidator,
         TestTransformationRule,
     )
-    from tests.tm import m
-    from tests.tp import p
-    from tests.typings import TestsFlextTargetLdapTypes, t, tt
-    from tests.utilities import TestsFlextTargetLdapUtilities, u
+    from .tm import m
+    from .tp import p
+    from .typings import TestsFlextTargetLdapTypes, t, tt
+    from .utilities import TestsFlextTargetLdapUtilities, u
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "EXPECTED_DATA_COUNT": ("tests.test_transformation", "EXPECTED_DATA_COUNT"),
