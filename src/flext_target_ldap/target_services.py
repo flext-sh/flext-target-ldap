@@ -8,6 +8,8 @@ from typing import Protocol, override
 
 from flext_core import r, u
 
+from flext_target_ldap.constants import c
+
 from . import target_client as target_client_module
 from .settings import FlextTargetLdapSettings
 from .target_config import validate_ldap_target_config
@@ -169,7 +171,12 @@ class LdapTransformationService:
                 text_value = text_value.strip().lower()
             ldap_attributes[mapping.ldap_attribute_name] = [text_value]
             applied_mappings.append(mapping)
-        entry_name = str(record.get("username", record.get("name", "unknown")))
+        entry_name = str(
+            record.get(
+                "username",
+                record.get("name", c.Mixins.IDENTIFIER_UNKNOWN),
+            )
+        )
         dn = f"cn={entry_name},{base_dn}"
         entry = LdapEntryModel.model_validate({
             "distinguished_name": dn,

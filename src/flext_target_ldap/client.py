@@ -14,6 +14,7 @@ from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import Protocol, override
 
+import ldap3
 from flext_core import FlextLogger, r, t, u
 from flext_ldap import (
     FlextLdap,
@@ -25,6 +26,7 @@ from flext_ldap import (
 from flext_ldif import FlextLdif
 
 logger = FlextLogger(__name__)
+LDAP3_MODULE = ldap3
 
 
 class LDAPConnection(Protocol):
@@ -215,7 +217,25 @@ class LDAPClient:
 
         @contextmanager
         def connection_context() -> Generator[LDAPConnection]:
-            yield self._get_flext_ldap_wrapper()
+            server_pool = ldap3.ServerPool([
+                ldap3.Server(
+                    self.config.host,
+                    port=self.config.port,
+                    use_ssl=self.config.use_ssl,
+                    connect_timeout=self.config.timeout,
+                )
+            ])
+            connection = ldap3.Connection(
+                server_pool,
+                user=self._bind_dn,
+                password=self._password,
+            )
+            connection.bind()
+            try:
+                yield connection
+            finally:
+                with suppress(Exception):
+                    connection.unbind()
 
         return connection_context()
 
