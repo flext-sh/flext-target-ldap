@@ -22,6 +22,7 @@ class TransformationRule(BaseModel):
     name: Annotated[str, Field(min_length=1)]
     pattern: Annotated[str, Field(min_length=1)]
     replacement: str
+    enabled: bool = True
 
 
 class TransformationResult(BaseModel):
@@ -51,6 +52,8 @@ class DataTransformationEngine:
             transformed_data: dict[str, t.ContainerValue] = data.copy()
             applied_rules: list[str] = []
             for rule in self.rules:
+                if not rule.enabled:
+                    continue
                 for key, value in transformed_data.items():
                     match value:
                         case str() as text if rule.pattern in text:
