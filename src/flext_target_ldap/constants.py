@@ -129,6 +129,8 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
     @unique
     class TargetLdapProjectType(StrEnum):
+        """Target LDAP project type enumeration."""
+
         LIBRARY = "library"
         APPLICATION = "application"
         SERVICE = "service"
