@@ -122,8 +122,8 @@ class TestDataTransformationEngine:
             "objectClass": ["person"],
             "cn": "testuser",
             "description": "",
-            "mail": None,
-            "telephoneNumber": [],
+            "mail": object(),
+            "telephoneNumber": list[object](),
         }
         result = engine.transform(entry)
         assert result.is_success
