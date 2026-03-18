@@ -315,7 +315,7 @@ def test_connection_wrapper_unbind_cleans_state_and_disconnects() -> None:
     client = LDAPClient({"host": "ldap.local", "port": 389})
     client._api = fake_api
     wrapper = client._get_flext_ldap_wrapper()
-    wrapper.entries = ["entry"]
+    wrapper.entries = [{"dn": "cn=entry"}]
     wrapper.unbind()
     assert wrapper.bound is False
     assert wrapper.entries == []
