@@ -64,7 +64,7 @@ class Sink:
                         return r[bool].ok(value=True)
                     return r[bool].fail("Target rejected record")
             return r[bool].fail(
-                "Target does not provide process_record/process handlers"
+                "Target does not provide process_record/process handlers",
             )
         except (
             ValueError,
@@ -94,12 +94,6 @@ def _is_container_list(
     value: t.ContainerValue | None,
 ) -> TypeIs[list[t.ContainerValue]]:
     return isinstance(value, list)
-
-
-def _is_container_mapping(
-    value: t.ContainerValue | None,
-) -> TypeIs[Mapping[str, t.ContainerValue]]:
-    return isinstance(value, dict)
 
 
 def _container_mapping_from_value(
@@ -141,11 +135,12 @@ class LDAPBaseSink(Sink):
         self._processing_result: LDAPProcessingResult = LDAPProcessingResult()
 
     def build_attributes(
-        self, _record: Mapping[str, t.ContainerValue]
+        self,
+        _record: Mapping[str, t.ContainerValue],
     ) -> r[dict[str, t.ContainerValue]]:
         """Build LDAP attributes from record. Override in subclasses."""
         return r[dict[str, t.ContainerValue]].fail(
-            "build_attributes must be implemented in subclass"
+            "build_attributes must be implemented in subclass",
         )
 
     def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
@@ -158,18 +153,18 @@ class LDAPBaseSink(Sink):
         if isinstance(entry_id, str) and entry_id:
             return r[str].ok(f"cn={entry_id},{base_dn}")
         return r[str].fail(
-            "build_dn must be implemented in subclass: No ID or name found for generic entry"
+            "build_dn must be implemented in subclass: No ID or name found for generic entry",
         )
 
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
         """Get object classes for entry."""
         record_classes = record.get("object_classes")
-        if u.is_list(record_classes):
+        if _is_container_list(record_classes):
             return [str(c) for c in record_classes]
         if isinstance(record_classes, str):
             return [record_classes]
         configured_classes = self._target.config.get("generic_object_classes")
-        if u.is_list(configured_classes):
+        if _is_container_list(configured_classes):
             return [str(c) for c in configured_classes]
         return ["top"]
 
@@ -186,19 +181,19 @@ class LDAPBaseSink(Sink):
         try:
             records_raw = _context.get("records", [])
             records: list[t.ContainerValue] = (
-                records_raw if u.is_list(records_raw) else []
+                records_raw if _is_container_list(records_raw) else []
             )
             logger.info(
-                f"Processing batch of {len(records)} records for stream: {self.stream_name}"
+                f"Processing batch of {len(records)} records for stream: {self.stream_name}",
             )
             for record in records:
-                if u.is_dict_like(record):
+                if isinstance(record, dict):
                     normalized_record: dict[str, t.ContainerValue] = {}
                     for k, v in record.items():
                         normalized_record[str(k)] = v
                     self.process_record(normalized_record, _context)
             logger.info(
-                f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}"
+                f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}",
             )
         finally:
             self.teardown_client()
@@ -229,7 +224,8 @@ class LDAPBaseSink(Sink):
             connection_config = {
                 "host": self._target.config.get("host", "localhost"),
                 "port": self._target.config.get(
-                    "port", c.TargetLdap.Connection.DEFAULT_PORT
+                    "port",
+                    c.TargetLdap.Connection.DEFAULT_PORT,
                 ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
@@ -240,7 +236,7 @@ class LDAPBaseSink(Sink):
             connect_result: r[str] = self.client.connect()
             if not connect_result.is_success:
                 return r[LDAPClient].fail(
-                    f"LDAP connection failed: {connect_result.error}"
+                    f"LDAP connection failed: {connect_result.error}",
                 )
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return r[LDAPClient].ok(self.client)
@@ -288,15 +284,16 @@ class UsersSink(LDAPBaseSink):
 
     @override
     def build_attributes(
-        self, _record: Mapping[str, t.ContainerValue]
+        self,
+        _record: Mapping[str, t.ContainerValue],
     ) -> r[dict[str, t.ContainerValue]]:
         """Build LDAP attributes for user entry."""
         attrs: dict[str, t.ContainerValue] = {}
         for k, v in _record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
-            if u.is_list(v):
+            if _is_container_list(v):
                 attrs[target_key] = [str(i) for i in v]
-            elif v is not None:
+            else:
                 attrs[target_key] = [str(v)]
         return r[dict[str, t.ContainerValue]].ok(attrs)
 
@@ -311,19 +308,21 @@ class UsersSink(LDAPBaseSink):
         return r[str].ok(f"{rdn_attr}={uid},{base_dn}")
 
     def build_user_attributes(
-        self, record: Mapping[str, t.ContainerValue]
+        self,
+        record: Mapping[str, t.ContainerValue],
     ) -> dict[str, t.ContainerValue]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
-            "object_classes", ["inetOrgPerson", "person"]
+            "object_classes",
+            ["inetOrgPerson", "person"],
         )
         attributes: dict[str, t.ContainerValue] = {
             "objectClass": object_classes.copy()
-            if u.is_list(object_classes)
-            else ["inetOrgPerson", "person"]
+            if _is_container_list(object_classes)
+            else ["inetOrgPerson", "person"],
         }
         obj_classes = attributes.get("objectClass")
-        if u.is_list(obj_classes):
+        if _is_container_list(obj_classes):
             if "person" not in obj_classes:
                 obj_classes.append("person")
             if "inetOrgPerson" not in obj_classes:
@@ -343,10 +342,7 @@ class UsersSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping: dict[str, t.ContainerValue] = {}
-        if u.is_dict_like(mapping_val):
-            for k, v in mapping_val.items():
-                raw_mapping[str(k)] = v
+        raw_mapping = _container_mapping_from_value(mapping_val)
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -364,7 +360,7 @@ class UsersSink(LDAPBaseSink):
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
         """Get object classes for user entry."""
         configured = self._target.config.get("users_object_classes")
-        if u.is_list(configured):
+        if _is_container_list(configured):
             return [str(c) for c in configured]
         return ["inetOrgPerson", "organizationalPerson", "person", "top"]
 
@@ -389,43 +385,47 @@ class UsersSink(LDAPBaseSink):
             user_dn = f"uid={username},{base_dn}"
             attributes = self.build_user_attributes(_record)
             object_classes_raw = attributes.get(
-                "objectClass", ["inetOrgPerson", "person"]
+                "objectClass",
+                ["inetOrgPerson", "person"],
             )
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.is_list(object_classes_raw)
+                if _is_container_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
             attributes_dict: dict[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
-                    if u.is_list(v):
+                    if _is_container_list(v):
                         attributes_dict[k] = [str(i) for i in v]
                     else:
                         attributes_dict[k] = [str(v)]
             add_result: r[bool] = self.client.add_entry(
-                user_dn, attributes_dict, object_classes
+                user_dn,
+                attributes_dict,
+                object_classes,
             )
             if add_result.is_success:
                 self._processing_result.add_success()
-                logger.debug(f"User entry added successfully: {user_dn}")
+                logger.debug("User entry added successfully: %s", user_dn)
                 return r[bool].ok(value=True)
             if self._target.config.get("update_existing_entries", False):
                 modify_result: r[bool] = self.client.modify_entry(
-                    user_dn, attributes_dict
+                    user_dn,
+                    attributes_dict,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
-                    logger.debug(f"User entry modified successfully: {user_dn}")
+                    logger.debug("User entry modified successfully: %s", user_dn)
                     return r[bool].ok(value=True)
                 self._processing_result.add_error(
-                    f"Failed to modify user {user_dn}: {modify_result.error}"
+                    f"Failed to modify user {user_dn}: {modify_result.error}",
                 )
                 return r[bool].fail(
-                    f"Failed to modify user {user_dn}: {modify_result.error}"
+                    f"Failed to modify user {user_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
-                f"Failed to add user {user_dn}: {add_result.error}"
+                f"Failed to add user {user_dn}: {add_result.error}",
             )
             return r[bool].fail(f"Failed to add user {user_dn}: {add_result.error}")
         except (RuntimeError, ValueError, TypeError) as e:
@@ -440,16 +440,17 @@ class GroupsSink(LDAPBaseSink):
 
     @override
     def build_attributes(
-        self, _record: Mapping[str, t.ContainerValue]
+        self,
+        _record: Mapping[str, t.ContainerValue],
     ) -> r[dict[str, t.ContainerValue]]:
         """Build LDAP attributes for group entry."""
         attrs: dict[str, t.ContainerValue] = {}
         field_map = {"members": "member"}
         for k, v in _record.items():
             target_key = field_map.get(k, k)
-            if u.is_list(v):
+            if _is_container_list(v):
                 attrs[target_key] = [str(i) for i in v]
-            elif v is not None:
+            else:
                 attrs[target_key] = [str(v)]
         return r[dict[str, t.ContainerValue]].ok(attrs)
 
@@ -467,7 +468,7 @@ class GroupsSink(LDAPBaseSink):
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
         """Get object classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
-        if u.is_list(configured):
+        if _is_container_list(configured):
             return [str(c) for c in configured]
         return ["groupOfNames", "top"]
 
@@ -491,39 +492,42 @@ class GroupsSink(LDAPBaseSink):
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.is_list(object_classes_raw)
+                if _is_container_list(object_classes_raw)
                 else ["groupOfNames"]
             )
             attributes_dict: dict[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
-                    if u.is_list(v):
+                    if _is_container_list(v):
                         attributes_dict[k] = list(v)
                     else:
                         attributes_dict[k] = v
             add_result: r[bool] = self.client.add_entry(
-                group_dn, attributes_dict, object_classes
+                group_dn,
+                attributes_dict,
+                object_classes,
             )
             if add_result.is_success:
                 self._processing_result.add_success()
-                logger.debug(f"Group entry added successfully: {group_dn}")
+                logger.debug("Group entry added successfully: %s", group_dn)
                 return r[bool].ok(value=True)
             if self._target.config.get("update_existing_entries", False):
                 modify_result: r[bool] = self.client.modify_entry(
-                    group_dn, attributes_dict
+                    group_dn,
+                    attributes_dict,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
-                    logger.debug(f"Group entry modified successfully: {group_dn}")
+                    logger.debug("Group entry modified successfully: %s", group_dn)
                     return r[bool].ok(value=True)
                 self._processing_result.add_error(
-                    f"Failed to modify group {group_dn}: {modify_result.error}"
+                    f"Failed to modify group {group_dn}: {modify_result.error}",
                 )
                 return r[bool].fail(
-                    f"Failed to modify group {group_dn}: {modify_result.error}"
+                    f"Failed to modify group {group_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
-                f"Failed to add group {group_dn}: {add_result.error}"
+                f"Failed to add group {group_dn}: {add_result.error}",
             )
             return r[bool].fail(f"Failed to add group {group_dn}: {add_result.error}")
         except (RuntimeError, ValueError, TypeError) as e:
@@ -533,19 +537,21 @@ class GroupsSink(LDAPBaseSink):
             return r[bool].fail(error_msg)
 
     def _build_group_attributes(
-        self, record: Mapping[str, t.ContainerValue]
+        self,
+        record: Mapping[str, t.ContainerValue],
     ) -> dict[str, t.ContainerValue]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
-            "group_object_classes", ["groupOfNames"]
+            "group_object_classes",
+            ["groupOfNames"],
         )
         attributes: dict[str, t.ContainerValue] = {
             "objectClass": object_classes.copy()
-            if u.is_list(object_classes)
-            else ["groupOfNames"]
+            if _is_container_list(object_classes)
+            else ["groupOfNames"],
         }
         obj_classes = attributes.get("objectClass")
-        if u.is_list(obj_classes) and "groupOfNames" not in obj_classes:
+        if _is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
             obj_classes.append("groupOfNames")
         field_mapping = {
             "name": "cn",
@@ -555,15 +561,12 @@ class GroupsSink(LDAPBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.is_list(value):
+                if _is_container_list(value):
                     attributes[ldap_attr] = value
                 else:
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping: dict[str, t.ContainerValue] = {}
-        if u.is_dict_like(mapping_val):
-            for k, v in mapping_val.items():
-                raw_mapping[str(k)] = v
+        raw_mapping = _container_mapping_from_value(mapping_val)
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
@@ -574,7 +577,7 @@ class GroupsSink(LDAPBaseSink):
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.is_list(value):
+                if _is_container_list(value):
                     attributes[mapped_attr] = value
                 else:
                     attributes[mapped_attr] = [str(value)]
@@ -603,31 +606,32 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             attributes = self._build_ou_attributes(_record)
             attributes_dict: dict[str, t.ContainerValue] = {}
             for k, v in attributes.items():
-                if u.is_list(v):
+                if _is_container_list(v):
                     attributes_dict[k] = list(v)
                 else:
                     attributes_dict[k] = v
             add_result: r[bool] = self.client.add_entry(ou_dn, attributes_dict)
             if add_result.is_success:
                 self._processing_result.add_success()
-                logger.debug(f"OU entry added successfully: {ou_dn}")
+                logger.debug("OU entry added successfully: %s", ou_dn)
                 return r[bool].ok(value=True)
             if self._target.config.get("update_existing_entries", False):
                 modify_result: r[bool] = self.client.modify_entry(
-                    ou_dn, attributes_dict
+                    ou_dn,
+                    attributes_dict,
                 )
                 if modify_result.is_success:
                     self._processing_result.add_success()
-                    logger.debug(f"OU entry modified successfully: {ou_dn}")
+                    logger.debug("OU entry modified successfully: %s", ou_dn)
                     return r[bool].ok(value=True)
                 self._processing_result.add_error(
-                    f"Failed to modify OU {ou_dn}: {modify_result.error}"
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
                 )
                 return r[bool].fail(
-                    f"Failed to modify OU {ou_dn}: {modify_result.error}"
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
                 )
             self._processing_result.add_error(
-                f"Failed to add OU {ou_dn}: {add_result.error}"
+                f"Failed to add OU {ou_dn}: {add_result.error}",
             )
             return r[bool].fail(f"Failed to add OU {ou_dn}: {add_result.error}")
         except (RuntimeError, ValueError, TypeError) as e:
@@ -637,19 +641,21 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             return r[bool].fail(error_msg)
 
     def _build_ou_attributes(
-        self, record: Mapping[str, t.ContainerValue]
+        self,
+        record: Mapping[str, t.ContainerValue],
     ) -> dict[str, t.ContainerValue]:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(
-            "object_classes", ["organizationalUnit"]
+            "object_classes",
+            ["organizationalUnit"],
         )
         attributes: dict[str, t.ContainerValue] = {
             "objectClass": default_classes.copy()
-            if u.is_list(default_classes)
-            else ["organizationalUnit"]
+            if _is_container_list(default_classes)
+            else ["organizationalUnit"],
         }
         obj_classes = attributes.get("objectClass")
-        if u.is_list(obj_classes) and "organizationalUnit" not in obj_classes:
+        if _is_container_list(obj_classes) and "organizationalUnit" not in obj_classes:
             obj_classes.append("organizationalUnit")
         field_mapping = {"name": "ou", "description": "description"}
         for singer_field, ldap_attr in field_mapping.items():
@@ -657,10 +663,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping: dict[str, t.ContainerValue] = {}
-        if u.is_dict_like(mapping_val):
-            for k, v in mapping_val.items():
-                raw_mapping[str(k)] = v
+        raw_mapping = _container_mapping_from_value(mapping_val)
         mapping: dict[str, str] = {}
         for k, v in raw_mapping.items():
             match v:

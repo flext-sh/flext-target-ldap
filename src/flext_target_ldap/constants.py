@@ -10,11 +10,6 @@ from __future__ import annotations
 from enum import StrEnum, unique
 from typing import Final
 
-from flext_core.constants import (
-    PROJECT_KIND_APPLICATION,
-    PROJECT_KIND_LIBRARY,
-    PROJECT_KIND_SERVICE,
-)
 from flext_ldap import FlextLdapConstants
 from flext_meltano import FlextMeltanoConstants
 
@@ -136,9 +131,6 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     class TargetLdapProjectType(StrEnum):
         """Target LDAP project type enumeration."""
 
-        LIBRARY = PROJECT_KIND_LIBRARY
-        APPLICATION = PROJECT_KIND_APPLICATION
-        SERVICE = PROJECT_KIND_SERVICE
         SINGER_TARGET = "singer-target"
         LDAP_LOADER = "ldap-loader"
         DIRECTORY_LOADER = "directory-loader"

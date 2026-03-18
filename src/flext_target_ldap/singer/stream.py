@@ -46,7 +46,7 @@ class SingerLDAPStreamProcessor:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
             return r[LDAPStreamProcessingStats].fail(
-                f"LDAP stream not found: {stream_name}"
+                f"LDAP stream not found: {stream_name}",
             )
         return r[LDAPStreamProcessingStats].ok(self._stream_stats[stream_name])
 

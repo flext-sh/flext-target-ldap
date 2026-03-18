@@ -26,7 +26,8 @@ class SingerSchemaDefinition(BaseModel):
     """Singer schema definition mapping properties to LDAP attributes."""
 
     properties: Annotated[
-        dict[str, SingerPropertyDefinition], Field(default_factory=dict)
+        dict[str, SingerPropertyDefinition],
+        Field(default_factory=dict),
     ]
 
 
@@ -40,7 +41,9 @@ class LDAPTypeConverter:
         """Initialize LDAP type converter."""
 
     def convert_singer_to_ldap(
-        self, singer_type: str, value: t.ContainerValue
+        self,
+        singer_type: str,
+        value: t.ContainerValue,
     ) -> r[str | None]:
         """Convert Singer scalar/list/map values for LDAP persistence."""
         try:
@@ -115,7 +118,8 @@ class LDAPDataTransformer:
                 prop_def = schema_model.properties.get(key)
                 singer_type = prop_def.type if prop_def is not None else "string"
                 convert_result = self.type_converter.convert_singer_to_ldap(
-                    singer_type, value
+                    singer_type,
+                    value,
                 )
                 converted_value: str | None = convert_result.unwrap_or(str(value))
                 transformed[ldap_key] = converted_value
@@ -268,7 +272,7 @@ class LDAPEntryManager:
                         break
                 if not rdn_value:
                     return r[str].fail(
-                        f"No value found for RDN attribute: {rdn_attribute}"
+                        f"No value found for RDN attribute: {rdn_attribute}",
                     )
             escaped_value = self._escape_dn_value(str(rdn_value))
             dn = f"{rdn_attribute}={escaped_value},{base_dn}"
@@ -302,11 +306,13 @@ class LDAPEntryManager:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
             return r[dict[str, list[tuple[str, list[str]]]]].fail(
-                f"Modify changes preparation failed: {e}"
+                f"Modify changes preparation failed: {e}",
             )
 
     def validate_entry_attributes(
-        self, attributes: dict[str, list[str]], object_classes: list[str]
+        self,
+        attributes: dict[str, list[str]],
+        object_classes: list[str],
     ) -> r[bool]:
         """Validate LDAP entry attributes against object class requirements."""
         try:

@@ -45,7 +45,8 @@ class LDAPConnectionSettings(FlextModels.Entity):
 
     host: Annotated[str, Field(..., description="LDAP server host")]
     port: Annotated[
-        int, Field(c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port")
+        int,
+        Field(c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port"),
     ]
     use_ssl: Annotated[bool, Field(default=False, description="Use SSL connection")]
     use_tls: Annotated[bool, Field(default=False, description="Use TLS connection")]
@@ -53,10 +54,12 @@ class LDAPConnectionSettings(FlextModels.Entity):
     bind_password: Annotated[str | None, Field(None, description="Bind password")]
     base_dn: Annotated[str, Field(..., description="Base DN")]
     connect_timeout: Annotated[
-        int, Field(c.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout")
+        int,
+        Field(c.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout"),
     ]
     receive_timeout: Annotated[
-        int, Field(c.Network.DEFAULT_TIMEOUT, description="Receive timeout")
+        int,
+        Field(c.Network.DEFAULT_TIMEOUT, description="Receive timeout"),
     ]
 
 
@@ -64,17 +67,21 @@ class LDAPOperationSettings(FlextModels.Entity):
     """LDAP operation settings model."""
 
     batch_size: Annotated[
-        int, Field(c.Performance.BatchProcessing.DEFAULT_SIZE, description="Batch size")
+        int,
+        Field(c.Performance.BatchProcessing.DEFAULT_SIZE, description="Batch size"),
     ]
     max_records: Annotated[int | None, Field(None, description="Maximum records")]
     create_missing_entries: Annotated[
-        bool, Field(default=True, description="Create missing entries")
+        bool,
+        Field(default=True, description="Create missing entries"),
     ]
     update_existing_entries: Annotated[
-        bool, Field(default=True, description="Update existing entries")
+        bool,
+        Field(default=True, description="Update existing entries"),
     ]
     delete_removed_entries: Annotated[
-        bool, Field(default=False, description="Delete removed entries")
+        bool,
+        Field(default=False, description="Delete removed entries"),
     ]
 
 
@@ -90,18 +97,18 @@ def validate_ldap_config(
             FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
         )
         object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(
-            config
+            config,
         )
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("base_dn", "")
+                config.get("base_dn", ""),
             ),
             search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_filter", "(objectClass=*)")
+                config.get("search_filter", "(objectClass=*)"),
             ),
             search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_scope", "SUBTREE")
+                config.get("search_scope", "SUBTREE"),
             ),
             connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("connect_timeout", c.Network.DEFAULT_TIMEOUT // 3),
@@ -116,16 +123,20 @@ def validate_ldap_config(
                 c.Performance.BatchProcessing.DEFAULT_SIZE,
             ),
             max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("max_records"), 0
+                config.get("max_records"),
+                0,
             ),
             create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("create_missing_entries", True), default=True
+                config.get("create_missing_entries", True),
+                default=True,
             ),
             update_existing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("update_existing_entries", True), default=True
+                config.get("update_existing_entries", True),
+                default=True,
             ),
             delete_removed_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("delete_removed_entries", False), default=False
+                config.get("delete_removed_entries", False),
+                default=False,
             ),
             attribute_mapping=dict(attribute_mapping),
             object_classes=object_classes,

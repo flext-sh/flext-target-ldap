@@ -35,7 +35,8 @@ class LDAPTargetOrchestrator:
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
-        self, records: list[Mapping[str, t.Scalar | None]]
+        self,
+        records: list[Mapping[str, t.Scalar | None]],
     ) -> r[Mapping[str, str | int]]:
         """Orchestrate data loading to LDAP target.
 
@@ -68,7 +69,7 @@ class LDAPTargetOrchestrator:
         ) as e:
             logger.exception("LDAP data loading orchestration failed")
             return r[Mapping[str, str | int]].fail(
-                f"Data loading orchestration failed: {e}"
+                f"Data loading orchestration failed: {e}",
             )
 
     def validate_target_configuration(self) -> r[bool]:

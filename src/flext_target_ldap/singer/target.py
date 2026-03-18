@@ -36,7 +36,8 @@ class SingerTargetLDAP:
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
-        self, messages: list[dict[str, t.ContainerValue]]
+        self,
+        messages: list[dict[str, t.ContainerValue]],
     ) -> r[dict[str, t.ContainerValue]]:
         """Process Singer messages for LDAP target.
 
@@ -57,7 +58,8 @@ class SingerTargetLDAP:
                 "status": "completed",
             }
             logger.info(
-                "Singer message processing completed: %d messages", processed_count
+                "Singer message processing completed: %d messages",
+                processed_count,
             )
             return r[dict[str, t.ContainerValue]].ok(result)
         except (
@@ -71,7 +73,7 @@ class SingerTargetLDAP:
         ) as e:
             logger.exception("Singer message processing failed")
             return r[dict[str, t.ContainerValue]].fail(
-                f"Message processing failed: {e}"
+                f"Message processing failed: {e}",
             )
 
     def validate_singer_config(self) -> r[bool]:

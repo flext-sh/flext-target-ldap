@@ -49,5 +49,5 @@ def build_singer_catalog() -> dict[str, t.ContainerValue]:
                     "required": ["name"],
                 },
             },
-        ]
+        ],
     }

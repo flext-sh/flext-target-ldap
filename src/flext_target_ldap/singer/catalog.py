@@ -32,12 +32,16 @@ class SingerLDAPCatalogManager:
         self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
 
     def add_stream(
-        self, stream_name: str, schema: dict[str, t.ContainerValue]
+        self,
+        stream_name: str,
+        schema: dict[str, t.ContainerValue],
     ) -> r[bool]:
         """Add LDAP stream to catalog."""
         try:
             entry = SingerLDAPCatalogEntry(
-                tap_stream_id=stream_name, stream=stream_name, stream_schema=schema
+                tap_stream_id=stream_name,
+                stream=stream_name,
+                stream_schema=schema,
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)
@@ -50,7 +54,7 @@ class SingerLDAPCatalogManager:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
             return r[SingerLDAPCatalogEntry].fail(
-                f"LDAP stream not found: {stream_name}"
+                f"LDAP stream not found: {stream_name}",
             )
         return r[SingerLDAPCatalogEntry].ok(self._catalog_entries[stream_name])
 

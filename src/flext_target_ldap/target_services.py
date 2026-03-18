@@ -25,7 +25,8 @@ class LdapTargetService(Protocol):
     """Protocol for LDAP target creation and record loading."""
 
     def create_target(
-        self, config: dict[str, t.ContainerValue]
+        self,
+        config: dict[str, t.ContainerValue],
     ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from config."""
         ...
@@ -136,7 +137,7 @@ class LdapTransformationService:
                 "singer_field_name": "name",
                 "ldap_attribute_name": "cn",
                 "is_required": True,
-            })
+            }),
         ]
 
     def transform_record(
@@ -157,7 +158,7 @@ class LdapTransformationService:
             if value is None:
                 if mapping.is_required:
                     mapping_errors.append(
-                        f"Missing required field: {mapping.singer_field_name}"
+                        f"Missing required field: {mapping.singer_field_name}",
                     )
                 continue
             text_value = str(value)
@@ -175,7 +176,7 @@ class LdapTransformationService:
             record.get(
                 "username",
                 record.get("name", c.Mixins.IDENTIFIER_UNKNOWN),
-            )
+            ),
         )
         dn = f"cn={entry_name},{base_dn}"
         entry = LdapEntryModel.model_validate({
@@ -272,7 +273,8 @@ class LdapTargetOrchestrator:
         return r[Mapping[str, t.ContainerValue]].ok(result)
 
     def validate_target_configuration(
-        self, config: FlextTargetLdapSettings | None = None
+        self,
+        config: FlextTargetLdapSettings | None = None,
     ) -> r[bool]:
         """Validate target configuration and test connection."""
         working = config or self._typed_config
@@ -290,7 +292,8 @@ class LdapTargetApiService:
         self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
 
     def create_ldap_target(
-        self, config: dict[str, t.ContainerValue]
+        self,
+        config: dict[str, t.ContainerValue],
     ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(

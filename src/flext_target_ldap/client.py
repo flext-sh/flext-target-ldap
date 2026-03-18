@@ -57,7 +57,10 @@ class LDAPConnection(Protocol):
         ...
 
     def search(
-        self, base_dn: str, search_filter: str, attributes: list[str] | None = None
+        self,
+        base_dn: str,
+        search_filter: str,
+        attributes: list[str] | None = None,
     ) -> bool:
         """Search LDAP entries."""
         ...
@@ -90,7 +93,8 @@ class LDAPClient:
 
     @override
     def __init__(
-        self, config: FlextLdapModels.Ldap.ConnectionConfig | t.ContainerValue
+        self,
+        config: FlextLdapModels.Ldap.ConnectionConfig | t.ContainerValue,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, FlextLdapModels.Ldap.ConnectionConfig):
@@ -196,7 +200,9 @@ class LDAPClient:
                 return r[bool].fail("DN required")
             logger.info("Checking if LDAP entry exists: %s", dn)
             search_result = self.search_entry(
-                base_dn=dn, search_filter="(objectClass=*)", attributes=["dn"]
+                base_dn=dn,
+                search_filter="(objectClass=*)",
+                attributes=["dn"],
             )
             if search_result.is_success:
                 return r[bool].ok(len(search_result.value) > 0)
@@ -223,7 +229,7 @@ class LDAPClient:
                     port=self.config.port,
                     use_ssl=self.config.use_ssl,
                     connect_timeout=self.config.timeout,
-                )
+                ),
             ])
             connection = ldap3.Connection(
                 server_pool,
@@ -240,7 +246,9 @@ class LDAPClient:
         return connection_context()
 
     def get_entry(
-        self, dn: str, attributes: list[str] | None = None
+        self,
+        dn: str,
+        attributes: list[str] | None = None,
     ) -> r[LDAPSearchEntry | None]:
         """Get LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -248,7 +256,9 @@ class LDAPClient:
                 return r[LDAPSearchEntry | None].fail("DN required")
             logger.info("Getting LDAP entry: %s", dn)
             search_result: r[list[LDAPSearchEntry]] = self.search_entry(
-                dn, "(objectClass=*)", attributes
+                dn,
+                "(objectClass=*)",
+                attributes,
             )
             if search_result.is_success and search_result.value:
                 return r[LDAPSearchEntry | None].ok(search_result.value[0])
@@ -278,7 +288,9 @@ class LDAPClient:
             if not base_dn:
                 return r[list[LDAPSearchEntry]].fail("Base DN required")
             logger.info(
-                "Searching LDAP entries: %s with filter %s", base_dn, search_filter
+                "Searching LDAP entries: %s with filter %s",
+                base_dn,
+                search_filter,
             )
             with self.get_connection() as conn:
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
@@ -334,7 +346,9 @@ class LDAPClient:
             connection = FlextLdapConnection(config=ldap_settings)
             operations = FlextLdapOperations(connection=connection)
             self._api = FlextLdap(
-                connection=connection, operations=operations, ldif=FlextLdif()
+                connection=connection,
+                operations=operations,
+                ldif=FlextLdif(),
             )
         return self._api
 

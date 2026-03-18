@@ -118,7 +118,8 @@ class TargetLDAP(Target):
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
             logger.warning(
-                f"No specific sink found for stream '{stream_name}', using base sink"
+                "No specific sink found for stream '%s', using base sink",
+                stream_name,
             )
             return LDAPBaseSink
         logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
@@ -131,7 +132,7 @@ class TargetLDAP(Target):
         self._container = get_flext_target_ldap_container()
         logger.info("DI container initialized successfully")
         host = str(self.config.get("host", "localhost"))
-        logger.info(f"LDAP target setup completed for host: {host}")
+        logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""
@@ -181,7 +182,7 @@ if __name__ == "__main__":
 def _load_config_from_file(config_path: str) -> dict[str, t.ContainerValue]:
     """Load configuration from JSON file."""
     config_adapter: TypeAdapter[dict[str, t.ContainerValue]] = TypeAdapter(
-        dict[str, t.ContainerValue]
+        dict[str, t.ContainerValue],
     )
     try:
         content = Path(config_path).read_text(encoding="utf-8")
@@ -214,7 +215,9 @@ def _get_ldap_api() -> _LdapApi | None:
 
 
 def _construct_dn(
-    stream: str, record: dict[str, t.ContainerValue], base_dn: str
+    stream: str,
+    record: dict[str, t.ContainerValue],
+    base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
     if stream == "users":
@@ -277,7 +280,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
             try:
                 msg_dict = (
                     FlextMeltanoModels.Meltano.SingerStateMessage.model_validate_json(
-                        line
+                        line,
                     )
                 )
                 msg_type = msg_dict.type
@@ -286,13 +289,13 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
                     schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(
-                        line
+                        line,
                     )
                     _schema: dict[str, t.ContainerValue] = {}
                     current_stream = schema_msg.stream
                 elif msg_type == "RECORD" and api is not None:
                     record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(
-                        line
+                        line,
                     )
                     stream = record_msg.stream or current_stream or "users"
                     normalized_record: dict[str, t.ContainerValue] = {}
@@ -305,7 +308,11 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                             case _:
                                 normalized_record[str(key)] = str(value)
                     _process_record_message(
-                        normalized_record, stream, cfg, api, seen_dns
+                        normalized_record,
+                        stream,
+                        cfg,
+                        api,
+                        seen_dns,
                     )
             except (
                 ValueError,

@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from .conftest import (
         mock_ldap_client,
         mock_ldap_config,
+        mock_ldap_config_internal,
         mock_target,
         sample_group_record,
         sample_ou_record,
@@ -102,6 +103,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "m": ("tests.tm", "m"),
     "mock_ldap_client": ("tests.conftest", "mock_ldap_client"),
     "mock_ldap_config": ("tests.conftest", "mock_ldap_config"),
+    "mock_ldap_config_internal": ("tests.conftest", "mock_ldap_config_internal"),
     "mock_target": ("tests.conftest", "mock_target"),
     "p": ("tests.tp", "p"),
     "sample_group_record": ("tests.conftest", "sample_group_record"),
@@ -152,6 +154,7 @@ __all__ = [
     "m",
     "mock_ldap_client",
     "mock_ldap_config",
+    "mock_ldap_config_internal",
     "mock_target",
     "p",
     "sample_group_record",

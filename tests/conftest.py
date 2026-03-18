@@ -8,17 +8,40 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import pathlib
-from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
+from flext_tests import tk
 from pydantic import TypeAdapter
 
 from flext_target_ldap import LdapTargetClient
 
 
+def _build_mock_ldap_config(*, bind_dn: str) -> dict[str, object]:
+    return {
+        "host": "test.ldap.com",
+        "port": 389,
+        "bind_dn": bind_dn,
+        "password": "test_password",
+        "base_dn": "dc=test,dc=com",
+        "use_ssl": False,
+        "timeout": 30,
+        "validate_records": True,
+        "user_rdn_attribute": "uid",
+        "group_rdn_attribute": "cn",
+        "dn_templates": {
+            "users": "uid={uid},ou=users,dc=test,dc=com",
+            "groups": "cn={cn},ou=groups,dc=test,dc=com",
+        },
+        "default_object_classes": {
+            "users": ["inetOrgPerson", "person", "top"],
+            "groups": ["groupOfNames", "top"],
+        },
+    }
+
+
 @pytest.fixture(scope="session")
-def shared_ldap_container(flext_docker: tk) -> Generator[str]:
+def shared_ldap_container(flext_docker: tk) -> str:
     """Managed LDAP container using centralized tk with docker-compose."""
     compose_file = pathlib.Path(
         "~/flext/docker/docker-compose.openldap.yml"
@@ -32,55 +55,19 @@ def shared_ldap_container(flext_docker: tk) -> Generator[str]:
 @pytest.fixture
 def mock_ldap_config() -> dict[str, object]:
     """Create mock LDAP configuration for testing."""
-    return {
-        "host": "test.ldap.com",
-        "port": 389,
-        "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-        "password": "test_password",
-        "base_dn": "dc=test,dc=com",
-        "use_ssl": False,
-        "timeout": 30,
-        "validate_records": True,
-        "user_rdn_attribute": "uid",
-        "group_rdn_attribute": "cn",
-        "dn_templates": {
-            "users": "uid={uid},ou=users,dc=test,dc=com",
-            "groups": "cn={cn},ou=groups,dc=test,dc=com",
-        },
-        "default_object_classes": {
-            "users": ["inetOrgPerson", "person", "top"],
-            "groups": ["groupOfNames", "top"],
-        },
-    }
+    return _build_mock_ldap_config(
+        bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
+    )
 
 
-@pytest.fixture
-def _mock_ldap_config() -> dict[str, object]:
+@pytest.fixture(name="_mock_ldap_config")
+def mock_ldap_config_internal() -> dict[str, object]:
     """Create mock LDAP configuration for internal sink testing.
 
     Provides a valid LDAP configuration dictionary for use in sink fixtures.
     This fixture is used by sink test classes to initialize target configurations.
     """
-    return {
-        "host": "test.ldap.com",
-        "port": 389,
-        "bind_dn": "cn=admin,dc=test,dc=com",
-        "password": "test_password",
-        "base_dn": "dc=test,dc=com",
-        "use_ssl": False,
-        "timeout": 30,
-        "validate_records": True,
-        "user_rdn_attribute": "uid",
-        "group_rdn_attribute": "cn",
-        "dn_templates": {
-            "users": "uid={uid},ou=users,dc=test,dc=com",
-            "groups": "cn={cn},ou=groups,dc=test,dc=com",
-        },
-        "default_object_classes": {
-            "users": ["inetOrgPerson", "person", "top"],
-            "groups": ["groupOfNames", "top"],
-        },
-    }
+    return _build_mock_ldap_config(bind_dn="cn=admin,dc=test,dc=com")
 
 
 @pytest.fixture

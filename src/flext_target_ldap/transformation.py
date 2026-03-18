@@ -29,7 +29,8 @@ class TransformationResult(BaseModel):
     """Result of data transformation with applied rules."""
 
     transformed_data: Annotated[
-        dict[str, t.ContainerValue], Field(default_factory=dict)
+        dict[str, t.ContainerValue],
+        Field(default_factory=dict),
     ]
     applied_rules: Annotated[list[str], Field(default_factory=list)]
 
@@ -58,13 +59,15 @@ class DataTransformationEngine:
                     match value:
                         case str() as text if rule.pattern in text:
                             transformed_data[key] = text.replace(
-                                rule.pattern, rule.replacement
+                                rule.pattern,
+                                rule.replacement,
                             )
                             applied_rules.append(rule.name)
                         case _:
                             pass
             result = TransformationResult(
-                transformed_data=transformed_data, applied_rules=applied_rules
+                transformed_data=transformed_data,
+                applied_rules=applied_rules,
             )
             return r[TransformationResult].ok(result)
         except (
