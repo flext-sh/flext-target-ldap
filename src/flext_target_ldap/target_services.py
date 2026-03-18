@@ -33,7 +33,7 @@ class LdapTargetService(Protocol):
 
     def load_records(
         self,
-        records: list[Mapping[str, dict[str, object]]],
+        records: list[Mapping[str, object]],
         config: dict[str, object],
         stream_type: str = "users",
     ) -> r[int]:
@@ -46,7 +46,7 @@ class LdapTransformationServiceProtocol(Protocol):
 
     def transform_record(
         self,
-        record: Mapping[str, dict[str, object]],
+        record: Mapping[str, object],
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
@@ -67,7 +67,7 @@ class LdapConnectionService:
         """Initialize with LDAP target settings."""
         self._config = config
 
-    def get_connection_info(self) -> Mapping[str, dict[str, object]]:
+    def get_connection_info(self) -> Mapping[str, object]:
         """Return connection parameters as a dict for logging or debugging."""
         return {
             "host": self._config.connection.host,
@@ -142,7 +142,7 @@ class LdapTransformationService:
 
     def transform_record(
         self,
-        record: Mapping[str, dict[str, object]],
+        record: Mapping[str, object],
         mappings: list[LdapAttributeMappingModel],
         object_classes: list[str],
         base_dn: str,
@@ -239,13 +239,13 @@ class LdapTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[Mapping[str, dict[str, object]]],
+        records: list[Mapping[str, object]],
         config: FlextTargetLdapSettings | None = None,
-    ) -> r[Mapping[str, dict[str, object]]]:
+    ) -> r[Mapping[str, object]]:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return r[Mapping[str, Mapping[str, object]]].fail(
+            return r[Mapping[str, object]].fail(
                 "Configuration is required"
             )
         transformation = LdapTransformationService(working)
@@ -272,7 +272,7 @@ class LdapTargetOrchestrator:
             "transformation_errors": errors,
             "status": "completed" if not errors else "completed_with_errors",
         }
-        return r[Mapping[str, Mapping[str, object]]].ok(result)
+        return r[Mapping[str, object]].ok(result)
 
     def validate_target_configuration(
         self,
@@ -305,7 +305,7 @@ class LdapTargetApiService:
 
     def load_groups_to_ldap(
         self,
-        groups: list[Mapping[str, dict[str, object]]],
+        groups: list[Mapping[str, object]],
         config: dict[str, object],
     ) -> r[int]:
         """Load group records into LDAP using the default groups sink."""
@@ -320,7 +320,7 @@ class LdapTargetApiService:
 
     def load_users_to_ldap(
         self,
-        users: list[Mapping[str, dict[str, object]]],
+        users: list[Mapping[str, object]],
         config: dict[str, object],
     ) -> r[int]:
         """Load user records into LDAP using the default users sink."""

@@ -54,7 +54,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
                 def process_record(
                     self,
-                    record: Mapping[str, dict[str, object]],
+                    record: Mapping[str, object],
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Process a single record."""
                     ...
@@ -68,7 +68,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
                 def transform_to_ldap(
                     self,
-                    record: Mapping[str, dict[str, object]],
+                    record: Mapping[str, object],
                 ) -> FlextMeltanoProtocols.Result[Mapping[str, object]]:
                     """Transform record to LDAP format."""
                     ...
@@ -81,7 +81,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
                 def orchestrate_load(
                     self,
-                    records: Sequence[Mapping[str, dict[str, object]]],
+                    records: Sequence[Mapping[str, object]],
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Orchestrate loading of records."""
                     ...
@@ -94,7 +94,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
                 def connect(
                     self,
-                    config: Mapping[str, dict[str, object]],
+                    config: Mapping[str, object],
                 ) -> FlextMeltanoProtocols.Result[Mapping[str, object]]:
                     """Connect to LDAP server."""
                     ...
@@ -105,7 +105,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
                 def process_singer_message(
                     self,
-                    message: Mapping[str, dict[str, object]],
+                    message: Mapping[str, object],
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Process a Singer protocol message."""
                     ...
@@ -129,7 +129,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
 
                 def validate_credentials(
                     self,
-                    config: Mapping[str, dict[str, object]],
+                    config: Mapping[str, object],
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Validate LDAP credentials."""
                     ...

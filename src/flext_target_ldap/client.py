@@ -33,13 +33,13 @@ class LDAPConnection(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: list[dict[str, object]]
+    entries: list[object]
 
     def add(
         self,
         dn: str,
         object_classes: list[str],
-        attributes: Mapping[str, dict[str, object]],
+        attributes: Mapping[str, object],
     ) -> bool:
         """Add LDAP entry."""
         ...
@@ -52,7 +52,7 @@ class LDAPConnection(Protocol):
         """Delete LDAP entry."""
         ...
 
-    def modify(self, dn: str, changes: Mapping[str, dict[str, object]]) -> bool:
+    def modify(self, dn: str, changes: Mapping[str, object]) -> bool:
         """Modify LDAP entry."""
         ...
 
@@ -366,7 +366,7 @@ class LDAPClient:
                 self,
                 dn: str,
                 object_classes: list[str],
-                attributes: Mapping[str, dict[str, object]],
+                attributes: Mapping[str, object],
             ) -> bool:
                 _ = (dn, object_classes, attributes)
                 return True
@@ -378,7 +378,7 @@ class LDAPClient:
                 _ = dn
                 return True
 
-            def modify(self, dn: str, changes: Mapping[str, dict[str, object]]) -> bool:
+            def modify(self, dn: str, changes: Mapping[str, object]) -> bool:
                 _ = (dn, changes)
                 return True
 

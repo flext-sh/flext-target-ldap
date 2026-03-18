@@ -23,7 +23,7 @@ from .constants import c
 from .settings import FlextTargetLdapSettings
 
 
-def _target_config_to_int(value: dict[str, object], default: int) -> int:
+def _target_config_to_int(value: object, default: int) -> int:
     """Convert value to int for target config."""
     match value:
         case bool():
@@ -39,7 +39,7 @@ def _target_config_to_int(value: dict[str, object], default: int) -> int:
             return default
 
 
-def _target_config_to_bool(value: dict[str, object], *, default: bool) -> bool:
+def _target_config_to_bool(value: object, *, default: bool) -> bool:
     """Convert value to bool for target config."""
     match value:
         case bool():
@@ -52,7 +52,7 @@ def _target_config_to_bool(value: dict[str, object], *, default: bool) -> bool:
             return default
 
 
-def _target_config_to_str(value: dict[str, object], default: str = "") -> str:
+def _target_config_to_str(value: object, default: str = "") -> str:
     """Convert value to str for target config."""
     return str(value) if value is not None else default
 

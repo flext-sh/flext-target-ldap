@@ -66,7 +66,7 @@ class _CompatibleEntry:
 
 
 def _container_mapping_from_value(
-    value: dict[str, object] | None,
+    value: object | None,
 ) -> dict[str, object]:
     if isinstance(value, dict):
         return {str(k): v for k, v in value.items()}
@@ -74,7 +74,7 @@ def _container_mapping_from_value(
 
 
 def _is_container_list(
-    value: dict[str, object] | None,
+    value: object | None,
 ) -> TypeIs[list[dict[str, object]]]:
     return isinstance(value, list)
 
@@ -603,8 +603,8 @@ class LdapBaseSink(Sink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, dict[str, object]],
-        _context: Mapping[str, dict[str, object]],
+        _record: Mapping[str, object],
+        _context: Mapping[str, object],
     ) -> r[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
@@ -663,7 +663,7 @@ class LdapUsersSink(LdapBaseSink):
 
     def build_user_attributes(
         self,
-        record: Mapping[str, dict[str, object]],
+        record: Mapping[str, object],
     ) -> dict[str, object]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
@@ -713,8 +713,8 @@ class LdapUsersSink(LdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, dict[str, object]],
-        _context: Mapping[str, dict[str, object]],
+        _record: Mapping[str, object],
+        _context: Mapping[str, object],
     ) -> r[bool]:
         """Process a user record."""
         if not self.client:
@@ -773,8 +773,8 @@ class LdapGroupsSink(LdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, dict[str, object]],
-        _context: Mapping[str, dict[str, object]],
+        _record: Mapping[str, object],
+        _context: Mapping[str, object],
     ) -> r[bool]:
         """Process a group record."""
         if not self.client:
@@ -822,7 +822,7 @@ class LdapGroupsSink(LdapBaseSink):
 
     def _build_group_attributes(
         self,
-        record: Mapping[str, dict[str, object]],
+        record: Mapping[str, object],
     ) -> dict[str, object]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
@@ -874,8 +874,8 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, dict[str, object]],
-        _context: Mapping[str, dict[str, object]],
+        _record: Mapping[str, object],
+        _context: Mapping[str, object],
     ) -> r[bool]:
         """Process an organizational unit record."""
         if not self.client:
@@ -918,7 +918,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: Mapping[str, dict[str, object]],
+        record: Mapping[str, object],
     ) -> dict[str, object]:
         """Build LDAP attributes for OU entry."""
         attributes: dict[str, object] = {

@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Annotated, override
 
 from flext_core import FlextLogger, r
@@ -47,10 +47,10 @@ class DataTransformationEngine:
         """Get transformation statistics."""
         return {"total_rules": len(self.rules), "transformations_applied": 0}
 
-    def transform(self, data: dict[str, object]) -> r[TransformationResult]:
+    def transform(self, data: Mapping[str, object]) -> r[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: dict[str, object] = data.copy()
+            transformed_data: dict[str, object] = dict(data)
             applied_rules: list[str] = []
             for rule in self.rules:
                 if not rule.enabled:
@@ -101,9 +101,9 @@ class MigrationValidator:
 
     def validate(
         self,
-        data: dict[str, object] | str,
-        attributes: dict[str, object] | None = None,
-        object_classes: list[str] | None = None,
+        data: Mapping[str, object] | str,
+        attributes: Mapping[str, object] | None = None,
+        object_classes: Sequence[object] | None = None,
     ) -> r[bool]:
         """Validate migration data."""
         try:

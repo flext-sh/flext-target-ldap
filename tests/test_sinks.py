@@ -42,8 +42,9 @@ class TestLDAPBaseSink:
             stream_msg: str = f"Expected {'test_stream'}, got {sink.stream_name}"
             raise AssertionError(stream_msg)
         assert sink.key_properties == ["dn"]
-        if "dn" not in sink.schema["properties"]:
-            schema_msg: str = f"Expected {'dn'} in {sink.schema['properties']}"
+        properties = sink.schema.get("properties")
+        if isinstance(properties, dict) and "dn" not in properties:
+            schema_msg: str = f"Expected {'dn'} in {properties}"
             raise AssertionError(schema_msg)
 
     def test_build_dn_not_implemented(self, sink: LDAPBaseSink) -> None:
