@@ -180,9 +180,10 @@ class LDAPBaseSink(Sink):
             return
         try:
             records_raw = _context.get("records", [])
-            records: list[dict[str, object]] = (
-                records_raw if _is_container_list(records_raw) else []
-            )
+            if isinstance(records_raw, list):
+                records: list[dict[str, object]] = records_raw
+            else:
+                records = []
             logger.info(
                 f"Processing batch of {len(records)} records for stream: {self.stream_name}",
             )

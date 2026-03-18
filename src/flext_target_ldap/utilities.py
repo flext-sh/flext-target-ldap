@@ -40,13 +40,13 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     @staticmethod
     def _coerce_container_value(
         value: t.ConfigMap | t.NormalizedValue | BaseModel,
-    ) -> t.ConfigMap | t.NormalizedValue | None:
+    ) -> t.ConfigMap | list[object] | t.NormalizedValue | None:
         if isinstance(value, BaseModel):
             return FlextTargetLdapUtilities._coerce_container_value(value.model_dump())
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
         if isinstance(value, list):
-            normalized_list: list[t.ConfigMap | t.NormalizedValue] = []
+            normalized_list: list[object] = []
             for item in value:
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -56,7 +56,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         normalized_list.append(coerced_item)
             return normalized_list
         if isinstance(value, Mapping):
-            normalized_dict: t.ConfigMap = {}
+            normalized_dict: dict[str, object] = {}
             for key, item in value.items():
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -66,7 +66,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         coerced_item, (str, int, float, bool)
                     ):
                         normalized_dict[str(key)] = coerced_item
-            return normalized_dict
+            return t.ConfigMap(root=normalized_dict)
         return None
 
     class TargetLdap:
@@ -396,7 +396,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             if not stream_name or not schema:
                 return r[bool].fail("Stream name and schema are required")
             raw_props = schema.get("properties", {})
-            properties: t.ConfigMap = {}
+            properties: dict[str, t.NormalizedValue | BaseModel] = {}
             if u.is_dict_like(raw_props):
                 for k, v in raw_props.items():
                     coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
@@ -559,7 +559,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             stream_name: str,
             records_processed: int,
             last_processed_record: Mapping[str, t.ConfigMap] | None = None,
-        ) -> Mapping[str, t.Scalar]:
+        ) -> Mapping[str, object]:
             """Create processing state for target stream.
 
             Args:
@@ -568,10 +568,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             last_processed_record: Last processed record for checkpointing
 
             Returns:
-            Mapping[str, t.Scalar]: Processing state
+            Mapping[str, object]: Processing state
 
             """
-            state: dict[str, t.Scalar] = {
+            state: dict[str, object] = {
                 "stream_name": stream_name,
                 "records_processed": records_processed,
                 "last_updated": datetime.now(UTC).isoformat(),
@@ -592,7 +592,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         def get_target_state(
             state: Mapping[str, t.ConfigMap],
             stream_name: str,
-        ) -> Mapping[str, t.Scalar]:
+        ) -> Mapping[str, object]:
             """Get state for a specific target stream.
 
             Args:
@@ -606,7 +606,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             bookmarks = state.get("bookmarks")
             if not u.is_dict_like(bookmarks):
                 return {}
-            bookmarks_map: t.ConfigMap = {}
+            bookmarks_map: dict[str, t.NormalizedValue | BaseModel] = {}
             for k, v in bookmarks.items():
                 coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
                 if coerced_value is not None and isinstance(
@@ -615,7 +615,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     bookmarks_map[str(k)] = coerced_value
             stream_state_data = bookmarks_map.get(stream_name)
             if u.is_dict_like(stream_state_data):
-                stream_state: t.ConfigMap = {}
+                stream_state: dict[str, t.NormalizedValue | BaseModel] = {}
                 for k, v in stream_state_data.items():
                     coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
                     if coerced_value is not None and isinstance(
@@ -629,8 +629,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         def set_target_state(
             state: Mapping[str, t.ConfigMap],
             stream_name: str,
-            stream_state: Mapping[str, t.Scalar],
-        ) -> Mapping[str, t.Scalar]:
+            stream_state: Mapping[str, object],
+        ) -> Mapping[str, object]:
             """Set state for a specific target stream.
 
             Args:
@@ -642,9 +642,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             Mapping[str, t.Scalar]: Updated state
 
             """
-            state_dict = dict(state)
+            state_dict: dict[str, object] = dict(state)
             bookmarks = state_dict.get("bookmarks")
-            bookmarks_dict: t.ConfigMap = {}
+            bookmarks_dict: dict[str, t.NormalizedValue | BaseModel] = {}
             if u.is_dict_like(bookmarks):
                 for k, v in bookmarks.items():
                     coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
@@ -661,7 +661,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             state: Mapping[str, t.ConfigMap],
             stream_name: str,
             records_count: int,
-        ) -> Mapping[str, t.Scalar]:
+        ) -> Mapping[str, object]:
             """Update processing progress in state.
 
             Args:
@@ -694,7 +694,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     batch_count = batch_count_val
                 case _:
                     batch_count = 0
-            updated_stream_state: dict[str, t.Scalar] = {
+            updated_stream_state: dict[str, object] = {
                 **stream_state,
                 "records_processed": new_count,
                 "last_updated": datetime.now(UTC).isoformat(),
@@ -734,7 +734,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         stream_name: str,
         records_processed: int,
         last_processed_record: Mapping[str, t.ConfigMap] | None = None,
-    ) -> Mapping[str, t.Scalar]:
+    ) -> Mapping[str, object]:
         """Proxy method for StateManagement.create_processing_state()."""
         return cls.StateManagement.create_processing_state(
             stream_name,
@@ -747,7 +747,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         cls,
         state: Mapping[str, t.ConfigMap],
         stream_name: str,
-    ) -> Mapping[str, t.Scalar]:
+    ) -> Mapping[str, object]:
         """Proxy method for StateManagement.get_target_state()."""
         return cls.StateManagement.get_target_state(state, stream_name)
 

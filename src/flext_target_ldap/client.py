@@ -33,7 +33,7 @@ class LDAPConnection(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: list[object]
+    entries: list[dict[str, object]]
 
     def add(
         self,

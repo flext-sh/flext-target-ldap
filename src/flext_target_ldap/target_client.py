@@ -75,12 +75,14 @@ def _container_mapping_from_value(
 
 def _is_container_list(
     value: object | None,
-) -> TypeIs[list[dict[str, object]]]:
+) -> TypeIs[list[object]]:
     return isinstance(value, list)
 
 
-def _to_container_list(values: list[str]) -> list[dict[str, object]]:
-    return [str(value) for value in values]
+def _to_container_list(values: object) -> object:
+    if isinstance(values, list):
+        return [str(value) for value in values]
+    return values
 
 
 class _LdapConnectionWrapper:
@@ -232,9 +234,7 @@ class LdapTargetClient:
             self._bind_dn = ""
             self._password = ""
         elif isinstance(config, dict):
-            config_map: dict[str, object] = {
-                str(k): v for k, v in config.items()
-            }
+            config_map: dict[str, object] = {str(k): v for k, v in config.items()}
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
                 host=str(config_map.get("host", "localhost")),
                 port=int(
@@ -584,9 +584,10 @@ class LdapBaseSink(Sink):
             return
         try:
             records_raw = _context.get("records", [])
-            records: list[dict[str, object]] = (
-                records_raw if _is_container_list(records_raw) else []
-            )
+            if isinstance(records_raw, list):
+                records: list[dict[str, object]] = records_raw
+            else:
+                records = []
             logger.info(
                 f"Processing batch of {len(records)} records for stream: {self.stream_name}",
             )
@@ -1010,11 +1011,19 @@ class TargetLdap(Target):
             ]
 
         sink_class = self.get_sink_class(stream_name)
+        schema_val = self.config.get(f"{stream_name}_schema", {})
+        schema: Mapping[str, object] = (
+            schema_val if isinstance(schema_val, dict) else {}
+        )
+        key_props_val = self.config.get(f"{stream_name}_key_properties", [])
+        key_properties: list[str] = (
+            key_props_val if isinstance(key_props_val, list) else []
+        )
         return sink_class(
             target=self,
             stream_name=stream_name,
-            schema=self.config.get(f"{stream_name}_schema", {}),
-            key_properties=self.config.get(f"{stream_name}_key_properties", []),
+            schema=schema,
+            key_properties=key_properties,
         )
 
     def setup(self) -> None:
