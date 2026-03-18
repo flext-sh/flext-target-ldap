@@ -29,10 +29,7 @@ if TYPE_CHECKING:
         singer_message_schema,
         singer_message_state,
     )
-    from .constants import (
-        TestsFlextTargetLdapConstants,
-        TestsFlextTargetLdapConstants as c,
-    )
+    from .constants import TestsFlextTargetLdapConstants, c
     from .models import TestsFlextTargetLdapModels, tm
     from .protocols import TestsFlextTargetLdapProtocols
     from .test_client import (
@@ -101,7 +98,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "tests.utilities",
         "TestsFlextTargetLdapUtilities",
     ),
-    "c": ("tests.constants", "TestsFlextTargetLdapConstants"),
+    "c": ("tests.constants", "c"),
     "m": ("tests.tm", "m"),
     "mock_ldap_client": ("tests.conftest", "mock_ldap_client"),
     "mock_ldap_config": ("tests.conftest", "mock_ldap_config"),
