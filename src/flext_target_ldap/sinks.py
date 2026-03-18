@@ -8,9 +8,9 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import ClassVar, override
+from typing import ClassVar, TypeIs, override
 
-from flext_core import FlextLogger, r, t, u
+from flext_core import FlextLogger, r, t
 
 from flext_target_ldap.client import LDAPClient
 from flext_target_ldap.constants import c
@@ -41,8 +41,6 @@ class Sink:
     ) -> r[bool]:
         """Process a record using the target."""
         try:
-            if not u.is_dict_like(_record):
-                return r[bool].fail("Record must be a mapping")
             process_record = getattr(self.target, "process_record", None)
             if callable(process_record):
                 result = process_record(_record, _context)
@@ -90,6 +88,26 @@ class Target:
 
 
 logger = FlextLogger(__name__)
+
+
+def _is_container_list(
+    value: t.ContainerValue | None,
+) -> TypeIs[list[t.ContainerValue]]:
+    return isinstance(value, list)
+
+
+def _is_container_mapping(
+    value: t.ContainerValue | None,
+) -> TypeIs[Mapping[str, t.ContainerValue]]:
+    return isinstance(value, dict)
+
+
+def _container_mapping_from_value(
+    value: t.ContainerValue | None,
+) -> dict[str, t.ContainerValue]:
+    if isinstance(value, dict):
+        return {str(k): v for k, v in value.items()}
+    return {}
 
 
 class LDAPProcessingResult(LdapProcessingCounters):

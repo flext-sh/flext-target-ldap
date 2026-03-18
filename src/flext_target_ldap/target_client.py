@@ -9,15 +9,14 @@ from __future__ import annotations
 import sys
 from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager
-from typing import override
+from typing import TypeIs, override
 
-from flext_core import FlextContainer, FlextLogger, p, r, t, u
+from flext_core import FlextContainer, FlextLogger, p, r, t
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
     FlextLdapModels,
     FlextLdapOperations,
-    FlextLdapSettings,
 )
 from flext_ldif import FlextLdif
 
@@ -69,9 +68,19 @@ class _CompatibleEntry:
 def _container_mapping_from_value(
     value: t.ContainerValue | None,
 ) -> dict[str, t.ContainerValue]:
-    if u.is_dict_like(value):
+    if isinstance(value, dict):
         return {str(k): v for k, v in value.items()}
     return {}
+
+
+def _is_container_list(
+    value: t.ContainerValue | None,
+) -> TypeIs[list[t.ContainerValue]]:
+    return isinstance(value, list)
+
+
+def _to_container_list(values: list[str]) -> list[t.ContainerValue]:
+    return [str(value) for value in values]
 
 
 class _LdapConnectionWrapper:
@@ -172,7 +181,9 @@ class _LdapConnectionWrapper:
                 for entry in entries:
                     dn = str(entry.get("dn", ""))
                     attrs: dict[str, t.ContainerValue] = {
-                        str(k): v for k, v in entry.items() if str(k) != "dn"
+                        str(k): _to_container_list(v)
+                        for k, v in entry.items()
+                        if str(k) != "dn"
                     }
                     compat_entry = _CompatibleEntry(dn, attrs)
                     self.entries.append(compat_entry)
@@ -212,7 +223,7 @@ class LdapTargetClient:
             self.config = config
             self._bind_dn = ""
             self._password = ""
-        elif u.is_dict_like(config):
+        elif isinstance(config, dict):
             config_map: dict[str, t.ContainerValue] = {
                 str(k): v for k, v in config.items()
             }
@@ -240,18 +251,7 @@ class LdapTargetClient:
             )
             self._bind_dn = ""
             self._password = ""
-        ldap_settings = FlextLdapSettings(
-            host=self.config.host,
-            port=self.config.port,
-            use_ssl=self.config.use_ssl,
-            use_tls=self.config.use_tls,
-            bind_dn=self._bind_dn,
-            bind_password=self._password,
-            timeout=self.config.timeout,
-            auto_bind=self.config.auto_bind,
-            auto_range=self.config.auto_range,
-        )
-        connection = FlextLdapConnection(config=ldap_settings)
+        connection = FlextLdapConnection()
         operations = FlextLdapOperations(connection=connection)
         self._operations = operations
         self._api: FlextLdap = FlextLdap(
@@ -308,7 +308,7 @@ class LdapTargetClient:
         try:
             ldap_attributes: dict[str, list[str]] = {}
             for key, value in attributes.items():
-                if u.is_list(value):
+                if _is_container_list(value):
                     ldap_attributes[key] = [str(v) for v in value]
                 else:
                     ldap_attributes[key] = [str(value)]
@@ -333,10 +333,17 @@ class LdapTargetClient:
                         "member": members or [],
                     }
                     group_entry = FlextLdapModels.Ldif.Entry(
-                        dn=FlextLdapModels.Ldif.DN(value=dn),
-                        attributes=FlextLdapModels.Ldif.Attributes(
-                            attributes=group_attrs
+                        dn=FlextLdapModels.Ldif.DN(
+                            value=dn,
+                            metadata=FlextLdapModels.Ldif.EntryMetadata(),
                         ),
+                        attributes=FlextLdapModels.Ldif.Attributes(
+                            attributes=group_attrs,
+                            attribute_metadata={},
+                            metadata=None,
+                        ),
+                        changetype=None,
+                        metadata=None,
                     )
                     result_op = self._operations.add(group_entry)
                     if result_op.is_success:
@@ -460,7 +467,7 @@ class LdapTargetClient:
         try:
             ldap_changes: dict[str, list[str]] = {}
             for key, value in changes.items():
-                if u.is_list(value):
+                if _is_container_list(value):
                     ldap_changes[key] = [str(v) for v in value]
                 else:
                     ldap_changes[key] = [str(value)]
@@ -514,7 +521,9 @@ class LdapTargetClient:
                 for entry in ldap_entries:
                     dn = str(entry.get("dn", ""))
                     attrs: dict[str, t.ContainerValue] = {
-                        str(k): v for k, v in entry.items() if str(k) != "dn"
+                        str(k): _to_container_list(v)
+                        for k, v in entry.items()
+                        if str(k) != "dn"
                     }
                     compat_entry = LdapSearchEntry(dn, attrs)
                     entries.append(compat_entry)
@@ -562,7 +571,7 @@ class LdapBaseSink(Sink):
         try:
             records_raw = _context.get("records", [])
             records: list[t.ContainerValue] = (
-                records_raw if u.is_list(records_raw) else []
+                records_raw if _is_container_list(records_raw) else []
             )
             logger.info(
                 f"Processing batch of {len(records)} records for stream: {self.stream_name}"
@@ -645,11 +654,11 @@ class LdapUsersSink(LdapBaseSink):
         )
         attributes: dict[str, t.ContainerValue] = {
             "objectClass": object_classes.copy()
-            if u.is_list(object_classes)
+            if _is_container_list(object_classes)
             else ["inetOrgPerson", "person"]
         }
         obj_classes = attributes.get("objectClass")
-        if u.is_list(obj_classes):
+        if _is_container_list(obj_classes):
             if "person" not in obj_classes:
                 obj_classes.append("person")
             if "inetOrgPerson" not in obj_classes:
@@ -708,7 +717,7 @@ class LdapUsersSink(LdapBaseSink):
             )
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.is_list(object_classes_raw)
+                if _is_container_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
             add_result = self.client.add_entry(user_dn, attributes, object_classes)
@@ -762,7 +771,7 @@ class LdapGroupsSink(LdapBaseSink):
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: list[str] = (
                 [str(oc) for oc in object_classes_raw]
-                if u.is_list(object_classes_raw)
+                if _is_container_list(object_classes_raw)
                 else ["groupOfNames"]
             )
             add_result = self.client.add_entry(group_dn, attributes, object_classes)
@@ -801,11 +810,11 @@ class LdapGroupsSink(LdapBaseSink):
         )
         attributes: dict[str, t.ContainerValue] = {
             "objectClass": object_classes.copy()
-            if u.is_list(object_classes)
+            if _is_container_list(object_classes)
             else ["groupOfNames"]
         }
         obj_classes = attributes.get("objectClass")
-        if u.is_list(obj_classes) and "groupOfNames" not in obj_classes:
+        if _is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
             obj_classes.append("groupOfNames")
         field_mapping = {
             "name": "cn",
@@ -815,7 +824,7 @@ class LdapGroupsSink(LdapBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.is_list(value):
+                if _is_container_list(value):
                     attributes[ldap_attr] = value
                 else:
                     attributes[ldap_attr] = [str(value)]
@@ -831,7 +840,7 @@ class LdapGroupsSink(LdapBaseSink):
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if u.is_list(value):
+                if _is_container_list(value):
                     attributes[mapped_attr] = value
                 else:
                     attributes[mapped_attr] = [str(value)]

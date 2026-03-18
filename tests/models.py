@@ -1,6 +1,6 @@
 """Test models for flext-target-ldap tests.
 
-Provides TestsFlextTargetLdapModels, extending FlextTestsModels with
+Provides TestsFlextTargetLdapModels, extending m with
 flext-target-ldap-specific models using COMPOSITION INHERITANCE.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -14,15 +14,15 @@ from flext_tests import m
 from flext_target_ldap.models import FlextTargetLdapModels
 
 
-class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
+class TestsFlextTargetLdapModels(m, FlextTargetLdapModels):
     """Models for flext-target-ldap tests using COMPOSITION INHERITANCE.
 
     MANDATORY: Inherits from BOTH:
-    1. FlextTestsModels - for test infrastructure (.Tests.*)
+    1. m - for test infrastructure (.Tests.*)
     2. FlextTargetLdapModels - for domain models
 
     Access patterns:
-    - tm.Tests.* (generic test models from FlextTestsModels)
+    - tm.Tests.* (generic test models from m)
     - tm.* (Target LDAP domain models)
     - m.* (production models via alternative alias)
     """

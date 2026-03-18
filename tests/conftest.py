@@ -18,8 +18,8 @@ from flext_target_ldap import LdapTargetClient
 
 
 @pytest.fixture(scope="session")
-def shared_ldap_container(flext_docker: FlextTestsDocker) -> Generator[str]:
-    """Managed LDAP container using centralized FlextTestsDocker with docker-compose."""
+def shared_ldap_container(flext_docker: tk) -> Generator[str]:
+    """Managed LDAP container using centralized tk with docker-compose."""
     compose_file = pathlib.Path(
         "~/flext/docker/docker-compose.openldap.yml"
     ).expanduser()

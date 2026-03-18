@@ -2,7 +2,7 @@
 
 This module provides test-specific types that extend the main flext-target-ldap types.
 Uses the unified namespace pattern t.Ldap.Tests.* for test-only objects.
-Combines FlextTestsTypes functionality with project-specific test types.
+Combines t functionality with project-specific test types.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -16,7 +16,7 @@ from flext_tests import t
 from flext_target_ldap.typings import FlextTargetLdapTypes
 
 
-class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
+class TestsFlextTargetLdapTypes(t, FlextTargetLdapTypes):
     """Test types for flext-target-ldap extending both test and project types."""
 
     class TargetLdap:

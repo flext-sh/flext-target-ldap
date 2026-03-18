@@ -11,7 +11,7 @@ from __future__ import annotations
 from flext_tests import c
 
 
-class TestsFlextTargetLdapConstants(FlextTestsConstants):
+class TestsFlextTargetLdapConstants(c):
     """Test constants for flexttargetldap."""
 
 
