@@ -12,7 +12,6 @@ from collections.abc import Generator
 from unittest.mock import MagicMock
 
 import pytest
-from flext_tests import FlextTestsDocker
 from pydantic import TypeAdapter
 
 from flext_target_ldap import LdapTargetClient

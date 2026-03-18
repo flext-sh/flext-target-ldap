@@ -15,7 +15,7 @@ from typing import override
 from flext_core import r, t
 from flext_ldap import FlextLdapModels, FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
-from pydantic import TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from flext_target_ldap.constants import c
 
@@ -36,6 +36,36 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     def __init__(self) -> None:
         """Initialize LDAP target utilities."""
         super().__init__()
+
+    @staticmethod
+    def _coerce_container_value(
+        value: t.ContainerValue | t.NormalizedValue | BaseModel,
+    ) -> t.ContainerValue | None:
+        if isinstance(value, BaseModel):
+            return FlextTargetLdapUtilities._coerce_container_value(value.model_dump())
+        if isinstance(value, (str, int, float, bool, datetime)):
+            return value
+        if isinstance(value, list):
+            normalized_list: list[t.ContainerValue] = []
+            for item in value:
+                if isinstance(item, (str, int, float, bool, datetime, list, dict)):
+                    coerced_item = FlextTargetLdapUtilities._coerce_container_value(
+                        item
+                    )
+                    if coerced_item is not None:
+                        normalized_list.append(coerced_item)
+            return normalized_list
+        if isinstance(value, Mapping):
+            normalized_dict: dict[str, t.ContainerValue] = {}
+            for key, item in value.items():
+                if isinstance(item, (str, int, float, bool, datetime, list, dict)):
+                    coerced_item = FlextTargetLdapUtilities._coerce_container_value(
+                        item
+                    )
+                    if coerced_item is not None:
+                        normalized_dict[str(key)] = coerced_item
+            return normalized_dict
+        return None
 
     class TargetLdap:
         """Singer protocol utilities for target operations."""
@@ -92,7 +122,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         f"RECORD message missing '{field}' field"
                     )
             record = message["record"]
-            if not u.is_dict_like(record):
+            if not isinstance(record, Mapping):
                 return r[Mapping[str, t.ContainerValue]].fail(
                     "Record data must be a dictionary"
                 )
@@ -122,7 +152,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         f"SCHEMA message missing '{field}' field"
                     )
             schema = message["schema"]
-            if not u.is_dict_like(schema):
+            if not isinstance(schema, Mapping):
                 return r[Mapping[str, t.ContainerValue]].fail(
                     "Schema data must be a dictionary"
                 )
@@ -206,7 +236,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     if value is None:
                         continue
                     ldap_attr = mapping.get(key, key)
-                    if u.is_list(value):
+                    if isinstance(value, list):
                         ldap_values = [
                             str(item).encode("utf-8")
                             for item in value
@@ -247,7 +277,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             object_classes = record.get("objectClass") or record.get("objectclass")
             if object_classes:
-                if u.is_list(object_classes):
+                if isinstance(object_classes, list):
                     return [str(oc) for oc in object_classes if oc]
                 return [str(object_classes)]
             if default_object_classes:
@@ -361,7 +391,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             properties: dict[str, t.ContainerValue] = {}
             if u.is_dict_like(raw_props):
                 for k, v in raw_props.items():
-                    properties[str(k)] = v
+                    coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
+                    if coerced_value is not None:
+                        properties[str(k)] = coerced_value
             if not properties:
                 return r[bool].fail("Schema must have properties")
             has_dn_field = "dn" in properties
@@ -564,12 +596,16 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 return {}
             bookmarks_map: dict[str, t.ContainerValue] = {}
             for k, v in bookmarks.items():
-                bookmarks_map[str(k)] = v
+                coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
+                if coerced_value is not None:
+                    bookmarks_map[str(k)] = coerced_value
             stream_state_data = bookmarks_map.get(stream_name)
             if u.is_dict_like(stream_state_data):
                 stream_state: dict[str, t.ContainerValue] = {}
                 for k, v in stream_state_data.items():
-                    stream_state[str(k)] = v
+                    coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
+                    if coerced_value is not None:
+                        stream_state[str(k)] = coerced_value
                 return stream_state
             return {}
 
@@ -595,7 +631,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             bookmarks_dict: dict[str, t.ContainerValue] = {}
             if u.is_dict_like(bookmarks):
                 for k, v in bookmarks.items():
-                    bookmarks_dict[str(k)] = v
+                    coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
+                    if coerced_value is not None:
+                        bookmarks_dict[str(k)] = coerced_value
             bookmarks_dict[stream_name] = dict(stream_state)
             state_dict["bookmarks"] = bookmarks_dict
             return state_dict
@@ -795,7 +833,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             raw_object_classes = config.get("object_classes")
-            if u.is_list(raw_object_classes):
+            if isinstance(raw_object_classes, list):
                 return [str(v) for v in raw_object_classes]
             return ["top"]
 

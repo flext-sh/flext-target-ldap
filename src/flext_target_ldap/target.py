@@ -19,6 +19,7 @@ from flext_meltano import FlextMeltanoModels
 from pydantic import TypeAdapter, ValidationError
 
 from flext_target_ldap.application import LDAPTargetOrchestrator
+from flext_target_ldap.catalog import build_singer_catalog
 from flext_target_ldap.constants import c
 from flext_target_ldap.infrastructure import get_flext_target_ldap_container
 from flext_target_ldap.settings import FlextTargetLdapSettings
@@ -40,7 +41,7 @@ class _DefaultCliHelper:
 
     def print(self, msg: str) -> None:
         """Print a message."""
-        self._logger.info("%s", msg)
+        self._logger.info(msg)
 
 
 def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
@@ -50,7 +51,7 @@ def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
         class _QuietHelper(_DefaultCliHelper):
             @override
             def print(self, msg: str) -> None:
-                self._logger.debug("%s", msg)
+                self._logger.debug(msg)
 
         return _QuietHelper()
     return _DefaultCliHelper()
@@ -105,50 +106,7 @@ class TargetLDAP(Target):
     @property
     def singer_catalog(self) -> dict[str, t.ContainerValue]:
         """Return the Singer catalog for this target."""
-        return {
-            "streams": [
-                {
-                    "tap_stream_id": "users",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "username": {"type": "string"},
-                            "email": {"type": "string"},
-                            "first_name": {"type": "string"},
-                            "last_name": {"type": "string"},
-                            "full_name": {"type": "string"},
-                            "phone": {"type": "string"},
-                            "department": {"type": "string"},
-                            "title": {"type": "string"},
-                        },
-                        "required": ["username"],
-                    },
-                },
-                {
-                    "tap_stream_id": "groups",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "description": {"type": "string"},
-                            "members": {"type": "array", "items": {"type": "string"}},
-                        },
-                        "required": ["name"],
-                    },
-                },
-                {
-                    "tap_stream_id": "organizational_units",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "description": {"type": "string"},
-                        },
-                        "required": ["name"],
-                    },
-                },
-            ]
-        }
+        return build_singer_catalog()
 
     def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Return the appropriate sink class for the stream."""
@@ -160,10 +118,10 @@ class TargetLDAP(Target):
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
             logger.warning(
-                "No specific sink found for stream '%s', using base sink", stream_name
+                f"No specific sink found for stream '{stream_name}', using base sink"
             )
             return LDAPBaseSink
-        logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
+        logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
         return sink_class
 
     def setup(self) -> None:
@@ -173,7 +131,7 @@ class TargetLDAP(Target):
         self._container = get_flext_target_ldap_container()
         logger.info("DI container initialized successfully")
         host = str(self.config.get("host", "localhost"))
-        logger.info("LDAP target setup completed for host: %s", host)
+        logger.info(f"LDAP target setup completed for host: {host}")
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""
@@ -249,7 +207,7 @@ def _get_ldap_api() -> _LdapApi | None:
     except (ImportError, AttributeError) as exc:
         logger.warning(
             "Failed to load optional LDAP API module",
-            error=str(exc),
+            error=exc,
             error_type=type(exc).__name__,
         )
         return None
@@ -337,8 +295,17 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                         line
                     )
                     stream = record_msg.stream or current_stream or "users"
+                    normalized_record: dict[str, t.ContainerValue] = {}
+                    for key, value in record_msg.record.items():
+                        match value:
+                            case bool() | int() | float() | str() | dict() | list():
+                                normalized_record[str(key)] = value
+                            case Path():
+                                normalized_record[str(key)] = str(value)
+                            case _:
+                                normalized_record[str(key)] = str(value)
                     _process_record_message(
-                        record_msg.record, stream, cfg, api, seen_dns
+                        normalized_record, stream, cfg, api, seen_dns
                     )
             except (
                 ValueError,

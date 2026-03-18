@@ -25,6 +25,7 @@ if TYPE_CHECKING:
         __version_info__,
     )
     from flext_target_ldap.application.orchestrator import LDAPTargetOrchestrator
+    from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.client import (
         LDAP3_MODULE,
         LDAPClient,
@@ -46,6 +47,7 @@ if TYPE_CHECKING:
         SingerPropertyDefinition,
         SingerSchemaDefinition,
     )
+    from flext_target_ldap.processing_result import LdapProcessingCounters
     from flext_target_ldap.protocols import FlextTargetLdapProtocols, p
     from flext_target_ldap.settings import (
         FlextTargetLdapSettings,
@@ -229,6 +231,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.target_client",
         "LdapOrganizationalUnitsSink",
     ),
+    "LdapProcessingCounters": (
+        "flext_target_ldap.processing_result",
+        "LdapProcessingCounters",
+    ),
     "LdapProcessingResult": ("flext_target_ldap.target_client", "LdapProcessingResult"),
     "LdapSearchEntry": ("flext_target_ldap.target_client", "LdapSearchEntry"),
     "LdapTargetApiService": (
@@ -293,6 +299,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "__version__": ("flext_target_ldap.__version__", "__version__"),
     "__version_info__": ("flext_target_ldap.__version__", "__version_info__"),
     "application": ("flext_target_ldap.application", ""),
+    "build_singer_catalog": ("flext_target_ldap.catalog", "build_singer_catalog"),
     "c": ("flext_target_ldap.constants", "c"),
     "configure_flext_target_ldap_dependencies": (
         "flext_target_ldap.infrastructure.di_container",
@@ -367,6 +374,7 @@ __all__ = [
     "LdapGroupsSink",
     "LdapOperationStatisticsModel",
     "LdapOrganizationalUnitsSink",
+    "LdapProcessingCounters",
     "LdapProcessingResult",
     "LdapSearchEntry",
     "LdapTargetApiService",
@@ -401,6 +409,7 @@ __all__ = [
     "__version__",
     "__version_info__",
     "application",
+    "build_singer_catalog",
     "c",
     "configure_flext_target_ldap_dependencies",
     "create_default_ldap_target_config",

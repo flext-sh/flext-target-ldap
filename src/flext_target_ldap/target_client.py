@@ -21,7 +21,9 @@ from flext_ldap import (
 )
 from flext_ldif import FlextLdif
 
+from flext_target_ldap.catalog import build_singer_catalog
 from flext_target_ldap.constants import c
+from flext_target_ldap.processing_result import LdapProcessingCounters
 from flext_target_ldap.settings import FlextTargetLdapSettings
 from flext_target_ldap.sinks import Sink, Target
 
@@ -38,7 +40,7 @@ class LdapSearchEntry:
         self.attributes = attributes
 
 
-class LdapProcessingResult:
+class LdapProcessingResult(LdapProcessingCounters):
     """Result tracking for LDAP processing operations."""
 
     @override
@@ -48,24 +50,6 @@ class LdapProcessingResult:
         self.success_count: int = 0
         self.error_count: int = 0
         self.errors: list[str] = []
-
-    @property
-    def success_rate(self) -> float:
-        """Calculate success rate as percentage."""
-        if self.processed_count == 0:
-            return 0.0
-        return self.success_count / self.processed_count * 100.0
-
-    def add_error(self, error_message: str) -> None:
-        """Record a failed operation."""
-        self.processed_count += 1
-        self.error_count += 1
-        self.errors.append(error_message)
-
-    def add_success(self) -> None:
-        """Record a successful operation."""
-        self.processed_count += 1
-        self.success_count += 1
 
 
 class _CompatibleEntry:
@@ -275,9 +259,7 @@ class LdapTargetClient:
         )
         self._current_session_id: str | None = None
         logger.info(
-            "Initialized LDAP client using flext-ldap API for %s:%d",
-            self.config.host,
-            self.config.port,
+            f"Initialized LDAP client using flext-ldap API for {self.config.host}:{self.config.port}"
         )
 
     @property
@@ -332,7 +314,7 @@ class LdapTargetClient:
                     ldap_attributes[key] = [str(value)]
             if object_classes:
                 ldap_attributes["objectClass"] = object_classes
-            logger.info("Adding LDAP entry using flext-ldap API: %s", dn)
+            logger.info(f"Adding LDAP entry using flext-ldap API: {dn}")
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
@@ -379,9 +361,7 @@ class LdapTargetClient:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             self._api.disconnect()
             logger.info(
-                "LDAP connectivity validated for %s:%d",
-                self.config.host,
-                self.config.port,
+                f"LDAP connectivity validated for {self.config.host}:{self.config.port}"
             )
             return r[bool].ok(value=True)
         except (
@@ -402,14 +382,14 @@ class LdapTargetClient:
         try:
             if not dn:
                 return r[bool].fail("DN required")
-            logger.info("Deleting LDAP entry using flext-ldap API: %s", dn)
+            logger.info(f"Deleting LDAP entry using flext-ldap API: {dn}")
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
                 result = self._api.delete(dn)
                 if result.is_success:
-                    logger.debug("Successfully deleted LDAP entry: %s", dn)
+                    logger.debug(f"Successfully deleted LDAP entry: {dn}")
                     return r[bool].ok(value=True)
                 return r[bool].fail(result.error or "Delete failed")
             finally:
@@ -428,7 +408,7 @@ class LdapTargetClient:
         try:
             if not dn:
                 return r[bool].fail("DN required")
-            logger.info("Checking if LDAP entry exists: %s", dn)
+            logger.info(f"Checking if LDAP entry exists: {dn}")
             search_result = self.search_entry(
                 base_dn=dn, search_filter="(objectClass=*)", attributes=["dn"]
             )
@@ -466,7 +446,7 @@ class LdapTargetClient:
         try:
             if not dn:
                 return r[LdapSearchEntry | None].fail("DN required")
-            logger.info("Getting LDAP entry: %s", dn)
+            logger.info(f"Getting LDAP entry: {dn}")
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
             if search_result.is_success and search_result.value:
                 return r[LdapSearchEntry | None].ok(search_result.value[0])
@@ -484,14 +464,14 @@ class LdapTargetClient:
                     ldap_changes[key] = [str(v) for v in value]
                 else:
                     ldap_changes[key] = [str(value)]
-            logger.info("Modifying LDAP entry using flext-ldap API: %s", dn)
+            logger.info(f"Modifying LDAP entry using flext-ldap API: {dn}")
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
                 result: r[bool] = r[bool].ok(value=True)
                 if result.is_success:
-                    logger.debug("Successfully modified LDAP entry: %s", dn)
+                    logger.debug(f"Successfully modified LDAP entry: {dn}")
                     return r[bool].ok(value=True)
             finally:
                 self._api.disconnect()
@@ -513,9 +493,7 @@ class LdapTargetClient:
             if not base_dn:
                 return r[list[LdapSearchEntry]].fail("Base DN required")
             logger.info(
-                "Searching LDAP entries using flext-ldap API: %s with filter %s",
-                base_dn,
-                search_filter,
+                f"Searching LDAP entries using flext-ldap API: {base_dn} with filter {search_filter}"
             )
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
@@ -540,7 +518,7 @@ class LdapTargetClient:
                     }
                     compat_entry = LdapSearchEntry(dn, attrs)
                     entries.append(compat_entry)
-                logger.debug("Successfully found %d LDAP entries", len(entries))
+                logger.debug(f"Successfully found {len(entries)} LDAP entries")
                 return r[list[LdapSearchEntry]].ok(entries)
             logger.debug("No LDAP entries found")
             return r[list[LdapSearchEntry]].ok([])
@@ -579,7 +557,7 @@ class LdapBaseSink(Sink):
         setup_result: r[LdapTargetClient] = self.setup_client()
         if not setup_result.is_success:
             setup_error = setup_result.error or ""
-            logger.error("Cannot process batch: %s", setup_error)
+            logger.error(f"Cannot process batch: {setup_error}")
             return
         try:
             records_raw = _context.get("records", [])
@@ -587,18 +565,14 @@ class LdapBaseSink(Sink):
                 records_raw if u.is_list(records_raw) else []
             )
             logger.info(
-                "Processing batch of %d records for stream: %s",
-                len(records),
-                self.stream_name,
+                f"Processing batch of {len(records)} records for stream: {self.stream_name}"
             )
             for record in records:
                 typed_record = _container_mapping_from_value(record)
                 if typed_record:
                     self.process_record(typed_record, _context)
             logger.info(
-                "Batch processing completed. Success: %d, Errors: %d",
-                self._processing_result.success_count,
-                self._processing_result.error_count,
+                f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}"
             )
         finally:
             self.teardown_client()
@@ -644,7 +618,7 @@ class LdapBaseSink(Sink):
                 return r[LdapTargetClient].fail(
                     f"LDAP connection failed: {connect_result.error}"
                 )
-            logger.info("LDAP client setup successful for stream: %s", self.stream_name)
+            logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return r[LdapTargetClient].ok(self.client)
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"LDAP client setup failed: {e}"
@@ -656,7 +630,7 @@ class LdapBaseSink(Sink):
         if self.client:
             self.client.disconnect()
             self.client = None
-            logger.info("LDAP client disconnected for stream: %s", self.stream_name)
+            logger.info(f"LDAP client disconnected for stream: {self.stream_name}")
 
 
 class LdapUsersSink(LdapBaseSink):
@@ -740,13 +714,13 @@ class LdapUsersSink(LdapBaseSink):
             add_result = self.client.add_entry(user_dn, attributes, object_classes)
             if add_result.is_success:
                 self._processing_result.add_success()
-                logger.debug("User entry added successfully: %s", user_dn)
+                logger.debug(f"User entry added successfully: {user_dn}")
                 return r[bool].ok(value=True)
             if self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(user_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
-                    logger.debug("User entry modified successfully: %s", user_dn)
+                    logger.debug(f"User entry modified successfully: {user_dn}")
                     return r[bool].ok(value=True)
                 self._processing_result.add_error(
                     f"Failed to modify user {user_dn}: {modify_result.error}"
@@ -794,13 +768,13 @@ class LdapGroupsSink(LdapBaseSink):
             add_result = self.client.add_entry(group_dn, attributes, object_classes)
             if add_result.is_success:
                 self._processing_result.add_success()
-                logger.debug("Group entry added successfully: %s", group_dn)
+                logger.debug(f"Group entry added successfully: {group_dn}")
                 return r[bool].ok(value=True)
             if self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(group_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
-                    logger.debug("Group entry modified successfully: %s", group_dn)
+                    logger.debug(f"Group entry modified successfully: {group_dn}")
                     return r[bool].ok(value=True)
                 self._processing_result.add_error(
                     f"Failed to modify group {group_dn}: {modify_result.error}"
@@ -888,13 +862,13 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
             add_result: r[bool] = self.client.add_entry(ou_dn, attributes)
             if add_result.is_success:
                 self._processing_result.add_success()
-                logger.debug("OU entry added successfully: %s", ou_dn)
+                logger.debug(f"OU entry added successfully: {ou_dn}")
                 return r[bool].ok(value=True)
             if self._target.config.get("update_existing_entries", False):
                 modify_result = self.client.modify_entry(ou_dn, attributes)
                 if modify_result.is_success:
                     self._processing_result.add_success()
-                    logger.debug("OU entry modified successfully: %s", ou_dn)
+                    logger.debug(f"OU entry modified successfully: {ou_dn}")
                     return r[bool].ok(value=True)
                 self._processing_result.add_error(
                     f"Failed to modify OU {ou_dn}: {modify_result.error}"
@@ -966,50 +940,7 @@ class TargetLdap(Target):
     @property
     def singer_catalog(self) -> dict[str, t.ContainerValue]:
         """Return the Singer catalog for this target."""
-        return {
-            "streams": [
-                {
-                    "tap_stream_id": "users",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "username": {"type": "string"},
-                            "email": {"type": "string"},
-                            "first_name": {"type": "string"},
-                            "last_name": {"type": "string"},
-                            "full_name": {"type": "string"},
-                            "phone": {"type": "string"},
-                            "department": {"type": "string"},
-                            "title": {"type": "string"},
-                        },
-                        "required": ["username"],
-                    },
-                },
-                {
-                    "tap_stream_id": "groups",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "description": {"type": "string"},
-                            "members": {"type": "array", "items": {"type": "string"}},
-                        },
-                        "required": ["name"],
-                    },
-                },
-                {
-                    "tap_stream_id": "organizational_units",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "name": {"type": "string"},
-                            "description": {"type": "string"},
-                        },
-                        "required": ["name"],
-                    },
-                },
-            ]
-        }
+        return build_singer_catalog()
 
     def cli(self) -> None:
         """Run CLI."""
@@ -1025,10 +956,10 @@ class TargetLdap(Target):
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
             logger.warning(
-                "No specific sink found for stream '%s', using base sink", stream_name
+                f"No specific sink found for stream '{stream_name}', using base sink"
             )
             return LdapBaseSink
-        logger.info("Using %s for stream '%s'", sink_class.__name__, stream_name)
+        logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
         return sink_class
 
     def setup(self) -> None:
@@ -1037,7 +968,7 @@ class TargetLdap(Target):
         logger.info("DI container initialized successfully")
         host = self.config.get("host", c.Platform.DEFAULT_HOST)
         host_name = host if isinstance(host, str) else c.Platform.DEFAULT_HOST
-        logger.info("LDAP target setup completed for host: %s", host_name)
+        logger.info(f"LDAP target setup completed for host: {host_name}")
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""
