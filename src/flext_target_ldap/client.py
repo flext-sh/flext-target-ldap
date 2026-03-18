@@ -33,7 +33,9 @@ class LDAPConnection(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: list[t.ContainerValue]
+
+    @property
+    def entries(self) -> list[t.ContainerValue]: ...
 
     def add(
         self,
@@ -211,7 +213,7 @@ class LDAPClient:
             logger.exception("Failed to check entry existence: %s", dn)
             return r[bool].fail(f"Entry exists check failed: {e}")
 
-    def get_connection(self) -> AbstractContextManager[LDAPConnection]:
+    def get_connection(self) -> AbstractContextManager[ldap3.Connection]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
 
         Returns a real LDAP connection for production use.
@@ -222,7 +224,7 @@ class LDAPClient:
         """
 
         @contextmanager
-        def connection_context() -> Generator[LDAPConnection]:
+        def connection_context() -> Generator[ldap3.Connection]:
             server_pool = ldap3.ServerPool([
                 ldap3.Server(
                     self.config.host,
