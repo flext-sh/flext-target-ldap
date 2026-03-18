@@ -1,0 +1,40 @@
+src/flext_target_ldap/singer/target.py
+  7b00d79ef8e2013c 14
+src/flext_target_ldap/target.py
+  7b00d79ef8e2013c 11
+src/flext_target_ldap/utilities.py
+  b924db76a65efc74 42-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.15",
+  "base_commit_sha": "e1a9480231a0da0e711bfe7987be20bcec647f72",
+  "prompts": {
+    "7b00d79ef8e2013c": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2fe4f524cffe2P0ZrkPayKFWfS",
+        "model": "anthropic/claude-opus-4-6"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 1,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    },
+    "b924db76a65efc74": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2fd5e4731ffei3EkioPKPmTa7N",
+        "model": "anthropic/claude-haiku-4-5"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
