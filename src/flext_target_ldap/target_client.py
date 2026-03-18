@@ -994,6 +994,29 @@ class TargetLdap(Target):
         logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
         return sink_class
 
+    def get_sink(self, stream_name: str) -> Sink:
+        """Get a sink instance for the stream, processing configuration as needed."""
+        dn_templates = self.config.get("dn_templates", {})
+        if isinstance(dn_templates, dict) and stream_name in dn_templates:
+            self.config[f"{stream_name}_dn_template"] = dn_templates[stream_name]
+
+        default_object_classes = self.config.get("default_object_classes", {})
+        if (
+            isinstance(default_object_classes, dict)
+            and stream_name in default_object_classes
+        ):
+            self.config[f"{stream_name}_object_classes"] = default_object_classes[
+                stream_name
+            ]
+
+        sink_class = self.get_sink_class(stream_name)
+        return sink_class(
+            target=self,
+            stream_name=stream_name,
+            schema=self.config.get(f"{stream_name}_schema", {}),
+            key_properties=self.config.get(f"{stream_name}_key_properties", []),
+        )
+
     def setup(self) -> None:
         """Set up the LDAP target."""
         self._container = FlextContainer.get_global()

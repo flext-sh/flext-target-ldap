@@ -33,9 +33,7 @@ class LDAPConnection(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-
-    @property
-    def entries(self) -> list[t.ContainerValue]: ...
+    entries: list[t.ContainerValue]
 
     def add(
         self,

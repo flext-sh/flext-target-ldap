@@ -45,7 +45,7 @@ class TestDataTransformationEngine:
         }
         result = engine.transform(entry)
         assert result.is_success
-        transform_result = result.data
+        transform_result = result.value
         assert transform_result is not None
         assert (
             transform_result.transformed_data["dn"]
@@ -71,7 +71,7 @@ class TestDataTransformationEngine:
         }
         result = engine.transform(entry)
         assert result.is_success
-        transform_result = result.data
+        transform_result = result.value
         assert transform_result is not None
         object_classes = transform_result.transformed_data["objectClass"]
         if "inetOrgPerson" not in str(object_classes):
@@ -99,7 +99,7 @@ class TestDataTransformationEngine:
         }
         result = engine.transform(entry)
         assert result.is_success
-        transform_result = result.data
+        transform_result = result.value
         assert transform_result is not None
         assert len(transform_result.applied_rules) > 0
         expected_object_class = ["user"]
@@ -127,7 +127,7 @@ class TestDataTransformationEngine:
         }
         result = engine.transform(entry)
         assert result.is_success
-        transform_result = result.data
+        transform_result = result.value
         assert transform_result is not None
         if "cn" not in transform_result.transformed_data:
             msg: str = f"Expected {'cn'} in {transform_result.transformed_data}"
@@ -147,7 +147,7 @@ class TestDataTransformationEngine:
         }
         result = engine.transform(entry)
         assert result.is_success
-        transform_result = result.data
+        transform_result = result.value
         assert transform_result is not None
         if transform_result.transformed_data["objectClass"] != ["orclUser"]:
             msg: str = f"Expected {['orclUser']}, got {transform_result.transformed_data['objectClass']}"
@@ -171,7 +171,7 @@ class TestDataTransformationEngine:
         for entry in entries:
             result = engine.transform(entry)
             assert result.is_success
-            transform_result = result.data
+            transform_result = result.value
             assert transform_result is not None
             applied_rules_count += len(transform_result.applied_rules)
         assert applied_rules_count >= 2
@@ -320,7 +320,7 @@ class TestIntegratedTransformation:
         }
         transformation_result = transformation_engine.transform(oracle_entry)
         assert transformation_result.is_success
-        transform = transformation_result.data
+        transform = transformation_result.value
         assert transform is not None
         assert len(transform.applied_rules) > 0
         transformed_entry = transform.transformed_data
@@ -364,6 +364,6 @@ class TestIntegratedTransformation:
         for entry in test_entries:
             result = engine.transform(entry)
             assert result.is_success
-            transform = result.data
+            transform = result.value
             assert transform is not None
             assert transform.transformed_data is not None

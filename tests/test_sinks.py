@@ -151,9 +151,9 @@ class TestUsersSink:
         record = {"uid": "testuser", "cn": "Test User"}
         result = users_sink.build_dn(record)
         assert result.is_success
-        if result.data != "uid=testuser,dc=example,dc=com":
+        if result.value != "uid=testuser,dc=example,dc=com":
             dn_result_msg: str = (
-                f"Expected {'uid=testuser,dc=example,dc=com'}, got {result.data}"
+                f"Expected {'uid=testuser,dc=example,dc=com'}, got {result.value}"
             )
             raise AssertionError(dn_result_msg)
 
@@ -178,19 +178,21 @@ class TestUsersSink:
         }
         result = users_sink.build_attributes(record)
         assert result.is_success
-        assert result.data is not None
-        if result.data["uid"] != ["testuser"]:
-            uid_msg: str = f"Expected {['testuser']}, got {result.data['uid']}"
+        assert result.value is not None
+        if result.value["uid"] != ["testuser"]:
+            uid_msg: str = f"Expected {['testuser']}, got {result.value['uid']}"
             raise AssertionError(uid_msg)
-        assert result.data["cn"] == ["Test User"]
-        if result.data["mail"] != ["test@example.com"]:
+        assert result.value["cn"] == ["Test User"]
+        if result.value["mail"] != ["test@example.com"]:
             mail_msg: str = (
-                f"Expected {['test@example.com']}, got {result.data['mail']}"
+                f"Expected {['test@example.com']}, got {result.value['mail']}"
             )
             raise AssertionError(mail_msg)
-        assert result.data["sn"] == ["User"]
-        if result.data["givenName"] != ["Test"]:
-            given_name_msg: str = f"Expected {['Test']}, got {result.data['givenName']}"
+        assert result.value["sn"] == ["User"]
+        if result.value["givenName"] != ["Test"]:
+            given_name_msg: str = (
+                f"Expected {['Test']}, got {result.value['givenName']}"
+            )
             raise AssertionError(given_name_msg)
 
     def test_users_build_attributes_multivalued(self, users_sink: UsersSink) -> None:
@@ -202,13 +204,13 @@ class TestUsersSink:
         }
         result = users_sink.build_attributes(record)
         assert result.is_success
-        assert result.data is not None
-        if result.data["uid"] != ["testuser"]:
-            uid_msg2: str = f"Expected {['testuser']}, got {result.data['uid']}"
+        assert result.value is not None
+        if result.value["uid"] != ["testuser"]:
+            uid_msg2: str = f"Expected {['testuser']}, got {result.value['uid']}"
             raise AssertionError(uid_msg2)
-        assert result.data["mail"] == ["test1@example.com", "test2@example.com"]
-        if result.data["telephoneNumber"] != ["123-456-7890", "098-765-4321"]:
-            phone_msg: str = f"Expected {['123-456-7890', '098-765-4321']}, got {result.data['telephoneNumber']}"
+        assert result.value["mail"] == ["test1@example.com", "test2@example.com"]
+        if result.value["telephoneNumber"] != ["123-456-7890", "098-765-4321"]:
+            phone_msg: str = f"Expected {['123-456-7890', '098-765-4321']}, got {result.value['telephoneNumber']}"
             raise AssertionError(phone_msg)
 
     def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
@@ -268,9 +270,9 @@ class TestGroupsSink:
         record = {"cn": "testgroup", "description": "Test Group"}
         result = groups_sink.build_dn(record)
         assert result.is_success
-        if result.data != "cn=testgroup,dc=example,dc=com":
+        if result.value != "cn=testgroup,dc=example,dc=com":
             group_dn_msg: str = (
-                f"Expected {'cn=testgroup,dc=example,dc=com'}, got {result.data}"
+                f"Expected {'cn=testgroup,dc=example,dc=com'}, got {result.value}"
             )
             raise AssertionError(group_dn_msg)
 
@@ -293,18 +295,18 @@ class TestGroupsSink:
         }
         result = groups_sink.build_attributes(record)
         assert result.is_success
-        assert result.data is not None
-        if result.data["cn"] != ["testgroup"]:
-            group_cn_msg: str = f"Expected {['testgroup']}, got {result.data['cn']}"
+        assert result.value is not None
+        if result.value["cn"] != ["testgroup"]:
+            group_cn_msg: str = f"Expected {['testgroup']}, got {result.value['cn']}"
             raise AssertionError(group_cn_msg)
-        assert result.data["description"] == ["Test Group"]
+        assert result.value["description"] == ["Test Group"]
         expected_members = [
             "uid=user1,dc=example,dc=com",
             "uid=user2,dc=example,dc=com",
         ]
-        if result.data["member"] != expected_members:
+        if result.value["member"] != expected_members:
             members_msg: str = (
-                f"Expected {expected_members}, got {result.data['member']}"
+                f"Expected {expected_members}, got {result.value['member']}"
             )
             raise AssertionError(members_msg)
 
@@ -343,9 +345,9 @@ class TestOrganizationalUnitsSink:
         record = {"ou": "testou", "description": "Test OU"}
         result = ou_sink.build_dn(record)
         assert result.is_success
-        if result.data != "ou=testou,dc=example,dc=com":
+        if result.value != "ou=testou,dc=example,dc=com":
             ou_dn_msg: str = (
-                f"Expected {'ou=testou,dc=example,dc=com'}, got {result.data}"
+                f"Expected {'ou=testou,dc=example,dc=com'}, got {result.value}"
             )
             raise AssertionError(ou_dn_msg)
 
@@ -374,23 +376,23 @@ class TestOrganizationalUnitsSink:
         }
         result = ou_sink.build_attributes(record)
         assert result.is_success
-        assert result.data is not None
-        if result.data["ou"] != ["testou"]:
-            ou_attr_msg: str = f"Expected {['testou']}, got {result.data['ou']}"
+        assert result.value is not None
+        if result.value["ou"] != ["testou"]:
+            ou_attr_msg: str = f"Expected {['testou']}, got {result.value['ou']}"
             raise AssertionError(ou_attr_msg)
-        assert result.data["description"] == ["Test OU"]
-        if result.data["telephoneNumber"] != ["123-456-7890"]:
+        assert result.value["description"] == ["Test OU"]
+        if result.value["telephoneNumber"] != ["123-456-7890"]:
             phone_attr_msg: str = (
-                f"Expected {['123-456-7890']}, got {result.data['telephoneNumber']}"
+                f"Expected {['123-456-7890']}, got {result.value['telephoneNumber']}"
             )
             raise AssertionError(phone_attr_msg)
-        assert result.data["street"] == ["123 Test St"]
-        if result.data["l"] != ["Test City"]:
-            city_msg: str = f"Expected {['Test City']}, got {result.data['l']}"
+        assert result.value["street"] == ["123 Test St"]
+        if result.value["l"] != ["Test City"]:
+            city_msg: str = f"Expected {['Test City']}, got {result.value['l']}"
             raise AssertionError(city_msg)
-        assert result.data["st"] == ["Test State"]
-        if result.data["postalCode"] != ["12345"]:
-            postal_msg: str = f"Expected {['12345']}, got {result.data['postalCode']}"
+        assert result.value["st"] == ["Test State"]
+        if result.value["postalCode"] != ["12345"]:
+            postal_msg: str = f"Expected {['12345']}, got {result.value['postalCode']}"
             raise AssertionError(postal_msg)
 
     def test_ou_get_object_classes_default(
@@ -428,9 +430,9 @@ class TestLDAPGenericSink:
         record = {"dn": "cn=test,dc=example,dc=com"}
         result = generic_sink.build_dn(record)
         assert result.is_success
-        if result.data != "cn=test,dc=example,dc=com":
+        if result.value != "cn=test,dc=example,dc=com":
             generic_dn_msg: str = (
-                f"Expected {'cn=test,dc=example,dc=com'}, got {result.data}"
+                f"Expected {'cn=test,dc=example,dc=com'}, got {result.value}"
             )
             raise AssertionError(generic_dn_msg)
 
@@ -439,9 +441,9 @@ class TestLDAPGenericSink:
         record = {"id": "testentry", "cn": "Test Entry"}
         result = generic_sink.build_dn(record)
         assert result.is_success
-        if result.data != "cn=testentry,dc=example,dc=com":
+        if result.value != "cn=testentry,dc=example,dc=com":
             generic_id_msg: str = (
-                f"Expected {'cn=testentry,dc=example,dc=com'}, got {result.data}"
+                f"Expected {'cn=testentry,dc=example,dc=com'}, got {result.value}"
             )
             raise AssertionError(generic_id_msg)
 
@@ -468,22 +470,22 @@ class TestLDAPGenericSink:
         }
         result = generic_sink.build_attributes(record)
         assert result.is_success
-        assert result.data is not None
-        if result.data["id"] != ["testentry"]:
+        assert result.value is not None
+        if result.value["id"] != ["testentry"]:
             generic_id_attr_msg: str = (
-                f"Expected {['testentry']}, got {result.data['id']}"
+                f"Expected {['testentry']}, got {result.value['id']}"
             )
             raise AssertionError(generic_id_attr_msg)
-        assert result.data["cn"] == ["Test Entry"]
-        if result.data["description"] != ["A test entry"]:
+        assert result.value["cn"] == ["Test Entry"]
+        if result.value["description"] != ["A test entry"]:
             desc_msg: str = (
-                f"Expected {['A test entry']}, got {result.data['description']}"
+                f"Expected {['A test entry']}, got {result.value['description']}"
             )
             raise AssertionError(desc_msg)
-        if "_sdc_table_version" in result.data:
-            sdc_msg: str = f"Expected '_sdc_table_version' not in {result.data}"
+        if "_sdc_table_version" in result.value:
+            sdc_msg: str = f"Expected '_sdc_table_version' not in {result.value}"
             raise AssertionError(sdc_msg)
-        assert "_sdc_received_at" not in result.data
+        assert "_sdc_received_at" not in result.value
 
     def test_generic_get_object_classes_from_record(
         self, generic_sink: LDAPBaseSink

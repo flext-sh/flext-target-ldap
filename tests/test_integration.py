@@ -62,7 +62,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries: list = []
+        mock_conn_instance.entries = list[object]()
         mock_conn_instance.add.return_value = True
         with patch("flext_target_ldap.client.get_ldap_api") as mock_api:
             mock_api.return_value = mock_conn_instance
@@ -117,13 +117,13 @@ class TestTargetLDAPIntegration:
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.side_effect = [True, True]
-        mock_conn_instance.entries: list = []
+        mock_conn_instance.entries = list[object]()
         mock_conn_instance.add.return_value = True
         mock_conn_instance.modify.return_value = True
 
         def search_side_effect(*_args: str | int | bool) -> bool:
             if mock_conn_instance.search.call_count <= 1:
-                mock_conn_instance.entries: list = []
+                mock_conn_instance.entries = list[object]()
             else:
                 mock_conn_instance.entries = [MagicMock()]
             return True
@@ -234,7 +234,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries: list = []
+        mock_conn_instance.entries = list[object]()
         mock_conn_instance.add.return_value = True
         with input_path.open(encoding="utf-8") as f:
             mock_result = Mock()
@@ -316,7 +316,7 @@ class TestTargetLDAPIntegration:
         mock_conn_instance = MagicMock()
         mock_conn_instance.bound = True
         mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries: list = []
+        mock_conn_instance.entries = list[object]()
         mock_conn_instance.add.return_value = True
         with input_path.open(encoding="utf-8") as f:
             mock_result = Mock()
