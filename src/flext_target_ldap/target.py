@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
@@ -31,7 +31,6 @@ from flext_target_ldap.sinks import (
     Target,
     UsersSink,
 )
-from flext_target_ldap.typings import t
 
 
 class _DefaultCliHelper:
@@ -62,11 +61,11 @@ logger = FlextLogger(__name__)
 
 
 class _LdapApi(Protocol):
-    def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
+    def add(self, dn: str, record: dict[str, dict[str, object]]) -> None: ...
 
     def delete(self, dn: str) -> None: ...
 
-    def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
+    def modify(self, dn: str, record: dict[str, dict[str, object]]) -> None: ...
 
 
 class TargetLDAP(Target):
@@ -74,14 +73,14 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: dict[str, t.ContainerValue]
+    config: dict[str, dict[str, object]]
     cli: ClassVar[Callable[..., None] | None] = None
 
     @override
     def __init__(
         self,
         *,
-        config: dict[str, t.ContainerValue] | None = None,
+        config: dict[str, dict[str, object]] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -104,7 +103,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> dict[str, t.ContainerValue]:
+    def singer_catalog(self) -> dict[str, dict[str, object]]:
         """Return the Singer catalog for this target."""
         return build_singer_catalog()
 
@@ -179,10 +178,10 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> dict[str, t.ContainerValue]:
+def _load_config_from_file(config_path: str) -> dict[str, dict[str, object]]:
     """Load configuration from JSON file."""
-    config_adapter: TypeAdapter[dict[str, t.ContainerValue]] = TypeAdapter(
-        dict[str, t.ContainerValue],
+    config_adapter: TypeAdapter[dict[str, dict[str, object]]] = TypeAdapter(
+        dict[str, Mapping[str, object]],
     )
     try:
         content = Path(config_path).read_text(encoding="utf-8")
@@ -216,7 +215,7 @@ def _get_ldap_api() -> _LdapApi | None:
 
 def _construct_dn(
     stream: str,
-    record: dict[str, t.ContainerValue],
+    record: dict[str, dict[str, object]],
     base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
@@ -231,9 +230,9 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: dict[str, t.ContainerValue],
+    record: dict[str, dict[str, object]],
     stream: str,
-    cfg: dict[str, t.ContainerValue],
+    cfg: dict[str, dict[str, object]],
     api: _LdapApi | None,
     seen_dns: set[str],
 ) -> None:
@@ -291,14 +290,14 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(
                         line,
                     )
-                    _schema: dict[str, t.ContainerValue] = {}
+                    _schema: dict[str, dict[str, object]] = {}
                     current_stream = schema_msg.stream
                 elif msg_type == "RECORD" and api is not None:
                     record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(
                         line,
                     )
                     stream = record_msg.stream or current_stream or "users"
-                    normalized_record: dict[str, t.ContainerValue] = {}
+                    normalized_record: dict[str, dict[str, object]] = {}
                     for key, value in record_msg.record.items():
                         match value:
                             case bool() | int() | float() | str() | dict() | list():

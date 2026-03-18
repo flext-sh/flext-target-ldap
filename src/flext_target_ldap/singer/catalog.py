@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Annotated, override
 
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
@@ -20,7 +20,7 @@ class SingerLDAPCatalogEntry(BaseModel):
 
     tap_stream_id: Annotated[str, Field(min_length=1)]
     stream: Annotated[str, Field(min_length=1)]
-    stream_schema: Annotated[dict[str, t.ContainerValue], Field(default_factory=dict)]
+    stream_schema: Annotated[dict[str, dict[str, object]], Field(default_factory=dict)]
 
 
 class SingerLDAPCatalogManager:
@@ -34,7 +34,7 @@ class SingerLDAPCatalogManager:
     def add_stream(
         self,
         stream_name: str,
-        schema: dict[str, t.ContainerValue],
+        schema: dict[str, dict[str, object]],
     ) -> r[bool]:
         """Add LDAP stream to catalog."""
         try:

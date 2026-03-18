@@ -43,7 +43,7 @@ class LDAPTypeConverter:
     def convert_singer_to_ldap(
         self,
         singer_type: str,
-        value: t.ContainerValue,
+        value: dict[str, object],
     ) -> r[str | None]:
         """Convert Singer scalar/list/map values for LDAP persistence."""
         try:
@@ -55,7 +55,9 @@ class LDAPTypeConverter:
             elif singer_type == "boolean":
                 result = self._normalize_bool(value)
             elif singer_type in {self._COMPLEX_KIND, "array"}:
-                result = TypeAdapter(t.ContainerValue).dump_json(value).decode("utf-8")
+                result = (
+                    TypeAdapter(Mapping[str, object]).dump_json(value).decode("utf-8")
+                )
             else:
                 result = str(value)
             return r[str | None].ok(result)
@@ -63,7 +65,7 @@ class LDAPTypeConverter:
             logger.exception("Type conversion failed for %s", singer_type)
             return r[str | None].ok(str(value))
 
-    def _normalize_bool(self, value: t.ContainerValue) -> str:
+    def _normalize_bool(self, value: dict[str, object]) -> str:
         """Normalize multiple boolean-like forms to LDAP literals."""
         match value:
             case bool() as flag:
