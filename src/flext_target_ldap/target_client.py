@@ -33,7 +33,7 @@ class LdapSearchEntry:
     """LDAP search result entry for backward compatibility."""
 
     @override
-    def __init__(self, dn: str, attributes: dict[str, dict[str, object]]) -> None:
+    def __init__(self, dn: str, attributes: dict[str, object]) -> None:
         """Initialize search entry."""
         self.dn = dn
         self.attributes = attributes
@@ -55,7 +55,7 @@ class _CompatibleEntry:
     """Compatible LDAP entry object."""
 
     @override
-    def __init__(self, dn: str, attrs: dict[str, dict[str, object]]) -> None:
+    def __init__(self, dn: str, attrs: dict[str, object]) -> None:
         """Initialize compatible entry."""
         self.entry_dn = dn
         self.entry_attributes = list(attrs.keys())
@@ -67,7 +67,7 @@ class _CompatibleEntry:
 
 def _container_mapping_from_value(
     value: dict[str, object] | None,
-) -> dict[str, dict[str, object]]:
+) -> dict[str, object]:
     if isinstance(value, dict):
         return {str(k): v for k, v in value.items()}
     return {}
@@ -100,7 +100,7 @@ class _LdapConnectionWrapper:
         self,
         _dn: str,
         _object_classes: list[str],
-        _attributes: dict[str, dict[str, object]],
+        _attributes: dict[str, object],
     ) -> bool:
         """Add entry to LDAP."""
         try:
@@ -143,7 +143,7 @@ class _LdapConnectionWrapper:
         ):
             return False
 
-    def modify(self, _dn: str, _changes: dict[str, dict[str, object]]) -> bool:
+    def modify(self, _dn: str, _changes: dict[str, object]) -> bool:
         """Modify entry in LDAP."""
         try:
             connect_result = self.api.connect(self.config)
@@ -187,7 +187,7 @@ class _LdapConnectionWrapper:
                 self.entries = []
                 for entry in entries:
                     dn = str(entry.get("dn", ""))
-                    attrs: dict[str, dict[str, object]] = {
+                    attrs: dict[str, object] = {
                         str(k): _to_container_list(v)
                         for k, v in entry.items()
                         if str(k) != "dn"
@@ -232,7 +232,7 @@ class LdapTargetClient:
             self._bind_dn = ""
             self._password = ""
         elif isinstance(config, dict):
-            config_map: dict[str, dict[str, object]] = {
+            config_map: dict[str, object] = {
                 str(k): v for k, v in config.items()
             }
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
@@ -306,7 +306,7 @@ class LdapTargetClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, dict[str, object]],
+        attributes: dict[str, object],
         object_classes: list[str] | None = None,
     ) -> r[bool]:
         """Add LDAP entry using flext-ldap API."""
@@ -472,7 +472,7 @@ class LdapTargetClient:
             logger.exception("Failed to get entry: %s", dn)
             return r[LdapSearchEntry | None].fail(f"Get entry failed: {e}")
 
-    def modify_entry(self, dn: str, changes: dict[str, dict[str, object]]) -> r[bool]:
+    def modify_entry(self, dn: str, changes: dict[str, object]) -> r[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             ldap_changes: dict[str, list[str]] = {}
@@ -534,7 +534,7 @@ class LdapTargetClient:
                 ldap_entries: list[dict[str, list[str]]] = search_res.entries
                 for entry in ldap_entries:
                     dn = str(entry.get("dn", ""))
-                    attrs: dict[str, dict[str, object]] = {
+                    attrs: dict[str, object] = {
                         str(k): _to_container_list(v)
                         for k, v in entry.items()
                         if str(k) != "dn"
@@ -562,7 +562,7 @@ class LdapBaseSink(Sink):
         self,
         target: Target,
         stream_name: str,
-        schema: dict[str, dict[str, object]],
+        schema: dict[str, object],
         key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
@@ -575,7 +575,7 @@ class LdapBaseSink(Sink):
         """Get processing results."""
         return self._processing_result
 
-    def process_batch(self, _context: dict[str, dict[str, object]]) -> None:
+    def process_batch(self, _context: dict[str, object]) -> None:
         """Process a batch of records."""
         setup_result: r[LdapTargetClient] = self.setup_client()
         if not setup_result.is_success:
@@ -664,13 +664,13 @@ class LdapUsersSink(LdapBaseSink):
     def build_user_attributes(
         self,
         record: Mapping[str, dict[str, object]],
-    ) -> dict[str, dict[str, object]]:
+    ) -> dict[str, object]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: dict[str, dict[str, object]] = {
+        attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
             if _is_container_list(object_classes)
             else ["inetOrgPerson", "person"],
@@ -823,13 +823,13 @@ class LdapGroupsSink(LdapBaseSink):
     def _build_group_attributes(
         self,
         record: Mapping[str, dict[str, object]],
-    ) -> dict[str, dict[str, object]]:
+    ) -> dict[str, object]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes: dict[str, dict[str, object]] = {
+        attributes: dict[str, object] = {
             "objectClass": object_classes.copy()
             if _is_container_list(object_classes)
             else ["groupOfNames"],
@@ -919,9 +919,9 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
     def _build_ou_attributes(
         self,
         record: Mapping[str, dict[str, object]],
-    ) -> dict[str, dict[str, object]]:
+    ) -> dict[str, object]:
         """Build LDAP attributes for OU entry."""
-        attributes: dict[str, dict[str, object]] = {
+        attributes: dict[str, object] = {
             "objectClass": ["organizationalUnit"],
         }
         field_mapping = {"name": "ou", "description": "description"}
@@ -959,7 +959,7 @@ class TargetLdap(Target):
     def __init__(
         self,
         *,
-        config: dict[str, dict[str, object]] | None = None,
+        config: dict[str, object] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -969,7 +969,7 @@ class TargetLdap(Target):
         self._container: p.Container | None = None
 
     @property
-    def singer_catalog(self) -> dict[str, dict[str, object]]:
+    def singer_catalog(self) -> dict[str, object]:
         """Return the Singer catalog for this target."""
         return build_singer_catalog()
 

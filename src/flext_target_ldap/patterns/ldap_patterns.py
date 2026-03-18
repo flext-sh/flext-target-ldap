@@ -10,7 +10,7 @@ from collections.abc import Mapping
 from typing import Annotated, override
 
 from flext_core import FlextLogger, r, t
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
 
@@ -43,21 +43,16 @@ class LDAPTypeConverter:
     def convert_singer_to_ldap(
         self,
         singer_type: str,
-        value: dict[str, object],
+        value: t.Scalar,
     ) -> r[str | None]:
         """Convert Singer scalar/list/map values for LDAP persistence."""
         try:
-            if singer_type in {"string", "text"} or singer_type in {
-                "integer",
-                "number",
-            }:
+            if singer_type in {"string", "text", "integer", "number"}:
                 result = str(value)
             elif singer_type == "boolean":
                 result = self._normalize_bool(value)
             elif singer_type in {self._COMPLEX_KIND, "array"}:
-                result = (
-                    TypeAdapter(Mapping[str, object]).dump_json(value).decode("utf-8")
-                )
+                result = str(value)
             else:
                 result = str(value)
             return r[str | None].ok(result)
@@ -65,7 +60,7 @@ class LDAPTypeConverter:
             logger.exception("Type conversion failed for %s", singer_type)
             return r[str | None].ok(str(value))
 
-    def _normalize_bool(self, value: dict[str, object]) -> str:
+    def _normalize_bool(self, value: t.Scalar) -> str:
         """Normalize multiple boolean-like forms to LDAP literals."""
         match value:
             case bool() as flag:

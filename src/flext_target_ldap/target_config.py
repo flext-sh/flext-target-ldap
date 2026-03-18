@@ -68,7 +68,7 @@ def _target_config_to_str_list(
 
 
 def _build_target_connection_config(
-    config: dict[str, dict[str, object]],
+    config: dict[str, object],
 ) -> FlextLdapModels.Ldap.ConnectionConfig:
     """Build connection config for target."""
     server = _target_config_to_str(config.get("host", "localhost"), "localhost")
@@ -87,7 +87,7 @@ def _build_target_connection_config(
     )
 
 
-def _extract_target_max_records(config: dict[str, dict[str, object]]) -> int | None:
+def _extract_target_max_records(config: dict[str, object]) -> int | None:
     """Extract max records from config."""
     max_records_val = config.get("max_records")
     match max_records_val:
@@ -105,7 +105,7 @@ def _extract_target_max_records(config: dict[str, dict[str, object]]) -> int | N
 
 
 def validate_ldap_target_config(
-    config: dict[str, dict[str, object]],
+    config: dict[str, object],
 ) -> r[FlextTargetLdapSettings]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:

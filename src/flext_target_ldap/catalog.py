@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 
-def build_singer_catalog() -> dict[str, dict[str, object]]:
+def build_singer_catalog() -> dict[
+    str, list[dict[str, str | dict[str, str | list[str] | dict[str, str]]]]
+]:
     """Build the canonical Singer catalog for LDAP targets."""
     return {
         "streams": [

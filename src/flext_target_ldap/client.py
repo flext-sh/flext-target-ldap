@@ -74,7 +74,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    def __init__(self, dn: str, attributes: dict[str, dict[str, object]]) -> None:
+    def __init__(self, dn: str, attributes: dict[str, str | list[str]]) -> None:
         """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
@@ -133,7 +133,7 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, dict[str, object]],
+        attributes: dict[str, object],
         object_classes: list[str] | None = None,
     ) -> r[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
@@ -267,7 +267,7 @@ class LDAPClient:
             logger.exception("Failed to get entry: %s", dn)
             return r[LDAPSearchEntry | None].fail(f"Get entry failed: {e}")
 
-    def modify_entry(self, dn: str, changes: dict[str, dict[str, object]]) -> r[bool]:
+    def modify_entry(self, dn: str, changes: dict[str, object]) -> r[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
@@ -301,7 +301,7 @@ class LDAPClient:
                         continue
                     dn = raw.dn
                     attr_names: list[str] = list(raw.attributes.keys())
-                    attrs: dict[str, dict[str, object]] = {}
+                    attrs: dict[str, str | list[str]] = {}
                     for name in attr_names:
                         name_str = name
                         try:

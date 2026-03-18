@@ -29,7 +29,7 @@ class TransformationResult(BaseModel):
     """Result of data transformation with applied rules."""
 
     transformed_data: Annotated[
-        dict[str, dict[str, object]],
+        dict[str, object],
         Field(default_factory=dict),
     ]
     applied_rules: Annotated[list[str], Field(default_factory=list)]
@@ -47,10 +47,10 @@ class DataTransformationEngine:
         """Get transformation statistics."""
         return {"total_rules": len(self.rules), "transformations_applied": 0}
 
-    def transform(self, data: dict[str, dict[str, object]]) -> r[TransformationResult]:
+    def transform(self, data: dict[str, object]) -> r[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: dict[str, dict[str, object]] = data.copy()
+            transformed_data: dict[str, object] = data.copy()
             applied_rules: list[str] = []
             for rule in self.rules:
                 if not rule.enabled:
@@ -101,8 +101,8 @@ class MigrationValidator:
 
     def validate(
         self,
-        data: dict[str, dict[str, object]] | str,
-        attributes: dict[str, dict[str, object]] | None = None,
+        data: dict[str, object] | str,
+        attributes: dict[str, object] | None = None,
         object_classes: list[str] | None = None,
     ) -> r[bool]:
         """Validate migration data."""
@@ -143,7 +143,7 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: dict[str, dict[str, object]],
+        attributes: dict[str, object],
         object_classes: list[str],
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""
