@@ -13,3 +13,7 @@ from flext_tests import FlextTestsConstants
 
 class TestsFlextTargetLdapConstants(FlextTestsConstants):
     """Test constants for flexttargetldap."""
+
+
+c = TestsFlextTargetLdapConstants
+__all__ = ["TestsFlextTargetLdapConstants", "c"]
