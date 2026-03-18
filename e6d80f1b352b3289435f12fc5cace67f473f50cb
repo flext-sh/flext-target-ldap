@@ -1,0 +1,29 @@
+tests/test_client.py
+  3049a53db5647db7 48-58,60,84,111-112,128,164-165,187-188,216,249-250,252,255-256,283,289,292,301,304
+tests/test_integration.py
+  3049a53db5647db7 65,120,126,237,319
+src/flext_target_ldap/client.py
+  3049a53db5647db7 36
+src/flext_target_ldap/target_client.py
+  3049a53db5647db7 997-1019
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.15",
+  "base_commit_sha": "e6d80f1b352b3289435f12fc5cace67f473f50cb",
+  "prompts": {
+    "3049a53db5647db7": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2fdf365a6ffelKuS5axGO51F4e",
+        "model": "anthropic/claude-haiku-4-5"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 72,
+      "total_deletions": 49,
+      "accepted_lines": 63,
+      "overriden_lines": 0
+    }
+  }
+}
