@@ -69,7 +69,7 @@ if TYPE_CHECKING:
         Target,
         UsersSink,
     )
-    from flext_target_ldap.target import TargetLDAP, flext_cli_create_helper
+    from flext_target_ldap.target import TargetLDAP, flext_cli_create_helper, main
     from flext_target_ldap.target_client import (
         LdapBaseSink,
         LdapGroupsSink,
@@ -79,7 +79,6 @@ if TYPE_CHECKING:
         LdapTargetClient,
         LdapUsersSink,
         TargetLdap,
-        main,
     )
     from flext_target_ldap.target_config import (
         create_default_ldap_target_config,
@@ -317,7 +316,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "infrastructure": ("flext_target_ldap.infrastructure", ""),
     "logger": ("flext_target_ldap.transformation", "logger"),
     "m": ("flext_target_ldap.models", "m"),
-    "main": ("flext_target_ldap.target_client", "main"),
+    "main": ("flext_target_ldap.target", "main"),
     "p": ("flext_target_ldap.protocols", "p"),
     "patterns": ("flext_target_ldap.patterns", ""),
     "r": ("flext_ldap", "r"),

@@ -31,11 +31,8 @@ if TYPE_CHECKING:
         singer_message_state,
     )
     from .constants import TestsFlextTargetLdapConstants, c
-    from .models import TestsFlextTargetLdapModels, TestsFlextTargetLdapModels as m, tm
-    from .protocols import (
-        TestsFlextTargetLdapProtocols,
-        TestsFlextTargetLdapProtocols as p,
-    )
+    from .models import TestsFlextTargetLdapModels, m, tm
+    from .protocols import TestsFlextTargetLdapProtocols, p
     from .test_client import (
         TestLDAPClient,
         test_connection_wrapper_unbind_cleans_state_and_disconnects,
@@ -60,8 +57,12 @@ if TYPE_CHECKING:
         TestMigrationValidator,
         TestTransformationRule,
     )
-    from .typings import TestsFlextTargetLdapTypes, t, tt
-    from .utilities import TestsFlextTargetLdapUtilities, u
+    from .tt import t
+    from .typings import TestsFlextTargetLdapTypes, tt
+    from .utilities import (
+        TestsFlextTargetLdapUtilities,
+        TestsFlextTargetLdapUtilities as u,
+    )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "EXPECTED_DATA_COUNT": ("tests.test_transformation", "EXPECTED_DATA_COUNT"),
@@ -101,12 +102,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "TestsFlextTargetLdapUtilities",
     ),
     "c": ("tests.constants", "c"),
-    "m": ("tests.models", "TestsFlextTargetLdapModels"),
+    "m": ("tests.models", "m"),
     "mock_ldap_client": ("tests.conftest", "mock_ldap_client"),
     "mock_ldap_config": ("tests.conftest", "mock_ldap_config"),
     "mock_ldap_config_internal": ("tests.conftest", "mock_ldap_config_internal"),
     "mock_target": ("tests.conftest", "mock_target"),
-    "p": ("tests.protocols", "TestsFlextTargetLdapProtocols"),
+    "p": ("tests.protocols", "p"),
     "sample_group_record": ("tests.conftest", "sample_group_record"),
     "sample_ou_record": ("tests.conftest", "sample_ou_record"),
     "sample_user_record": ("tests.conftest", "sample_user_record"),
@@ -114,7 +115,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "singer_message_record": ("tests.conftest", "singer_message_record"),
     "singer_message_schema": ("tests.conftest", "singer_message_schema"),
     "singer_message_state": ("tests.conftest", "singer_message_state"),
-    "t": ("tests.typings", "t"),
+    "t": ("tests.tt", "t"),
     "test_connection_wrapper_unbind_cleans_state_and_disconnects": (
         "tests.test_client",
         "test_connection_wrapper_unbind_cleans_state_and_disconnects",
@@ -129,7 +130,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     ),
     "tm": ("tests.models", "tm"),
     "tt": ("tests.typings", "tt"),
-    "u": ("tests.utilities", "u"),
+    "u": ("tests.utilities", "TestsFlextTargetLdapUtilities"),
 }
 
 __all__ = [
