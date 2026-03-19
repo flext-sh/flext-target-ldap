@@ -11,6 +11,12 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
+    from flext_ldap.decorators import d
+    from flext_ldap.exceptions import e
+    from flext_ldap.handlers import h
+    from flext_ldap.mixins import x
+    from flext_ldap.result import r
+    from flext_ldap.service import s
 
     from flext_target_ldap import application, infrastructure, patterns, singer
     from flext_target_ldap.__version__ import (
@@ -63,7 +69,6 @@ if TYPE_CHECKING:
         GroupsSink,
         LDAPBaseSink,
         LDAPProcessingResult,
-        LDAPProcessingResult as r,
         OrganizationalUnitsSink,
         Sink,
         Target,
@@ -103,7 +108,6 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.target_services import (
         LdapConnectionService,
-        LdapConnectionService as s,
         LdapTargetApiService,
         LdapTargetOrchestrator,
         LdapTargetService,
@@ -303,6 +307,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.target_config",
         "create_default_ldap_target_config",
     ),
+    "d": ("flext_ldap.decorators", "d"),
+    "e": ("flext_ldap.exceptions", "e"),
     "flext_cli_create_helper": ("flext_target_ldap.target", "flext_cli_create_helper"),
     "get_flext_target_ldap_container": (
         "flext_target_ldap.infrastructure.di_container",
@@ -312,14 +318,15 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.infrastructure.di_container",
         "get_flext_target_ldap_service",
     ),
+    "h": ("flext_ldap.handlers", "h"),
     "infrastructure": ("flext_target_ldap.infrastructure", ""),
     "logger": ("flext_target_ldap.transformation", "logger"),
     "m": ("flext_target_ldap.models", "m"),
     "main": ("flext_target_ldap.target_client", "main"),
     "p": ("flext_target_ldap.protocols", "p"),
     "patterns": ("flext_target_ldap.patterns", ""),
-    "r": ("flext_target_ldap.sinks", "LDAPProcessingResult"),
-    "s": ("flext_target_ldap.target_services", "LdapConnectionService"),
+    "r": ("flext_ldap.result", "r"),
+    "s": ("flext_ldap.service", "s"),
     "singer": ("flext_target_ldap.singer", ""),
     "t": ("flext_target_ldap.typings", "t"),
     "u": ("flext_target_ldap.utilities", "u"),
@@ -328,6 +335,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.target_config",
         "validate_ldap_target_config",
     ),
+    "x": ("flext_ldap.mixins", "x"),
 }
 
 __all__ = [
@@ -406,9 +414,12 @@ __all__ = [
     "c",
     "configure_flext_target_ldap_dependencies",
     "create_default_ldap_target_config",
+    "d",
+    "e",
     "flext_cli_create_helper",
     "get_flext_target_ldap_container",
     "get_flext_target_ldap_service",
+    "h",
     "infrastructure",
     "logger",
     "m",
@@ -422,6 +433,7 @@ __all__ = [
     "u",
     "validate_ldap_config",
     "validate_ldap_target_config",
+    "x",
 ]
 
 
