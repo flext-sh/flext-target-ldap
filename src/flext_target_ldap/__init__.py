@@ -11,12 +11,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
-    from flext_ldap.decorators import d
-    from flext_ldap.exceptions import e
-    from flext_ldap.handlers import h
-    from flext_ldap.mixins import x
-    from flext_ldap.result import r
-    from flext_ldap.service import s
+    from flext_ldap import d, e, h, r, s, x
 
     from flext_target_ldap import application, infrastructure, patterns, singer
     from flext_target_ldap.__version__ import (
@@ -307,8 +302,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.target_config",
         "create_default_ldap_target_config",
     ),
-    "d": ("flext_ldap.decorators", "d"),
-    "e": ("flext_ldap.exceptions", "e"),
+    "d": ("flext_ldap", "d"),
+    "e": ("flext_ldap", "e"),
     "flext_cli_create_helper": ("flext_target_ldap.target", "flext_cli_create_helper"),
     "get_flext_target_ldap_container": (
         "flext_target_ldap.infrastructure.di_container",
@@ -318,15 +313,15 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.infrastructure.di_container",
         "get_flext_target_ldap_service",
     ),
-    "h": ("flext_ldap.handlers", "h"),
+    "h": ("flext_ldap", "h"),
     "infrastructure": ("flext_target_ldap.infrastructure", ""),
     "logger": ("flext_target_ldap.transformation", "logger"),
     "m": ("flext_target_ldap.models", "m"),
     "main": ("flext_target_ldap.target_client", "main"),
     "p": ("flext_target_ldap.protocols", "p"),
     "patterns": ("flext_target_ldap.patterns", ""),
-    "r": ("flext_ldap.result", "r"),
-    "s": ("flext_ldap.service", "s"),
+    "r": ("flext_ldap", "r"),
+    "s": ("flext_ldap", "s"),
     "singer": ("flext_target_ldap.singer", ""),
     "t": ("flext_target_ldap.typings", "t"),
     "u": ("flext_target_ldap.utilities", "u"),
@@ -335,7 +330,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_ldap.target_config",
         "validate_ldap_target_config",
     ),
-    "x": ("flext_ldap.mixins", "x"),
+    "x": ("flext_ldap", "x"),
 }
 
 __all__ = [

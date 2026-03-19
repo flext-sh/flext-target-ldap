@@ -31,8 +31,11 @@ if TYPE_CHECKING:
         singer_message_state,
     )
     from .constants import TestsFlextTargetLdapConstants, c
-    from .models import TestsFlextTargetLdapModels, tm
-    from .protocols import TestsFlextTargetLdapProtocols
+    from .models import TestsFlextTargetLdapModels, TestsFlextTargetLdapModels as m, tm
+    from .protocols import (
+        TestsFlextTargetLdapProtocols,
+        TestsFlextTargetLdapProtocols as p,
+    )
     from .test_client import (
         TestLDAPClient,
         test_connection_wrapper_unbind_cleans_state_and_disconnects,
@@ -57,8 +60,6 @@ if TYPE_CHECKING:
         TestMigrationValidator,
         TestTransformationRule,
     )
-    from .tm import m
-    from .tp import p
     from .typings import TestsFlextTargetLdapTypes, t, tt
     from .utilities import TestsFlextTargetLdapUtilities, u
 
@@ -100,12 +101,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "TestsFlextTargetLdapUtilities",
     ),
     "c": ("tests.constants", "c"),
-    "m": ("tests.tm", "m"),
+    "m": ("tests.models", "TestsFlextTargetLdapModels"),
     "mock_ldap_client": ("tests.conftest", "mock_ldap_client"),
     "mock_ldap_config": ("tests.conftest", "mock_ldap_config"),
     "mock_ldap_config_internal": ("tests.conftest", "mock_ldap_config_internal"),
     "mock_target": ("tests.conftest", "mock_target"),
-    "p": ("tests.tp", "p"),
+    "p": ("tests.protocols", "TestsFlextTargetLdapProtocols"),
     "sample_group_record": ("tests.conftest", "sample_group_record"),
     "sample_ou_record": ("tests.conftest", "sample_ou_record"),
     "sample_user_record": ("tests.conftest", "sample_user_record"),
