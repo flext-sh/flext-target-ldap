@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, p, r
+from flext_core import FlextLogger, p, r, t
 
 logger: p.Logger = FlextLogger(__name__)
 
@@ -22,7 +22,10 @@ class SingerTargetLDAP:
     """Singer LDAP target implementation."""
 
     @override
-    def __init__(self, config: dict[str, object] | None = None) -> None:
+    def __init__(
+        self,
+        config: dict[str, t.ContainerValue] | None = None,
+    ) -> None:
         """Initialize Singer LDAP target.
 
         Args:
@@ -32,12 +35,12 @@ class SingerTargetLDAP:
         object: Description of return value.
 
         """
-        self.config: dict[str, object] = config or {}
+        self.config: dict[str, t.ContainerValue] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, object]],
+        messages: list[dict[str, t.ContainerValue]],
     ) -> r[dict[str, int | str]]:
         """Process Singer messages for LDAP target.
 

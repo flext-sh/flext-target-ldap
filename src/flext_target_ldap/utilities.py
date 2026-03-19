@@ -12,12 +12,12 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import r, t
-from flext_ldap import FlextLdapModels, FlextLdapUtilities
+from flext_core import r
+from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
-from flext_target_ldap.constants import c
+from flext_target_ldap import c, m, t
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -40,13 +40,13 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     @staticmethod
     def _coerce_container_value(
         value: t.ConfigMap | t.NormalizedValue | BaseModel,
-    ) -> t.ConfigMap | list[object] | t.NormalizedValue | None:
+    ) -> t.ConfigMap | list[t.ContainerValue] | t.NormalizedValue | None:
         if isinstance(value, BaseModel):
             return FlextTargetLdapUtilities._coerce_container_value(value.model_dump())
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
         if isinstance(value, list):
-            normalized_list: list[object] = []
+            normalized_list: list[t.ContainerValue] = []
             for item in value:
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -56,7 +56,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         normalized_list.append(coerced_item)
             return normalized_list
         if isinstance(value, Mapping):
-            normalized_dict: dict[str, object] = {}
+            normalized_dict: dict[str, t.ContainerValue] = {}
             for key, item in value.items():
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -559,7 +559,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             stream_name: str,
             records_processed: int,
             last_processed_record: Mapping[str, t.ConfigMap] | None = None,
-        ) -> Mapping[str, object]:
+        ) -> Mapping[str, t.ContainerValue]:
             """Create processing state for target stream.
 
             Args:
@@ -568,10 +568,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             last_processed_record: Last processed record for checkpointing
 
             Returns:
-            Mapping[str, object]: Processing state
+            Mapping[str, t.ContainerValue]: Processing state
 
             """
-            state: dict[str, object] = {
+            state: dict[str, t.ContainerValue] = {
                 "stream_name": stream_name,
                 "records_processed": records_processed,
                 "last_updated": datetime.now(UTC).isoformat(),
@@ -592,7 +592,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         def get_target_state(
             state: Mapping[str, t.ConfigMap],
             stream_name: str,
-        ) -> Mapping[str, object]:
+        ) -> Mapping[str, t.ContainerValue]:
             """Get state for a specific target stream.
 
             Args:
@@ -629,8 +629,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         def set_target_state(
             state: Mapping[str, t.ConfigMap],
             stream_name: str,
-            stream_state: Mapping[str, object],
-        ) -> Mapping[str, object]:
+            stream_state: Mapping[str, t.ContainerValue],
+        ) -> Mapping[str, t.ContainerValue]:
             """Set state for a specific target stream.
 
             Args:
@@ -642,7 +642,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             Mapping[str, t.Scalar]: Updated state
 
             """
-            state_dict: dict[str, object] = dict(state)
+            state_dict: dict[str, t.ContainerValue] = dict(state)
             bookmarks = state_dict.get("bookmarks")
             bookmarks_dict: dict[str, t.NormalizedValue | BaseModel] = {}
             if u.is_dict_like(bookmarks):
@@ -661,7 +661,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             state: Mapping[str, t.ConfigMap],
             stream_name: str,
             records_count: int,
-        ) -> Mapping[str, object]:
+        ) -> Mapping[str, t.ContainerValue]:
             """Update processing progress in state.
 
             Args:
@@ -694,7 +694,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     batch_count = batch_count_val
                 case _:
                     batch_count = 0
-            updated_stream_state: dict[str, object] = {
+            updated_stream_state: dict[str, t.ContainerValue] = {
                 **stream_state,
                 "records_processed": new_count,
                 "last_updated": datetime.now(UTC).isoformat(),
@@ -734,7 +734,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         stream_name: str,
         records_processed: int,
         last_processed_record: Mapping[str, t.ConfigMap] | None = None,
-    ) -> Mapping[str, object]:
+    ) -> Mapping[str, t.ContainerValue]:
         """Proxy method for StateManagement.create_processing_state()."""
         return cls.StateManagement.create_processing_state(
             stream_name,
@@ -747,7 +747,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         cls,
         state: Mapping[str, t.ConfigMap],
         stream_name: str,
-    ) -> Mapping[str, object]:
+    ) -> Mapping[str, t.ContainerValue]:
         """Proxy method for StateManagement.get_target_state()."""
         return cls.StateManagement.get_target_state(state, stream_name)
 
@@ -770,14 +770,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         @staticmethod
         def build_connection_config(
             config: Mapping[str, t.ConfigMap],
-        ) -> FlextLdapModels.Ldap.ConnectionConfig:
+        ) -> m.Ldap.ConnectionConfig:
             """Build LDAP connection configuration from config dict.
 
             Args:
                 config: Raw configuration dictionary from any source
 
             Returns:
-                FlextLdapModels.Ldap.ConnectionConfig: Validated connection config
+                m.Ldap.ConnectionConfig: Validated connection config
 
             """
             server = FlextTargetLdapUtilities.TypeConversion.to_str(
@@ -804,7 +804,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 config.get("timeout", c.Network.DEFAULT_TIMEOUT),
                 c.Network.DEFAULT_TIMEOUT,
             )
-            return FlextLdapModels.Ldap.ConnectionConfig(
+            return m.Ldap.ConnectionConfig(
                 host=server,
                 port=port,
                 use_ssl=use_ssl,

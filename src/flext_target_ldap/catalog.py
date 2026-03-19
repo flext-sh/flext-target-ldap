@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from flext_target_ldap import t
 
-def build_singer_catalog() -> dict[str, object]:
+
+def build_singer_catalog() -> dict[str, t.ContainerValue]:
     """Build the canonical Singer catalog for LDAP targets."""
     return {
         "streams": [

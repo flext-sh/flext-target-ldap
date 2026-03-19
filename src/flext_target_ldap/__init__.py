@@ -26,12 +26,7 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.application.orchestrator import LDAPTargetOrchestrator
     from flext_target_ldap.catalog import build_singer_catalog
-    from flext_target_ldap.client import (
-        LDAP3_MODULE,
-        LDAPClient,
-        LDAPConnection,
-        LDAPSearchEntry,
-    )
+    from flext_target_ldap.client import LDAPClient, LDAPConnection, LDAPSearchEntry
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
     from flext_target_ldap.infrastructure.di_container import (
         configure_flext_target_ldap_dependencies,
@@ -176,7 +171,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "FlextTargetLdapValidationError",
     ),
     "GroupsSink": ("flext_target_ldap.sinks", "GroupsSink"),
-    "LDAP3_MODULE": ("flext_target_ldap.client", "LDAP3_MODULE"),
     "LDAPBaseSink": ("flext_target_ldap.sinks", "LDAPBaseSink"),
     "LDAPClient": ("flext_target_ldap.client", "LDAPClient"),
     "LDAPConnection": ("flext_target_ldap.client", "LDAPConnection"),
@@ -337,7 +331,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
 }
 
 __all__ = [
-    "LDAP3_MODULE",
     "DataTransformationEngine",
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapConnectionError",

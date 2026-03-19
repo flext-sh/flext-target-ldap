@@ -13,6 +13,8 @@ from typing import Annotated, override
 from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
 
+from flext_target_ldap import t
+
 logger = FlextLogger(__name__)
 
 
@@ -29,7 +31,7 @@ class TransformationResult(BaseModel):
     """Result of data transformation with applied rules."""
 
     transformed_data: Annotated[
-        dict[str, object],
+        dict[str, t.ContainerValue],
         Field(default_factory=dict),
     ]
     applied_rules: Annotated[list[str], Field(default_factory=list)]
@@ -47,10 +49,13 @@ class DataTransformationEngine:
         """Get transformation statistics."""
         return {"total_rules": len(self.rules), "transformations_applied": 0}
 
-    def transform(self, data: Mapping[str, object]) -> r[TransformationResult]:
+    def transform(
+        self,
+        data: Mapping[str, t.ContainerValue],
+    ) -> r[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: dict[str, object] = dict(data)
+            transformed_data: dict[str, t.ContainerValue] = dict(data)
             applied_rules: list[str] = []
             for rule in self.rules:
                 if not rule.enabled:
@@ -101,9 +106,9 @@ class MigrationValidator:
 
     def validate(
         self,
-        data: Mapping[str, object] | str,
-        attributes: Mapping[str, object] | None = None,
-        object_classes: Sequence[object] | None = None,
+        data: Mapping[str, t.ContainerValue] | str,
+        attributes: Mapping[str, t.ContainerValue] | None = None,
+        object_classes: Sequence[t.ContainerValue] | None = None,
     ) -> r[bool]:
         """Validate migration data."""
         try:
@@ -143,7 +148,7 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: dict[str, object],
+        attributes: dict[str, t.ContainerValue],
         object_classes: list[str],
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""

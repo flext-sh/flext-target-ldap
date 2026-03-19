@@ -86,7 +86,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             Note: Does not override parent Processing class to avoid inheritance conflicts.
             """
 
-            DEFAULT_BATCH_SIZE: Final[int] = 1000
+            DEFAULT_BATCH_SIZE: Final[int] = FlextLdapConstants.DEFAULT_BATCH_SIZE
             MAX_BATCH_SIZE: Final[int] = (
                 FlextLdapConstants.Performance.BatchProcessing.MAX_ITEMS
             )

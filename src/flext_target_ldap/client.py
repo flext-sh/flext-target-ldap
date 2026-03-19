@@ -15,31 +15,31 @@ from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import Protocol, override
 
 import ldap3
-from flext_core import FlextLogger, r, u
+from flext_core import FlextLogger, r
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
-    FlextLdapModels,
     FlextLdapOperations,
     FlextLdapSettings,
 )
 from flext_ldif import FlextLdif
 
+from flext_target_ldap import m, t
+
 logger = FlextLogger(__name__)
-LDAP3_MODULE = ldap3
 
 
 class LDAPConnection(Protocol):
     """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
     bound: bool
-    entries: list[dict[str, object]]
+    entries: list[dict[str, t.ContainerValue]]
 
     def add(
         self,
         dn: str,
         object_classes: list[str],
-        attributes: Mapping[str, object],
+        attributes: Mapping[str, t.ContainerValue],
     ) -> bool:
         """Add LDAP entry."""
         ...
@@ -52,7 +52,7 @@ class LDAPConnection(Protocol):
         """Delete LDAP entry."""
         ...
 
-    def modify(self, dn: str, changes: Mapping[str, object]) -> bool:
+    def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
         """Modify LDAP entry."""
         ...
 
@@ -94,15 +94,15 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.Ldap.ConnectionConfig | Mapping[str, object],
+        config: m.Ldap.ConnectionConfig | Mapping[str, t.ContainerValue],
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        if isinstance(config, FlextLdapModels.Ldap.ConnectionConfig):
+        if isinstance(config, m.Ldap.ConnectionConfig):
             self.config = config
             self._bind_dn = ""
             self._password = ""
-        elif u.is_dict_like(config):
-            self.config = FlextLdapModels.Ldap.ConnectionConfig(
+        elif isinstance(config, Mapping):
+            self.config = m.Ldap.ConnectionConfig(
                 host=str(config.get("host", "localhost")),
                 port=int(str(config.get("port", 389)))
                 if config.get("port", 389) is not None
@@ -115,7 +115,7 @@ class LDAPClient:
             self._bind_dn = str(config.get("bind_dn", ""))
             self._password = str(config.get("password", ""))
         else:
-            self.config = FlextLdapModels.Ldap.ConnectionConfig(
+            self.config = m.Ldap.ConnectionConfig(
                 host="localhost",
                 port=389,
                 use_ssl=False,
@@ -133,7 +133,7 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, object],
+        attributes: dict[str, t.ContainerValue],
         object_classes: list[str] | None = None,
     ) -> r[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
@@ -267,7 +267,11 @@ class LDAPClient:
             logger.exception("Failed to get entry: %s", dn)
             return r[LDAPSearchEntry | None].fail(f"Get entry failed: {e}")
 
-    def modify_entry(self, dn: str, changes: dict[str, object]) -> r[bool]:
+    def modify_entry(
+        self,
+        dn: str,
+        changes: dict[str, t.ContainerValue],
+    ) -> r[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
@@ -294,7 +298,7 @@ class LDAPClient:
             )
             with self.get_connection() as conn:
                 _ = conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: list[dict[str, object]] = conn.entries
+                raw_entries: list[dict[str, t.ContainerValue]] = conn.entries
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     if not isinstance(raw, LDAPSearchEntry):
@@ -360,13 +364,13 @@ class LDAPClient:
             def __init__(self, session_id: str) -> None:
                 self.session_id = session_id
                 self.bound = True
-                self.entries: list[dict[str, object]] = []
+                self.entries: list[dict[str, t.ContainerValue]] = []
 
             def add(
                 self,
                 dn: str,
                 object_classes: list[str],
-                attributes: Mapping[str, object],
+                attributes: Mapping[str, t.ContainerValue],
             ) -> bool:
                 _ = (dn, object_classes, attributes)
                 return True
@@ -378,7 +382,11 @@ class LDAPClient:
                 _ = dn
                 return True
 
-            def modify(self, dn: str, changes: Mapping[str, object]) -> bool:
+            def modify(
+                self,
+                dn: str,
+                changes: Mapping[str, t.ContainerValue],
+            ) -> bool:
                 _ = (dn, changes)
                 return True
 

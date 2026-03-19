@@ -12,9 +12,7 @@ from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger, r, t
 
-from flext_target_ldap.client import LDAPClient
-from flext_target_ldap.constants import c
-from flext_target_ldap.processing_result import LdapProcessingCounters
+from flext_target_ldap import LDAPClient, LdapProcessingCounters, c
 
 
 class Sink:
@@ -25,7 +23,7 @@ class Sink:
         self,
         target: Target,
         stream_name: str,
-        schema: Mapping[str, object],
+        schema: Mapping[str, t.ContainerValue],
         key_properties: list[str],
     ) -> None:
         """Initialize sink with Singer protocol parameters."""
@@ -36,8 +34,8 @@ class Sink:
 
     def process_record(
         self,
-        _record: Mapping[str, object],
-        _context: Mapping[str, object],
+        _record: Mapping[str, t.ContainerValue],
+        _context: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Process a record using the target."""
         try:
@@ -82,23 +80,27 @@ class Target:
     """Base Target class for Singer protocol compatibility."""
 
     @override
-    def __init__(self, config: dict[str, object], **kwargs: t.Scalar) -> None:
+    def __init__(
+        self,
+        config: dict[str, t.ContainerValue],
+        **kwargs: t.Scalar,
+    ) -> None:
         """Initialize target with configuration."""
-        self.config: dict[str, object] = config
+        self.config: dict[str, t.ContainerValue] = config
 
 
 logger = FlextLogger(__name__)
 
 
 def _is_container_list(
-    value: object,
-) -> TypeIs[list[object]]:
+    value: t.ContainerValue,
+) -> TypeIs[list[t.ContainerValue]]:
     return isinstance(value, list)
 
 
 def _container_mapping_from_value(
-    value: object,
-) -> dict[str, object]:
+    value: t.ContainerValue,
+) -> dict[str, t.ContainerValue]:
     if isinstance(value, dict):
         return {str(k): v for k, v in value.items()}
     return {}
@@ -124,7 +126,7 @@ class LDAPBaseSink(Sink):
         self,
         target: Target,
         stream_name: str,
-        schema: Mapping[str, object],
+        schema: Mapping[str, t.ContainerValue],
         key_properties: list[str],
     ) -> None:
         """Initialize LDAP sink."""
@@ -136,14 +138,14 @@ class LDAPBaseSink(Sink):
 
     def build_attributes(
         self,
-        _record: Mapping[str, object],
-    ) -> r[dict[str, object]]:
+        _record: Mapping[str, t.ContainerValue],
+    ) -> r[dict[str, t.ContainerValue]]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return r[dict[str, object]].fail(
+        return r[dict[str, t.ContainerValue]].fail(
             "build_attributes must be implemented in subclass",
         )
 
-    def build_dn(self, record: Mapping[str, object]) -> r[str]:
+    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
         """Build distinguished name from record. Override in subclasses."""
         dn = record.get("dn")
         if isinstance(dn, str) and dn:
@@ -156,7 +158,7 @@ class LDAPBaseSink(Sink):
             "build_dn must be implemented in subclass: No ID or name found for generic entry",
         )
 
-    def get_object_classes(self, record: Mapping[str, object]) -> list[str]:
+    def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
         """Get object classes for entry."""
         record_classes = record.get("object_classes")
         if _is_container_list(record_classes):
@@ -172,7 +174,7 @@ class LDAPBaseSink(Sink):
         """Get processing results."""
         return self._processing_result
 
-    def process_batch(self, _context: Mapping[str, object]) -> None:
+    def process_batch(self, _context: Mapping[str, t.ContainerValue]) -> None:
         """Process a batch of records."""
         setup_result: r[LDAPClient] = self.setup_client()
         if not setup_result.is_success:
@@ -181,7 +183,7 @@ class LDAPBaseSink(Sink):
         try:
             records_raw = _context.get("records", [])
             if isinstance(records_raw, list):
-                records: list[dict[str, object]] = records_raw
+                records: list[dict[str, t.ContainerValue]] = records_raw
             else:
                 records = []
             logger.info(
@@ -189,7 +191,7 @@ class LDAPBaseSink(Sink):
             )
             for record in records:
                 if isinstance(record, dict):
-                    normalized_record: dict[str, object] = {}
+                    normalized_record: dict[str, t.ContainerValue] = {}
                     for k, v in record.items():
                         normalized_record[str(k)] = v
                     self.process_record(normalized_record, _context)
@@ -202,8 +204,8 @@ class LDAPBaseSink(Sink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, object],
-        _context: Mapping[str, object],
+        _record: Mapping[str, t.ContainerValue],
+        _context: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
@@ -256,7 +258,7 @@ class LDAPBaseSink(Sink):
     def validate_entry(
         self,
         dn: str,
-        attributes: dict[str, object],
+        attributes: dict[str, t.ContainerValue],
         object_classes: list[str],
     ) -> r[bool]:
         """Validate LDAP entry before writing."""
@@ -286,20 +288,20 @@ class UsersSink(LDAPBaseSink):
     @override
     def build_attributes(
         self,
-        _record: Mapping[str, object],
-    ) -> r[dict[str, object]]:
+        _record: Mapping[str, t.ContainerValue],
+    ) -> r[dict[str, t.ContainerValue]]:
         """Build LDAP attributes for user entry."""
-        attrs: dict[str, object] = {}
+        attrs: dict[str, t.ContainerValue] = {}
         for k, v in _record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
             if _is_container_list(v):
                 attrs[target_key] = [str(i) for i in v]
             else:
                 attrs[target_key] = [str(v)]
-        return r[dict[str, object]].ok(attrs)
+        return r[dict[str, t.ContainerValue]].ok(attrs)
 
     @override
-    def build_dn(self, record: Mapping[str, object]) -> r[str]:
+    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
         """Build DN for user entry."""
         rdn_attr = str(self._target.config.get("user_rdn_attribute", "uid"))
         uid = record.get(rdn_attr)
@@ -310,14 +312,14 @@ class UsersSink(LDAPBaseSink):
 
     def build_user_attributes(
         self,
-        record: Mapping[str, object],
-    ) -> dict[str, object]:
+        record: Mapping[str, t.ContainerValue],
+    ) -> dict[str, t.ContainerValue]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: dict[str, object] = {
+        attributes: dict[str, t.ContainerValue] = {
             "objectClass": object_classes.copy()
             if _is_container_list(object_classes)
             else ["inetOrgPerson", "person"],
@@ -358,7 +360,7 @@ class UsersSink(LDAPBaseSink):
         return attributes
 
     @override
-    def get_object_classes(self, record: Mapping[str, object]) -> list[str]:
+    def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
         """Get object classes for user entry."""
         configured = self._target.config.get("users_object_classes")
         if _is_container_list(configured):
@@ -368,8 +370,8 @@ class UsersSink(LDAPBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, object],
-        _context: Mapping[str, object],
+        _record: Mapping[str, t.ContainerValue],
+        _context: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Process a user record."""
         if not self.client:
@@ -394,7 +396,7 @@ class UsersSink(LDAPBaseSink):
                 if _is_container_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
-            attributes_dict: dict[str, object] = {}
+            attributes_dict: dict[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
                     if _is_container_list(v):
@@ -442,10 +444,10 @@ class GroupsSink(LDAPBaseSink):
     @override
     def build_attributes(
         self,
-        _record: Mapping[str, object],
-    ) -> r[dict[str, object]]:
+        _record: Mapping[str, t.ContainerValue],
+    ) -> r[dict[str, t.ContainerValue]]:
         """Build LDAP attributes for group entry."""
-        attrs: dict[str, object] = {}
+        attrs: dict[str, t.ContainerValue] = {}
         field_map = {"members": "member"}
         for k, v in _record.items():
             target_key = field_map.get(k, k)
@@ -453,10 +455,10 @@ class GroupsSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             else:
                 attrs[target_key] = [str(v)]
-        return r[dict[str, object]].ok(attrs)
+        return r[dict[str, t.ContainerValue]].ok(attrs)
 
     @override
-    def build_dn(self, record: Mapping[str, object]) -> r[str]:
+    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
         """Build DN for group entry."""
         rdn_attr = str(self._target.config.get("group_rdn_attribute", "cn"))
         cn = record.get(rdn_attr)
@@ -466,7 +468,7 @@ class GroupsSink(LDAPBaseSink):
         return r[str].ok(f"{rdn_attr}={cn},{base_dn}")
 
     @override
-    def get_object_classes(self, record: Mapping[str, object]) -> list[str]:
+    def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
         """Get object classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
         if _is_container_list(configured):
@@ -476,8 +478,8 @@ class GroupsSink(LDAPBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, object],
-        _context: Mapping[str, object],
+        _record: Mapping[str, t.ContainerValue],
+        _context: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Process a group record."""
         if not self.client:
@@ -496,7 +498,7 @@ class GroupsSink(LDAPBaseSink):
                 if _is_container_list(object_classes_raw)
                 else ["groupOfNames"]
             )
-            attributes_dict: dict[str, object] = {}
+            attributes_dict: dict[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
                     if _is_container_list(v):
@@ -539,14 +541,14 @@ class GroupsSink(LDAPBaseSink):
 
     def _build_group_attributes(
         self,
-        record: Mapping[str, object],
-    ) -> dict[str, object]:
+        record: Mapping[str, t.ContainerValue],
+    ) -> dict[str, t.ContainerValue]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes: dict[str, object] = {
+        attributes: dict[str, t.ContainerValue] = {
             "objectClass": object_classes.copy()
             if _is_container_list(object_classes)
             else ["groupOfNames"],
@@ -591,8 +593,8 @@ class OrganizationalUnitsSink(LDAPBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, object],
-        _context: Mapping[str, object],
+        _record: Mapping[str, t.ContainerValue],
+        _context: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Process an organizational unit record."""
         if not self.client:
@@ -605,7 +607,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 return r[bool].fail("No OU name found in record")
             ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
             attributes = self._build_ou_attributes(_record)
-            attributes_dict: dict[str, object] = {}
+            attributes_dict: dict[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if _is_container_list(v):
                     attributes_dict[k] = list(v)
@@ -643,14 +645,14 @@ class OrganizationalUnitsSink(LDAPBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: Mapping[str, object],
-    ) -> dict[str, object]:
+        record: Mapping[str, t.ContainerValue],
+    ) -> dict[str, t.ContainerValue]:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(
             "object_classes",
             ["organizationalUnit"],
         )
-        attributes: dict[str, object] = {
+        attributes: dict[str, t.ContainerValue] = {
             "objectClass": default_classes.copy()
             if _is_container_list(default_classes)
             else ["organizationalUnit"],

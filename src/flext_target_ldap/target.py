@@ -8,28 +8,30 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, Protocol, override
 
-from flext_core import FlextLogger, p
-from flext_meltano import FlextMeltanoModels
+from flext_core import FlextLogger
 from pydantic import TypeAdapter, ValidationError
 
-from flext_target_ldap.application import LDAPTargetOrchestrator
-from flext_target_ldap.catalog import build_singer_catalog
-from flext_target_ldap.constants import c
-from flext_target_ldap.infrastructure import get_flext_target_ldap_container
-from flext_target_ldap.settings import FlextTargetLdapSettings
-from flext_target_ldap.sinks import (
+from flext_target_ldap import (
+    FlextTargetLdapSettings,
     GroupsSink,
     LDAPBaseSink,
+    LDAPTargetOrchestrator,
     OrganizationalUnitsSink,
     Sink,
     Target,
     UsersSink,
+    build_singer_catalog,
+    c,
+    get_flext_target_ldap_container,
+    m,
+    p,
+    t,
 )
 
 
@@ -61,11 +63,11 @@ logger = FlextLogger(__name__)
 
 
 class _LdapApi(Protocol):
-    def add(self, dn: str, record: dict[str, object]) -> None: ...
+    def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
     def delete(self, dn: str) -> None: ...
 
-    def modify(self, dn: str, record: dict[str, object]) -> None: ...
+    def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
 
 
 class TargetLDAP(Target):
@@ -73,14 +75,14 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: dict[str, object]
+    config: dict[str, t.ContainerValue]
     cli: ClassVar[Callable[..., None] | None] = None
 
     @override
     def __init__(
         self,
         *,
-        config: dict[str, object] | None = None,
+        config: dict[str, t.ContainerValue] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -103,7 +105,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> dict[str, object]:
+    def singer_catalog(self) -> dict[str, t.ContainerValue]:
         """Return the Singer catalog for this target."""
         return build_singer_catalog()
 
@@ -178,10 +180,10 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> dict[str, object]:
+def _load_config_from_file(config_path: str) -> dict[str, t.ContainerValue]:
     """Load configuration from JSON file."""
-    config_adapter: TypeAdapter[dict[str, object]] = TypeAdapter(
-        dict[str, Mapping[str, object]],
+    config_adapter: TypeAdapter[dict[str, t.ContainerValue]] = TypeAdapter(
+        dict[str, t.ContainerValue],
     )
     try:
         content = Path(config_path).read_text(encoding="utf-8")
@@ -215,7 +217,7 @@ def _get_ldap_api() -> _LdapApi | None:
 
 def _construct_dn(
     stream: str,
-    record: dict[str, object],
+    record: dict[str, t.ContainerValue],
     base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
@@ -230,9 +232,9 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: dict[str, object],
+    record: dict[str, t.ContainerValue],
     stream: str,
-    cfg: dict[str, object],
+    cfg: dict[str, t.ContainerValue],
     api: _LdapApi | None,
     seen_dns: set[str],
 ) -> None:
@@ -277,27 +279,25 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         seen_dns: set[str] = set()
         for line in sys.stdin:
             try:
-                msg_dict = (
-                    FlextMeltanoModels.Meltano.SingerStateMessage.model_validate_json(
-                        line,
-                    )
+                msg_dict = m.Meltano.SingerStateMessage.model_validate_json(
+                    line,
                 )
                 msg_type = msg_dict.type
                 if msg_type == "STATE":
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    schema_msg = FlextMeltanoModels.Meltano.SingerSchemaMessage.model_validate_json(
+                    schema_msg = m.Meltano.SingerSchemaMessage.model_validate_json(
                         line,
                     )
-                    _schema: dict[str, object] = {}
+                    _schema: dict[str, t.ContainerValue] = {}
                     current_stream = schema_msg.stream
                 elif msg_type == "RECORD" and api is not None:
-                    record_msg = FlextMeltanoModels.Meltano.SingerRecordMessage.model_validate_json(
+                    record_msg = m.Meltano.SingerRecordMessage.model_validate_json(
                         line,
                     )
                     stream = record_msg.stream or current_stream or "users"
-                    normalized_record: dict[str, object] = {}
+                    normalized_record: dict[str, t.ContainerValue] = {}
                     for key, value in record_msg.record.items():
                         match value:
                             case bool() | int() | float() | str() | dict() | list():
