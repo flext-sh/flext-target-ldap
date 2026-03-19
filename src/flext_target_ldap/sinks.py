@@ -10,9 +10,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import ClassVar, TypeIs, override
 
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger
 
-from flext_target_ldap import LDAPClient, LdapProcessingCounters, c
+from flext_target_ldap import LDAPClient, LdapProcessingCounters, c, r, t
 
 
 class Sink:

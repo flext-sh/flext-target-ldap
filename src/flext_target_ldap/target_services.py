@@ -6,14 +6,13 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import Protocol, override
 
-from flext_core import r
-
 from flext_target_ldap import (
     FlextTargetLdapSettings,
     LdapAttributeMappingModel,
     LdapEntryModel,
     LdapTransformationResultModel,
     c,
+    r,
     t,
     target_client as target_client_module,
     u,

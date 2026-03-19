@@ -15,7 +15,7 @@ from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import Protocol, override
 
 import ldap3
-from flext_core import FlextLogger, r
+from flext_core import FlextLogger
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -24,7 +24,7 @@ from flext_ldap import (
 )
 from flext_ldif import FlextLdif
 
-from flext_target_ldap import m, t
+from flext_target_ldap import m, r, t
 
 logger = FlextLogger(__name__)
 

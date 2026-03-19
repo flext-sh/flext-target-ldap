@@ -11,7 +11,7 @@ from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager
 from typing import TypeIs, override
 
-from flext_core import FlextContainer, FlextLogger, p, r, t
+from flext_core import FlextContainer, FlextLogger
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -27,6 +27,9 @@ from flext_target_ldap import (
     Target,
     build_singer_catalog,
     c,
+    p,
+    r,
+    t,
 )
 
 logger = FlextLogger(__name__)

@@ -16,9 +16,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from flext_core import r
-
-from flext_target_ldap import FlextTargetLdapSettings, c, m, t, u
+from flext_target_ldap import FlextTargetLdapSettings, c, m, r, t, u
 
 
 def _target_config_to_int(value: t.ContainerValue, default: int) -> int:

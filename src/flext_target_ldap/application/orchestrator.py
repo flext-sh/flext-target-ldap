@@ -13,7 +13,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextLogger, p, r, t
+from flext_core import FlextLogger
+
+from flext_target_ldap import p, r, t
 
 logger: p.Logger = FlextLogger(__name__)
 

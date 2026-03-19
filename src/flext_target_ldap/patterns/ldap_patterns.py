@@ -9,8 +9,10 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated, override
 
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger
 from pydantic import BaseModel, Field
+
+from flext_target_ldap import r, t
 
 logger = FlextLogger(__name__)
 

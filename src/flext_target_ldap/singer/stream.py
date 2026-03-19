@@ -9,7 +9,9 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger, r
+from flext_core import FlextLogger
+
+from flext_target_ldap import r
 
 logger = FlextLogger(__name__)
 

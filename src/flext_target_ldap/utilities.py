@@ -12,12 +12,11 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
-from flext_target_ldap import c, m, t
+from flext_target_ldap import c, m, r, t
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):

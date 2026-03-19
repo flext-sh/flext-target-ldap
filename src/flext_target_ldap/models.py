@@ -15,10 +15,11 @@ import math
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_core import r, t
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, field_validator
+
+from flext_target_ldap import r, t
 
 from .constants import c
 

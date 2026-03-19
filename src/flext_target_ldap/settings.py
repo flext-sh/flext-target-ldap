@@ -15,9 +15,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated
 
-from flext_core import FlextModels, r, t
+from flext_core import FlextModels
 from flext_ldap import FlextLdapModels
 from pydantic import Field
+
+from flext_target_ldap import r, t
 
 from .constants import c
 from .utilities import FlextTargetLdapUtilities
