@@ -32,8 +32,8 @@ class FlextTargetLdapSettings(FlextModels.Entity):
     base_dn: str
     search_filter: str = "(objectClass=*)"
     search_scope: str = "SUBTREE"
-    connect_timeout: int = c.Network.DEFAULT_TIMEOUT // 3
-    receive_timeout: int = c.Network.DEFAULT_TIMEOUT
+    connect_timeout: int = c.DEFAULT_TIMEOUT_SECONDS // 3
+    receive_timeout: int = c.DEFAULT_TIMEOUT_SECONDS
     batch_size: int = c.Performance.BatchProcessing.DEFAULT_SIZE
     max_records: int | None = None
     create_missing_entries: bool = True
@@ -58,11 +58,11 @@ class LDAPConnectionSettings(FlextModels.Entity):
     base_dn: Annotated[str, Field(..., description="Base DN")]
     connect_timeout: Annotated[
         int,
-        Field(c.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout"),
+        Field(c.DEFAULT_TIMEOUT_SECONDS // 3, description="Connection timeout"),
     ]
     receive_timeout: Annotated[
         int,
-        Field(c.Network.DEFAULT_TIMEOUT, description="Receive timeout"),
+        Field(c.DEFAULT_TIMEOUT_SECONDS, description="Receive timeout"),
     ]
 
 
@@ -114,12 +114,12 @@ def validate_ldap_config(
                 config.get("search_scope", "SUBTREE"),
             ),
             connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("connect_timeout", c.Network.DEFAULT_TIMEOUT // 3),
-                c.Network.DEFAULT_TIMEOUT // 3,
+                config.get("connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3),
+                c.DEFAULT_TIMEOUT_SECONDS // 3,
             ),
             receive_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("receive_timeout", c.Network.DEFAULT_TIMEOUT),
-                c.Network.DEFAULT_TIMEOUT,
+                config.get("receive_timeout", c.DEFAULT_TIMEOUT_SECONDS),
+                c.DEFAULT_TIMEOUT_SECONDS,
             ),
             batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("batch_size", c.Performance.BatchProcessing.DEFAULT_SIZE),

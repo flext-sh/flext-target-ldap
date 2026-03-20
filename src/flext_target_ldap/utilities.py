@@ -800,8 +800,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 "",
             )
             timeout = FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("timeout", c.Network.DEFAULT_TIMEOUT),
-                c.Network.DEFAULT_TIMEOUT,
+                config.get("timeout", c.DEFAULT_TIMEOUT_SECONDS),
+                c.DEFAULT_TIMEOUT_SECONDS,
             )
             return m.Ldap.ConnectionConfig(
                 host=server,
