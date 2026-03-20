@@ -58,11 +58,9 @@ if TYPE_CHECKING:
         TestTransformationRule,
     )
     from .tt import t
+    from .tu import u
     from .typings import TestsFlextTargetLdapTypes, tt
-    from .utilities import (
-        TestsFlextTargetLdapUtilities,
-        TestsFlextTargetLdapUtilities as u,
-    )
+    from .utilities import TestsFlextTargetLdapUtilities
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "EXPECTED_DATA_COUNT": ("tests.test_transformation", "EXPECTED_DATA_COUNT"),
@@ -130,7 +128,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     ),
     "tm": ("tests.models", "tm"),
     "tt": ("tests.typings", "tt"),
-    "u": ("tests.utilities", "TestsFlextTargetLdapUtilities"),
+    "u": ("tests.tu", "u"),
 }
 
 __all__ = [

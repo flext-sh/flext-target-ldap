@@ -28,13 +28,19 @@ if TYPE_CHECKING:
     from flext_target_ldap.application.orchestrator import LDAPTargetOrchestrator
     from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.client import LDAPClient, LDAPConnection, LDAPSearchEntry
-    from flext_target_ldap.constants import FlextTargetLdapConstants, c
+    from flext_target_ldap.constants import (
+        FlextTargetLdapConstants,
+        FlextTargetLdapConstants as c,
+    )
     from flext_target_ldap.infrastructure.di_container import (
         configure_flext_target_ldap_dependencies,
         get_flext_target_ldap_container,
         get_flext_target_ldap_service,
     )
-    from flext_target_ldap.models import FlextTargetLdapModels, m
+    from flext_target_ldap.models import (
+        FlextTargetLdapModels,
+        FlextTargetLdapModels as m,
+    )
     from flext_target_ldap.patterns.ldap_patterns import (
         LDAPDataTransformer,
         LDAPEntryManager,
@@ -44,7 +50,10 @@ if TYPE_CHECKING:
         SingerSchemaDefinition,
     )
     from flext_target_ldap.processing_result import LdapProcessingCounters
-    from flext_target_ldap.protocols import FlextTargetLdapProtocols, p
+    from flext_target_ldap.protocols import (
+        FlextTargetLdapProtocols,
+        FlextTargetLdapProtocols as p,
+    )
     from flext_target_ldap.settings import (
         FlextTargetLdapSettings,
         LDAPConnectionSettings,
@@ -114,8 +123,14 @@ if TYPE_CHECKING:
         TransformationRule,
         logger,
     )
-    from flext_target_ldap.typings import FlextTargetLdapTypes, t
-    from flext_target_ldap.utilities import FlextTargetLdapUtilities, u
+    from flext_target_ldap.typings import (
+        FlextTargetLdapTypes,
+        FlextTargetLdapTypes as t,
+    )
+    from flext_target_ldap.utilities import (
+        FlextTargetLdapUtilities,
+        FlextTargetLdapUtilities as u,
+    )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "DataTransformationEngine": (
@@ -292,7 +307,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "__version_info__": ("flext_target_ldap.__version__", "__version_info__"),
     "application": ("flext_target_ldap.application", ""),
     "build_singer_catalog": ("flext_target_ldap.catalog", "build_singer_catalog"),
-    "c": ("flext_target_ldap.constants", "c"),
+    "c": ("flext_target_ldap.constants", "FlextTargetLdapConstants"),
     "configure_flext_target_ldap_dependencies": (
         "flext_target_ldap.infrastructure.di_container",
         "configure_flext_target_ldap_dependencies",
@@ -315,15 +330,15 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "h": ("flext_ldap", "h"),
     "infrastructure": ("flext_target_ldap.infrastructure", ""),
     "logger": ("flext_target_ldap.transformation", "logger"),
-    "m": ("flext_target_ldap.models", "m"),
+    "m": ("flext_target_ldap.models", "FlextTargetLdapModels"),
     "main": ("flext_target_ldap.target", "main"),
-    "p": ("flext_target_ldap.protocols", "p"),
+    "p": ("flext_target_ldap.protocols", "FlextTargetLdapProtocols"),
     "patterns": ("flext_target_ldap.patterns", ""),
     "r": ("flext_ldap", "r"),
     "s": ("flext_ldap", "s"),
     "singer": ("flext_target_ldap.singer", ""),
-    "t": ("flext_target_ldap.typings", "t"),
-    "u": ("flext_target_ldap.utilities", "u"),
+    "t": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
+    "u": ("flext_target_ldap.utilities", "FlextTargetLdapUtilities"),
     "validate_ldap_config": ("flext_target_ldap.settings", "validate_ldap_config"),
     "validate_ldap_target_config": (
         "flext_target_ldap.target_config",
