@@ -11,7 +11,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
-    from flext_ldap import d, e, h, x
+    from flext_ldap import d, e, h, r, s, x
 
     from flext_target_ldap import application, infrastructure, patterns, singer
     from flext_target_ldap.__version__ import (
@@ -73,7 +73,6 @@ if TYPE_CHECKING:
         GroupsSink,
         LDAPBaseSink,
         LDAPProcessingResult,
-        LDAPProcessingResult as r,
         OrganizationalUnitsSink,
         Sink,
         Target,
@@ -112,7 +111,6 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.target_services import (
         LdapConnectionService,
-        LdapConnectionService as s,
         LdapTargetApiService,
         LdapTargetOrchestrator,
         LdapTargetService,
@@ -336,8 +334,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "main": ("flext_target_ldap.target", "main"),
     "p": ("flext_target_ldap.protocols", "FlextTargetLdapProtocols"),
     "patterns": ("flext_target_ldap.patterns", ""),
-    "r": ("flext_target_ldap.sinks", "LDAPProcessingResult"),
-    "s": ("flext_target_ldap.target_services", "LdapConnectionService"),
+    "r": ("flext_ldap", "r"),
+    "s": ("flext_ldap", "s"),
     "singer": ("flext_target_ldap.singer", ""),
     "t": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
     "u": ("flext_target_ldap.utilities", "FlextTargetLdapUtilities"),
