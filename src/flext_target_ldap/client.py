@@ -21,10 +21,12 @@ from flext_ldap import (
     FlextLdapConnection,
     FlextLdapOperations,
     FlextLdapSettings,
+    m,
+    r,
 )
 from flext_ldif import FlextLdif
 
-from flext_target_ldap import m, r, t
+from flext_target_ldap import t
 
 logger = FlextLogger(__name__)
 
