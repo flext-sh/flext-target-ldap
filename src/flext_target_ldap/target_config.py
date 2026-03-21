@@ -18,7 +18,6 @@ from collections.abc import Mapping
 
 from flext_core.result import r
 from flext_core.typings import t
-from flext_core.utilities import u
 
 from flext_target_ldap.constants import c
 from flext_target_ldap.models import m
@@ -64,7 +63,7 @@ def _target_config_to_str_list(
     default: list[str],
 ) -> list[str]:
     """Convert value to string list."""
-    if u.is_list(value):
+    if isinstance(value, list):
         return [str(v) for v in value]
     return default
 
@@ -183,6 +182,8 @@ def create_default_ldap_target_config(
             max_records=None,
             search_filter="(objectClass=*)",
             search_scope="SUBTREE",
+            attribute_mapping={},
+            object_classes=["top"],
         )
         return r[FlextTargetLdapSettings].ok(target_config)
     except (ValueError, TypeError, RuntimeError) as e:

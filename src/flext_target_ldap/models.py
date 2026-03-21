@@ -162,13 +162,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     description="Type of LDAP entry (user, group, ou, etc.)",
                 ),
             ]
-            created_at: Annotated[
-                datetime,
-                Field(
-                    default_factory=lambda: datetime.now(UTC),
-                    description="Entry creation timestamp",
-                ),
-            ]
 
             @field_validator("object_classes")
             @classmethod
