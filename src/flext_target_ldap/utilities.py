@@ -12,14 +12,12 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core.result import r
-from flext_core.typings import t
+from flext_core import r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
-from flext_target_ldap.constants import c
-from flext_target_ldap.models import m
+from flext_target_ldap import c, m, t
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -54,11 +52,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
                         item,
                     )
-                    if coerced_item is not None:
+                    if isinstance(coerced_item, (str, int, float, bool, datetime)):
                         normalized_list.append(coerced_item)
             return normalized_list
         if isinstance(value, Mapping):
-            normalized_dict: dict[str, t.ContainerValue] = {}
+            normalized_dict: dict[str, t.NormalizedValue | BaseModel] = {}
             for key, item in value.items():
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -580,14 +578,15 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 "target_type": "ldap",
             }
             if last_processed_record:
-                checkpoint_data = {
-                    "id": last_processed_record.get("id"),
-                    "dn": last_processed_record.get("dn"),
-                    "timestamp": last_processed_record.get("_timestamp"),
-                }
-                state["checkpoint"] = {
-                    k: v for k, v in checkpoint_data.items() if v is not None
-                }
+                checkpoint: dict[str, t.ContainerValue] = {}
+                for field_key in ("id", "dn", "_timestamp"):
+                    field_val = last_processed_record.get(field_key)
+                    if field_val is not None:
+                        checkpoint_key = (
+                            "timestamp" if field_key == "_timestamp" else field_key
+                        )
+                        checkpoint[checkpoint_key] = str(field_val)
+                state["checkpoint"] = checkpoint
             return state
 
         @staticmethod
@@ -606,9 +605,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             bookmarks = state.get("bookmarks")
-            if not u.is_dict_like(bookmarks):
+            if not isinstance(bookmarks, Mapping):
                 return {}
-            bookmarks_map: dict[str, t.NormalizedValue | BaseModel] = {}
+            bookmarks_map: dict[str, t.ContainerValue] = {}
             for k, v in bookmarks.items():
                 coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
                 if coerced_value is not None and isinstance(
@@ -616,14 +615,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 ):
                     bookmarks_map[str(k)] = coerced_value
             stream_state_data = bookmarks_map.get(stream_name)
-            if u.is_dict_like(stream_state_data):
-                stream_state: dict[str, t.NormalizedValue | BaseModel] = {}
+            if isinstance(stream_state_data, Mapping):
+                stream_state: dict[str, t.ContainerValue] = {}
                 for k, v in stream_state_data.items():
-                    coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
-                    if coerced_value is not None and isinstance(
-                        coerced_value, (str, int, float, bool)
-                    ):
-                        stream_state[str(k)] = coerced_value
+                    if isinstance(v, (str, int, float, bool)):
+                        stream_state[str(k)] = v
                 return stream_state
             return {}
 
@@ -644,16 +640,17 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             Mapping[str, t.Scalar]: Updated state
 
             """
-            state_dict: dict[str, t.ContainerValue] = dict(state)
-            bookmarks = state_dict.get("bookmarks")
-            bookmarks_dict: dict[str, t.NormalizedValue | BaseModel] = {}
-            if u.is_dict_like(bookmarks):
-                for k, v in bookmarks.items():
-                    coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
-                    if coerced_value is not None and isinstance(
-                        coerced_value, (str, int, float, bool)
-                    ):
-                        bookmarks_dict[str(k)] = coerced_value
+            state_dict: dict[str, t.ContainerValue] = {
+                sk: sv
+                for sk, sv in state.items()
+                if isinstance(sv, (str, int, float, bool))
+            }
+            bookmarks_val = state.get("bookmarks")
+            bookmarks_dict: dict[str, t.ContainerValue] = {}
+            if isinstance(bookmarks_val, Mapping):
+                for k, v in bookmarks_val.items():
+                    if isinstance(v, (str, int, float, bool)):
+                        bookmarks_dict[str(k)] = v
             bookmarks_dict[stream_name] = dict(stream_state)
             state_dict["bookmarks"] = bookmarks_dict
             return state_dict

@@ -253,7 +253,7 @@ class LdapTargetOrchestrator:
         stream_type = "users"
         mappings = transformation.get_default_mappings(stream_type)
         processed = 0
-        errors: list[str] = []
+        errors: list[t.ContainerValue] = []
         for record in records:
             transformed = transformation.transform_record(
                 record=record,

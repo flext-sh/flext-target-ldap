@@ -23,7 +23,7 @@ class TestsFlextTargetLdapProtocols(p, FlextTargetLdapProtocols):
     - p.TargetLdap.* (from FlextTargetLdapProtocols)
     """
 
-    class Tests:
+    class Tests(p.Tests):
         """Project-specific test protocols.
 
         Extends p.Tests with TargetLdap-specific protocols.

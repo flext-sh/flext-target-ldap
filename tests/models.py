@@ -27,7 +27,7 @@ class TestsFlextTargetLdapModels(m, FlextTargetLdapModels):
     - m.* (production models via alternative alias)
     """
 
-    class Tests:
+    class Tests(m.Tests):
         """Project-specific test fixtures namespace."""
 
         class TargetLdap:

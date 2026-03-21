@@ -89,7 +89,7 @@ def _is_container_list(
     return isinstance(value, list)
 
 
-def _to_container_list(values: t.ContainerValue) -> t.ContainerValue:
+def _to_container_list(values: t.ContainerValue | list[str]) -> t.ContainerValue:
     if isinstance(values, list):
         return [str(value) for value in values]
     return values
@@ -362,6 +362,7 @@ class LdapTargetClient:
                         ),
                         changetype=None,
                         metadata=None,
+                        validation_metadata=None,
                     )
                     result_op = self._operations.add(group_entry)
                     if result_op.is_success:
@@ -600,10 +601,11 @@ class LdapBaseSink(Sink):
             return
         try:
             records_raw = _context.get("records", [])
-            if isinstance(records_raw, list):
-                records: list[dict[str, t.ContainerValue]] = records_raw
-            else:
-                records = []
+            records: list[dict[str, t.ContainerValue]] = [
+                item
+                for item in (records_raw if isinstance(records_raw, list) else [])
+                if isinstance(item, dict)
+            ]
             logger.info(
                 f"Processing batch of {len(records)} records for stream: {self.stream_name}",
             )
@@ -1033,7 +1035,7 @@ class TargetLdap(Target):
         )
         key_props_val = self.config.get(f"{stream_name}_key_properties", [])
         key_properties: list[str] = (
-            key_props_val if isinstance(key_props_val, list) else []
+            [str(k) for k in key_props_val] if isinstance(key_props_val, list) else []
         )
         return sink_class(
             target=self,

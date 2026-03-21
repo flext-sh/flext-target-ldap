@@ -10,6 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
+from flext_core.typings import t
 
 from flext_target_ldap import (
     GroupsSink,
@@ -24,11 +25,13 @@ class TestLDAPBaseSink:
 
     @pytest.fixture
     def sink(
-        self, mock_target: MagicMock, mock_ldap_config: dict[str, object]
+        self, mock_target: MagicMock, mock_ldap_config: dict[str, t.ContainerValue]
     ) -> LDAPBaseSink:
         """Create LDAP base sink fixture for testing."""
         _mock_ldap_config = mock_ldap_config
-        schema = {"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}}
+        schema: dict[str, t.ContainerValue] = {
+            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
+        }
         return LDAPBaseSink(
             target=mock_target,
             stream_name="test_stream",
@@ -73,7 +76,7 @@ class TestLDAPBaseSink:
 
     def test_get_object_classes_default(self, sink: LDAPBaseSink) -> None:
         """Test that get_object_classes returns default 'top' class."""
-        record: dict[str, object] = {}
+        record: dict[str, t.ContainerValue] = {}
         classes = sink.get_object_classes(record)
         if classes != ["top"]:
             classes_msg: str = f"Expected {['top']}, got {classes}"
@@ -126,14 +129,14 @@ class TestUsersSink:
 
     @pytest.fixture
     def users_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, t.ContainerValue]
     ) -> UsersSink:
         """Create users sink fixture for testing."""
         mock_target.config.update({
             "base_dn": "dc=example,dc=com",
             "user_rdn_attribute": "uid",
         })
-        schema = {
+        schema: dict[str, t.ContainerValue] = {
             "properties": {
                 "uid": {"type": "string"},
                 "cn": {"type": "string"},
@@ -198,7 +201,7 @@ class TestUsersSink:
 
     def test_users_build_attributes_multivalued(self, users_sink: UsersSink) -> None:
         """Test building LDAP attributes with multi-valued fields."""
-        record = {
+        record: dict[str, t.ContainerValue] = {
             "uid": "testuser",
             "emails": ["test1@example.com", "test2@example.com"],
             "phone_numbers": ["123-456-7890", "098-765-4321"],
@@ -216,7 +219,7 @@ class TestUsersSink:
 
     def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
         """Test getting default object classes for user entries."""
-        record: dict[str, object] = {}
+        record: dict[str, t.ContainerValue] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["inetOrgPerson", "organizationalPerson", "person", "top"]:
             user_classes_msg: str = f"Expected {['inetOrgPerson', 'organizationalPerson', 'person', 'top']}, got {classes}"
@@ -230,14 +233,16 @@ class TestUsersSink:
             "user_rdn_attribute": "uid",
             "users_object_classes": ["customUser", "top"],
         })
-        schema = {"properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}}
+        schema: dict[str, t.ContainerValue] = {
+            "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}
+        }
         users_sink = UsersSink(
             target=mock_target,
             stream_name="users",
             schema=schema,
             key_properties=["uid"],
         )
-        record: dict[str, object] = {}
+        record: dict[str, t.ContainerValue] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["customUser", "top"]:
             custom_user_classes_msg: str = (
@@ -251,14 +256,16 @@ class TestGroupsSink:
 
     @pytest.fixture
     def groups_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, t.ContainerValue]
     ) -> GroupsSink:
         """Create groups sink fixture for testing."""
         mock_target.config.update({
             "base_dn": "dc=example,dc=com",
             "group_rdn_attribute": "cn",
         })
-        schema = {"properties": {"cn": {"type": "string"}, "member": {"type": "array"}}}
+        schema: dict[str, t.ContainerValue] = {
+            "properties": {"cn": {"type": "string"}, "member": {"type": "array"}}
+        }
         return GroupsSink(
             target=mock_target,
             stream_name="groups",
@@ -289,7 +296,7 @@ class TestGroupsSink:
 
     def test_groups_build_attributes_basic(self, groups_sink: GroupsSink) -> None:
         """Test building basic LDAP attributes for group record."""
-        record = {
+        record: dict[str, t.ContainerValue] = {
             "cn": "testgroup",
             "description": "Test Group",
             "members": ["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
@@ -313,7 +320,7 @@ class TestGroupsSink:
 
     def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
         """Test getting default object classes for group entries."""
-        record: dict[str, object] = {}
+        record: dict[str, t.ContainerValue] = {}
         classes = groups_sink.get_object_classes(record)
         if classes != ["groupOfNames", "top"]:
             group_classes_msg: str = (
@@ -327,11 +334,11 @@ class TestOrganizationalUnitsSink:
 
     @pytest.fixture
     def ou_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, t.ContainerValue]
     ) -> OrganizationalUnitsSink:
         """Create organizational units sink fixture for testing."""
         mock_target.config.update({"base_dn": "dc=example,dc=com"})
-        schema = {
+        schema: dict[str, t.ContainerValue] = {
             "properties": {"ou": {"type": "string"}, "description": {"type": "string"}}
         }
         return OrganizationalUnitsSink(
@@ -400,7 +407,7 @@ class TestOrganizationalUnitsSink:
         self, ou_sink: OrganizationalUnitsSink
     ) -> None:
         """Test getting default object classes for organizational unit entries."""
-        record: dict[str, object] = {}
+        record: dict[str, t.ContainerValue] = {}
         classes = ou_sink.get_object_classes(record)
         if classes != ["organizationalUnit", "top"]:
             ou_classes_msg: str = (
@@ -414,11 +421,13 @@ class TestLDAPGenericSink:
 
     @pytest.fixture
     def generic_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: dict[str, object]
+        self, mock_target: MagicMock, _mock_ldap_config: dict[str, t.ContainerValue]
     ) -> LDAPBaseSink:
         """Create generic LDAP sink fixture for testing."""
         mock_target.config.update({"base_dn": "dc=example,dc=com"})
-        schema = {"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}}
+        schema: dict[str, t.ContainerValue] = {
+            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
+        }
         return LDAPBaseSink(
             target=mock_target,
             stream_name="generic",
@@ -492,7 +501,7 @@ class TestLDAPGenericSink:
         self, generic_sink: LDAPBaseSink
     ) -> None:
         """Test getting object classes from record data."""
-        record = {"object_classes": ["customClass", "top"]}
+        record: dict[str, t.ContainerValue] = {"object_classes": ["customClass", "top"]}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass", "top"]:
             custom_classes_msg: str = (
@@ -514,7 +523,7 @@ class TestLDAPGenericSink:
         self, generic_sink: LDAPBaseSink
     ) -> None:
         """Test getting default object classes for generic entries."""
-        record: dict[str, object] = {}
+        record: dict[str, t.ContainerValue] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
             default_classes_msg: str = f"Expected {['top']}, got {classes}"
@@ -527,14 +536,16 @@ class TestLDAPGenericSink:
             "base_dn": "dc=example,dc=com",
             "generic_object_classes": ["customGeneric", "top"],
         })
-        schema = {"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}}
+        schema: dict[str, t.ContainerValue] = {
+            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
+        }
         generic_sink = LDAPBaseSink(
             target=mock_target,
             stream_name="generic",
             schema=schema,
             key_properties=["id"],
         )
-        record: dict[str, object] = {}
+        record: dict[str, t.ContainerValue] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customGeneric", "top"]:
             configured_classes_msg: str = (

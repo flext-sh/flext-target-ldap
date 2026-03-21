@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_core.typings import t
+
 from flext_target_ldap.transformation import (
     DataTransformationEngine,
     MigrationValidator,
@@ -38,7 +40,7 @@ class TestDataTransformationEngine:
             replacement="dc=network,dc=invaliddc",
         )
         engine = DataTransformationEngine([rule])
-        entry = {
+        entry: dict[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "person"],
             "cn": "testuser",
@@ -64,7 +66,7 @@ class TestDataTransformationEngine:
             replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
-        entry = {
+        entry: dict[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser", "top"],
             "cn": "testuser",
@@ -91,7 +93,7 @@ class TestDataTransformationEngine:
             ),
         ]
         engine = DataTransformationEngine(rules)
-        entry = {
+        entry: dict[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser"],
             "description": "Oracle User Account",
@@ -117,13 +119,11 @@ class TestDataTransformationEngine:
             name="clean_empty_attributes", pattern="empty", replacement=""
         )
         engine = DataTransformationEngine([rule])
-        entry = {
+        entry: dict[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["person"],
             "cn": "testuser",
             "description": "",
-            "mail": object(),
-            "telephoneNumber": list[object](),
         }
         result = engine.transform(entry)
         assert result.is_success
@@ -140,7 +140,7 @@ class TestDataTransformationEngine:
             name="test_rule", pattern="orclUser", replacement="inetOrgPerson"
         )
         engine = DataTransformationEngine([rule])
-        entry = {
+        entry: dict[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser"],
             "cn": "testuser",
@@ -162,7 +162,7 @@ class TestDataTransformationEngine:
             replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
-        entries = [
+        entries: list[dict[str, t.ContainerValue]] = [
             {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
             {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
             {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
@@ -186,7 +186,7 @@ class TestMigrationValidator:
     def test_validate_valid_entry(self) -> None:
         """Test validate valid entry function."""
         validator = MigrationValidator()
-        data = {
+        data: dict[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "cn": "testuser",
             "sn": "User",
@@ -309,7 +309,7 @@ class TestIntegratedTransformation:
         ]
         transformation_engine = DataTransformationEngine(rules)
         validator = MigrationValidator(strict_mode=False)
-        oracle_entry = {
+        oracle_entry: dict[str, t.ContainerValue] = {
             "dn": "cn=john.doe,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "top"],
             "orclSamAccountName": "john.doe",
@@ -331,14 +331,15 @@ class TestIntegratedTransformation:
         if "inetOrgPerson" not in str(object_classes):
             msg: str = f"Expected {'inetOrgPerson'} in {object_classes!s}"
             raise AssertionError(msg)
-        dn = transformed_entry["dn"]
+        dn = str(transformed_entry["dn"])
         attributes = {
             k: v for k, v in transformed_entry.items() if k not in {"dn", "objectClass"}
         }
-        obj_classes = (
-            transformed_entry["objectClass"]
-            if isinstance(transformed_entry["objectClass"], list)
-            else [transformed_entry["objectClass"]]
+        raw_classes = transformed_entry["objectClass"]
+        obj_classes: list[str] = (
+            [str(c) for c in raw_classes]
+            if isinstance(raw_classes, list)
+            else [str(raw_classes)]
         )
         validation_result = validator.validate(dn, attributes, obj_classes)
         assert validation_result.is_success
@@ -350,7 +351,7 @@ class TestIntegratedTransformation:
             name="general_transform", pattern="orclUser", replacement="inetOrgPerson"
         )
         engine = DataTransformationEngine([rule])
-        test_entries = [
+        test_entries: list[dict[str, t.ContainerValue]] = [
             {
                 "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",
                 "objectClass": ["orclContext"],
