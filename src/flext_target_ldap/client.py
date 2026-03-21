@@ -16,6 +16,7 @@ from typing import Protocol, override
 
 import ldap3
 from flext_core import FlextLogger
+from flext_core.typings import t
 from flext_ldap import (
     FlextLdap,
     FlextLdapConnection,
@@ -25,8 +26,6 @@ from flext_ldap import (
     r,
 )
 from flext_ldif import FlextLdif
-
-from flext_target_ldap import t
 
 logger = FlextLogger(__name__)
 

@@ -11,8 +11,12 @@ from collections.abc import Mapping
 from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger
+from flext_core.constants import c
+from flext_core.result import r
+from flext_core.typings import t
 
-from flext_target_ldap import LDAPClient, LdapProcessingCounters, c, r, t
+from flext_target_ldap.client import LDAPClient
+from flext_target_ldap.processing_result import LdapProcessingCounters
 
 
 class Sink:

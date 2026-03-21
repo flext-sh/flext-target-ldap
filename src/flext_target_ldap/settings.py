@@ -16,10 +16,10 @@ from collections.abc import Mapping
 from typing import Annotated
 
 from flext_core import FlextModels
+from flext_core.result import r
+from flext_core.typings import t
 from flext_ldap import FlextLdapModels
 from pydantic import Field
-
-from flext_target_ldap import r, t
 
 from .constants import c
 from .utilities import FlextTargetLdapUtilities
