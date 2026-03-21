@@ -45,21 +45,17 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """
 
             singer_field_name: Annotated[
-                str,
+                t.NonEmptyStr,
                 Field(
                     ...,
                     description="Singer field name from source data",
-                    min_length=1,
-                    max_length=255,
                 ),
             ]
             ldap_attribute_name: Annotated[
-                str,
+                t.NonEmptyStr,
                 Field(
                     ...,
                     description="Target LDAP attribute name",
-                    min_length=1,
-                    max_length=255,
                 ),
             ]
             is_required: Annotated[
@@ -74,7 +70,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(
                     default=None,
                     description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
-                    max_length=100,
                 ),
             ]
             default_value: Annotated[
@@ -82,7 +77,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(
                     default=None,
                     description="Default value if source field is missing",
-                    max_length=1000,
                 ),
             ]
 
@@ -141,12 +135,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """
 
             distinguished_name: Annotated[
-                str,
+                t.NonEmptyStr,
                 Field(
                     ...,
                     description="LDAP Distinguished Name (DN)",
-                    min_length=1,
-                    max_length=1000,
                 ),
             ]
             object_classes: Annotated[
@@ -168,7 +160,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(
                     default="generic",
                     description="Type of LDAP entry (user, group, ou, etc.)",
-                    max_length=50,
                 ),
             ]
             created_at: Annotated[
@@ -300,11 +291,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             processing_time_ms: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Processing time in milliseconds",
-                    ge=0,
                 ),
             ]
             transformation_timestamp: Annotated[
@@ -365,21 +355,17 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """
 
             stream_name: Annotated[
-                str,
+                t.NonEmptyStr,
                 Field(
                     ...,
                     description="Singer stream being processed",
-                    min_length=1,
-                    max_length=255,
                 ),
             ]
             batch_size: Annotated[
-                int,
+                t.BatchSize,
                 Field(
                     ...,
                     description="Maximum records per batch",
-                    gt=0,
-                    le=10000,
                 ),
             ]
             current_batch: Annotated[
@@ -392,27 +378,24 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             total_processed: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Total entries processed across all batches",
-                    ge=0,
                 ),
             ]
             successful_operations: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Count of successful LDAP operations",
-                    ge=0,
                 ),
             ]
             failed_operations: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Count of failed LDAP operations",
-                    ge=0,
                 ),
             ]
             last_processed_at: Annotated[
@@ -522,51 +505,45 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """
 
             total_entries_processed: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Total LDAP entries processed",
-                    ge=0,
                 ),
             ]
             successful_adds: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Successful LDAP add operations",
-                    ge=0,
                 ),
             ]
             successful_updates: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Successful LDAP modify operations",
-                    ge=0,
                 ),
             ]
             successful_deletes: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Successful LDAP delete operations",
-                    ge=0,
                 ),
             ]
             failed_operations: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
                     default=0,
                     description="Total failed operations",
-                    ge=0,
                 ),
             ]
             average_processing_time_ms: Annotated[
-                float,
+                t.NonNegativeFloat,
                 Field(
                     default=0.0,
                     description="Average processing time per entry in milliseconds",
-                    ge=0.0,
                 ),
             ]
             start_time: Annotated[
