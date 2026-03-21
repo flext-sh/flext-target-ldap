@@ -174,7 +174,7 @@ class LdapTransformationService:
         entry_name = str(
             record.get(
                 "username",
-                record.get("name", c.Mixins.IDENTIFIER_UNKNOWN),
+                record.get("name", c.IDENTIFIER_UNKNOWN),
             ),
         )
         dn = f"cn={entry_name},{base_dn}"

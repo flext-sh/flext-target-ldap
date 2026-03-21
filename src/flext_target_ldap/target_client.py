@@ -641,7 +641,7 @@ class LdapBaseSink(Sink):
         """Set up LDAP client connection."""
         try:
             connection_config = {
-                "host": self._target.config.get("host", c.Platform.DEFAULT_HOST),
+                "host": self._target.config.get("host", c.DEFAULT_HOST),
                 "port": self._target.config.get(
                     "port",
                     c.TargetLdap.Connection.DEFAULT_PORT,
@@ -1046,8 +1046,8 @@ class TargetLdap(Target):
         """Set up the LDAP target."""
         self._container = FlextContainer.get_global()
         logger.info("DI container initialized successfully")
-        host = self.config.get("host", c.Platform.DEFAULT_HOST)
-        host_name = host if isinstance(host, str) else c.Platform.DEFAULT_HOST
+        host = self.config.get("host", c.DEFAULT_HOST)
+        host_name = host if isinstance(host, str) else c.DEFAULT_HOST
         logger.info("LDAP target setup completed for host: %s", host_name)
 
     def teardown(self) -> None:

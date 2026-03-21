@@ -30,7 +30,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         - c.TargetLdap.* (target-specific constants)
         - c.Ldap.* (inherited from FlextLdapConstants)
         - c.* (inherited from FlextLdifConstants via FlextLdapConstants)
-        - c.Network.*, c.Errors.*, etc. (inherited from FlextConstants)
+        - c.*, c.*, etc. (inherited from FlextConstants)
     """
 
     class TargetLdap:

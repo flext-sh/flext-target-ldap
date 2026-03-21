@@ -34,7 +34,7 @@ class FlextTargetLdapSettings(FlextModels.Entity):
     search_scope: str = "SUBTREE"
     connect_timeout: int = c.DEFAULT_TIMEOUT_SECONDS // 3
     receive_timeout: int = c.DEFAULT_TIMEOUT_SECONDS
-    batch_size: int = c.Performance.BatchProcessing.DEFAULT_SIZE
+    batch_size: int = c.DEFAULT_SIZE
     max_records: int | None = None
     create_missing_entries: bool = True
     update_existing_entries: bool = True
@@ -71,7 +71,7 @@ class LDAPOperationSettings(FlextModels.Entity):
 
     batch_size: Annotated[
         int,
-        Field(c.Performance.BatchProcessing.DEFAULT_SIZE, description="Batch size"),
+        Field(c.DEFAULT_SIZE, description="Batch size"),
     ]
     max_records: Annotated[int | None, Field(None, description="Maximum records")]
     create_missing_entries: Annotated[
@@ -122,8 +122,8 @@ def validate_ldap_config(
                 c.DEFAULT_TIMEOUT_SECONDS,
             ),
             batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("batch_size", c.Performance.BatchProcessing.DEFAULT_SIZE),
-                c.Performance.BatchProcessing.DEFAULT_SIZE,
+                config.get("batch_size", c.DEFAULT_SIZE),
+                c.DEFAULT_SIZE,
             ),
             max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
                 config.get("max_records"),
