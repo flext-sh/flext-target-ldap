@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager, suppress
-from typing import Protocol, override
+from typing import Protocol, cast, override
 
 import ldap3
 from flext_core import FlextLogger
@@ -143,7 +143,7 @@ class LDAPClient:
                 if object_classes is None:
                     object_classes = []
                 try:
-                    _ = conn.add(dn, object_classes, dict(attributes))
+                    conn.add(dn, object_classes, dict(attributes))
                 except Exception as e:
                     if e.__class__.__name__ == "LDAPEntryAlreadyExistsResult":
                         return r[bool].fail("Entry already exists")
@@ -179,7 +179,7 @@ class LDAPClient:
                 return r[bool].fail("DN required")
             logger.info("Deleting LDAP entry using ldap3: %s", dn)
             with self.get_connection() as conn:
-                _ = conn.delete(dn)
+                conn.delete(dn)
                 return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to delete entry %s", dn)
@@ -212,18 +212,18 @@ class LDAPClient:
             logger.exception("Failed to check entry existence: %s", dn)
             return r[bool].fail(f"Entry exists check failed: {e}")
 
-    def get_connection(self) -> AbstractContextManager[ldap3.Connection]:
+    def get_connection(self) -> AbstractContextManager[LDAPConnection]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
 
         Returns a real LDAP connection for production use.
 
         Returns:
-        _GeneratorContextManager[LDAPConnection]: LDAP connection context manager.
+        AbstractContextManager[LDAPConnection]: LDAP connection context manager.
 
         """
 
         @contextmanager
-        def connection_context() -> Generator[ldap3.Connection]:
+        def connection_context() -> Generator[LDAPConnection]:
             server_pool = ldap3.ServerPool([
                 ldap3.Server(
                     self.config.host,
@@ -232,10 +232,13 @@ class LDAPClient:
                     connect_timeout=self.config.timeout,
                 ),
             ])
-            connection = ldap3.Connection(
-                server_pool,
-                user=self._bind_dn,
-                password=self._password,
+            connection: LDAPConnection = cast(
+                "LDAPConnection",
+                ldap3.Connection(
+                    server_pool,
+                    user=self._bind_dn,
+                    password=self._password,
+                ),
             )
             connection.bind()
             try:
@@ -276,7 +279,7 @@ class LDAPClient:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
-                _ = conn.modify(dn, dict(changes))
+                conn.modify(dn, dict(changes))
                 return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to modify entry %s", dn)
@@ -298,7 +301,7 @@ class LDAPClient:
                 search_filter,
             )
             with self.get_connection() as conn:
-                _ = conn.search(base_dn, search_filter, attributes=attributes)
+                conn.search(base_dn, search_filter, attributes=attributes)
                 raw_entries: list[dict[str, t.ContainerValue]] = conn.entries
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
@@ -337,17 +340,18 @@ class LDAPClient:
     def _get_api(self) -> FlextLdap:
         """Instantiate and cache FlextLdap lazily."""
         if self._api is None:
-            ldap_settings = FlextLdapSettings(
-                host=self.config.host,
-                port=self.config.port,
-                use_ssl=self.config.use_ssl,
-                use_tls=self.config.use_tls,
-                bind_dn=self._bind_dn,
-                bind_password=self._password,
-                timeout=self.config.timeout,
-                auto_bind=self.config.auto_bind,
-                auto_range=self.config.auto_range,
-            )
+            ldap_config: dict[str, str | int | bool] = {
+                "host": self.config.host,
+                "port": self.config.port,
+                "use_ssl": self.config.use_ssl,
+                "use_tls": self.config.use_tls,
+                "bind_dn": self._bind_dn,
+                "bind_password": self._password,
+                "timeout": self.config.timeout,
+                "auto_bind": self.config.auto_bind,
+                "auto_range": self.config.auto_range,
+            }
+            ldap_settings = FlextLdapSettings.model_validate(ldap_config)
             connection = FlextLdapConnection(config=ldap_settings)
             operations = FlextLdapOperations(connection=connection)
             self._api = FlextLdap(

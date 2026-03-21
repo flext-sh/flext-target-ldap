@@ -64,7 +64,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Connection:
             """LDAP connection configuration constants for target operations."""
 
-            DEFAULT_HOST: Final[str] = FlextLdapConstants.Platform.DEFAULT_HOST
+            DEFAULT_HOST: Final[str] = FlextLdapConstants.DEFAULT_HOST
             DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
             DEFAULT_TIMEOUT: Final[int] = (
                 FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
@@ -87,12 +87,8 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             """
 
             DEFAULT_BATCH_SIZE: Final[int] = FlextLdapConstants.DEFAULT_BATCH_SIZE
-            MAX_BATCH_SIZE: Final[int] = (
-                FlextLdapConstants.Performance.BatchProcessing.MAX_ITEMS
-            )
-            DEFAULT_PAGE_SIZE: Final[int] = (
-                FlextLdapConstants.Pagination.DEFAULT_PAGE_SIZE
-            )
+            MAX_BATCH_SIZE: Final[int] = FlextLdapConstants.MAX_ITEMS
+            DEFAULT_PAGE_SIZE: Final[int] = FlextLdapConstants.DEFAULT_PAGE_SIZE
 
         class Operations:
             """LDAP operation types and commands.
@@ -110,11 +106,9 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             DEFAULT_LOAD_TIMEOUT: Final[int] = (
                 FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
             )
-            MAX_LOAD_RETRIES: Final[int] = (
-                FlextLdapConstants.Reliability.MAX_RETRY_ATTEMPTS
-            )
+            MAX_LOAD_RETRIES: Final[int] = FlextLdapConstants.DEFAULT_MAX_RETRY_ATTEMPTS
             LOAD_RETRY_DELAY: Final[float] = (
-                FlextLdapConstants.Reliability.DEFAULT_RETRY_DELAY_SECONDS
+                FlextLdapConstants.DEFAULT_RETRY_DELAY_SECONDS
             )
 
         class Validation:
@@ -124,7 +118,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             """
 
             MAX_DN_LENGTH: Final[int] = (
-                FlextLdapConstants.Ldif.LdifValidation.MAX_DN_LENGTH
+                FlextLdapConstants.Ldif.LdifValidation.MAX_URL_LENGTH
             )
 
     @unique

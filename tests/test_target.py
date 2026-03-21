@@ -82,7 +82,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {['customPerson', 'top']}, got {target.config['users_object_classes']}"
             raise AssertionError(msg)
 
-    @patch("target_ldap.sinks.LDAPClient")
+    @patch("flext_target_ldap.sinks.LDAPClient")
     def test_process_record(
         self, mock_client_class: MagicMock, config: dict[str, object]
     ) -> None:
@@ -111,7 +111,7 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {'inetOrgPerson'} in {call_args[0][1]}"
             raise AssertionError(msg)
 
-    @patch("target_ldap.sinks.LDAPClient")
+    @patch("flext_target_ldap.sinks.LDAPClient")
     def test_process_delete_record(
         self, mock_client_class: MagicMock, config: dict[str, object]
     ) -> None:

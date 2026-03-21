@@ -11,11 +11,11 @@ from collections.abc import Mapping
 from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger
-from flext_core.constants import c
 from flext_core.result import r
 from flext_core.typings import t
 
 from flext_target_ldap.client import LDAPClient
+from flext_target_ldap.constants import c
 from flext_target_ldap.processing_result import LdapProcessingCounters
 
 
@@ -97,7 +97,7 @@ logger = FlextLogger(__name__)
 
 
 def _is_container_list(
-    value: t.ContainerValue,
+    value: t.ContainerValue | None,
 ) -> TypeIs[list[t.ContainerValue]]:
     return isinstance(value, list)
 
@@ -186,10 +186,9 @@ class LDAPBaseSink(Sink):
             return
         try:
             records_raw = _context.get("records", [])
+            records: list[dict[str, t.ContainerValue]] = []
             if isinstance(records_raw, list):
-                records: list[dict[str, t.ContainerValue]] = records_raw
-            else:
-                records = []
+                records.extend(item for item in records_raw if isinstance(item, dict))
             logger.info(
                 f"Processing batch of {len(records)} records for stream: {self.stream_name}",
             )

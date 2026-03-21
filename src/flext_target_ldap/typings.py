@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from flext_core.constants import c
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
+
+from flext_target_ldap.constants import c
 
 
 class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
