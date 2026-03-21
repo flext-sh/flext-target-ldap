@@ -18,8 +18,6 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-
-if TYPE_CHECKING:
     from flext_target_ldap.infrastructure.di_container import (
         configure_flext_target_ldap_dependencies,
         get_flext_target_ldap_container,
