@@ -13,7 +13,7 @@ import pytest
 from flext_core.typings import t
 
 from flext_target_ldap import LdapTargetClient
-from flext_target_ldap.client import LDAPClient
+from flext_target_ldap.client import LDAPClient, LDAPSearchEntry
 
 EXPECTED_DATA_COUNT = 3
 
@@ -22,29 +22,38 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: dict[str, t.ContainerValue]) -> LdapTargetClient:
-        """Create test LDAP client instance."""
+    def client(self, mock_ldap_config: dict[str, t.ContainerValue]) -> LDAPClient:
+        """Create test LDAPClient instance."""
+        return LDAPClient(config=mock_ldap_config)
+
+    @pytest.fixture
+    def target_client(
+        self, mock_ldap_config: dict[str, t.ContainerValue]
+    ) -> LdapTargetClient:
+        """Create test LdapTargetClient instance."""
         return LdapTargetClient(config=mock_ldap_config)
 
-    def test_client_initialization(self, client: LdapTargetClient) -> None:
+    def test_client_initialization(self, target_client: LdapTargetClient) -> None:
         """Test LDAP client initialization with configuration values."""
-        if client.host != "test.ldap.com":
-            msg: str = f"Expected {'test.ldap.com'}, got {client.host}"
+        if target_client.host != "test.ldap.com":
+            msg: str = f"Expected {'test.ldap.com'}, got {target_client.host}"
             raise AssertionError(msg)
-        assert client.port == 389
-        if client.bind_dn != "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com":
-            msg: str = f"Expected {'cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com'}, got {client.bind_dn}"
+        assert target_client.port == 389
+        if target_client.bind_dn != "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com":
+            msg: str = f"Expected {'cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com'}, got {target_client.bind_dn}"
             raise AssertionError(msg)
-        assert client.password == "test_password"
-        assert not client.use_ssl
-        if client.timeout != 30:
-            msg: str = f"Expected {30}, got {client.timeout}"
+        assert target_client.password == "test_password"
+        assert not target_client.use_ssl
+        if target_client.timeout != 30:
+            msg: str = f"Expected {30}, got {target_client.timeout}"
             raise AssertionError(msg)
 
-    def test_server_uri_construction(self, client: LdapTargetClient) -> None:
+    def test_server_uri_construction(self, target_client: LdapTargetClient) -> None:
         """Test server URI construction with and without SSL."""
-        if client.server_uri != "ldap://test.ldap.com:389":
-            msg: str = f"Expected {'ldap://test.ldap.com:389'}, got {client.server_uri}"
+        if target_client.server_uri != "ldap://test.ldap.com:389":
+            msg: str = (
+                f"Expected {'ldap://test.ldap.com:389'}, got {target_client.server_uri}"
+            )
             raise AssertionError(msg)
         # Create new client with SSL enabled to test LDAPS URI
         ssl_config = {
@@ -203,11 +212,10 @@ class TestLDAPClient:
         mock_connection.bind.return_value = True
         mock_connection.bound = True
         mock_connection.search.return_value = True
-        mock_entry = MagicMock()
-        mock_entry.entry_dn = "uid=test,dc=test,dc=com"
-        mock_entry.entry_attributes = ["cn", "mail"]
-        mock_entry.cn = ["Test User"]
-        mock_entry.mail = ["test@example.com"]
+        mock_entry = LDAPSearchEntry(
+            dn="uid=test,dc=test,dc=com",
+            attributes={"cn": ["Test User"], "mail": ["test@example.com"]},
+        )
         mock_connection.entries = [mock_entry]
         mock_connection_class.return_value = mock_connection
         mock_pool = MagicMock()
@@ -237,10 +245,10 @@ class TestLDAPClient:
         mock_connection.bind.return_value = True
         mock_connection.bound = True
         mock_connection.search.return_value = True
-        mock_entry = MagicMock()
-        mock_entry.entry_dn = "uid=test,dc=test,dc=com"
-        mock_entry.entry_attributes = ["cn"]
-        mock_entry.cn = ["Test User"]
+        mock_entry = LDAPSearchEntry(
+            dn="uid=test,dc=test,dc=com",
+            attributes={"cn": ["Test User"]},
+        )
         mock_connection.entries = [mock_entry]
         mock_connection_class.return_value = mock_connection
         mock_pool = MagicMock()
@@ -270,11 +278,10 @@ class TestLDAPClient:
         mock_connection.bind.return_value = True
         mock_connection.bound = True
         mock_connection.search.return_value = True
-        mock_entry = MagicMock()
-        mock_entry.entry_dn = "uid=test,dc=test,dc=com"
-        mock_entry.entry_attributes = ["cn", "mail"]
-        mock_entry.cn = ["Test User"]
-        mock_entry.mail = ["test@example.com"]
+        mock_entry = LDAPSearchEntry(
+            dn="uid=test,dc=test,dc=com",
+            attributes={"cn": ["Test User"], "mail": ["test@example.com"]},
+        )
         mock_connection.entries = [mock_entry]
         mock_connection_class.return_value = mock_connection
         mock_pool = MagicMock()
@@ -292,6 +299,8 @@ class TestLDAPClient:
         assert result.is_success
         assert result.value is None
 
+    @patch("flext_target_ldap.client.ldap3.Connection")
+    @patch("flext_target_ldap.client.ldap3.ServerPool")
     def test_connection_error_handling(
         self,
         mock_pool_class: MagicMock,

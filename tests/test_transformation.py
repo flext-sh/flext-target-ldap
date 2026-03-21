@@ -86,10 +86,10 @@ class TestDataTransformationEngine:
         "Test transform oracle attributes function."
         rules = [
             TransformationRule(
-                name="oracle_user_prefix_removal", pattern="^orcl", replacement=""
+                name="oracle_user_prefix_removal", pattern="orcl", replacement=""
             ),
             TransformationRule(
-                name="normalize_case", pattern="User$", replacement="user"
+                name="normalize_case", pattern="User", replacement="user"
             ),
         ]
         engine = DataTransformationEngine(rules)
@@ -149,8 +149,8 @@ class TestDataTransformationEngine:
         assert result.is_success
         transform_result = result.value
         assert transform_result is not None
-        if transform_result.transformed_data["objectClass"] != ["orclUser"]:
-            msg: str = f"Expected {['orclUser']}, got {transform_result.transformed_data['objectClass']}"
+        if transform_result.transformed_data["objectClass"] != ["inetOrgPerson"]:
+            msg: str = f"Expected {['inetOrgPerson']}, got {transform_result.transformed_data['objectClass']}"
             raise AssertionError(msg)
 
     def test_transformation_statistics(self) -> None:

@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import json
 import sys
 from collections.abc import Callable
 from contextlib import suppress
@@ -29,7 +30,6 @@ from flext_target_ldap import (
     build_singer_catalog,
     c,
     get_flext_target_ldap_container,
-    m,
     p,
     t,
 )
@@ -279,26 +279,19 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         seen_dns: set[str] = set()
         for line in sys.stdin:
             try:
-                msg_dict = m.Meltano.SingerStateMessage.model_validate_json(
-                    line,
-                )
-                msg_type = msg_dict.type
+                raw = json.loads(line)
+                msg_type = raw.get("type")
                 if msg_type == "STATE":
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    schema_msg = m.Meltano.SingerSchemaMessage.model_validate_json(
-                        line,
-                    )
                     _schema: dict[str, t.ContainerValue] = {}
-                    current_stream = schema_msg.stream
+                    current_stream = raw.get("stream")
                 elif msg_type == "RECORD" and api is not None:
-                    record_msg = m.Meltano.SingerRecordMessage.model_validate_json(
-                        line,
-                    )
-                    stream = record_msg.stream or current_stream or "users"
+                    record_data = raw.get("record", {})
+                    stream = raw.get("stream") or current_stream or "users"
                     normalized_record: dict[str, t.ContainerValue] = {}
-                    for key, value in record_msg.record.items():
+                    for key, value in record_data.items():
                         match value:
                             case bool() | int() | float() | str() | dict() | list():
                                 normalized_record[str(key)] = value

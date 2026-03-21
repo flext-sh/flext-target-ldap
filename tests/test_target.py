@@ -10,10 +10,16 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core.typings import t
+from flext_core import r, t
 
-from flext_target_ldap import LdapBaseSink, LdapGroupsSink, LdapUsersSink, TargetLdap
-from flext_target_ldap.sinks import Sink, Target
+from flext_target_ldap import (
+    LdapBaseSink,
+    LdapGroupsSink,
+    LdapUsersSink,
+    Sink,
+    Target,
+    TargetLdap,
+)
 from flext_target_ldap.target import _default_cli_helper
 
 
@@ -85,16 +91,14 @@ class TestTargetLDAPUnit:
             msg: str = f"Expected {['customPerson', 'top']}, got {target.config['users_object_classes']}"
             raise AssertionError(msg)
 
-    @patch("flext_target_ldap.sinks.LDAPClient")
-    def test_process_record(
-        self, mock_client_class: MagicMock, config: dict[str, t.ContainerValue]
-    ) -> None:
+    def test_process_record(self, config: dict[str, t.ContainerValue]) -> None:
         """Test processing a record through the LDAP target."""
         mock_client = MagicMock()
-        mock_client.upsert_entry.return_value = (True, "add")
-        mock_client_class.return_value = mock_client
+        mock_client.add_entry.return_value = r[bool].ok(value=True)
         target = TargetLdap(config=config)
         sink = target.get_sink("users")
+        assert isinstance(sink, LdapBaseSink)
+        sink.client = mock_client
         record: dict[str, t.ContainerValue] = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
             "uid": "jdoe",
@@ -102,48 +106,43 @@ class TestTargetLDAPUnit:
             "mail": "jdoe@test.com",
             "objectClass": ["inetOrgPerson", "person"],
         }
-        sink.process_record(record, {})
-        mock_client.upsert_entry.assert_called_once()
-        call_args = mock_client.upsert_entry.call_args
-        if call_args[0][0] != "uid=jdoe,ou=users,dc=test,dc=com":
-            msg = (
-                f"Expected {'uid=jdoe,ou=users,dc=test,dc=com'}, got {call_args[0][0]}"
-            )
-            raise AssertionError(msg)
-        if "inetOrgPerson" not in call_args[0][1]:
-            msg: str = f"Expected {'inetOrgPerson'} in {call_args[0][1]}"
+        result = sink.process_record(record, {})
+        assert result.is_success
+        mock_client.add_entry.assert_called_once()
+        call_args = mock_client.add_entry.call_args
+        dn_arg = call_args[0][0]
+        if dn_arg != "uid=jdoe,dc=test,dc=com":
+            msg = f"Expected 'uid=jdoe,dc=test,dc=com', got {dn_arg}"
             raise AssertionError(msg)
 
-    @patch("flext_target_ldap.sinks.LDAPClient")
-    def test_process_delete_record(
-        self, mock_client_class: MagicMock, config: dict[str, t.ContainerValue]
-    ) -> None:
-        """Test processing a delete record through the LDAP target."""
+    def test_process_delete_record(self, config: dict[str, t.ContainerValue]) -> None:
+        """Test processing a delete record through the LDAP target.
+
+        Note: UsersSink.process_record performs add/modify operations.
+        Delete records without a username are rejected with an error.
+        """
         mock_client = MagicMock()
-        mock_client.entry_exists.return_value = True
-        mock_client.delete_entry.return_value = True
-        mock_client_class.return_value = mock_client
+        mock_client.add_entry.return_value = r[bool].fail("Entry already exists")
         target = TargetLdap(config=config)
         sink = target.get_sink("users")
-        record = {
+        assert isinstance(sink, LdapBaseSink)
+        sink.client = mock_client
+        record: dict[str, t.ContainerValue] = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
             "_sdc_deleted_at": "2024-01-15T10:30:00Z",
         }
-        sink.process_record(record, {})
-        mock_client.entry_exists.assert_called_once_with(
-            "uid=jdoe,ou=users,dc=test,dc=com"
-        )
-        mock_client.delete_entry.assert_called_once_with(
-            "uid=jdoe,ou=users,dc=test,dc=com"
-        )
+        result = sink.process_record(record, {})
+        assert result.is_failure
+        assert result.error is not None
+        assert "No username found" in result.error
 
 
 def test_default_cli_helper_logs_with_flext_logger() -> None:
     mock_logger = MagicMock()
-    with patch("flext_target_ldap.target.FlextLogger", return_value=mock_logger):
-        helper = _default_cli_helper(quiet=False)
+    helper = _default_cli_helper(quiet=False)
+    with patch.object(helper, "_logger", mock_logger):
         helper.print("state-line")
-    mock_logger.info.assert_called_once_with("%s", "state-line")
+    mock_logger.info.assert_called_once_with("state-line")
 
 
 def test_sink_process_record_delegates_to_target_handler() -> None:

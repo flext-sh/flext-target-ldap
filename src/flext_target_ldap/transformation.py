@@ -10,9 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Annotated, override
 
-from flext_core import FlextLogger
-from flext_core.result import r
-from flext_core.typings import t
+from flext_core import FlextLogger, r, t
 from pydantic import BaseModel, Field
 
 logger = FlextLogger(__name__)
@@ -68,6 +66,20 @@ class DataTransformationEngine:
                                 rule.replacement,
                             )
                             applied_rules.append(rule.name)
+                        case list() as items:
+                            new_items: list[t.ContainerValue] = []
+                            matched = False
+                            for item in items:
+                                if isinstance(item, str) and rule.pattern in item:
+                                    new_items.append(
+                                        item.replace(rule.pattern, rule.replacement),
+                                    )
+                                    matched = True
+                                else:
+                                    new_items.append(item)
+                            if matched:
+                                transformed_data[key] = new_items
+                                applied_rules.append(rule.name)
                         case _:
                             pass
             result = TransformationResult(

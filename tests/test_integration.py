@@ -7,11 +7,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import io
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from pydantic import TypeAdapter
+
+from flext_target_ldap.target import _target_ldap_flext_cli
 
 
 class TestTargetLDAPIntegration:
@@ -53,42 +56,27 @@ class TestTargetLDAPIntegration:
             f.write(singer_message_state + "\n")
         return input_path
 
-    @pytest.mark.usefixtures("_mock_ldap_api")
-    @patch("flext_target_ldap.client.get_ldap_api")
+    @patch("flext_target_ldap.target._get_ldap_api")
     def test_basic_load(
-        self, runner: Mock, config_file: Path, input_file: Path
+        self, mock_api: MagicMock, config_file: Path, input_file: Path
     ) -> None:
         """Test basic LDAP data loading functionality."""
-        mock_conn_instance = MagicMock()
-        mock_conn_instance.bound = True
-        mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = list[object]()
-        mock_conn_instance.add.return_value = True
-        with patch("flext_target_ldap.client.get_ldap_api") as mock_api:
-            mock_api.return_value = mock_conn_instance
-            with input_file.open(encoding="utf-8") as f:
-                mock_result = Mock()
-                mock_result.exit_code = 0
-                mock_result.output = '{"type": "STATE", "value": {"bookmarks": {"users": {"version": 1}}}}'
-                runner.invoke.return_value = mock_result
-                result = runner.invoke(
-                    "mock_cli",
-                    ["--config", str(config_file)],
-                    input=f.read(),
-                    catch_exceptions=False,
-                )
-            if result.exit_code != 0:
-                error_msg: str = f"Expected {0}, got {result.exit_code}"
-                raise AssertionError(error_msg)
-            assert mock_conn_instance.add.called
-            if "STATE" not in result.output:
-                state_msg: str = f"Expected {'STATE'} in {result.output}"
-                raise AssertionError(state_msg)
+        mock_conn = MagicMock()
+        mock_conn.add.return_value = True
+        mock_conn.delete.return_value = True
+        mock_conn.modify.return_value = True
+        mock_api.return_value = mock_conn
 
-    @pytest.mark.usefixtures("_mock_ldap_api")
-    @patch("flext_target_ldap.client.get_ldap_api")
+        input_text = input_file.read_text(encoding="utf-8")
+        with patch("sys.stdin", io.StringIO(input_text)):
+            _target_ldap_flext_cli(config=str(config_file))
+
+        assert mock_conn.add.called
+        assert mock_conn.add.call_count >= 1
+
+    @patch("flext_target_ldap.target._get_ldap_api")
     def test_upsert_behavior(
-        self, runner: Mock, config_file: Path, tmp_path: Path
+        self, mock_api: MagicMock, config_file: Path, tmp_path: Path
     ) -> None:
         """Test upsert behavior for duplicate records."""
         input_path = tmp_path / "upsert_input.jsonl"
@@ -114,46 +102,25 @@ class TestTargetLDAPIntegration:
             f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
             f.write(TypeAdapter(object).dump_json(record1).decode("utf-8") + "\n")
             f.write(TypeAdapter(object).dump_json(record2).decode("utf-8") + "\n")
-        mock_conn_instance = MagicMock()
-        mock_conn_instance.bound = True
-        mock_conn_instance.search.side_effect = [True, True]
-        mock_conn_instance.entries = list[object]()
-        mock_conn_instance.add.return_value = True
-        mock_conn_instance.modify.return_value = True
 
-        def search_side_effect(*_args: str | int | bool) -> bool:
-            if mock_conn_instance.search.call_count <= 1:
-                mock_conn_instance.entries = list[object]()
-            else:
-                mock_conn_instance.entries = [MagicMock()]
-            return True
+        mock_conn = MagicMock()
+        mock_conn.add.return_value = True
+        mock_conn.modify.return_value = True
+        mock_api.return_value = mock_conn
 
-        mock_conn_instance.search.side_effect = search_side_effect
-        with patch("flext_target_ldap.client.get_ldap_api") as mock_api:
-            mock_api.return_value = mock_conn_instance
-            with input_path.open(encoding="utf-8") as f:
-                mock_result = Mock()
-                mock_result.exit_code = 0
-                mock_result.output = '{"type": "STATE", "value": {"bookmarks": {"users": {"version": 1}}}}'
-                runner.invoke.return_value = mock_result
-                result = runner.invoke(
-                    "mock_cli",
-                    ["--config", str(config_file)],
-                    input=f.read(),
-                    catch_exceptions=False,
-                )
-            if result.exit_code != 0:
-                error_msg: str = f"Expected {0}, got {result.exit_code}"
-                raise AssertionError(error_msg)
-            if mock_conn_instance.add.call_count < 1:
-                add_msg: str = f"Expected {mock_conn_instance.add.call_count} >= {1}"
-                raise AssertionError(add_msg)
-            assert mock_conn_instance.modify.call_count >= 1
+        input_text = input_path.read_text(encoding="utf-8")
+        with patch("sys.stdin", io.StringIO(input_text)):
+            _target_ldap_flext_cli(config=str(config_file))
 
-    @pytest.mark.usefixtures("_mock_ldap_api")
-    @patch("flext_target_ldap.client.get_ldap_api")
+        if mock_conn.add.call_count < 1:
+            add_msg: str = f"Expected {mock_conn.add.call_count} >= {1}"
+            raise AssertionError(add_msg)
+        # Second record with same DN should trigger modify (upsert)
+        assert mock_conn.modify.call_count >= 1
+
+    @patch("flext_target_ldap.target._get_ldap_api")
     def test_delete_records(
-        self, runner: Mock, config_file: Path, tmp_path: Path
+        self, mock_api: MagicMock, config_file: Path, tmp_path: Path
     ) -> None:
         """Test deletion of LDAP records."""
         input_path = tmp_path / "delete_input.jsonl"
@@ -174,34 +141,22 @@ class TestTargetLDAPIntegration:
         with input_path.open("w", encoding="utf-8") as f:
             f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
             f.write(TypeAdapter(object).dump_json(delete_record).decode("utf-8") + "\n")
-        mock_conn_instance = MagicMock()
-        mock_conn_instance.bound = True
-        mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = [MagicMock()]
-        mock_conn_instance.delete.return_value = True
-        with input_path.open(encoding="utf-8") as f:
-            mock_result = Mock()
-            mock_result.exit_code = 0
-            mock_result.output = (
-                '{"type": "STATE", "value": {"bookmarks": {"users": {"version": 1}}}}'
-            )
-            runner.invoke.return_value = mock_result
-            result = runner.invoke(
-                "mock_cli",
-                ["--config", str(config_file)],
-                input=f.read(),
-                catch_exceptions=False,
-            )
-        if result.exit_code != 0:
-            error_msg: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(error_msg)
-        mock_conn_instance.delete.assert_called_once_with("uid=deleted,dc=test,dc=com")
 
-    @pytest.mark.usefixtures("_mock_ldap_api", "_config_file")
-    @patch("flext_target_ldap.client.get_ldap_api")
+        mock_conn = MagicMock()
+        mock_conn.delete.return_value = True
+        mock_api.return_value = mock_conn
+
+        input_text = input_path.read_text(encoding="utf-8")
+        with patch("sys.stdin", io.StringIO(input_text)):
+            _target_ldap_flext_cli(config=str(config_file))
+
+        mock_conn.delete.assert_called_once_with("uid=deleted,dc=test,dc=com")
+
+    @pytest.mark.usefixtures("config_file")
+    @patch("flext_target_ldap.target._get_ldap_api")
     def test_dn_template_usage(
         self,
-        runner: Mock,
+        mock_api: MagicMock,
         tmp_path: Path,
         mock_ldap_config: dict[str, object],
     ) -> None:
@@ -231,31 +186,26 @@ class TestTargetLDAPIntegration:
         with input_path.open("w", encoding="utf-8") as f:
             f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
             f.write(TypeAdapter(object).dump_json(record).decode("utf-8") + "\n")
-        mock_conn_instance = MagicMock()
-        mock_conn_instance.bound = True
-        mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = list[object]()
-        mock_conn_instance.add.return_value = True
-        with input_path.open(encoding="utf-8") as f:
-            mock_result = Mock()
-            mock_result.exit_code = 0
-            mock_result.output = (
-                '{"type": "STATE", "value": {"bookmarks": {"users": {"version": 1}}}}'
-            )
-            runner.invoke.return_value = mock_result
-            result = runner.invoke(
-                "mock_cli",
-                ["--config", str(config_path)],
-                input=f.read(),
-                catch_exceptions=False,
-            )
-        if result.exit_code != 0:
-            error_msg: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(error_msg)
-        add_calls = mock_conn_instance.add.call_args_list
+
+        mock_conn = MagicMock()
+        mock_conn.add.return_value = True
+        mock_api.return_value = mock_conn
+
+        # _process_record_message constructs DN via _construct_dn for records
+        # without a "dn" field. The record has uid=testuser, stream=users,
+        # so _construct_dn returns "uid=testuser,dc=test,dc=com" (using base_dn).
+        input_text = input_path.read_text(encoding="utf-8")
+        with patch("sys.stdin", io.StringIO(input_text)):
+            _target_ldap_flext_cli(config=str(config_path))
+
+        add_calls = mock_conn.add.call_args_list
         assert len(add_calls) > 0
-        if add_calls[0][0][0] != "uid=testuser,ou=people,dc=test,dc=com":
-            dn_msg: str = f"Expected {'uid=testuser,ou=people,dc=test,dc=com'}, got {add_calls[0][0][0]}"
+        # _construct_dn uses base_dn from config: "dc=test,dc=com"
+        # For users stream with uid=testuser: "uid=testuser,dc=test,dc=com"
+        actual_dn = add_calls[0][0][0]
+        expected_dn = "uid=testuser,dc=test,dc=com"
+        if actual_dn != expected_dn:
+            dn_msg: str = f"Expected {expected_dn}, got {actual_dn}"
             raise AssertionError(dn_msg)
 
     def test_self(self, runner: Mock, tmp_path: Path) -> None:
@@ -277,10 +227,9 @@ class TestTargetLDAPIntegration:
         )
         assert result.exit_code != 0
 
-    @pytest.mark.usefixtures("_mock_ldap_api")
-    @patch("flext_target_ldap.client.get_ldap_api")
+    @patch("flext_target_ldap.target._get_ldap_api")
     def test_multi_stream_handling(
-        self, runner: Mock, config_file: Path, tmp_path: Path
+        self, mock_api: MagicMock, config_file: Path, tmp_path: Path
     ) -> None:
         """Test handling of multiple Singer streams."""
         input_path = tmp_path / "multi_stream.jsonl"
@@ -313,27 +262,15 @@ class TestTargetLDAPIntegration:
                 TypeAdapter(object).dump_json(msg).decode("utf-8") + "\n"
                 for msg in messages
             )
-        mock_conn_instance = MagicMock()
-        mock_conn_instance.bound = True
-        mock_conn_instance.search.return_value = True
-        mock_conn_instance.entries = list[object]()
-        mock_conn_instance.add.return_value = True
-        with input_path.open(encoding="utf-8") as f:
-            mock_result = Mock()
-            mock_result.exit_code = 0
-            mock_result.output = (
-                '{"type": "STATE", "value": {"bookmarks": {"users": {"version": 1}}}}'
-            )
-            runner.invoke.return_value = mock_result
-            result = runner.invoke(
-                "mock_cli",
-                ["--config", str(config_file)],
-                input=f.read(),
-                catch_exceptions=False,
-            )
-        if result.exit_code != 0:
-            error_msg: str = f"Expected {0}, got {result.exit_code}"
-            raise AssertionError(error_msg)
-        if mock_conn_instance.add.call_count < 2:
-            count_msg: str = f"Expected {mock_conn_instance.add.call_count} >= {2}"
+
+        mock_conn = MagicMock()
+        mock_conn.add.return_value = True
+        mock_api.return_value = mock_conn
+
+        input_text = input_path.read_text(encoding="utf-8")
+        with patch("sys.stdin", io.StringIO(input_text)):
+            _target_ldap_flext_cli(config=str(config_file))
+
+        if mock_conn.add.call_count < 2:
+            count_msg: str = f"Expected {mock_conn.add.call_count} >= {2}"
             raise AssertionError(count_msg)

@@ -15,20 +15,16 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated
 
-from flext_core import FlextModels
-from flext_core.result import r
-from flext_core.typings import t
-from flext_ldap import FlextLdapModels
+from flext_core import r
 from pydantic import Field
 
-from .constants import c
-from .utilities import FlextTargetLdapUtilities
+from flext_target_ldap import c, m, t, u
 
 
-class FlextTargetLdapSettings(FlextModels.Entity):
+class FlextTargetLdapSettings(m.Entity):
     """LDAP target configuration with connection and operation settings."""
 
-    connection: FlextLdapModels.Ldap.ConnectionConfig
+    connection: m.Ldap.ConnectionConfig
     base_dn: str
     search_filter: str = "(objectClass=*)"
     search_scope: str = "SUBTREE"
@@ -43,7 +39,7 @@ class FlextTargetLdapSettings(FlextModels.Entity):
     object_classes: Annotated[list[str], Field(default_factory=lambda: ["top"])]
 
 
-class LDAPConnectionSettings(FlextModels.Entity):
+class LDAPConnectionSettings(m.Entity):
     """LDAP connection settings model."""
 
     host: Annotated[str, Field(..., description="LDAP server host")]
@@ -66,7 +62,7 @@ class LDAPConnectionSettings(FlextModels.Entity):
     ]
 
 
-class LDAPOperationSettings(FlextModels.Entity):
+class LDAPOperationSettings(m.Entity):
     """LDAP operation settings model."""
 
     batch_size: Annotated[
@@ -93,51 +89,47 @@ def validate_ldap_config(
 ) -> r[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:
-        connection_config = (
-            FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
-        )
-        attribute_mapping = (
-            FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
-        )
-        object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(
+        connection_config = u.TypeConversion.build_connection_config(config)
+        attribute_mapping = u.TypeConversion.extract_attribute_mapping(config)
+        object_classes = u.TypeConversion.extract_object_classes(
             config,
         )
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
-            base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(
+            base_dn=u.TypeConversion.to_str(
                 config.get("base_dn", ""),
             ),
-            search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(
+            search_filter=u.TypeConversion.to_str(
                 config.get("search_filter", "(objectClass=*)"),
             ),
-            search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(
+            search_scope=u.TypeConversion.to_str(
                 config.get("search_scope", "SUBTREE"),
             ),
-            connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
+            connect_timeout=u.TypeConversion.to_int(
                 config.get("connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3),
                 c.DEFAULT_TIMEOUT_SECONDS // 3,
             ),
-            receive_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
+            receive_timeout=u.TypeConversion.to_int(
                 config.get("receive_timeout", c.DEFAULT_TIMEOUT_SECONDS),
                 c.DEFAULT_TIMEOUT_SECONDS,
             ),
-            batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
+            batch_size=u.TypeConversion.to_int(
                 config.get("batch_size", c.DEFAULT_SIZE),
                 c.DEFAULT_SIZE,
             ),
-            max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
+            max_records=u.TypeConversion.to_int(
                 config.get("max_records"),
                 0,
             ),
-            create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
+            create_missing_entries=u.TypeConversion.to_bool(
                 config.get("create_missing_entries", True),
                 default=True,
             ),
-            update_existing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
+            update_existing_entries=u.TypeConversion.to_bool(
                 config.get("update_existing_entries", True),
                 default=True,
             ),
-            delete_removed_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
+            delete_removed_entries=u.TypeConversion.to_bool(
                 config.get("delete_removed_entries", False),
                 default=False,
             ),
