@@ -45,6 +45,69 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
     class TargetLdap:
         """Singer Target domain protocols."""
 
+        class LDAPConnection(Protocol):
+            """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
+
+            bound: bool
+            entries: list[dict[str, t.ContainerValue]]
+
+            def add(
+                self,
+                dn: str,
+                object_classes: list[str],
+                attributes: Mapping[str, t.ContainerValue],
+            ) -> bool:
+                """Add LDAP entry."""
+                ...
+
+            def bind(self) -> bool:
+                """Bind to LDAP server."""
+                ...
+
+            def delete(self, dn: str) -> bool:
+                """Delete LDAP entry."""
+                ...
+
+            def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
+                """Modify LDAP entry."""
+                ...
+
+            def search(
+                self,
+                base_dn: str,
+                search_filter: str,
+                attributes: list[str] | None = None,
+            ) -> bool:
+                """Search LDAP entries."""
+                ...
+
+            def unbind(self) -> None:
+                """Unbind from LDAP server."""
+                ...
+
+        class LdapProcessingState(Protocol):
+            """Protocol for LDAP processing state tracking."""
+
+            processed_count: int
+            success_count: int
+            error_count: int
+            errors: list[str]
+
+        class LdapApi(Protocol):
+            """Protocol for LDAP API operations."""
+
+            def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None:
+                """Add LDAP entry."""
+                ...
+
+            def delete(self, dn: str) -> None:
+                """Delete LDAP entry."""
+                ...
+
+            def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None:
+                """Modify LDAP entry."""
+                ...
+
         class Ldap:
             """Singer Target LDAP domain protocols for LDAP directory loading."""
 

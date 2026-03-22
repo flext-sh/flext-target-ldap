@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager, suppress
-from typing import Protocol, cast, override
+from typing import cast, override
 
 import ldap3
 from flext_core import FlextLogger
@@ -27,48 +27,12 @@ from flext_ldap import (
 )
 from flext_ldif import FlextLdif
 
+from flext_target_ldap.protocols import FlextTargetLdapProtocols as p
+
 logger = FlextLogger(__name__)
 
-
-class LDAPConnection(Protocol):
-    """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
-
-    bound: bool
-    entries: list[dict[str, t.ContainerValue]]
-
-    def add(
-        self,
-        dn: str,
-        object_classes: list[str],
-        attributes: Mapping[str, t.ContainerValue],
-    ) -> bool:
-        """Add LDAP entry."""
-        ...
-
-    def bind(self) -> bool:
-        """Bind to LDAP server."""
-        ...
-
-    def delete(self, dn: str) -> bool:
-        """Delete LDAP entry."""
-        ...
-
-    def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
-        """Modify LDAP entry."""
-        ...
-
-    def search(
-        self,
-        base_dn: str,
-        search_filter: str,
-        attributes: list[str] | None = None,
-    ) -> bool:
-        """Search LDAP entries."""
-        ...
-
-    def unbind(self) -> None:
-        """Unbind from LDAP server."""
-        ...
+# Backward-compatible alias
+LDAPConnection = p.TargetLdap.LDAPConnection
 
 
 class LDAPSearchEntry:

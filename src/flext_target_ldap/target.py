@@ -13,7 +13,7 @@ from collections.abc import Callable
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
-from typing import ClassVar, Protocol, override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger
 from pydantic import TypeAdapter, ValidationError
@@ -62,12 +62,7 @@ flext_cli_create_helper = _default_cli_helper
 logger = FlextLogger(__name__)
 
 
-class _LdapApi(Protocol):
-    def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
-
-    def delete(self, dn: str) -> None: ...
-
-    def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None: ...
+_LdapApi = p.TargetLdap.LdapApi
 
 
 class TargetLDAP(Target):

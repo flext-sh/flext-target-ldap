@@ -7,30 +7,19 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Annotated, override
+from typing import override
 
 from flext_core import FlextLogger
 from flext_core.result import r
 from flext_core.typings import t
-from pydantic import BaseModel, Field
+
+from flext_target_ldap.models import FlextTargetLdapModels as m
 
 logger = FlextLogger(__name__)
 
-
-class SingerPropertyDefinition(BaseModel):
-    """Singer property definition for LDAP schema mapping."""
-
-    type: str = "string"
-    format: str | None = None
-
-
-class SingerSchemaDefinition(BaseModel):
-    """Singer schema definition mapping properties to LDAP attributes."""
-
-    properties: Annotated[
-        dict[str, SingerPropertyDefinition],
-        Field(default_factory=dict),
-    ]
+# Backward-compatible aliases
+SingerPropertyDefinition = m.TargetLdap.SingerPropertyDefinition
+SingerSchemaDefinition = m.TargetLdap.SingerSchemaDefinition
 
 
 class LDAPTypeConverter:

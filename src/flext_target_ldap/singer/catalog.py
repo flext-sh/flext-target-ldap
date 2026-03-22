@@ -7,25 +7,18 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated, override
+from typing import override
 
 from flext_core import FlextLogger
 from flext_core.result import r
 from flext_core.typings import t
-from pydantic import BaseModel, Field
+
+from flext_target_ldap.models import FlextTargetLdapModels as m
 
 logger = FlextLogger(__name__)
 
-
-class SingerLDAPCatalogEntry(BaseModel):
-    """Singer LDAP catalog entry with stream metadata."""
-
-    tap_stream_id: Annotated[str, Field(min_length=1)]
-    stream: Annotated[str, Field(min_length=1)]
-    stream_schema: Annotated[
-        dict[str, t.ContainerValue],
-        Field(default_factory=dict),
-    ]
+# Backward-compatible alias
+SingerLDAPCatalogEntry = m.TargetLdap.SingerLDAPCatalogEntry
 
 
 class SingerLDAPCatalogManager:

@@ -18,7 +18,7 @@ from typing import Annotated, Self
 from flext_core.typings import t
 from flext_ldap import FlextLdapModels, r
 from flext_meltano import FlextMeltanoModels
-from pydantic import Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from .constants import c
 
@@ -625,6 +625,47 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     return r[bool].fail(
                         f"Operation statistics validation failed: {e}",
                     )
+
+        class SingerPropertyDefinition(BaseModel):
+            """Singer property definition for LDAP schema mapping."""
+
+            type: str = "string"
+            format: str | None = None
+
+        class SingerSchemaDefinition(BaseModel):
+            """Singer schema definition mapping properties to LDAP attributes."""
+
+            properties: Annotated[
+                dict[str, FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition],
+                Field(default_factory=dict),
+            ]
+
+        class SingerLDAPCatalogEntry(BaseModel):
+            """Singer LDAP catalog entry with stream metadata."""
+
+            tap_stream_id: Annotated[str, Field(min_length=1)]
+            stream: Annotated[str, Field(min_length=1)]
+            stream_schema: Annotated[
+                dict[str, t.ContainerValue],
+                Field(default_factory=dict),
+            ]
+
+        class TransformationRule(BaseModel):
+            """Rule for transforming LDAP data with pattern matching and replacement."""
+
+            name: Annotated[str, Field(min_length=1)]
+            pattern: Annotated[str, Field(min_length=1)]
+            replacement: str
+            enabled: bool = True
+
+        class DataTransformationResult(BaseModel):
+            """Lightweight result of data transformation engine operations."""
+
+            transformed_data: Annotated[
+                dict[str, t.ContainerValue],
+                Field(default_factory=dict),
+            ]
+            applied_rules: Annotated[list[str], Field(default_factory=list)]
 
 
 # Export the unified models class

@@ -8,31 +8,17 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Annotated, override
+from typing import override
 
 from flext_core import FlextLogger, r, t
-from pydantic import BaseModel, Field
+
+from flext_target_ldap.models import FlextTargetLdapModels as m
 
 logger = FlextLogger(__name__)
 
-
-class TransformationRule(BaseModel):
-    """Rule for transforming LDAP data with pattern matching and replacement."""
-
-    name: Annotated[str, Field(min_length=1)]
-    pattern: Annotated[str, Field(min_length=1)]
-    replacement: str
-    enabled: bool = True
-
-
-class TransformationResult(BaseModel):
-    """Result of data transformation with applied rules."""
-
-    transformed_data: Annotated[
-        dict[str, t.ContainerValue],
-        Field(default_factory=dict),
-    ]
-    applied_rules: Annotated[list[str], Field(default_factory=list)]
+# Backward-compatible aliases
+TransformationRule = m.TargetLdap.TransformationRule
+TransformationResult = m.TargetLdap.DataTransformationResult
 
 
 class DataTransformationEngine:
