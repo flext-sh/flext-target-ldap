@@ -7,10 +7,18 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from flext_core.typings import t
 from flext_ldap import FlextLdapProtocols
+
+if TYPE_CHECKING:
+    from flext_target_ldap import target_client as target_client_module
+    from flext_target_ldap.target_models import (
+        LdapAttributeMappingModel,
+        LdapEntryModel,
+        LdapTransformationResultModel,
+    )
 
 
 class FlextTargetLdapProtocols(FlextLdapProtocols):
@@ -106,6 +114,44 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None:
                 """Modify LDAP entry."""
+                ...
+
+        class LdapTargetService(Protocol):
+            """Protocol for LDAP target creation and record loading."""
+
+            def create_target(
+                self,
+                config: dict[str, t.ContainerValue],
+            ) -> FlextLdapProtocols.Result[target_client_module.TargetLdap]:
+                """Create an LDAP target from config."""
+                ...
+
+            def load_records(
+                self,
+                records: list[Mapping[str, t.ContainerValue]],
+                config: dict[str, t.ContainerValue],
+                stream_type: str = "users",
+            ) -> FlextLdapProtocols.Result[int]:
+                """Load records into the LDAP target."""
+                ...
+
+        class LdapTransformationServiceProtocol(Protocol):
+            """Protocol for transforming and validating LDAP entries."""
+
+            def transform_record(
+                self,
+                record: Mapping[str, t.ContainerValue],
+                mappings: list[LdapAttributeMappingModel],
+                object_classes: list[str],
+                base_dn: str,
+            ) -> FlextLdapProtocols.Result[LdapTransformationResultModel]:
+                """Transform a record for LDAP storage."""
+                ...
+
+            def validate_entry(
+                self, entry: LdapEntryModel,
+            ) -> FlextLdapProtocols.Result[bool]:
+                """Validate an LDAP entry against business rules."""
                 ...
 
         class Ldap:

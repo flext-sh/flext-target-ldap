@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Protocol, override
+from typing import override
 
 from flext_target_ldap import (
     FlextTargetLdapSettings,
@@ -18,44 +18,10 @@ from flext_target_ldap import (
     u,
     validate_ldap_target_config,
 )
+from flext_target_ldap.protocols import FlextTargetLdapProtocols as p
 
-
-class LdapTargetService(Protocol):
-    """Protocol for LDAP target creation and record loading."""
-
-    def create_target(
-        self,
-        config: dict[str, t.ContainerValue],
-    ) -> r[target_client_module.TargetLdap]:
-        """Create an LDAP target from config."""
-        ...
-
-    def load_records(
-        self,
-        records: list[Mapping[str, t.ContainerValue]],
-        config: dict[str, t.ContainerValue],
-        stream_type: str = "users",
-    ) -> r[int]:
-        """Load records into the LDAP target."""
-        ...
-
-
-class LdapTransformationServiceProtocol(Protocol):
-    """Protocol for transforming and validating LDAP entries."""
-
-    def transform_record(
-        self,
-        record: Mapping[str, t.ContainerValue],
-        mappings: list[LdapAttributeMappingModel],
-        object_classes: list[str],
-        base_dn: str,
-    ) -> r[LdapTransformationResultModel]:
-        """Transform a record for LDAP storage."""
-        ...
-
-    def validate_entry(self, entry: LdapEntryModel) -> r[bool]:
-        """Validate an LDAP entry against business rules."""
-        ...
+LdapTargetService = p.TargetLdap.LdapTargetService
+LdapTransformationServiceProtocol = p.TargetLdap.LdapTransformationServiceProtocol
 
 
 class LdapConnectionService:
