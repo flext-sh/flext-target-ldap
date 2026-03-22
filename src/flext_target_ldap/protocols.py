@@ -149,7 +149,8 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
                 ...
 
             def validate_entry(
-                self, entry: LdapEntryModel,
+                self,
+                entry: LdapEntryModel,
             ) -> FlextLdapProtocols.Result[bool]:
                 """Validate an LDAP entry against business rules."""
                 ...

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Generator, Mapping
 from contextlib import AbstractContextManager, contextmanager, suppress
-from typing import cast, override
+from typing import override
 
 import ldap3
 from flext_core import FlextLogger
@@ -176,7 +176,7 @@ class LDAPClient:
             logger.exception("Failed to check entry existence: %s", dn)
             return r[bool].fail(f"Entry exists check failed: {e}")
 
-    def get_connection(self) -> AbstractContextManager[LDAPConnection]:
+    def get_connection(self) -> AbstractContextManager[ldap3.Connection]:
         """Get LDAP connection context manager using ldap3 or flext-ldap API.
 
         Returns a real LDAP connection for production use.
@@ -187,7 +187,7 @@ class LDAPClient:
         """
 
         @contextmanager
-        def connection_context() -> Generator[LDAPConnection]:
+        def connection_context() -> Generator[ldap3.Connection]:
             server_pool = ldap3.ServerPool([
                 ldap3.Server(
                     self.config.host,
@@ -196,13 +196,10 @@ class LDAPClient:
                     connect_timeout=self.config.timeout,
                 ),
             ])
-            connection: LDAPConnection = cast(
-                "LDAPConnection",
-                ldap3.Connection(
-                    server_pool,
-                    user=self._bind_dn,
-                    password=self._password,
-                ),
+            connection = ldap3.Connection(
+                server_pool,
+                user=self._bind_dn,
+                password=self._password,
             )
             connection.bind()
             try:
