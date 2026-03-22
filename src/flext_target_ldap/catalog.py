@@ -12,7 +12,7 @@ def build_singer_catalog() -> dict[str, t.ContainerValue]:
             {
                 "tap_stream_id": "users",
                 "schema": {
-                    "type": "object",
+                    "type": "t.NormalizedValue",
                     "properties": {
                         "username": {"type": "string"},
                         "email": {"type": "string"},
@@ -29,7 +29,7 @@ def build_singer_catalog() -> dict[str, t.ContainerValue]:
             {
                 "tap_stream_id": "groups",
                 "schema": {
-                    "type": "object",
+                    "type": "t.NormalizedValue",
                     "properties": {
                         "name": {"type": "string"},
                         "description": {"type": "string"},
@@ -41,7 +41,7 @@ def build_singer_catalog() -> dict[str, t.ContainerValue]:
             {
                 "tap_stream_id": "organizational_units",
                 "schema": {
-                    "type": "object",
+                    "type": "t.NormalizedValue",
                     "properties": {
                         "name": {"type": "string"},
                         "description": {"type": "string"},

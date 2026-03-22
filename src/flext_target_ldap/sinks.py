@@ -159,7 +159,7 @@ class LDAPBaseSink(Sink):
         )
 
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
-        """Get object classes for entry."""
+        """Get t.NormalizedValue classes for entry."""
         record_classes = record.get("object_classes")
         if _is_container_list(record_classes):
             return [str(c) for c in record_classes]
@@ -360,7 +360,7 @@ class UsersSink(LDAPBaseSink):
 
     @override
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
-        """Get object classes for user entry."""
+        """Get t.NormalizedValue classes for user entry."""
         configured = self._target.config.get("users_object_classes")
         if _is_container_list(configured):
             return [str(c) for c in configured]
@@ -468,7 +468,7 @@ class GroupsSink(LDAPBaseSink):
 
     @override
     def get_object_classes(self, record: Mapping[str, t.ContainerValue]) -> list[str]:
-        """Get object classes for group entry."""
+        """Get t.NormalizedValue classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
         if _is_container_list(configured):
             return [str(c) for c in configured]

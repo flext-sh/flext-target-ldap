@@ -35,7 +35,7 @@ class SingerTargetLDAP:
         config: Configuration dictionary
 
         Returns:
-        object: Description of return value.
+        t.NormalizedValue: Description of return value.
 
         """
         self.config: dict[str, t.ContainerValue] = config or {}

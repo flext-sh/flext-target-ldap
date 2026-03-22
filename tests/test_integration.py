@@ -15,6 +15,7 @@ import pytest
 from pydantic import TypeAdapter
 
 from flext_target_ldap.target import _target_ldap_flext_cli
+from tests import t
 
 
 class TestTargetLDAPIntegration:
@@ -31,11 +32,13 @@ class TestTargetLDAPIntegration:
         return mock_runner
 
     @pytest.fixture
-    def config_file(self, tmp_path: Path, mock_ldap_config: dict[str, object]) -> Path:
+    def config_file(
+        self, tmp_path: Path, mock_ldap_config: dict[str, t.NormalizedValue]
+    ) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
         config_path.write_text(
-            TypeAdapter(object).dump_json(mock_ldap_config).decode("utf-8"),
+            TypeAdapter(t.NormalizedValue).dump_json(mock_ldap_config).decode("utf-8"),
             encoding="utf-8",
         )
         return config_path
@@ -99,9 +102,16 @@ class TestTargetLDAPIntegration:
             "record": {"dn": "uid=test,dc=test,dc=com", "cn": "Updated Test User"},
         }
         with input_path.open("w", encoding="utf-8") as f:
-            f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
-            f.write(TypeAdapter(object).dump_json(record1).decode("utf-8") + "\n")
-            f.write(TypeAdapter(object).dump_json(record2).decode("utf-8") + "\n")
+            f.write(
+                TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
+                + "\n"
+            )
+            f.write(
+                TypeAdapter(t.NormalizedValue).dump_json(record1).decode("utf-8") + "\n"
+            )
+            f.write(
+                TypeAdapter(t.NormalizedValue).dump_json(record2).decode("utf-8") + "\n"
+            )
 
         mock_conn = MagicMock()
         mock_conn.add.return_value = True
@@ -139,8 +149,14 @@ class TestTargetLDAPIntegration:
             },
         }
         with input_path.open("w", encoding="utf-8") as f:
-            f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
-            f.write(TypeAdapter(object).dump_json(delete_record).decode("utf-8") + "\n")
+            f.write(
+                TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
+                + "\n"
+            )
+            f.write(
+                TypeAdapter(t.NormalizedValue).dump_json(delete_record).decode("utf-8")
+                + "\n"
+            )
 
         mock_conn = MagicMock()
         mock_conn.delete.return_value = True
@@ -158,7 +174,7 @@ class TestTargetLDAPIntegration:
         self,
         mock_api: MagicMock,
         tmp_path: Path,
-        mock_ldap_config: dict[str, object],
+        mock_ldap_config: dict[str, t.NormalizedValue],
     ) -> None:
         """Test DN template usage for record processing."""
         mock_ldap_config["dn_templates"] = {
@@ -166,7 +182,7 @@ class TestTargetLDAPIntegration:
         }
         config_path = tmp_path / "template_config.json"
         config_path.write_text(
-            TypeAdapter(object).dump_json(mock_ldap_config).decode("utf-8"),
+            TypeAdapter(t.NormalizedValue).dump_json(mock_ldap_config).decode("utf-8"),
             encoding="utf-8",
         )
         input_path = tmp_path / "template_input.jsonl"
@@ -184,8 +200,13 @@ class TestTargetLDAPIntegration:
             "record": {"uid": "testuser", "cn": "Test User"},
         }
         with input_path.open("w", encoding="utf-8") as f:
-            f.write(TypeAdapter(object).dump_json(schema_msg).decode("utf-8") + "\n")
-            f.write(TypeAdapter(object).dump_json(record).decode("utf-8") + "\n")
+            f.write(
+                TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
+                + "\n"
+            )
+            f.write(
+                TypeAdapter(t.NormalizedValue).dump_json(record).decode("utf-8") + "\n"
+            )
 
         mock_conn = MagicMock()
         mock_conn.add.return_value = True
@@ -213,7 +234,7 @@ class TestTargetLDAPIntegration:
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
         config_path.write_text(
-            TypeAdapter(object).dump_json(bad_config).decode("utf-8"),
+            TypeAdapter(t.NormalizedValue).dump_json(bad_config).decode("utf-8"),
             encoding="utf-8",
         )
         mock_result = Mock()
@@ -259,7 +280,7 @@ class TestTargetLDAPIntegration:
         ]
         with input_path.open("w", encoding="utf-8") as f:
             f.writelines(
-                TypeAdapter(object).dump_json(msg).decode("utf-8") + "\n"
+                TypeAdapter(t.NormalizedValue).dump_json(msg).decode("utf-8") + "\n"
                 for msg in messages
             )
 

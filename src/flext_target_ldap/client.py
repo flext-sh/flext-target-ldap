@@ -52,7 +52,7 @@ class LDAPClient:
     delegating all LDAP operations to the flext-ldap library.
 
     Returns:
-    object: Description of return value.
+    t.NormalizedValue: Description of return value.
 
     """
 

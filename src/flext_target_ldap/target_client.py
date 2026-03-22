@@ -62,7 +62,7 @@ class LdapProcessingResult(LdapProcessingCounters):
 
 
 class _CompatibleEntry:
-    """Compatible LDAP entry object."""
+    """Compatible LDAP entry t.NormalizedValue."""
 
     @override
     def __init__(self, dn: str, attrs: dict[str, t.ContainerValue]) -> None:
@@ -678,7 +678,7 @@ class LdapBaseSink(Sink):
 
 
 class LdapUsersSink(LdapBaseSink):
-    """LDAP sink for user entries with person/inetOrgPerson object classes."""
+    """LDAP sink for user entries with person/inetOrgPerson t.NormalizedValue classes."""
 
     def build_user_attributes(
         self,
@@ -787,7 +787,7 @@ class LdapUsersSink(LdapBaseSink):
 
 
 class LdapGroupsSink(LdapBaseSink):
-    """LDAP sink for group entries with groupOfNames object class."""
+    """LDAP sink for group entries with groupOfNames t.NormalizedValue class."""
 
     @override
     def process_record(
@@ -888,7 +888,7 @@ class LdapGroupsSink(LdapBaseSink):
 
 
 class LdapOrganizationalUnitsSink(LdapBaseSink):
-    """LDAP sink for organizational unit entries with organizationalUnit object class."""
+    """LDAP sink for organizational unit entries with organizationalUnit t.NormalizedValue class."""
 
     @override
     def process_record(

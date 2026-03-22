@@ -83,7 +83,7 @@ class TestLDAPBaseSink:
             raise AssertionError(classes_msg)
 
     def test_validate_entry_success(self, sink: LDAPBaseSink) -> None:
-        """Test successful validation of LDAP entry with valid DN, attributes, and object classes."""
+        """Test successful validation of LDAP entry with valid DN, attributes, and t.NormalizedValue classes."""
         mock_client = MagicMock()
         mock_client.validate_dn.return_value.is_success = True
         sink._client = mock_client
@@ -113,7 +113,7 @@ class TestLDAPBaseSink:
             raise AssertionError(attr_error_msg)
 
     def test_validate_entry_empty_object_classes(self, sink: LDAPBaseSink) -> None:
-        """Test validation failure when object classes are empty."""
+        """Test validation failure when t.NormalizedValue classes are empty."""
         result = sink.validate_entry("cn=test,dc=example,dc=com", {"cn": ["test"]}, [])
         assert not result.is_success
         assert result.error is not None
@@ -218,7 +218,7 @@ class TestUsersSink:
             raise AssertionError(phone_msg)
 
     def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
-        """Test getting default object classes for user entries."""
+        """Test getting default t.NormalizedValue classes for user entries."""
         record: dict[str, t.ContainerValue] = {}
         classes = users_sink.get_object_classes(record)
         if classes != ["inetOrgPerson", "organizationalPerson", "person", "top"]:
@@ -227,7 +227,7 @@ class TestUsersSink:
 
     @pytest.mark.usefixtures("_mock_ldap_config")
     def test_get_object_classes_configured(self, mock_target: MagicMock) -> None:
-        """Test getting configured object classes for user entries."""
+        """Test getting configured t.NormalizedValue classes for user entries."""
         mock_target.config.update({
             "base_dn": "dc=example,dc=com",
             "user_rdn_attribute": "uid",
@@ -319,7 +319,7 @@ class TestGroupsSink:
             raise AssertionError(members_msg)
 
     def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
-        """Test getting default object classes for group entries."""
+        """Test getting default t.NormalizedValue classes for group entries."""
         record: dict[str, t.ContainerValue] = {}
         classes = groups_sink.get_object_classes(record)
         if classes != ["groupOfNames", "top"]:
@@ -379,7 +379,7 @@ class TestOrganizationalUnitsSink:
     def test_ou_get_object_classes_default(
         self, ou_sink: OrganizationalUnitsSink
     ) -> None:
-        """Test getting default object classes (base class returns ['top'])."""
+        """Test getting default t.NormalizedValue classes (base class returns ['top'])."""
         record: dict[str, t.ContainerValue] = {}
         classes = ou_sink.get_object_classes(record)
         assert "top" in classes
@@ -453,7 +453,7 @@ class TestLDAPGenericSink:
     def test_generic_get_object_classes_from_record(
         self, generic_sink: LDAPBaseSink
     ) -> None:
-        """Test getting object classes from record data."""
+        """Test getting t.NormalizedValue classes from record data."""
         record: dict[str, t.ContainerValue] = {"object_classes": ["customClass", "top"]}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass", "top"]:
@@ -465,7 +465,7 @@ class TestLDAPGenericSink:
     def test_generic_get_object_classes_single_value(
         self, generic_sink: LDAPBaseSink
     ) -> None:
-        """Test getting object classes from single value in record."""
+        """Test getting t.NormalizedValue classes from single value in record."""
         record = {"object_classes": "customClass"}
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass"]:
@@ -475,7 +475,7 @@ class TestLDAPGenericSink:
     def test_generic_get_object_classes_default(
         self, generic_sink: LDAPBaseSink
     ) -> None:
-        """Test getting default object classes for generic entries."""
+        """Test getting default t.NormalizedValue classes for generic entries."""
         record: dict[str, t.ContainerValue] = {}
         classes = generic_sink.get_object_classes(record)
         if classes != ["top"]:
@@ -484,7 +484,7 @@ class TestLDAPGenericSink:
 
     @pytest.mark.usefixtures("_mock_ldap_config")
     def test_get_object_classes_configured(self, mock_target: MagicMock) -> None:
-        """Test getting configured object classes for generic entries."""
+        """Test getting configured t.NormalizedValue classes for generic entries."""
         mock_target.config.update({
             "base_dn": "dc=example,dc=com",
             "generic_object_classes": ["customGeneric", "top"],

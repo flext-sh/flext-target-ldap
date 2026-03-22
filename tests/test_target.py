@@ -83,7 +83,7 @@ class TestTargetLDAPUnit:
     def test_object_classes_processing(
         self, config: dict[str, t.ContainerValue]
     ) -> None:
-        """Test default object classes configuration processing."""
+        """Test default t.NormalizedValue classes configuration processing."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
         target = TargetLdap(config=config)
         target.get_sink("users")
@@ -140,7 +140,7 @@ class TestTargetLDAPUnit:
 def test_default_cli_helper_logs_with_flext_logger() -> None:
     mock_logger = MagicMock()
     helper = _default_cli_helper(quiet=False)
-    with patch.object(helper, "_logger", mock_logger):
+    with patch.t.NormalizedValue(helper, "_logger", mock_logger):
         helper.print("state-line")
     mock_logger.info.assert_called_once_with("state-line")
 
@@ -162,7 +162,7 @@ def test_sink_process_record_delegates_to_target_handler() -> None:
     sink = Sink(
         target=target,
         stream_name="users",
-        schema={"type": "object"},
+        schema={"type": "t.NormalizedValue"},
         key_properties=["id"],
     )
     result = sink.process_record({"id": "42"}, {"batch": "1"})

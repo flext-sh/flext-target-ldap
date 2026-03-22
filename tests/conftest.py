@@ -120,7 +120,7 @@ def singer_message_record(sample_user_record: dict[str, t.ContainerValue]) -> st
         "record": sample_user_record,
         "time_extracted": "2024-01-01T12:00:00Z",
     }
-    return TypeAdapter(object).dump_json(message).decode("utf-8")
+    return TypeAdapter(t.NormalizedValue).dump_json(message).decode("utf-8")
 
 
 @pytest.fixture
@@ -130,7 +130,7 @@ def singer_message_schema() -> str:
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "object",
+            "type": "t.NormalizedValue",
             "properties": {
                 "dn": {"type": "string"},
                 "uid": {"type": "string"},
@@ -141,7 +141,7 @@ def singer_message_schema() -> str:
         },
         "key_properties": ["dn"],
     }
-    return TypeAdapter(object).dump_json(message).decode("utf-8")
+    return TypeAdapter(t.NormalizedValue).dump_json(message).decode("utf-8")
 
 
 @pytest.fixture
@@ -158,7 +158,7 @@ def singer_message_state() -> str:
             }
         },
     }
-    return TypeAdapter(object).dump_json(message).decode("utf-8")
+    return TypeAdapter(t.NormalizedValue).dump_json(message).decode("utf-8")
 
 
 @pytest.fixture

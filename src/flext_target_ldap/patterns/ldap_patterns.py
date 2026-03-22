@@ -25,7 +25,7 @@ SingerSchemaDefinition = m.TargetLdap.SingerSchemaDefinition
 class LDAPTypeConverter:
     """Convert Singer values to LDAP-safe string values."""
 
-    _COMPLEX_KIND = "object"
+    _COMPLEX_KIND = "t.NormalizedValue"
 
     @override
     def __init__(self) -> None:
@@ -183,7 +183,7 @@ class LDAPSchemaMapper:
                 return r[str].ok("Integer")
             if prop_type == "boolean":
                 return r[str].ok("Boolean")
-            if prop_type in {"object", "array"}:
+            if prop_type in {"t.NormalizedValue", "array"}:
                 return r[str].ok("OctetString")
             return r[str].ok("DirectoryString")
         except (RuntimeError, ValueError, TypeError):
@@ -214,7 +214,7 @@ class LDAPEntryManager:
         record: dict[str, t.Scalar],
         stream_name: str,
     ) -> r[list[str]]:
-        """Determine appropriate object classes for LDAP entry."""
+        """Determine appropriate t.NormalizedValue classes for LDAP entry."""
         try:
             object_classes = ["top"]
             stream_lower = stream_name.lower()
@@ -302,7 +302,7 @@ class LDAPEntryManager:
         attributes: dict[str, list[str]],
         object_classes: list[str],
     ) -> r[bool]:
-        """Validate LDAP entry attributes against object class requirements."""
+        """Validate LDAP entry attributes against t.NormalizedValue class requirements."""
         try:
             required_attrs: set[str] = set()
             for obj_class in object_classes:

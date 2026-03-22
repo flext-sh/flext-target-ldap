@@ -123,7 +123,9 @@ class MigrationValidator:
                     elif "person" in obj_classes and "sn" not in attrs:
                         self._stats["validation_warnings"] += 1
                         if self.strict_mode:
-                            error_msg = "person object class requires 'sn' attribute"
+                            error_msg = (
+                                "person t.NormalizedValue class requires 'sn' attribute"
+                            )
                 case _:
                     if not data:
                         error_msg = "Data is empty"

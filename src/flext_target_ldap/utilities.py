@@ -269,14 +269,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             record: Mapping[str, t.ConfigMap],
             default_object_classes: list[str] | None = None,
         ) -> list[str]:
-            """Extract object classes for LDAP entry.
+            """Extract t.NormalizedValue classes for LDAP entry.
 
             Args:
             record: Singer record data
-            default_object_classes: Default object classes if not in record
+            default_object_classes: Default t.NormalizedValue classes if not in record
 
             Returns:
-            list[str]: List of object classes
+            list[str]: List of t.NormalizedValue classes
 
             """
             object_classes = record.get("objectClass") or record.get("objectclass")
@@ -848,12 +848,12 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         def extract_object_classes(
             config: Mapping[str, t.ConfigMap],
         ) -> list[str]:
-            """Extract object classes from configuration dict.
+            """Extract t.NormalizedValue classes from configuration dict.
 
             Business Rule: Object Classes Configuration
             ==========================================
-            LDAP object classes define the schema for directory entries. This method
-            extracts object class lists from configuration with safe defaults.
+            LDAP t.NormalizedValue classes define the schema for directory entries. This method
+            extracts t.NormalizedValue class lists from configuration with safe defaults.
 
             Validation Rules:
             - Must be a list
@@ -864,7 +864,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 config: Configuration dictionary containing object_classes
 
             Returns:
-                list[str]: List of object classes or ["top"] default
+                list[str]: List of t.NormalizedValue classes or ["top"] default
 
             """
             raw_object_classes = config.get("object_classes")

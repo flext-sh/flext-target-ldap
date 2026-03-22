@@ -40,7 +40,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class AttributeMapping(FlextLdapModels.Entity):
             """LDAP attribute mapping configuration with validation.
 
-            Immutable value object defining how Singer fields map to LDAP attributes
+            Immutable value t.NormalizedValue defining how Singer fields map to LDAP attributes
             with business rule validation and transformation support.
             """
 
@@ -130,8 +130,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class Entry(FlextLdapModels.Entity):
             """LDAP entry representation with validation and business rules.
 
-            Immutable value object representing a complete LDAP entry with
-            DN, object classes, and attributes, including validation rules.
+            Immutable value t.NormalizedValue representing a complete LDAP entry with
+            DN, t.NormalizedValue classes, and attributes, including validation rules.
             """
 
             distinguished_name: Annotated[
@@ -145,7 +145,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 list[str],
                 Field(
                     default_factory=list,
-                    description="LDAP object classes",
+                    description="LDAP t.NormalizedValue classes",
                 ),
             ]
             attributes: Annotated[
@@ -169,7 +169,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 cls,
                 v: list[str],
             ) -> list[str]:
-                """Validate object classes contain 'top'."""
+                """Validate t.NormalizedValue classes contain 'top'."""
                 if "top" not in v:
                     v.append("top")
                 return v
@@ -191,7 +191,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 return self.distinguished_name.split(",")[0].strip()
 
             def has_object_class(self, object_class: str) -> bool:
-                """Check if entry has a specific object class."""
+                """Check if entry has a specific t.NormalizedValue class."""
                 return object_class.lower() in [
                     oc.lower() for oc in self.object_classes
                 ]
@@ -210,9 +210,11 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                             "DN must contain attribute=value pairs separated by commas",
                         )
 
-                    # Validate object classes
+                    # Validate t.NormalizedValue classes
                     if not self.object_classes:
-                        errors.append("Entry must have at least one object class")
+                        errors.append(
+                            "Entry must have at least one t.NormalizedValue class"
+                        )
 
                     # Validate person entries have required attributes
                     if "person" in self.object_classes:

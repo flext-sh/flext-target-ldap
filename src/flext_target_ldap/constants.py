@@ -38,9 +38,9 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
         @unique
         class ObjectClass(StrEnum):
-            """Standard LDAP object classes for target operations.
+            """Standard LDAP t.NormalizedValue classes for target operations.
 
-            Defines the common object classes used in enterprise LDAP directories
+            Defines the common t.NormalizedValue classes used in enterprise LDAP directories
             for users, groups, and organizational structures.
 
             DRY Pattern:
