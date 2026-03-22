@@ -1,6 +1,6 @@
-"""Module skeleton for TestsFlextTargetLdapConstants.
+"""Module skeleton for FlextTargetLdapTestConstants.
 
-Test constants for flexttargetldap.
+Test constants for flext-target-ldap.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -8,12 +8,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import c
+from flext_tests import FlextTestsConstants
 
 
-class TestsFlextTargetLdapConstants(c):
-    """Test constants for flexttargetldap."""
+class FlextTargetLdapTestConstants(FlextTestsConstants):
+    """Test constants for flext-target-ldap."""
 
 
-c = TestsFlextTargetLdapConstants
-__all__ = ["TestsFlextTargetLdapConstants", "c"]
+c = FlextTargetLdapTestConstants
+__all__ = ["FlextTargetLdapTestConstants", "c"]

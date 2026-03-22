@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 import sys
 from collections.abc import Callable
 from contextlib import suppress
@@ -16,7 +15,7 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextLogger
-from pydantic import TypeAdapter, ValidationError
+from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_target_ldap import (
     FlextTargetLdapSettings,
@@ -32,6 +31,11 @@ from flext_target_ldap import (
     get_flext_target_ldap_container,
     p,
     t,
+)
+
+_SINGER_MSG_ADAPTER: TypeAdapter[dict[str, t.NormalizedValue]] = TypeAdapter(
+    dict[str, t.NormalizedValue],
+    config=ConfigDict(strict=False),
 )
 
 
@@ -274,7 +278,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         seen_dns: set[str] = set()
         for line in sys.stdin:
             try:
-                raw = json.loads(line)
+                raw = _SINGER_MSG_ADAPTER.validate_json(line)
                 msg_type = raw.get("type")
                 if msg_type == "STATE":
                     cli_helper = flext_cli_create_helper(quiet=True)

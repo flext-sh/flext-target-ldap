@@ -16,6 +16,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
+    from flext_tests import d, e, h, r, s, x
 
     from .conftest import (
         mock_ldap_client,
@@ -31,13 +32,13 @@ if TYPE_CHECKING:
         singer_message_state,
     )
     from .constants import (
-        TestsFlextTargetLdapConstants,
-        TestsFlextTargetLdapConstants as c,
+        FlextTargetLdapTestConstants,
+        FlextTargetLdapTestConstants as c,
     )
-    from .models import TestsFlextTargetLdapModels, TestsFlextTargetLdapModels as m, tm
+    from .models import FlextTargetLdapTestModels, FlextTargetLdapTestModels as m, tm
     from .protocols import (
-        TestsFlextTargetLdapProtocols,
-        TestsFlextTargetLdapProtocols as p,
+        FlextTargetLdapTestProtocols,
+        FlextTargetLdapTestProtocols as p,
     )
     from .test_client import (
         TestLDAPClient,
@@ -63,14 +64,19 @@ if TYPE_CHECKING:
         TestMigrationValidator,
         TestTransformationRule,
     )
-    from .typings import TestsFlextTargetLdapTypes, TestsFlextTargetLdapTypes as t, tt
+    from .typings import FlextTargetLdapTestTypes, FlextTargetLdapTestTypes as t, tt
     from .utilities import (
-        TestsFlextTargetLdapUtilities,
-        TestsFlextTargetLdapUtilities as u,
+        FlextTargetLdapTestUtilities,
+        FlextTargetLdapTestUtilities as u,
     )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "EXPECTED_DATA_COUNT": ("tests.test_transformation", "EXPECTED_DATA_COUNT"),
+    "FlextTargetLdapTestConstants": ("tests.constants", "FlextTargetLdapTestConstants"),
+    "FlextTargetLdapTestModels": ("tests.models", "FlextTargetLdapTestModels"),
+    "FlextTargetLdapTestProtocols": ("tests.protocols", "FlextTargetLdapTestProtocols"),
+    "FlextTargetLdapTestTypes": ("tests.typings", "FlextTargetLdapTestTypes"),
+    "FlextTargetLdapTestUtilities": ("tests.utilities", "FlextTargetLdapTestUtilities"),
     "TestDataTransformationEngine": (
         "tests.test_transformation",
         "TestDataTransformationEngine",
@@ -92,27 +98,18 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestTargetLDAPUnit": ("tests.test_target", "TestTargetLDAPUnit"),
     "TestTransformationRule": ("tests.test_transformation", "TestTransformationRule"),
     "TestUsersSink": ("tests.test_sinks", "TestUsersSink"),
-    "TestsFlextTargetLdapConstants": (
-        "tests.constants",
-        "TestsFlextTargetLdapConstants",
-    ),
-    "TestsFlextTargetLdapModels": ("tests.models", "TestsFlextTargetLdapModels"),
-    "TestsFlextTargetLdapProtocols": (
-        "tests.protocols",
-        "TestsFlextTargetLdapProtocols",
-    ),
-    "TestsFlextTargetLdapTypes": ("tests.typings", "TestsFlextTargetLdapTypes"),
-    "TestsFlextTargetLdapUtilities": (
-        "tests.utilities",
-        "TestsFlextTargetLdapUtilities",
-    ),
-    "c": ("tests.constants", "TestsFlextTargetLdapConstants"),
-    "m": ("tests.models", "TestsFlextTargetLdapModels"),
+    "c": ("tests.constants", "FlextTargetLdapTestConstants"),
+    "d": ("flext_tests", "d"),
+    "e": ("flext_tests", "e"),
+    "h": ("flext_tests", "h"),
+    "m": ("tests.models", "FlextTargetLdapTestModels"),
     "mock_ldap_client": ("tests.conftest", "mock_ldap_client"),
     "mock_ldap_config": ("tests.conftest", "mock_ldap_config"),
     "mock_ldap_config_internal": ("tests.conftest", "mock_ldap_config_internal"),
     "mock_target": ("tests.conftest", "mock_target"),
-    "p": ("tests.protocols", "TestsFlextTargetLdapProtocols"),
+    "p": ("tests.protocols", "FlextTargetLdapTestProtocols"),
+    "r": ("flext_tests", "r"),
+    "s": ("flext_tests", "s"),
     "sample_group_record": ("tests.conftest", "sample_group_record"),
     "sample_ou_record": ("tests.conftest", "sample_ou_record"),
     "sample_user_record": ("tests.conftest", "sample_user_record"),
@@ -120,7 +117,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "singer_message_record": ("tests.conftest", "singer_message_record"),
     "singer_message_schema": ("tests.conftest", "singer_message_schema"),
     "singer_message_state": ("tests.conftest", "singer_message_state"),
-    "t": ("tests.typings", "TestsFlextTargetLdapTypes"),
+    "t": ("tests.typings", "FlextTargetLdapTestTypes"),
     "test_connection_wrapper_unbind_cleans_state_and_disconnects": (
         "tests.test_client",
         "test_connection_wrapper_unbind_cleans_state_and_disconnects",
@@ -135,11 +132,17 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     ),
     "tm": ("tests.models", "tm"),
     "tt": ("tests.typings", "tt"),
-    "u": ("tests.utilities", "TestsFlextTargetLdapUtilities"),
+    "u": ("tests.utilities", "FlextTargetLdapTestUtilities"),
+    "x": ("flext_tests", "x"),
 }
 
 __all__ = [
     "EXPECTED_DATA_COUNT",
+    "FlextTargetLdapTestConstants",
+    "FlextTargetLdapTestModels",
+    "FlextTargetLdapTestProtocols",
+    "FlextTargetLdapTestTypes",
+    "FlextTargetLdapTestUtilities",
     "TestDataTransformationEngine",
     "TestGroupsSink",
     "TestIntegratedTransformation",
@@ -152,18 +155,18 @@ __all__ = [
     "TestTargetLDAPUnit",
     "TestTransformationRule",
     "TestUsersSink",
-    "TestsFlextTargetLdapConstants",
-    "TestsFlextTargetLdapModels",
-    "TestsFlextTargetLdapProtocols",
-    "TestsFlextTargetLdapTypes",
-    "TestsFlextTargetLdapUtilities",
     "c",
+    "d",
+    "e",
+    "h",
     "m",
     "mock_ldap_client",
     "mock_ldap_config",
     "mock_ldap_config_internal",
     "mock_target",
     "p",
+    "r",
+    "s",
     "sample_group_record",
     "sample_ou_record",
     "sample_user_record",
@@ -178,6 +181,7 @@ __all__ = [
     "tm",
     "tt",
     "u",
+    "x",
 ]
 
 

@@ -2,7 +2,7 @@
 
 This module provides test-specific utilities that extend the main flext-target-ldap utilities.
 Uses the unified namespace pattern u.TargetLdap.Tests.* for test-only objects.
-Combines u functionality with project-specific test utilities.
+Combines FlextTestsUtilities functionality with project-specific test utilities.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,12 +11,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import u
+from flext_tests import FlextTestsUtilities
 
 from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
 
-class TestsFlextTargetLdapUtilities(u, FlextTargetLdapUtilities):
+class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
     """Test utilities for flext-target-ldap extending both test and project utilities."""
 
     class TargetLdap(FlextTargetLdapUtilities.TargetLdap):
@@ -26,5 +26,5 @@ class TestsFlextTargetLdapUtilities(u, FlextTargetLdapUtilities):
             """Internal tests declarations."""
 
 
-u = TestsFlextTargetLdapUtilities
-__all__ = ["TestsFlextTargetLdapUtilities", "u"]
+u = FlextTargetLdapTestUtilities
+__all__ = ["FlextTargetLdapTestUtilities", "u"]
