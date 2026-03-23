@@ -140,7 +140,7 @@ class TestTargetLDAPUnit:
 def test_default_cli_helper_logs_with_flext_logger() -> None:
     mock_logger = MagicMock()
     helper = _default_cli_helper(quiet=False)
-    with patch.t.NormalizedValue(helper, "_logger", mock_logger):
+    with patch.object(helper, "_logger", mock_logger):
         helper.print("state-line")
     mock_logger.info.assert_called_once_with("state-line")
 

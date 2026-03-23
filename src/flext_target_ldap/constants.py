@@ -117,9 +117,7 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             Note: Does not override parent Validation class to avoid inheritance conflicts.
             """
 
-            MAX_DN_LENGTH: Final[int] = (
-                FlextLdapConstants.Ldif.LdifValidation.MAX_URL_LENGTH
-            )
+            MAX_DN_LENGTH: Final[int] = FlextLdapConstants.Ldif.MAX_URL_LENGTH
 
     @unique
     class TargetLdapProjectType(StrEnum):
