@@ -13,10 +13,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger
-from flext_core.protocols import FlextProtocols as p
-from flext_core.result import r
-from flext_core.typings import t
+from flext_core import FlextLogger, p, r, t
 
 logger: p.Logger = FlextLogger(__name__)
 

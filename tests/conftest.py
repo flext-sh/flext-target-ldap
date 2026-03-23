@@ -11,7 +11,7 @@ import pathlib
 from unittest.mock import MagicMock
 
 import pytest
-from flext_core.typings import t
+from flext_core import t
 from flext_tests import tk
 from pydantic import TypeAdapter
 

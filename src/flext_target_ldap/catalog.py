@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core.typings import t
+from flext_core import t
 
 
 def build_singer_catalog() -> dict[str, t.ContainerValue]:

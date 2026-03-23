@@ -15,7 +15,7 @@ import math
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_core.typings import t
+from flext_core import t
 from flext_ldap import FlextLdapModels, r
 from flext_meltano import FlextMeltanoModels
 from pydantic import BaseModel, Field, field_validator

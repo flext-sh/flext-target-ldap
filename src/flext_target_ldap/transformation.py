@@ -12,7 +12,7 @@ from typing import override
 
 from flext_core import FlextLogger, r, t
 
-from flext_target_ldap.models import FlextTargetLdapModels as m
+from flext_target_ldap.models import m
 
 logger = FlextLogger(__name__)
 

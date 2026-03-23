@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_ldap.protocols import FlextTargetLdapProtocols as p
+from flext_target_ldap.protocols import p
 
 # Backward-compatible alias for the private protocol
 _LdapProcessingState = p.TargetLdap.LdapProcessingState

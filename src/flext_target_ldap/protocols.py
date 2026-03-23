@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from flext_core.typings import t
+from flext_core import t
 from flext_ldap import FlextLdapProtocols
 
 if TYPE_CHECKING:

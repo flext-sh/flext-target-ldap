@@ -18,7 +18,7 @@ from flext_target_ldap import (
     u,
     validate_ldap_target_config,
 )
-from flext_target_ldap.protocols import FlextTargetLdapProtocols as p
+from flext_target_ldap.protocols import p
 
 LdapTargetService = p.TargetLdap.LdapTargetService
 LdapTransformationServiceProtocol = p.TargetLdap.LdapTransformationServiceProtocol

@@ -9,8 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextLogger
-from flext_core.result import r
+from flext_core import FlextLogger, r
 
 logger = FlextLogger(__name__)
 

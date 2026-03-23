@@ -10,7 +10,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core.typings import t
+from flext_core import t
 
 from flext_target_ldap import LdapTargetClient
 from flext_target_ldap.client import LDAPClient, LDAPSearchEntry
