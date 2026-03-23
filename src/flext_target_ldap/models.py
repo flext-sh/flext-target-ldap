@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
@@ -143,14 +143,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             object_classes: Annotated[
-                Sequence[str],
+                MutableSequence[str],
                 Field(
                     default_factory=list,
                     description="LDAP t.NormalizedValue classes",
                 ),
             ]
             attributes: Annotated[
-                Mapping[str, Sequence[str]],
+                MutableMapping[str, MutableSequence[str]],
                 Field(
                     default_factory=dict,
                     description="LDAP attributes with values",
@@ -168,8 +168,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             @classmethod
             def validate_object_classes(
                 cls,
-                v: Sequence[str],
-            ) -> Sequence[str]:
+                v: MutableSequence[str],
+            ) -> MutableSequence[str]:
                 """Validate t.NormalizedValue classes contain 'top'."""
                 if "top" not in v:
                     v.append("top")
@@ -178,7 +178,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             def get_attribute_values(
                 self,
                 attribute_name: str,
-            ) -> Sequence[str]:
+            ) -> MutableSequence[str]:
                 """Get values for a specific attribute."""
                 return self.attributes.get(attribute_name, [])
 
@@ -200,7 +200,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             def validate_business_rules(self) -> r[bool]:
                 """Validate LDAP entry business rules."""
                 try:
-                    errors: Sequence[str] = []
+                    errors: list[str] = []
 
                     # Validate DN format
                     if (
@@ -271,16 +271,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             applied_mappings: Annotated[
-                Sequence[FlextTargetLdapModels.TargetLdap.AttributeMapping],
+                MutableSequence[FlextTargetLdapModels.TargetLdap.AttributeMapping],
                 Field(
-                    default_factory=lambda: Sequence[
-                        FlextTargetLdapModels.TargetLdap.AttributeMapping
-                    ](),
+                    default_factory=list,
                     description="Attribute mappings that were applied",
                 ),
             ]
             transformation_errors: Annotated[
-                Sequence[str],
+                MutableSequence[str],
                 Field(
                     default_factory=list,
                     description="schema errors encountered during transformation",
@@ -365,11 +363,9 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             current_batch: Annotated[
-                Sequence[FlextTargetLdapModels.TargetLdap.Entry],
+                MutableSequence[FlextTargetLdapModels.TargetLdap.Entry],
                 Field(
-                    default_factory=lambda: Sequence[
-                        FlextTargetLdapModels.TargetLdap.Entry
-                    ](),
+                    default_factory=list,
                     description="Current batch of LDAP entries",
                 ),
             ]
@@ -425,7 +421,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 entry: FlextTargetLdapModels.TargetLdap.Entry,
             ) -> Self:
                 """Add entry to current batch (immutable operation)."""
-                new_batch = self.current_batch.copy()
+                new_batch = [v for v in self.current_batch]  # noqa: C416
                 new_batch.append(entry)
 
                 return self.model_copy(
@@ -639,7 +635,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Singer schema definition mapping properties to LDAP attributes."""
 
             properties: Annotated[
-                Mapping[str, FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition],
+                MutableMapping[str, FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition],
                 Field(default_factory=dict),
             ]
 
@@ -649,7 +645,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             tap_stream_id: Annotated[str, Field(min_length=1)]
             stream: Annotated[str, Field(min_length=1)]
             stream_schema: Annotated[
-                Mapping[str, t.ContainerValue],
+                MutableMapping[str, t.ContainerValue],
                 Field(default_factory=dict),
             ]
 
@@ -665,10 +661,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Lightweight result of data transformation engine operations."""
 
             transformed_data: Annotated[
-                Mapping[str, t.ContainerValue],
+                MutableMapping[str, t.ContainerValue],
                 Field(default_factory=dict),
             ]
-            applied_rules: Annotated[Sequence[str], Field(default_factory=list)]
+            applied_rules: Annotated[MutableSequence[str], Field(default_factory=list)]
 
 
 # Export the unified models class
