@@ -187,16 +187,14 @@ class LDAPClient:
 
         @contextmanager
         def connection_context() -> Generator[ldap3.Connection]:
-            server_pool = ldap3.ServerPool([
-                ldap3.Server(
-                    self.config.host,
-                    port=self.config.port,
-                    use_ssl=self.config.use_ssl,
-                    connect_timeout=self.config.timeout,
-                ),
-            ])
+            server = ldap3.Server(
+                self.config.host,
+                port=self.config.port,
+                use_ssl=self.config.use_ssl,
+                connect_timeout=self.config.timeout,
+            )
             connection = ldap3.Connection(
-                server_pool,
+                server,
                 user=self._bind_dn,
                 password=self._password,
             )
@@ -261,8 +259,8 @@ class LDAPClient:
                 search_filter,
             )
             with self.get_connection() as conn:
-                conn.search(base_dn, search_filter, attributes=attributes)
-                raw_entries: list[dict[str, t.ContainerValue]] = conn.entries
+                conn.search(base_dn, search_filter, attributes=attributes or [])
+                raw_entries = conn.entries
                 entries: list[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     if not isinstance(raw, LDAPSearchEntry):
