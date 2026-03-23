@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_tests import d, e, h, r, s, x
 
-    from .conftest import (
+    from tests.conftest import (
         mock_ldap_client,
         mock_ldap_config,
         mock_ldap_config_internal,
@@ -31,41 +31,49 @@ if TYPE_CHECKING:
         singer_message_schema,
         singer_message_state,
     )
-    from .constants import (
+    from tests.constants import (
         FlextTargetLdapTestConstants,
         FlextTargetLdapTestConstants as c,
     )
-    from .models import FlextTargetLdapTestModels, FlextTargetLdapTestModels as m, tm
-    from .protocols import (
+    from tests.models import (
+        FlextTargetLdapTestModels,
+        FlextTargetLdapTestModels as m,
+        tm,
+    )
+    from tests.protocols import (
         FlextTargetLdapTestProtocols,
         FlextTargetLdapTestProtocols as p,
     )
-    from .test_client import (
+    from tests.test_client import (
         TestLDAPClient,
         test_connection_wrapper_unbind_cleans_state_and_disconnects,
     )
-    from .test_integration import TestTargetLDAPIntegration
-    from .test_sinks import (
+    from tests.test_integration import TestTargetLDAPIntegration
+    from tests.test_sinks import (
         TestGroupsSink,
         TestLDAPBaseSink,
         TestLDAPGenericSink,
         TestOrganizationalUnitsSink,
         TestUsersSink,
     )
-    from .test_target import (
+    from tests.test_target import (
         TestTargetLDAPUnit,
         test_default_cli_helper_logs_with_flext_logger,
         test_sink_process_record_delegates_to_target_handler,
     )
-    from .test_transformation import (
+    from tests.test_transformation import (
         EXPECTED_DATA_COUNT,
         TestDataTransformationEngine,
         TestIntegratedTransformation,
         TestMigrationValidator,
         TestTransformationRule,
     )
-    from .typings import FlextTargetLdapTestTypes, FlextTargetLdapTestTypes as t, tt
-    from .utilities import (
+    from tests.typings import (
+        FlextTargetLdapTestTypes,
+        FlextTargetLdapTestTypes as t,
+        tt,
+    )
+    from tests.utilities import (
         FlextTargetLdapTestUtilities,
         FlextTargetLdapTestUtilities as u,
     )
