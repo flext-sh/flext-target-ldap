@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, p, r, t
@@ -21,7 +21,7 @@ logger: p.Logger = FlextLogger(__name__)
 class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    config: dict[str, str | int | bool]
+    config: Mapping[str, str | int | bool]
 
     @override
     def __init__(self, config: Mapping[str, str | int | bool] | None = None) -> None:
@@ -36,7 +36,7 @@ class LDAPTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[Mapping[str, t.Scalar | None]],
+        records: Sequence[Mapping[str, t.Scalar | None]],
     ) -> r[Mapping[str, str | int]]:
         """Orchestrate data loading to LDAP target.
 
@@ -52,7 +52,7 @@ class LDAPTargetOrchestrator:
             processed_count = 0
             for _record in records:
                 processed_count += 1
-            result_dict: dict[str, str | int] = {
+            result_dict: Mapping[str, str | int] = {
                 "loaded_records": processed_count,
                 "status": "completed",
             }
@@ -97,4 +97,4 @@ class LDAPTargetOrchestrator:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: list[str] = ["LDAPTargetOrchestrator"]
+__all__: Sequence[str] = ["LDAPTargetOrchestrator"]

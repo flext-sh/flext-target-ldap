@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r, t
@@ -25,12 +26,12 @@ class SingerLDAPCatalogManager:
     @override
     def __init__(self) -> None:
         """Initialize Singer LDAP catalog manager."""
-        self._catalog_entries: dict[str, SingerLDAPCatalogEntry] = {}
+        self._catalog_entries: Mapping[str, SingerLDAPCatalogEntry] = {}
 
     def add_stream(
         self,
         stream_name: str,
-        schema: dict[str, t.ContainerValue],
+        schema: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Add LDAP stream to catalog."""
         try:
@@ -55,4 +56,4 @@ class SingerLDAPCatalogManager:
         return r[SingerLDAPCatalogEntry].ok(self._catalog_entries[stream_name])
 
 
-__all__: list[str] = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]
+__all__: Sequence[str] = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]

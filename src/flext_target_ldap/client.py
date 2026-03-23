@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping
+from collections.abc import Generator, Mapping, Sequence
 from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import override
 
@@ -38,7 +38,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    def __init__(self, dn: str, attributes: dict[str, str | list[str]]) -> None:
+    def __init__(self, dn: str, attributes: Mapping[str, str | Sequence[str]]) -> None:
         """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
@@ -97,8 +97,8 @@ class LDAPClient:
     def add_entry(
         self,
         dn: str,
-        attributes: dict[str, t.ContainerValue],
-        object_classes: list[str] | None = None,
+        attributes: Mapping[str, t.ContainerValue],
+        object_classes: Sequence[str] | None = None,
     ) -> r[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -210,14 +210,14 @@ class LDAPClient:
     def get_entry(
         self,
         dn: str,
-        attributes: list[str] | None = None,
+        attributes: Sequence[str] | None = None,
     ) -> r[LDAPSearchEntry | None]:
         """Get LDAP entry using ldap3-compatible connection for tests."""
         try:
             if not dn:
                 return r[LDAPSearchEntry | None].fail("DN required")
             logger.info("Getting LDAP entry: %s", dn)
-            search_result: r[list[LDAPSearchEntry]] = self.search_entry(
+            search_result: r[Sequence[LDAPSearchEntry]] = self.search_entry(
                 dn,
                 "(objectClass=*)",
                 attributes,
@@ -232,7 +232,7 @@ class LDAPClient:
     def modify_entry(
         self,
         dn: str,
-        changes: dict[str, t.ContainerValue],
+        changes: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
@@ -247,12 +247,12 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: list[str] | None = None,
-    ) -> r[list[LDAPSearchEntry]]:
+        attributes: Sequence[str] | None = None,
+    ) -> r[Sequence[LDAPSearchEntry]]:
         """Search LDAP entries using ldap3-compatible connection for tests."""
         try:
             if not base_dn:
-                return r[list[LDAPSearchEntry]].fail("Base DN required")
+                return r[Sequence[LDAPSearchEntry]].fail("Base DN required")
             logger.info(
                 "Searching LDAP entries: %s with filter %s",
                 base_dn,
@@ -261,13 +261,13 @@ class LDAPClient:
             with self.get_connection() as conn:
                 conn.search(base_dn, search_filter, attributes=attributes or [])
                 raw_entries = conn.entries
-                entries: list[LDAPSearchEntry] = []
+                entries: Sequence[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     if not isinstance(raw, LDAPSearchEntry):
                         continue
                     dn = raw.dn
-                    attr_names: list[str] = list(raw.attributes.keys())
-                    attrs: dict[str, str | list[str]] = {}
+                    attr_names: Sequence[str] = list(raw.attributes.keys())
+                    attrs: Mapping[str, str | Sequence[str]] = {}
                     for name in attr_names:
                         name_str = name
                         try:
@@ -285,10 +285,10 @@ class LDAPClient:
                             val = raw.attributes.get(name_str)
                             attrs[name_str] = [str(val)] if val is not None else []
                     entries.append(LDAPSearchEntry(dn=str(dn), attributes=attrs))
-                return r[list[LDAPSearchEntry]].ok(entries)
+                return r[Sequence[LDAPSearchEntry]].ok(entries)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
-            return r[list[LDAPSearchEntry]].fail(f"Search failed: {e}")
+            return r[Sequence[LDAPSearchEntry]].fail(f"Search failed: {e}")
 
     def sync_connect(self) -> r[bool]:
         """Sync connect method for backward compatibility."""
@@ -298,7 +298,7 @@ class LDAPClient:
     def _get_api(self) -> FlextLdap:
         """Instantiate and cache FlextLdap lazily."""
         if self._api is None:
-            ldap_config: dict[str, str | int | bool] = {
+            ldap_config: Mapping[str, str | int | bool] = {
                 "host": self.config.host,
                 "port": self.config.port,
                 "use_ssl": self.config.use_ssl,
@@ -327,12 +327,12 @@ class LDAPClient:
             def __init__(self, session_id: str) -> None:
                 self.session_id = session_id
                 self.bound = True
-                self.entries: list[dict[str, t.ContainerValue]] = []
+                self.entries: Sequence[Mapping[str, t.ContainerValue]] = []
 
             def add(
                 self,
                 dn: str,
-                object_classes: list[str],
+                object_classes: Sequence[str],
                 attributes: Mapping[str, t.ContainerValue],
             ) -> bool:
                 _ = (dn, object_classes, attributes)
@@ -357,7 +357,7 @@ class LDAPClient:
                 self,
                 base_dn: str,
                 search_filter: str,
-                attributes: list[str] | None = None,
+                attributes: Sequence[str] | None = None,
             ) -> bool:
                 _ = (base_dn, search_filter, attributes)
                 self.entries = []
@@ -392,4 +392,4 @@ class LDAPClient:
             return ConnectionWrapper("test_session")
 
 
-__all__: list[str] = ["LDAPClient"]
+__all__: Sequence[str] = ["LDAPClient"]

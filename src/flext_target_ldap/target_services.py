@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from typing import override
 
@@ -59,7 +59,9 @@ class LdapTransformationService:
         """Initialize with LDAP target settings."""
         self._config = config
 
-    def get_default_mappings(self, entry_type: str) -> list[LdapAttributeMappingModel]:
+    def get_default_mappings(
+        self, entry_type: str
+    ) -> Sequence[LdapAttributeMappingModel]:
         """Return default attribute mappings for the given entry type (e.g. users, groups)."""
         if entry_type == "users":
             return [
@@ -108,14 +110,14 @@ class LdapTransformationService:
     def transform_record(
         self,
         record: Mapping[str, t.ContainerValue],
-        mappings: list[LdapAttributeMappingModel],
-        object_classes: list[str],
+        mappings: Sequence[LdapAttributeMappingModel],
+        object_classes: Sequence[str],
         base_dn: str,
     ) -> r[LdapTransformationResultModel]:
         """Transform a single record into an LDAP entry using mappings."""
-        mapping_errors: list[str] = []
-        ldap_attributes: dict[str, list[str]] = {}
-        applied_mappings: list[LdapAttributeMappingModel] = []
+        mapping_errors: Sequence[str] = []
+        ldap_attributes: Mapping[str, Sequence[str]] = {}
+        applied_mappings: Sequence[LdapAttributeMappingModel] = []
         for mapping in mappings:
             value = record.get(mapping.singer_field_name)
             if value is None and mapping.default_value is not None:
@@ -150,7 +152,7 @@ class LdapTransformationService:
             "attributes": ldap_attributes,
             "entry_type": self._determine_entry_type(object_classes),
         })
-        original_record_json: dict[str, t.Scalar] = {
+        original_record_json: Mapping[str, t.Scalar] = {
             str(key): str(value) for key, value in record.items()
         }
         result = LdapTransformationResultModel.model_validate({
@@ -167,7 +169,7 @@ class LdapTransformationService:
         """Run business-rule validation on an LDAP entry."""
         return entry.validate_business_rules()
 
-    def _determine_entry_type(self, object_classes: list[str]) -> str:
+    def _determine_entry_type(self, object_classes: Sequence[str]) -> str:
         normalized = {oc.lower() for oc in object_classes}
         if "person" in normalized or "inetorgperson" in normalized:
             return "user"
@@ -204,7 +206,7 @@ class LdapTargetOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: list[Mapping[str, t.ContainerValue]],
+        records: Sequence[Mapping[str, t.ContainerValue]],
         config: FlextTargetLdapSettings | None = None,
     ) -> r[Mapping[str, t.ContainerValue]]:
         """Load records using default mappings and return a summary result."""
@@ -219,7 +221,7 @@ class LdapTargetOrchestrator:
         stream_type = "users"
         mappings = transformation.get_default_mappings(stream_type)
         processed = 0
-        errors: list[t.ContainerValue] = []
+        errors: Sequence[t.ContainerValue] = []
         for record in records:
             transformed = transformation.transform_record(
                 record=record,
@@ -231,7 +233,7 @@ class LdapTargetOrchestrator:
                 processed += 1
             else:
                 errors.append(transformed.error or "Transformation failed")
-        result: dict[str, t.ContainerValue] = {
+        result: Mapping[str, t.ContainerValue] = {
             "processed_records": processed,
             "total_records": len(records),
             "transformation_errors": errors,
@@ -256,11 +258,11 @@ class LdapTargetApiService:
     @override
     def __init__(self) -> None:
         """Initialize the API service and internal orchestrator cache."""
-        self._orchestrators: dict[str, LdapTargetOrchestrator] = {}
+        self._orchestrators: Mapping[str, LdapTargetOrchestrator] = {}
 
     def create_ldap_target(
         self,
-        config: dict[str, t.ContainerValue],
+        config: Mapping[str, t.ContainerValue],
     ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(
@@ -270,8 +272,8 @@ class LdapTargetApiService:
 
     def load_groups_to_ldap(
         self,
-        groups: list[Mapping[str, t.ContainerValue]],
-        config: dict[str, t.ContainerValue],
+        groups: Sequence[Mapping[str, t.ContainerValue]],
+        config: Mapping[str, t.ContainerValue],
     ) -> r[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
@@ -285,8 +287,8 @@ class LdapTargetApiService:
 
     def load_users_to_ldap(
         self,
-        users: list[Mapping[str, t.ContainerValue]],
-        config: dict[str, t.ContainerValue],
+        users: Sequence[Mapping[str, t.ContainerValue]],
+        config: Mapping[str, t.ContainerValue],
     ) -> r[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
@@ -300,7 +302,7 @@ class LdapTargetApiService:
 
     def test_ldap_connection(
         self,
-        config: dict[str, t.ContainerValue],
+        config: Mapping[str, t.ContainerValue],
     ) -> r[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)

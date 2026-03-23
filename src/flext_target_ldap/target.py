@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
@@ -33,8 +33,8 @@ from flext_target_ldap import (
     t,
 )
 
-_SINGER_MSG_ADAPTER: TypeAdapter[dict[str, t.NormalizedValue]] = TypeAdapter(
-    dict[str, t.NormalizedValue],
+_SINGER_MSG_ADAPTER: TypeAdapter[Mapping[str, t.NormalizedValue]] = TypeAdapter(
+    Mapping[str, t.NormalizedValue],
     config=ConfigDict(strict=False),
 )
 
@@ -74,14 +74,14 @@ class TargetLDAP(Target):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: dict[str, t.ContainerValue]
+    config: Mapping[str, t.ContainerValue]
     cli: ClassVar[Callable[..., None] | None] = None
 
     @override
     def __init__(
         self,
         *,
-        config: dict[str, t.ContainerValue] | None = None,
+        config: Mapping[str, t.ContainerValue] | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -93,7 +93,7 @@ class TargetLDAP(Target):
     def orchestrator(self) -> LDAPTargetOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            normalized_config: dict[str, str | int | bool] = {}
+            normalized_config: Mapping[str, str | int | bool] = {}
             for key, value in self.config.items():
                 match value:
                     case bool() | int() | str():
@@ -104,7 +104,7 @@ class TargetLDAP(Target):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> dict[str, t.ContainerValue]:
+    def singer_catalog(self) -> Mapping[str, t.ContainerValue]:
         """Return the Singer catalog for this target."""
         return build_singer_catalog()
 
@@ -179,10 +179,10 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> dict[str, t.ContainerValue]:
+def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
     """Load configuration from JSON file."""
-    config_adapter: TypeAdapter[dict[str, t.ContainerValue]] = TypeAdapter(
-        dict[str, t.ContainerValue],
+    config_adapter: TypeAdapter[Mapping[str, t.ContainerValue]] = TypeAdapter(
+        Mapping[str, t.ContainerValue],
     )
     try:
         content = Path(config_path).read_text(encoding="utf-8")
@@ -216,7 +216,7 @@ def _get_ldap_api() -> _LdapApi | None:
 
 def _construct_dn(
     stream: str,
-    record: dict[str, t.ContainerValue],
+    record: Mapping[str, t.ContainerValue],
     base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
@@ -231,9 +231,9 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: dict[str, t.ContainerValue],
+    record: Mapping[str, t.ContainerValue],
     stream: str,
-    cfg: dict[str, t.ContainerValue],
+    cfg: Mapping[str, t.ContainerValue],
     api: _LdapApi | None,
     seen_dns: set[str],
 ) -> None:
@@ -284,12 +284,12 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     cli_helper = flext_cli_create_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    _schema: dict[str, t.ContainerValue] = {}
+                    _schema: Mapping[str, t.ContainerValue] = {}
                     current_stream = raw.get("stream")
                 elif msg_type == "RECORD" and api is not None:
                     record_data = raw.get("record", {})
                     stream = raw.get("stream") or current_stream or "users"
-                    normalized_record: dict[str, t.ContainerValue] = {}
+                    normalized_record: Mapping[str, t.ContainerValue] = {}
                     for key, value in record_data.items():
                         match value:
                             case bool() | int() | float() | str() | dict() | list():

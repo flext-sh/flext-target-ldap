@@ -25,7 +25,7 @@ class DataTransformationEngine:
     """Engine for transforming data using rules."""
 
     @override
-    def __init__(self, rules: list[TransformationRule]) -> None:
+    def __init__(self, rules: Sequence[TransformationRule]) -> None:
         """Initialize transformation engine."""
         self.rules = rules
 
@@ -39,8 +39,8 @@ class DataTransformationEngine:
     ) -> r[TransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: dict[str, t.ContainerValue] = dict(data)
-            applied_rules: list[str] = []
+            transformed_data: Mapping[str, t.ContainerValue] = dict(data)
+            applied_rules: Sequence[str] = []
             for rule in self.rules:
                 if not rule.enabled:
                     continue
@@ -53,7 +53,7 @@ class DataTransformationEngine:
                             )
                             applied_rules.append(rule.name)
                         case list() as items:
-                            new_items: list[t.ContainerValue] = []
+                            new_items: Sequence[t.ContainerValue] = []
                             matched = False
                             for item in items:
                                 if isinstance(item, str) and rule.pattern in item:
@@ -148,8 +148,8 @@ class MigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: dict[str, t.ContainerValue],
-        object_classes: list[str],
+        attributes: Mapping[str, t.ContainerValue],
+        object_classes: Sequence[str],
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)

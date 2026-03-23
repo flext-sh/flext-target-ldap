@@ -8,6 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import pathlib
+from collections.abc import Mapping
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,7 +19,7 @@ from pydantic import TypeAdapter
 from flext_target_ldap import LdapTargetClient
 
 
-def _build_mock_ldap_config(*, bind_dn: str) -> dict[str, t.ContainerValue]:
+def _build_mock_ldap_config(*, bind_dn: str) -> Mapping[str, t.ContainerValue]:
     return {
         "host": "test.ldap.com",
         "port": 389,
@@ -54,7 +55,7 @@ def shared_ldap_container(flext_docker: tk) -> str:
 
 
 @pytest.fixture
-def mock_ldap_config() -> dict[str, t.ContainerValue]:
+def mock_ldap_config() -> Mapping[str, t.ContainerValue]:
     """Create mock LDAP configuration for testing."""
     return _build_mock_ldap_config(
         bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
@@ -62,7 +63,7 @@ def mock_ldap_config() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture(name="_mock_ldap_config")
-def mock_ldap_config_internal() -> dict[str, t.ContainerValue]:
+def mock_ldap_config_internal() -> Mapping[str, t.ContainerValue]:
     """Create mock LDAP configuration for internal sink testing.
 
     Provides a valid LDAP configuration dictionary for use in sink fixtures.
@@ -72,7 +73,7 @@ def mock_ldap_config_internal() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def sample_user_record() -> dict[str, t.ContainerValue]:
+def sample_user_record() -> Mapping[str, t.ContainerValue]:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
@@ -86,7 +87,7 @@ def sample_user_record() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def sample_group_record() -> dict[str, t.ContainerValue]:
+def sample_group_record() -> Mapping[str, t.ContainerValue]:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "cn=developers,ou=groups,dc=test,dc=com",
@@ -101,7 +102,7 @@ def sample_group_record() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def sample_ou_record() -> dict[str, t.ContainerValue]:
+def sample_ou_record() -> Mapping[str, t.ContainerValue]:
     """Create mock LDAP configuration for testing."""
     return {
         "dn": "ou=engineering,dc=test,dc=com",
@@ -112,7 +113,7 @@ def sample_ou_record() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record: dict[str, t.ContainerValue]) -> str:
+def singer_message_record(sample_user_record: Mapping[str, t.ContainerValue]) -> str:
     """Create mock LDAP configuration for testing."""
     message = {
         "type": "RECORD",
@@ -175,7 +176,7 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: dict[str, t.ContainerValue]) -> MagicMock:
+def mock_target(mock_ldap_config: Mapping[str, t.ContainerValue]) -> MagicMock:
     """Create mock LDAP configuration for testing."""
     target = MagicMock()
     target.config = mock_ldap_config

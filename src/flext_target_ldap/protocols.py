@@ -57,12 +57,12 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
             bound: bool
-            entries: list[dict[str, t.ContainerValue]]
+            entries: Sequence[Mapping[str, t.ContainerValue]]
 
             def add(
                 self,
                 dn: str,
-                object_classes: list[str],
+                object_classes: Sequence[str],
                 attributes: Mapping[str, t.ContainerValue],
             ) -> bool:
                 """Add LDAP entry."""
@@ -84,7 +84,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
                 self,
                 base_dn: str,
                 search_filter: str,
-                attributes: list[str] | None = None,
+                attributes: Sequence[str] | None = None,
             ) -> bool:
                 """Search LDAP entries."""
                 ...
@@ -99,12 +99,12 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             processed_count: int
             success_count: int
             error_count: int
-            errors: list[str]
+            errors: Sequence[str]
 
         class LdapApi(Protocol):
             """Protocol for LDAP API operations."""
 
-            def add(self, dn: str, record: dict[str, t.ContainerValue]) -> None:
+            def add(self, dn: str, record: Mapping[str, t.ContainerValue]) -> None:
                 """Add LDAP entry."""
                 ...
 
@@ -112,7 +112,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
                 """Delete LDAP entry."""
                 ...
 
-            def modify(self, dn: str, record: dict[str, t.ContainerValue]) -> None:
+            def modify(self, dn: str, record: Mapping[str, t.ContainerValue]) -> None:
                 """Modify LDAP entry."""
                 ...
 
@@ -121,15 +121,15 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             def create_target(
                 self,
-                config: dict[str, t.ContainerValue],
+                config: Mapping[str, t.ContainerValue],
             ) -> FlextLdapProtocols.Result[target_client_module.TargetLdap]:
                 """Create an LDAP target from config."""
                 ...
 
             def load_records(
                 self,
-                records: list[Mapping[str, t.ContainerValue]],
-                config: dict[str, t.ContainerValue],
+                records: Sequence[Mapping[str, t.ContainerValue]],
+                config: Mapping[str, t.ContainerValue],
                 stream_type: str = "users",
             ) -> FlextLdapProtocols.Result[int]:
                 """Load records into the LDAP target."""
@@ -141,8 +141,8 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             def transform_record(
                 self,
                 record: Mapping[str, t.ContainerValue],
-                mappings: list[LdapAttributeMappingModel],
-                object_classes: list[str],
+                mappings: Sequence[LdapAttributeMappingModel],
+                object_classes: Sequence[str],
                 base_dn: str,
             ) -> FlextLdapProtocols.Result[LdapTransformationResultModel]:
                 """Transform a record for LDAP storage."""

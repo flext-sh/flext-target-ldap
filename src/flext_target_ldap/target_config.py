@@ -14,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 from flext_core import r
 
@@ -57,8 +57,8 @@ def _target_config_to_str(value: t.ContainerValue, default: str = "") -> str:
 
 def _target_config_to_str_list(
     value: t.ContainerValue,
-    default: list[str],
-) -> list[str]:
+    default: Sequence[str],
+) -> Sequence[str]:
     """Convert value to string list."""
     if isinstance(value, list):
         return [str(v) for v in value]
@@ -66,7 +66,7 @@ def _target_config_to_str_list(
 
 
 def _build_target_connection_config(
-    config: dict[str, t.ContainerValue],
+    config: Mapping[str, t.ContainerValue],
 ) -> m.Ldap.ConnectionConfig:
     """Build connection config for target."""
     server = _target_config_to_str(config.get("host", "localhost"), "localhost")
@@ -85,7 +85,7 @@ def _build_target_connection_config(
     )
 
 
-def _extract_target_max_records(config: dict[str, t.ContainerValue]) -> int | None:
+def _extract_target_max_records(config: Mapping[str, t.ContainerValue]) -> int | None:
     """Extract max records from config."""
     max_records_val = config.get("max_records")
     match max_records_val:
@@ -103,7 +103,7 @@ def _extract_target_max_records(config: dict[str, t.ContainerValue]) -> int | No
 
 
 def validate_ldap_target_config(
-    config: dict[str, t.ContainerValue],
+    config: Mapping[str, t.ContainerValue],
 ) -> r[FlextTargetLdapSettings]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
@@ -123,7 +123,7 @@ def validate_ldap_target_config(
             config.get("delete_removed_entries", False),
             default=False,
         )
-        attribute_mapping: dict[str, str] = {}
+        attribute_mapping: Mapping[str, str] = {}
         raw_attr_map_obj = config.get("attribute_mapping")
         match raw_attr_map_obj:
             case Mapping() as mapping_value:

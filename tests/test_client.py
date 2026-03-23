@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -22,13 +23,13 @@ class TestLDAPClient:
     """Test LDAP client functionality."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: dict[str, t.ContainerValue]) -> LDAPClient:
+    def client(self, mock_ldap_config: Mapping[str, t.ContainerValue]) -> LDAPClient:
         """Create test LDAPClient instance."""
         return LDAPClient(config=mock_ldap_config)
 
     @pytest.fixture
     def target_client(
-        self, mock_ldap_config: dict[str, t.ContainerValue]
+        self, mock_ldap_config: Mapping[str, t.ContainerValue]
     ) -> LdapTargetClient:
         """Create test LdapTargetClient instance."""
         return LdapTargetClient(config=mock_ldap_config)
@@ -258,7 +259,7 @@ class TestLDAPClient:
         if not result.value:
             msg: str = f"Expected True, got {result.value}"
             raise AssertionError(msg)
-        mock_connection.entries = list[t.NormalizedValue]()
+        mock_connection.entries = Sequence[t.NormalizedValue]()
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
         assert result.is_success
         if result.value:
@@ -294,7 +295,7 @@ class TestLDAPClient:
             msg: str = f"Expected {'uid=test,dc=test,dc=com'}, got {entry.dn}"
             raise AssertionError(msg)
         assert entry.attributes["cn"] == ["Test User"]
-        mock_connection.entries = list[t.NormalizedValue]()
+        mock_connection.entries = Sequence[t.NormalizedValue]()
         result = client.get_entry("uid=notfound,dc=test,dc=com")
         assert result.is_success
         assert result.value is None

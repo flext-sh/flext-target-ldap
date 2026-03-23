@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r, t
@@ -74,30 +74,32 @@ class LDAPDataTransformer:
 
     def prepare_ldap_attributes(
         self,
-        record: dict[str, t.Scalar],
-        object_classes: list[str],
-    ) -> r[dict[str, list[str]]]:
+        record: Mapping[str, t.Scalar],
+        object_classes: Sequence[str],
+    ) -> r[Mapping[str, Sequence[str]]]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes: dict[str, list[str]] = {}
+            attributes: Mapping[str, Sequence[str]] = {}
             attributes["objectClass"] = object_classes
             for key, value in record.items():
                 attributes[key] = self._to_ldap_values(value)
-            return r[dict[str, list[str]]].ok(attributes)
+            return r[Mapping[str, Sequence[str]]].ok(attributes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return r[dict[str, list[str]]].fail(f"Attribute preparation failed: {e}")
+            return r[Mapping[str, Sequence[str]]].fail(
+                f"Attribute preparation failed: {e}"
+            )
 
     def transform_record(
         self,
-        record: dict[str, t.Scalar],
+        record: Mapping[str, t.Scalar],
         schema: SingerSchemaDefinition
         | Mapping[str, Mapping[str, Mapping[str, str] | str]]
         | None = None,
-    ) -> r[dict[str, str | None]]:
+    ) -> r[Mapping[str, str | None]]:
         """Transform Singer record for LDAP storage."""
         try:
-            transformed: dict[str, str | None] = {}
+            transformed: Mapping[str, str | None] = {}
             schema_model = SingerSchemaDefinition.model_validate(schema or {})
             for key, value in record.items():
                 ldap_key = self._normalize_ldap_attribute_name(key)
@@ -109,10 +111,12 @@ class LDAPDataTransformer:
                 )
                 converted_value: str | None = convert_result.unwrap_or(str(value))
                 transformed[ldap_key] = converted_value
-            return r[dict[str, str | None]].ok(transformed)
+            return r[Mapping[str, str | None]].ok(transformed)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
-            return r[dict[str, str | None]].fail(f"Record transformation failed: {e}")
+            return r[Mapping[str, str | None]].fail(
+                f"Record transformation failed: {e}"
+            )
 
     def _normalize_ldap_attribute_name(self, name: str) -> str:
         """Normalize attribute name for LDAP conventions."""
@@ -126,7 +130,7 @@ class LDAPDataTransformer:
             normalized = name.lower()
         return normalized
 
-    def _to_ldap_values(self, value: t.Scalar | list[t.Scalar]) -> list[str]:
+    def _to_ldap_values(self, value: t.Scalar | Sequence[t.Scalar]) -> Sequence[str]:
         """Normalize incoming Singer value to LDAP list values."""
         match value:
             case list() as values:
@@ -150,7 +154,7 @@ class LDAPSchemaMapper:
     ) -> r[Mapping[str, str]]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
-            ldap_attributes: dict[str, str] = {}
+            ldap_attributes: Mapping[str, str] = {}
             schema_model = SingerSchemaDefinition.model_validate(schema)
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
@@ -209,9 +213,9 @@ class LDAPEntryManager:
 
     def determine_object_classes(
         self,
-        record: dict[str, t.Scalar],
+        record: Mapping[str, t.Scalar],
         stream_name: str,
-    ) -> r[list[str]]:
+    ) -> r[Sequence[str]]:
         """Determine appropriate t.NormalizedValue classes for LDAP entry."""
         try:
             object_classes = ["top"]
@@ -235,14 +239,14 @@ class LDAPEntryManager:
                     "organizationalPerson",
                     "inetOrgPerson",
                 ])
-            return r[list[str]].ok(object_classes)
+            return r[Sequence[str]].ok(object_classes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
-            return r[list[str]].fail(f"Object class determination failed: {e}")
+            return r[Sequence[str]].fail(f"Object class determination failed: {e}")
 
     def generate_dn(
         self,
-        record: dict[str, t.Scalar],
+        record: Mapping[str, t.Scalar],
         base_dn: str,
         rdn_attribute: str = "cn",
     ) -> r[str]:
@@ -269,12 +273,12 @@ class LDAPEntryManager:
 
     def prepare_modify_changes(
         self,
-        current_attrs: Mapping[str, str | list[str] | None],
-        new_attrs: Mapping[str, str | list[str] | None],
-    ) -> r[dict[str, list[tuple[str, list[str]]]]]:
+        current_attrs: Mapping[str, str | Sequence[str] | None],
+        new_attrs: Mapping[str, str | Sequence[str] | None],
+    ) -> r[Mapping[str, Sequence[tuple[str, Sequence[str]]]]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: dict[str, list[tuple[str, list[str]]]] = {}
+            changes: Mapping[str, Sequence[tuple[str, Sequence[str]]]] = {}
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
             for attr in all_attrs:
                 current_value = current_attrs.get(attr)
@@ -288,17 +292,17 @@ class LDAPEntryManager:
                     else:
                         values = self._normalize_modify_values(new_value)
                         changes[attr] = [("MODIFY_REPLACE", values)]
-            return r[dict[str, list[tuple[str, list[str]]]]].ok(changes)
+            return r[Mapping[str, Sequence[tuple[str, Sequence[str]]]]].ok(changes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return r[dict[str, list[tuple[str, list[str]]]]].fail(
+            return r[Mapping[str, Sequence[tuple[str, Sequence[str]]]]].fail(
                 f"Modify changes preparation failed: {e}",
             )
 
     def validate_entry_attributes(
         self,
-        attributes: dict[str, list[str]],
-        object_classes: list[str],
+        attributes: Mapping[str, Sequence[str]],
+        object_classes: Sequence[str],
     ) -> r[bool]:
         """Validate LDAP entry attributes against t.NormalizedValue class requirements."""
         try:
@@ -339,7 +343,9 @@ class LDAPEntryManager:
             escaped = escaped[:-1] + "\\ "
         return escaped
 
-    def _normalize_modify_values(self, value: str | list[str] | None) -> list[str]:
+    def _normalize_modify_values(
+        self, value: str | Sequence[str] | None
+    ) -> Sequence[str]:
         """Normalize modify payload values to LDAP list representation."""
         match value:
             case list() as values:

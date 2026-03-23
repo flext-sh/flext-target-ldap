@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
 
@@ -18,9 +20,9 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     class Core:
         """Core type aliases overrides."""
 
-        type Dict = dict[str, FlextMeltanoTypes.NormalizedValue]
-        type Headers = dict[str, str]
-        type StringList = list[str]
+        type Dict = Mapping[str, FlextMeltanoTypes.NormalizedValue]
+        type Headers = Mapping[str, str]
+        type StringList = Sequence[str]
 
     class Project:
         """Project-specific type aliases for target-ldap."""

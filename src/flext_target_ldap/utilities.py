@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from typing import override
 
@@ -40,13 +40,13 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     @staticmethod
     def _coerce_container_value(
         value: t.ConfigMap | t.NormalizedValue | BaseModel,
-    ) -> t.ConfigMap | list[t.ContainerValue] | t.NormalizedValue | None:
+    ) -> t.ConfigMap | Sequence[t.ContainerValue] | t.NormalizedValue | None:
         if isinstance(value, BaseModel):
             return FlextTargetLdapUtilities._coerce_container_value(value.model_dump())
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
         if isinstance(value, list):
-            normalized_list: list[t.ContainerValue] = []
+            normalized_list: Sequence[t.ContainerValue] = []
             for item in value:
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -56,7 +56,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         normalized_list.append(coerced_item)
             return normalized_list
         if isinstance(value, Mapping):
-            normalized_dict: dict[str, t.NormalizedValue | BaseModel] = {}
+            normalized_dict: Mapping[str, t.NormalizedValue | BaseModel] = {}
             for key, item in value.items():
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -220,7 +220,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         def convert_record_to_ldap_attributes(
             record: Mapping[str, t.ConfigMap],
             attribute_mapping: Mapping[str, str] | None = None,
-        ) -> r[Mapping[str, list[bytes]]]:
+        ) -> r[Mapping[str, Sequence[bytes]]]:
             """Convert Singer record to LDAP attributes format.
 
             Args:
@@ -228,13 +228,13 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             attribute_mapping: Optional mapping from record keys to LDAP attributes
 
             Returns:
-            r[Mapping[str, list[bytes]]]: LDAP attributes or error
+            r[Mapping[str, Sequence[bytes]]]: LDAP attributes or error
 
             """
             if not record:
-                return r[Mapping[str, list[bytes]]].fail("Record cannot be empty")
+                return r[Mapping[str, Sequence[bytes]]].fail("Record cannot be empty")
             try:
-                ldap_attrs: dict[str, list[bytes]] = {}
+                ldap_attrs: Mapping[str, Sequence[bytes]] = {}
                 mapping = attribute_mapping or {}
                 for key, value in record.items():
                     if value is None:
@@ -250,7 +250,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                             ldap_attrs[ldap_attr] = ldap_values
                     else:
                         ldap_attrs[ldap_attr] = [str(value).encode("utf-8")]
-                return r[Mapping[str, list[bytes]]].ok(ldap_attrs)
+                return r[Mapping[str, Sequence[bytes]]].ok(ldap_attrs)
             except (
                 ValueError,
                 TypeError,
@@ -260,15 +260,15 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 RuntimeError,
                 ImportError,
             ) as e:
-                return r[Mapping[str, list[bytes]]].fail(
+                return r[Mapping[str, Sequence[bytes]]].fail(
                     f"Error converting to LDAP attributes: {e}",
                 )
 
         @staticmethod
         def extract_object_classes(
             record: Mapping[str, t.ConfigMap],
-            default_object_classes: list[str] | None = None,
-        ) -> list[str]:
+            default_object_classes: Sequence[str] | None = None,
+        ) -> Sequence[str]:
             """Extract t.NormalizedValue classes for LDAP entry.
 
             Args:
@@ -276,7 +276,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             default_object_classes: Default t.NormalizedValue classes if not in record
 
             Returns:
-            list[str]: List of t.NormalizedValue classes
+            Sequence[str]: List of t.NormalizedValue classes
 
             """
             object_classes = record.get("objectClass") or record.get("objectclass")
@@ -396,7 +396,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             if not stream_name or not schema:
                 return r[bool].fail("Stream name and schema are required")
             raw_props = schema.get("properties", {})
-            properties: dict[str, t.NormalizedValue | BaseModel] = {}
+            properties: Mapping[str, t.NormalizedValue | BaseModel] = {}
             if u.is_dict_like(raw_props):
                 for k, v in raw_props.items():
                     coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
@@ -571,14 +571,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             Mapping[str, t.ContainerValue]: Processing state
 
             """
-            state: dict[str, t.ContainerValue] = {
+            state: Mapping[str, t.ContainerValue] = {
                 "stream_name": stream_name,
                 "records_processed": records_processed,
                 "last_updated": datetime.now(UTC).isoformat(),
                 "target_type": "ldap",
             }
             if last_processed_record:
-                checkpoint: dict[str, t.ContainerValue] = {}
+                checkpoint: Mapping[str, t.ContainerValue] = {}
                 for field_key in ("id", "dn", "_timestamp"):
                     field_val = last_processed_record.get(field_key)
                     if field_val is not None:
@@ -607,7 +607,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             bookmarks = state.get("bookmarks")
             if not isinstance(bookmarks, Mapping):
                 return {}
-            bookmarks_map: dict[str, t.ContainerValue] = {}
+            bookmarks_map: Mapping[str, t.ContainerValue] = {}
             for k, v in bookmarks.items():
                 coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
                 if coerced_value is not None and isinstance(
@@ -616,7 +616,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     bookmarks_map[str(k)] = coerced_value
             stream_state_data = bookmarks_map.get(stream_name)
             if isinstance(stream_state_data, Mapping):
-                stream_state: dict[str, t.ContainerValue] = {}
+                stream_state: Mapping[str, t.ContainerValue] = {}
                 for k, v in stream_state_data.items():
                     if isinstance(v, (str, int, float, bool)):
                         stream_state[str(k)] = v
@@ -640,13 +640,13 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             Mapping[str, t.Scalar]: Updated state
 
             """
-            state_dict: dict[str, t.ContainerValue] = {
+            state_dict: Mapping[str, t.ContainerValue] = {
                 sk: sv
                 for sk, sv in state.items()
                 if isinstance(sv, (str, int, float, bool))
             }
             bookmarks_val = state.get("bookmarks")
-            bookmarks_dict: dict[str, t.ContainerValue] = {}
+            bookmarks_dict: Mapping[str, t.ContainerValue] = {}
             if isinstance(bookmarks_val, Mapping):
                 for k, v in bookmarks_val.items():
                     if isinstance(v, (str, int, float, bool)):
@@ -693,7 +693,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     batch_count = batch_count_val
                 case _:
                     batch_count = 0
-            updated_stream_state: dict[str, t.ContainerValue] = {
+            updated_stream_state: Mapping[str, t.ContainerValue] = {
                 **stream_state,
                 "records_processed": new_count,
                 "last_updated": datetime.now(UTC).isoformat(),
@@ -720,7 +720,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         cls,
         record: Mapping[str, t.ConfigMap],
         attribute_mapping: Mapping[str, str] | None = None,
-    ) -> r[Mapping[str, list[bytes]]]:
+    ) -> r[Mapping[str, Sequence[bytes]]]:
         """Proxy method for LdapDataProcessing.convert_record_to_ldap_attributes()."""
         return cls.LdapDataProcessing.convert_record_to_ldap_attributes(
             record,
@@ -838,7 +838,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             raw_attr_map = config.get("attribute_mapping")
             if u.is_dict_like(raw_attr_map):
-                extracted_mapping: dict[str, str] = {}
+                extracted_mapping: Mapping[str, str] = {}
                 for k, v in raw_attr_map.items():
                     extracted_mapping[str(k)] = str(v)
                 return extracted_mapping
@@ -847,7 +847,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         @staticmethod
         def extract_object_classes(
             config: Mapping[str, t.ConfigMap],
-        ) -> list[str]:
+        ) -> Sequence[str]:
             """Extract t.NormalizedValue classes from configuration dict.
 
             Business Rule: Object Classes Configuration
@@ -864,7 +864,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 config: Configuration dictionary containing object_classes
 
             Returns:
-                list[str]: List of t.NormalizedValue classes or ["top"] default
+                Sequence[str]: List of t.NormalizedValue classes or ["top"] default
 
             """
             raw_object_classes = config.get("object_classes")

@@ -8,6 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import io
+from collections.abc import Mapping
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
@@ -33,7 +34,7 @@ class TestTargetLDAPIntegration:
 
     @pytest.fixture
     def config_file(
-        self, tmp_path: Path, mock_ldap_config: dict[str, t.NormalizedValue]
+        self, tmp_path: Path, mock_ldap_config: Mapping[str, t.NormalizedValue]
     ) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
@@ -174,7 +175,7 @@ class TestTargetLDAPIntegration:
         self,
         mock_api: MagicMock,
         tmp_path: Path,
-        mock_ldap_config: dict[str, t.NormalizedValue],
+        mock_ldap_config: Mapping[str, t.NormalizedValue],
     ) -> None:
         """Test DN template usage for record processing."""
         mock_ldap_config["dn_templates"] = {

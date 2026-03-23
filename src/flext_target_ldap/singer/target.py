@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, p, r, t
@@ -24,7 +25,7 @@ class SingerTargetLDAP:
     @override
     def __init__(
         self,
-        config: dict[str, t.ContainerValue] | None = None,
+        config: Mapping[str, t.ContainerValue] | None = None,
     ) -> None:
         """Initialize Singer LDAP target.
 
@@ -35,13 +36,13 @@ class SingerTargetLDAP:
         t.NormalizedValue: Description of return value.
 
         """
-        self.config: dict[str, t.ContainerValue] = config or {}
+        self.config: Mapping[str, t.ContainerValue] = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, t.ContainerValue]],
-    ) -> r[dict[str, int | str]]:
+        messages: Sequence[Mapping[str, t.ContainerValue]],
+    ) -> r[Mapping[str, int | str]]:
         """Process Singer messages for LDAP target.
 
         Args:
@@ -56,7 +57,7 @@ class SingerTargetLDAP:
             processed_count = 0
             for _message in messages:
                 processed_count += 1
-            result: dict[str, int | str] = {
+            result: Mapping[str, int | str] = {
                 "processed_messages": processed_count,
                 "status": "completed",
             }
@@ -64,7 +65,7 @@ class SingerTargetLDAP:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return r[dict[str, int | str]].ok(result)
+            return r[Mapping[str, int | str]].ok(result)
         except (
             ValueError,
             TypeError,
@@ -75,7 +76,7 @@ class SingerTargetLDAP:
             ImportError,
         ) as e:
             logger.exception("Singer message processing failed")
-            return r[dict[str, int | str]].fail(
+            return r[Mapping[str, int | str]].fail(
                 f"Message processing failed: {e}",
             )
 
@@ -104,4 +105,4 @@ class SingerTargetLDAP:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: list[str] = ["SingerTargetLDAP"]
+__all__: Sequence[str] = ["SingerTargetLDAP"]

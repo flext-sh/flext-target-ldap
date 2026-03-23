@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+
 from flext_core import t
 
 from flext_target_ldap.transformation import (
@@ -40,7 +42,7 @@ class TestDataTransformationEngine:
             replacement="dc=network,dc=invaliddc",
         )
         engine = DataTransformationEngine([rule])
-        entry: dict[str, t.ContainerValue] = {
+        entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "person"],
             "cn": "testuser",
@@ -66,7 +68,7 @@ class TestDataTransformationEngine:
             replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
-        entry: dict[str, t.ContainerValue] = {
+        entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser", "top"],
             "cn": "testuser",
@@ -93,7 +95,7 @@ class TestDataTransformationEngine:
             ),
         ]
         engine = DataTransformationEngine(rules)
-        entry: dict[str, t.ContainerValue] = {
+        entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser"],
             "description": "Oracle User Account",
@@ -119,7 +121,7 @@ class TestDataTransformationEngine:
             name="clean_empty_attributes", pattern="empty", replacement=""
         )
         engine = DataTransformationEngine([rule])
-        entry: dict[str, t.ContainerValue] = {
+        entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["person"],
             "cn": "testuser",
@@ -140,7 +142,7 @@ class TestDataTransformationEngine:
             name="test_rule", pattern="orclUser", replacement="inetOrgPerson"
         )
         engine = DataTransformationEngine([rule])
-        entry: dict[str, t.ContainerValue] = {
+        entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser"],
             "cn": "testuser",
@@ -162,7 +164,7 @@ class TestDataTransformationEngine:
             replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
-        entries: list[dict[str, t.ContainerValue]] = [
+        entries: Sequence[Mapping[str, t.ContainerValue]] = [
             {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
             {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
             {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
@@ -186,7 +188,7 @@ class TestMigrationValidator:
     def test_validate_valid_entry(self) -> None:
         """Test validate valid entry function."""
         validator = MigrationValidator()
-        data: dict[str, t.ContainerValue] = {
+        data: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "cn": "testuser",
             "sn": "User",
@@ -309,7 +311,7 @@ class TestIntegratedTransformation:
         ]
         transformation_engine = DataTransformationEngine(rules)
         validator = MigrationValidator(strict_mode=False)
-        oracle_entry: dict[str, t.ContainerValue] = {
+        oracle_entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=john.doe,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "top"],
             "orclSamAccountName": "john.doe",
@@ -336,7 +338,7 @@ class TestIntegratedTransformation:
             k: v for k, v in transformed_entry.items() if k not in {"dn", "objectClass"}
         }
         raw_classes = transformed_entry["objectClass"]
-        obj_classes: list[str] = (
+        obj_classes: Sequence[str] = (
             [str(c) for c in raw_classes]
             if isinstance(raw_classes, list)
             else [str(raw_classes)]
@@ -351,7 +353,7 @@ class TestIntegratedTransformation:
             name="general_transform", pattern="orclUser", replacement="inetOrgPerson"
         )
         engine = DataTransformationEngine([rule])
-        test_entries: list[dict[str, t.ContainerValue]] = [
+        test_entries: Sequence[Mapping[str, t.ContainerValue]] = [
             {
                 "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",
                 "objectClass": ["orclContext"],
