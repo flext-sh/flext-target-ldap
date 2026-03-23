@@ -635,15 +635,17 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Singer schema definition mapping properties to LDAP attributes."""
 
             properties: Annotated[
-                MutableMapping[str, FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition],
+                MutableMapping[
+                    str, FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition
+                ],
                 Field(default_factory=dict),
             ]
 
         class SingerLDAPCatalogEntry(BaseModel):
             """Singer LDAP catalog entry with stream metadata."""
 
-            tap_stream_id: Annotated[str, Field(min_length=1)]
-            stream: Annotated[str, Field(min_length=1)]
+            tap_stream_id: t.NonEmptyStr
+            stream: t.NonEmptyStr
             stream_schema: Annotated[
                 MutableMapping[str, t.ContainerValue],
                 Field(default_factory=dict),
@@ -652,8 +654,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class TransformationRule(BaseModel):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
-            name: Annotated[str, Field(min_length=1)]
-            pattern: Annotated[str, Field(min_length=1)]
+            name: t.NonEmptyStr
+            pattern: t.NonEmptyStr
             replacement: str
             enabled: bool = True
 
