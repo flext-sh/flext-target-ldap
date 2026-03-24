@@ -209,7 +209,7 @@ class FlextTargetLdapLdapClient:
                 yield connection
             finally:
                 with suppress(Exception):
-                    connection.unbind()
+                    _unbind_ok: bool = connection.unbind()
 
         return connection_context()
 
@@ -243,7 +243,7 @@ class FlextTargetLdapLdapClient:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
-                conn.modify(dn, dict(changes))
+                _: bool = conn.modify(dn, dict(changes))
                 return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to modify entry %s", dn)
@@ -265,8 +265,8 @@ class FlextTargetLdapLdapClient:
                 search_filter,
             )
             with self.get_connection() as conn:
-                conn.search(base_dn, search_filter, attributes=attributes or [])
-                raw_entries = conn.entries
+                _: bool = conn.search(base_dn, search_filter, attributes=attributes or [])
+                raw_entries: Sequence[FlextTargetLdapSearchEntry] = conn.entries
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
                 for raw in raw_entries:
                     if not isinstance(raw, FlextTargetLdapSearchEntry):
