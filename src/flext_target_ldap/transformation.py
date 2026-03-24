@@ -151,7 +151,3 @@ class FlextTargetLdapMigrationValidator:
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
-
-
-DataTransformationEngine = FlextTargetLdapTransformationEngine
-MigrationValidator = FlextTargetLdapMigrationValidator

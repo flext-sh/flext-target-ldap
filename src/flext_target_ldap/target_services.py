@@ -18,8 +18,10 @@ from flext_target_ldap import (
 from flext_target_ldap.models import m
 from flext_target_ldap.protocols import p
 
-LdapTargetService = p.TargetLdap.LdapTargetService
-LdapTransformationServiceProtocol = p.TargetLdap.LdapTransformationServiceProtocol
+FlextTargetLdapTargetService = p.TargetLdap.LdapTargetService
+FlextTargetLdapTransformationServiceProtocol = (
+    p.TargetLdap.LdapTransformationServiceProtocol
+)
 
 
 class FlextTargetLdapConnectionService:
@@ -261,10 +263,10 @@ class FlextTargetLdapApiService:
     def create_ldap_target(
         self,
         config: Mapping[str, t.ContainerValue],
-    ) -> r[target_client_module.TargetLdap]:
+    ) -> r[target_client_module.FlextTargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(
-            lambda: target_client_module.TargetLdap(config=dict(config)),
+            lambda: target_client_module.FlextTargetLdap(config=dict(config)),
             catch=(RuntimeError, ValueError, TypeError),
         ).map_error(lambda exc: str(exc))
 
@@ -309,7 +311,7 @@ class FlextTargetLdapApiService:
         return FlextTargetLdapConnectionService(validated.value).test_connection()
 
 
-# Aliases for __init__.py exports
+# Short aliases for __init__.py imports
 LdapConnectionService = FlextTargetLdapConnectionService
 LdapTargetApiService = FlextTargetLdapApiService
 LdapTargetOrchestrator = FlextTargetLdapOrchestrator

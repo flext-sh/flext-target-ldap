@@ -68,7 +68,9 @@ class FlextTargetLdapDataTransformer:
     """Transform Singer records into LDAP-oriented records."""
 
     @override
-    def __init__(self, type_converter: FlextTargetLdapTypeConverter | None = None) -> None:
+    def __init__(
+        self, type_converter: FlextTargetLdapTypeConverter | None = None
+    ) -> None:
         """Initialize LDAP data transformer."""
         self.type_converter = type_converter or FlextTargetLdapTypeConverter()
 

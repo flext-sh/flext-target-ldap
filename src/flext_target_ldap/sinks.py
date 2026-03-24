@@ -135,7 +135,9 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         self._target = target
         self.client: LDAPClient | None = None
         self._client: LDAPClient | None = None
-        self._processing_result: FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult()
+        self._processing_result: FlextTargetLdapProcessingResult = (
+            FlextTargetLdapProcessingResult()
+        )
 
     def build_attributes(
         self,

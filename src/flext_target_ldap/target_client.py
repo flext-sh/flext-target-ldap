@@ -27,15 +27,17 @@ from flext_ldap import (
 from flext_ldif import FlextLdif
 
 from flext_target_ldap import (
-    FlextTargetFlextTargetLdapProcessingCounters,
     FlextTargetLdapSettings,
-    FlextTargetLdapFlextTargetLdapSink,
-    FlextTargetLdapFlextTargetLdapTarget,
     build_singer_catalog,
     c,
     p,
     r,
     t,
+)
+from flext_target_ldap.processing_result import FlextTargetLdapProcessingCounters
+from flext_target_ldap.sinks import (
+    FlextTargetLdapSink,
+    FlextTargetLdapTarget,
 )
 
 logger = FlextLogger(__name__)
@@ -598,7 +600,9 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         super().__init__(target, stream_name, schema, key_properties)
         self._target = target
         self.client: FlextTargetLdapClient | None = None
-        self._processing_result: FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult()
+        self._processing_result: FlextTargetLdapProcessingResult = (
+            FlextTargetLdapProcessingResult()
+        )
 
     def get_processing_result(self) -> FlextTargetLdapProcessingResult:
         """Get processing results."""
@@ -1015,12 +1019,12 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Run CLI."""
         logger.info("CLI execution from target_client.py")
 
-    def get_sink_class(self, stream_name: str) -> type[Sink]:
+    def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
-            "users": LdapUsersFlextTargetLdapSink,
-            "groups": LdapGroupsFlextTargetLdapSink,
-            "organizational_units": LdapOrganizationalUnitsFlextTargetLdapSink,
+            "users": FlextTargetLdapUsersSink,
+            "groups": FlextTargetLdapGroupsSink,
+            "organizational_units": FlextTargetLdapOrganizationalUnitsSink,
         }
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
@@ -1032,7 +1036,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
         return sink_class
 
-    def get_sink(self, stream_name: str) -> Sink:
+    def get_sink(self, stream_name: str) -> FlextTargetLdapSink:
         """Get a sink instance for the stream, processing configuration as needed."""
         dn_templates = self.config.get("dn_templates", {})
         if isinstance(dn_templates, dict) and stream_name in dn_templates:
@@ -1135,13 +1139,6 @@ __all__ = [
     "FlextTargetLdapOrganizationalUnitsSink",
     "FlextTargetLdapProcessingResult",
     "FlextTargetLdapSearchEntry",
-    "FlextTargetLdapUsersSink",
-    "FlextTargetLdapBaseSink",
-    "FlextTargetLdapGroupsSink",
-    "FlextTargetLdapOrganizationalUnitsSink",
-    "FlextTargetLdapProcessingResult",
-    "FlextTargetLdapSearchEntry",
-    "FlextTargetLdapClient",
     "FlextTargetLdapUsersSink",
     "TargetLdap",
     "main",

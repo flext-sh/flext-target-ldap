@@ -290,7 +290,9 @@ class FlextTargetLdapLdapClient:
                         ):
                             val = raw.attributes.get(name_str)
                             attrs[name_str] = [str(val)] if val is not None else []
-                    entries.append(FlextTargetLdapSearchEntry(dn=str(dn), attributes=attrs))
+                    entries.append(
+                        FlextTargetLdapSearchEntry(dn=str(dn), attributes=attrs)
+                    )
                 return r[Sequence[FlextTargetLdapSearchEntry]].ok(entries)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
@@ -398,12 +400,7 @@ class FlextTargetLdapLdapClient:
             return ConnectionWrapper("test_session")
 
 
-LDAPClient = FlextTargetLdapLdapClient
-LDAPSearchEntry = FlextTargetLdapSearchEntry
-
 __all__: t.StrSequence = [
     "FlextTargetLdapLdapClient",
     "FlextTargetLdapSearchEntry",
-    "LDAPClient",
-    "LDAPSearchEntry",
 ]
