@@ -273,7 +273,9 @@ def _process_record_message(
 def _target_ldap_flext_cli(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
-        cfg: Mapping[str, t.ContainerValue] = _load_config_from_file(config) if config else {}
+        cfg: Mapping[str, t.ContainerValue] = (
+            _load_config_from_file(config) if config else {}
+        )
         current_stream: str | None = None
         api = _get_ldap_api()
         seen_dns: set[str] = set()

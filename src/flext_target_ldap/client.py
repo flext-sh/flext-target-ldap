@@ -265,7 +265,9 @@ class FlextTargetLdapLdapClient:
                 search_filter,
             )
             with self.get_connection() as conn:
-                _: bool = conn.search(base_dn, search_filter, attributes=attributes or [])
+                _: bool = conn.search(
+                    base_dn, search_filter, attributes=attributes or []
+                )
                 raw_entries: Sequence[FlextTargetLdapSearchEntry] = conn.entries
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
                 for raw in raw_entries:

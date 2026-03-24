@@ -889,7 +889,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return default
 
         @staticmethod
-        def to_str(value: t.ContainerValue | t.ConfigMap | None, default: str = "") -> str:
+        def to_str(
+            value: t.ContainerValue | t.ConfigMap | None, default: str = ""
+        ) -> str:
             """Convert value to str with safe defaults.
 
             Business Rule: String Configuration Conversion
