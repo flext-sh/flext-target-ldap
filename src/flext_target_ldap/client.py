@@ -58,7 +58,7 @@ class LDAPClient:
     @override
     def __init__(
         self,
-        config: m.Ldap.ConnectionConfig | Mapping[str, t.ContainerValue],
+        config: m.Ldap.ConnectionConfig | t.ContainerValueMapping,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, m.Ldap.ConnectionConfig):

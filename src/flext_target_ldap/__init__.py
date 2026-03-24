@@ -120,8 +120,6 @@ if TYPE_CHECKING:
     from flext_target_ldap.transformation import (
         DataTransformationEngine,
         MigrationValidator,
-        TransformationResult,
-        TransformationRule,
         logger,
     )
     from flext_target_ldap.typings import (
@@ -291,11 +289,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     "Target": ("flext_target_ldap.sinks", "Target"),
     "TargetLDAP": ("flext_target_ldap.target", "TargetLDAP"),
     "TargetLdap": ("flext_target_ldap.target_client", "TargetLdap"),
-    "TransformationResult": (
-        "flext_target_ldap.transformation",
-        "TransformationResult",
-    ),
-    "TransformationRule": ("flext_target_ldap.transformation", "TransformationRule"),
     "UsersSink": ("flext_target_ldap.sinks", "UsersSink"),
     "__all__": ("flext_target_ldap.__version__", "__all__"),
     "__author__": ("flext_target_ldap.__version__", "__author__"),
@@ -407,8 +400,6 @@ __all__ = [
     "Target",
     "TargetLDAP",
     "TargetLdap",
-    "TransformationResult",
-    "TransformationRule",
     "UsersSink",
     "__all__",
     "__author__",

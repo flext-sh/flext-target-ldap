@@ -14,11 +14,7 @@ from flext_ldap import FlextLdapProtocols
 
 if TYPE_CHECKING:
     from flext_target_ldap import target_client as target_client_module
-    from flext_target_ldap.target_models import (
-        LdapAttributeMappingModel,
-        LdapEntryModel,
-        LdapTransformationResultModel,
-    )
+    from flext_target_ldap.models import m as _m
 
 
 class FlextTargetLdapProtocols(FlextLdapProtocols):
@@ -141,16 +137,16 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             def transform_record(
                 self,
                 record: Mapping[str, t.ContainerValue],
-                mappings: Sequence[LdapAttributeMappingModel],
+                mappings: Sequence[_m.TargetLdap.AttributeMapping],
                 object_classes: Sequence[str],
                 base_dn: str,
-            ) -> FlextLdapProtocols.Result[LdapTransformationResultModel]:
+            ) -> FlextLdapProtocols.Result[_m.TargetLdap.TransformationResult]:
                 """Transform a record for LDAP storage."""
                 ...
 
             def validate_entry(
                 self,
-                entry: LdapEntryModel,
+                entry: _m.TargetLdap.Entry,
             ) -> FlextLdapProtocols.Result[bool]:
                 """Validate an LDAP entry against business rules."""
                 ...
@@ -160,7 +156,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Target(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]],
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
                 Protocol,
             ):
                 """Protocol for LDAP target operations."""
@@ -174,7 +170,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Transformation(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]],
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
                 Protocol,
             ):
                 """Protocol for Singer to LDAP transformation."""
@@ -182,13 +178,13 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
                 def transform_to_ldap(
                     self,
                     record: Mapping[str, t.ContainerValue],
-                ) -> FlextLdapProtocols.Result[Mapping[str, t.ContainerValue]]:
+                ) -> FlextLdapProtocols.Result[t.ContainerValueMapping]:
                     """Transform record to LDAP format."""
                     ...
 
             @runtime_checkable
             class Orchestration(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
             ):
                 """Protocol for LDAP loading orchestration."""
 
@@ -201,20 +197,20 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Connection(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
             ):
                 """Protocol for LDAP connection management."""
 
                 def connect(
                     self,
                     config: Mapping[str, t.ContainerValue],
-                ) -> FlextLdapProtocols.Result[Mapping[str, t.ContainerValue]]:
+                ) -> FlextLdapProtocols.Result[t.ContainerValueMapping]:
                     """Connect to LDAP server."""
                     ...
 
             @runtime_checkable
             class Singer(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]],
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
                 Protocol,
             ):
                 """Protocol for Singer message handling."""
@@ -228,7 +224,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Performance(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
             ):
                 """Protocol for LDAP loading performance."""
 
@@ -241,7 +237,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Security(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]],
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
                 Protocol,
             ):
                 """Protocol for LDAP security operations."""
@@ -255,7 +251,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Monitoring(
-                FlextLdapProtocols.Service[Mapping[str, t.ContainerValue]], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
             ):
                 """Protocol for LDAP loading monitoring."""
 

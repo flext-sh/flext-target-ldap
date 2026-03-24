@@ -141,7 +141,7 @@ class LDAPBaseSink(Sink):
         _record: Mapping[str, t.ContainerValue],
     ) -> r[Mapping[str, t.ContainerValue]]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return r[Mapping[str, t.ContainerValue]].fail(
+        return r[t.ContainerValueMapping].fail(
             "build_attributes must be implemented in subclass",
         )
 
@@ -299,7 +299,7 @@ class UsersSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             else:
                 attrs[target_key] = [str(v)]
-        return r[Mapping[str, t.ContainerValue]].ok(attrs)
+        return r[t.ContainerValueMapping].ok(attrs)
 
     @override
     def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
@@ -458,7 +458,7 @@ class GroupsSink(LDAPBaseSink):
                 attrs[target_key] = [str(i) for i in v]
             else:
                 attrs[target_key] = [str(v)]
-        return r[Mapping[str, t.ContainerValue]].ok(attrs)
+        return r[t.ContainerValueMapping].ok(attrs)
 
     @override
     def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:

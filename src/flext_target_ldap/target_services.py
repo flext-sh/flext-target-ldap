@@ -59,26 +59,26 @@ class LdapTransformationService:
 
     def get_default_mappings(
         self, entry_type: str
-    ) -> Sequence[LdapAttributeMappingModel]:
+    ) -> Sequence[m.TargetLdap.AttributeMapping]:
         """Return default attribute mappings for the given entry type (e.g. users, groups)."""
         if entry_type == "users":
             return [
-                LdapAttributeMappingModel.model_validate({
+                m.TargetLdap.AttributeMapping.model_validate({
                     "singer_field_name": "username",
                     "ldap_attribute_name": "uid",
                     "is_required": True,
                 }),
-                LdapAttributeMappingModel.model_validate({
+                m.TargetLdap.AttributeMapping.model_validate({
                     "singer_field_name": "full_name",
                     "ldap_attribute_name": "cn",
                     "is_required": True,
                 }),
-                LdapAttributeMappingModel.model_validate({
+                m.TargetLdap.AttributeMapping.model_validate({
                     "singer_field_name": "last_name",
                     "ldap_attribute_name": "sn",
                     "is_required": True,
                 }),
-                LdapAttributeMappingModel.model_validate({
+                m.TargetLdap.AttributeMapping.model_validate({
                     "singer_field_name": "email",
                     "ldap_attribute_name": "mail",
                     "is_required": False,
@@ -86,19 +86,19 @@ class LdapTransformationService:
             ]
         if entry_type == "groups":
             return [
-                LdapAttributeMappingModel.model_validate({
+                m.TargetLdap.AttributeMapping.model_validate({
                     "singer_field_name": "name",
                     "ldap_attribute_name": "cn",
                     "is_required": True,
                 }),
-                LdapAttributeMappingModel.model_validate({
+                m.TargetLdap.AttributeMapping.model_validate({
                     "singer_field_name": "description",
                     "ldap_attribute_name": "description",
                     "is_required": False,
                 }),
             ]
         return [
-            LdapAttributeMappingModel.model_validate({
+            m.TargetLdap.AttributeMapping.model_validate({
                 "singer_field_name": "name",
                 "ldap_attribute_name": "cn",
                 "is_required": True,
@@ -108,14 +108,14 @@ class LdapTransformationService:
     def transform_record(
         self,
         record: Mapping[str, t.ContainerValue],
-        mappings: Sequence[LdapAttributeMappingModel],
+        mappings: Sequence[m.TargetLdap.AttributeMapping],
         object_classes: Sequence[str],
         base_dn: str,
-    ) -> r[LdapTransformationResultModel]:
+    ) -> r[m.TargetLdap.TransformationResult]:
         """Transform a single record into an LDAP entry using mappings."""
         mapping_errors: Sequence[str] = []
         ldap_attributes: Mapping[str, Sequence[str]] = {}
-        applied_mappings: Sequence[LdapAttributeMappingModel] = []
+        applied_mappings: Sequence[m.TargetLdap.AttributeMapping] = []
         for mapping in mappings:
             value = record.get(mapping.singer_field_name)
             if value is None and mapping.default_value is not None:
@@ -144,7 +144,7 @@ class LdapTransformationService:
             ),
         )
         dn = f"cn={entry_name},{base_dn}"
-        entry = LdapEntryModel.model_validate({
+        entry = m.TargetLdap.Entry.model_validate({
             "distinguished_name": dn,
             "object_classes": object_classes,
             "attributes": ldap_attributes,
@@ -153,7 +153,7 @@ class LdapTransformationService:
         original_record_json: Mapping[str, t.Scalar] = {
             str(key): str(value) for key, value in record.items()
         }
-        result = LdapTransformationResultModel.model_validate({
+        result = m.TargetLdap.TransformationResult.model_validate({
             "original_record": original_record_json,
             "transformed_entry": entry,
             "applied_mappings": applied_mappings,
@@ -161,9 +161,9 @@ class LdapTransformationService:
             "processing_time_ms": 0,
             "transformation_timestamp": datetime.now(UTC),
         })
-        return r[LdapTransformationResultModel].ok(result)
+        return r[m.TargetLdap.TransformationResult].ok(result)
 
-    def validate_entry(self, entry: LdapEntryModel) -> r[bool]:
+    def validate_entry(self, entry: m.TargetLdap.Entry) -> r[bool]:
         """Run business-rule validation on an LDAP entry."""
         return entry.validate_business_rules()
 
@@ -210,7 +210,7 @@ class LdapTargetOrchestrator:
         """Load records using default mappings and return a summary result."""
         working = config or self._typed_config
         if working is None:
-            return r[Mapping[str, t.ContainerValue]].fail(
+            return r[t.ContainerValueMapping].fail(
                 "Configuration is required",
             )
         transformation = LdapTransformationService(working)
@@ -237,7 +237,7 @@ class LdapTargetOrchestrator:
             "transformation_errors": errors,
             "status": "completed" if not errors else "completed_with_errors",
         }
-        return r[Mapping[str, t.ContainerValue]].ok(result)
+        return r[t.ContainerValueMapping].ok(result)
 
     def validate_target_configuration(
         self,

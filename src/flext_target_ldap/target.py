@@ -182,7 +182,7 @@ if __name__ == "__main__":
 def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
     """Load configuration from JSON file."""
     config_adapter: TypeAdapter[Mapping[str, t.ContainerValue]] = TypeAdapter(
-        Mapping[str, t.ContainerValue],
+        t.ContainerValueMapping,
     )
     try:
         content = Path(config_path).read_text(encoding="utf-8")
