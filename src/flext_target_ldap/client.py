@@ -169,7 +169,7 @@ class LDAPClient:
                 attributes=["dn"],
             )
             if search_result.is_success:
-                return r[bool].ok(len(search_result.value) > 0)
+                return r[bool].ok(search_result.value)
             return r[bool].ok(value=False)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to check entry existence: %s", dn)

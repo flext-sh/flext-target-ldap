@@ -221,7 +221,7 @@ class TestTargetLDAPIntegration:
             _target_ldap_flext_cli(config=str(config_path))
 
         add_calls = mock_conn.add.call_args_list
-        assert len(add_calls) > 0
+        assert add_calls
         # _construct_dn uses base_dn from config: "dc=test,dc=com"
         # For users stream with uid=testuser: "uid=testuser,dc=test,dc=com"
         actual_dn = add_calls[0][0][0]

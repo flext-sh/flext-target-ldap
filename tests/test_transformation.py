@@ -105,7 +105,7 @@ class TestDataTransformationEngine:
         assert result.is_success
         transform_result = result.value
         assert transform_result is not None
-        assert len(transform_result.applied_rules) > 0
+        assert transform_result.applied_rules
         expected_object_class = ["user"]
         if transform_result.transformed_data["objectClass"] != expected_object_class:
             msg: str = f"Expected {expected_object_class}, got {transform_result.transformed_data['objectClass']}"
@@ -324,7 +324,7 @@ class TestIntegratedTransformation:
         assert transformation_result.is_success
         transform = transformation_result.value
         assert transform is not None
-        assert len(transform.applied_rules) > 0
+        assert transform.applied_rules
         transformed_entry = transform.transformed_data
         if transformed_entry["dn"] != "cn=john.doe,ou=people,dc=network,dc=invaliddc":
             msg: str = f"Expected {'cn=john.doe,ou=people,dc=network,dc=invaliddc'}, got {transformed_entry['dn']}"
