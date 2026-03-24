@@ -31,6 +31,8 @@ if TYPE_CHECKING:
     from flext_target_ldap.client import (
         FlextTargetLdapLdapClient,
         FlextTargetLdapSearchEntry,
+        LDAPClient,
+        LDAPSearchEntry,
     )
     from flext_target_ldap.constants import (
         FlextTargetLdapConstants,
@@ -93,8 +95,10 @@ if TYPE_CHECKING:
         FlextTargetLdapTransformationService,
     )
     from flext_target_ldap.transformation import (
+        DataTransformationEngine,
         FlextTargetLdapMigrationValidator,
         FlextTargetLdapTransformationEngine,
+        MigrationValidator,
         logger,
     )
     from flext_target_ldap.typings import (
@@ -107,6 +111,10 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
+    "DataTransformationEngine": (
+        "flext_target_ldap.transformation",
+        "DataTransformationEngine",
+    ),
     "FlextTargetLdap": ("flext_target_ldap.target", "FlextTargetLdap"),
     "FlextTargetLdapApiService": (
         "flext_target_ldap.target_services",
@@ -242,6 +250,9 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
         "flext_target_ldap.target_exceptions",
         "FlextTargetLdapValidationError",
     ),
+    "LDAPClient": ("flext_target_ldap.client", "LDAPClient"),
+    "LDAPSearchEntry": ("flext_target_ldap.client", "LDAPSearchEntry"),
+    "MigrationValidator": ("flext_target_ldap.transformation", "MigrationValidator"),
     "__all__": ("flext_target_ldap.__version__", "__all__"),
     "__author__": ("flext_target_ldap.__version__", "__author__"),
     "__author_email__": ("flext_target_ldap.__version__", "__author_email__"),
@@ -293,6 +304,7 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
 }
 
 __all__ = [
+    "DataTransformationEngine",
     "FlextTargetLdap",
     "FlextTargetLdapApiService",
     "FlextTargetLdapAuthenticationError",
@@ -332,6 +344,9 @@ __all__ = [
     "FlextTargetLdapUsersSink",
     "FlextTargetLdapUtilities",
     "FlextTargetLdapValidationError",
+    "LDAPClient",
+    "LDAPSearchEntry",
+    "MigrationValidator",
     "__all__",
     "__author__",
     "__author_email__",
