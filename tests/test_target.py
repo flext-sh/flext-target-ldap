@@ -163,9 +163,7 @@ def test_sink_process_record_delegates_to_target_handler() -> None:
             super().__init__({"base_dn": "dc=test,dc=com"})
             self.calls: Sequence[tuple[t.StrMapping, t.StrMapping]] = []
 
-        def process_record(
-            self, record: t.StrMapping, context: t.StrMapping
-        ) -> bool:
+        def process_record(self, record: t.StrMapping, context: t.StrMapping) -> bool:
             self.calls.append((record, context))
             return True
 

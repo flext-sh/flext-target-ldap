@@ -148,8 +148,7 @@ class LDAPSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: SingerSchemaDefinition
-        | Mapping[str, Mapping[str, t.StrMapping | str]],
+        schema: SingerSchemaDefinition | Mapping[str, Mapping[str, t.StrMapping | str]],
         object_class: str = "inetOrgPerson",
     ) -> r[t.StrMapping]:
         """Map Singer schema to LDAP attribute definitions."""
