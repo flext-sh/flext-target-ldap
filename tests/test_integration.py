@@ -8,11 +8,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import io
+import json
+from collections.abc import MutableMapping
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from pydantic import TypeAdapter
 
 from flext_target_ldap.target import _target_ldap_flext_cli
 from tests import t
@@ -36,7 +37,7 @@ class TestTargetLDAPIntegration:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
         config_path.write_text(
-            TypeAdapter(t.NormalizedValue).dump_json(mock_ldap_config).decode("utf-8"),
+            json.dumps(mock_ldap_config),
             encoding="utf-8",
         )
         return config_path
@@ -107,16 +108,13 @@ class TestTargetLDAPIntegration:
         }
         with input_path.open("w", encoding="utf-8") as f:
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
-                + "\n",
+                json.dumps(schema_msg) + "\n",
             )
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(record1).decode("utf-8")
-                + "\n",
+                json.dumps(record1) + "\n",
             )
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(record2).decode("utf-8")
-                + "\n",
+                json.dumps(record2) + "\n",
             )
 
         mock_conn = MagicMock()
@@ -159,12 +157,10 @@ class TestTargetLDAPIntegration:
         }
         with input_path.open("w", encoding="utf-8") as f:
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
-                + "\n",
+                json.dumps(schema_msg) + "\n",
             )
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(delete_record).decode("utf-8")
-                + "\n",
+                json.dumps(delete_record) + "\n",
             )
 
         mock_conn = MagicMock()
@@ -183,7 +179,7 @@ class TestTargetLDAPIntegration:
         self,
         mock_api: MagicMock,
         tmp_path: Path,
-        mock_ldap_config: t.ContainerMapping,
+        mock_ldap_config: MutableMapping[str, t.ContainerValue],
     ) -> None:
         """Test DN template usage for record processing."""
         mock_ldap_config["dn_templates"] = {
@@ -191,7 +187,7 @@ class TestTargetLDAPIntegration:
         }
         config_path = tmp_path / "template_config.json"
         config_path.write_text(
-            TypeAdapter(t.NormalizedValue).dump_json(mock_ldap_config).decode("utf-8"),
+            json.dumps(mock_ldap_config),
             encoding="utf-8",
         )
         input_path = tmp_path / "template_input.jsonl"
@@ -210,11 +206,10 @@ class TestTargetLDAPIntegration:
         }
         with input_path.open("w", encoding="utf-8") as f:
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
-                + "\n",
+                json.dumps(schema_msg) + "\n",
             )
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(record).decode("utf-8") + "\n",
+                json.dumps(record) + "\n",
             )
 
         mock_conn = MagicMock()
@@ -243,7 +238,7 @@ class TestTargetLDAPIntegration:
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
         config_path.write_text(
-            TypeAdapter(t.NormalizedValue).dump_json(bad_config).decode("utf-8"),
+            json.dumps(bad_config),
             encoding="utf-8",
         )
         mock_result = Mock()
@@ -291,10 +286,7 @@ class TestTargetLDAPIntegration:
             },
         ]
         with input_path.open("w", encoding="utf-8") as f:
-            f.writelines(
-                TypeAdapter(t.NormalizedValue).dump_json(msg).decode("utf-8") + "\n"
-                for msg in messages
-            )
+            f.writelines(json.dumps(msg) + "\n" for msg in messages)
 
         mock_conn = MagicMock()
         mock_conn.add.return_value = True

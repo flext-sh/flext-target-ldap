@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -29,7 +29,7 @@ class TestTargetLDAPUnit:
     """Unit tests for TargetLDAP."""
 
     @pytest.fixture
-    def config(self) -> Mapping[str, t.ContainerValue]:
+    def config(self) -> MutableMapping[str, t.ContainerValue]:
         """Create test configuration for LDAP target."""
         return {
             "host": "test.ldap.com",
@@ -84,7 +84,7 @@ class TestTargetLDAPUnit:
 
     def test_dn_template_processing(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: MutableMapping[str, t.ContainerValue],
     ) -> None:
         """Test DN template configuration processing."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
@@ -96,7 +96,7 @@ class TestTargetLDAPUnit:
 
     def test_object_classes_processing(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: MutableMapping[str, t.ContainerValue],
     ) -> None:
         """Test default t.NormalizedValue classes configuration processing."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
@@ -168,7 +168,7 @@ def test_sink_process_record_delegates_to_target_handler() -> None:
     class _ProcessTarget(Target):
         def __init__(self) -> None:
             super().__init__({"base_dn": "dc=test,dc=com"})
-            self.calls: Sequence[tuple[t.StrMapping, t.StrMapping]] = []
+            self.calls: MutableSequence[tuple[t.StrMapping, t.StrMapping]] = []
 
         def process_record(self, record: t.StrMapping, context: t.StrMapping) -> bool:
             self.calls.append((record, context))

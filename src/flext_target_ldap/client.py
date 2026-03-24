@@ -426,7 +426,12 @@ class FlextTargetLdapLdapClient:
             return ConnectionWrapper("test_session")  # type: ignore[return-value]
 
 
+LDAPClient = FlextTargetLdapLdapClient
+LDAPSearchEntry = FlextTargetLdapSearchEntry
+
 __all__: t.StrSequence = [
     "FlextTargetLdapLdapClient",
     "FlextTargetLdapSearchEntry",
+    "LDAPClient",
+    "LDAPSearchEntry",
 ]
