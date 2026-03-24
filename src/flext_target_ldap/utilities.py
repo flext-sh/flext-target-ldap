@@ -19,6 +19,10 @@ from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from flext_target_ldap import c, m, t
 
+_CONFIG_MAP_ADAPTER: TypeAdapter[Mapping[str, t.ConfigMap]] = TypeAdapter(
+    Mapping[str, t.ConfigMap],
+)
+
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     """Single unified utilities class for Singer target LDAP operations.
@@ -88,11 +92,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             if not line or not line.strip():
                 return r[Mapping[str, t.ConfigMap]].fail("Empty input line")
-            message_adapter: TypeAdapter[Mapping[str, t.ConfigMap]] = TypeAdapter(
-                Mapping[str, t.ConfigMap],
-            )
             try:
-                validated = message_adapter.validate_json(line.strip())
+                validated = _CONFIG_MAP_ADAPTER.validate_json(line.strip())
                 if "type" not in validated:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Message missing required 'type' field",
@@ -713,7 +714,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def build_connection_config(
-            config: Mapping[str, t.ConfigMap],
+            config: Mapping[str, t.ContainerValue | t.ConfigMap],
         ) -> m.Ldap.ConnectionConfig:
             """Build LDAP connection configuration from config dict.
 
@@ -759,7 +760,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def extract_attribute_mapping(
-            config: Mapping[str, t.ContainerValue],
+            config: Mapping[str, t.ContainerValue | t.ConfigMap],
         ) -> t.StrMapping:
             """Extract attribute mapping from configuration dict.
 
@@ -791,7 +792,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def extract_object_classes(
-            config: Mapping[str, t.ContainerValue],
+            config: Mapping[str, t.ContainerValue | t.ConfigMap],
         ) -> t.StrSequence:
             """Extract t.NormalizedValue classes from configuration dict.
 
@@ -818,7 +819,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             return ["top"]
 
         @staticmethod
-        def to_bool(value: t.Scalar | t.ConfigMap | None, *, default: bool) -> bool:
+        def to_bool(value: t.ContainerValue | t.ConfigMap | None, *, default: bool) -> bool:
             """Convert value to bool with safe defaults.
 
             Business Rule: Boolean Configuration Conversion
@@ -852,7 +853,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return default
 
         @staticmethod
-        def to_int(value: t.Scalar | t.ConfigMap | None, default: int) -> int:
+        def to_int(value: t.ContainerValue | t.ConfigMap | None, default: int) -> int:
             """Convert value to int with safe defaults.
 
             Business Rule: Safe Type Conversion

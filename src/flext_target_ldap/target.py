@@ -39,6 +39,9 @@ _SINGER_MSG_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
     t.ContainerMapping,
     config=ConfigDict(strict=False),
 )
+_CONTAINER_VALUE_MAP_ADAPTER: TypeAdapter[t.ContainerValueMapping] = TypeAdapter(
+    t.ContainerValueMapping,
+)
 
 
 class _DefaultCliHelper:
@@ -182,12 +185,9 @@ if __name__ == "__main__":
 
 def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
     """Load configuration from JSON file."""
-    config_adapter: TypeAdapter[Mapping[str, t.ContainerValue]] = TypeAdapter(
-        t.ContainerValueMapping,
-    )
     try:
         content = Path(config_path).read_text(encoding="utf-8")
-        return config_adapter.validate_json(content)
+        return _CONTAINER_VALUE_MAP_ADAPTER.validate_json(content)
     except (
         ValueError,
         TypeError,
