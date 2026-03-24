@@ -705,64 +705,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 updated_stream_state,
             )
 
-    @classmethod
-    def build_ldap_dn(
-        cls,
-        record: Mapping[str, t.ConfigMap],
-        dn_template: str,
-        base_dn: str,
-    ) -> r[str]:
-        """Proxy method for LdapDataProcessing.build_ldap_dn()."""
-        return cls.LdapDataProcessing.build_ldap_dn(record, dn_template, base_dn)
-
-    @classmethod
-    def convert_record_to_ldap_attributes(
-        cls,
-        record: Mapping[str, t.ConfigMap],
-        attribute_mapping: Mapping[str, str] | None = None,
-    ) -> r[Mapping[str, Sequence[bytes]]]:
-        """Proxy method for LdapDataProcessing.convert_record_to_ldap_attributes()."""
-        return cls.LdapDataProcessing.convert_record_to_ldap_attributes(
-            record,
-            attribute_mapping,
-        )
-
-    @classmethod
-    def create_processing_state(
-        cls,
-        stream_name: str,
-        records_processed: int,
-        last_processed_record: Mapping[str, t.ConfigMap] | None = None,
-    ) -> Mapping[str, t.ContainerValue]:
-        """Proxy method for StateManagement.create_processing_state()."""
-        return cls.StateManagement.create_processing_state(
-            stream_name,
-            records_processed,
-            last_processed_record,
-        )
-
-    @classmethod
-    def get_target_state(
-        cls,
-        state: Mapping[str, t.ConfigMap],
-        stream_name: str,
-    ) -> Mapping[str, t.ContainerValue]:
-        """Proxy method for StateManagement.get_target_state()."""
-        return cls.StateManagement.get_target_state(state, stream_name)
-
-    @classmethod
-    def parse_singer_message(cls, line: str) -> r[Mapping[str, t.ConfigMap]]:
-        """Proxy method for TargetLdap.parse_singer_message()."""
-        return cls.TargetLdap.parse_singer_message(line)
-
-    @classmethod
-    def validate_ldap_connection_config(
-        cls,
-        config: Mapping[str, t.ConfigMap],
-    ) -> r[Mapping[str, t.ConfigMap]]:
-        """Proxy method for ConfigValidation.validate_ldap_connection_config()."""
-        return cls.ConfigValidation.validate_ldap_connection_config(config)
-
     class TypeConversion:
         """Type conversion utilities for configuration parsing."""
 
