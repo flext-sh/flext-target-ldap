@@ -1118,8 +1118,6 @@ def main() -> None:
     target.cli()
 
 
-TargetLdap = FlextTargetLdap
-
 __all__ = [
     "FlextTargetLdap",
     "FlextTargetLdapBaseSink",
@@ -1129,6 +1127,5 @@ __all__ = [
     "FlextTargetLdapProcessingResult",
     "FlextTargetLdapSearchEntry",
     "FlextTargetLdapUsersSink",
-    "TargetLdap",
     "main",
 ]

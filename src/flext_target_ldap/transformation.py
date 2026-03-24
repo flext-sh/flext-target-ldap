@@ -153,13 +153,7 @@ class FlextTargetLdapMigrationValidator:
         return self.validate(dn, attributes, object_classes)
 
 
-# Backward-compatible aliases
-DataTransformationEngine = FlextTargetLdapTransformationEngine
-MigrationValidator = FlextTargetLdapMigrationValidator
-
 __all__: t.StrSequence = [
-    "DataTransformationEngine",
     "FlextTargetLdapMigrationValidator",
     "FlextTargetLdapTransformationEngine",
-    "MigrationValidator",
 ]

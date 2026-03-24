@@ -400,13 +400,7 @@ class FlextTargetLdapLdapClient:
             return ConnectionWrapper("test_session")
 
 
-# Backward-compatible aliases
-LDAPClient = FlextTargetLdapLdapClient
-LDAPSearchEntry = FlextTargetLdapSearchEntry
-
 __all__: t.StrSequence = [
     "FlextTargetLdapLdapClient",
     "FlextTargetLdapSearchEntry",
-    "LDAPClient",
-    "LDAPSearchEntry",
 ]
