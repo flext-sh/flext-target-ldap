@@ -161,7 +161,7 @@ def create_default_ldap_target_config(
     host: str,
     base_dn: str,
     *,
-    port: int = c.TargetLdap.Connection.DEFAULT_PORT,
+    port: int = c.Ldap.ConnectionDefaults.PORT,
     use_ssl: bool = False,
 ) -> r[FlextTargetLdapSettings]:
     """Create default LDAP target configuration with minimal parameters."""

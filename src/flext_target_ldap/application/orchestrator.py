@@ -21,10 +21,10 @@ logger: p.Logger = FlextLogger(__name__)
 class LDAPTargetOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    config: Mapping[str, str | int | bool]
+    config: Mapping[str, t.Scalar]
 
     @override
-    def __init__(self, config: Mapping[str, str | int | bool] | None = None) -> None:
+    def __init__(self, config: Mapping[str, t.Scalar] | None = None) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:

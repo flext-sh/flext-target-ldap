@@ -27,9 +27,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     domain-specific Singer target functionality with LDAP directory operations.
 
     Constants are accessed via constants module:
-        c.TargetLdap.Connection.DEFAULT_PORT (389)
-        c.TargetLdap.Connection.Ldaps.DEFAULT_PORT (636)
-        c.TargetLdap.Processing.DEFAULT_BATCH_SIZE
+        c.Ldap.ConnectionDefaults.PORT (389)
+        c.TargetLdap.Connection.LDAPS_DEFAULT_PORT (636)
+        c.DEFAULT_BATCH_SIZE
     """
 
     @override
@@ -348,9 +348,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             """
             if record_count <= 0:
-                return c.TargetLdap.Processing.DEFAULT_BATCH_SIZE
+                return c.DEFAULT_BATCH_SIZE
             calculated_size = max(1, record_count // target_batches)
-            return min(calculated_size, c.TargetLdap.Processing.DEFAULT_BATCH_SIZE)
+            return min(calculated_size, c.DEFAULT_BATCH_SIZE)
 
         @staticmethod
         def generate_ldap_stream_metadata(
@@ -536,7 +536,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         )
             batch_size = config.get(
                 "batch_size",
-                c.TargetLdap.Processing.DEFAULT_BATCH_SIZE,
+                c.DEFAULT_BATCH_SIZE,
             )
             match batch_size:
                 case bool():
@@ -726,8 +726,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 "localhost",
             )
             port = FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("port", c.TargetLdap.Connection.DEFAULT_PORT),
-                c.TargetLdap.Connection.DEFAULT_PORT,
+                config.get("port", c.Ldap.ConnectionDefaults.PORT),
+                c.Ldap.ConnectionDefaults.PORT,
             )
             use_ssl = FlextTargetLdapUtilities.TypeConversion.to_bool(
                 config.get("use_ssl", False),

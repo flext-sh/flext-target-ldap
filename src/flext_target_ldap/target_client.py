@@ -250,7 +250,7 @@ class LdapTargetClient:
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
                 host=str(config_map.get("host", "localhost")),
                 port=int(
-                    str(config_map.get("port", c.TargetLdap.Connection.DEFAULT_PORT)),
+                    str(config_map.get("port", c.Ldap.ConnectionDefaults.PORT)),
                 ),
                 use_ssl=bool(config_map.get("use_ssl")),
                 timeout=int(str(config_map.get("timeout", 30))),
@@ -260,7 +260,7 @@ class LdapTargetClient:
         else:
             self.config = FlextLdapModels.Ldap.ConnectionConfig(
                 host="localhost",
-                port=c.TargetLdap.Connection.DEFAULT_PORT,
+                port=c.Ldap.ConnectionDefaults.PORT,
                 use_ssl=False,
                 timeout=30,
             )
@@ -646,14 +646,14 @@ class LdapBaseSink(Sink):
                 "host": self._target.config.get("host", c.DEFAULT_HOST),
                 "port": self._target.config.get(
                     "port",
-                    c.TargetLdap.Connection.DEFAULT_PORT,
+                    c.Ldap.ConnectionDefaults.PORT,
                 ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),
                 "password": self._target.config.get("password", ""),
                 "timeout": self._target.config.get(
                     "timeout",
-                    c.TargetLdap.Connection.DEFAULT_TIMEOUT,
+                    c.Ldap.ConnectionDefaults.TIMEOUT,
                 ),
             }
             self.client = LdapTargetClient(connection_config)
@@ -1069,19 +1069,19 @@ class TargetLdap(Target):
         if not base_dn:
             msg = "LDAP base DN is required"
             raise ValueError(msg)
-        port_obj = self.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT)
+        port_obj = self.config.get("port", c.Ldap.ConnectionDefaults.PORT)
         match port_obj:
             case bool():
-                port = c.TargetLdap.Connection.DEFAULT_PORT
+                port = c.Ldap.ConnectionDefaults.PORT
             case int():
                 port = port_obj
             case str():
                 try:
                     port = int(port_obj)
                 except ValueError:
-                    port = c.TargetLdap.Connection.DEFAULT_PORT
+                    port = c.Ldap.ConnectionDefaults.PORT
             case _:
-                port = c.TargetLdap.Connection.DEFAULT_PORT
+                port = c.Ldap.ConnectionDefaults.PORT
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)

@@ -25,12 +25,12 @@ class FlextTargetLdapSettings(m.Entity):
     """LDAP target configuration with connection and operation settings."""
 
     connection: m.Ldap.ConnectionConfig
-    base_dn: str
+    base_dn: t.NonEmptyStr
     search_filter: str = "(objectClass=*)"
     search_scope: str = "SUBTREE"
-    connect_timeout: int = c.DEFAULT_TIMEOUT_SECONDS // 3
-    receive_timeout: int = c.DEFAULT_TIMEOUT_SECONDS
-    batch_size: int = c.DEFAULT_SIZE
+    connect_timeout: t.PositiveInt = c.DEFAULT_TIMEOUT_SECONDS // 3
+    receive_timeout: t.PositiveInt = c.DEFAULT_TIMEOUT_SECONDS
+    batch_size: t.BatchSize = c.DEFAULT_SIZE
     max_records: int | None = None
     create_missing_entries: bool = True
     update_existing_entries: bool = True
@@ -44,20 +44,20 @@ class LDAPConnectionSettings(m.Entity):
 
     host: Annotated[str, Field(..., description="LDAP server host")]
     port: Annotated[
-        int,
-        Field(c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port"),
+        t.PortNumber,
+        Field(c.Ldap.ConnectionDefaults.PORT, description="LDAP server port"),
     ]
     use_ssl: Annotated[bool, Field(default=False, description="Use SSL connection")]
     use_tls: Annotated[bool, Field(default=False, description="Use TLS connection")]
     bind_dn: Annotated[str | None, Field(None, description="Bind DN")]
     bind_password: Annotated[str | None, Field(None, description="Bind password")]
-    base_dn: Annotated[str, Field(..., description="Base DN")]
+    base_dn: Annotated[t.NonEmptyStr, Field(..., description="Base DN")]
     connect_timeout: Annotated[
-        int,
+        t.PositiveInt,
         Field(c.DEFAULT_TIMEOUT_SECONDS // 3, description="Connection timeout"),
     ]
     receive_timeout: Annotated[
-        int,
+        t.PositiveInt,
         Field(c.DEFAULT_TIMEOUT_SECONDS, description="Receive timeout"),
     ]
 
@@ -66,7 +66,7 @@ class LDAPOperationSettings(m.Entity):
     """LDAP operation settings model."""
 
     batch_size: Annotated[
-        int,
+        t.BatchSize,
         Field(c.DEFAULT_SIZE, description="Batch size"),
     ]
     max_records: Annotated[int | None, Field(None, description="Maximum records")]

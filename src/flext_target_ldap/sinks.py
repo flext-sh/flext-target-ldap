@@ -229,7 +229,7 @@ class LDAPBaseSink(Sink):
                 "host": self._target.config.get("host", "localhost"),
                 "port": self._target.config.get(
                     "port",
-                    c.TargetLdap.Connection.DEFAULT_PORT,
+                    c.Ldap.ConnectionDefaults.PORT,
                 ),
                 "use_ssl": self._target.config.get("use_ssl", False),
                 "bind_dn": self._target.config.get("bind_dn", ""),

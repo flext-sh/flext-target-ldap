@@ -93,7 +93,7 @@ class TargetLDAP(Target):
     def orchestrator(self) -> LDAPTargetOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            normalized_config: Mapping[str, str | int | bool] = {}
+            normalized_config: Mapping[str, t.Scalar] = {}
             for key, value in self.config.items():
                 match value:
                     case bool() | int() | str():
@@ -154,11 +154,11 @@ class TargetLDAP(Target):
         if not base_dn:
             msg = "LDAP base DN is required"
             raise ValueError(msg)
-        port_obj = self.config.get("port", c.TargetLdap.Connection.DEFAULT_PORT)
+        port_obj = self.config.get("port", c.Ldap.ConnectionDefaults.PORT)
         try:
             port = int(str(port_obj))
         except (TypeError, ValueError):
-            port = c.TargetLdap.Connection.DEFAULT_PORT
+            port = c.Ldap.ConnectionDefaults.PORT
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
             raise ValueError(msg)

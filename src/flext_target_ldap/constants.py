@@ -64,31 +64,9 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
         class Connection:
             """LDAP connection configuration constants for target operations."""
 
-            DEFAULT_HOST: Final[str] = FlextLdapConstants.DEFAULT_HOST
-            DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
-            DEFAULT_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-            )
             CONNECT_TIMEOUT: Final[int] = 10
-            RECEIVE_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-            )
             MAX_PORT_NUMBER: Final[int] = 65535
-
-            class Ldaps:
-                """Secure LDAP connection settings."""
-
-                DEFAULT_PORT: Final[int] = 636
-
-        class Processing:
-            """Singer target data processing configuration.
-
-            Note: Does not override parent Processing class to avoid inheritance conflicts.
-            """
-
-            DEFAULT_BATCH_SIZE: Final[int] = FlextLdapConstants.DEFAULT_BATCH_SIZE
-            MAX_BATCH_SIZE: Final[int] = FlextLdapConstants.MAX_ITEMS
-            DEFAULT_PAGE_SIZE: Final[int] = FlextLdapConstants.DEFAULT_PAGE_SIZE
+            LDAPS_DEFAULT_PORT: Final[int] = 636
 
 
 c = FlextTargetLdapConstants

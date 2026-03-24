@@ -298,7 +298,7 @@ class LDAPClient:
     def _get_api(self) -> FlextLdap:
         """Instantiate and cache FlextLdap lazily."""
         if self._api is None:
-            ldap_config: Mapping[str, str | int | bool] = {
+            ldap_config: Mapping[str, t.Scalar] = {
                 "host": self.config.host,
                 "port": self.config.port,
                 "use_ssl": self.config.use_ssl,
