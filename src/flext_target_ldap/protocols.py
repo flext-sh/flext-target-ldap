@@ -58,7 +58,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             def add(
                 self,
                 dn: str,
-                object_classes: Sequence[str],
+                object_classes: t.StrSequence,
                 attributes: Mapping[str, t.ContainerValue],
             ) -> bool:
                 """Add LDAP entry."""
@@ -80,7 +80,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
                 self,
                 base_dn: str,
                 search_filter: str,
-                attributes: Sequence[str] | None = None,
+                attributes: t.StrSequence | None = None,
             ) -> bool:
                 """Search LDAP entries."""
                 ...
@@ -95,7 +95,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             processed_count: int
             success_count: int
             error_count: int
-            errors: Sequence[str]
+            errors: t.StrSequence
 
         class LdapApi(Protocol):
             """Protocol for LDAP API operations."""
@@ -138,7 +138,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
                 self,
                 record: Mapping[str, t.ContainerValue],
                 mappings: Sequence[_m.TargetLdap.AttributeMapping],
-                object_classes: Sequence[str],
+                object_classes: t.StrSequence,
                 base_dn: str,
             ) -> FlextLdapProtocols.Result[_m.TargetLdap.TransformationResult]:
                 """Transform a record for LDAP storage."""

@@ -340,7 +340,7 @@ class TestIntegratedTransformation:
             k: v for k, v in transformed_entry.items() if k not in {"dn", "objectClass"}
         }
         raw_classes = transformed_entry["objectClass"]
-        obj_classes: Sequence[str] = (
+        obj_classes: t.StrSequence = (
             [str(c) for c in raw_classes]
             if isinstance(raw_classes, list)
             else [str(raw_classes)]

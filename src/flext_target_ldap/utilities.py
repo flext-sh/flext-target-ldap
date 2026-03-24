@@ -219,7 +219,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         @staticmethod
         def convert_record_to_ldap_attributes(
             record: Mapping[str, t.ConfigMap],
-            attribute_mapping: Mapping[str, str] | None = None,
+            attribute_mapping: t.StrMapping | None = None,
         ) -> r[Mapping[str, Sequence[bytes]]]:
             """Convert Singer record to LDAP attributes format.
 
@@ -267,8 +267,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         @staticmethod
         def extract_object_classes(
             record: Mapping[str, t.ConfigMap],
-            default_object_classes: Sequence[str] | None = None,
-        ) -> Sequence[str]:
+            default_object_classes: t.StrSequence | None = None,
+        ) -> t.StrSequence:
             """Extract t.NormalizedValue classes for LDAP entry.
 
             Args:
@@ -276,7 +276,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             default_object_classes: Default t.NormalizedValue classes if not in record
 
             Returns:
-            Sequence[str]: List of t.NormalizedValue classes
+            t.StrSequence: List of t.NormalizedValue classes
 
             """
             object_classes = record.get("objectClass") or record.get("objectclass")
@@ -757,7 +757,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         @staticmethod
         def extract_attribute_mapping(
             config: Mapping[str, t.ConfigMap],
-        ) -> Mapping[str, str]:
+        ) -> t.StrMapping:
             """Extract attribute mapping from configuration dict.
 
             Business Rule: Attribute Mapping Extraction
@@ -775,12 +775,12 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 config: Configuration dictionary containing attribute_mapping
 
             Returns:
-                Mapping[str, str]: Validated attribute mapping or empty dict
+                t.StrMapping: Validated attribute mapping or empty dict
 
             """
             raw_attr_map = config.get("attribute_mapping")
             if u.is_dict_like(raw_attr_map):
-                extracted_mapping: Mapping[str, str] = {}
+                extracted_mapping: t.StrMapping = {}
                 for k, v in raw_attr_map.items():
                     extracted_mapping[str(k)] = str(v)
                 return extracted_mapping
@@ -789,7 +789,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         @staticmethod
         def extract_object_classes(
             config: Mapping[str, t.ConfigMap],
-        ) -> Sequence[str]:
+        ) -> t.StrSequence:
             """Extract t.NormalizedValue classes from configuration dict.
 
             Business Rule: Object Classes Configuration
@@ -806,7 +806,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 config: Configuration dictionary containing object_classes
 
             Returns:
-                Sequence[str]: List of t.NormalizedValue classes or ["top"] default
+                t.StrSequence: List of t.NormalizedValue classes or ["top"] default
 
             """
             raw_object_classes = config.get("object_classes")

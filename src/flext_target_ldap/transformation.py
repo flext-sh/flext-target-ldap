@@ -36,7 +36,7 @@ class DataTransformationEngine:
         """Transform data using rules."""
         try:
             transformed_data: Mapping[str, t.ContainerValue] = dict(data)
-            applied_rules: Sequence[str] = []
+            applied_rules: t.StrSequence = []
             for rule in self.rules:
                 if not rule.enabled:
                     continue
@@ -147,7 +147,7 @@ class MigrationValidator:
         self,
         dn: str,
         attributes: Mapping[str, t.ContainerValue],
-        object_classes: Sequence[str],
+        object_classes: t.StrSequence,
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)

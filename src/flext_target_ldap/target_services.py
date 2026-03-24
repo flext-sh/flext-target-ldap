@@ -109,12 +109,12 @@ class LdapTransformationService:
         self,
         record: Mapping[str, t.ContainerValue],
         mappings: Sequence[m.TargetLdap.AttributeMapping],
-        object_classes: Sequence[str],
+        object_classes: t.StrSequence,
         base_dn: str,
     ) -> r[m.TargetLdap.TransformationResult]:
         """Transform a single record into an LDAP entry using mappings."""
-        mapping_errors: Sequence[str] = []
-        ldap_attributes: Mapping[str, Sequence[str]] = {}
+        mapping_errors: t.StrSequence = []
+        ldap_attributes: Mapping[str, t.StrSequence] = {}
         applied_mappings: Sequence[m.TargetLdap.AttributeMapping] = []
         for mapping in mappings:
             value = record.get(mapping.singer_field_name)
@@ -167,7 +167,7 @@ class LdapTransformationService:
         """Run business-rule validation on an LDAP entry."""
         return entry.validate_business_rules()
 
-    def _determine_entry_type(self, object_classes: Sequence[str]) -> str:
+    def _determine_entry_type(self, object_classes: t.StrSequence) -> str:
         normalized = {oc.lower() for oc in object_classes}
         if "person" in normalized or "inetorgperson" in normalized:
             return "user"

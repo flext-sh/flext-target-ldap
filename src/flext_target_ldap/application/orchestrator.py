@@ -97,4 +97,4 @@ class LDAPTargetOrchestrator:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: Sequence[str] = ["LDAPTargetOrchestrator"]
+__all__: t.StrSequence = ["LDAPTargetOrchestrator"]
