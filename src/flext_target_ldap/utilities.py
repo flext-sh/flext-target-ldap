@@ -820,7 +820,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def to_bool(
-            value: t.ContainerValue | t.ConfigMap | None, *, default: bool,
+            value: t.ContainerValue | t.ConfigMap | None,
+            *,
+            default: bool,
         ) -> bool:
             """Convert value to bool with safe defaults.
 
@@ -893,7 +895,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def to_str(
-            value: t.ContainerValue | t.ConfigMap | None, default: str = "",
+            value: t.ContainerValue | t.ConfigMap | None,
+            default: str = "",
         ) -> str:
             """Convert value to str with safe defaults.
 

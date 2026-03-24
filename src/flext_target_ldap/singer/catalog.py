@@ -24,7 +24,8 @@ class FlextTargetLdapCatalogManager:
     def __init__(self) -> None:
         """Initialize Singer LDAP catalog manager."""
         self._catalog_entries: MutableMapping[
-            str, m.TargetLdap.SingerLDAPCatalogEntry,
+            str,
+            m.TargetLdap.SingerLDAPCatalogEntry,
         ] = {}
 
     def add_stream(
