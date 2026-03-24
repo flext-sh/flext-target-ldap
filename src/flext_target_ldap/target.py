@@ -33,8 +33,8 @@ from flext_target_ldap import (
     t,
 )
 
-_SINGER_MSG_ADAPTER: TypeAdapter[Mapping[str, t.NormalizedValue]] = TypeAdapter(
-    Mapping[str, t.NormalizedValue],
+_SINGER_MSG_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
+    t.ContainerMapping,
     config=ConfigDict(strict=False),
 )
 
