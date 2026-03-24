@@ -105,4 +105,4 @@ class SingerTargetLDAP:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: t.StrSequence = ["SingerTargetLDAP"]
+__all__: Sequence[str] = ["SingerTargetLDAP"]

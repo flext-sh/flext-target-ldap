@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r, t
@@ -56,4 +56,4 @@ class SingerLDAPCatalogManager:
         return r[SingerLDAPCatalogEntry].ok(self._catalog_entries[stream_name])
 
 
-__all__: t.StrSequence = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]
+__all__: Sequence[str] = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]

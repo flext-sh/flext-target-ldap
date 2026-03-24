@@ -38,7 +38,7 @@ class LDAPSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
-    def __init__(self, dn: str, attributes: Mapping[str, str | t.StrSequence]) -> None:
+    def __init__(self, dn: str, attributes: Mapping[str, str | Sequence[str]]) -> None:
         """Initialize the instance."""
         self.dn = dn
         self.attributes = attributes
@@ -98,7 +98,7 @@ class LDAPClient:
         self,
         dn: str,
         attributes: Mapping[str, t.ContainerValue],
-        object_classes: t.StrSequence | None = None,
+        object_classes: Sequence[str] | None = None,
     ) -> r[bool]:
         """Add LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -210,7 +210,7 @@ class LDAPClient:
     def get_entry(
         self,
         dn: str,
-        attributes: t.StrSequence | None = None,
+        attributes: Sequence[str] | None = None,
     ) -> r[LDAPSearchEntry | None]:
         """Get LDAP entry using ldap3-compatible connection for tests."""
         try:
@@ -247,7 +247,7 @@ class LDAPClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: t.StrSequence | None = None,
+        attributes: Sequence[str] | None = None,
     ) -> r[Sequence[LDAPSearchEntry]]:
         """Search LDAP entries using ldap3-compatible connection for tests."""
         try:
@@ -266,8 +266,8 @@ class LDAPClient:
                     if not isinstance(raw, LDAPSearchEntry):
                         continue
                     dn = raw.dn
-                    attr_names: t.StrSequence = list(raw.attributes.keys())
-                    attrs: Mapping[str, str | t.StrSequence] = {}
+                    attr_names: Sequence[str] = list(raw.attributes.keys())
+                    attrs: Mapping[str, str | Sequence[str]] = {}
                     for name in attr_names:
                         name_str = name
                         try:
@@ -332,7 +332,7 @@ class LDAPClient:
             def add(
                 self,
                 dn: str,
-                object_classes: t.StrSequence,
+                object_classes: Sequence[str],
                 attributes: Mapping[str, t.ContainerValue],
             ) -> bool:
                 _ = (dn, object_classes, attributes)
@@ -357,7 +357,7 @@ class LDAPClient:
                 self,
                 base_dn: str,
                 search_filter: str,
-                attributes: t.StrSequence | None = None,
+                attributes: Sequence[str] | None = None,
             ) -> bool:
                 _ = (base_dn, search_filter, attributes)
                 self.entries = []
@@ -392,4 +392,4 @@ class LDAPClient:
             return ConnectionWrapper("test_session")
 
 
-__all__: t.StrSequence = ["LDAPClient"]
+__all__: Sequence[str] = ["LDAPClient"]
