@@ -40,6 +40,30 @@ logger = FlextLogger(__name__)
 LDAPConnection = p.TargetLdap.LDAPConnection
 
 
+def _ldap3_call(
+    conn: ldap3.Connection,
+    method: str,
+    *args: t.NormalizedValue,
+    **kwargs: t.NormalizedValue,
+) -> bool:
+    """Invoke an ldap3 Connection method by name, returning bool.
+
+    ldap3 stubs do not fully type their methods, causing pyright unknown-member errors.
+    This wrapper uses getattr to avoid those errors while keeping typed callers.
+    """
+    fn = getattr(conn, method)
+    result: t.NormalizedValue = fn(*args, **kwargs)
+    return bool(result) if result is not None else True
+
+
+def _ldap3_entries(conn: ldap3.Connection) -> Sequence[t.NormalizedValue]:
+    """Get entries from ldap3 connection with proper typing."""
+    raw: t.NormalizedValue = getattr(conn, "entries", [])
+    if isinstance(raw, Sequence) and not isinstance(raw, (str, bytes)):
+        return raw
+    return []
+
+
 class FlextTargetLdapSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
@@ -112,7 +136,7 @@ class FlextTargetLdapLdapClient:
                 if object_classes is None:
                     object_classes = []
                 try:
-                    _: bool = conn.add(dn, object_classes, dict(attributes))
+                    _ldap3_call(conn, "add", dn, object_classes, dict(attributes))
                 except Exception as e:
                     if e.__class__.__name__ == "LDAPEntryAlreadyExistsResult":
                         return r[bool].fail("Entry already exists")
@@ -148,7 +172,7 @@ class FlextTargetLdapLdapClient:
                 return r[bool].fail("DN required")
             logger.info("Deleting LDAP entry using ldap3: %s", dn)
             with self.get_connection() as conn:
-                _: bool = conn.delete(dn)
+                _ldap3_call(conn, "delete", dn)
                 return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to delete entry %s", dn)
@@ -204,12 +228,12 @@ class FlextTargetLdapLdapClient:
                 user=self._bind_dn,
                 password=self._password,
             )
-            _bind_ok: bool = connection.bind()
+            _ldap3_call(connection, "bind")
             try:
                 yield connection
             finally:
                 with suppress(Exception):
-                    _unbind_ok: bool = connection.unbind()
+                    _ldap3_call(connection, "unbind")
 
         return connection_context()
 
@@ -243,7 +267,7 @@ class FlextTargetLdapLdapClient:
         """Modify LDAP entry using flext-ldap API."""
         try:
             with self.get_connection() as conn:
-                _: bool = conn.modify(dn, dict(changes))
+                _ldap3_call(conn, "modify", dn, dict(changes))
                 return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to modify entry %s", dn)
@@ -265,12 +289,14 @@ class FlextTargetLdapLdapClient:
                 search_filter,
             )
             with self.get_connection() as conn:
-                _: bool = conn.search(
-                    base_dn, search_filter, attributes=attributes or []
-                )
-                raw_entries: Sequence[FlextTargetLdapSearchEntry] = conn.entries
+                _ldap3_call(conn, "search", base_dn, search_filter, attributes or [])
+                raw_entries: Sequence[t.NormalizedValue] = _ldap3_entries(conn)
+                _conn_entries: Sequence[FlextTargetLdapSearchEntry] = [
+                    entry for entry in raw_entries
+                    if isinstance(entry, FlextTargetLdapSearchEntry)
+                ]
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
-                for raw in raw_entries:
+                for raw in _conn_entries:
                     if not isinstance(raw, FlextTargetLdapSearchEntry):
                         continue
                     dn = raw.dn

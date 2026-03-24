@@ -40,7 +40,7 @@ class FlextTargetLdapSettings(m.Entity):
 
 
 def validate_ldap_config(
-    config: Mapping[str, t.ConfigMap],
+    config: Mapping[str, t.ContainerValue | t.ConfigMap],
 ) -> r[FlextTargetLdapSettings]:
     """Validate LDAP configuration."""
     try:
