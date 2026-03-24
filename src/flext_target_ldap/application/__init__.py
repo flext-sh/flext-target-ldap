@@ -26,7 +26,10 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "LDAPTargetOrchestrator": ("flext_target_ldap.application.orchestrator", "LDAPTargetOrchestrator"),
+    "LDAPTargetOrchestrator": (
+        "flext_target_ldap.application.orchestrator",
+        "LDAPTargetOrchestrator",
+    ),
     "logger": ("flext_target_ldap.application.orchestrator", "logger"),
 }
 
