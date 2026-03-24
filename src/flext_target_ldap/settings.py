@@ -94,7 +94,7 @@ class FlextTargetLdapSettings(m.Entity):
             return r[FlextTargetLdapSettings].ok(validated_config)
         except (RuntimeError, ValueError, TypeError) as e:
             return r[FlextTargetLdapSettings].fail(
-                f"Configuration validation failed: {e}"
+                f"Configuration validation failed: {e}",
             )
 
 

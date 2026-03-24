@@ -116,7 +116,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Return an instantiated sink for the given stream name."""
         sink_class = self.get_sink_class(stream_name)
         return sink_class(
-            target=self, stream_name=stream_name, schema={}, key_properties=[]
+            target=self, stream_name=stream_name, schema={}, key_properties=[],
         )
 
     def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:

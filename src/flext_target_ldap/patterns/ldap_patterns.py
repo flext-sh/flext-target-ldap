@@ -100,7 +100,7 @@ class FlextTargetLdapDataTransformer:
         try:
             transformed: MutableMapping[str, str | None] = {}
             schema_model = m.TargetLdap.SingerSchemaDefinition.model_validate(
-                schema or {}
+                schema or {},
             )
             for key, value in record.items():
                 ldap_key = self._normalize_ldap_attribute_name(key)
