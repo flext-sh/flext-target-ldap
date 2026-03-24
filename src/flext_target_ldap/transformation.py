@@ -16,16 +16,12 @@ from flext_target_ldap.models import m
 
 logger = FlextLogger(__name__)
 
-# Backward-compatible aliases
-TransformationRule = m.TargetLdap.TransformationRule
-TransformationResult = m.TargetLdap.DataTransformationResult
-
 
 class DataTransformationEngine:
     """Engine for transforming data using rules."""
 
     @override
-    def __init__(self, rules: Sequence[TransformationRule]) -> None:
+    def __init__(self, rules: Sequence[m.TargetLdap.TransformationRule]) -> None:
         """Initialize transformation engine."""
         self.rules = rules
 
@@ -36,7 +32,7 @@ class DataTransformationEngine:
     def transform(
         self,
         data: Mapping[str, t.ContainerValue],
-    ) -> r[TransformationResult]:
+    ) -> r[m.TargetLdap.DataTransformationResult]:
         """Transform data using rules."""
         try:
             transformed_data: Mapping[str, t.ContainerValue] = dict(data)
@@ -68,11 +64,11 @@ class DataTransformationEngine:
                                 applied_rules.append(rule.name)
                         case _:
                             pass
-            result = TransformationResult(
+            result = m.TargetLdap.DataTransformationResult(
                 transformed_data=transformed_data,
                 applied_rules=applied_rules,
             )
-            return r[TransformationResult].ok(result)
+            return r[m.TargetLdap.DataTransformationResult].ok(result)
         except (
             ValueError,
             TypeError,
@@ -82,7 +78,7 @@ class DataTransformationEngine:
             RuntimeError,
             ImportError,
         ) as e:
-            return r[TransformationResult].fail(f"Transformation failed: {e}")
+            return r[m.TargetLdap.DataTransformationResult].fail(f"Transformation failed: {e}")
 
 
 class MigrationValidator:

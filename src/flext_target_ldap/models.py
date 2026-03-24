@@ -19,7 +19,7 @@ from typing import Annotated, Self
 from flext_core import t
 from flext_ldap import FlextLdapModels, r
 from flext_meltano import FlextMeltanoModels
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
 from .constants import c
 
@@ -625,13 +625,13 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                         f"Operation statistics validation failed: {e}",
                     )
 
-        class SingerPropertyDefinition(BaseModel):
+        class SingerPropertyDefinition(FlextLdapModels.Value):
             """Singer property definition for LDAP schema mapping."""
 
             type: str = "string"
             format: str | None = None
 
-        class SingerSchemaDefinition(BaseModel):
+        class SingerSchemaDefinition(FlextLdapModels.Value):
             """Singer schema definition mapping properties to LDAP attributes."""
 
             properties: Annotated[
@@ -641,7 +641,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(default_factory=dict),
             ]
 
-        class SingerLDAPCatalogEntry(BaseModel):
+        class SingerLDAPCatalogEntry(FlextLdapModels.Entity):
             """Singer LDAP catalog entry with stream metadata."""
 
             tap_stream_id: t.NonEmptyStr
@@ -651,7 +651,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(default_factory=dict),
             ]
 
-        class TransformationRule(BaseModel):
+        class TransformationRule(FlextLdapModels.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
             name: t.NonEmptyStr
@@ -659,7 +659,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             replacement: str
             enabled: bool = True
 
-        class DataTransformationResult(BaseModel):
+        class DataTransformationResult(FlextLdapModels.Value):
             """Lightweight result of data transformation engine operations."""
 
             transformed_data: Annotated[
