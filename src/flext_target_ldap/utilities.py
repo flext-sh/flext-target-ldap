@@ -40,7 +40,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     @staticmethod
     def _coerce_container_value(
         value: t.ConfigMap | t.NormalizedValue | BaseModel,
-    ) -> t.ConfigMap | Sequence[t.ContainerValue] | t.NormalizedValue | None:
+    ) -> t.ConfigMap | t.ContainerValueList | t.NormalizedValue | None:
         if isinstance(value, BaseModel):
             return FlextTargetLdapUtilities._coerce_container_value(value.model_dump())
         if isinstance(value, (str, int, float, bool, datetime)):
