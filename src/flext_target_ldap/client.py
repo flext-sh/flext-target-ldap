@@ -291,12 +291,12 @@ class FlextTargetLdapLdapClient:
             with self.get_connection() as conn:
                 _ldap3_call(conn, "search", base_dn, search_filter, attributes or [])
                 raw_entries: Sequence[t.NormalizedValue] = _ldap3_entries(conn)
-                _conn_entries: Sequence[FlextTargetLdapSearchEntry] = [
+                conn_entries: Sequence[FlextTargetLdapSearchEntry] = [
                     entry for entry in raw_entries
                     if isinstance(entry, FlextTargetLdapSearchEntry)
                 ]
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
-                for raw in _conn_entries:
+                for raw in conn_entries:
                     if not isinstance(raw, FlextTargetLdapSearchEntry):
                         continue
                     dn = raw.dn
