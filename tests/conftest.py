@@ -12,11 +12,11 @@ from collections.abc import Mapping
 from unittest.mock import MagicMock
 
 import pytest
-from tests import t
 from flext_tests import tk
 from pydantic import TypeAdapter
 
 from flext_target_ldap import LdapTargetClient
+from tests import t
 
 
 def _build_mock_ldap_config(*, bind_dn: str) -> Mapping[str, t.ContainerValue]:

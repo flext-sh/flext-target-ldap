@@ -11,10 +11,10 @@ from collections.abc import Mapping
 from unittest.mock import MagicMock, patch
 
 import pytest
-from tests import t
 
 from flext_target_ldap import LdapTargetClient
 from flext_target_ldap.client import LDAPClient, LDAPSearchEntry
+from tests import t
 
 EXPECTED_DATA_COUNT = 3
 

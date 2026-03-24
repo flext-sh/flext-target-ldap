@@ -12,7 +12,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from flext_core import r
-from tests import t
 
 from flext_target_ldap import (
     LdapBaseSink,
@@ -23,6 +22,7 @@ from flext_target_ldap import (
     TargetLdap,
 )
 from flext_target_ldap.target import _default_cli_helper
+from tests import t
 
 
 class TestTargetLDAPUnit:

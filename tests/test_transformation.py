@@ -9,13 +9,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from tests import t
-
 from flext_target_ldap.models import m
 from flext_target_ldap.transformation import (
     DataTransformationEngine,
     MigrationValidator,
 )
+from tests import t
 
 TransformationRule = m.TargetLdap.TransformationRule
 

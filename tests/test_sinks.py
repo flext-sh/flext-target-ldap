@@ -11,7 +11,6 @@ from collections.abc import Mapping
 from unittest.mock import MagicMock
 
 import pytest
-from tests import t
 
 from flext_target_ldap import (
     GroupsSink,
@@ -19,6 +18,7 @@ from flext_target_ldap import (
     OrganizationalUnitsSink,
     UsersSink,
 )
+from tests import t
 
 
 class TestLDAPBaseSink:
