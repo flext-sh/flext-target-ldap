@@ -200,7 +200,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             def validate_business_rules(self) -> r[bool]:
                 """Validate LDAP entry business rules."""
                 try:
-                    errors: list[str] = []
+                    errors: MutableSequence[str] = []
 
                     # Validate DN format
                     if (
