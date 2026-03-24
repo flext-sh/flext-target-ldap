@@ -11,7 +11,7 @@ from collections.abc import Mapping
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import t
+from tests import t
 
 from flext_target_ldap import LdapTargetClient
 from flext_target_ldap.client import LDAPClient, LDAPSearchEntry

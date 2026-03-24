@@ -11,7 +11,8 @@ from collections.abc import Mapping, Sequence
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import r, t
+from flext_core import r
+from tests import t
 
 from flext_target_ldap import (
     LdapBaseSink,

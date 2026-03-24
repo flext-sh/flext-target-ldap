@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from flext_core import t
+from tests import t
 
 from flext_target_ldap.models import m
 from flext_target_ldap.transformation import (
