@@ -31,7 +31,6 @@ if TYPE_CHECKING:
     from flext_target_ldap.client import (
         FlextTargetLdapLdapClient,
         FlextTargetLdapSearchEntry,
-        LDAPConnection,
     )
     from flext_target_ldap.constants import (
         FlextTargetLdapConstants,
@@ -51,8 +50,6 @@ if TYPE_CHECKING:
         FlextTargetLdapEntryManager,
         FlextTargetLdapSchemaMapper,
         FlextTargetLdapTypeConverter,
-        SingerPropertyDefinition,
-        SingerSchemaDefinition,
     )
     from flext_target_ldap.processing_result import FlextTargetLdapProcessingCounters
     from flext_target_ldap.protocols import (
@@ -60,10 +57,7 @@ if TYPE_CHECKING:
         FlextTargetLdapProtocols as p,
     )
     from flext_target_ldap.settings import FlextTargetLdapSettings, validate_ldap_config
-    from flext_target_ldap.singer.catalog import (
-        FlextTargetLdapCatalogManager,
-        SingerLDAPCatalogEntry,
-    )
+    from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
     from flext_target_ldap.singer.stream import (
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
@@ -248,19 +242,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
         "flext_target_ldap.target_exceptions",
         "FlextTargetLdapValidationError",
     ),
-    "LDAPConnection": ("flext_target_ldap.client", "LDAPConnection"),
-    "SingerLDAPCatalogEntry": (
-        "flext_target_ldap.singer.catalog",
-        "SingerLDAPCatalogEntry",
-    ),
-    "SingerPropertyDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerPropertyDefinition",
-    ),
-    "SingerSchemaDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerSchemaDefinition",
-    ),
     "__all__": ("flext_target_ldap.__version__", "__all__"),
     "__author__": ("flext_target_ldap.__version__", "__author__"),
     "__author_email__": ("flext_target_ldap.__version__", "__author_email__"),
@@ -351,10 +332,6 @@ __all__ = [
     "FlextTargetLdapUsersSink",
     "FlextTargetLdapUtilities",
     "FlextTargetLdapValidationError",
-    "LDAPConnection",
-    "SingerLDAPCatalogEntry",
-    "SingerPropertyDefinition",
-    "SingerSchemaDefinition",
     "__all__",
     "__author__",
     "__author_email__",

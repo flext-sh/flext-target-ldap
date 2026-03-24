@@ -23,8 +23,6 @@ if TYPE_CHECKING:
         FlextTargetLdapEntryManager,
         FlextTargetLdapSchemaMapper,
         FlextTargetLdapTypeConverter,
-        SingerPropertyDefinition,
-        SingerSchemaDefinition,
         logger,
     )
 
@@ -45,14 +43,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
         "flext_target_ldap.patterns.ldap_patterns",
         "FlextTargetLdapTypeConverter",
     ),
-    "SingerPropertyDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerPropertyDefinition",
-    ),
-    "SingerSchemaDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerSchemaDefinition",
-    ),
     "logger": ("flext_target_ldap.patterns.ldap_patterns", "logger"),
 }
 
@@ -61,8 +51,6 @@ __all__ = [
     "FlextTargetLdapEntryManager",
     "FlextTargetLdapSchemaMapper",
     "FlextTargetLdapTypeConverter",
-    "SingerPropertyDefinition",
-    "SingerSchemaDefinition",
     "logger",
 ]
 

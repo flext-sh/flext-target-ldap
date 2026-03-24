@@ -16,10 +16,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from flext_target_ldap.singer.catalog import (
-        FlextTargetLdapCatalogManager,
-        SingerLDAPCatalogEntry,
-    )
+    from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
     from flext_target_ldap.singer.stream import (
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
@@ -43,10 +40,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
         "flext_target_ldap.singer.stream",
         "FlextTargetLdapStreamProcessor",
     ),
-    "SingerLDAPCatalogEntry": (
-        "flext_target_ldap.singer.catalog",
-        "SingerLDAPCatalogEntry",
-    ),
     "logger": ("flext_target_ldap.singer.target", "logger"),
 }
 
@@ -55,7 +48,6 @@ __all__ = [
     "FlextTargetLdapSingerTarget",
     "FlextTargetLdapStreamProcessingStats",
     "FlextTargetLdapStreamProcessor",
-    "SingerLDAPCatalogEntry",
     "logger",
 ]
 

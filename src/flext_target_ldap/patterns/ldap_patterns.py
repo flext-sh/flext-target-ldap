@@ -15,10 +15,6 @@ from flext_target_ldap.models import m
 
 logger = FlextLogger(__name__)
 
-# Backward-compatible aliases
-SingerPropertyDefinition = m.TargetLdap.SingerPropertyDefinition
-SingerSchemaDefinition = m.TargetLdap.SingerSchemaDefinition
-
 
 class FlextTargetLdapTypeConverter:
     """Convert Singer values to LDAP-safe string values."""
@@ -96,14 +92,16 @@ class FlextTargetLdapDataTransformer:
     def transform_record(
         self,
         record: t.ConfigurationMapping,
-        schema: SingerSchemaDefinition
+        schema: m.TargetLdap.SingerSchemaDefinition
         | Mapping[str, Mapping[str, t.StrMapping | str]]
         | None = None,
     ) -> r[Mapping[str, str | None]]:
         """Transform Singer record for LDAP storage."""
         try:
             transformed: MutableMapping[str, str | None] = {}
-            schema_model = SingerSchemaDefinition.model_validate(schema or {})
+            schema_model = m.TargetLdap.SingerSchemaDefinition.model_validate(
+                schema or {}
+            )
             for key, value in record.items():
                 ldap_key = self._normalize_ldap_attribute_name(key)
                 prop_def = schema_model.properties.get(key)
@@ -151,13 +149,14 @@ class FlextTargetLdapSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: SingerSchemaDefinition | Mapping[str, Mapping[str, t.StrMapping | str]],
+        schema: m.TargetLdap.SingerSchemaDefinition
+        | Mapping[str, Mapping[str, t.StrMapping | str]],
         object_class: str = "inetOrgPerson",
     ) -> r[t.StrMapping]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: MutableMapping[str, str] = {}
-            schema_model = SingerSchemaDefinition.model_validate(schema)
+            schema_model = m.TargetLdap.SingerSchemaDefinition.model_validate(schema)
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
@@ -174,7 +173,7 @@ class FlextTargetLdapSchemaMapper:
 
     def _map_singer_type_to_ldap(
         self,
-        prop_def: SingerPropertyDefinition,
+        prop_def: m.TargetLdap.SingerPropertyDefinition,
         _object_class: str,
     ) -> r[str]:
         """Map Singer property definition to LDAP attribute syntax."""
@@ -364,6 +363,4 @@ __all__: t.StrSequence = [
     "FlextTargetLdapEntryManager",
     "FlextTargetLdapSchemaMapper",
     "FlextTargetLdapTypeConverter",
-    "SingerPropertyDefinition",
-    "SingerSchemaDefinition",
 ]

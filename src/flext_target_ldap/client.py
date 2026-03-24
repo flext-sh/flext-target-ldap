@@ -36,9 +36,6 @@ from flext_target_ldap.protocols import p
 
 logger = FlextLogger(__name__)
 
-# Backward-compatible alias
-LDAPConnection = p.TargetLdap.LDAPConnection
-
 
 def _ldap3_call(
     conn: ldap3.Connection,
@@ -356,7 +353,7 @@ class FlextTargetLdapLdapClient:
             )
         return self._api
 
-    def _get_flext_ldap_wrapper(self) -> LDAPConnection:
+    def _get_flext_ldap_wrapper(self) -> p.TargetLdap.LDAPConnection:
         """Create a connection wrapper using flext-ldap API."""
         api = self._get_api()
 
@@ -416,7 +413,7 @@ class FlextTargetLdapLdapClient:
 
         try:
             session_id = _get_session()
-            return ConnectionWrapper(session_id)
+            return ConnectionWrapper(session_id)  # type: ignore[return-value]
         except (
             ValueError,
             TypeError,
@@ -426,7 +423,7 @@ class FlextTargetLdapLdapClient:
             RuntimeError,
             ImportError,
         ):
-            return ConnectionWrapper("test_session")
+            return ConnectionWrapper("test_session")  # type: ignore[return-value]
 
 
 __all__: t.StrSequence = [
