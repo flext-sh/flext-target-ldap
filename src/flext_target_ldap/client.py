@@ -112,7 +112,7 @@ class FlextTargetLdapLdapClient:
                 if object_classes is None:
                     object_classes = []
                 try:
-                    conn.add(dn, object_classes, dict(attributes))
+                    _: bool = conn.add(dn, object_classes, dict(attributes))
                 except Exception as e:
                     if e.__class__.__name__ == "LDAPEntryAlreadyExistsResult":
                         return r[bool].fail("Entry already exists")
@@ -148,7 +148,7 @@ class FlextTargetLdapLdapClient:
                 return r[bool].fail("DN required")
             logger.info("Deleting LDAP entry using ldap3: %s", dn)
             with self.get_connection() as conn:
-                conn.delete(dn)
+                _: bool = conn.delete(dn)
                 return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to delete entry %s", dn)
@@ -204,7 +204,7 @@ class FlextTargetLdapLdapClient:
                 user=self._bind_dn,
                 password=self._password,
             )
-            connection.bind()
+            _bind_ok: bool = connection.bind()
             try:
                 yield connection
             finally:

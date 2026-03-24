@@ -759,7 +759,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def extract_attribute_mapping(
-            config: Mapping[str, t.ConfigMap],
+            config: Mapping[str, t.ContainerValue],
         ) -> t.StrMapping:
             """Extract attribute mapping from configuration dict.
 
@@ -791,7 +791,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
         @staticmethod
         def extract_object_classes(
-            config: Mapping[str, t.ConfigMap],
+            config: Mapping[str, t.ContainerValue],
         ) -> t.StrSequence:
             """Extract t.NormalizedValue classes from configuration dict.
 
@@ -889,7 +889,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return default
 
         @staticmethod
-        def to_str(value: t.Scalar | t.ConfigMap | None, default: str = "") -> str:
+        def to_str(value: t.ContainerValue | t.ConfigMap | None, default: str = "") -> str:
             """Convert value to str with safe defaults.
 
             Business Rule: String Configuration Conversion
