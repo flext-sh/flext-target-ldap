@@ -56,11 +56,7 @@ class FlextTargetLdapCatalogManager:
         return r[SingerLDAPCatalogEntry].ok(self._catalog_entries[stream_name])
 
 
-# Backward-compatible alias
-SingerLDAPCatalogManager = FlextTargetLdapCatalogManager
-
 __all__: t.StrSequence = [
     "FlextTargetLdapCatalogManager",
     "SingerLDAPCatalogEntry",
-    "SingerLDAPCatalogManager",
 ]
