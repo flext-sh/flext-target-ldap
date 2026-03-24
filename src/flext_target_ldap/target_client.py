@@ -192,7 +192,7 @@ class _LdapConnectionWrapper:
         try:
             connect_result = self.api.connect(self.config)
             if connect_result.is_failure:
-                self.entries = []
+                self.entries = list[_CompatibleEntry]()
                 return False
             search_options = FlextLdapModels.Ldap.SearchOptions(
                 base_dn=base_dn,
@@ -204,7 +204,7 @@ class _LdapConnectionWrapper:
             if search_result.is_success and search_result.value:
                 search_res = search_result.value
                 entries: Sequence[Mapping[str, t.StrSequence]] = search_res.entries
-                self.entries = []
+                self.entries = list[_CompatibleEntry]()
                 for entry in entries:
                     dn = str(entry.get("dn", ""))
                     attrs: MutableMapping[str, t.ContainerValue] = {
@@ -215,7 +215,7 @@ class _LdapConnectionWrapper:
                     compat_entry = _CompatibleEntry(dn, attrs)
                     self.entries.append(compat_entry)
             else:
-                self.entries = []
+                self.entries = list[_CompatibleEntry]()
             return True
         except (
             ValueError,
@@ -226,7 +226,7 @@ class _LdapConnectionWrapper:
             RuntimeError,
             ImportError,
         ):
-            self.entries = []
+            self.entries = list[_CompatibleEntry]()
             return False
 
     def unbind(self) -> None:

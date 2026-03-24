@@ -394,7 +394,7 @@ class FlextTargetLdapLdapClient:
                 attributes: t.StrSequence | None = None,
             ) -> bool:
                 _ = (base_dn, search_filter, attributes)
-                self.entries = []
+                self.entries = list[Mapping[str, t.ContainerValue]]()
                 return True
 
             def unbind(self) -> None:
