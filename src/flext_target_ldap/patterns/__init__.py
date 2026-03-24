@@ -26,24 +26,24 @@ if TYPE_CHECKING:
         logger,
     )
 
-_LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "FlextTargetLdapDataTransformer": (
+_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
+    "FlextTargetLdapDataTransformer": [
         "flext_target_ldap.patterns.ldap_patterns",
         "FlextTargetLdapDataTransformer",
-    ),
-    "FlextTargetLdapEntryManager": (
+    ],
+    "FlextTargetLdapEntryManager": [
         "flext_target_ldap.patterns.ldap_patterns",
         "FlextTargetLdapEntryManager",
-    ),
-    "FlextTargetLdapSchemaMapper": (
+    ],
+    "FlextTargetLdapSchemaMapper": [
         "flext_target_ldap.patterns.ldap_patterns",
         "FlextTargetLdapSchemaMapper",
-    ),
-    "FlextTargetLdapTypeConverter": (
+    ],
+    "FlextTargetLdapTypeConverter": [
         "flext_target_ldap.patterns.ldap_patterns",
         "FlextTargetLdapTypeConverter",
-    ),
-    "logger": ("flext_target_ldap.patterns.ldap_patterns", "logger"),
+    ],
+    "logger": ["flext_target_ldap.patterns.ldap_patterns", "logger"],
 }
 
 __all__ = [

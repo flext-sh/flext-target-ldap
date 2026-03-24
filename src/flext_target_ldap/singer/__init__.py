@@ -23,24 +23,24 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget, logger
 
-_LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "FlextTargetLdapCatalogManager": (
+_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
+    "FlextTargetLdapCatalogManager": [
         "flext_target_ldap.singer.catalog",
         "FlextTargetLdapCatalogManager",
-    ),
-    "FlextTargetLdapSingerTarget": (
+    ],
+    "FlextTargetLdapSingerTarget": [
         "flext_target_ldap.singer.target",
         "FlextTargetLdapSingerTarget",
-    ),
-    "FlextTargetLdapStreamProcessingStats": (
+    ],
+    "FlextTargetLdapStreamProcessingStats": [
         "flext_target_ldap.singer.stream",
         "FlextTargetLdapStreamProcessingStats",
-    ),
-    "FlextTargetLdapStreamProcessor": (
+    ],
+    "FlextTargetLdapStreamProcessor": [
         "flext_target_ldap.singer.stream",
         "FlextTargetLdapStreamProcessor",
-    ),
-    "logger": ("flext_target_ldap.singer.target", "logger"),
+    ],
+    "logger": ["flext_target_ldap.singer.target", "logger"],
 }
 
 __all__ = [

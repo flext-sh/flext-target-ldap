@@ -25,19 +25,19 @@ if TYPE_CHECKING:
         get_flext_target_ldap_service,
     )
 
-_LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "configure_flext_target_ldap_dependencies": (
+_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
+    "configure_flext_target_ldap_dependencies": [
         "flext_target_ldap.infrastructure.di_container",
         "configure_flext_target_ldap_dependencies",
-    ),
-    "get_flext_target_ldap_container": (
+    ],
+    "get_flext_target_ldap_container": [
         "flext_target_ldap.infrastructure.di_container",
         "get_flext_target_ldap_container",
-    ),
-    "get_flext_target_ldap_service": (
+    ],
+    "get_flext_target_ldap_service": [
         "flext_target_ldap.infrastructure.di_container",
         "get_flext_target_ldap_service",
-    ),
+    ],
 }
 
 __all__ = [
