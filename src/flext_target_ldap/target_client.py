@@ -27,10 +27,10 @@ from flext_ldap import (
 from flext_ldif import FlextLdif
 
 from flext_target_ldap import (
+    FlextTargetFlextTargetLdapProcessingCounters,
     FlextTargetLdapSettings,
-    LdapProcessingCounters,
-    Sink,
-    Target,
+    FlextTargetLdapFlextTargetLdapSink,
+    FlextTargetLdapFlextTargetLdapTarget,
     build_singer_catalog,
     c,
     p,
@@ -41,7 +41,7 @@ from flext_target_ldap import (
 logger = FlextLogger(__name__)
 
 
-class LdapSearchEntry:
+class FlextTargetLdapSearchEntry:
     """LDAP search result entry for backward compatibility."""
 
     @override
@@ -55,7 +55,7 @@ class LdapSearchEntry:
         self.attributes = attributes
 
 
-class LdapProcessingResult(LdapProcessingCounters):
+class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
     """Result tracking for LDAP processing operations."""
 
     @override
@@ -231,7 +231,7 @@ class _LdapConnectionWrapper:
         """Unbind from LDAP server."""
 
 
-class LdapTargetClient:
+class FlextTargetLdapClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
 
     This client provides backward compatibility while delegating all LDAP operations
@@ -361,11 +361,11 @@ class LdapTargetClient:
                             value=dn,
                             metadata=FlextLdapModels.Ldif.EntryMetadata(),
                         ),
-                        attributes=FlextLdapModels.Ldif.Attributes(
-                            attributes=group_attrs,
-                            attribute_metadata={},
-                            metadata=None,
-                        ),
+                        attributes=FlextLdapModels.Ldif.Attributes.model_validate({
+                            "attributes": group_attrs,
+                            "attribute_metadata": {},
+                            "metadata": None,
+                        }),
                         changetype=None,
                         metadata=None,
                         validation_metadata=None,
@@ -477,19 +477,19 @@ class LdapTargetClient:
         self,
         dn: str,
         attributes: t.StrSequence | None = None,
-    ) -> r[LdapSearchEntry | None]:
+    ) -> r[FlextTargetLdapSearchEntry | None]:
         """Get LDAP entry using flext-ldap API."""
         try:
             if not dn:
-                return r[LdapSearchEntry | None].fail("DN required")
+                return r[FlextTargetLdapSearchEntry | None].fail("DN required")
             logger.info("Getting LDAP entry: %s", dn)
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
             if search_result.is_success and search_result.value:
-                return r[LdapSearchEntry | None].ok(search_result.value[0])
-            return r[LdapSearchEntry | None].ok(None)
+                return r[FlextTargetLdapSearchEntry | None].ok(search_result.value[0])
+            return r[FlextTargetLdapSearchEntry | None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to get entry: %s", dn)
-            return r[LdapSearchEntry | None].fail(f"Get entry failed: {e}")
+            return r[FlextTargetLdapSearchEntry | None].fail(f"Get entry failed: {e}")
 
     def modify_entry(
         self,
@@ -527,11 +527,11 @@ class LdapTargetClient:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: t.StrSequence | None = None,
-    ) -> r[Sequence[LdapSearchEntry]]:
+    ) -> r[Sequence[FlextTargetLdapSearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:
-                return r[Sequence[LdapSearchEntry]].fail("Base DN required")
+                return r[Sequence[FlextTargetLdapSearchEntry]].fail("Base DN required")
             logger.info(
                 "Searching LDAP entries using flext-ldap API: %s with filter %s",
                 base_dn,
@@ -539,7 +539,7 @@ class LdapTargetClient:
             )
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
-                return r[Sequence[LdapSearchEntry]].fail(
+                return r[Sequence[FlextTargetLdapSearchEntry]].fail(
                     f"Connection failed: {connect_result.error}",
                 )
             try:
@@ -552,7 +552,7 @@ class LdapTargetClient:
             finally:
                 self._api.disconnect()
             if result.is_success and result.value:
-                entries: MutableSequence[LdapSearchEntry] = []
+                entries: MutableSequence[FlextTargetLdapSearchEntry] = []
                 search_res = result.value
                 ldap_entries: Sequence[Mapping[str, t.StrSequence]] = search_res.entries
                 for entry in ldap_entries:
@@ -562,28 +562,34 @@ class LdapTargetClient:
                         for k, v in entry.items()
                         if str(k) != "dn"
                     }
-                    compat_entry = LdapSearchEntry(dn, attrs)
+                    compat_entry = FlextTargetLdapSearchEntry(dn, attrs)
                     entries.append(compat_entry)
                 logger.debug(f"Successfully found {len(entries)} LDAP entries")
-                return r[Sequence[LdapSearchEntry]].ok(entries)
+                return r[Sequence[FlextTargetLdapSearchEntry]].ok(entries)
             logger.debug("No LDAP entries found")
-            return r[Sequence[LdapSearchEntry]].ok([])
+            return r[Sequence[FlextTargetLdapSearchEntry]].ok([])
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
-            return r[Sequence[LdapSearchEntry]].fail(f"Search failed: {e}")
+            return r[Sequence[FlextTargetLdapSearchEntry]].fail(f"Search failed: {e}")
 
     def _create_connection_wrapper(self, api: FlextLdap) -> _LdapConnectionWrapper:
         """Create LDAP connection wrapper for delegation."""
         return _LdapConnectionWrapper(api, self.config)
 
 
-class LdapBaseSink(Sink):
+# Aliases used internally and exported via __init__.py
+FlextTargetLdapSearchEntry = FlextTargetLdapSearchEntry
+FlextTargetLdapClient = FlextTargetLdapClient
+FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult
+
+
+class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     """Base LDAP sink with common functionality using enterprise patterns."""
 
     @override
     def __init__(
         self,
-        target: Target,
+        target: FlextTargetLdapTarget,
         stream_name: str,
         schema: Mapping[str, t.ContainerValue],
         key_properties: t.StrSequence,
@@ -591,16 +597,16 @@ class LdapBaseSink(Sink):
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
         self._target = target
-        self.client: LdapTargetClient | None = None
-        self._processing_result: LdapProcessingResult = LdapProcessingResult()
+        self.client: FlextTargetLdapClient | None = None
+        self._processing_result: FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult()
 
-    def get_processing_result(self) -> LdapProcessingResult:
+    def get_processing_result(self) -> FlextTargetLdapProcessingResult:
         """Get processing results."""
         return self._processing_result
 
     def process_batch(self, _context: Mapping[str, t.ContainerValue]) -> None:
         """Process a batch of records."""
-        setup_result: r[LdapTargetClient] = self.setup_client()
+        setup_result: r[FlextTargetLdapClient] = self.setup_client()
         if not setup_result.is_success:
             setup_error = setup_result.error or ""
             logger.error("Cannot process batch: %s", setup_error)
@@ -645,7 +651,7 @@ class LdapBaseSink(Sink):
             self._processing_result.add_error(error_msg)
             return r[bool].fail(error_msg)
 
-    def setup_client(self) -> r[LdapTargetClient]:
+    def setup_client(self) -> r[FlextTargetLdapClient]:
         """Set up LDAP client connection."""
         try:
             connection_config = {
@@ -662,18 +668,18 @@ class LdapBaseSink(Sink):
                     c.Ldap.ConnectionDefaults.TIMEOUT,
                 ),
             }
-            self.client = LdapTargetClient(connection_config)
+            self.client = FlextTargetLdapClient(connection_config)
             connect_result: r[bool] = self.client.connect()
             if not connect_result.is_success:
-                return r[LdapTargetClient].fail(
+                return r[FlextTargetLdapClient].fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
-            return r[LdapTargetClient].ok(self.client)
+            return r[FlextTargetLdapClient].ok(self.client)
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
-            return r[LdapTargetClient].fail(error_msg)
+            return r[FlextTargetLdapClient].fail(error_msg)
 
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""
@@ -683,7 +689,7 @@ class LdapBaseSink(Sink):
             logger.info(f"LDAP client disconnected for stream: {self.stream_name}")
 
 
-class LdapUsersSink(LdapBaseSink):
+class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     """LDAP sink for user entries with person/inetOrgPerson t.NormalizedValue classes."""
 
     def build_user_attributes(
@@ -794,7 +800,7 @@ class LdapUsersSink(LdapBaseSink):
             return r[bool].fail(error_msg)
 
 
-class LdapGroupsSink(LdapBaseSink):
+class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     """LDAP sink for group entries with groupOfNames t.NormalizedValue class."""
 
     @override
@@ -897,7 +903,7 @@ class LdapGroupsSink(LdapBaseSink):
         return attributes
 
 
-class LdapOrganizationalUnitsSink(LdapBaseSink):
+class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
     """LDAP sink for organizational unit entries with organizationalUnit t.NormalizedValue class."""
 
     @override
@@ -974,7 +980,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
         return attributes
 
 
-class TargetLdap(Target):
+class FlextTargetLdap(FlextTargetLdapTarget):
     """Enterprise LDAP target implementation using flext-core patterns.
 
     This target provides complete Singer protocol implementation with
@@ -1012,9 +1018,9 @@ class TargetLdap(Target):
     def get_sink_class(self, stream_name: str) -> type[Sink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
-            "users": LdapUsersSink,
-            "groups": LdapGroupsSink,
-            "organizational_units": LdapOrganizationalUnitsSink,
+            "users": LdapUsersFlextTargetLdapSink,
+            "groups": LdapGroupsFlextTargetLdapSink,
+            "organizational_units": LdapOrganizationalUnitsFlextTargetLdapSink,
         }
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
@@ -1022,7 +1028,7 @@ class TargetLdap(Target):
                 "No specific sink found for stream '%s', using base sink",
                 stream_name,
             )
-            return LdapBaseSink
+            return FlextTargetLdapBaseSink
         logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
         return sink_class
 
@@ -1110,18 +1116,33 @@ def main() -> None:
     """CLI entry point for target-ldap."""
     if len(sys.argv) > 1 and sys.argv[1] == "--help":
         return
-    target = TargetLdap()
+    target = FlextTargetLdap()
     target.cli()
 
 
+# Sink and target aliases for __init__.py exports
+FlextTargetLdapBaseSink = FlextTargetLdapBaseSink
+FlextTargetLdapUsersSink = FlextTargetLdapUsersSink
+FlextTargetLdapGroupsSink = FlextTargetLdapGroupsSink
+FlextTargetLdapOrganizationalUnitsSink = FlextTargetLdapOrganizationalUnitsSink
+TargetLdap = FlextTargetLdap
+
 __all__ = [
-    "LdapBaseSink",
-    "LdapGroupsSink",
-    "LdapOrganizationalUnitsSink",
-    "LdapProcessingResult",
-    "LdapSearchEntry",
-    "LdapTargetClient",
-    "LdapUsersSink",
+    "FlextTargetLdap",
+    "FlextTargetLdapBaseSink",
+    "FlextTargetLdapClient",
+    "FlextTargetLdapGroupsSink",
+    "FlextTargetLdapOrganizationalUnitsSink",
+    "FlextTargetLdapProcessingResult",
+    "FlextTargetLdapSearchEntry",
+    "FlextTargetLdapUsersSink",
+    "FlextTargetLdapBaseSink",
+    "FlextTargetLdapGroupsSink",
+    "FlextTargetLdapOrganizationalUnitsSink",
+    "FlextTargetLdapProcessingResult",
+    "FlextTargetLdapSearchEntry",
+    "FlextTargetLdapClient",
+    "FlextTargetLdapUsersSink",
     "TargetLdap",
     "main",
 ]

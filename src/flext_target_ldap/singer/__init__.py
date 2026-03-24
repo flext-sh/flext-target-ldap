@@ -17,37 +17,40 @@ if TYPE_CHECKING:
     from flext_core import FlextTypes
 
     from flext_target_ldap.singer.catalog import (
+        FlextTargetLdapCatalogManager,
         SingerLDAPCatalogEntry,
         SingerLDAPCatalogManager,
     )
     from flext_target_ldap.singer.stream import (
+        FlextTargetLdapStreamProcessingStats,
+        FlextTargetLdapStreamProcessor,
         LDAPStreamProcessingStats,
         SingerLDAPStreamProcessor,
     )
-    from flext_target_ldap.singer.target import SingerTargetLDAP, logger
+    from flext_target_ldap.singer.target import (
+        FlextTargetLdapSingerTarget,
+        SingerTargetLDAP,
+        logger,
+    )
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "LDAPStreamProcessingStats": (
-        "flext_target_ldap.singer.stream",
-        "LDAPStreamProcessingStats",
-    ),
-    "SingerLDAPCatalogEntry": (
-        "flext_target_ldap.singer.catalog",
-        "SingerLDAPCatalogEntry",
-    ),
-    "SingerLDAPCatalogManager": (
-        "flext_target_ldap.singer.catalog",
-        "SingerLDAPCatalogManager",
-    ),
-    "SingerLDAPStreamProcessor": (
-        "flext_target_ldap.singer.stream",
-        "SingerLDAPStreamProcessor",
-    ),
+    "FlextTargetLdapCatalogManager": ("flext_target_ldap.singer.catalog", "FlextTargetLdapCatalogManager"),
+    "FlextTargetLdapSingerTarget": ("flext_target_ldap.singer.target", "FlextTargetLdapSingerTarget"),
+    "FlextTargetLdapStreamProcessingStats": ("flext_target_ldap.singer.stream", "FlextTargetLdapStreamProcessingStats"),
+    "FlextTargetLdapStreamProcessor": ("flext_target_ldap.singer.stream", "FlextTargetLdapStreamProcessor"),
+    "LDAPStreamProcessingStats": ("flext_target_ldap.singer.stream", "LDAPStreamProcessingStats"),
+    "SingerLDAPCatalogEntry": ("flext_target_ldap.singer.catalog", "SingerLDAPCatalogEntry"),
+    "SingerLDAPCatalogManager": ("flext_target_ldap.singer.catalog", "SingerLDAPCatalogManager"),
+    "SingerLDAPStreamProcessor": ("flext_target_ldap.singer.stream", "SingerLDAPStreamProcessor"),
     "SingerTargetLDAP": ("flext_target_ldap.singer.target", "SingerTargetLDAP"),
     "logger": ("flext_target_ldap.singer.target", "logger"),
 }
 
 __all__ = [
+    "FlextTargetLdapCatalogManager",
+    "FlextTargetLdapSingerTarget",
+    "FlextTargetLdapStreamProcessingStats",
+    "FlextTargetLdapStreamProcessor",
     "LDAPStreamProcessingStats",
     "SingerLDAPCatalogEntry",
     "SingerLDAPCatalogManager",

@@ -17,7 +17,7 @@ from flext_target_ldap.models import m
 logger = FlextLogger(__name__)
 
 
-class DataTransformationEngine:
+class FlextTargetLdapTransformationEngine:
     """Engine for transforming data using rules."""
 
     @override
@@ -83,7 +83,7 @@ class DataTransformationEngine:
             )
 
 
-class MigrationValidator:
+class FlextTargetLdapMigrationValidator:
     """Validator for migration data."""
 
     @override
@@ -151,3 +151,7 @@ class MigrationValidator:
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
+
+
+DataTransformationEngine = FlextTargetLdapTransformationEngine
+MigrationValidator = FlextTargetLdapMigrationValidator

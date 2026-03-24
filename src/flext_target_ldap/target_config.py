@@ -61,19 +61,19 @@ def validate_ldap_target_config(
             config.get("search_filter", "(objectClass=*)"),
         )
         search_scope = u.TypeConversion.to_str(config.get("search_scope", "SUBTREE"))
-        validated_config = FlextTargetLdapSettings(
-            connection=connection_config,
-            base_dn=base_dn,
-            batch_size=batch_size,
-            max_records=max_records,
-            create_missing_entries=create_missing_entries,
-            update_existing_entries=update_existing_entries,
-            delete_removed_entries=delete_removed_entries,
-            attribute_mapping=attribute_mapping,
-            object_classes=object_classes,
-            search_filter=search_filter,
-            search_scope=search_scope,
-        )
+        validated_config = FlextTargetLdapSettings.model_validate({
+            "connection": connection_config,
+            "base_dn": base_dn,
+            "batch_size": batch_size,
+            "max_records": max_records,
+            "create_missing_entries": create_missing_entries,
+            "update_existing_entries": update_existing_entries,
+            "delete_removed_entries": delete_removed_entries,
+            "attribute_mapping": attribute_mapping,
+            "object_classes": object_classes,
+            "search_filter": search_filter,
+            "search_scope": search_scope,
+        })
         return r[FlextTargetLdapSettings].ok(validated_config)
     except (ValueError, TypeError, RuntimeError) as e:
         return r[FlextTargetLdapSettings].fail(f"Configuration validation failed: {e}")

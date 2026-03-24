@@ -5,7 +5,7 @@ from __future__ import annotations
 from flext_target_ldap.protocols import p
 
 
-class LdapProcessingCounters:
+class FlextTargetLdapProcessingCounters:
     """Common counters and mutations for record processing outcomes."""
 
     @property
@@ -25,3 +25,6 @@ class LdapProcessingCounters:
         """Record one successful processing attempt."""
         self.processed_count += 1
         self.success_count += 1
+
+
+LdapProcessingCounters = FlextTargetLdapProcessingCounters

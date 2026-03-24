@@ -12,7 +12,8 @@ from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger, r
 
-from flext_target_ldap import LDAPClient, LdapProcessingCounters, c, t
+from flext_target_ldap import LdapProcessingCounters, c, t
+from flext_target_ldap.client import LDAPClient as LDAPClient  # noqa: PLC0414
 
 
 class FlextTargetLdapSink:
@@ -690,3 +691,30 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             if value is not None:
                 attributes[mapped_attr] = [str(value)]
         return attributes
+
+
+# Aliases for __init__.py exports
+GroupsSink = FlextTargetLdapGroupsSink
+LDAPBaseSink = FlextTargetLdapBaseSink
+LDAPProcessingResult = FlextTargetLdapProcessingResult
+OrganizationalUnitsSink = FlextTargetLdapOrganizationalUnitsSink
+Sink = FlextTargetLdapSink
+Target = FlextTargetLdapTarget
+UsersSink = FlextTargetLdapUsersSink
+
+__all__ = [
+    "FlextTargetLdapBaseSink",
+    "FlextTargetLdapGroupsSink",
+    "FlextTargetLdapOrganizationalUnitsSink",
+    "FlextTargetLdapProcessingResult",
+    "FlextTargetLdapSink",
+    "FlextTargetLdapTarget",
+    "FlextTargetLdapUsersSink",
+    "GroupsSink",
+    "LDAPBaseSink",
+    "LDAPProcessingResult",
+    "OrganizationalUnitsSink",
+    "Sink",
+    "Target",
+    "UsersSink",
+]

@@ -18,7 +18,7 @@ from flext_core import FlextLogger, p, r, t
 logger: p.Logger = FlextLogger(__name__)
 
 
-class LDAPTargetOrchestrator:
+class FlextTargetLdapOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
     config: t.ConfigurationMapping
@@ -97,4 +97,6 @@ class LDAPTargetOrchestrator:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: t.StrSequence = ["LDAPTargetOrchestrator"]
+LDAPTargetOrchestrator = FlextTargetLdapOrchestrator
+
+__all__: t.StrSequence = ["FlextTargetLdapOrchestrator", "LDAPTargetOrchestrator"]

@@ -40,7 +40,7 @@ logger = FlextLogger(__name__)
 LDAPConnection = p.TargetLdap.LDAPConnection
 
 
-class LDAPSearchEntry:
+class FlextTargetLdapSearchEntry:
     """LDAP search result entry for compatibility with tests."""
 
     @override
@@ -50,7 +50,7 @@ class LDAPSearchEntry:
         self.attributes = attributes
 
 
-class LDAPClient:
+class FlextTargetLdapLdapClient:
     """Backward-compatible LDAP client using flext-ldap API for all operations.
 
     This class provides compatibility with existing flext-target-ldap code while
@@ -217,23 +217,23 @@ class LDAPClient:
         self,
         dn: str,
         attributes: t.StrSequence | None = None,
-    ) -> r[LDAPSearchEntry | None]:
+    ) -> r[FlextTargetLdapSearchEntry | None]:
         """Get LDAP entry using ldap3-compatible connection for tests."""
         try:
             if not dn:
-                return r[LDAPSearchEntry | None].fail("DN required")
+                return r[FlextTargetLdapSearchEntry | None].fail("DN required")
             logger.info("Getting LDAP entry: %s", dn)
-            search_result: r[Sequence[LDAPSearchEntry]] = self.search_entry(
+            search_result: r[Sequence[FlextTargetLdapSearchEntry]] = self.search_entry(
                 dn,
                 "(objectClass=*)",
                 attributes,
             )
             if search_result.is_success and search_result.value:
-                return r[LDAPSearchEntry | None].ok(search_result.value[0])
-            return r[LDAPSearchEntry | None].ok(None)
+                return r[FlextTargetLdapSearchEntry | None].ok(search_result.value[0])
+            return r[FlextTargetLdapSearchEntry | None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to get entry: %s", dn)
-            return r[LDAPSearchEntry | None].fail(f"Get entry failed: {e}")
+            return r[FlextTargetLdapSearchEntry | None].fail(f"Get entry failed: {e}")
 
     def modify_entry(
         self,
@@ -254,11 +254,11 @@ class LDAPClient:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: t.StrSequence | None = None,
-    ) -> r[Sequence[LDAPSearchEntry]]:
+    ) -> r[Sequence[FlextTargetLdapSearchEntry]]:
         """Search LDAP entries using ldap3-compatible connection for tests."""
         try:
             if not base_dn:
-                return r[Sequence[LDAPSearchEntry]].fail("Base DN required")
+                return r[Sequence[FlextTargetLdapSearchEntry]].fail("Base DN required")
             logger.info(
                 "Searching LDAP entries: %s with filter %s",
                 base_dn,
@@ -267,9 +267,9 @@ class LDAPClient:
             with self.get_connection() as conn:
                 conn.search(base_dn, search_filter, attributes=attributes or [])
                 raw_entries = conn.entries
-                entries: MutableSequence[LDAPSearchEntry] = []
+                entries: MutableSequence[FlextTargetLdapSearchEntry] = []
                 for raw in raw_entries:
-                    if not isinstance(raw, LDAPSearchEntry):
+                    if not isinstance(raw, FlextTargetLdapSearchEntry):
                         continue
                     dn = raw.dn
                     attr_names: t.StrSequence = list(raw.attributes.keys())
@@ -290,11 +290,11 @@ class LDAPClient:
                         ):
                             val = raw.attributes.get(name_str)
                             attrs[name_str] = [str(val)] if val is not None else []
-                    entries.append(LDAPSearchEntry(dn=str(dn), attributes=attrs))
-                return r[Sequence[LDAPSearchEntry]].ok(entries)
+                    entries.append(FlextTargetLdapSearchEntry(dn=str(dn), attributes=attrs))
+                return r[Sequence[FlextTargetLdapSearchEntry]].ok(entries)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
-            return r[Sequence[LDAPSearchEntry]].fail(f"Search failed: {e}")
+            return r[Sequence[FlextTargetLdapSearchEntry]].fail(f"Search failed: {e}")
 
     def sync_connect(self) -> r[bool]:
         """Sync connect method for backward compatibility."""
@@ -398,4 +398,12 @@ class LDAPClient:
             return ConnectionWrapper("test_session")
 
 
-__all__: t.StrSequence = ["LDAPClient"]
+LDAPClient = FlextTargetLdapLdapClient
+LDAPSearchEntry = FlextTargetLdapSearchEntry
+
+__all__: t.StrSequence = [
+    "FlextTargetLdapLdapClient",
+    "FlextTargetLdapSearchEntry",
+    "LDAPClient",
+    "LDAPSearchEntry",
+]

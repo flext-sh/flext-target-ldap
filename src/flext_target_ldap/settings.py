@@ -49,48 +49,48 @@ def validate_ldap_config(
         object_classes = u.TypeConversion.extract_object_classes(
             config,
         )
-        validated_config = FlextTargetLdapSettings(
-            connection=connection_config,
-            base_dn=u.TypeConversion.to_str(
+        validated_config = FlextTargetLdapSettings.model_validate({
+            "connection": connection_config,
+            "base_dn": u.TypeConversion.to_str(
                 config.get("base_dn", ""),
             ),
-            search_filter=u.TypeConversion.to_str(
+            "search_filter": u.TypeConversion.to_str(
                 config.get("search_filter", "(objectClass=*)"),
             ),
-            search_scope=u.TypeConversion.to_str(
+            "search_scope": u.TypeConversion.to_str(
                 config.get("search_scope", "SUBTREE"),
             ),
-            connect_timeout=u.TypeConversion.to_int(
+            "connect_timeout": u.TypeConversion.to_int(
                 config.get("connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3),
                 c.DEFAULT_TIMEOUT_SECONDS // 3,
             ),
-            receive_timeout=u.TypeConversion.to_int(
+            "receive_timeout": u.TypeConversion.to_int(
                 config.get("receive_timeout", c.DEFAULT_TIMEOUT_SECONDS),
                 c.DEFAULT_TIMEOUT_SECONDS,
             ),
-            batch_size=u.TypeConversion.to_int(
+            "batch_size": u.TypeConversion.to_int(
                 config.get("batch_size", c.DEFAULT_SIZE),
                 c.DEFAULT_SIZE,
             ),
-            max_records=u.TypeConversion.to_int(
+            "max_records": u.TypeConversion.to_int(
                 config.get("max_records"),
                 0,
             ),
-            create_missing_entries=u.TypeConversion.to_bool(
+            "create_missing_entries": u.TypeConversion.to_bool(
                 config.get("create_missing_entries", True),
                 default=True,
             ),
-            update_existing_entries=u.TypeConversion.to_bool(
+            "update_existing_entries": u.TypeConversion.to_bool(
                 config.get("update_existing_entries", True),
                 default=True,
             ),
-            delete_removed_entries=u.TypeConversion.to_bool(
+            "delete_removed_entries": u.TypeConversion.to_bool(
                 config.get("delete_removed_entries", False),
                 default=False,
             ),
-            attribute_mapping=attribute_mapping,
-            object_classes=object_classes,
-        )
+            "attribute_mapping": attribute_mapping,
+            "object_classes": object_classes,
+        })
         return r[FlextTargetLdapSettings].ok(validated_config)
     except (RuntimeError, ValueError, TypeError) as e:
         return r[FlextTargetLdapSettings].fail(f"Configuration validation failed: {e}")

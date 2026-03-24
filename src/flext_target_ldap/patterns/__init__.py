@@ -19,6 +19,10 @@ if TYPE_CHECKING:
     from flext_core import FlextTypes
 
     from flext_target_ldap.patterns.ldap_patterns import (
+        FlextTargetLdapDataTransformer,
+        FlextTargetLdapEntryManager,
+        FlextTargetLdapSchemaMapper,
+        FlextTargetLdapTypeConverter,
         LDAPDataTransformer,
         LDAPEntryManager,
         LDAPSchemaMapper,
@@ -29,34 +33,24 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "LDAPDataTransformer": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPDataTransformer",
-    ),
-    "LDAPEntryManager": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPEntryManager",
-    ),
-    "LDAPSchemaMapper": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPSchemaMapper",
-    ),
-    "LDAPTypeConverter": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "LDAPTypeConverter",
-    ),
-    "SingerPropertyDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerPropertyDefinition",
-    ),
-    "SingerSchemaDefinition": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "SingerSchemaDefinition",
-    ),
+    "FlextTargetLdapDataTransformer": ("flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapDataTransformer"),
+    "FlextTargetLdapEntryManager": ("flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapEntryManager"),
+    "FlextTargetLdapSchemaMapper": ("flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapSchemaMapper"),
+    "FlextTargetLdapTypeConverter": ("flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapTypeConverter"),
+    "LDAPDataTransformer": ("flext_target_ldap.patterns.ldap_patterns", "LDAPDataTransformer"),
+    "LDAPEntryManager": ("flext_target_ldap.patterns.ldap_patterns", "LDAPEntryManager"),
+    "LDAPSchemaMapper": ("flext_target_ldap.patterns.ldap_patterns", "LDAPSchemaMapper"),
+    "LDAPTypeConverter": ("flext_target_ldap.patterns.ldap_patterns", "LDAPTypeConverter"),
+    "SingerPropertyDefinition": ("flext_target_ldap.patterns.ldap_patterns", "SingerPropertyDefinition"),
+    "SingerSchemaDefinition": ("flext_target_ldap.patterns.ldap_patterns", "SingerSchemaDefinition"),
     "logger": ("flext_target_ldap.patterns.ldap_patterns", "logger"),
 }
 
 __all__ = [
+    "FlextTargetLdapDataTransformer",
+    "FlextTargetLdapEntryManager",
+    "FlextTargetLdapSchemaMapper",
+    "FlextTargetLdapTypeConverter",
     "LDAPDataTransformer",
     "LDAPEntryManager",
     "LDAPSchemaMapper",

@@ -20,7 +20,7 @@ logger = FlextLogger(__name__)
 SingerLDAPCatalogEntry = m.TargetLdap.SingerLDAPCatalogEntry
 
 
-class SingerLDAPCatalogManager:
+class FlextTargetLdapCatalogManager:
     """Manage Singer LDAP catalog operations using flext-core patterns."""
 
     @override
@@ -56,4 +56,10 @@ class SingerLDAPCatalogManager:
         return r[SingerLDAPCatalogEntry].ok(self._catalog_entries[stream_name])
 
 
-__all__: t.StrSequence = ["SingerLDAPCatalogEntry", "SingerLDAPCatalogManager"]
+SingerLDAPCatalogManager = FlextTargetLdapCatalogManager
+
+__all__: t.StrSequence = [
+    "FlextTargetLdapCatalogManager",
+    "SingerLDAPCatalogEntry",
+    "SingerLDAPCatalogManager",
+]

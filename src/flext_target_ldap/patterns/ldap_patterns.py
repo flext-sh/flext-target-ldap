@@ -20,7 +20,7 @@ SingerPropertyDefinition = m.TargetLdap.SingerPropertyDefinition
 SingerSchemaDefinition = m.TargetLdap.SingerSchemaDefinition
 
 
-class LDAPTypeConverter:
+class FlextTargetLdapTypeConverter:
     """Convert Singer values to LDAP-safe string values."""
 
     _COMPLEX_KIND = "t.NormalizedValue"
@@ -64,13 +64,13 @@ class LDAPTypeConverter:
                 return "TRUE" if bool(value) else "FALSE"
 
 
-class LDAPDataTransformer:
+class FlextTargetLdapDataTransformer:
     """Transform Singer records into LDAP-oriented records."""
 
     @override
-    def __init__(self, type_converter: LDAPTypeConverter | None = None) -> None:
+    def __init__(self, type_converter: FlextTargetLdapTypeConverter | None = None) -> None:
         """Initialize LDAP data transformer."""
-        self.type_converter = type_converter or LDAPTypeConverter()
+        self.type_converter = type_converter or FlextTargetLdapTypeConverter()
 
     def prepare_ldap_attributes(
         self,
@@ -139,7 +139,7 @@ class LDAPDataTransformer:
                 return [str(value)]
 
 
-class LDAPSchemaMapper:
+class FlextTargetLdapSchemaMapper:
     """Map Singer schema definitions to LDAP attribute syntaxes."""
 
     @override
@@ -203,7 +203,7 @@ class LDAPSchemaMapper:
         return normalized
 
 
-class LDAPEntryManager:
+class FlextTargetLdapEntryManager:
     """Manage entry DN, class selection, and modify payloads."""
 
     @override
@@ -353,3 +353,10 @@ class LDAPEntryManager:
                 return [text]
             case _:
                 return []
+
+
+# Aliases for __init__.py exports
+LDAPTypeConverter = FlextTargetLdapTypeConverter
+LDAPDataTransformer = FlextTargetLdapDataTransformer
+LDAPSchemaMapper = FlextTargetLdapSchemaMapper
+LDAPEntryManager = FlextTargetLdapEntryManager

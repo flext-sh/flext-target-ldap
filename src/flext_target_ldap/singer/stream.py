@@ -17,7 +17,7 @@ from flext_target_ldap import t
 logger = FlextLogger(__name__)
 
 
-class LDAPStreamProcessingStats:
+class FlextTargetLdapStreamProcessingStats:
     """LDAP stream processing statistics - mutable for performance."""
 
     @override
@@ -37,26 +37,26 @@ class LDAPStreamProcessingStats:
         return self.records_success / self.records_processed * 100.0
 
 
-class SingerLDAPStreamProcessor:
+class FlextTargetLdapStreamProcessor:
     """Process Singer LDAP streams using flext-core patterns."""
 
     @override
     def __init__(self) -> None:
         """Initialize Singer LDAP stream processor."""
-        self._stream_stats: MutableMapping[str, LDAPStreamProcessingStats] = {}
+        self._stream_stats: MutableMapping[str, FlextTargetLdapStreamProcessingStats] = {}
 
-    def get_stream_stats(self, stream_name: str) -> r[LDAPStreamProcessingStats]:
+    def get_stream_stats(self, stream_name: str) -> r[FlextTargetLdapStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
-            return r[LDAPStreamProcessingStats].fail(
+            return r[FlextTargetLdapStreamProcessingStats].fail(
                 f"LDAP stream not found: {stream_name}",
             )
-        return r[LDAPStreamProcessingStats].ok(self._stream_stats[stream_name])
+        return r[FlextTargetLdapStreamProcessingStats].ok(self._stream_stats[stream_name])
 
     def initialize_stream(self, stream_name: str) -> r[bool]:
         """Initialize LDAP stream processing."""
         try:
-            self._stream_stats[stream_name] = LDAPStreamProcessingStats(stream_name)
+            self._stream_stats[stream_name] = FlextTargetLdapStreamProcessingStats(stream_name)
             logger.info("Initialized LDAP stream processing: %s", stream_name)
             return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -64,4 +64,12 @@ class SingerLDAPStreamProcessor:
             return r[bool].fail(f"Stream initialization failed: {e}")
 
 
-__all__: t.StrSequence = ["LDAPStreamProcessingStats", "SingerLDAPStreamProcessor"]
+LDAPStreamProcessingStats = FlextTargetLdapStreamProcessingStats
+SingerLDAPStreamProcessor = FlextTargetLdapStreamProcessor
+
+__all__: t.StrSequence = [
+    "FlextTargetLdapStreamProcessingStats",
+    "FlextTargetLdapStreamProcessor",
+    "LDAPStreamProcessingStats",
+    "SingerLDAPStreamProcessor",
+]

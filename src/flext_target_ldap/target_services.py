@@ -22,7 +22,7 @@ LdapTargetService = p.TargetLdap.LdapTargetService
 LdapTransformationServiceProtocol = p.TargetLdap.LdapTransformationServiceProtocol
 
 
-class LdapConnectionService:
+class FlextTargetLdapConnectionService:
     """Service for testing and querying LDAP connection settings."""
 
     @override
@@ -49,7 +49,7 @@ class LdapConnectionService:
         return r[bool].ok(value=True)
 
 
-class LdapTransformationService:
+class FlextTargetLdapTransformationService:
     """Transform Singer records into LDAP entries with attribute mappings."""
 
     @override
@@ -178,7 +178,7 @@ class LdapTransformationService:
         return "generic"
 
 
-class LdapTargetOrchestrator:
+class FlextTargetLdapOrchestrator:
     """Orchestrates connection, transformation, and data loading for the LDAP target."""
 
     @override
@@ -186,17 +186,17 @@ class LdapTargetOrchestrator:
         """Initialize with optional LDAP target settings."""
         self._typed_config = config
 
-    def get_connection_service(self) -> LdapConnectionService | None:
+    def get_connection_service(self) -> FlextTargetLdapConnectionService | None:
         """Return a connection service instance if config is set."""
         if self._typed_config is None:
             return None
-        return LdapConnectionService(self._typed_config)
+        return FlextTargetLdapConnectionService(self._typed_config)
 
-    def get_transformation_service(self) -> LdapTransformationService | None:
+    def get_transformation_service(self) -> FlextTargetLdapTransformationService | None:
         """Return a transformation service instance if config is set."""
         if self._typed_config is None:
             return None
-        return LdapTransformationService(self._typed_config)
+        return FlextTargetLdapTransformationService(self._typed_config)
 
     def get_typed_config(self) -> FlextTargetLdapSettings | None:
         """Return the current typed settings, if any."""
@@ -213,7 +213,7 @@ class LdapTargetOrchestrator:
             return r[t.ContainerValueMapping].fail(
                 "Configuration is required",
             )
-        transformation = LdapTransformationService(working)
+        transformation = FlextTargetLdapTransformationService(working)
         object_classes = working.object_classes
         base_dn = working.base_dn
         stream_type = "users"
@@ -247,16 +247,16 @@ class LdapTargetOrchestrator:
         working = config or self._typed_config
         if working is None:
             return r[bool].fail("Configuration is required")
-        return LdapConnectionService(working).test_connection()
+        return FlextTargetLdapConnectionService(working).test_connection()
 
 
-class LdapTargetApiService:
+class FlextTargetLdapApiService:
     """API facade for creating targets and loading users/groups to LDAP."""
 
     @override
     def __init__(self) -> None:
         """Initialize the API service and internal orchestrator cache."""
-        self._orchestrators: MutableMapping[str, LdapTargetOrchestrator] = {}
+        self._orchestrators: MutableMapping[str, FlextTargetLdapOrchestrator] = {}
 
     def create_ldap_target(
         self,
@@ -306,13 +306,22 @@ class LdapTargetApiService:
         validated = validate_ldap_target_config(config)
         if validated.is_failure:
             return r[bool].fail(validated.error or "Configuration validation failed")
-        return LdapConnectionService(validated.value).test_connection()
+        return FlextTargetLdapConnectionService(validated.value).test_connection()
 
+
+# Aliases for __init__.py exports
+LdapConnectionService = FlextTargetLdapConnectionService
+LdapTargetApiService = FlextTargetLdapApiService
+LdapTargetOrchestrator = FlextTargetLdapOrchestrator
+LdapTransformationService = FlextTargetLdapTransformationService
 
 __all__ = [
+    "FlextTargetLdapApiService",
+    "FlextTargetLdapConnectionService",
+    "FlextTargetLdapOrchestrator",
+    "FlextTargetLdapTransformationService",
     "LdapConnectionService",
     "LdapTargetApiService",
     "LdapTargetOrchestrator",
-    "LdapTargetService",
     "LdapTransformationService",
 ]

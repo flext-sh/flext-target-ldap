@@ -19,18 +19,20 @@ from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_target_ldap import (
     FlextTargetLdapSettings,
-    GroupsSink,
-    LDAPBaseSink,
-    LDAPTargetOrchestrator,
-    OrganizationalUnitsSink,
-    Sink,
-    Target,
-    UsersSink,
     build_singer_catalog,
     c,
     get_flext_target_ldap_container,
     p,
     t,
+)
+from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+from flext_target_ldap.sinks import (
+    FlextTargetLdapBaseSink,
+    FlextTargetLdapGroupsSink,
+    FlextTargetLdapOrganizationalUnitsSink,
+    FlextTargetLdapSink,
+    FlextTargetLdapTarget,
+    FlextTargetLdapUsersSink,
 )
 
 _SINGER_MSG_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
@@ -68,7 +70,7 @@ logger = FlextLogger(__name__)
 _LdapApi = p.TargetLdap.LdapApi
 
 
-class TargetLDAP(Target):
+class FlextTargetLdap(FlextTargetLdapTarget):
     """LDAP target for Singer using flext-core patterns."""
 
     name = "target-ldap"
@@ -85,11 +87,11 @@ class TargetLDAP(Target):
     ) -> None:
         """Initialize LDAP target."""
         super().__init__(config=config or {}, validate_config=validate_config)
-        self._orchestrator: LDAPTargetOrchestrator | None = None
+        self._orchestrator: FlextTargetLdapOrchestrator | None = None
         self._container: p.Container | None = None
 
     @property
-    def orchestrator(self) -> LDAPTargetOrchestrator:
+    def orchestrator(self) -> FlextTargetLdapOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
             normalized_config: MutableMapping[str, t.Scalar] = {}
@@ -99,7 +101,7 @@ class TargetLDAP(Target):
                         normalized_config[key] = value
                     case _:
                         normalized_config[key] = str(value)
-            self._orchestrator = LDAPTargetOrchestrator(normalized_config)
+            self._orchestrator = FlextTargetLdapOrchestrator(normalized_config)
         return self._orchestrator
 
     @property
@@ -107,12 +109,12 @@ class TargetLDAP(Target):
         """Return the Singer catalog for this target."""
         return build_singer_catalog()
 
-    def get_sink_class(self, stream_name: str) -> type[Sink]:
+    def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
-            "users": UsersSink,
-            "groups": GroupsSink,
-            "organizational_units": OrganizationalUnitsSink,
+            "users": FlextTargetLdapUsersSink,
+            "groups": FlextTargetLdapGroupsSink,
+            "organizational_units": FlextTargetLdapOrganizationalUnitsSink,
         }
         sink_class = sink_mapping.get(stream_name)
         if not sink_class:
@@ -120,7 +122,7 @@ class TargetLDAP(Target):
                 "No specific sink found for stream '%s', using base sink",
                 stream_name,
             )
-            return LDAPBaseSink
+            return FlextTargetLdapBaseSink
         logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
         return sink_class
 
@@ -335,4 +337,6 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         logger.debug("Unexpected error in CLI suppressed", exc_info=True)
 
 
-TargetLDAP.cli = _target_ldap_flext_cli
+FlextTargetLdap.cli = _target_ldap_flext_cli
+
+TargetLDAP = FlextTargetLdap

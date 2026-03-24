@@ -19,7 +19,7 @@ from flext_core import FlextLogger, p, r, t
 logger: p.Logger = FlextLogger(__name__)
 
 
-class SingerTargetLDAP:
+class FlextTargetLdapSingerTarget:
     """Singer LDAP target implementation."""
 
     @override
@@ -105,4 +105,6 @@ class SingerTargetLDAP:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: t.StrSequence = ["SingerTargetLDAP"]
+SingerTargetLDAP = FlextTargetLdapSingerTarget
+
+__all__: t.StrSequence = ["FlextTargetLdapSingerTarget", "SingerTargetLDAP"]
