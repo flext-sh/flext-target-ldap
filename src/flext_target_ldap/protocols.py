@@ -53,7 +53,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             """Protocol for LDAP connection objects (ldap3.Connection or compatible)."""
 
             bound: bool
-            entries: Sequence[Mapping[str, t.ContainerValue]]
+            entries: MutableSequence[Mapping[str, t.ContainerValue]]
 
             def add(
                 self,

@@ -55,7 +55,7 @@ def validate_ldap_target_config(
             config.get("delete_removed_entries", False),
             default=False,
         )
-        attribute_mapping = dict(u.TypeConversion.extract_attribute_mapping(config))
+        attribute_mapping = u.TypeConversion.extract_attribute_mapping(config)
         object_classes = u.TypeConversion.extract_object_classes(config)
         search_filter = u.TypeConversion.to_str(
             config.get("search_filter", "(objectClass=*)"),

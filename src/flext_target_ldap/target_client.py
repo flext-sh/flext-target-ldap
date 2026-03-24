@@ -7,7 +7,13 @@ SPDX-License-Identifier: MIT.
 from __future__ import annotations
 
 import sys
-from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import (
+    Generator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 from contextlib import AbstractContextManager, contextmanager
 from typing import TypeIs, override
 
@@ -345,7 +351,7 @@ class LdapTargetClient:
                     cn = str(cn_values[0]) if cn_values else "group"
                     members_raw = ldap_attributes.get("member", [])
                     members = [str(m) for m in members_raw]
-                    group_attrs: MutableMapping[str, t.StrSequence] = {
+                    group_attrs: MutableMapping[str, MutableSequence[str]] = {
                         "objectClass": ["top", "groupOfNames"],
                         "cn": [cn],
                         "member": members or [],
@@ -690,13 +696,13 @@ class LdapUsersSink(LdapBaseSink):
             ["inetOrgPerson", "person"],
         )
         attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": [v for v in object_classes]
+            "objectClass": list(object_classes)
             if _is_container_list(object_classes)
             else ["inetOrgPerson", "person"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes):
-            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             if "person" not in obj_classes_mut:
                 obj_classes_mut.append("person")
             if "inetOrgPerson" not in obj_classes_mut:
@@ -851,13 +857,13 @@ class LdapGroupsSink(LdapBaseSink):
             ["groupOfNames"],
         )
         attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": [v for v in object_classes]
+            "objectClass": list(object_classes)
             if _is_container_list(object_classes)
             else ["groupOfNames"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
-            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             obj_classes_mut.append("groupOfNames")
             attributes["objectClass"] = obj_classes_mut
         field_mapping = {

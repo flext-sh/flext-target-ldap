@@ -15,13 +15,13 @@ from flext_core import FlextLogger, r
 from flext_target_ldap import LDAPClient, LdapProcessingCounters, c, t
 
 
-class Sink:
+class FlextTargetLdapSink:
     """Base Sink class for Singer protocol compatibility."""
 
     @override
     def __init__(
         self,
-        target: Target,
+        target: FlextTargetLdapTarget,
         stream_name: str,
         schema: Mapping[str, t.ContainerValue],
         key_properties: t.StrSequence,
@@ -76,7 +76,7 @@ class Sink:
             return r[bool].fail(f"Record processing failed: {e}")
 
 
-class Target:
+class FlextTargetLdapTarget:
     """Base Target class for Singer protocol compatibility."""
 
     @override
@@ -106,7 +106,7 @@ def _container_mapping_from_value(
     return {}
 
 
-class LDAPProcessingResult(LdapProcessingCounters):
+class FlextTargetLdapProcessingResult(LdapProcessingCounters):
     """Result of LDAP processing operations - mutable for performance tracking."""
 
     @override
@@ -118,13 +118,13 @@ class LDAPProcessingResult(LdapProcessingCounters):
         self.errors: MutableSequence[str] = []
 
 
-class LDAPBaseSink(Sink):
+class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     """Base LDAP sink with common functionality."""
 
     @override
     def __init__(
         self,
-        target: Target,
+        target: FlextTargetLdapTarget,
         stream_name: str,
         schema: Mapping[str, t.ContainerValue],
         key_properties: t.StrSequence,
@@ -134,7 +134,7 @@ class LDAPBaseSink(Sink):
         self._target = target
         self.client: LDAPClient | None = None
         self._client: LDAPClient | None = None
-        self._processing_result: LDAPProcessingResult = LDAPProcessingResult()
+        self._processing_result: FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult()
 
     def build_attributes(
         self,
@@ -172,7 +172,7 @@ class LDAPBaseSink(Sink):
             return [str(c) for c in configured_classes]
         return ["top"]
 
-    def get_processing_result(self) -> LDAPProcessingResult:
+    def get_processing_result(self) -> FlextTargetLdapProcessingResult:
         """Get processing results."""
         return self._processing_result
 
@@ -278,7 +278,7 @@ class LDAPBaseSink(Sink):
         return r[bool].ok(value=True)
 
 
-class UsersSink(LDAPBaseSink):
+class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     """LDAP sink for user entries."""
 
     _USER_FIELD_MAP: ClassVar[t.StrMapping] = {
@@ -321,13 +321,13 @@ class UsersSink(LDAPBaseSink):
             ["inetOrgPerson", "person"],
         )
         attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": [v for v in object_classes]
+            "objectClass": list(object_classes)
             if _is_container_list(object_classes)
             else ["inetOrgPerson", "person"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes):
-            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             if "person" not in obj_classes_mut:
                 obj_classes_mut.append("person")
             if "inetOrgPerson" not in obj_classes_mut:
@@ -443,7 +443,7 @@ class UsersSink(LDAPBaseSink):
             return r[bool].fail(error_msg)
 
 
-class GroupsSink(LDAPBaseSink):
+class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     """LDAP sink for group entries."""
 
     @override
@@ -556,13 +556,13 @@ class GroupsSink(LDAPBaseSink):
             ["groupOfNames"],
         )
         attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": [v for v in object_classes]
+            "objectClass": list(object_classes)
             if _is_container_list(object_classes)
             else ["groupOfNames"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
-            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             obj_classes_mut.append("groupOfNames")
             attributes["objectClass"] = obj_classes_mut
         field_mapping = {
@@ -596,7 +596,7 @@ class GroupsSink(LDAPBaseSink):
         return attributes
 
 
-class OrganizationalUnitsSink(LDAPBaseSink):
+class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
     """LDAP sink for organizational unit entries."""
 
     @override
@@ -662,13 +662,13 @@ class OrganizationalUnitsSink(LDAPBaseSink):
             ["organizationalUnit"],
         )
         attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": [v for v in default_classes]
+            "objectClass": list(default_classes)
             if _is_container_list(default_classes)
             else ["organizationalUnit"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes) and "organizationalUnit" not in obj_classes:
-            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             obj_classes_mut.append("organizationalUnit")
             attributes["objectClass"] = obj_classes_mut
         field_mapping = {"name": "ou", "description": "description"}

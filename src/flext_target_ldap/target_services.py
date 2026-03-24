@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import override
 
@@ -113,9 +113,9 @@ class LdapTransformationService:
         base_dn: str,
     ) -> r[m.TargetLdap.TransformationResult]:
         """Transform a single record into an LDAP entry using mappings."""
-        mapping_errors: t.StrSequence = []
-        ldap_attributes: Mapping[str, t.StrSequence] = {}
-        applied_mappings: Sequence[m.TargetLdap.AttributeMapping] = []
+        mapping_errors: MutableSequence[str] = []
+        ldap_attributes: MutableMapping[str, t.StrSequence] = {}
+        applied_mappings: MutableSequence[m.TargetLdap.AttributeMapping] = []
         for mapping in mappings:
             value = record.get(mapping.singer_field_name)
             if value is None and mapping.default_value is not None:
@@ -219,7 +219,7 @@ class LdapTargetOrchestrator:
         stream_type = "users"
         mappings = transformation.get_default_mappings(stream_type)
         processed = 0
-        errors: Sequence[t.ContainerValue] = []
+        errors: MutableSequence[t.ContainerValue] = []
         for record in records:
             transformed = transformation.transform_record(
                 record=record,
@@ -256,7 +256,7 @@ class LdapTargetApiService:
     @override
     def __init__(self) -> None:
         """Initialize the API service and internal orchestrator cache."""
-        self._orchestrators: Mapping[str, LdapTargetOrchestrator] = {}
+        self._orchestrators: MutableMapping[str, LdapTargetOrchestrator] = {}
 
     def create_ldap_target(
         self,
@@ -264,7 +264,7 @@ class LdapTargetApiService:
     ) -> r[target_client_module.TargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(
-            lambda: target_client_module.TargetLdap(config=config),
+            lambda: target_client_module.TargetLdap(config=dict(config)),
             catch=(RuntimeError, ValueError, TypeError),
         ).map_error(lambda exc: str(exc))
 

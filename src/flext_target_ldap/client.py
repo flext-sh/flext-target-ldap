@@ -10,7 +10,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import (
+    Generator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import override
 

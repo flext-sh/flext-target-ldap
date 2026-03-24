@@ -284,11 +284,19 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
                     _schema: MutableMapping[str, t.ContainerValue] = {}
-                    current_stream = raw.get("stream")
+                    raw_stream = raw.get("stream")
+                    current_stream = str(raw_stream) if raw_stream is not None else None
                 elif msg_type == "RECORD" and api is not None:
                     record_data = raw.get("record", {})
-                    stream = raw.get("stream") or current_stream or "users"
+                    raw_rec_stream = raw.get("stream")
+                    stream = (
+                        str(raw_rec_stream)
+                        if raw_rec_stream is not None
+                        else (current_stream or "users")
+                    )
                     normalized_record: MutableMapping[str, t.ContainerValue] = {}
+                    if not isinstance(record_data, Mapping):
+                        continue
                     for key, value in record_data.items():
                         match value:
                             case bool() | int() | float() | str() | dict() | list():

@@ -88,7 +88,7 @@ def validate_ldap_config(
                 config.get("delete_removed_entries", False),
                 default=False,
             ),
-            attribute_mapping=dict(attribute_mapping),
+            attribute_mapping=attribute_mapping,
             object_classes=object_classes,
         )
         return r[FlextTargetLdapSettings].ok(validated_config)

@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping
 from typing import override
 
 from flext_core import FlextLogger, r, t
@@ -26,7 +26,7 @@ class SingerLDAPCatalogManager:
     @override
     def __init__(self) -> None:
         """Initialize Singer LDAP catalog manager."""
-        self._catalog_entries: Mapping[str, SingerLDAPCatalogEntry] = {}
+        self._catalog_entries: MutableMapping[str, SingerLDAPCatalogEntry] = {}
 
     def add_stream(
         self,
@@ -38,7 +38,7 @@ class SingerLDAPCatalogManager:
             entry = SingerLDAPCatalogEntry(
                 tap_stream_id=stream_name,
                 stream=stream_name,
-                stream_schema=schema,
+                stream_schema={k: v for k, v in schema.items()},  # noqa: C416
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)

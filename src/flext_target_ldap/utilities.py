@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import override
 
@@ -46,7 +46,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
         if isinstance(value, list):
-            normalized_list: Sequence[t.ContainerValue] = []
+            normalized_list: MutableSequence[t.ContainerValue] = []
             for item in value:
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -56,7 +56,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         normalized_list.append(coerced_item)
             return normalized_list
         if isinstance(value, Mapping):
-            normalized_dict: Mapping[str, t.ValueOrModel] = {}
+            normalized_dict: MutableMapping[str, t.ValueOrModel] = {}
             for key, item in value.items():
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities._coerce_container_value(
@@ -234,7 +234,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             if not record:
                 return r[Mapping[str, Sequence[bytes]]].fail("Record cannot be empty")
             try:
-                ldap_attrs: Mapping[str, Sequence[bytes]] = {}
+                ldap_attrs: MutableMapping[str, Sequence[bytes]] = {}
                 mapping = attribute_mapping or {}
                 for key, value in record.items():
                     if value is None:
@@ -396,7 +396,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             if not stream_name or not schema:
                 return r[bool].fail("Stream name and schema are required")
             raw_props = schema.get("properties", {})
-            properties: Mapping[str, t.ValueOrModel] = {}
+            properties: MutableMapping[str, t.ValueOrModel] = {}
             if u.is_dict_like(raw_props):
                 for k, v in raw_props.items():
                     coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
@@ -571,14 +571,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             Mapping[str, t.ContainerValue]: Processing state
 
             """
-            state: Mapping[str, t.ContainerValue] = {
+            state: MutableMapping[str, t.ContainerValue] = {
                 "stream_name": stream_name,
                 "records_processed": records_processed,
                 "last_updated": datetime.now(UTC).isoformat(),
                 "target_type": "ldap",
             }
             if last_processed_record:
-                checkpoint: Mapping[str, t.ContainerValue] = {}
+                checkpoint: MutableMapping[str, t.ContainerValue] = {}
                 for field_key in ("id", "dn", "_timestamp"):
                     field_val = last_processed_record.get(field_key)
                     if field_val is not None:
@@ -607,7 +607,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             bookmarks = state.get("bookmarks")
             if not isinstance(bookmarks, Mapping):
                 return {}
-            bookmarks_map: Mapping[str, t.ContainerValue] = {}
+            bookmarks_map: MutableMapping[str, t.ContainerValue] = {}
             for k, v in bookmarks.items():
                 coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
                 if coerced_value is not None and isinstance(
@@ -616,7 +616,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     bookmarks_map[str(k)] = coerced_value
             stream_state_data = bookmarks_map.get(stream_name)
             if isinstance(stream_state_data, Mapping):
-                stream_state: Mapping[str, t.ContainerValue] = {}
+                stream_state: MutableMapping[str, t.ContainerValue] = {}
                 for k, v in stream_state_data.items():
                     if isinstance(v, (str, int, float, bool)):
                         stream_state[str(k)] = v
@@ -640,13 +640,13 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             t.ConfigurationMapping: Updated state
 
             """
-            state_dict: Mapping[str, t.ContainerValue] = {
+            state_dict: MutableMapping[str, t.ContainerValue] = {
                 sk: sv
                 for sk, sv in state.items()
                 if isinstance(sv, (str, int, float, bool))
             }
             bookmarks_val = state.get("bookmarks")
-            bookmarks_dict: Mapping[str, t.ContainerValue] = {}
+            bookmarks_dict: MutableMapping[str, t.ContainerValue] = {}
             if isinstance(bookmarks_val, Mapping):
                 for k, v in bookmarks_val.items():
                     if isinstance(v, (str, int, float, bool)):
@@ -780,7 +780,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """
             raw_attr_map = config.get("attribute_mapping")
             if u.is_dict_like(raw_attr_map):
-                extracted_mapping: t.StrMapping = {}
+                extracted_mapping: MutableMapping[str, str] = {}
                 for k, v in raw_attr_map.items():
                     extracted_mapping[str(k)] = str(v)
                 return extracted_mapping
