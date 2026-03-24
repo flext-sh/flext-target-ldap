@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r, t
@@ -35,8 +35,8 @@ class DataTransformationEngine:
     ) -> r[m.TargetLdap.DataTransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: Mapping[str, t.ContainerValue] = dict(data)
-            applied_rules: t.StrSequence = []
+            transformed_data: MutableMapping[str, t.ContainerValue] = dict(data)
+            applied_rules: MutableSequence[str] = []
             for rule in self.rules:
                 if not rule.enabled:
                     continue
@@ -49,7 +49,7 @@ class DataTransformationEngine:
                             )
                             applied_rules.append(rule.name)
                         case list() as items:
-                            new_items: Sequence[t.ContainerValue] = []
+                            new_items: MutableSequence[t.ContainerValue] = []
                             matched = False
                             for item in items:
                                 if isinstance(item, str) and rule.pattern in item:

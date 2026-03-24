@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, MutableMapping
 from contextlib import suppress
 from importlib import import_module
 from pathlib import Path
@@ -92,7 +92,7 @@ class TargetLDAP(Target):
     def orchestrator(self) -> LDAPTargetOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            normalized_config: t.ConfigurationMapping = {}
+            normalized_config: MutableMapping[str, t.Scalar] = {}
             for key, value in self.config.items():
                 match value:
                     case bool() | int() | str():
@@ -283,12 +283,12 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     cli_helper = _default_cli_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    _schema: Mapping[str, t.ContainerValue] = {}
+                    _schema: MutableMapping[str, t.ContainerValue] = {}
                     current_stream = raw.get("stream")
                 elif msg_type == "RECORD" and api is not None:
                     record_data = raw.get("record", {})
                     stream = raw.get("stream") or current_stream or "users"
-                    normalized_record: Mapping[str, t.ContainerValue] = {}
+                    normalized_record: MutableMapping[str, t.ContainerValue] = {}
                     for key, value in record_data.items():
                         match value:
                             case bool() | int() | float() | str() | dict() | list():

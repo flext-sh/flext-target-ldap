@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger, r
@@ -115,7 +115,7 @@ class LDAPProcessingResult(LdapProcessingCounters):
         self.processed_count: int = 0
         self.success_count: int = 0
         self.error_count: int = 0
-        self.errors: t.StrSequence = []
+        self.errors: MutableSequence[str] = []
 
 
 class LDAPBaseSink(Sink):
@@ -184,7 +184,7 @@ class LDAPBaseSink(Sink):
             return
         try:
             records_raw = _context.get("records", [])
-            records: Sequence[Mapping[str, t.ContainerValue]] = []
+            records: MutableSequence[Mapping[str, t.ContainerValue]] = []
             if isinstance(records_raw, list):
                 records.extend(item for item in records_raw if isinstance(item, dict))
             logger.info(
@@ -192,7 +192,7 @@ class LDAPBaseSink(Sink):
             )
             for record in records:
                 if isinstance(record, dict):
-                    normalized_record: Mapping[str, t.ContainerValue] = {}
+                    normalized_record: MutableMapping[str, t.ContainerValue] = {}
                     for k, v in record.items():
                         normalized_record[str(k)] = v
                     self.process_record(normalized_record, _context)
@@ -292,7 +292,7 @@ class UsersSink(LDAPBaseSink):
         _record: Mapping[str, t.ContainerValue],
     ) -> r[Mapping[str, t.ContainerValue]]:
         """Build LDAP attributes for user entry."""
-        attrs: Mapping[str, t.ContainerValue] = {}
+        attrs: MutableMapping[str, t.ContainerValue] = {}
         for k, v in _record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
             if _is_container_list(v):
@@ -314,23 +314,25 @@ class UsersSink(LDAPBaseSink):
     def build_user_attributes(
         self,
         record: Mapping[str, t.ContainerValue],
-    ) -> Mapping[str, t.ContainerValue]:
+    ) -> MutableMapping[str, t.ContainerValue]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: Mapping[str, t.ContainerValue] = {
-            "objectClass": object_classes.copy()
+        attributes: MutableMapping[str, t.ContainerValue] = {
+            "objectClass": [v for v in object_classes]
             if _is_container_list(object_classes)
             else ["inetOrgPerson", "person"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes):
-            if "person" not in obj_classes:
-                obj_classes.append("person")
-            if "inetOrgPerson" not in obj_classes:
-                obj_classes.append("inetOrgPerson")
+            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            if "person" not in obj_classes_mut:
+                obj_classes_mut.append("person")
+            if "inetOrgPerson" not in obj_classes_mut:
+                obj_classes_mut.append("inetOrgPerson")
+            attributes["objectClass"] = obj_classes_mut
         field_mapping = {
             "username": "uid",
             "email": "mail",
@@ -347,7 +349,7 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: t.StrMapping = {}
+        mapping: MutableMapping[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -399,7 +401,7 @@ class UsersSink(LDAPBaseSink):
                 if _is_container_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
-            attributes_dict: Mapping[str, t.ContainerValue] = {}
+            attributes_dict: MutableMapping[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
                     if _is_container_list(v):
@@ -450,7 +452,7 @@ class GroupsSink(LDAPBaseSink):
         _record: Mapping[str, t.ContainerValue],
     ) -> r[Mapping[str, t.ContainerValue]]:
         """Build LDAP attributes for group entry."""
-        attrs: Mapping[str, t.ContainerValue] = {}
+        attrs: MutableMapping[str, t.ContainerValue] = {}
         field_map = {"members": "member"}
         for k, v in _record.items():
             target_key = field_map.get(k, k)
@@ -503,11 +505,11 @@ class GroupsSink(LDAPBaseSink):
                 if _is_container_list(object_classes_raw)
                 else ["groupOfNames"]
             )
-            attributes_dict: Mapping[str, t.ContainerValue] = {}
+            attributes_dict: MutableMapping[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if k != "objectClass":
                     if _is_container_list(v):
-                        attributes_dict[k] = list(v)
+                        attributes_dict[k] = [i for i in v]  # noqa: C416
                     else:
                         attributes_dict[k] = v
             add_result: r[bool] = self.client.add_entry(
@@ -547,20 +549,22 @@ class GroupsSink(LDAPBaseSink):
     def _build_group_attributes(
         self,
         record: Mapping[str, t.ContainerValue],
-    ) -> Mapping[str, t.ContainerValue]:
+    ) -> MutableMapping[str, t.ContainerValue]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes: Mapping[str, t.ContainerValue] = {
-            "objectClass": object_classes.copy()
+        attributes: MutableMapping[str, t.ContainerValue] = {
+            "objectClass": [v for v in object_classes]
             if _is_container_list(object_classes)
             else ["groupOfNames"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
-            obj_classes.append("groupOfNames")
+            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            obj_classes_mut.append("groupOfNames")
+            attributes["objectClass"] = obj_classes_mut
         field_mapping = {
             "name": "cn",
             "description": "description",
@@ -575,7 +579,7 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: t.StrMapping = {}
+        mapping: MutableMapping[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -612,10 +616,10 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 return r[bool].fail("No OU name found in record")
             ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
             attributes = self._build_ou_attributes(_record)
-            attributes_dict: Mapping[str, t.ContainerValue] = {}
+            attributes_dict: MutableMapping[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if _is_container_list(v):
-                    attributes_dict[k] = list(v)
+                    attributes_dict[k] = [i for i in v]  # noqa: C416
                 else:
                     attributes_dict[k] = v
             add_result: r[bool] = self.client.add_entry(ou_dn, attributes_dict)
@@ -651,20 +655,22 @@ class OrganizationalUnitsSink(LDAPBaseSink):
     def _build_ou_attributes(
         self,
         record: Mapping[str, t.ContainerValue],
-    ) -> Mapping[str, t.ContainerValue]:
+    ) -> MutableMapping[str, t.ContainerValue]:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(
             "object_classes",
             ["organizationalUnit"],
         )
-        attributes: Mapping[str, t.ContainerValue] = {
-            "objectClass": default_classes.copy()
+        attributes: MutableMapping[str, t.ContainerValue] = {
+            "objectClass": [v for v in default_classes]
             if _is_container_list(default_classes)
             else ["organizationalUnit"],
         }
         obj_classes = attributes.get("objectClass")
         if _is_container_list(obj_classes) and "organizationalUnit" not in obj_classes:
-            obj_classes.append("organizationalUnit")
+            obj_classes_mut: MutableSequence[t.ContainerValue] = [v for v in obj_classes]
+            obj_classes_mut.append("organizationalUnit")
+            attributes["objectClass"] = obj_classes_mut
         field_mapping = {"name": "ou", "description": "description"}
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
@@ -672,7 +678,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: t.StrMapping = {}
+        mapping: MutableMapping[str, str] = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():

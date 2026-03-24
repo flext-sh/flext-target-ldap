@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableSequence, Sequence
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from flext_core import t
@@ -95,7 +95,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             processed_count: int
             success_count: int
             error_count: int
-            errors: t.StrSequence
+            errors: MutableSequence[str]
 
         class LdapApi(Protocol):
             """Protocol for LDAP API operations."""

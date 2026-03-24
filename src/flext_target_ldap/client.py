@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
 from contextlib import AbstractContextManager, contextmanager, suppress
 from typing import override
 
@@ -169,7 +169,7 @@ class LDAPClient:
                 attributes=["dn"],
             )
             if search_result.is_success:
-                return r[bool].ok(search_result.value)
+                return r[bool].ok(bool(search_result.value))
             return r[bool].ok(value=False)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to check entry existence: %s", dn)
@@ -261,13 +261,13 @@ class LDAPClient:
             with self.get_connection() as conn:
                 conn.search(base_dn, search_filter, attributes=attributes or [])
                 raw_entries = conn.entries
-                entries: Sequence[LDAPSearchEntry] = []
+                entries: MutableSequence[LDAPSearchEntry] = []
                 for raw in raw_entries:
                     if not isinstance(raw, LDAPSearchEntry):
                         continue
                     dn = raw.dn
                     attr_names: t.StrSequence = list(raw.attributes.keys())
-                    attrs: Mapping[str, str | t.StrSequence] = {}
+                    attrs: MutableMapping[str, str | t.StrSequence] = {}
                     for name in attr_names:
                         name_str = name
                         try:
@@ -327,7 +327,7 @@ class LDAPClient:
             def __init__(self, session_id: str) -> None:
                 self.session_id = session_id
                 self.bound = True
-                self.entries: Sequence[Mapping[str, t.ContainerValue]] = []
+                self.entries: MutableSequence[Mapping[str, t.ContainerValue]] = []
 
             def add(
                 self,

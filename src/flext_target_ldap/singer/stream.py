@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, MutableMapping, MutableSequence
 from typing import override
 
 from flext_core import FlextLogger, r
@@ -27,7 +27,7 @@ class LDAPStreamProcessingStats:
         self.records_processed = 0
         self.records_success = 0
         self.records_failed = 0
-        self.errors: t.StrSequence = []
+        self.errors: MutableSequence[str] = []
 
     @property
     def success_rate(self) -> float:
@@ -43,7 +43,7 @@ class SingerLDAPStreamProcessor:
     @override
     def __init__(self) -> None:
         """Initialize Singer LDAP stream processor."""
-        self._stream_stats: Mapping[str, LDAPStreamProcessingStats] = {}
+        self._stream_stats: MutableMapping[str, LDAPStreamProcessingStats] = {}
 
     def get_stream_stats(self, stream_name: str) -> r[LDAPStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""

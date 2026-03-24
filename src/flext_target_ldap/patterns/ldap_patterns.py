@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r, t
@@ -79,7 +79,7 @@ class LDAPDataTransformer:
     ) -> r[Mapping[str, t.StrSequence]]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes: Mapping[str, t.StrSequence] = {}
+            attributes: MutableMapping[str, t.StrSequence] = {}
             attributes["objectClass"] = object_classes
             for key, value in record.items():
                 attributes[key] = self._to_ldap_values(value)
@@ -99,7 +99,7 @@ class LDAPDataTransformer:
     ) -> r[Mapping[str, str | None]]:
         """Transform Singer record for LDAP storage."""
         try:
-            transformed: Mapping[str, str | None] = {}
+            transformed: MutableMapping[str, str | None] = {}
             schema_model = SingerSchemaDefinition.model_validate(schema or {})
             for key, value in record.items():
                 ldap_key = self._normalize_ldap_attribute_name(key)
@@ -153,7 +153,7 @@ class LDAPSchemaMapper:
     ) -> r[t.StrMapping]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
-            ldap_attributes: t.StrMapping = {}
+            ldap_attributes: MutableMapping[str, str] = {}
             schema_model = SingerSchemaDefinition.model_validate(schema)
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
@@ -277,7 +277,7 @@ class LDAPEntryManager:
     ) -> r[Mapping[str, Sequence[tuple[str, t.StrSequence]]]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: Mapping[str, Sequence[tuple[str, t.StrSequence]]] = {}
+            changes: MutableMapping[str, Sequence[tuple[str, t.StrSequence]]] = {}
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
             for attr in all_attrs:
                 current_value = current_attrs.get(attr)
