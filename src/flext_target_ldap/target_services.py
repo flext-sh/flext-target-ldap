@@ -311,19 +311,9 @@ class FlextTargetLdapApiService:
         return FlextTargetLdapConnectionService(validated.value).test_connection()
 
 
-# Short aliases for __init__.py imports
-LdapConnectionService = FlextTargetLdapConnectionService
-LdapTargetApiService = FlextTargetLdapApiService
-LdapTargetOrchestrator = FlextTargetLdapOrchestrator
-LdapTransformationService = FlextTargetLdapTransformationService
-
 __all__ = [
     "FlextTargetLdapApiService",
     "FlextTargetLdapConnectionService",
     "FlextTargetLdapOrchestrator",
     "FlextTargetLdapTransformationService",
-    "LdapConnectionService",
-    "LdapTargetApiService",
-    "LdapTargetOrchestrator",
-    "LdapTransformationService",
 ]

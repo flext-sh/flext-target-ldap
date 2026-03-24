@@ -27,4 +27,7 @@ class FlextTargetLdapProcessingCounters:
         self.success_count += 1
 
 
+# Backward-compatible alias
 LdapProcessingCounters = FlextTargetLdapProcessingCounters
+
+__all__ = ["FlextTargetLdapProcessingCounters", "LdapProcessingCounters"]

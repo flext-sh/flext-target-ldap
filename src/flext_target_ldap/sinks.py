@@ -12,8 +12,12 @@ from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger, r
 
-from flext_target_ldap import LdapProcessingCounters, c, t
-from flext_target_ldap.client import LDAPClient as LDAPClient  # noqa: PLC0414
+from flext_target_ldap import (
+    FlextTargetLdapLdapClient,
+    FlextTargetLdapProcessingCounters,
+    c,
+    t,
+)
 
 
 class FlextTargetLdapSink:
@@ -107,7 +111,7 @@ def _container_mapping_from_value(
     return {}
 
 
-class FlextTargetLdapProcessingResult(LdapProcessingCounters):
+class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
     """Result of LDAP processing operations - mutable for performance tracking."""
 
     @override
@@ -133,8 +137,8 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
         self._target = target
-        self.client: LDAPClient | None = None
-        self._client: LDAPClient | None = None
+        self.client: FlextTargetLdapLdapClient | None = None
+        self._client: FlextTargetLdapLdapClient | None = None
         self._processing_result: FlextTargetLdapProcessingResult = (
             FlextTargetLdapProcessingResult()
         )
@@ -181,7 +185,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
 
     def process_batch(self, _context: Mapping[str, t.ContainerValue]) -> None:
         """Process a batch of records."""
-        setup_result: r[LDAPClient] = self.setup_client()
+        setup_result: r[FlextTargetLdapLdapClient] = self.setup_client()
         if not setup_result.is_success:
             logger.error(f"Cannot process batch: {setup_result.error or ''}")
             return
@@ -225,7 +229,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             self._processing_result.add_error(error_msg)
             return r[bool].fail(error_msg)
 
-    def setup_client(self) -> r[LDAPClient]:
+    def setup_client(self) -> r[FlextTargetLdapLdapClient]:
         """Set up LDAP client connection."""
         try:
             connection_config = {
@@ -239,18 +243,18 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
                 "password": self._target.config.get("password", ""),
                 "timeout": self._target.config.get("timeout", 30),
             }
-            self.client = LDAPClient(connection_config)
+            self.client = FlextTargetLdapLdapClient(connection_config)
             connect_result: r[str] = self.client.connect()
             if not connect_result.is_success:
-                return r[LDAPClient].fail(
+                return r[FlextTargetLdapLdapClient].fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
-            return r[LDAPClient].ok(self.client)
+            return r[FlextTargetLdapLdapClient].ok(self.client)
         except (RuntimeError, ValueError, TypeError) as e:
             error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
-            return r[LDAPClient].fail(error_msg)
+            return r[FlextTargetLdapLdapClient].fail(error_msg)
 
     def teardown_client(self) -> None:
         """Teardown LDAP client connection."""
@@ -695,7 +699,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         return attributes
 
 
-# Aliases for __init__.py exports
+# Backward-compatible aliases
 GroupsSink = FlextTargetLdapGroupsSink
 LDAPBaseSink = FlextTargetLdapBaseSink
 LDAPProcessingResult = FlextTargetLdapProcessingResult
@@ -704,7 +708,7 @@ Sink = FlextTargetLdapSink
 Target = FlextTargetLdapTarget
 UsersSink = FlextTargetLdapUsersSink
 
-__all__ = [
+__all__: t.StrSequence = [
     "FlextTargetLdapBaseSink",
     "FlextTargetLdapGroupsSink",
     "FlextTargetLdapOrganizationalUnitsSink",

@@ -105,6 +105,7 @@ class FlextTargetLdapSingerTarget:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
+# Backward-compatible alias
 SingerTargetLDAP = FlextTargetLdapSingerTarget
 
 __all__: t.StrSequence = ["FlextTargetLdapSingerTarget", "SingerTargetLDAP"]

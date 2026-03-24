@@ -339,4 +339,5 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
 
 FlextTargetLdap.cli = _target_ldap_flext_cli
 
+# Backward-compatible alias
 TargetLDAP = FlextTargetLdap

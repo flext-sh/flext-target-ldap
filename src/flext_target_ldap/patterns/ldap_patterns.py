@@ -357,8 +357,21 @@ class FlextTargetLdapEntryManager:
                 return []
 
 
-# Aliases for __init__.py exports
-LDAPTypeConverter = FlextTargetLdapTypeConverter
+# Backward-compatible aliases
 LDAPDataTransformer = FlextTargetLdapDataTransformer
-LDAPSchemaMapper = FlextTargetLdapSchemaMapper
 LDAPEntryManager = FlextTargetLdapEntryManager
+LDAPSchemaMapper = FlextTargetLdapSchemaMapper
+LDAPTypeConverter = FlextTargetLdapTypeConverter
+
+__all__: t.StrSequence = [
+    "FlextTargetLdapDataTransformer",
+    "FlextTargetLdapEntryManager",
+    "FlextTargetLdapSchemaMapper",
+    "FlextTargetLdapTypeConverter",
+    "LDAPDataTransformer",
+    "LDAPEntryManager",
+    "LDAPSchemaMapper",
+    "LDAPTypeConverter",
+    "SingerPropertyDefinition",
+    "SingerSchemaDefinition",
+]

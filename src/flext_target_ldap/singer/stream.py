@@ -72,6 +72,7 @@ class FlextTargetLdapStreamProcessor:
             return r[bool].fail(f"Stream initialization failed: {e}")
 
 
+# Backward-compatible aliases
 LDAPStreamProcessingStats = FlextTargetLdapStreamProcessingStats
 SingerLDAPStreamProcessor = FlextTargetLdapStreamProcessor
 
