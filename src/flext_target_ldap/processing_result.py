@@ -27,6 +27,4 @@ class FlextTargetLdapProcessingCounters:
         self.success_count += 1
 
 
-LdapProcessingCounters = FlextTargetLdapProcessingCounters
-
-__all__ = ["FlextTargetLdapProcessingCounters", "LdapProcessingCounters"]
+__all__ = ["FlextTargetLdapProcessingCounters"]

@@ -341,6 +341,4 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
 
 FlextTargetLdap.cli = _target_ldap_flext_cli
 
-TargetLDAP = FlextTargetLdap
-
-__all__: list[str] = ["FlextTargetLdap", "TargetLDAP", "main"]
+__all__: list[str] = ["FlextTargetLdap", "main"]

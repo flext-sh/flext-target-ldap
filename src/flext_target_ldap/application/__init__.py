@@ -22,19 +22,19 @@ if TYPE_CHECKING:
 
     from flext_target_ldap.application.orchestrator import (
         FlextTargetLdapOrchestrator,
-        LDAPTargetOrchestrator,
         logger,
     )
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "FlextTargetLdapOrchestrator": ("flext_target_ldap.application.orchestrator", "FlextTargetLdapOrchestrator"),
-    "LDAPTargetOrchestrator": ("flext_target_ldap.application.orchestrator", "LDAPTargetOrchestrator"),
+    "FlextTargetLdapOrchestrator": (
+        "flext_target_ldap.application.orchestrator",
+        "FlextTargetLdapOrchestrator",
+    ),
     "logger": ("flext_target_ldap.application.orchestrator", "logger"),
 }
 
 __all__ = [
     "FlextTargetLdapOrchestrator",
-    "LDAPTargetOrchestrator",
     "logger",
 ]
 

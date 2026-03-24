@@ -819,7 +819,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             return ["top"]
 
         @staticmethod
-        def to_bool(value: t.ContainerValue | t.ConfigMap | None, *, default: bool) -> bool:
+        def to_bool(
+            value: t.ContainerValue | t.ConfigMap | None, *, default: bool
+        ) -> bool:
             """Convert value to bool with safe defaults.
 
             Business Rule: Boolean Configuration Conversion

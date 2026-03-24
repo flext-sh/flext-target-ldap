@@ -118,7 +118,7 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
             def create_target(
                 self,
                 config: Mapping[str, t.ContainerValue],
-            ) -> FlextLdapProtocols.Result[target_client_module.TargetLdap]:
+            ) -> FlextLdapProtocols.Result[target_client_module.FlextTargetLdap]:
                 """Create an LDAP target from config."""
                 ...
 

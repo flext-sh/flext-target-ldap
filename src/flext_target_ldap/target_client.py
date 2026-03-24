@@ -1030,7 +1030,11 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def get_sink(self, stream_name: str) -> FlextTargetLdapSink:
         """Get a sink instance for the stream, processing configuration as needed."""
         dn_templates = self.config.get("dn_templates", {})
-        if isinstance(dn_templates, dict) and stream_name in dn_templates and isinstance(self.config, MutableMapping):
+        if (
+            isinstance(dn_templates, dict)
+            and stream_name in dn_templates
+            and isinstance(self.config, MutableMapping)
+        ):
             self.config[f"{stream_name}_dn_template"] = dn_templates[stream_name]
 
         default_object_classes = self.config.get("default_object_classes", {})
@@ -1116,8 +1120,6 @@ def main() -> None:
     target.cli()
 
 
-TargetLdap = FlextTargetLdap
-
 __all__ = [
     "FlextTargetLdap",
     "FlextTargetLdapBaseSink",
@@ -1127,6 +1129,5 @@ __all__ = [
     "FlextTargetLdapProcessingResult",
     "FlextTargetLdapSearchEntry",
     "FlextTargetLdapUsersSink",
-    "TargetLdap",
     "main",
 ]

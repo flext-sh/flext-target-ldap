@@ -38,59 +38,66 @@ class FlextTargetLdapSettings(m.Entity):
     attribute_mapping: Annotated[t.StrMapping, Field(default_factory=dict)]
     object_classes: Annotated[t.StrSequence, Field(default_factory=lambda: ["top"])]
 
+    @staticmethod
+    def validate_ldap_config(
+        config: Mapping[str, t.ContainerValue | t.ConfigMap],
+    ) -> r[FlextTargetLdapSettings]:
+        """Validate LDAP configuration."""
+        try:
+            connection_config = u.TypeConversion.build_connection_config(config)
+            attribute_mapping = u.TypeConversion.extract_attribute_mapping(config)
+            object_classes = u.TypeConversion.extract_object_classes(
+                config,
+            )
+            validated_config = FlextTargetLdapSettings.model_validate({
+                "connection": connection_config,
+                "base_dn": u.TypeConversion.to_str(
+                    config.get("base_dn", ""),
+                ),
+                "search_filter": u.TypeConversion.to_str(
+                    config.get("search_filter", "(objectClass=*)"),
+                ),
+                "search_scope": u.TypeConversion.to_str(
+                    config.get("search_scope", "SUBTREE"),
+                ),
+                "connect_timeout": u.TypeConversion.to_int(
+                    config.get("connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3),
+                    c.DEFAULT_TIMEOUT_SECONDS // 3,
+                ),
+                "receive_timeout": u.TypeConversion.to_int(
+                    config.get("receive_timeout", c.DEFAULT_TIMEOUT_SECONDS),
+                    c.DEFAULT_TIMEOUT_SECONDS,
+                ),
+                "batch_size": u.TypeConversion.to_int(
+                    config.get("batch_size", c.DEFAULT_SIZE),
+                    c.DEFAULT_SIZE,
+                ),
+                "max_records": u.TypeConversion.to_int(
+                    config.get("max_records"),
+                    0,
+                ),
+                "create_missing_entries": u.TypeConversion.to_bool(
+                    config.get("create_missing_entries", True),
+                    default=True,
+                ),
+                "update_existing_entries": u.TypeConversion.to_bool(
+                    config.get("update_existing_entries", True),
+                    default=True,
+                ),
+                "delete_removed_entries": u.TypeConversion.to_bool(
+                    config.get("delete_removed_entries", False),
+                    default=False,
+                ),
+                "attribute_mapping": attribute_mapping,
+                "object_classes": object_classes,
+            })
+            return r[FlextTargetLdapSettings].ok(validated_config)
+        except (RuntimeError, ValueError, TypeError) as e:
+            return r[FlextTargetLdapSettings].fail(f"Configuration validation failed: {e}")
+
 
 def validate_ldap_config(
     config: Mapping[str, t.ContainerValue | t.ConfigMap],
 ) -> r[FlextTargetLdapSettings]:
-    """Validate LDAP configuration."""
-    try:
-        connection_config = u.TypeConversion.build_connection_config(config)
-        attribute_mapping = u.TypeConversion.extract_attribute_mapping(config)
-        object_classes = u.TypeConversion.extract_object_classes(
-            config,
-        )
-        validated_config = FlextTargetLdapSettings.model_validate({
-            "connection": connection_config,
-            "base_dn": u.TypeConversion.to_str(
-                config.get("base_dn", ""),
-            ),
-            "search_filter": u.TypeConversion.to_str(
-                config.get("search_filter", "(objectClass=*)"),
-            ),
-            "search_scope": u.TypeConversion.to_str(
-                config.get("search_scope", "SUBTREE"),
-            ),
-            "connect_timeout": u.TypeConversion.to_int(
-                config.get("connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3),
-                c.DEFAULT_TIMEOUT_SECONDS // 3,
-            ),
-            "receive_timeout": u.TypeConversion.to_int(
-                config.get("receive_timeout", c.DEFAULT_TIMEOUT_SECONDS),
-                c.DEFAULT_TIMEOUT_SECONDS,
-            ),
-            "batch_size": u.TypeConversion.to_int(
-                config.get("batch_size", c.DEFAULT_SIZE),
-                c.DEFAULT_SIZE,
-            ),
-            "max_records": u.TypeConversion.to_int(
-                config.get("max_records"),
-                0,
-            ),
-            "create_missing_entries": u.TypeConversion.to_bool(
-                config.get("create_missing_entries", True),
-                default=True,
-            ),
-            "update_existing_entries": u.TypeConversion.to_bool(
-                config.get("update_existing_entries", True),
-                default=True,
-            ),
-            "delete_removed_entries": u.TypeConversion.to_bool(
-                config.get("delete_removed_entries", False),
-                default=False,
-            ),
-            "attribute_mapping": attribute_mapping,
-            "object_classes": object_classes,
-        })
-        return r[FlextTargetLdapSettings].ok(validated_config)
-    except (RuntimeError, ValueError, TypeError) as e:
-        return r[FlextTargetLdapSettings].fail(f"Configuration validation failed: {e}")
+    """Validate LDAP configuration - delegates to FlextTargetLdapSettings.validate_ldap_config."""
+    return FlextTargetLdapSettings.validate_ldap_config(config)

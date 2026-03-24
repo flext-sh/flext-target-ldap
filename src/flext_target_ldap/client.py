@@ -292,7 +292,8 @@ class FlextTargetLdapLdapClient:
                 _ldap3_call(conn, "search", base_dn, search_filter, attributes or [])
                 raw_entries: Sequence[t.NormalizedValue] = _ldap3_entries(conn)
                 conn_entries: Sequence[FlextTargetLdapSearchEntry] = [
-                    entry for entry in raw_entries
+                    entry
+                    for entry in raw_entries
                     if isinstance(entry, FlextTargetLdapSearchEntry)
                 ]
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
@@ -428,12 +429,7 @@ class FlextTargetLdapLdapClient:
             return ConnectionWrapper("test_session")
 
 
-LDAPClient = FlextTargetLdapLdapClient
-LDAPSearchEntry = FlextTargetLdapSearchEntry
-
 __all__: t.StrSequence = [
     "FlextTargetLdapLdapClient",
     "FlextTargetLdapSearchEntry",
-    "LDAPClient",
-    "LDAPSearchEntry",
 ]
