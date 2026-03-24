@@ -716,7 +716,7 @@ class LdapUsersSink(LdapBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: Mapping[str, str] = {}
+        mapping: t.StrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -870,7 +870,7 @@ class LdapGroupsSink(LdapBaseSink):
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: Mapping[str, str] = {}
+        mapping: t.StrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -950,7 +950,7 @@ class LdapOrganizationalUnitsSink(LdapBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: Mapping[str, str] = {}
+        mapping: t.StrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():

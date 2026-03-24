@@ -74,27 +74,27 @@ class LDAPDataTransformer:
 
     def prepare_ldap_attributes(
         self,
-        record: Mapping[str, t.Scalar],
-        object_classes: Sequence[str],
-    ) -> r[Mapping[str, Sequence[str]]]:
+        record: t.ConfigurationMapping,
+        object_classes: t.StrSequence,
+    ) -> r[Mapping[str, t.StrSequence]]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes: Mapping[str, Sequence[str]] = {}
+            attributes: Mapping[str, t.StrSequence] = {}
             attributes["objectClass"] = object_classes
             for key, value in record.items():
                 attributes[key] = self._to_ldap_values(value)
-            return r[Mapping[str, Sequence[str]]].ok(attributes)
+            return r[Mapping[str, t.StrSequence]].ok(attributes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return r[Mapping[str, Sequence[str]]].fail(
+            return r[Mapping[str, t.StrSequence]].fail(
                 f"Attribute preparation failed: {e}"
             )
 
     def transform_record(
         self,
-        record: Mapping[str, t.Scalar],
+        record: t.ConfigurationMapping,
         schema: SingerSchemaDefinition
-        | Mapping[str, Mapping[str, Mapping[str, str] | str]]
+        | Mapping[str, Mapping[str, t.StrMapping | str]]
         | None = None,
     ) -> r[Mapping[str, str | None]]:
         """Transform Singer record for LDAP storage."""
@@ -130,7 +130,7 @@ class LDAPDataTransformer:
             normalized = name.lower()
         return normalized
 
-    def _to_ldap_values(self, value: t.Scalar | Sequence[t.Scalar]) -> Sequence[str]:
+    def _to_ldap_values(self, value: t.Scalar | t.ScalarList) -> t.StrSequence:
         """Normalize incoming Singer value to LDAP list values."""
         match value:
             case list() as values:
@@ -148,13 +148,12 @@ class LDAPSchemaMapper:
 
     def map_singer_schema_to_ldap(
         self,
-        schema: SingerSchemaDefinition
-        | Mapping[str, Mapping[str, Mapping[str, str] | str]],
+        schema: SingerSchemaDefinition | Mapping[str, Mapping[str, t.StrMapping | str]],
         object_class: str = "inetOrgPerson",
-    ) -> r[Mapping[str, str]]:
+    ) -> r[t.StrMapping]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
-            ldap_attributes: Mapping[str, str] = {}
+            ldap_attributes: t.StrMapping = {}
             schema_model = SingerSchemaDefinition.model_validate(schema)
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
@@ -165,10 +164,10 @@ class LDAPSchemaMapper:
                     else "DirectoryString"
                 )
                 ldap_attributes[ldap_name] = mapped_type
-            return r[Mapping[str, str]].ok(ldap_attributes)
+            return r[t.StrMapping].ok(ldap_attributes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP schema mapping failed")
-            return r[Mapping[str, str]].fail(f"Schema mapping failed: {e}")
+            return r[t.StrMapping].fail(f"Schema mapping failed: {e}")
 
     def _map_singer_type_to_ldap(
         self,
@@ -213,9 +212,9 @@ class LDAPEntryManager:
 
     def determine_object_classes(
         self,
-        record: Mapping[str, t.Scalar],
+        record: t.ConfigurationMapping,
         stream_name: str,
-    ) -> r[Sequence[str]]:
+    ) -> r[t.StrSequence]:
         """Determine appropriate t.NormalizedValue classes for LDAP entry."""
         try:
             object_classes = ["top"]
@@ -239,14 +238,14 @@ class LDAPEntryManager:
                     "organizationalPerson",
                     "inetOrgPerson",
                 ])
-            return r[Sequence[str]].ok(object_classes)
+            return r[t.StrSequence].ok(object_classes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
-            return r[Sequence[str]].fail(f"Object class determination failed: {e}")
+            return r[t.StrSequence].fail(f"Object class determination failed: {e}")
 
     def generate_dn(
         self,
-        record: Mapping[str, t.Scalar],
+        record: t.ConfigurationMapping,
         base_dn: str,
         rdn_attribute: str = "cn",
     ) -> r[str]:
@@ -273,12 +272,12 @@ class LDAPEntryManager:
 
     def prepare_modify_changes(
         self,
-        current_attrs: Mapping[str, str | Sequence[str] | None],
-        new_attrs: Mapping[str, str | Sequence[str] | None],
-    ) -> r[Mapping[str, Sequence[tuple[str, Sequence[str]]]]]:
+        current_attrs: Mapping[str, str | t.StrSequence | None],
+        new_attrs: Mapping[str, str | t.StrSequence | None],
+    ) -> r[Mapping[str, Sequence[tuple[str, t.StrSequence]]]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: Mapping[str, Sequence[tuple[str, Sequence[str]]]] = {}
+            changes: Mapping[str, Sequence[tuple[str, t.StrSequence]]] = {}
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
             for attr in all_attrs:
                 current_value = current_attrs.get(attr)
@@ -292,17 +291,17 @@ class LDAPEntryManager:
                     else:
                         values = self._normalize_modify_values(new_value)
                         changes[attr] = [("MODIFY_REPLACE", values)]
-            return r[Mapping[str, Sequence[tuple[str, Sequence[str]]]]].ok(changes)
+            return r[Mapping[str, Sequence[tuple[str, t.StrSequence]]]].ok(changes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return r[Mapping[str, Sequence[tuple[str, Sequence[str]]]]].fail(
+            return r[Mapping[str, Sequence[tuple[str, t.StrSequence]]]].fail(
                 f"Modify changes preparation failed: {e}",
             )
 
     def validate_entry_attributes(
         self,
-        attributes: Mapping[str, Sequence[str]],
-        object_classes: Sequence[str],
+        attributes: Mapping[str, t.StrSequence],
+        object_classes: t.StrSequence,
     ) -> r[bool]:
         """Validate LDAP entry attributes against t.NormalizedValue class requirements."""
         try:
@@ -344,8 +343,8 @@ class LDAPEntryManager:
         return escaped
 
     def _normalize_modify_values(
-        self, value: str | Sequence[str] | None
-    ) -> Sequence[str]:
+        self, value: str | t.StrSequence | None
+    ) -> t.StrSequence:
         """Normalize modify payload values to LDAP list representation."""
         match value:
             case list() as values:

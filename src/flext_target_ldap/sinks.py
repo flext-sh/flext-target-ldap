@@ -24,7 +24,7 @@ class Sink:
         target: Target,
         stream_name: str,
         schema: Mapping[str, t.ContainerValue],
-        key_properties: Sequence[str],
+        key_properties: t.StrSequence,
     ) -> None:
         """Initialize sink with Singer protocol parameters."""
         self.target = target
@@ -115,7 +115,7 @@ class LDAPProcessingResult(LdapProcessingCounters):
         self.processed_count: int = 0
         self.success_count: int = 0
         self.error_count: int = 0
-        self.errors: Sequence[str] = []
+        self.errors: t.StrSequence = []
 
 
 class LDAPBaseSink(Sink):
@@ -127,7 +127,7 @@ class LDAPBaseSink(Sink):
         target: Target,
         stream_name: str,
         schema: Mapping[str, t.ContainerValue],
-        key_properties: Sequence[str],
+        key_properties: t.StrSequence,
     ) -> None:
         """Initialize LDAP sink."""
         super().__init__(target, stream_name, schema, key_properties)
@@ -160,7 +160,7 @@ class LDAPBaseSink(Sink):
 
     def get_object_classes(
         self, record: Mapping[str, t.ContainerValue]
-    ) -> Sequence[str]:
+    ) -> t.StrSequence:
         """Get t.NormalizedValue classes for entry."""
         record_classes = record.get("object_classes")
         if _is_container_list(record_classes):
@@ -260,7 +260,7 @@ class LDAPBaseSink(Sink):
         self,
         dn: str,
         attributes: Mapping[str, t.ContainerValue],
-        object_classes: Sequence[str],
+        object_classes: t.StrSequence,
     ) -> r[bool]:
         """Validate LDAP entry before writing."""
         if not dn:
@@ -281,7 +281,7 @@ class LDAPBaseSink(Sink):
 class UsersSink(LDAPBaseSink):
     """LDAP sink for user entries."""
 
-    _USER_FIELD_MAP: ClassVar[Mapping[str, str]] = {
+    _USER_FIELD_MAP: ClassVar[t.StrMapping] = {
         "emails": "mail",
         "phone_numbers": "telephoneNumber",
     }
@@ -347,7 +347,7 @@ class UsersSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: Mapping[str, str] = {}
+        mapping: t.StrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -363,7 +363,7 @@ class UsersSink(LDAPBaseSink):
     @override
     def get_object_classes(
         self, record: Mapping[str, t.ContainerValue]
-    ) -> Sequence[str]:
+    ) -> t.StrSequence:
         """Get t.NormalizedValue classes for user entry."""
         configured = self._target.config.get("users_object_classes")
         if _is_container_list(configured):
@@ -394,7 +394,7 @@ class UsersSink(LDAPBaseSink):
                 "objectClass",
                 ["inetOrgPerson", "person"],
             )
-            object_classes: Sequence[str] = (
+            object_classes: t.StrSequence = (
                 [str(oc) for oc in object_classes_raw]
                 if _is_container_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
@@ -473,7 +473,7 @@ class GroupsSink(LDAPBaseSink):
     @override
     def get_object_classes(
         self, record: Mapping[str, t.ContainerValue]
-    ) -> Sequence[str]:
+    ) -> t.StrSequence:
         """Get t.NormalizedValue classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
         if _is_container_list(configured):
@@ -498,7 +498,7 @@ class GroupsSink(LDAPBaseSink):
             group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
             attributes = self._build_group_attributes(_record)
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
-            object_classes: Sequence[str] = (
+            object_classes: t.StrSequence = (
                 [str(oc) for oc in object_classes_raw]
                 if _is_container_list(object_classes_raw)
                 else ["groupOfNames"]
@@ -575,7 +575,7 @@ class GroupsSink(LDAPBaseSink):
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: Mapping[str, str] = {}
+        mapping: t.StrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -672,7 +672,7 @@ class OrganizationalUnitsSink(LDAPBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: Mapping[str, str] = {}
+        mapping: t.StrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():

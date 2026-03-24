@@ -14,92 +14,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 
 from flext_core import r
 
-from flext_target_ldap import FlextTargetLdapSettings, c, m, t
-
-
-def _target_config_to_int(value: t.ContainerValue, default: int) -> int:
-    """Convert value to int for target config."""
-    match value:
-        case bool():
-            return default
-        case int():
-            return value
-        case str():
-            try:
-                return int(value)
-            except ValueError:
-                return default
-        case _:
-            return default
-
-
-def _target_config_to_bool(value: t.ContainerValue, *, default: bool) -> bool:
-    """Convert value to bool for target config."""
-    match value:
-        case bool():
-            return value
-        case int():
-            return value != 0
-        case str():
-            return value.strip().lower() in {"1", "true", "yes", "on"}
-        case _:
-            return default
-
-
-def _target_config_to_str(value: t.ContainerValue, default: str = "") -> str:
-    """Convert value to str for target config."""
-    return str(value) if value is not None else default
-
-
-def _target_config_to_str_list(
-    value: t.ContainerValue,
-    default: Sequence[str],
-) -> Sequence[str]:
-    """Convert value to string list."""
-    if isinstance(value, list):
-        return [str(v) for v in value]
-    return default
-
-
-def _build_target_connection_config(
-    config: Mapping[str, t.ContainerValue],
-) -> m.Ldap.ConnectionConfig:
-    """Build connection config for target."""
-    server = _target_config_to_str(config.get("host", "localhost"), "localhost")
-    port = _target_config_to_int(config.get("port", 389), 389)
-    use_ssl = _target_config_to_bool(config.get("use_ssl", False), default=False)
-    bind_dn = _target_config_to_str(config.get("bind_dn", ""), "")
-    bind_password = _target_config_to_str(config.get("password", ""), "")
-    timeout = _target_config_to_int(config.get("timeout", 30), 30)
-    return m.Ldap.ConnectionConfig(
-        host=server,
-        port=port,
-        use_ssl=use_ssl,
-        bind_dn=bind_dn,
-        bind_password=bind_password,
-        timeout=timeout,
-    )
-
-
-def _extract_target_max_records(config: Mapping[str, t.ContainerValue]) -> int | None:
-    """Extract max records from config."""
-    max_records_val = config.get("max_records")
-    match max_records_val:
-        case bool():
-            return None
-        case int():
-            return max_records_val
-        case str():
-            try:
-                return int(max_records_val)
-            except ValueError:
-                return None
-        case _:
-            return None
+from flext_target_ldap import FlextTargetLdapSettings, c, m, t, u
 
 
 def validate_ldap_target_config(
@@ -107,38 +26,41 @@ def validate_ldap_target_config(
 ) -> r[FlextTargetLdapSettings]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:
-        connection_config = _build_target_connection_config(config)
-        base_dn = _target_config_to_str(config.get("base_dn", ""))
-        batch_size = _target_config_to_int(config.get("batch_size", 1000), 1000)
-        max_records = _extract_target_max_records(config)
-        create_missing_entries = _target_config_to_bool(
+        connection_config = u.TypeConversion.build_connection_config(config)
+        base_dn = u.TypeConversion.to_str(config.get("base_dn", ""))
+        batch_size = u.TypeConversion.to_int(config.get("batch_size", 1000), 1000)
+        max_records_val = config.get("max_records")
+        max_records: int | None
+        match max_records_val:
+            case bool():
+                max_records = None
+            case int():
+                max_records = max_records_val
+            case str():
+                try:
+                    max_records = int(max_records_val)
+                except ValueError:
+                    max_records = None
+            case _:
+                max_records = None
+        create_missing_entries = u.TypeConversion.to_bool(
             config.get("create_missing_entries", True),
             default=True,
         )
-        update_existing_entries = _target_config_to_bool(
+        update_existing_entries = u.TypeConversion.to_bool(
             config.get("update_existing_entries", True),
             default=True,
         )
-        delete_removed_entries = _target_config_to_bool(
+        delete_removed_entries = u.TypeConversion.to_bool(
             config.get("delete_removed_entries", False),
             default=False,
         )
-        attribute_mapping: Mapping[str, str] = {}
-        raw_attr_map_obj = config.get("attribute_mapping")
-        match raw_attr_map_obj:
-            case Mapping() as mapping_value:
-                for k, v in mapping_value.items():
-                    attribute_mapping[str(k)] = str(v)
-            case _:
-                pass
-        object_classes = _target_config_to_str_list(
-            config.get("object_classes", ["top"]),
-            ["top"],
-        )
-        search_filter = _target_config_to_str(
+        attribute_mapping = dict(u.TypeConversion.extract_attribute_mapping(config))
+        object_classes = u.TypeConversion.extract_object_classes(config)
+        search_filter = u.TypeConversion.to_str(
             config.get("search_filter", "(objectClass=*)"),
         )
-        search_scope = _target_config_to_str(config.get("search_scope", "SUBTREE"))
+        search_scope = u.TypeConversion.to_str(config.get("search_scope", "SUBTREE"))
         validated_config = FlextTargetLdapSettings(
             connection=connection_config,
             base_dn=base_dn,

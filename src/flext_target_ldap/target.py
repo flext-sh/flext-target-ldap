@@ -93,7 +93,7 @@ class TargetLDAP(Target):
     def orchestrator(self) -> LDAPTargetOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            normalized_config: Mapping[str, t.Scalar] = {}
+            normalized_config: t.ConfigurationMapping = {}
             for key, value in self.config.items():
                 match value:
                     case bool() | int() | str():

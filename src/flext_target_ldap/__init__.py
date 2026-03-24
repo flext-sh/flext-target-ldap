@@ -55,12 +55,7 @@ if TYPE_CHECKING:
         FlextTargetLdapProtocols,
         FlextTargetLdapProtocols as p,
     )
-    from flext_target_ldap.settings import (
-        FlextTargetLdapSettings,
-        LDAPConnectionSettings,
-        LDAPOperationSettings,
-        validate_ldap_config,
-    )
+    from flext_target_ldap.settings import FlextTargetLdapSettings, validate_ldap_config
     from flext_target_ldap.singer.catalog import (
         SingerLDAPCatalogEntry,
         SingerLDAPCatalogManager,
@@ -186,7 +181,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     "LDAPBaseSink": ("flext_target_ldap.sinks", "LDAPBaseSink"),
     "LDAPClient": ("flext_target_ldap.client", "LDAPClient"),
     "LDAPConnection": ("flext_target_ldap.client", "LDAPConnection"),
-    "LDAPConnectionSettings": ("flext_target_ldap.settings", "LDAPConnectionSettings"),
     "LDAPDataTransformer": (
         "flext_target_ldap.patterns.ldap_patterns",
         "LDAPDataTransformer",
@@ -195,7 +189,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
         "flext_target_ldap.patterns.ldap_patterns",
         "LDAPEntryManager",
     ),
-    "LDAPOperationSettings": ("flext_target_ldap.settings", "LDAPOperationSettings"),
     "LDAPProcessingResult": ("flext_target_ldap.sinks", "LDAPProcessingResult"),
     "LDAPSchemaMapper": (
         "flext_target_ldap.patterns.ldap_patterns",
@@ -360,10 +353,8 @@ __all__ = [
     "LDAPBaseSink",
     "LDAPClient",
     "LDAPConnection",
-    "LDAPConnectionSettings",
     "LDAPDataTransformer",
     "LDAPEntryManager",
-    "LDAPOperationSettings",
     "LDAPProcessingResult",
     "LDAPSchemaMapper",
     "LDAPSearchEntry",

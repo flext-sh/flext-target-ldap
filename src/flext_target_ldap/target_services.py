@@ -150,7 +150,7 @@ class LdapTransformationService:
             "attributes": ldap_attributes,
             "entry_type": self._determine_entry_type(object_classes),
         })
-        original_record_json: Mapping[str, t.Scalar] = {
+        original_record_json: t.ConfigurationMapping = {
             str(key): str(value) for key, value in record.items()
         }
         result = m.TargetLdap.TransformationResult.model_validate({

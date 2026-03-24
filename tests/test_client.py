@@ -73,10 +73,10 @@ class TestLDAPClient:
             raise AssertionError(msg)
 
     @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
+    @patch("flext_target_ldap.client.ldap3.Server")
     def test_get_connection(
         self,
-        mock_pool_class: MagicMock,
+        mock_server_class: MagicMock,
         mock_connection_class: MagicMock,
         client: LDAPClient,
     ) -> None:
@@ -85,14 +85,14 @@ class TestLDAPClient:
         mock_connection.bind.return_value = True
         mock_connection.bound = True
         mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
+        mock_server = MagicMock()
+        mock_server_class.return_value = mock_server
         with client.get_connection() as conn:
             if conn != mock_connection:
                 msg: str = f"Expected {mock_connection}, got {conn}"
                 raise AssertionError(msg)
         mock_connection_class.assert_called_once_with(
-            mock_pool, user=client._bind_dn, password=client._password
+            mock_server, user=client._bind_dn, password=client._password
         )
         mock_connection.bind.assert_called_once()
         mock_connection.unbind.assert_called_once()
@@ -259,7 +259,7 @@ class TestLDAPClient:
         if not result.value:
             msg: str = f"Expected True, got {result.value}"
             raise AssertionError(msg)
-        mock_connection.entries = t.ContainerList()
+        mock_connection.entries = []
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
         assert result.is_success
         if result.value:
@@ -295,7 +295,7 @@ class TestLDAPClient:
             msg: str = f"Expected {'uid=test,dc=test,dc=com'}, got {entry.dn}"
             raise AssertionError(msg)
         assert entry.attributes["cn"] == ["Test User"]
-        mock_connection.entries = t.ContainerList()
+        mock_connection.entries = []
         result = client.get_entry("uid=notfound,dc=test,dc=com")
         assert result.is_success
         assert result.value is None

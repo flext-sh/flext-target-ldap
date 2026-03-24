@@ -11,11 +11,13 @@ from collections.abc import Mapping, Sequence
 
 from flext_core import t
 
+from flext_target_ldap.models import m
 from flext_target_ldap.transformation import (
     DataTransformationEngine,
     MigrationValidator,
-    TransformationRule,
 )
+
+TransformationRule = m.TargetLdap.TransformationRule
 
 EXPECTED_DATA_COUNT = 3
 
@@ -338,7 +340,7 @@ class TestIntegratedTransformation:
             k: v for k, v in transformed_entry.items() if k not in {"dn", "objectClass"}
         }
         raw_classes = transformed_entry["objectClass"]
-        obj_classes: Sequence[str] = (
+        obj_classes: t.StrSequence = (
             [str(c) for c in raw_classes]
             if isinstance(raw_classes, list)
             else [str(raw_classes)]

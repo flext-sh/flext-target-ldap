@@ -68,6 +68,7 @@ if TYPE_CHECKING:
         TestIntegratedTransformation,
         TestMigrationValidator,
         TestTransformationRule,
+        TransformationRule,
     )
     from tests.typings import (
         FlextTargetLdapTestTypes,
@@ -107,6 +108,7 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     "TestTargetLDAPUnit": ("tests.test_target", "TestTargetLDAPUnit"),
     "TestTransformationRule": ("tests.test_transformation", "TestTransformationRule"),
     "TestUsersSink": ("tests.test_sinks", "TestUsersSink"),
+    "TransformationRule": ("tests.test_transformation", "TransformationRule"),
     "c": ("tests.constants", "FlextTargetLdapTestConstants"),
     "d": ("flext_tests", "d"),
     "e": ("flext_tests", "e"),
@@ -164,6 +166,7 @@ __all__ = [
     "TestTargetLDAPUnit",
     "TestTransformationRule",
     "TestUsersSink",
+    "TransformationRule",
     "c",
     "d",
     "e",
