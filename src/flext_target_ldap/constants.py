@@ -90,56 +90,6 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
             MAX_BATCH_SIZE: Final[int] = FlextLdapConstants.MAX_ITEMS
             DEFAULT_PAGE_SIZE: Final[int] = FlextLdapConstants.DEFAULT_PAGE_SIZE
 
-        class Operations:
-            """LDAP operation types and commands.
-
-            Note: For type-safe operation handling, use c.Ldap.OperationType StrEnum.
-
-            DRY Pattern:
-                TYPES tuple is generated from OperationType StrEnum members to eliminate
-                string duplication. The StrEnum is the single source of truth.
-            """
-
-        class Loading:
-            """Target-specific loading configuration."""
-
-            DEFAULT_LOAD_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-            )
-            MAX_LOAD_RETRIES: Final[int] = FlextLdapConstants.DEFAULT_MAX_RETRY_ATTEMPTS
-            LOAD_RETRY_DELAY: Final[float] = (
-                FlextLdapConstants.DEFAULT_RETRY_DELAY_SECONDS
-            )
-
-        class Validation:
-            """Target-specific validation configuration.
-
-            Note: Does not override parent Validation class to avoid inheritance conflicts.
-            """
-
-            MAX_DN_LENGTH: Final[int] = FlextLdapConstants.Ldif.MAX_URL_LENGTH
-
-    @unique
-    class TargetLdapProjectType(StrEnum):
-        """Target LDAP project type enumeration."""
-
-        SINGER_TARGET = "singer-target"
-        LDAP_LOADER = "ldap-loader"
-        DIRECTORY_LOADER = "directory-loader"
-        SINGER_TARGET_LDAP = "singer-target-ldap"
-        TARGET_LDAP = "target-ldap"
-        LDAP_CONNECTOR = "ldap-connector"
-        DIRECTORY_CONNECTOR = "directory-connector"
-        SINGER_PROTOCOL = "singer-protocol"
-        LDAP_INTEGRATION = "ldap-integration"
-        DIRECTORY_SERVICE = "directory-service"
-        LDAP_TARGET = "ldap-target"
-        SINGER_STREAM = "singer-stream"
-        ETL_TARGET = "etl-target"
-        DATA_PIPELINE = "data-pipeline"
-        LDAP_SINK = "ldap-sink"
-        SINGER_INTEGRATION = "singer-integration"
-
 
 c = FlextTargetLdapConstants
 __all__ = ["FlextTargetLdapConstants", "c"]
