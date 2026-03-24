@@ -184,7 +184,8 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Orchestration(
-                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
+                Protocol,
             ):
                 """Protocol for LDAP loading orchestration."""
 
@@ -197,7 +198,8 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Connection(
-                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
+                Protocol,
             ):
                 """Protocol for LDAP connection management."""
 
@@ -224,7 +226,8 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Performance(
-                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
+                Protocol,
             ):
                 """Protocol for LDAP loading performance."""
 
@@ -251,7 +254,8 @@ class FlextTargetLdapProtocols(FlextLdapProtocols):
 
             @runtime_checkable
             class Monitoring(
-                FlextLdapProtocols.Service[t.ContainerValueMapping], Protocol
+                FlextLdapProtocols.Service[t.ContainerValueMapping],
+                Protocol,
             ):
                 """Protocol for LDAP loading monitoring."""
 

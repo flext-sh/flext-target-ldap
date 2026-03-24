@@ -46,7 +46,7 @@ def _build_mock_ldap_config(*, bind_dn: str) -> Mapping[str, t.ContainerValue]:
 def shared_ldap_container(flext_docker: tk) -> str:
     """Managed LDAP container using centralized tk with docker-compose."""
     compose_file = pathlib.Path(
-        "~/flext/docker/docker-compose.openldap.yml"
+        "~/flext/docker/docker-compose.openldap.yml",
     ).expanduser()
     start_result = flext_docker.start_compose_stack(str(compose_file))
     if start_result.is_failure:
@@ -58,7 +58,7 @@ def shared_ldap_container(flext_docker: tk) -> str:
 def mock_ldap_config() -> Mapping[str, t.ContainerValue]:
     """Create mock LDAP configuration for testing."""
     return _build_mock_ldap_config(
-        bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
+        bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
     )
 
 
@@ -155,8 +155,8 @@ def singer_message_state() -> str:
                 "users": {
                     "replication_key": "modifyTimestamp",
                     "replication_key_value": "20240101120000Z",
-                }
-            }
+                },
+            },
         },
     }
     return TypeAdapter(t.NormalizedValue).dump_json(message).decode("utf-8")

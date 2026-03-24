@@ -291,7 +291,7 @@ class FlextTargetLdapLdapClient:
                             val = raw.attributes.get(name_str)
                             attrs[name_str] = [str(val)] if val is not None else []
                     entries.append(
-                        FlextTargetLdapSearchEntry(dn=str(dn), attributes=attrs)
+                        FlextTargetLdapSearchEntry(dn=str(dn), attributes=attrs),
                     )
                 return r[Sequence[FlextTargetLdapSearchEntry]].ok(entries)
         except (RuntimeError, ValueError, TypeError) as e:

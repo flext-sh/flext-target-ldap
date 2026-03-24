@@ -90,10 +90,14 @@ class TestDataTransformationEngine:
         "Test transform oracle attributes function."
         rules = [
             TransformationRule(
-                name="oracle_user_prefix_removal", pattern="orcl", replacement=""
+                name="oracle_user_prefix_removal",
+                pattern="orcl",
+                replacement="",
             ),
             TransformationRule(
-                name="normalize_case", pattern="User", replacement="user"
+                name="normalize_case",
+                pattern="User",
+                replacement="user",
             ),
         ]
         engine = DataTransformationEngine(rules)
@@ -120,7 +124,9 @@ class TestDataTransformationEngine:
         """Test method."""
         "Test remove empty attributes function."
         rule = TransformationRule(
-            name="clean_empty_attributes", pattern="empty", replacement=""
+            name="clean_empty_attributes",
+            pattern="empty",
+            replacement="",
         )
         engine = DataTransformationEngine([rule])
         entry: Mapping[str, t.ContainerValue] = {
@@ -141,7 +147,9 @@ class TestDataTransformationEngine:
         """Test method."""
         "Test dry run transformation function."
         rule = TransformationRule(
-            name="test_rule", pattern="orclUser", replacement="inetOrgPerson"
+            name="test_rule",
+            pattern="orclUser",
+            replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
         entry: Mapping[str, t.ContainerValue] = {
@@ -223,7 +231,9 @@ class TestMigrationValidator:
         "Test validate missing objectclass function."
         validator = MigrationValidator()
         result = validator.validate(
-            "cn=testuser,dc=example,dc=com", {"cn": "testuser"}, []
+            "cn=testuser,dc=example,dc=com",
+            {"cn": "testuser"},
+            [],
         )
         assert not result.is_success
         assert result.error is not None
@@ -236,7 +246,9 @@ class TestMigrationValidator:
         "Test validate missing required attributes function."
         validator = MigrationValidator()
         result = validator.validate(
-            "cn=testuser,ou=people,dc=example,dc=com", {"cn": "testuser"}, ["person"]
+            "cn=testuser,ou=people,dc=example,dc=com",
+            {"cn": "testuser"},
+            ["person"],
         )
         assert result is not None
 
@@ -279,7 +291,10 @@ class TestTransformationRule:
         """Test method."""
         "Test transformation rule creation function."
         rule = TransformationRule(
-            name="test_rule", pattern="orclUser", replacement="person", enabled=True
+            name="test_rule",
+            pattern="orclUser",
+            replacement="person",
+            enabled=True,
         )
         if rule.name != "test_rule":
             msg: str = f"Expected 'test_rule', got {rule.name}"
@@ -352,7 +367,9 @@ class TestIntegratedTransformation:
         """Test method."""
         "Test classification and transformation integration function."
         rule = TransformationRule(
-            name="general_transform", pattern="orclUser", replacement="inetOrgPerson"
+            name="general_transform",
+            pattern="orclUser",
+            replacement="inetOrgPerson",
         )
         engine = DataTransformationEngine([rule])
         test_entries: Sequence[Mapping[str, t.ContainerValue]] = [

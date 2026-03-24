@@ -69,7 +69,8 @@ class FlextTargetLdapDataTransformer:
 
     @override
     def __init__(
-        self, type_converter: FlextTargetLdapTypeConverter | None = None
+        self,
+        type_converter: FlextTargetLdapTypeConverter | None = None,
     ) -> None:
         """Initialize LDAP data transformer."""
         self.type_converter = type_converter or FlextTargetLdapTypeConverter()
@@ -89,7 +90,7 @@ class FlextTargetLdapDataTransformer:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
             return r[Mapping[str, t.StrSequence]].fail(
-                f"Attribute preparation failed: {e}"
+                f"Attribute preparation failed: {e}",
             )
 
     def transform_record(
@@ -117,7 +118,7 @@ class FlextTargetLdapDataTransformer:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
             return r[Mapping[str, str | None]].fail(
-                f"Record transformation failed: {e}"
+                f"Record transformation failed: {e}",
             )
 
     def _normalize_ldap_attribute_name(self, name: str) -> str:
@@ -345,7 +346,8 @@ class FlextTargetLdapEntryManager:
         return escaped
 
     def _normalize_modify_values(
-        self, value: str | t.StrSequence | None
+        self,
+        value: str | t.StrSequence | None,
     ) -> t.StrSequence:
         """Normalize modify payload values to LDAP list representation."""
         match value:

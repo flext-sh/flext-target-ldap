@@ -26,12 +26,14 @@ class TestLDAPBaseSink:
 
     @pytest.fixture
     def sink(
-        self, mock_target: MagicMock, mock_ldap_config: Mapping[str, t.ContainerValue]
+        self,
+        mock_target: MagicMock,
+        mock_ldap_config: Mapping[str, t.ContainerValue],
     ) -> LDAPBaseSink:
         """Create LDAP base sink fixture for testing."""
         _mock_ldap_config = mock_ldap_config
         schema: Mapping[str, t.ContainerValue] = {
-            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
+            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
         }
         return LDAPBaseSink(
             target=mock_target,
@@ -89,7 +91,9 @@ class TestLDAPBaseSink:
         mock_client.validate_dn.return_value.is_success = True
         sink._client = mock_client
         result = sink.validate_entry(
-            "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
+            "cn=test,dc=example,dc=com",
+            {"cn": ["test"]},
+            ["person", "top"],
         )
         assert result.is_success
 
@@ -130,7 +134,9 @@ class TestUsersSink:
 
     @pytest.fixture
     def users_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: Mapping[str, t.ContainerValue]
+        self,
+        mock_target: MagicMock,
+        _mock_ldap_config: Mapping[str, t.ContainerValue],
     ) -> UsersSink:
         """Create users sink fixture for testing."""
         mock_target.config.update({
@@ -142,7 +148,7 @@ class TestUsersSink:
                 "uid": {"type": "string"},
                 "cn": {"type": "string"},
                 "mail": {"type": "string"},
-            }
+            },
         }
         return UsersSink(
             target=mock_target,
@@ -235,7 +241,7 @@ class TestUsersSink:
             "users_object_classes": ["customUser", "top"],
         })
         schema: Mapping[str, t.ContainerValue] = {
-            "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}
+            "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
         }
         users_sink = UsersSink(
             target=mock_target,
@@ -257,7 +263,9 @@ class TestGroupsSink:
 
     @pytest.fixture
     def groups_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: Mapping[str, t.ContainerValue]
+        self,
+        mock_target: MagicMock,
+        _mock_ldap_config: Mapping[str, t.ContainerValue],
     ) -> GroupsSink:
         """Create groups sink fixture for testing."""
         mock_target.config.update({
@@ -265,7 +273,7 @@ class TestGroupsSink:
             "group_rdn_attribute": "cn",
         })
         schema: Mapping[str, t.ContainerValue] = {
-            "properties": {"cn": {"type": "string"}, "member": {"type": "array"}}
+            "properties": {"cn": {"type": "string"}, "member": {"type": "array"}},
         }
         return GroupsSink(
             target=mock_target,
@@ -335,12 +343,14 @@ class TestOrganizationalUnitsSink:
 
     @pytest.fixture
     def ou_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: Mapping[str, t.ContainerValue]
+        self,
+        mock_target: MagicMock,
+        _mock_ldap_config: Mapping[str, t.ContainerValue],
     ) -> OrganizationalUnitsSink:
         """Create organizational units sink fixture for testing."""
         mock_target.config.update({"base_dn": "dc=example,dc=com"})
         schema: Mapping[str, t.ContainerValue] = {
-            "properties": {"ou": {"type": "string"}, "description": {"type": "string"}}
+            "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
         }
         return OrganizationalUnitsSink(
             target=mock_target,
@@ -381,7 +391,8 @@ class TestOrganizationalUnitsSink:
         assert not result.is_success
 
     def test_ou_get_object_classes_default(
-        self, ou_sink: OrganizationalUnitsSink
+        self,
+        ou_sink: OrganizationalUnitsSink,
     ) -> None:
         """Test getting default t.NormalizedValue classes (base class returns ['top'])."""
         record: Mapping[str, t.ContainerValue] = {}
@@ -394,12 +405,14 @@ class TestLDAPGenericSink:
 
     @pytest.fixture
     def generic_sink(
-        self, mock_target: MagicMock, _mock_ldap_config: Mapping[str, t.ContainerValue]
+        self,
+        mock_target: MagicMock,
+        _mock_ldap_config: Mapping[str, t.ContainerValue],
     ) -> LDAPBaseSink:
         """Create generic LDAP sink fixture for testing."""
         mock_target.config.update({"base_dn": "dc=example,dc=com"})
         schema: Mapping[str, t.ContainerValue] = {
-            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
+            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
         }
         return LDAPBaseSink(
             target=mock_target,
@@ -455,11 +468,12 @@ class TestLDAPGenericSink:
         assert "must be implemented in subclass" in result.error
 
     def test_generic_get_object_classes_from_record(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         """Test getting t.NormalizedValue classes from record data."""
         record: Mapping[str, t.ContainerValue] = {
-            "object_classes": ["customClass", "top"]
+            "object_classes": ["customClass", "top"],
         }
         classes = generic_sink.get_object_classes(record)
         if classes != ["customClass", "top"]:
@@ -469,7 +483,8 @@ class TestLDAPGenericSink:
             raise AssertionError(custom_classes_msg)
 
     def test_generic_get_object_classes_single_value(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         """Test getting t.NormalizedValue classes from single value in record."""
         record = {"object_classes": "customClass"}
@@ -479,7 +494,8 @@ class TestLDAPGenericSink:
             raise AssertionError(single_class_msg)
 
     def test_generic_get_object_classes_default(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         """Test getting default t.NormalizedValue classes for generic entries."""
         record: Mapping[str, t.ContainerValue] = {}
@@ -496,7 +512,7 @@ class TestLDAPGenericSink:
             "generic_object_classes": ["customGeneric", "top"],
         })
         schema: Mapping[str, t.ContainerValue] = {
-            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
+            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
         }
         generic_sink = LDAPBaseSink(
             target=mock_target,

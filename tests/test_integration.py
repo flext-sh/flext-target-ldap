@@ -59,7 +59,10 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.target._get_ldap_api")
     def test_basic_load(
-        self, mock_api: MagicMock, config_file: Path, input_file: Path
+        self,
+        mock_api: MagicMock,
+        config_file: Path,
+        input_file: Path,
     ) -> None:
         """Test basic LDAP data loading functionality."""
         mock_conn = MagicMock()
@@ -77,7 +80,10 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.target._get_ldap_api")
     def test_upsert_behavior(
-        self, mock_api: MagicMock, config_file: Path, tmp_path: Path
+        self,
+        mock_api: MagicMock,
+        config_file: Path,
+        tmp_path: Path,
     ) -> None:
         """Test upsert behavior for duplicate records."""
         input_path = tmp_path / "upsert_input.jsonl"
@@ -85,7 +91,7 @@ class TestTargetLDAPIntegration:
             "type": "SCHEMA",
             "stream": "users",
             "schema": {
-                "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
+                "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
             },
             "key_properties": ["dn"],
         }
@@ -102,13 +108,15 @@ class TestTargetLDAPIntegration:
         with input_path.open("w", encoding="utf-8") as f:
             f.write(
                 TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
-                + "\n"
+                + "\n",
             )
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(record1).decode("utf-8") + "\n"
+                TypeAdapter(t.NormalizedValue).dump_json(record1).decode("utf-8")
+                + "\n",
             )
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(record2).decode("utf-8") + "\n"
+                TypeAdapter(t.NormalizedValue).dump_json(record2).decode("utf-8")
+                + "\n",
             )
 
         mock_conn = MagicMock()
@@ -128,7 +136,10 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.target._get_ldap_api")
     def test_delete_records(
-        self, mock_api: MagicMock, config_file: Path, tmp_path: Path
+        self,
+        mock_api: MagicMock,
+        config_file: Path,
+        tmp_path: Path,
     ) -> None:
         """Test deletion of LDAP records."""
         input_path = tmp_path / "delete_input.jsonl"
@@ -149,11 +160,11 @@ class TestTargetLDAPIntegration:
         with input_path.open("w", encoding="utf-8") as f:
             f.write(
                 TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
-                + "\n"
+                + "\n",
             )
             f.write(
                 TypeAdapter(t.NormalizedValue).dump_json(delete_record).decode("utf-8")
-                + "\n"
+                + "\n",
             )
 
         mock_conn = MagicMock()
@@ -176,7 +187,7 @@ class TestTargetLDAPIntegration:
     ) -> None:
         """Test DN template usage for record processing."""
         mock_ldap_config["dn_templates"] = {
-            "users": "uid={uid},ou=people,dc=test,dc=com"
+            "users": "uid={uid},ou=people,dc=test,dc=com",
         }
         config_path = tmp_path / "template_config.json"
         config_path.write_text(
@@ -188,7 +199,7 @@ class TestTargetLDAPIntegration:
             "type": "SCHEMA",
             "stream": "users",
             "schema": {
-                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}
+                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
             },
             "key_properties": ["uid"],
         }
@@ -200,10 +211,10 @@ class TestTargetLDAPIntegration:
         with input_path.open("w", encoding="utf-8") as f:
             f.write(
                 TypeAdapter(t.NormalizedValue).dump_json(schema_msg).decode("utf-8")
-                + "\n"
+                + "\n",
             )
             f.write(
-                TypeAdapter(t.NormalizedValue).dump_json(record).decode("utf-8") + "\n"
+                TypeAdapter(t.NormalizedValue).dump_json(record).decode("utf-8") + "\n",
             )
 
         mock_conn = MagicMock()
@@ -248,7 +259,10 @@ class TestTargetLDAPIntegration:
 
     @patch("flext_target_ldap.target._get_ldap_api")
     def test_multi_stream_handling(
-        self, mock_api: MagicMock, config_file: Path, tmp_path: Path
+        self,
+        mock_api: MagicMock,
+        config_file: Path,
+        tmp_path: Path,
     ) -> None:
         """Test handling of multiple Singer streams."""
         input_path = tmp_path / "multi_stream.jsonl"

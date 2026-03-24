@@ -63,7 +63,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         item,
                     )
                     if coerced_item is not None and isinstance(
-                        coerced_item, (str, int, float, bool)
+                        coerced_item,
+                        (str, int, float, bool),
                     ):
                         normalized_dict[str(key)] = coerced_item
             return t.ConfigMap(root=normalized_dict)
@@ -401,7 +402,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 for k, v in raw_props.items():
                     coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
                     if coerced_value is not None and isinstance(
-                        coerced_value, (str, int, float, bool)
+                        coerced_value,
+                        (str, int, float, bool),
                     ):
                         properties[str(k)] = coerced_value
             if not properties:
@@ -611,7 +613,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             for k, v in bookmarks.items():
                 coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
                 if coerced_value is not None and isinstance(
-                    coerced_value, (str, int, float, bool)
+                    coerced_value,
+                    (str, int, float, bool),
                 ):
                     bookmarks_map[str(k)] = coerced_value
             stream_state_data = bookmarks_map.get(stream_name)

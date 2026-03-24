@@ -19,12 +19,19 @@ if TYPE_CHECKING:
     from flext_target_ldap.singer.catalog import (
         FlextTargetLdapCatalogManager,
         SingerLDAPCatalogEntry,
+        SingerLDAPCatalogManager,
     )
     from flext_target_ldap.singer.stream import (
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
+        LDAPStreamProcessingStats,
+        SingerLDAPStreamProcessor,
     )
-    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget, logger
+    from flext_target_ldap.singer.target import (
+        FlextTargetLdapSingerTarget,
+        SingerTargetLDAP,
+        logger,
+    )
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     "FlextTargetLdapCatalogManager": (
@@ -43,10 +50,23 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
         "flext_target_ldap.singer.stream",
         "FlextTargetLdapStreamProcessor",
     ),
+    "LDAPStreamProcessingStats": (
+        "flext_target_ldap.singer.stream",
+        "LDAPStreamProcessingStats",
+    ),
     "SingerLDAPCatalogEntry": (
         "flext_target_ldap.singer.catalog",
         "SingerLDAPCatalogEntry",
     ),
+    "SingerLDAPCatalogManager": (
+        "flext_target_ldap.singer.catalog",
+        "SingerLDAPCatalogManager",
+    ),
+    "SingerLDAPStreamProcessor": (
+        "flext_target_ldap.singer.stream",
+        "SingerLDAPStreamProcessor",
+    ),
+    "SingerTargetLDAP": ("flext_target_ldap.singer.target", "SingerTargetLDAP"),
     "logger": ("flext_target_ldap.singer.target", "logger"),
 }
 
@@ -55,7 +75,11 @@ __all__ = [
     "FlextTargetLdapSingerTarget",
     "FlextTargetLdapStreamProcessingStats",
     "FlextTargetLdapStreamProcessor",
+    "LDAPStreamProcessingStats",
     "SingerLDAPCatalogEntry",
+    "SingerLDAPCatalogManager",
+    "SingerLDAPStreamProcessor",
+    "SingerTargetLDAP",
     "logger",
 ]
 

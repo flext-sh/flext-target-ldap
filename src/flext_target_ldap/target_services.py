@@ -60,7 +60,8 @@ class FlextTargetLdapTransformationService:
         self._config = config
 
     def get_default_mappings(
-        self, entry_type: str
+        self,
+        entry_type: str,
     ) -> Sequence[m.TargetLdap.AttributeMapping]:
         """Return default attribute mappings for the given entry type (e.g. users, groups)."""
         if entry_type == "users":

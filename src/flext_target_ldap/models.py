@@ -214,7 +214,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     # Validate t.NormalizedValue classes
                     if not self.object_classes:
                         errors.append(
-                            "Entry must have at least one t.NormalizedValue class"
+                            "Entry must have at least one t.NormalizedValue class",
                         )
 
                     # Validate person entries have required attributes
@@ -636,7 +636,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             properties: Annotated[
                 MutableMapping[
-                    str, FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition
+                    str,
+                    FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition,
                 ],
                 Field(default_factory=dict),
             ]

@@ -579,12 +579,6 @@ class FlextTargetLdapClient:
         return _LdapConnectionWrapper(api, self.config)
 
 
-# Aliases used internally and exported via __init__.py
-FlextTargetLdapSearchEntry = FlextTargetLdapSearchEntry
-FlextTargetLdapClient = FlextTargetLdapClient
-FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult
-
-
 class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     """Base LDAP sink with common functionality using enterprise patterns."""
 
@@ -1124,11 +1118,6 @@ def main() -> None:
     target.cli()
 
 
-# Sink and target aliases for __init__.py exports
-FlextTargetLdapBaseSink = FlextTargetLdapBaseSink
-FlextTargetLdapUsersSink = FlextTargetLdapUsersSink
-FlextTargetLdapGroupsSink = FlextTargetLdapGroupsSink
-FlextTargetLdapOrganizationalUnitsSink = FlextTargetLdapOrganizationalUnitsSink
 TargetLdap = FlextTargetLdap
 
 __all__ = [

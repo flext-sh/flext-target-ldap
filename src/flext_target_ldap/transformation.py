@@ -79,7 +79,7 @@ class FlextTargetLdapTransformationEngine:
             ImportError,
         ) as e:
             return r[m.TargetLdap.DataTransformationResult].fail(
-                f"Transformation failed: {e}"
+                f"Transformation failed: {e}",
             )
 
 

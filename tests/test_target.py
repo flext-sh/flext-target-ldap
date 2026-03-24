@@ -41,7 +41,8 @@ class TestTargetLDAPUnit:
         }
 
     def test_target_initialization(
-        self, config: Mapping[str, t.ContainerValue]
+        self,
+        config: Mapping[str, t.ContainerValue],
     ) -> None:
         """Test target LDAP initialization with name and config."""
         target = TargetLdap(config=config)
@@ -59,7 +60,8 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_get_sink_class_groups(
-        self, config: Mapping[str, t.ContainerValue]
+        self,
+        config: Mapping[str, t.ContainerValue],
     ) -> None:
         """Test getting groups sink class."""
         target = TargetLdap(config=config)
@@ -69,7 +71,8 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_get_sink_class_generic(
-        self, config: Mapping[str, t.ContainerValue]
+        self,
+        config: Mapping[str, t.ContainerValue],
     ) -> None:
         """Test getting generic sink class for unknown stream."""
         target = TargetLdap(config=config)
@@ -79,7 +82,8 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_dn_template_processing(
-        self, config: Mapping[str, t.ContainerValue]
+        self,
+        config: Mapping[str, t.ContainerValue],
     ) -> None:
         """Test DN template configuration processing."""
         config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
@@ -90,7 +94,8 @@ class TestTargetLDAPUnit:
         )
 
     def test_object_classes_processing(
-        self, config: Mapping[str, t.ContainerValue]
+        self,
+        config: Mapping[str, t.ContainerValue],
     ) -> None:
         """Test default t.NormalizedValue classes configuration processing."""
         config["default_object_classes"] = {"users": ["customPerson", "top"]}
@@ -125,7 +130,8 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
 
     def test_process_delete_record(
-        self, config: Mapping[str, t.ContainerValue]
+        self,
+        config: Mapping[str, t.ContainerValue],
     ) -> None:
         """Test processing a delete record through the LDAP target.
 

@@ -44,11 +44,13 @@ class FlextTargetLdapStreamProcessor:
     def __init__(self) -> None:
         """Initialize Singer LDAP stream processor."""
         self._stream_stats: MutableMapping[
-            str, FlextTargetLdapStreamProcessingStats
+            str,
+            FlextTargetLdapStreamProcessingStats,
         ] = {}
 
     def get_stream_stats(
-        self, stream_name: str
+        self,
+        stream_name: str,
     ) -> r[FlextTargetLdapStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
@@ -56,14 +58,14 @@ class FlextTargetLdapStreamProcessor:
                 f"LDAP stream not found: {stream_name}",
             )
         return r[FlextTargetLdapStreamProcessingStats].ok(
-            self._stream_stats[stream_name]
+            self._stream_stats[stream_name],
         )
 
     def initialize_stream(self, stream_name: str) -> r[bool]:
         """Initialize LDAP stream processing."""
         try:
             self._stream_stats[stream_name] = FlextTargetLdapStreamProcessingStats(
-                stream_name
+                stream_name,
             )
             logger.info("Initialized LDAP stream processing: %s", stream_name)
             return r[bool].ok(value=True)

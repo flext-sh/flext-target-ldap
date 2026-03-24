@@ -29,7 +29,8 @@ class TestLDAPClient:
 
     @pytest.fixture
     def target_client(
-        self, mock_ldap_config: Mapping[str, t.ContainerValue]
+        self,
+        mock_ldap_config: Mapping[str, t.ContainerValue],
     ) -> LdapTargetClient:
         """Create test LdapTargetClient instance."""
         return LdapTargetClient(config=mock_ldap_config)
@@ -92,7 +93,9 @@ class TestLDAPClient:
                 msg: str = f"Expected {mock_connection}, got {conn}"
                 raise AssertionError(msg)
         mock_connection_class.assert_called_once_with(
-            mock_server, user=client._bind_dn, password=client._password
+            mock_server,
+            user=client._bind_dn,
+            password=client._password,
         )
         mock_connection.bind.assert_called_once()
         mock_connection.unbind.assert_called_once()
