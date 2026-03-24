@@ -519,7 +519,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             for k, v in attributes.items():
                 if k != "objectClass":
                     if _is_container_list(v):
-                        attributes_dict[k] = [i for i in v]  # noqa: C416
+                        attributes_dict[k] = list(v)
                     else:
                         attributes_dict[k] = v
             add_result: r[bool] = self.client.add_entry(
@@ -629,7 +629,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             attributes_dict: MutableMapping[str, t.ContainerValue] = {}
             for k, v in attributes.items():
                 if _is_container_list(v):
-                    attributes_dict[k] = [i for i in v]  # noqa: C416
+                    attributes_dict[k] = list(v)
                 else:
                     attributes_dict[k] = v
             add_result: r[bool] = self.client.add_entry(ou_dn, attributes_dict)

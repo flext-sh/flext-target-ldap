@@ -421,7 +421,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 entry: FlextTargetLdapModels.TargetLdap.Entry,
             ) -> Self:
                 """Add entry to current batch (immutable operation)."""
-                new_batch = [v for v in self.current_batch]  # noqa: C416
+                new_batch = list(self.current_batch)
                 new_batch.append(entry)
 
                 return self.model_copy(

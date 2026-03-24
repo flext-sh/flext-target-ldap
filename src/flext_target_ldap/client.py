@@ -413,7 +413,7 @@ class FlextTargetLdapLdapClient:
 
         try:
             session_id = _get_session()
-            return ConnectionWrapper(session_id)  # type: ignore[return-value]
+            return ConnectionWrapper(session_id)
         except (
             ValueError,
             TypeError,
@@ -423,7 +423,7 @@ class FlextTargetLdapLdapClient:
             RuntimeError,
             ImportError,
         ):
-            return ConnectionWrapper("test_session")  # type: ignore[return-value]
+            return ConnectionWrapper("test_session")
 
 
 LDAPClient = FlextTargetLdapLdapClient
