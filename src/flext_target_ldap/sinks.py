@@ -702,6 +702,14 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         return attributes
 
 
+GroupsSink = FlextTargetLdapGroupsSink
+LDAPBaseSink = FlextTargetLdapBaseSink
+LDAPProcessingResult = FlextTargetLdapProcessingResult
+OrganizationalUnitsSink = FlextTargetLdapOrganizationalUnitsSink
+Sink = FlextTargetLdapSink
+Target = FlextTargetLdapTarget
+UsersSink = FlextTargetLdapUsersSink
+
 __all__: t.StrSequence = [
     "FlextTargetLdapBaseSink",
     "FlextTargetLdapGroupsSink",
@@ -710,4 +718,11 @@ __all__: t.StrSequence = [
     "FlextTargetLdapSink",
     "FlextTargetLdapTarget",
     "FlextTargetLdapUsersSink",
+    "GroupsSink",
+    "LDAPBaseSink",
+    "LDAPProcessingResult",
+    "OrganizationalUnitsSink",
+    "Sink",
+    "Target",
+    "UsersSink",
 ]

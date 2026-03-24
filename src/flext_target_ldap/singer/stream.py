@@ -74,7 +74,12 @@ class FlextTargetLdapStreamProcessor:
             return r[bool].fail(f"Stream initialization failed: {e}")
 
 
+LDAPStreamProcessingStats = FlextTargetLdapStreamProcessingStats
+SingerLDAPStreamProcessor = FlextTargetLdapStreamProcessor
+
 __all__: t.StrSequence = [
     "FlextTargetLdapStreamProcessingStats",
     "FlextTargetLdapStreamProcessor",
+    "LDAPStreamProcessingStats",
+    "SingerLDAPStreamProcessor",
 ]

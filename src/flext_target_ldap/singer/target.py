@@ -105,4 +105,6 @@ class FlextTargetLdapSingerTarget:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: t.StrSequence = ["FlextTargetLdapSingerTarget"]
+SingerTargetLDAP = FlextTargetLdapSingerTarget
+
+__all__: t.StrSequence = ["FlextTargetLdapSingerTarget", "SingerTargetLDAP"]
