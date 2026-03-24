@@ -97,4 +97,6 @@ class FlextTargetLdapOrchestrator:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 
-__all__: t.StrSequence = ["FlextTargetLdapOrchestrator"]
+LDAPTargetOrchestrator = FlextTargetLdapOrchestrator
+
+__all__: t.StrSequence = ["FlextTargetLdapOrchestrator", "LDAPTargetOrchestrator"]

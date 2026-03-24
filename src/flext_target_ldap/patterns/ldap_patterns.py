@@ -359,11 +359,20 @@ class FlextTargetLdapEntryManager:
                 return []
 
 
+LDAPDataTransformer = FlextTargetLdapDataTransformer
+LDAPEntryManager = FlextTargetLdapEntryManager
+LDAPSchemaMapper = FlextTargetLdapSchemaMapper
+LDAPTypeConverter = FlextTargetLdapTypeConverter
+
 __all__: t.StrSequence = [
     "FlextTargetLdapDataTransformer",
     "FlextTargetLdapEntryManager",
     "FlextTargetLdapSchemaMapper",
     "FlextTargetLdapTypeConverter",
+    "LDAPDataTransformer",
+    "LDAPEntryManager",
+    "LDAPSchemaMapper",
+    "LDAPTypeConverter",
     "SingerPropertyDefinition",
     "SingerSchemaDefinition",
 ]

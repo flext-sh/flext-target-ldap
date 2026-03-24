@@ -400,7 +400,12 @@ class FlextTargetLdapLdapClient:
             return ConnectionWrapper("test_session")
 
 
+LDAPClient = FlextTargetLdapLdapClient
+LDAPSearchEntry = FlextTargetLdapSearchEntry
+
 __all__: t.StrSequence = [
     "FlextTargetLdapLdapClient",
     "FlextTargetLdapSearchEntry",
+    "LDAPClient",
+    "LDAPSearchEntry",
 ]
