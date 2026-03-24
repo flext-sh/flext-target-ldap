@@ -39,50 +39,6 @@ class FlextTargetLdapSettings(m.Entity):
     object_classes: Annotated[Sequence[str], Field(default_factory=lambda: ["top"])]
 
 
-class LDAPConnectionSettings(m.Entity):
-    """LDAP connection settings model."""
-
-    host: Annotated[str, Field(..., description="LDAP server host")]
-    port: Annotated[
-        t.PortNumber,
-        Field(c.Ldap.ConnectionDefaults.PORT, description="LDAP server port"),
-    ]
-    use_ssl: Annotated[bool, Field(default=False, description="Use SSL connection")]
-    use_tls: Annotated[bool, Field(default=False, description="Use TLS connection")]
-    bind_dn: Annotated[str | None, Field(None, description="Bind DN")]
-    bind_password: Annotated[str | None, Field(None, description="Bind password")]
-    base_dn: Annotated[t.NonEmptyStr, Field(..., description="Base DN")]
-    connect_timeout: Annotated[
-        t.PositiveInt,
-        Field(c.DEFAULT_TIMEOUT_SECONDS // 3, description="Connection timeout"),
-    ]
-    receive_timeout: Annotated[
-        t.PositiveInt,
-        Field(c.DEFAULT_TIMEOUT_SECONDS, description="Receive timeout"),
-    ]
-
-
-class LDAPOperationSettings(m.Entity):
-    """LDAP operation settings model."""
-
-    batch_size: Annotated[
-        t.BatchSize,
-        Field(c.DEFAULT_SIZE, description="Batch size"),
-    ]
-    max_records: Annotated[int | None, Field(None, description="Maximum records")]
-    create_missing_entries: Annotated[
-        bool,
-        Field(default=True, description="Create missing entries"),
-    ]
-    update_existing_entries: Annotated[
-        bool,
-        Field(default=True, description="Update existing entries"),
-    ]
-    delete_removed_entries: Annotated[
-        bool,
-        Field(default=False, description="Delete removed entries"),
-    ]
-
 
 def validate_ldap_config(
     config: Mapping[str, t.ConfigMap],
