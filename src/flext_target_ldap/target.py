@@ -62,7 +62,6 @@ def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
     return _DefaultCliHelper()
 
 
-flext_cli_create_helper = _default_cli_helper
 logger = FlextLogger(__name__)
 
 
@@ -281,7 +280,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                 raw = _SINGER_MSG_ADAPTER.validate_json(line)
                 msg_type = raw.get("type")
                 if msg_type == "STATE":
-                    cli_helper = flext_cli_create_helper(quiet=True)
+                    cli_helper = _default_cli_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
                     _schema: Mapping[str, t.ContainerValue] = {}

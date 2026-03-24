@@ -74,7 +74,7 @@ if TYPE_CHECKING:
         Target,
         UsersSink,
     )
-    from flext_target_ldap.target import TargetLDAP, flext_cli_create_helper, main
+    from flext_target_ldap.target import TargetLDAP, main
     from flext_target_ldap.target_client import (
         LdapBaseSink,
         LdapGroupsSink,
@@ -305,7 +305,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     ),
     "d": ("flext_ldap", "d"),
     "e": ("flext_ldap", "e"),
-    "flext_cli_create_helper": ("flext_target_ldap.target", "flext_cli_create_helper"),
     "get_flext_target_ldap_container": (
         "flext_target_ldap.infrastructure.di_container",
         "get_flext_target_ldap_container",
@@ -408,7 +407,6 @@ __all__ = [
     "create_default_ldap_target_config",
     "d",
     "e",
-    "flext_cli_create_helper",
     "get_flext_target_ldap_container",
     "get_flext_target_ldap_service",
     "h",
