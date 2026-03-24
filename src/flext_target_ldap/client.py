@@ -131,7 +131,7 @@ class FlextTargetLdapLdapClient:
         try:
             with self.get_connection() as conn:
                 if object_classes is None:
-                    object_classes = []
+                    object_classes: t.StrSequence = []
                 try:
                     _ldap3_call(conn, "add", dn, object_classes, dict(attributes))
                 except Exception as e:
