@@ -243,10 +243,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     for key, value in record.items():
                         ldap_attr = mapping.get(key, key)
                         if isinstance(value, list):
-                            ldap_values = [
-                                str(item).encode("utf-8")
-                                for item in value
-                            ]
+                            ldap_values = [str(item).encode("utf-8") for item in value]
                             if ldap_values:
                                 ldap_attrs[ldap_attr] = ldap_values
                         else:
