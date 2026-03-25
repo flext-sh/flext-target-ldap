@@ -13,10 +13,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from flext_target_ldap import (
-    GroupsSink,
-    LDAPBaseSink,
-    OrganizationalUnitsSink,
-    UsersSink,
+    FlextTargetLdapBaseSink as LDAPBaseSink,
+    FlextTargetLdapGroupsSink as GroupsSink,
+    FlextTargetLdapOrganizationalUnitsSink as OrganizationalUnitsSink,
+    FlextTargetLdapUsersSink as UsersSink,
 )
 from tests import t
 

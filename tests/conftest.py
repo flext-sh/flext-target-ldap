@@ -15,7 +15,7 @@ from unittest.mock import MagicMock
 import pytest
 from flext_tests import tk
 
-from flext_target_ldap import LdapTargetClient
+from flext_target_ldap import FlextTargetLdapClient as LdapTargetClient
 from tests import t
 
 

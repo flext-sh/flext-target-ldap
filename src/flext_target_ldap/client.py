@@ -132,7 +132,7 @@ class FlextTargetLdapLdapClient:
         try:
             with self.get_connection() as conn:
                 if object_classes is None:
-                    object_classes: t.StrSequence = []
+                    object_classes = list[str]()
                 try:
                     _ldap3_call(conn, "add", dn, object_classes, dict(attributes))
                 except Exception as e:
@@ -289,11 +289,10 @@ class FlextTargetLdapLdapClient:
             with self.get_connection() as conn:
                 _ldap3_call(conn, "search", base_dn, search_filter, attributes or [])
                 raw_entries: Sequence[t.NormalizedValue] = _ldap3_entries(conn)
-                conn_entries: Sequence[FlextTargetLdapSearchEntry] = [
-                    entry
-                    for entry in raw_entries
-                    if isinstance(entry, FlextTargetLdapSearchEntry)
-                ]
+                conn_entries: list[FlextTargetLdapSearchEntry] = []
+                for raw_entry in raw_entries:
+                    if isinstance(raw_entry, FlextTargetLdapSearchEntry):
+                        conn_entries.append(raw_entry)  # noqa: PERF401
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
                 for raw in conn_entries:
                     if not isinstance(raw, FlextTargetLdapSearchEntry):

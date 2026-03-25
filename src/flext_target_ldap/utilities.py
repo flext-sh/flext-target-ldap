@@ -401,7 +401,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """
                 if not stream_name or not schema:
                     return r[bool].fail("Stream name and schema are required")
-                raw_props = schema.get("properties", {})
+                raw_props: t.ConfigMap | Mapping[str, t.NormalizedValue] = schema.get("properties", {})
                 properties: MutableMapping[str, t.ValueOrModel] = {}
                 if u.is_dict_like(raw_props):
                     for k, v in raw_props.items():
@@ -451,13 +451,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         f"Missing required LDAP connection fields: {', '.join(missing_fields)}",
                     )
                 host = config["host"]
-                match host:
-                    case str() if host.strip():
-                        pass
-                    case _:
-                        return r[Mapping[str, t.ConfigMap]].fail(
-                            "Host must be a non-empty string",
-                        )
+                if not isinstance(host, str) or not host.strip():
+                    return r[Mapping[str, t.ConfigMap]].fail(
+                        "Host must be a non-empty string",
+                    )
                 bind_dn = config["bind_dn"]
                 match bind_dn:
                     case str():
@@ -547,13 +544,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     )
                 if "dn_template" in config:
                     dn_template = config["dn_template"]
-                    match dn_template:
-                        case str() if dn_template.strip():
-                            pass
-                        case _:
-                            return r[Mapping[str, t.ConfigMap]].fail(
-                                "DN template must be a non-empty string",
-                            )
+                    if not isinstance(dn_template, str) or not dn_template.strip():
+                        return r[Mapping[str, t.ConfigMap]].fail(
+                            "DN template must be a non-empty string",
+                        )
                 batch_size = config.get(
                     "batch_size",
                     c.DEFAULT_BATCH_SIZE,

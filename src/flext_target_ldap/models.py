@@ -623,11 +623,9 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class SingerSchemaDefinition(FlextLdapModels.Value):
             """Singer schema definition mapping properties to LDAP attributes."""
 
-            properties: Annotated[
-                MutableMapping[
-                    str,
-                    FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition,
-                ]
+            properties: MutableMapping[
+                str,
+                FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition,
             ] = Field(default_factory=dict)
 
         class SingerLDAPCatalogEntry(FlextLdapModels.Entity):
@@ -635,7 +633,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             tap_stream_id: t.NonEmptyStr
             stream: t.NonEmptyStr
-            stream_schema: Annotated[MutableMapping[str, t.ContainerValue]] = Field(
+            stream_schema: MutableMapping[str, t.ContainerValue] = Field(
                 default_factory=dict
             )
 
@@ -650,7 +648,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class DataTransformationResult(FlextLdapModels.Value):
             """Lightweight result of data transformation engine operations."""
 
-            transformed_data: Annotated[MutableMapping[str, t.ContainerValue]] = Field(
+            transformed_data: MutableMapping[str, t.ContainerValue] = Field(
                 default_factory=dict
             )
             applied_rules: MutableSequence[str] = Field(default_factory=list)

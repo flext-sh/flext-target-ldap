@@ -12,7 +12,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from flext_target_ldap import LdapTargetClient
+from flext_target_ldap import FlextTargetLdapClient as LdapTargetClient
 from flext_target_ldap.client import LDAPClient, LDAPSearchEntry
 from tests import t
 
