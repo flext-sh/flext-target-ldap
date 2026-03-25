@@ -1,5 +1,5 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
-# Regenerate with: make codegen
+# Regenerate with: make gen
 #
 """LDAP application module using flext-core patterns.
 
@@ -26,10 +26,7 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextTargetLdapOrchestrator": [
-        "flext_target_ldap.application.orchestrator",
-        "FlextTargetLdapOrchestrator",
-    ],
+    "FlextTargetLdapOrchestrator": ["flext_target_ldap.application.orchestrator", "FlextTargetLdapOrchestrator"],
     "logger": ["flext_target_ldap.application.orchestrator", "logger"],
 }
 
