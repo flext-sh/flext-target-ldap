@@ -262,7 +262,8 @@ class TestLDAPClient:
         if not result.value:
             msg: str = f"Expected True, got {result.value}"
             raise AssertionError(msg)
-        mock_connection.entries = []
+        empty_entries: list[LDAPSearchEntry] = []
+        mock_connection.entries = empty_entries
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
         assert result.is_success
         if result.value:
@@ -298,7 +299,8 @@ class TestLDAPClient:
             msg: str = f"Expected {'uid=test,dc=test,dc=com'}, got {entry.dn}"
             raise AssertionError(msg)
         assert entry.attributes["cn"] == ["Test User"]
-        mock_connection.entries = []
+        empty_entries: list[LDAPSearchEntry] = []
+        mock_connection.entries = empty_entries
         result = client.get_entry("uid=notfound,dc=test,dc=com")
         assert result.is_success
         assert result.value is None
