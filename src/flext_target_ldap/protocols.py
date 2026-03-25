@@ -10,6 +10,7 @@ from collections.abc import Mapping, MutableSequence, Sequence
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from flext_ldap import FlextLdapProtocols
+from flext_meltano import FlextMeltanoProtocols
 
 from flext_target_ldap import t
 
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from flext_target_ldap.models import m as _m
 
 
-class FlextTargetLdapProtocols(FlextLdapProtocols):
+class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     """Singer Target LDAP protocols extending LDAP and Meltano protocols.
 
     Extends both FlextLdapProtocols and FlextMeltanoProtocols via multiple inheritance
