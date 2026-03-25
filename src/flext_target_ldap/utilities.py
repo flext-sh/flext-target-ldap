@@ -401,7 +401,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """
                 if not stream_name or not schema:
                     return r[bool].fail("Stream name and schema are required")
-                raw_props: t.ConfigMap | Mapping[str, t.NormalizedValue] = schema.get("properties", {})
+                raw_props: t.ConfigMap | Mapping[str, t.NormalizedValue] = schema.get(
+                    "properties", {}
+                )
                 properties: MutableMapping[str, t.ValueOrModel] = {}
                 if u.is_dict_like(raw_props):
                     for k, v in raw_props.items():
