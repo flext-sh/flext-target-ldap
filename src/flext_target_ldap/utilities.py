@@ -204,7 +204,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     if "{" in dn_rdn and "}" in dn_rdn:
                         return r[str].fail(f"Unresolved placeholders in DN: {dn_rdn}")
                     full_dn = f"{dn_rdn},{base_dn}"
-                    if not FlextTargetLdapUtilities.LdapDataProcessing.split(full_dn):
+                    if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                        full_dn
+                    ):
                         return r[str].fail(f"Invalid DN format: {full_dn}")
                     return r[str].ok(full_dn)
                 except (
@@ -464,7 +466,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Bind DN must be a string",
                         )
-                if not FlextTargetLdapUtilities.LdapDataProcessing.split(bind_dn):
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    bind_dn
+                ):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid bind DN format: {bind_dn}",
                     )
@@ -476,14 +480,18 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Base DN must be a string",
                         )
-                if not FlextTargetLdapUtilities.LdapDataProcessing.split(base_dn):
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    base_dn
+                ):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
                 base_dn = config["base_dn"]
                 match base_dn:
-                    case str() if FlextTargetLdapUtilities.LdapDataProcessing.split(
-                        base_dn,
+                    case str() if (
+                        FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                            base_dn,
+                        )
                     ):
                         pass
                     case _:
@@ -526,7 +534,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 r[Mapping[str, t.ConfigMap]]: Validated config or error
 
                 """
-                ldap_result = FlextTargetLdapUtilities.ConfigValidation.validate_ldap_connection_config(
+                ldap_result = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.validate_ldap_connection_config(
                     config,
                 )
                 if ldap_result.is_failure:
@@ -685,11 +693,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 t.ConfigurationMapping: Updated state
 
                 """
-                stream_state = (
-                    FlextTargetLdapUtilities.StateManagement.get_target_state(
-                        state,
-                        stream_name,
-                    )
+                stream_state = FlextTargetLdapUtilities.TargetLdap.StateManagement.get_target_state(
+                    state,
+                    stream_name,
                 )
                 current_count_val = stream_state.get("records_processed", 0)
                 match current_count_val:
@@ -714,7 +720,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     "last_updated": datetime.now(UTC).isoformat(),
                     "batch_count": batch_count + 1,
                 }
-                return FlextTargetLdapUtilities.StateManagement.set_target_state(
+                return FlextTargetLdapUtilities.TargetLdap.StateManagement.set_target_state(
                     state,
                     stream_name,
                     updated_stream_state,
@@ -736,27 +742,29 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     m.Ldap.ConnectionConfig: Validated connection config
 
                 """
-                server = FlextTargetLdapUtilities.TypeConversion.to_str(
+                server = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
                     config.get("host", "localhost"),
                     "localhost",
                 )
-                port = FlextTargetLdapUtilities.TypeConversion.to_int(
+                port = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
                     config.get("port", c.Ldap.ConnectionDefaults.PORT),
                     c.Ldap.ConnectionDefaults.PORT,
                 )
-                use_ssl = FlextTargetLdapUtilities.TypeConversion.to_bool(
+                use_ssl = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_bool(
                     config.get("use_ssl", False),
                     default=False,
                 )
-                bind_dn = FlextTargetLdapUtilities.TypeConversion.to_str(
+                bind_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
                     config.get("bind_dn", ""),
                     "",
                 )
-                bind_password = FlextTargetLdapUtilities.TypeConversion.to_str(
-                    config.get("password", ""),
-                    "",
+                bind_password = (
+                    FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                        config.get("password", ""),
+                        "",
+                    )
                 )
-                timeout = FlextTargetLdapUtilities.TypeConversion.to_int(
+                timeout = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
                     config.get("timeout", c.DEFAULT_TIMEOUT_SECONDS),
                     c.DEFAULT_TIMEOUT_SECONDS,
                 )

@@ -28,7 +28,9 @@ def validate_ldap_target_config(
     try:
         connection_config = u.TargetLdap.TypeConversion.build_connection_config(config)
         base_dn = u.TargetLdap.TypeConversion.to_str(config.get("base_dn", ""))
-        batch_size = u.TargetLdap.TypeConversion.to_int(config.get("batch_size", 1000), 1000)
+        batch_size = u.TargetLdap.TypeConversion.to_int(
+            config.get("batch_size", 1000), 1000
+        )
         max_records_val = config.get("max_records")
         max_records: int | None
         match max_records_val:
@@ -55,12 +57,16 @@ def validate_ldap_target_config(
             config.get("delete_removed_entries", False),
             default=False,
         )
-        attribute_mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(config)
+        attribute_mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
+            config
+        )
         object_classes = u.TargetLdap.TypeConversion.extract_object_classes(config)
         search_filter = u.TargetLdap.TypeConversion.to_str(
             config.get("search_filter", "(objectClass=*)"),
         )
-        search_scope = u.TargetLdap.TypeConversion.to_str(config.get("search_scope", "SUBTREE"))
+        search_scope = u.TargetLdap.TypeConversion.to_str(
+            config.get("search_scope", "SUBTREE")
+        )
         validated_config = FlextTargetLdapSettings.model_validate({
             "connection": connection_config,
             "base_dn": base_dn,

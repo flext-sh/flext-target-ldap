@@ -43,47 +43,51 @@ class FlextTargetLdapSettings(m.Entity):
     ) -> r[FlextTargetLdapSettings]:
         """Validate LDAP configuration."""
         try:
-            connection_config = u.TypeConversion.build_connection_config(config)
-            attribute_mapping = u.TypeConversion.extract_attribute_mapping(config)
-            object_classes = u.TypeConversion.extract_object_classes(
+            connection_config = u.TargetLdap.TypeConversion.build_connection_config(
+                config
+            )
+            attribute_mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
+                config
+            )
+            object_classes = u.TargetLdap.TypeConversion.extract_object_classes(
                 config,
             )
             validated_config = FlextTargetLdapSettings.model_validate({
                 "connection": connection_config,
-                "base_dn": u.TypeConversion.to_str(
+                "base_dn": u.TargetLdap.TypeConversion.to_str(
                     config.get("base_dn", ""),
                 ),
-                "search_filter": u.TypeConversion.to_str(
+                "search_filter": u.TargetLdap.TypeConversion.to_str(
                     config.get("search_filter", "(objectClass=*)"),
                 ),
-                "search_scope": u.TypeConversion.to_str(
+                "search_scope": u.TargetLdap.TypeConversion.to_str(
                     config.get("search_scope", "SUBTREE"),
                 ),
-                "connect_timeout": u.TypeConversion.to_int(
+                "connect_timeout": u.TargetLdap.TypeConversion.to_int(
                     config.get("connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3),
                     c.DEFAULT_TIMEOUT_SECONDS // 3,
                 ),
-                "receive_timeout": u.TypeConversion.to_int(
+                "receive_timeout": u.TargetLdap.TypeConversion.to_int(
                     config.get("receive_timeout", c.DEFAULT_TIMEOUT_SECONDS),
                     c.DEFAULT_TIMEOUT_SECONDS,
                 ),
-                "batch_size": u.TypeConversion.to_int(
+                "batch_size": u.TargetLdap.TypeConversion.to_int(
                     config.get("batch_size", c.DEFAULT_SIZE),
                     c.DEFAULT_SIZE,
                 ),
-                "max_records": u.TypeConversion.to_int(
+                "max_records": u.TargetLdap.TypeConversion.to_int(
                     config.get("max_records"),
                     0,
                 ),
-                "create_missing_entries": u.TypeConversion.to_bool(
+                "create_missing_entries": u.TargetLdap.TypeConversion.to_bool(
                     config.get("create_missing_entries", True),
                     default=True,
                 ),
-                "update_existing_entries": u.TypeConversion.to_bool(
+                "update_existing_entries": u.TargetLdap.TypeConversion.to_bool(
                     config.get("update_existing_entries", True),
                     default=True,
                 ),
-                "delete_removed_entries": u.TypeConversion.to_bool(
+                "delete_removed_entries": u.TargetLdap.TypeConversion.to_bool(
                     config.get("delete_removed_entries", False),
                     default=False,
                 ),
