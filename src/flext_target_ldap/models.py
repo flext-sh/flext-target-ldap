@@ -16,12 +16,11 @@ from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_core import t
 from flext_ldap import FlextLdapModels, r
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, field_validator
 
-from flext_target_ldap import c
+from flext_target_ldap import c, t
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):

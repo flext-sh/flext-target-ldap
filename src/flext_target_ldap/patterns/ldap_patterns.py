@@ -9,8 +9,9 @@ from __future__ import annotations
 from collections.abc import Mapping, MutableMapping, Sequence
 from typing import override
 
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger, r
 
+from flext_target_ldap import t
 from flext_target_ldap.models import m
 
 logger = FlextLogger(__name__)

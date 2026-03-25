@@ -9,8 +9,9 @@ from __future__ import annotations
 from collections.abc import Mapping, MutableSequence, Sequence
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from flext_core import t
 from flext_ldap import FlextLdapProtocols
+
+from flext_target_ldap import t
 
 if TYPE_CHECKING:
     from flext_target_ldap import target_client as target_client_module
