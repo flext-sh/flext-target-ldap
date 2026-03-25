@@ -115,7 +115,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             r[Mapping[str, t.ConfigMap]]: Validated record or error
 
             """
-            if message.get("type") != "RECORD":
+            if str(message.get("type", "")) != "RECORD":
                 return r[Mapping[str, t.ConfigMap]].fail(
                     "Message type must be RECORD",
                 )
@@ -145,7 +145,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             r[Mapping[str, t.ConfigMap]]: Validated schema or error
 
             """
-            if message.get("type") != "SCHEMA":
+            if str(message.get("type", "")) != "SCHEMA":
                 return r[Mapping[str, t.ConfigMap]].fail(
                     "Message type must be SCHEMA",
                 )
@@ -198,8 +198,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     for key, value in record.items():
                         placeholder = f"{{{key}}}"
                         if placeholder in dn_rdn:
-                            if value is None:
-                                return r[str].fail(f"Cannot build DN: {key} is null")
                             dn_rdn = dn_rdn.replace(placeholder, str(value))
                     if "{" in dn_rdn and "}" in dn_rdn:
                         return r[str].fail(f"Unresolved placeholders in DN: {dn_rdn}")
@@ -243,14 +241,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     ldap_attrs: MutableMapping[str, Sequence[bytes]] = {}
                     mapping = attribute_mapping or {}
                     for key, value in record.items():
-                        if value is None:
-                            continue
                         ldap_attr = mapping.get(key, key)
                         if isinstance(value, list):
                             ldap_values = [
                                 str(item).encode("utf-8")
                                 for item in value
-                                if item is not None
                             ]
                             if ldap_values:
                                 ldap_attrs[ldap_attr] = ldap_values
@@ -457,61 +452,48 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Host must be a non-empty string",
                     )
-                bind_dn = config["bind_dn"]
-                match bind_dn:
-                    case str():
-                        pass
-                    case _:
-                        return r[Mapping[str, t.ConfigMap]].fail(
-                            "Bind DN must be a string",
-                        )
+                bind_dn_raw = config["bind_dn"]
+                bind_dn = str(bind_dn_raw)
+                if not bind_dn:
+                    return r[Mapping[str, t.ConfigMap]].fail(
+                        "Bind DN must be a string",
+                    )
                 if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
                     bind_dn
                 ):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid bind DN format: {bind_dn}",
                     )
-                base_dn = config["base_dn"]
-                match base_dn:
-                    case str():
-                        pass
-                    case _:
-                        return r[Mapping[str, t.ConfigMap]].fail(
-                            "Base DN must be a string",
-                        )
+                base_dn_raw = config["base_dn"]
+                base_dn = str(base_dn_raw)
+                if not base_dn:
+                    return r[Mapping[str, t.ConfigMap]].fail(
+                        "Base DN must be a string",
+                    )
                 if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
                     base_dn
                 ):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
-                base_dn = config["base_dn"]
-                match base_dn:
-                    case str() if (
-                        FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
-                            base_dn,
-                        )
-                    ):
-                        pass
-                    case _:
-                        return r[Mapping[str, t.ConfigMap]].fail(
-                            f"Invalid base DN format: {base_dn}",
-                        )
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    base_dn,
+                ):
+                    return r[Mapping[str, t.ConfigMap]].fail(
+                        f"Invalid base DN format: {base_dn}",
+                    )
                 if "port" in config:
-                    port = config["port"]
-                    match port:
-                        case bool():
-                            return r[Mapping[str, t.ConfigMap]].fail(
-                                "Port must be a valid integer between 1 and 65535",
-                            )
-                        case int() if (
-                            0 < port <= c.TargetLdap.Connection.MAX_PORT_NUMBER
-                        ):
-                            pass
-                        case _:
-                            return r[Mapping[str, t.ConfigMap]].fail(
-                                "Port must be a valid integer between 1 and 65535",
-                            )
+                    port_raw = config["port"]
+                    try:
+                        port_int = int(str(port_raw))
+                    except (ValueError, TypeError):
+                        return r[Mapping[str, t.ConfigMap]].fail(
+                            "Port must be a valid integer between 1 and 65535",
+                        )
+                    if not (0 < port_int <= c.TargetLdap.Connection.MAX_PORT_NUMBER):
+                        return r[Mapping[str, t.ConfigMap]].fail(
+                            "Port must be a valid integer between 1 and 65535",
+                        )
                 use_ssl = config.get("use_ssl", False)
                 use_tls = config.get("use_tls", False)
                 if use_ssl and use_tls:

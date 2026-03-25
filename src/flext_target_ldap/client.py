@@ -93,28 +93,15 @@ class FlextTargetLdapLdapClient:
             self.config = config
             self._bind_dn = ""
             self._password = ""
-        elif isinstance(config, Mapping):
+        else:
             self.config = m.Ldap.ConnectionConfig(
                 host=str(config.get("host", "localhost")),
-                port=int(str(config.get("port", 389)))
-                if config.get("port", 389) is not None
-                else 389,
+                port=int(str(config.get("port", 389))),
                 use_ssl=bool(config.get("use_ssl", False)),
-                timeout=int(str(config.get("timeout", 30)))
-                if config.get("timeout", 30) is not None
-                else 30,
+                timeout=int(str(config.get("timeout", 30))),
             )
             self._bind_dn = str(config.get("bind_dn", ""))
             self._password = str(config.get("password", ""))
-        else:
-            self.config = m.Ldap.ConnectionConfig(
-                host="localhost",
-                port=389,
-                use_ssl=False,
-                timeout=30,
-            )
-            self._bind_dn = ""
-            self._password = ""
         self._api: FlextLdap | None = None
         logger.info(
             "Initialized LDAP client using flext-ldap API for %s:%d",
@@ -289,14 +276,13 @@ class FlextTargetLdapLdapClient:
             with self.get_connection() as conn:
                 _ldap3_call(conn, "search", base_dn, search_filter, attributes or [])
                 raw_entries: Sequence[t.NormalizedValue] = _ldap3_entries(conn)
-                conn_entries: list[FlextTargetLdapSearchEntry] = []
-                for raw_entry in raw_entries:
-                    if isinstance(raw_entry, FlextTargetLdapSearchEntry):
-                        conn_entries.append(raw_entry)  # noqa: PERF401
+                conn_entries: list[FlextTargetLdapSearchEntry] = [
+                    raw_entry
+                    for raw_entry in raw_entries
+                    if isinstance(raw_entry, FlextTargetLdapSearchEntry)
+                ]
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
                 for raw in conn_entries:
-                    if not isinstance(raw, FlextTargetLdapSearchEntry):
-                        continue
                     dn = raw.dn
                     attr_names: t.StrSequence = list(raw.attributes.keys())
                     attrs: MutableMapping[str, str | t.StrSequence] = {}

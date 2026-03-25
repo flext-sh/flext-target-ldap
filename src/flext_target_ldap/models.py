@@ -269,7 +269,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(
                     description="Attribute mappings that were applied",
                 ),
-            ] = Field(default_factory=list)
+            ] = Field(default_factory=lambda: list[FlextTargetLdapModels.TargetLdap.AttributeMapping]())
             transformation_errors: Annotated[
                 MutableSequence[str],
                 Field(
@@ -358,7 +358,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 Field(
                     description="Current batch of LDAP entries",
                 ),
-            ] = Field(default_factory=list)
+            ] = Field(default_factory=lambda: list[FlextTargetLdapModels.TargetLdap.Entry]())
             total_processed: Annotated[
                 t.NonNegativeInt,
                 Field(
