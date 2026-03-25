@@ -13,7 +13,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Annotated
 
 from flext_core import r
 from pydantic import Field
@@ -35,8 +34,8 @@ class FlextTargetLdapSettings(m.Entity):
     create_missing_entries: bool = True
     update_existing_entries: bool = True
     delete_removed_entries: bool = False
-    attribute_mapping: Annotated[t.StrMapping, Field(default_factory=dict)]
-    object_classes: Annotated[t.StrSequence, Field(default_factory=lambda: ["top"])]
+    attribute_mapping: t.StrMapping = Field(default_factory=dict)
+    object_classes: t.StrSequence = Field(default_factory=lambda: ["top"])
 
     @staticmethod
     def validate_ldap_config(
