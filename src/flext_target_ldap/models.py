@@ -31,9 +31,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     Integrates with flext-core patterns for enterprise LDAP data loading.
     """
 
-    # ObjectClass moved to constants.py as c.TargetLdap.ObjectClass (DRY pattern)
-    ObjectClass = c.TargetLdap.ObjectClass
-
     class TargetLdap:
         """TargetLdap domain namespace."""
 

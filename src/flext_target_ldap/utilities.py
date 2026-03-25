@@ -941,11 +941,5 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 return str(value)
 
 
-LdapDataProcessing = FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing
-StreamUtilities = FlextTargetLdapUtilities.TargetLdap.StreamUtilities
-ConfigValidation = FlextTargetLdapUtilities.TargetLdap.ConfigValidation
-StateManagement = FlextTargetLdapUtilities.TargetLdap.StateManagement
-TypeConversion = FlextTargetLdapUtilities.TargetLdap.TypeConversion
-
 u = FlextTargetLdapUtilities
 __all__ = ["FlextTargetLdapUtilities", "u"]
