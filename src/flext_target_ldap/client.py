@@ -68,6 +68,15 @@ class FlextTargetLdapSearchEntry:
         self.attributes = attributes
 
 
+def _filter_search_entries(
+    raw_entries: Sequence[object],
+) -> list[FlextTargetLdapSearchEntry]:
+    """Filter raw entries to only FlextTargetLdapSearchEntry instances."""
+    return [
+        entry for entry in raw_entries if isinstance(entry, FlextTargetLdapSearchEntry)
+    ]
+
+
 class FlextTargetLdapLdapClient:
     """Backward-compatible LDAP client using flext-ldap API for all operations.
 
@@ -272,11 +281,9 @@ class FlextTargetLdapLdapClient:
             with self.get_connection() as conn:
                 _ldap3_call(conn, "search", base_dn, search_filter, attributes or [])
                 raw_entries: Sequence[t.NormalizedValue] = _ldap3_entries(conn)
-                conn_entries: list[FlextTargetLdapSearchEntry] = [
-                    raw_entry
-                    for raw_entry in raw_entries
-                    if isinstance(raw_entry, FlextTargetLdapSearchEntry)
-                ]
+                conn_entries: list[FlextTargetLdapSearchEntry] = _filter_search_entries(
+                    raw_entries,
+                )
                 entries: MutableSequence[FlextTargetLdapSearchEntry] = []
                 for raw in conn_entries:
                     dn = raw.dn

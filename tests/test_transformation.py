@@ -113,11 +113,11 @@ class TestDataTransformationEngine:
         assert transform_result.applied_rules
         expected_object_class = ["user"]
         if transform_result.transformed_data["objectClass"] != expected_object_class:
-            msg: str = f"Expected {expected_object_class}, got {transform_result.transformed_data['objectClass']}"
-            raise AssertionError(msg)
+            msg_oc: str = f"Expected {expected_object_class}, got {transform_result.transformed_data['objectClass']}"
+            raise AssertionError(msg_oc)
         if transform_result.transformed_data["title"] != "Test user":
-            msg: str = f"Expected 'Test user', got {transform_result.transformed_data['title']}"
-            raise AssertionError(msg)
+            msg_title: str = f"Expected 'Test user', got {transform_result.transformed_data['title']}"
+            raise AssertionError(msg_title)
 
     def test_remove_empty_attributes(self) -> None:
         """Test method."""
@@ -275,11 +275,11 @@ class TestMigrationValidator:
             validator.validate(dn, attributes, object_classes)
         stats = validator.get_validation_statistics()
         if stats["entries_validated"] != EXPECTED_DATA_COUNT:
-            msg: str = f"Expected {3}, got {stats['entries_validated']}"
-            raise AssertionError(msg)
+            msg_count: str = f"Expected {3}, got {stats['entries_validated']}"
+            raise AssertionError(msg_count)
         if stats["validation_errors"] < 0:
-            msg: str = f"Expected {stats['validation_errors']} >= {0}"
-            raise AssertionError(msg)
+            msg_errors: str = f"Expected {stats['validation_errors']} >= {0}"
+            raise AssertionError(msg_errors)
         assert stats["validation_warnings"] >= 0
 
 
@@ -296,14 +296,14 @@ class TestTransformationRule:
             enabled=True,
         )
         if rule.name != "test_rule":
-            msg: str = f"Expected 'test_rule', got {rule.name}"
-            raise AssertionError(msg)
+            msg_name: str = f"Expected 'test_rule', got {rule.name}"
+            raise AssertionError(msg_name)
         if not rule.enabled:
-            msg: str = f"Expected True, got {rule.enabled}"
-            raise AssertionError(msg)
+            msg_enabled: str = f"Expected True, got {rule.enabled}"
+            raise AssertionError(msg_enabled)
         if rule.pattern != "orclUser":
-            msg: str = f"Expected 'orclUser', got {rule.pattern}"
-            raise AssertionError(msg)
+            msg_pattern: str = f"Expected 'orclUser', got {rule.pattern}"
+            raise AssertionError(msg_pattern)
         assert rule.replacement == "person"
 
 
@@ -343,12 +343,12 @@ class TestIntegratedTransformation:
         assert transform.applied_rules
         transformed_entry = transform.transformed_data
         if transformed_entry["dn"] != "cn=john.doe,ou=people,dc=network,dc=invaliddc":
-            msg: str = f"Expected {'cn=john.doe,ou=people,dc=network,dc=invaliddc'}, got {transformed_entry['dn']}"
-            raise AssertionError(msg)
+            msg_dn: str = f"Expected {'cn=john.doe,ou=people,dc=network,dc=invaliddc'}, got {transformed_entry['dn']}"
+            raise AssertionError(msg_dn)
         object_classes = transformed_entry["objectClass"]
         if "inetOrgPerson" not in str(object_classes):
-            msg: str = f"Expected {'inetOrgPerson'} in {object_classes!s}"
-            raise AssertionError(msg)
+            msg_oc: str = f"Expected {'inetOrgPerson'} in {object_classes!s}"
+            raise AssertionError(msg_oc)
         dn = str(transformed_entry["dn"])
         attributes = {
             k: v for k, v in transformed_entry.items() if k not in {"dn", "objectClass"}

@@ -38,27 +38,27 @@ class TestLDAPClient:
     def test_client_initialization(self, target_client: LdapTargetClient) -> None:
         """Test LDAP client initialization with configuration values."""
         if target_client.host != "test.ldap.com":
-            msg: str = f"Expected {'test.ldap.com'}, got {target_client.host}"
-            raise AssertionError(msg)
+            msg_host: str = f"Expected {'test.ldap.com'}, got {target_client.host}"
+            raise AssertionError(msg_host)
         assert target_client.port == 389
         if target_client.bind_dn != "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com":
-            msg: str = f"Expected {'cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com'}, got {target_client.bind_dn}"
-            raise AssertionError(msg)
+            msg_dn: str = f"Expected {'cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com'}, got {target_client.bind_dn}"
+            raise AssertionError(msg_dn)
         assert target_client.password == "test_password"
         assert not target_client.use_ssl
         if target_client.timeout != 30:
-            msg: str = f"Expected {30}, got {target_client.timeout}"
-            raise AssertionError(msg)
+            msg_timeout: str = f"Expected {30}, got {target_client.timeout}"
+            raise AssertionError(msg_timeout)
 
     def test_server_uri_construction(self, target_client: LdapTargetClient) -> None:
         """Test server URI construction with and without SSL."""
         if target_client.server_uri != "ldap://test.ldap.com:389":
-            msg: str = (
+            msg_uri: str = (
                 f"Expected {'ldap://test.ldap.com:389'}, got {target_client.server_uri}"
             )
-            raise AssertionError(msg)
+            raise AssertionError(msg_uri)
         # Create new client with SSL enabled to test LDAPS URI
-        ssl_config = {
+        ssl_config: Mapping[str, t.ContainerValue] = {
             "host": "test.ldap.com",
             "port": 389,
             "use_ssl": True,
@@ -68,10 +68,10 @@ class TestLDAPClient:
         }
         ssl_client = LdapTargetClient(config=ssl_config)
         if ssl_client.server_uri != "ldaps://test.ldap.com:389":
-            msg: str = (
+            msg_ssl_uri: str = (
                 f"Expected {'ldaps://test.ldap.com:389'}, got {ssl_client.server_uri}"
             )
-            raise AssertionError(msg)
+            raise AssertionError(msg_ssl_uri)
 
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.Server")
@@ -228,12 +228,12 @@ class TestLDAPClient:
         assert result.is_success
         entries = result.value
         if len(entries) != 1:
-            msg: str = f"Expected {1}, got {len(entries)}"
-            raise AssertionError(msg)
+            msg_count: str = f"Expected {1}, got {len(entries)}"
+            raise AssertionError(msg_count)
         assert entries[0].dn == "uid=test,dc=test,dc=com"
         if entries[0].attributes["cn"] != ["Test User"]:
-            msg: str = f"Expected {['Test User']}, got {entries[0].attributes['cn']}"
-            raise AssertionError(msg)
+            msg_cn: str = f"Expected {['Test User']}, got {entries[0].attributes['cn']}"
+            raise AssertionError(msg_cn)
         assert entries[0].attributes["mail"] == ["test@example.com"]
 
     @patch("flext_target_ldap.client.ldap3.Connection")
@@ -260,15 +260,15 @@ class TestLDAPClient:
         result = client.entry_exists("uid=test,dc=test,dc=com")
         assert result.is_success
         if not result.value:
-            msg: str = f"Expected True, got {result.value}"
-            raise AssertionError(msg)
+            msg_true: str = f"Expected True, got {result.value}"
+            raise AssertionError(msg_true)
         empty_entries: list[LDAPSearchEntry] = []
         mock_connection.entries = empty_entries
         result = client.entry_exists("uid=notfound,dc=test,dc=com")
         assert result.is_success
         if result.value:
-            msg: str = f"Expected False, got {result.value}"
-            raise AssertionError(msg)
+            msg_false: str = f"Expected False, got {result.value}"
+            raise AssertionError(msg_false)
 
     @patch("flext_target_ldap.client.ldap3.Connection")
     @patch("flext_target_ldap.client.ldap3.ServerPool")
