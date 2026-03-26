@@ -23,14 +23,10 @@ from typing import override
 import ldap3
 from flext_core import FlextLogger
 from flext_ldap import (
-    FlextLdap,
-    FlextLdapConnection,
-    FlextLdapOperations,
-    FlextLdapSettings,
+    ldap,
     m,
     r,
 )
-from flext_ldif import FlextLdif
 
 from flext_target_ldap import t
 from flext_target_ldap.protocols import p
@@ -91,8 +87,8 @@ class FlextTargetLdapLdapClient:
         """Initialize LDAP client with connection configuration."""
         if isinstance(config, m.Ldap.ConnectionConfig):
             self.config = config
-            self._bind_dn = ""
-            self._password = ""
+            self._bind_dn = config.bind_dn or ""
+            self._password = config.bind_password or ""
         else:
             self.config = m.Ldap.ConnectionConfig(
                 host=str(config.get("host", "localhost")),
@@ -102,7 +98,7 @@ class FlextTargetLdapLdapClient:
             )
             self._bind_dn = str(config.get("bind_dn", ""))
             self._password = str(config.get("password", ""))
-        self._api: FlextLdap | None = None
+        self._api: ldap | None = None
         logger.info(
             "Initialized LDAP client using flext-ldap API for %s:%d",
             self.config.host,
@@ -315,28 +311,10 @@ class FlextTargetLdapLdapClient:
         logger.info("Sync connect called - using flext-ldap infrastructure")
         return r[bool].ok(value=True)
 
-    def _get_api(self) -> FlextLdap:
-        """Instantiate and cache FlextLdap lazily."""
+    def _get_api(self) -> ldap:
+        """Instantiate and cache ldap lazily."""
         if self._api is None:
-            ldap_config: t.ConfigurationMapping = {
-                "host": self.config.host,
-                "port": self.config.port,
-                "use_ssl": self.config.use_ssl,
-                "use_tls": self.config.use_tls,
-                "bind_dn": self._bind_dn,
-                "bind_password": self._password,
-                "timeout": self.config.timeout,
-                "auto_bind": self.config.auto_bind,
-                "auto_range": self.config.auto_range,
-            }
-            ldap_settings = FlextLdapSettings.model_validate(ldap_config)
-            connection = FlextLdapConnection(config=ldap_settings)
-            operations = FlextLdapOperations(connection=connection)
-            self._api = FlextLdap(
-                connection=connection,
-                operations=operations,
-                ldif=FlextLdif(),
-            )
+            self._api = ldap()
         return self._api
 
     def _get_flext_ldap_wrapper(self) -> p.TargetLdap.LDAPConnection:

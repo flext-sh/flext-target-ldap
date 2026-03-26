@@ -19,12 +19,9 @@ from typing import TypeIs, override
 
 from flext_core import FlextContainer, FlextLogger
 from flext_ldap import (
-    FlextLdap,
-    FlextLdapConnection,
-    FlextLdapModels,
-    FlextLdapOperations,
+    ldap,
+    m,
 )
-from flext_ldif import FlextLdif
 
 from flext_target_ldap import (
     FlextTargetLdapSettings,
@@ -107,8 +104,8 @@ class _LdapConnectionWrapper:
     @override
     def __init__(
         self,
-        api: FlextLdap,
-        config: FlextLdapModels.Ldap.ConnectionConfig,
+        api: ldap,
+        config: m.Ldap.ConnectionConfig,
     ) -> None:
         """Initialize wrapper."""
         self.api = api
@@ -194,7 +191,7 @@ class _LdapConnectionWrapper:
             if connect_result.is_failure:
                 self.entries = list[_CompatibleEntry]()
                 return False
-            search_options = FlextLdapModels.Ldap.SearchOptions(
+            search_options = m.Ldap.SearchOptions(
                 base_dn=base_dn,
                 filter_str=search_filter,
                 attributes=attributes,
@@ -243,19 +240,19 @@ class FlextTargetLdapClient:
     @override
     def __init__(
         self,
-        config: FlextLdapModels.Ldap.ConnectionConfig | t.ContainerValueMapping,
+        config: m.Ldap.ConnectionConfig | t.ContainerValueMapping,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        self.config: FlextLdapModels.Ldap.ConnectionConfig
-        if isinstance(config, FlextLdapModels.Ldap.ConnectionConfig):
+        self.config: m.Ldap.ConnectionConfig
+        if isinstance(config, m.Ldap.ConnectionConfig):
             self.config = config
-            self._bind_dn = ""
-            self._password = ""
+            self._bind_dn = config.bind_dn or ""
+            self._password = config.bind_password or ""
         elif isinstance(config, dict):
             config_map: Mapping[str, t.ContainerValue] = {
                 str(k): v for k, v in config.items()
             }
-            self.config = FlextLdapModels.Ldap.ConnectionConfig(
+            self.config = m.Ldap.ConnectionConfig(
                 host=str(config_map.get("host", "localhost")),
                 port=int(
                     str(config_map.get("port", c.Ldap.ConnectionDefaults.PORT)),
@@ -266,7 +263,7 @@ class FlextTargetLdapClient:
             self._bind_dn = str(config_map.get("bind_dn", ""))
             self._password = str(config_map.get("password", ""))
         else:
-            self.config = FlextLdapModels.Ldap.ConnectionConfig(
+            self.config = m.Ldap.ConnectionConfig(
                 host="localhost",
                 port=c.Ldap.ConnectionDefaults.PORT,
                 use_ssl=False,
@@ -274,14 +271,7 @@ class FlextTargetLdapClient:
             )
             self._bind_dn = ""
             self._password = ""
-        connection = FlextLdapConnection()
-        operations = FlextLdapOperations(connection=connection)
-        self._operations = operations
-        self._api: FlextLdap = FlextLdap(
-            connection=connection,
-            operations=operations,
-            ldif=FlextLdif(),
-        )
+        self._api: ldap = ldap()
         self._current_session_id: str | None = None
         logger.info(
             f"Initialized LDAP client using flext-ldap API for {self.config.host}:{self.config.port}",
@@ -358,12 +348,12 @@ class FlextTargetLdapClient:
                         "cn": [cn],
                         "member": members or [],
                     }
-                    group_entry = FlextLdapModels.Ldif.Entry(
-                        dn=FlextLdapModels.Ldif.DN(
+                    group_entry = m.Ldif.Entry(
+                        dn=m.Ldif.DN(
                             value=dn,
-                            metadata=FlextLdapModels.Ldif.EntryMetadata(),
+                            metadata=m.Ldif.EntryMetadata(),
                         ),
-                        attributes=FlextLdapModels.Ldif.Attributes.model_validate({
+                        attributes=m.Ldif.Attributes.model_validate({
                             "attributes": group_attrs,
                             "attribute_metadata": {},
                             "metadata": None,
@@ -372,7 +362,7 @@ class FlextTargetLdapClient:
                         metadata=None,
                         validation_metadata=None,
                     )
-                    result_op = self._operations.add(group_entry)
+                    result_op = self._api.add(group_entry)
                     if result_op.is_success:
                         return r[bool].ok(value=True)
                     return r[bool].fail(
@@ -545,7 +535,7 @@ class FlextTargetLdapClient:
                     f"Connection failed: {connect_result.error}",
                 )
             try:
-                search_options = FlextLdapModels.Ldap.SearchOptions(
+                search_options = m.Ldap.SearchOptions(
                     base_dn=base_dn,
                     filter_str=search_filter,
                     attributes=attributes,
@@ -574,7 +564,7 @@ class FlextTargetLdapClient:
             logger.exception("Failed to search entries in %s", base_dn)
             return r[Sequence[FlextTargetLdapSearchEntry]].fail(f"Search failed: {e}")
 
-    def _create_connection_wrapper(self, api: FlextLdap) -> _LdapConnectionWrapper:
+    def _create_connection_wrapper(self, api: ldap) -> _LdapConnectionWrapper:
         """Create LDAP connection wrapper for delegation."""
         return _LdapConnectionWrapper(api, self.config)
 
