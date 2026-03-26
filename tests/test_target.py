@@ -85,25 +85,27 @@ class TestTargetLDAPUnit:
         self,
         config: MutableMapping[str, t.ContainerValue],
     ) -> None:
-        """Test DN template configuration processing."""
-        config["dn_templates"] = {"users": "uid={uid},ou=people,dc=test,dc=com"}
+        """Test DN template configuration via user_rdn_attribute."""
+        config["user_rdn_attribute"] = "uid"
+        config["base_dn"] = "ou=people,dc=test,dc=com"
         target = TargetLdap(config=config)
-        target.get_sink("users")
-        assert (
-            target.config["users_dn_template"] == "uid={uid},ou=people,dc=test,dc=com"
-        )
+        sink = target.get_sink("users")
+        assert isinstance(sink, LdapUsersSink)
+        dn_result = sink.build_dn({"uid": "jdoe"})
+        assert dn_result.is_success
+        assert dn_result.value == "uid=jdoe,ou=people,dc=test,dc=com"
 
     def test_object_classes_processing(
         self,
         config: MutableMapping[str, t.ContainerValue],
     ) -> None:
-        """Test default t.NormalizedValue classes configuration processing."""
-        config["default_object_classes"] = {"users": ["customPerson", "top"]}
+        """Test object classes configuration read by UsersSink."""
+        config["users_object_classes"] = ["customPerson", "top"]
         target = TargetLdap(config=config)
-        target.get_sink("users")
-        if target.config["users_object_classes"] != ["customPerson", "top"]:
-            msg: str = f"Expected {['customPerson', 'top']}, got {target.config['users_object_classes']}"
-            raise AssertionError(msg)
+        sink = target.get_sink("users")
+        assert isinstance(sink, LdapUsersSink)
+        object_classes = sink.get_object_classes({})
+        assert object_classes == ["customPerson", "top"]
 
     def test_process_record(self, config: Mapping[str, t.ContainerValue]) -> None:
         """Test processing a record through the LDAP target."""
