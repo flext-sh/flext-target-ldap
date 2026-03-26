@@ -258,22 +258,18 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             transformed_entry: Annotated[
-                FlextTargetLdapModels.TargetLdap.Entry,
+                m.TargetLdap.Entry,
                 Field(
                     ...,
                     description="Resulting LDAP entry after transformation",
                 ),
             ]
             applied_mappings: Annotated[
-                MutableSequence[FlextTargetLdapModels.TargetLdap.AttributeMapping],
+                MutableSequence[m.TargetLdap.AttributeMapping],
                 Field(
                     description="Attribute mappings that were applied",
                 ),
-            ] = Field(
-                default_factory=lambda: list[
-                    FlextTargetLdapModels.TargetLdap.AttributeMapping
-                ]()
-            )
+            ] = Field(default_factory=lambda: list[m.TargetLdap.AttributeMapping]())
             transformation_errors: Annotated[
                 MutableSequence[str],
                 Field(
@@ -358,13 +354,11 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             current_batch: Annotated[
-                MutableSequence[FlextTargetLdapModels.TargetLdap.Entry],
+                MutableSequence[m.TargetLdap.Entry],
                 Field(
                     description="Current batch of LDAP entries",
                 ),
-            ] = Field(
-                default_factory=lambda: list[FlextTargetLdapModels.TargetLdap.Entry]()
-            )
+            ] = Field(default_factory=lambda: list[m.TargetLdap.Entry]())
             total_processed: Annotated[
                 t.NonNegativeInt,
                 Field(
@@ -414,7 +408,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             def add_entry(
                 self,
-                entry: FlextTargetLdapModels.TargetLdap.Entry,
+                entry: m.TargetLdap.Entry,
             ) -> Self:
                 """Add entry to current batch (immutable operation)."""
                 new_batch = list(self.current_batch)
@@ -631,7 +625,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             properties: MutableMapping[
                 str,
-                FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition,
+                m.TargetLdap.SingerPropertyDefinition,
             ] = Field(default_factory=dict)
 
         class SingerLDAPCatalogEntry(FlextLdapModels.Entity):

@@ -42,18 +42,31 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         super().__init__()
 
     @staticmethod
-    def _coerce_container_value(
+    def coerce_container_value(
         value: t.ConfigMap | t.ValueOrModel,
     ) -> t.ConfigMap | t.ContainerValueList | t.NormalizedValue | None:
+        """Coerce a container value to a normalized form for LDAP operations.
+
+        Recursively normalizes BaseModel, scalar, list, and Mapping values into
+        types suitable for LDAP attribute storage.
+
+        Args:
+            value: Value to coerce (ConfigMap, scalar, list, dict, or BaseModel)
+
+        Returns:
+            Normalized value, ConfigMap, list of container values, or None if
+            the value cannot be coerced.
+
+        """
         if isinstance(value, BaseModel):
-            return FlextTargetLdapUtilities._coerce_container_value(value.model_dump())
+            return u.coerce_container_value(value.model_dump())
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
         if isinstance(value, list):
             normalized_list: MutableSequence[t.ContainerValue] = []
             for item in value:
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
-                    coerced_item = FlextTargetLdapUtilities._coerce_container_value(
+                    coerced_item = u.coerce_container_value(
                         item,
                     )
                     if isinstance(coerced_item, (str, int, float, bool, datetime)):
@@ -63,7 +76,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             normalized_dict: MutableMapping[str, t.ValueOrModel] = {}
             for key, item in value.items():
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
-                    coerced_item = FlextTargetLdapUtilities._coerce_container_value(
+                    coerced_item = u.coerce_container_value(
                         item,
                     )
                     if coerced_item is not None and isinstance(
@@ -202,9 +215,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     if "{" in dn_rdn and "}" in dn_rdn:
                         return r[str].fail(f"Unresolved placeholders in DN: {dn_rdn}")
                     full_dn = f"{dn_rdn},{base_dn}"
-                    if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
-                        full_dn
-                    ):
+                    if not u.TargetLdap.LdapDataProcessing.split(full_dn):
                         return r[str].fail(f"Invalid DN format: {full_dn}")
                     return r[str].ok(full_dn)
                 except (
@@ -399,9 +410,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 properties: MutableMapping[str, t.ValueOrModel] = {}
                 if u.is_dict_like(raw_props):
                     for k, v in raw_props.items():
-                        coerced_value = (
-                            FlextTargetLdapUtilities._coerce_container_value(v)
-                        )
+                        coerced_value = u.coerce_container_value(v)
                         if coerced_value is not None and isinstance(
                             coerced_value,
                             (str, int, float, bool),
@@ -455,9 +464,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Bind DN must be a string",
                     )
-                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
-                    bind_dn
-                ):
+                if not u.TargetLdap.LdapDataProcessing.split(bind_dn):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid bind DN format: {bind_dn}",
                     )
@@ -467,13 +474,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Base DN must be a string",
                     )
-                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
-                    base_dn
-                ):
+                if not u.TargetLdap.LdapDataProcessing.split(base_dn):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
-                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                if not u.TargetLdap.LdapDataProcessing.split(
                     base_dn,
                 ):
                     return r[Mapping[str, t.ConfigMap]].fail(
@@ -512,8 +517,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 r[Mapping[str, t.ConfigMap]]: Validated config or error
 
                 """
-                ldap_result = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.validate_ldap_connection_config(
-                    config,
+                ldap_result = (
+                    u.TargetLdap.ConfigValidation.validate_ldap_connection_config(
+                        config,
+                    )
                 )
                 if ldap_result.is_failure:
                     return ldap_result
@@ -604,7 +611,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return {}
                 bookmarks_map: MutableMapping[str, t.ContainerValue] = {}
                 for k, v in bookmarks.items():
-                    coerced_value = FlextTargetLdapUtilities._coerce_container_value(v)
+                    coerced_value = u.coerce_container_value(v)
                     if coerced_value is not None and isinstance(
                         coerced_value,
                         (str, int, float, bool),
@@ -668,7 +675,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 t.ConfigurationMapping: Updated state
 
                 """
-                stream_state = FlextTargetLdapUtilities.TargetLdap.StateManagement.get_target_state(
+                stream_state = u.TargetLdap.StateManagement.get_target_state(
                     state,
                     stream_name,
                 )
@@ -695,7 +702,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     "last_updated": datetime.now(UTC).isoformat(),
                     "batch_count": batch_count + 1,
                 }
-                return FlextTargetLdapUtilities.TargetLdap.StateManagement.set_target_state(
+                return u.TargetLdap.StateManagement.set_target_state(
                     state,
                     stream_name,
                     updated_stream_state,
@@ -717,29 +724,27 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     m.Ldap.ConnectionConfig: Validated connection config
 
                 """
-                server = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                server = u.TargetLdap.TypeConversion.to_str(
                     config.get("host", "localhost"),
                     "localhost",
                 )
-                port = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
+                port = u.TargetLdap.TypeConversion.to_int(
                     config.get("port", c.Ldap.ConnectionDefaults.PORT),
                     c.Ldap.ConnectionDefaults.PORT,
                 )
-                use_ssl = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_bool(
+                use_ssl = u.TargetLdap.TypeConversion.to_bool(
                     config.get("use_ssl", False),
                     default=False,
                 )
-                bind_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                bind_dn = u.TargetLdap.TypeConversion.to_str(
                     config.get("bind_dn", ""),
                     "",
                 )
-                bind_password = (
-                    FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
-                        config.get("password", ""),
-                        "",
-                    )
+                bind_password = u.TargetLdap.TypeConversion.to_str(
+                    config.get("password", ""),
+                    "",
                 )
-                timeout = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
+                timeout = u.TargetLdap.TypeConversion.to_int(
                     config.get("timeout", c.DEFAULT_TIMEOUT_SECONDS),
                     c.DEFAULT_TIMEOUT_SECONDS,
                 )

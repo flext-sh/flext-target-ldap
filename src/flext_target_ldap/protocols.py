@@ -120,7 +120,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             def create_target(
                 self,
                 config: Mapping[str, t.ContainerValue],
-            ) -> FlextLdapProtocols.Result[target_client_module.FlextTargetLdap]:
+            ) -> p.Result[target_client_module.FlextTargetLdap]:
                 """Create an LDAP target from config."""
                 ...
 
@@ -129,7 +129,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 records: Sequence[Mapping[str, t.ContainerValue]],
                 config: Mapping[str, t.ContainerValue],
                 stream_type: str = "users",
-            ) -> FlextLdapProtocols.Result[int]:
+            ) -> p.Result[int]:
                 """Load records into the LDAP target."""
                 ...
 
@@ -142,14 +142,14 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 mappings: Sequence[_m.TargetLdap.AttributeMapping],
                 object_classes: t.StrSequence,
                 base_dn: str,
-            ) -> FlextLdapProtocols.Result[_m.TargetLdap.TransformationResult]:
+            ) -> p.Result[_m.TargetLdap.TransformationResult]:
                 """Transform a record for LDAP storage."""
                 ...
 
             def validate_entry(
                 self,
                 entry: _m.TargetLdap.Entry,
-            ) -> FlextLdapProtocols.Result[bool]:
+            ) -> p.Result[bool]:
                 """Validate an LDAP entry against business rules."""
                 ...
 
@@ -166,7 +166,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def process_record(
                     self,
                     record: Mapping[str, t.ContainerValue],
-                ) -> FlextLdapProtocols.Result[bool]:
+                ) -> p.Result[bool]:
                     """Process a single record."""
                     ...
 
@@ -180,7 +180,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def transform_to_ldap(
                     self,
                     record: Mapping[str, t.ContainerValue],
-                ) -> FlextLdapProtocols.Result[t.ContainerValueMapping]:
+                ) -> p.Result[t.ContainerValueMapping]:
                     """Transform record to LDAP format."""
                     ...
 
@@ -194,7 +194,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def orchestrate_load(
                     self,
                     records: Sequence[Mapping[str, t.ContainerValue]],
-                ) -> FlextLdapProtocols.Result[bool]:
+                ) -> p.Result[bool]:
                     """Orchestrate loading of records."""
                     ...
 
@@ -208,7 +208,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def connect(
                     self,
                     config: Mapping[str, t.ContainerValue],
-                ) -> FlextLdapProtocols.Result[t.ContainerValueMapping]:
+                ) -> p.Result[t.ContainerValueMapping]:
                     """Connect to LDAP server."""
                     ...
 
@@ -222,7 +222,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def process_singer_message(
                     self,
                     message: Mapping[str, t.ContainerValue],
-                ) -> FlextLdapProtocols.Result[bool]:
+                ) -> p.Result[bool]:
                     """Process a Singer protocol message."""
                     ...
 
@@ -236,7 +236,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def optimize_batch(
                     self,
                     batch_size: int,
-                ) -> FlextLdapProtocols.Result[int]:
+                ) -> p.Result[int]:
                     """Optimize batch size for LDAP loading."""
                     ...
 
@@ -250,7 +250,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def validate_credentials(
                     self,
                     config: Mapping[str, t.ContainerValue],
-                ) -> FlextLdapProtocols.Result[bool]:
+                ) -> p.Result[bool]:
                     """Validate LDAP credentials."""
                     ...
 
@@ -264,7 +264,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 def track_load_progress(
                     self,
                     records: int,
-                ) -> FlextLdapProtocols.Result[bool]:
+                ) -> p.Result[bool]:
                     """Track LDAP loading progress."""
                     ...
 
