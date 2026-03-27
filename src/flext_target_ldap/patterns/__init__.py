@@ -27,22 +27,10 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextTargetLdapDataTransformer": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapDataTransformer",
-    ],
-    "FlextTargetLdapEntryManager": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapEntryManager",
-    ],
-    "FlextTargetLdapSchemaMapper": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapSchemaMapper",
-    ],
-    "FlextTargetLdapTypeConverter": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapTypeConverter",
-    ],
+    "FlextTargetLdapDataTransformer": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapDataTransformer"],
+    "FlextTargetLdapEntryManager": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapEntryManager"],
+    "FlextTargetLdapSchemaMapper": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapSchemaMapper"],
+    "FlextTargetLdapTypeConverter": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapTypeConverter"],
     "logger": ["flext_target_ldap.patterns.ldap_patterns", "logger"],
 }
 
