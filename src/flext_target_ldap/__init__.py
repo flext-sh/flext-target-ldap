@@ -82,10 +82,10 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.target_exceptions import (
         FlextTargetLdapAuthenticationError,
+        FlextTargetLdapConfigurationError,
         FlextTargetLdapConnectionError,
         FlextTargetLdapError,
         FlextTargetLdapProcessingError,
-        FlextTargetLdapSettingsurationError,
         FlextTargetLdapTimeoutError,
         FlextTargetLdapValidationError,
     )
@@ -206,9 +206,9 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_ldap.settings",
         "FlextTargetLdapSettings",
     ],
-    "FlextTargetLdapSettingsurationError": [
+    "FlextTargetLdapConfigurationError": [
         "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapSettingsurationError",
+        "FlextTargetLdapConfigurationError",
     ],
     "FlextTargetLdapSingerTarget": [
         "flext_target_ldap.singer.target",
@@ -311,6 +311,7 @@ __all__ = [
     "FlextTargetLdapBaseSink",
     "FlextTargetLdapCatalogManager",
     "FlextTargetLdapClient",
+    "FlextTargetLdapConfigurationError",
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapConnectionService",
     "FlextTargetLdapConstants",
@@ -330,7 +331,6 @@ __all__ = [
     "FlextTargetLdapSchemaMapper",
     "FlextTargetLdapSearchEntry",
     "FlextTargetLdapSettings",
-    "FlextTargetLdapSettingsurationError",
     "FlextTargetLdapSingerTarget",
     "FlextTargetLdapSink",
     "FlextTargetLdapStreamProcessingStats",

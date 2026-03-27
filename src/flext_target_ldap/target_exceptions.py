@@ -18,7 +18,7 @@ class FlextTargetLdapValidationError(FlextExceptions.ValidationError):
     """LDAP target validation-specific errors."""
 
 
-class FlextTargetLdapSettingsurationError(FlextExceptions.ConfigurationError):
+class FlextTargetLdapConfigurationError(FlextExceptions.ConfigurationError):
     """LDAP target configuration-specific errors."""
 
 
@@ -40,10 +40,10 @@ class FlextTargetLdapTimeoutError(FlextExceptions.TimeoutError):
 
 __all__ = [
     "FlextTargetLdapAuthenticationError",
+    "FlextTargetLdapConfigurationError",
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapError",
     "FlextTargetLdapProcessingError",
-    "FlextTargetLdapSettingsurationError",
     "FlextTargetLdapTimeoutError",
     "FlextTargetLdapValidationError",
 ]
