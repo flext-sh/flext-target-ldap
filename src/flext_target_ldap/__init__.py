@@ -111,145 +111,46 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "DataTransformationEngine": [
-        "flext_target_ldap.transformation",
-        "DataTransformationEngine",
-    ],
+    "DataTransformationEngine": ["flext_target_ldap.transformation", "DataTransformationEngine"],
     "FlextTargetLdap": ["flext_target_ldap.target", "FlextTargetLdap"],
-    "FlextTargetLdapApiService": [
-        "flext_target_ldap.target_services",
-        "FlextTargetLdapApiService",
-    ],
-    "FlextTargetLdapAuthenticationError": [
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapAuthenticationError",
-    ],
+    "FlextTargetLdapApiService": ["flext_target_ldap.target_services", "FlextTargetLdapApiService"],
+    "FlextTargetLdapAuthenticationError": ["flext_target_ldap.target_exceptions", "FlextTargetLdapAuthenticationError"],
     "FlextTargetLdapBaseSink": ["flext_target_ldap.sinks", "FlextTargetLdapBaseSink"],
-    "FlextTargetLdapCatalogManager": [
-        "flext_target_ldap.singer.catalog",
-        "FlextTargetLdapCatalogManager",
-    ],
-    "FlextTargetLdapClient": [
-        "flext_target_ldap.target_client",
-        "FlextTargetLdapClient",
-    ],
-    "FlextTargetLdapConnectionError": [
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapConnectionError",
-    ],
-    "FlextTargetLdapConnectionService": [
-        "flext_target_ldap.target_services",
-        "FlextTargetLdapConnectionService",
-    ],
-    "FlextTargetLdapConstants": [
-        "flext_target_ldap.constants",
-        "FlextTargetLdapConstants",
-    ],
-    "FlextTargetLdapDataTransformer": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapDataTransformer",
-    ],
-    "FlextTargetLdapEntryManager": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapEntryManager",
-    ],
-    "FlextTargetLdapError": [
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapError",
-    ],
-    "FlextTargetLdapGroupsSink": [
-        "flext_target_ldap.sinks",
-        "FlextTargetLdapGroupsSink",
-    ],
-    "FlextTargetLdapLdapClient": [
-        "flext_target_ldap.client",
-        "FlextTargetLdapLdapClient",
-    ],
-    "FlextTargetLdapMigrationValidator": [
-        "flext_target_ldap.transformation",
-        "FlextTargetLdapMigrationValidator",
-    ],
+    "FlextTargetLdapCatalogManager": ["flext_target_ldap.singer.catalog", "FlextTargetLdapCatalogManager"],
+    "FlextTargetLdapClient": ["flext_target_ldap.target_client", "FlextTargetLdapClient"],
+    "FlextTargetLdapConnectionError": ["flext_target_ldap.target_exceptions", "FlextTargetLdapConnectionError"],
+    "FlextTargetLdapConnectionService": ["flext_target_ldap.target_services", "FlextTargetLdapConnectionService"],
+    "FlextTargetLdapConstants": ["flext_target_ldap.constants", "FlextTargetLdapConstants"],
+    "FlextTargetLdapDataTransformer": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapDataTransformer"],
+    "FlextTargetLdapEntryManager": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapEntryManager"],
+    "FlextTargetLdapError": ["flext_target_ldap.target_exceptions", "FlextTargetLdapError"],
+    "FlextTargetLdapGroupsSink": ["flext_target_ldap.sinks", "FlextTargetLdapGroupsSink"],
+    "FlextTargetLdapLdapClient": ["flext_target_ldap.client", "FlextTargetLdapLdapClient"],
+    "FlextTargetLdapMigrationValidator": ["flext_target_ldap.transformation", "FlextTargetLdapMigrationValidator"],
     "FlextTargetLdapModels": ["flext_target_ldap.models", "FlextTargetLdapModels"],
-    "FlextTargetLdapOrchestrator": [
-        "flext_target_ldap.application.orchestrator",
-        "FlextTargetLdapOrchestrator",
-    ],
-    "FlextTargetLdapOrganizationalUnitsSink": [
-        "flext_target_ldap.sinks",
-        "FlextTargetLdapOrganizationalUnitsSink",
-    ],
-    "FlextTargetLdapProcessingCounters": [
-        "flext_target_ldap.processing_result",
-        "FlextTargetLdapProcessingCounters",
-    ],
-    "FlextTargetLdapProcessingError": [
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapProcessingError",
-    ],
-    "FlextTargetLdapProcessingResult": [
-        "flext_target_ldap.sinks",
-        "FlextTargetLdapProcessingResult",
-    ],
-    "FlextTargetLdapProtocols": [
-        "flext_target_ldap.protocols",
-        "FlextTargetLdapProtocols",
-    ],
-    "FlextTargetLdapSchemaMapper": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapSchemaMapper",
-    ],
-    "FlextTargetLdapSearchEntry": [
-        "flext_target_ldap.client",
-        "FlextTargetLdapSearchEntry",
-    ],
-    "FlextTargetLdapSettings": [
-        "flext_target_ldap.settings",
-        "FlextTargetLdapSettings",
-    ],
-    "FlextTargetLdapSettingsurationError": [
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapSettingsurationError",
-    ],
-    "FlextTargetLdapSingerTarget": [
-        "flext_target_ldap.singer.target",
-        "FlextTargetLdapSingerTarget",
-    ],
+    "FlextTargetLdapOrchestrator": ["flext_target_ldap.application.orchestrator", "FlextTargetLdapOrchestrator"],
+    "FlextTargetLdapOrganizationalUnitsSink": ["flext_target_ldap.sinks", "FlextTargetLdapOrganizationalUnitsSink"],
+    "FlextTargetLdapProcessingCounters": ["flext_target_ldap.processing_result", "FlextTargetLdapProcessingCounters"],
+    "FlextTargetLdapProcessingError": ["flext_target_ldap.target_exceptions", "FlextTargetLdapProcessingError"],
+    "FlextTargetLdapProcessingResult": ["flext_target_ldap.sinks", "FlextTargetLdapProcessingResult"],
+    "FlextTargetLdapProtocols": ["flext_target_ldap.protocols", "FlextTargetLdapProtocols"],
+    "FlextTargetLdapSchemaMapper": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapSchemaMapper"],
+    "FlextTargetLdapSearchEntry": ["flext_target_ldap.client", "FlextTargetLdapSearchEntry"],
+    "FlextTargetLdapSettings": ["flext_target_ldap.settings", "FlextTargetLdapSettings"],
+    "FlextTargetLdapSettingsurationError": ["flext_target_ldap.target_exceptions", "FlextTargetLdapSettingsurationError"],
+    "FlextTargetLdapSingerTarget": ["flext_target_ldap.singer.target", "FlextTargetLdapSingerTarget"],
     "FlextTargetLdapSink": ["flext_target_ldap.sinks", "FlextTargetLdapSink"],
-    "FlextTargetLdapStreamProcessingStats": [
-        "flext_target_ldap.singer.stream",
-        "FlextTargetLdapStreamProcessingStats",
-    ],
-    "FlextTargetLdapStreamProcessor": [
-        "flext_target_ldap.singer.stream",
-        "FlextTargetLdapStreamProcessor",
-    ],
+    "FlextTargetLdapStreamProcessingStats": ["flext_target_ldap.singer.stream", "FlextTargetLdapStreamProcessingStats"],
+    "FlextTargetLdapStreamProcessor": ["flext_target_ldap.singer.stream", "FlextTargetLdapStreamProcessor"],
     "FlextTargetLdapTarget": ["flext_target_ldap.sinks", "FlextTargetLdapTarget"],
-    "FlextTargetLdapTimeoutError": [
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapTimeoutError",
-    ],
-    "FlextTargetLdapTransformationEngine": [
-        "flext_target_ldap.transformation",
-        "FlextTargetLdapTransformationEngine",
-    ],
-    "FlextTargetLdapTransformationService": [
-        "flext_target_ldap.target_services",
-        "FlextTargetLdapTransformationService",
-    ],
-    "FlextTargetLdapTypeConverter": [
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapTypeConverter",
-    ],
+    "FlextTargetLdapTimeoutError": ["flext_target_ldap.target_exceptions", "FlextTargetLdapTimeoutError"],
+    "FlextTargetLdapTransformationEngine": ["flext_target_ldap.transformation", "FlextTargetLdapTransformationEngine"],
+    "FlextTargetLdapTransformationService": ["flext_target_ldap.target_services", "FlextTargetLdapTransformationService"],
+    "FlextTargetLdapTypeConverter": ["flext_target_ldap.patterns.ldap_patterns", "FlextTargetLdapTypeConverter"],
     "FlextTargetLdapTypes": ["flext_target_ldap.typings", "FlextTargetLdapTypes"],
     "FlextTargetLdapUsersSink": ["flext_target_ldap.sinks", "FlextTargetLdapUsersSink"],
-    "FlextTargetLdapUtilities": [
-        "flext_target_ldap.utilities",
-        "FlextTargetLdapUtilities",
-    ],
-    "FlextTargetLdapValidationError": [
-        "flext_target_ldap.target_exceptions",
-        "FlextTargetLdapValidationError",
-    ],
+    "FlextTargetLdapUtilities": ["flext_target_ldap.utilities", "FlextTargetLdapUtilities"],
+    "FlextTargetLdapValidationError": ["flext_target_ldap.target_exceptions", "FlextTargetLdapValidationError"],
     "LDAPClient": ["flext_target_ldap.client", "LDAPClient"],
     "LDAPSearchEntry": ["flext_target_ldap.client", "LDAPSearchEntry"],
     "MigrationValidator": ["flext_target_ldap.transformation", "MigrationValidator"],
@@ -265,24 +166,12 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "application": ["flext_target_ldap.application", ""],
     "build_singer_catalog": ["flext_target_ldap.catalog", "build_singer_catalog"],
     "c": ["flext_target_ldap.constants", "FlextTargetLdapConstants"],
-    "configure_flext_target_ldap_dependencies": [
-        "flext_target_ldap.infrastructure.di_container",
-        "configure_flext_target_ldap_dependencies",
-    ],
-    "create_default_ldap_target_config": [
-        "flext_target_ldap.target_config",
-        "create_default_ldap_target_config",
-    ],
+    "configure_flext_target_ldap_dependencies": ["flext_target_ldap.infrastructure.di_container", "configure_flext_target_ldap_dependencies"],
+    "create_default_ldap_target_config": ["flext_target_ldap.target_config", "create_default_ldap_target_config"],
     "d": ["flext_ldap", "d"],
     "e": ["flext_ldap", "e"],
-    "get_flext_target_ldap_container": [
-        "flext_target_ldap.infrastructure.di_container",
-        "get_flext_target_ldap_container",
-    ],
-    "get_flext_target_ldap_service": [
-        "flext_target_ldap.infrastructure.di_container",
-        "get_flext_target_ldap_service",
-    ],
+    "get_flext_target_ldap_container": ["flext_target_ldap.infrastructure.di_container", "get_flext_target_ldap_container"],
+    "get_flext_target_ldap_service": ["flext_target_ldap.infrastructure.di_container", "get_flext_target_ldap_service"],
     "h": ["flext_ldap", "h"],
     "infrastructure": ["flext_target_ldap.infrastructure", ""],
     "logger": ["flext_target_ldap.transformation", "logger"],
@@ -296,10 +185,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "t": ["flext_target_ldap.typings", "FlextTargetLdapTypes"],
     "u": ["flext_target_ldap.utilities", "FlextTargetLdapUtilities"],
     "validate_ldap_config": ["flext_target_ldap.settings", "validate_ldap_config"],
-    "validate_ldap_target_config": [
-        "flext_target_ldap.target_config",
-        "validate_ldap_target_config",
-    ],
+    "validate_ldap_target_config": ["flext_target_ldap.target_config", "validate_ldap_target_config"],
     "x": ["flext_ldap", "x"],
 }
 
