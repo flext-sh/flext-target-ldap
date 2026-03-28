@@ -4,18 +4,27 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
-from typing import override
+from typing import TYPE_CHECKING, override
 
 from flext_target_ldap import (
     FlextTargetLdapSettings,
     c,
+    m,
     r,
     t,
-    target_client as target_client_module,
     u,
     validate_ldap_target_config,
 )
-from flext_target_ldap.models import m
+
+if TYPE_CHECKING:
+    from flext_target_ldap.target import FlextTargetLdap as _FlextTargetLdap
+
+
+def _resolve_target_class() -> type[_FlextTargetLdap]:
+    """Resolve FlextTargetLdap at runtime to avoid circular import."""
+    import flext_target_ldap  # noqa: PLC0415
+
+    return flext_target_ldap.FlextTargetLdap
 
 
 class FlextTargetLdapConnectionService:
@@ -258,10 +267,10 @@ class FlextTargetLdapApiService:
     def create_ldap_target(
         self,
         config: Mapping[str, t.ContainerValue],
-    ) -> r[target_client_module.FlextTargetLdap]:
+    ) -> r[_FlextTargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(
-            lambda: target_client_module.FlextTargetLdap(config=dict(config)),
+            lambda: _resolve_target_class()(config=dict(config)),
             catch=(RuntimeError, ValueError, TypeError),
         ).map_error(lambda exc: str(exc))
 

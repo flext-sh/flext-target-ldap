@@ -15,8 +15,8 @@ from flext_meltano import FlextMeltanoProtocols
 from flext_target_ldap import t
 
 if TYPE_CHECKING:
-    from flext_target_ldap import target_client as target_client_module
     from flext_target_ldap.models import m as _m
+    from flext_target_ldap.target import FlextTargetLdap as _FlextTargetLdap
 
 
 class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
@@ -120,7 +120,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
             def create_target(
                 self,
                 config: Mapping[str, t.ContainerValue],
-            ) -> p.Result[target_client_module.FlextTargetLdap]:
+            ) -> p.Result[_FlextTargetLdap]:
                 """Create an LDAP target from config."""
                 ...
 
