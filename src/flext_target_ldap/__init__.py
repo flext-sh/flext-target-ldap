@@ -90,8 +90,8 @@ if TYPE_CHECKING:
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
     )
-    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
-    from flext_target_ldap.target import FlextTargetLdap, logger, main
+    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget, logger
+    from flext_target_ldap.target import FlextTargetLdap, main
     from flext_target_ldap.transformation import (
         DataTransformationEngine,
         MigrationValidator,
@@ -269,7 +269,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "d": ["flext_ldap", "d"],
     "e": ["flext_ldap", "e"],
     "h": ["flext_ldap", "h"],
-    "logger": ["flext_target_ldap.target", "logger"],
+    "logger": ["flext_target_ldap.singer.target", "logger"],
     "m": ["flext_target_ldap.models", "FlextTargetLdapModels"],
     "main": ["flext_target_ldap.target", "main"],
     "p": ["flext_target_ldap.protocols", "FlextTargetLdapProtocols"],
