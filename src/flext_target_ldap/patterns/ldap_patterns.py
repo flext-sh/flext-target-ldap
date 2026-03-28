@@ -42,9 +42,9 @@ class FlextTargetLdapTypeConverter:
             else:
                 result = str(value)
             return r[str | None].ok(result)
-        except (RuntimeError, ValueError, TypeError):
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Type conversion failed for %s", singer_type)
-            return r[str | None].ok(str(value))
+            return r[str | None].fail(f"Type conversion failed for {singer_type}: {e}")
 
     def _normalize_bool(self, value: t.Scalar) -> str:
         """Normalize multiple boolean-like forms to LDAP literals."""
@@ -111,8 +111,11 @@ class FlextTargetLdapDataTransformer:
                     singer_type,
                     value,
                 )
-                converted_value: str | None = convert_result.unwrap_or(str(value))
-                transformed[ldap_key] = converted_value
+                if convert_result.is_failure:
+                    return r[Mapping[str, str | None]].fail(
+                        f"Conversion failed for '{key}': {convert_result.error}",
+                    )
+                transformed[ldap_key] = convert_result.value
             return r[Mapping[str, str | None]].ok(transformed)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
@@ -161,9 +164,13 @@ class FlextTargetLdapSchemaMapper:
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
+                if ldap_type_result.is_failure:
+                    return r[t.StrMapping].fail(
+                        f"Type mapping failed for '{prop_name}': {ldap_type_result.error}",
+                    )
                 mapped_type: str = (
                     str(ldap_type_result.value)
-                    if ldap_type_result.is_success and ldap_type_result.value
+                    if ldap_type_result.value
                     else "DirectoryString"
                 )
                 ldap_attributes[ldap_name] = mapped_type
@@ -190,9 +197,9 @@ class FlextTargetLdapSchemaMapper:
             if prop_type in {"t.NormalizedValue", "array"}:
                 return r[str].ok("OctetString")
             return r[str].ok("DirectoryString")
-        except (RuntimeError, ValueError, TypeError):
+        except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP type mapping failed")
-            return r[str].ok("DirectoryString")
+            return r[str].fail(f"LDAP type mapping failed: {e}")
 
     def _normalize_attribute_name(self, name: str) -> str:
         """Normalize attribute name for LDAP."""

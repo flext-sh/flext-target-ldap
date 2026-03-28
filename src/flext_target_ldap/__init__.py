@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_ldap import d, e, h, r, s, x
 
-    from flext_target_ldap import application, infrastructure, patterns, singer
+    from flext_target_ldap import application, patterns, singer
     from flext_target_ldap.__version__ import (
         __all__,
         __author__,
@@ -28,20 +28,9 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
     from flext_target_ldap.catalog import build_singer_catalog
-    from flext_target_ldap.client import (
-        FlextTargetLdapLdapClient,
-        FlextTargetLdapSearchEntry,
-        LDAPClient,
-        LDAPSearchEntry,
-    )
     from flext_target_ldap.constants import (
         FlextTargetLdapConstants,
         FlextTargetLdapConstants as c,
-    )
-    from flext_target_ldap.infrastructure.di_container import (
-        configure_flext_target_ldap_dependencies,
-        get_flext_target_ldap_container,
-        get_flext_target_ldap_service,
     )
     from flext_target_ldap.models import (
         FlextTargetLdapModels,
@@ -75,7 +64,10 @@ if TYPE_CHECKING:
         FlextTargetLdapUsersSink,
     )
     from flext_target_ldap.target import FlextTargetLdap, main
-    from flext_target_ldap.target_client import FlextTargetLdapClient
+    from flext_target_ldap.target_client import (
+        FlextTargetLdapClient,
+        FlextTargetLdapSearchEntry,
+    )
     from flext_target_ldap.target_config import (
         create_default_ldap_target_config,
         validate_ldap_target_config,
@@ -165,10 +157,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_ldap.sinks",
         "FlextTargetLdapGroupsSink",
     ],
-    "FlextTargetLdapLdapClient": [
-        "flext_target_ldap.client",
-        "FlextTargetLdapLdapClient",
-    ],
     "FlextTargetLdapMigrationValidator": [
         "flext_target_ldap.transformation",
         "FlextTargetLdapMigrationValidator",
@@ -203,7 +191,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "FlextTargetLdapSchemaMapper",
     ],
     "FlextTargetLdapSearchEntry": [
-        "flext_target_ldap.client",
+        "flext_target_ldap.target_client",
         "FlextTargetLdapSearchEntry",
     ],
     "FlextTargetLdapSettings": [
@@ -250,8 +238,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_ldap.target_exceptions",
         "FlextTargetLdapValidationError",
     ],
-    "LDAPClient": ["flext_target_ldap.client", "LDAPClient"],
-    "LDAPSearchEntry": ["flext_target_ldap.client", "LDAPSearchEntry"],
     "MigrationValidator": ["flext_target_ldap.transformation", "MigrationValidator"],
     "__all__": ["flext_target_ldap.__version__", "__all__"],
     "__author__": ["flext_target_ldap.__version__", "__author__"],
@@ -265,26 +251,13 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "application": ["flext_target_ldap.application", ""],
     "build_singer_catalog": ["flext_target_ldap.catalog", "build_singer_catalog"],
     "c": ["flext_target_ldap.constants", "FlextTargetLdapConstants"],
-    "configure_flext_target_ldap_dependencies": [
-        "flext_target_ldap.infrastructure.di_container",
-        "configure_flext_target_ldap_dependencies",
-    ],
     "create_default_ldap_target_config": [
         "flext_target_ldap.target_config",
         "create_default_ldap_target_config",
     ],
     "d": ["flext_ldap", "d"],
     "e": ["flext_ldap", "e"],
-    "get_flext_target_ldap_container": [
-        "flext_target_ldap.infrastructure.di_container",
-        "get_flext_target_ldap_container",
-    ],
-    "get_flext_target_ldap_service": [
-        "flext_target_ldap.infrastructure.di_container",
-        "get_flext_target_ldap_service",
-    ],
     "h": ["flext_ldap", "h"],
-    "infrastructure": ["flext_target_ldap.infrastructure", ""],
     "logger": ["flext_target_ldap.transformation", "logger"],
     "m": ["flext_target_ldap.models", "FlextTargetLdapModels"],
     "main": ["flext_target_ldap.target", "main"],
@@ -319,7 +292,6 @@ __all__ = [
     "FlextTargetLdapEntryManager",
     "FlextTargetLdapError",
     "FlextTargetLdapGroupsSink",
-    "FlextTargetLdapLdapClient",
     "FlextTargetLdapMigrationValidator",
     "FlextTargetLdapModels",
     "FlextTargetLdapOrchestrator",
@@ -344,8 +316,6 @@ __all__ = [
     "FlextTargetLdapUsersSink",
     "FlextTargetLdapUtilities",
     "FlextTargetLdapValidationError",
-    "LDAPClient",
-    "LDAPSearchEntry",
     "MigrationValidator",
     "__all__",
     "__author__",
@@ -359,14 +329,10 @@ __all__ = [
     "application",
     "build_singer_catalog",
     "c",
-    "configure_flext_target_ldap_dependencies",
     "create_default_ldap_target_config",
     "d",
     "e",
-    "get_flext_target_ldap_container",
-    "get_flext_target_ldap_service",
     "h",
-    "infrastructure",
     "logger",
     "m",
     "main",

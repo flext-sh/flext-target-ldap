@@ -45,10 +45,7 @@ if TYPE_CHECKING:
         FlextTargetLdapTestProtocols,
         FlextTargetLdapTestProtocols as p,
     )
-    from tests.test_client import (
-        TestLDAPClient,
-        test_connection_wrapper_unbind_cleans_state_and_disconnects,
-    )
+    from tests.test_client import TestLDAPClient
     from tests.test_integration import TestTargetLDAPIntegration
     from tests.test_sinks import (
         TestGroupsSink,
@@ -129,10 +126,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "singer_message_schema": ["tests.conftest", "singer_message_schema"],
     "singer_message_state": ["tests.conftest", "singer_message_state"],
     "t": ["tests.typings", "FlextTargetLdapTestTypes"],
-    "test_connection_wrapper_unbind_cleans_state_and_disconnects": [
-        "tests.test_client",
-        "test_connection_wrapper_unbind_cleans_state_and_disconnects",
-    ],
     "test_default_cli_helper_logs_with_flext_logger": [
         "tests.test_target",
         "test_default_cli_helper_logs_with_flext_logger",
@@ -187,7 +180,6 @@ __all__ = [
     "singer_message_schema",
     "singer_message_state",
     "t",
-    "test_connection_wrapper_unbind_cleans_state_and_disconnects",
     "test_default_cli_helper_logs_with_flext_logger",
     "test_sink_process_record_delegates_to_target_handler",
     "tm",

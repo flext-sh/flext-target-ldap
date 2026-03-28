@@ -9,19 +9,17 @@ from __future__ import annotations
 
 import sys
 from collections.abc import Callable, Mapping, MutableMapping
-from contextlib import suppress
-from importlib import import_module
 from pathlib import Path
 from typing import ClassVar, override
 
-from flext_core import FlextLogger
+from flext_core import FlextContainer, FlextLogger
 from pydantic import ConfigDict, TypeAdapter, ValidationError
 
 from flext_target_ldap import (
+    FlextTargetLdapClient,
     FlextTargetLdapSettings,
     build_singer_catalog,
     c,
-    get_flext_target_ldap_container,
     p,
     t,
 )
@@ -68,9 +66,6 @@ def _default_cli_helper(*, quiet: bool = False) -> _DefaultCliHelper:
 
 
 logger = FlextLogger(__name__)
-
-
-_LdapApi = p.TargetLdap.LdapApi
 
 
 class FlextTargetLdap(FlextTargetLdapTarget):
@@ -143,7 +138,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Set up the LDAP target."""
         _ = self.orchestrator
         logger.info("Orchestrator initialized successfully")
-        self._container = get_flext_target_ldap_container()
+        self._container = FlextContainer.get_global()
         logger.info("DI container initialized successfully")
         host = str(self.config.get("host", "localhost"))
         logger.info("LDAP target setup completed for host: %s", host)
@@ -207,18 +202,20 @@ def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
         RuntimeError,
         ImportError,
         ValidationError,
-    ):
-        return {}
+    ) as e:
+        msg = f"Failed to load configuration from {config_path}: {e}"
+        raise RuntimeError(msg) from e
 
 
-def _get_ldap_api() -> _LdapApi | None:
-    """Get optional LDAP API module."""
+def _get_ldap_api(
+    config: Mapping[str, t.ContainerValue],
+) -> FlextTargetLdapClient | None:
+    """Get LDAP target client backed by flext-ldap."""
     try:
-        client_mod = import_module("flext_target_ldap.client")
-        return client_mod.get_flext_ldap_api()
-    except (ImportError, AttributeError) as exc:
+        return FlextTargetLdapClient(config=config)
+    except (RuntimeError, ValueError, TypeError, AttributeError, ImportError) as exc:
         logger.warning(
-            "Failed to load optional LDAP API module",
+            "Failed to initialize LDAP target client",
             error=exc,
             error_type=type(exc).__name__,
         )
@@ -245,7 +242,7 @@ def _process_record_message(
     record: Mapping[str, t.ContainerValue],
     stream: str,
     cfg: Mapping[str, t.ContainerValue],
-    api: _LdapApi | None,
+    api: FlextTargetLdapClient | None,
     seen_dns: set[str],
 ) -> None:
     """Process a RECORD message."""
@@ -258,14 +255,13 @@ def _process_record_message(
     else:
         dn = str(dn_value)
     if record.get("_sdc_deleted_at"):
-        with suppress(Exception):
-            api.delete(dn)
+        api.delete_entry(dn)
     else:
         try:
             if dn in seen_dns:
-                api.modify(dn, record)
+                api.modify_entry(dn, record)
             else:
-                api.add(dn, record)
+                api.add_entry(dn, record)
                 seen_dns.add(dn)
         except (
             ValueError,
@@ -275,9 +271,9 @@ def _process_record_message(
             OSError,
             RuntimeError,
             ImportError,
-        ):
-            with suppress(Exception):
-                api.modify(dn, record)
+        ) as e:
+            logger.warning(f"Failed to add entry {dn}, attempting modify: {e}")
+            api.modify_entry(dn, record)
 
 
 def _target_ldap_flext_cli(config: str | None = None) -> None:
@@ -287,7 +283,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
             _load_config_from_file(config) if config else {}
         )
         current_stream: str | None = None
-        api = _get_ldap_api()
+        api = _get_ldap_api(cfg)
         seen_dns: set[str] = set()
         for line in sys.stdin:
             try:
@@ -334,9 +330,10 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                 OSError,
                 RuntimeError,
                 ImportError,
+                ValidationError,
             ):
-                logger.debug("Malformed input line skipped in CLI", exc_info=True)
-                continue
+                logger.exception("Malformed input line failed")
+                raise
     except (
         ValueError,
         TypeError,
@@ -345,8 +342,10 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         OSError,
         RuntimeError,
         ImportError,
+        ValidationError,
     ):
-        logger.debug("Unexpected error in CLI suppressed", exc_info=True)
+        logger.exception("Unexpected error in CLI execution")
+        raise
 
 
 FlextTargetLdap.cli = _target_ldap_flext_cli

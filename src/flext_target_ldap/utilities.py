@@ -13,11 +13,11 @@ from datetime import UTC, datetime
 from typing import override
 
 from flext_core import r
-from flext_ldap import FlextLdapUtilities
+from flext_ldap import FlextLdapUtilities, m as ldap_m
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
-from flext_target_ldap import c, m, t
+from flext_target_ldap import c, t
 
 _CONFIG_MAP_ADAPTER: TypeAdapter[Mapping[str, t.ConfigMap]] = TypeAdapter(
     Mapping[str, t.ConfigMap],
@@ -183,6 +183,96 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             state: State data to write
 
             """
+
+        class TypeConversion:
+            """Type coercion utilities for Singer config values to typed Python values."""
+
+            @staticmethod
+            def build_connection_config(
+                config: Mapping[str, t.ConfigMap | t.ContainerValue],
+            ) -> ldap_m.Ldap.ConnectionConfig:
+                """Build LDAP ConnectionConfig from a flat config mapping."""
+                return ldap_m.Ldap.ConnectionConfig(
+                    host=str(config.get("host", "localhost")),
+                    port=int(str(config.get("port", c.Ldap.ConnectionDefaults.PORT))),
+                    use_ssl=bool(config.get("use_ssl", False)),
+                    bind_dn=str(config.get("bind_dn", "")),
+                    bind_password=str(config.get("password", "")),
+                    timeout=int(str(config.get("timeout", 30))),
+                )
+
+            @staticmethod
+            def to_str(
+                value: t.ContainerValue | t.ConfigMap | None,
+                default: str = "",
+            ) -> str:
+                """Coerce a config value to str."""
+                if value is None:
+                    return default
+                return str(value)
+
+            @staticmethod
+            def to_int(
+                value: t.ContainerValue | t.ConfigMap | None,
+                default: int = 0,
+            ) -> int:
+                """Coerce a config value to int."""
+                if value is None:
+                    return default
+                match value:
+                    case bool():
+                        return default
+                    case int():
+                        return value
+                    case str():
+                        try:
+                            return int(value)
+                        except ValueError:
+                            return default
+                    case float():
+                        return int(value)
+                    case _:
+                        return default
+
+            @staticmethod
+            def to_bool(
+                value: t.ContainerValue | t.ConfigMap | None,
+                *,
+                default: bool = False,
+            ) -> bool:
+                """Coerce a config value to bool."""
+                if value is None:
+                    return default
+                if isinstance(value, bool):
+                    return value
+                if isinstance(value, str):
+                    return value.lower() in {"true", "1", "yes"}
+                if isinstance(value, int):
+                    return value != 0
+                return default
+
+            @staticmethod
+            def extract_attribute_mapping(
+                config: Mapping[str, t.ConfigMap | t.ContainerValue],
+            ) -> t.StrMapping:
+                """Extract attribute mapping from config."""
+                raw = config.get("attribute_mapping", {})
+                if isinstance(raw, Mapping):
+                    return {str(k): str(v) for k, v in raw.items()}
+                msg = f"Expected Mapping for 'attribute_mapping', got {type(raw).__name__}: {raw!r}"
+                raise TypeError(msg)
+
+            @staticmethod
+            def extract_object_classes(
+                config: Mapping[str, t.ConfigMap | t.ContainerValue],
+            ) -> t.StrSequence:
+                """Extract object classes from config."""
+                raw = config.get("object_classes")
+                if isinstance(raw, list):
+                    return [str(oc) for oc in raw if oc]
+                if isinstance(raw, str):
+                    return [raw]
+                return ["top"]
 
         class LdapDataProcessing:
             """LDAP-specific data processing utilities."""
@@ -707,226 +797,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     stream_name,
                     updated_stream_state,
                 )
-
-        class TypeConversion:
-            """Type conversion utilities for configuration parsing."""
-
-            @staticmethod
-            def build_connection_config(
-                config: Mapping[str, t.ContainerValue | t.ConfigMap],
-            ) -> m.Ldap.ConnectionConfig:
-                """Build LDAP connection configuration from config dict.
-
-                Args:
-                    config: Raw configuration dictionary from any source
-
-                Returns:
-                    m.Ldap.ConnectionConfig: Validated connection config
-
-                """
-                server = u.TargetLdap.TypeConversion.to_str(
-                    config.get("host", "localhost"),
-                    "localhost",
-                )
-                port = u.TargetLdap.TypeConversion.to_int(
-                    config.get("port", c.Ldap.ConnectionDefaults.PORT),
-                    c.Ldap.ConnectionDefaults.PORT,
-                )
-                use_ssl = u.TargetLdap.TypeConversion.to_bool(
-                    config.get("use_ssl", False),
-                    default=False,
-                )
-                bind_dn = u.TargetLdap.TypeConversion.to_str(
-                    config.get("bind_dn", ""),
-                    "",
-                )
-                bind_password = u.TargetLdap.TypeConversion.to_str(
-                    config.get("password", ""),
-                    "",
-                )
-                timeout = u.TargetLdap.TypeConversion.to_int(
-                    config.get("timeout", c.DEFAULT_TIMEOUT_SECONDS),
-                    c.DEFAULT_TIMEOUT_SECONDS,
-                )
-                return m.Ldap.ConnectionConfig(
-                    host=server,
-                    port=port,
-                    use_ssl=use_ssl,
-                    bind_dn=bind_dn,
-                    bind_password=bind_password,
-                    timeout=timeout,
-                )
-
-            @staticmethod
-            def extract_attribute_mapping(
-                config: Mapping[str, t.ContainerValue | t.ConfigMap],
-            ) -> t.StrMapping:
-                """Extract attribute mapping from configuration dict.
-
-                Business Rule: Attribute Mapping Extraction
-                ==========================================
-                LDAP attribute mappings define how Singer record fields map to LDAP
-                attributes. This method safely extracts and validates attribute mappings
-                from configuration, ensuring type safety.
-
-                Validation Rules:
-                - Must be a dictionary
-                - Keys and values converted to strings
-                - Invalid mappings are silently ignored (empty dict returned)
-
-                Args:
-                    config: Configuration dictionary containing attribute_mapping
-
-                Returns:
-                    t.StrMapping: Validated attribute mapping or empty dict
-
-                """
-                raw_attr_map = config.get("attribute_mapping")
-                if u.is_dict_like(raw_attr_map):
-                    extracted_mapping: MutableMapping[str, str] = {}
-                    for k, v in raw_attr_map.items():
-                        extracted_mapping[str(k)] = str(v)
-                    return extracted_mapping
-                return {}
-
-            @staticmethod
-            def extract_object_classes(
-                config: Mapping[str, t.ContainerValue | t.ConfigMap],
-            ) -> t.StrSequence:
-                """Extract t.NormalizedValue classes from configuration dict.
-
-                Business Rule: Object Classes Configuration
-                ==========================================
-                LDAP t.NormalizedValue classes define the schema for directory entries. This method
-                extracts t.NormalizedValue class lists from configuration with safe defaults.
-
-                Validation Rules:
-                - Must be a list
-                - All items converted to strings
-                - Default to ["top"] if invalid or missing
-
-                Args:
-                    config: Configuration dictionary containing object_classes
-
-                Returns:
-                    t.StrSequence: List of t.NormalizedValue classes or ["top"] default
-
-                """
-                raw_object_classes = config.get("object_classes")
-                if isinstance(raw_object_classes, list):
-                    return [str(v) for v in raw_object_classes]
-                return ["top"]
-
-            @staticmethod
-            def to_bool(
-                value: t.ContainerValue | t.ConfigMap | None,
-                *,
-                default: bool,
-            ) -> bool:
-                """Convert value to bool with safe defaults.
-
-                Business Rule: Boolean Configuration Conversion
-                ==============================================
-                Boolean configuration values can come as strings ("true", "1", "yes"),
-                integers (0/1), or actual booleans. This method standardizes conversion
-                with clear rules to avoid ambiguity.
-
-                Conversion Rules:
-                - bool values pass through unchanged
-                - int values: non-zero = True, zero = False
-                - str values: case-insensitive check for "1", "true", "yes", "on"
-                - All other types return default
-
-                Args:
-                    value: Value to convert
-                    default: Default value if conversion fails
-
-                Returns:
-                    bool: Converted value or default
-
-                """
-                match value:
-                    case bool():
-                        return value
-                    case int():
-                        return value != 0
-                    case str():
-                        return value.strip().lower() in {"1", "true", "yes", "on"}
-                    case _:
-                        return default
-
-            @staticmethod
-            def to_int(
-                value: t.ContainerValue | t.ConfigMap | None, default: int
-            ) -> int:
-                """Convert value to int with safe defaults.
-
-                Business Rule: Safe Type Conversion
-                ===================================
-                Configuration values can come from various sources (env vars, config files,
-                command line args) and may not have the expected type. This method provides
-                safe conversion with sensible defaults to prevent runtime errors.
-
-                Conversion Rules:
-                - bool values return default (avoid 0/1 confusion)
-                - int values pass through unchanged
-                - str values attempt int() conversion, fallback to default on error
-                - All other types return default
-
-                Args:
-                    value: Value to convert (from any source)
-                    default: Default value if conversion fails
-
-                Returns:
-                    int: Converted value or default
-
-                """
-                match value:
-                    case bool():
-                        return default
-                    case int():
-                        return value
-                    case str():
-                        try:
-                            return int(value)
-                        except ValueError:
-                            return default
-                    case _:
-                        return default
-
-            @staticmethod
-            def to_str(
-                value: t.ContainerValue | t.ConfigMap | None,
-                default: str = "",
-            ) -> str:
-                """Convert value to str with safe defaults.
-
-                Business Rule: String Configuration Conversion
-                =============================================
-                String configuration values need consistent handling regardless of source.
-                This method ensures all values can be safely converted to strings.
-
-                Conversion Rules:
-                - str values pass through unchanged
-                - None becomes empty string (unless default provided)
-                - All other types use str() conversion
-
-                Args:
-                    value: Value to convert
-                    default: Default value if value is None
-
-                Returns:
-                    str: Converted string or default for None
-
-                """
-                if value is None:
-                    return default
-                match value:
-                    case str():
-                        return value
-                    case _:
-                        pass
-                return str(value)
 
 
 u = FlextTargetLdapUtilities

@@ -15,9 +15,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 from flext_core import r
-from pydantic import Field
+from pydantic import Field, ValidationError
 
-from flext_target_ldap import c, m, t, u
+from flext_target_ldap import c, m, t
 
 
 class FlextTargetLdapSettings(m.Entity):
@@ -43,59 +43,34 @@ class FlextTargetLdapSettings(m.Entity):
     ) -> r[FlextTargetLdapSettings]:
         """Validate LDAP configuration."""
         try:
-            connection_config = u.TargetLdap.TypeConversion.build_connection_config(
-                config
-            )
-            attribute_mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-                config
-            )
-            object_classes = u.TargetLdap.TypeConversion.extract_object_classes(
-                config,
-            )
             validated_config = FlextTargetLdapSettings.model_validate({
-                "connection": connection_config,
-                "base_dn": u.TargetLdap.TypeConversion.to_str(
-                    config.get("base_dn", ""),
+                "connection": {
+                    "host": config.get("host", "localhost"),
+                    "port": config.get("port", c.Ldap.ConnectionDefaults.PORT),
+                    "use_ssl": config.get("use_ssl", False),
+                    "bind_dn": config.get("bind_dn", ""),
+                    "bind_password": config.get("password", ""),
+                    "timeout": config.get("timeout", c.DEFAULT_TIMEOUT_SECONDS),
+                },
+                "base_dn": config.get("base_dn", ""),
+                "search_filter": config.get("search_filter", "(objectClass=*)"),
+                "search_scope": config.get("search_scope", "SUBTREE"),
+                "connect_timeout": config.get(
+                    "connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3
                 ),
-                "search_filter": u.TargetLdap.TypeConversion.to_str(
-                    config.get("search_filter", "(objectClass=*)"),
+                "receive_timeout": config.get(
+                    "receive_timeout", c.DEFAULT_TIMEOUT_SECONDS
                 ),
-                "search_scope": u.TargetLdap.TypeConversion.to_str(
-                    config.get("search_scope", "SUBTREE"),
-                ),
-                "connect_timeout": u.TargetLdap.TypeConversion.to_int(
-                    config.get("connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3),
-                    c.DEFAULT_TIMEOUT_SECONDS // 3,
-                ),
-                "receive_timeout": u.TargetLdap.TypeConversion.to_int(
-                    config.get("receive_timeout", c.DEFAULT_TIMEOUT_SECONDS),
-                    c.DEFAULT_TIMEOUT_SECONDS,
-                ),
-                "batch_size": u.TargetLdap.TypeConversion.to_int(
-                    config.get("batch_size", c.DEFAULT_SIZE),
-                    c.DEFAULT_SIZE,
-                ),
-                "max_records": u.TargetLdap.TypeConversion.to_int(
-                    config.get("max_records"),
-                    0,
-                ),
-                "create_missing_entries": u.TargetLdap.TypeConversion.to_bool(
-                    config.get("create_missing_entries", True),
-                    default=True,
-                ),
-                "update_existing_entries": u.TargetLdap.TypeConversion.to_bool(
-                    config.get("update_existing_entries", True),
-                    default=True,
-                ),
-                "delete_removed_entries": u.TargetLdap.TypeConversion.to_bool(
-                    config.get("delete_removed_entries", False),
-                    default=False,
-                ),
-                "attribute_mapping": attribute_mapping,
-                "object_classes": object_classes,
+                "batch_size": config.get("batch_size", c.DEFAULT_SIZE),
+                "max_records": config.get("max_records"),
+                "create_missing_entries": config.get("create_missing_entries", True),
+                "update_existing_entries": config.get("update_existing_entries", True),
+                "delete_removed_entries": config.get("delete_removed_entries", False),
+                "attribute_mapping": config.get("attribute_mapping", {}),
+                "object_classes": config.get("object_classes", ["top"]),
             })
             return r[FlextTargetLdapSettings].ok(validated_config)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except ValidationError as e:
             return r[FlextTargetLdapSettings].fail(
                 f"Configuration validation failed: {e}",
             )

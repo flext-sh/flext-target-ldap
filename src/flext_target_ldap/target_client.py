@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT.
 
 from __future__ import annotations
 
-import sys
 from collections.abc import (
     Generator,
     Mapping,
@@ -17,24 +16,16 @@ from collections.abc import (
 from contextlib import AbstractContextManager, contextmanager
 from typing import TypeIs, override
 
-from flext_core import FlextContainer, FlextLogger
+from flext_core import FlextLogger
 from flext_ldap import (
     ldap,
     m,
 )
 
 from flext_target_ldap import (
-    FlextTargetLdapSettings,
-    build_singer_catalog,
     c,
-    p,
     r,
     t,
-)
-from flext_target_ldap.processing_result import FlextTargetLdapProcessingCounters
-from flext_target_ldap.sinks import (
-    FlextTargetLdapSink,
-    FlextTargetLdapTarget,
 )
 
 logger = FlextLogger(__name__)
@@ -52,18 +43,6 @@ class FlextTargetLdapSearchEntry:
         """Initialize search entry."""
         self.dn = dn
         self.attributes = attributes
-
-
-class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
-    """Result tracking for LDAP processing operations."""
-
-    @override
-    def __init__(self) -> None:
-        """Initialize processing result counters."""
-        self.processed_count: int = 0
-        self.success_count: int = 0
-        self.error_count: int = 0
-        self.errors: MutableSequence[str] = []
 
 
 class _CompatibleEntry:
@@ -85,7 +64,8 @@ def _container_mapping_from_value(
 ) -> Mapping[str, t.ContainerValue]:
     if isinstance(value, dict):
         return {str(k): v for k, v in value.items()}
-    return {}
+    msg = f"Expected dict for attribute mapping, got {type(value).__name__}: {value!r}"
+    raise TypeError(msg)
 
 
 def _is_container_list(
@@ -98,6 +78,47 @@ def _to_container_list(values: t.ContainerValue | t.StrSequence) -> t.ContainerV
     if isinstance(values, list):
         return [str(value) for value in values]
     return values
+
+
+def _to_str_values(value: t.ContainerValue) -> t.StrSequence:
+    if _is_container_list(value):
+        return [str(item) for item in value]
+    return [str(value)]
+
+
+def _build_ldif_entry(
+    dn: str,
+    attributes: Mapping[str, t.ContainerValue],
+    object_classes: t.StrSequence | None = None,
+) -> m.Ldif.Entry:
+    entry_attributes: MutableMapping[str, t.StrSequence] = {
+        key: _to_str_values(value) for key, value in attributes.items()
+    }
+    if object_classes:
+        entry_attributes["objectClass"] = [str(value) for value in object_classes]
+    return m.Ldif.Entry(
+        dn=m.Ldif.DN(
+            value=dn,
+            metadata=m.Ldif.EntryMetadata(),
+        ),
+        attributes=m.Ldif.Attributes.model_validate({
+            "attributes": entry_attributes,
+            "attribute_metadata": {},
+            "metadata": None,
+        }),
+        changetype=None,
+        metadata=None,
+        validation_metadata=None,
+    )
+
+
+def _build_modify_changes(
+    changes: Mapping[str, t.ContainerValue],
+) -> t.Ldap.OperationChanges:
+    return {
+        key: [(c.Ldap.ModifyOperation.REPLACE, _to_str_values(value))]
+        for key, value in changes.items()
+    }
 
 
 class _LdapConnectionWrapper:
@@ -115,69 +136,30 @@ class _LdapConnectionWrapper:
 
     def add(
         self,
-        _dn: str,
-        _object_classes: t.StrSequence,
-        _attributes: Mapping[str, t.ContainerValue],
+        dn: str,
+        object_classes: t.StrSequence,
+        attributes: Mapping[str, t.ContainerValue],
     ) -> bool:
         """Add entry to LDAP."""
-        try:
-            connect_result = self.api.connect(self.config)
-            if connect_result.is_failure:
-                return False
-            self.api.disconnect()
-            return True
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ):
-            return False
+        entry = _build_ldif_entry(dn, attributes, object_classes)
+        result = self.api.add(entry)
+        return result.is_success
 
     def bind(self) -> bool:
         """Bind to LDAP server."""
-        return True
+        result = self.api.connect(self.config)
+        self.bound = result.is_success
+        return self.bound
 
-    def delete(self, _dn: str) -> bool:
+    def delete(self, dn: str) -> bool:
         """Delete entry from LDAP."""
-        try:
-            connect_result = self.api.connect(self.config)
-            if connect_result.is_failure:
-                return False
-            self.api.disconnect()
-            return True
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ):
-            return False
+        result = self.api.delete(dn)
+        return result.is_success
 
-    def modify(self, _dn: str, _changes: Mapping[str, t.ContainerValue]) -> bool:
+    def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
         """Modify entry in LDAP."""
-        try:
-            connect_result = self.api.connect(self.config)
-            if connect_result.is_failure:
-                return False
-            self.api.disconnect()
-            return True
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ):
-            return False
+        result = self.api.modify(dn, _build_modify_changes(changes))
+        return result.is_success
 
     def search(
         self,
@@ -228,6 +210,9 @@ class _LdapConnectionWrapper:
 
     def unbind(self) -> None:
         """Unbind from LDAP server."""
+        self.api.disconnect()
+        self.bound = False
+        self.entries.clear()
 
 
 class FlextTargetLdapClient:
@@ -321,56 +306,18 @@ class FlextTargetLdapClient:
     ) -> r[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
-            ldap_attributes: MutableMapping[str, t.StrSequence] = {}
-            for key, value in attributes.items():
-                if _is_container_list(value):
-                    ldap_attributes[key] = [str(v) for v in value]
-                else:
-                    ldap_attributes[key] = [str(value)]
-            if object_classes:
-                ldap_attributes["objectClass"] = object_classes
             logger.info("Adding LDAP entry using flext-ldap API: %s", dn)
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
-                is_group: bool = "groupOfNames" in ldap_attributes.get(
-                    "objectClass",
-                    [],
+                ldap_entry = _build_ldif_entry(dn, attributes, object_classes)
+                result_op = self._api.add(ldap_entry)
+                if result_op.is_success:
+                    return r[bool].ok(value=True)
+                return r[bool].fail(
+                    str(result_op.error) if result_op.error else "LDAP add failed",
                 )
-                if is_group:
-                    cn_values = ldap_attributes.get("cn", [])
-                    cn = str(cn_values[0]) if cn_values else "group"
-                    members_raw = ldap_attributes.get("member", [])
-                    members = [str(m) for m in members_raw]
-                    group_attrs: MutableMapping[str, MutableSequence[str]] = {
-                        "objectClass": ["top", "groupOfNames"],
-                        "cn": [cn],
-                        "member": members or [],
-                    }
-                    group_entry = m.Ldif.Entry(
-                        dn=m.Ldif.DN(
-                            value=dn,
-                            metadata=m.Ldif.EntryMetadata(),
-                        ),
-                        attributes=m.Ldif.Attributes.model_validate({
-                            "attributes": group_attrs,
-                            "attribute_metadata": {},
-                            "metadata": None,
-                        }),
-                        changetype=None,
-                        metadata=None,
-                        validation_metadata=None,
-                    )
-                    result_op = self._api.add(group_entry)
-                    if result_op.is_success:
-                        return r[bool].ok(value=True)
-                    return r[bool].fail(
-                        str(result_op.error)
-                        if result_op.error
-                        else "Group creation failed",
-                    )
-                return r[bool].ok(value=True)
             finally:
                 self._api.disconnect()
         except (RuntimeError, ValueError, TypeError) as e:
@@ -423,9 +370,14 @@ class FlextTargetLdapClient:
             return r[bool].fail(f"Delete entry failed: {e}")
 
     def disconnect(self) -> r[bool]:
-        """Disconnect noop (connection is context-managed per operation)."""
-        logger.debug("No persistent session to disconnect")
-        return r[bool].ok(value=True)
+        """Disconnect LDAP session through flext-ldap."""
+        try:
+            self._api.disconnect()
+            self._current_session_id = None
+            return r[bool].ok(value=True)
+        except (RuntimeError, ValueError, TypeError) as e:
+            logger.exception("Failed to disconnect LDAP client")
+            return r[bool].fail(f"Disconnect failed: {e}")
 
     def entry_exists(self, dn: str) -> r[bool]:
         """Check if LDAP entry exists using flext-ldap API."""
@@ -490,18 +442,12 @@ class FlextTargetLdapClient:
     ) -> r[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
-            ldap_changes: MutableMapping[str, t.StrSequence] = {}
-            for key, value in changes.items():
-                if _is_container_list(value):
-                    ldap_changes[key] = [str(v) for v in value]
-                else:
-                    ldap_changes[key] = [str(value)]
             logger.info("Modifying LDAP entry using flext-ldap API: %s", dn)
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
-                result: r[bool] = r[bool].ok(value=True)
+                result = self._api.modify(dn, _build_modify_changes(changes))
                 if result.is_success:
                     logger.debug("Successfully modified LDAP entry: %s", dn)
                     return r[bool].ok(value=True)
@@ -569,555 +515,4 @@ class FlextTargetLdapClient:
         return _LdapConnectionWrapper(api, self.config)
 
 
-class FlextTargetLdapBaseSink(FlextTargetLdapSink):
-    """Base LDAP sink with common functionality using enterprise patterns."""
-
-    @override
-    def __init__(
-        self,
-        target: FlextTargetLdapTarget,
-        stream_name: str,
-        schema: Mapping[str, t.ContainerValue],
-        key_properties: t.StrSequence,
-    ) -> None:
-        """Initialize LDAP sink."""
-        super().__init__(target, stream_name, schema, key_properties)
-        self._target = target
-        self.client: FlextTargetLdapClient | None = None
-        self._processing_result: FlextTargetLdapProcessingResult = (
-            FlextTargetLdapProcessingResult()
-        )
-
-    def get_processing_result(self) -> FlextTargetLdapProcessingResult:
-        """Get processing results."""
-        return self._processing_result
-
-    def process_batch(self, _context: Mapping[str, t.ContainerValue]) -> None:
-        """Process a batch of records."""
-        setup_result: r[FlextTargetLdapClient] = self.setup_client()
-        if not setup_result.is_success:
-            setup_error = setup_result.error or ""
-            logger.error("Cannot process batch: %s", setup_error)
-            return
-        try:
-            records_raw = _context.get("records", [])
-            records: Sequence[Mapping[str, t.ContainerValue]] = [
-                item
-                for item in (records_raw if isinstance(records_raw, list) else [])
-                if isinstance(item, dict)
-            ]
-            logger.info(
-                f"Processing batch of {len(records)} records for stream: {self.stream_name}",
-            )
-            for record in records:
-                typed_record = _container_mapping_from_value(record)
-                if typed_record:
-                    self.process_record(typed_record, _context)
-            logger.info(
-                f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}",
-            )
-        finally:
-            self.teardown_client()
-
-    @override
-    def process_record(
-        self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
-    ) -> r[bool]:
-        """Process a single record. Override in subclasses."""
-        if not self.client:
-            self._processing_result.add_error("LDAP client not initialized")
-            return r[bool].fail("LDAP client not initialized")
-        try:
-            logger.debug(f"Processing record: {_record!r}")
-            self._processing_result.add_success()
-            return r[bool].ok(value=True)
-        except (RuntimeError, ValueError, TypeError) as e:
-            error_msg: str = f"Error processing record: {e}"
-            logger.exception(error_msg)
-            self._processing_result.add_error(error_msg)
-            return r[bool].fail(error_msg)
-
-    def setup_client(self) -> r[FlextTargetLdapClient]:
-        """Set up LDAP client connection."""
-        try:
-            connection_config = {
-                "host": self._target.config.get("host", c.DEFAULT_HOST),
-                "port": self._target.config.get(
-                    "port",
-                    c.Ldap.ConnectionDefaults.PORT,
-                ),
-                "use_ssl": self._target.config.get("use_ssl", False),
-                "bind_dn": self._target.config.get("bind_dn", ""),
-                "password": self._target.config.get("password", ""),
-                "timeout": self._target.config.get(
-                    "timeout",
-                    c.Ldap.ConnectionDefaults.TIMEOUT,
-                ),
-            }
-            self.client = FlextTargetLdapClient(connection_config)
-            connect_result: r[bool] = self.client.connect()
-            if not connect_result.is_success:
-                return r[FlextTargetLdapClient].fail(
-                    f"LDAP connection failed: {connect_result.error}",
-                )
-            logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
-            return r[FlextTargetLdapClient].ok(self.client)
-        except (RuntimeError, ValueError, TypeError) as e:
-            error_msg: str = f"LDAP client setup failed: {e}"
-            logger.exception(error_msg)
-            return r[FlextTargetLdapClient].fail(error_msg)
-
-    def teardown_client(self) -> None:
-        """Teardown LDAP client connection."""
-        if self.client:
-            self.client.disconnect()
-            self.client = None
-            logger.info(f"LDAP client disconnected for stream: {self.stream_name}")
-
-
-class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
-    """LDAP sink for user entries with person/inetOrgPerson t.NormalizedValue classes."""
-
-    def build_user_attributes(
-        self,
-        record: Mapping[str, t.ContainerValue],
-    ) -> MutableMapping[str, t.ContainerValue]:
-        """Build LDAP attributes for user entry."""
-        object_classes = self._target.config.get(
-            "object_classes",
-            ["inetOrgPerson", "person"],
-        )
-        attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": list(object_classes)
-            if _is_container_list(object_classes)
-            else ["inetOrgPerson", "person"],
-        }
-        obj_classes = attributes.get("objectClass")
-        if _is_container_list(obj_classes):
-            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
-            if "person" not in obj_classes_mut:
-                obj_classes_mut.append("person")
-            if "inetOrgPerson" not in obj_classes_mut:
-                obj_classes_mut.append("inetOrgPerson")
-            attributes["objectClass"] = obj_classes_mut
-        field_mapping = {
-            "username": "uid",
-            "email": "mail",
-            "first_name": "givenName",
-            "last_name": "sn",
-            "full_name": "cn",
-            "phone": "telephoneNumber",
-            "department": "departmentNumber",
-            "title": "title",
-        }
-        for singer_field, ldap_attr in field_mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = [str(value)]
-        mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: MutableMapping[str, str] = {}
-        for k, v in raw_mapping.items():
-            match v:
-                case str():
-                    mapping[k] = str(v)
-                case _:
-                    pass
-        for singer_field, mapped_attr in mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[mapped_attr] = [str(value)]
-        return attributes
-
-    @override
-    def process_record(
-        self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
-    ) -> r[bool]:
-        """Process a user record."""
-        if not self.client:
-            self._processing_result.add_error("LDAP client not initialized")
-            return r[bool].fail("LDAP client not initialized")
-        try:
-            username = (
-                _record.get("username") or _record.get("uid") or _record.get("cn")
-            )
-            if not username:
-                self._processing_result.add_error("No username found in record")
-                return r[bool].fail("No username found in record")
-            base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
-            user_dn = f"uid={username},{base_dn}"
-            attributes = self.build_user_attributes(_record)
-            object_classes_raw = attributes.get(
-                "objectClass",
-                ["inetOrgPerson", "person"],
-            )
-            object_classes: t.StrSequence = (
-                [str(oc) for oc in object_classes_raw]
-                if _is_container_list(object_classes_raw)
-                else ["inetOrgPerson", "person"]
-            )
-            add_result = self.client.add_entry(user_dn, attributes, object_classes)
-            if add_result.is_success:
-                self._processing_result.add_success()
-                logger.debug("User entry added successfully: %s", user_dn)
-                return r[bool].ok(value=True)
-            if self._target.config.get("update_existing_entries", False):
-                modify_result = self.client.modify_entry(user_dn, attributes)
-                if modify_result.is_success:
-                    self._processing_result.add_success()
-                    logger.debug("User entry modified successfully: %s", user_dn)
-                    return r[bool].ok(value=True)
-                self._processing_result.add_error(
-                    f"Failed to modify user {user_dn}: {modify_result.error}",
-                )
-                return r[bool].fail(
-                    f"Failed to modify user {user_dn}: {modify_result.error}",
-                )
-            self._processing_result.add_error(
-                f"Failed to add user {user_dn}: {add_result.error}",
-            )
-            return r[bool].fail(f"Failed to add user {user_dn}: {add_result.error}")
-        except (RuntimeError, ValueError, TypeError) as e:
-            error_msg: str = f"Error processing user record: {e}"
-            logger.exception(error_msg)
-            self._processing_result.add_error(error_msg)
-            return r[bool].fail(error_msg)
-
-
-class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
-    """LDAP sink for group entries with groupOfNames t.NormalizedValue class."""
-
-    @override
-    def process_record(
-        self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
-    ) -> r[bool]:
-        """Process a group record."""
-        if not self.client:
-            self._processing_result.add_error("LDAP client not initialized")
-            return r[bool].fail("LDAP client not initialized")
-        try:
-            group_name = _record.get("name") or _record.get("cn")
-            if not group_name:
-                self._processing_result.add_error("No group name found in record")
-                return r[bool].fail("No group name found in record")
-            group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
-            attributes = self._build_group_attributes(_record)
-            object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
-            object_classes: t.StrSequence = (
-                [str(oc) for oc in object_classes_raw]
-                if _is_container_list(object_classes_raw)
-                else ["groupOfNames"]
-            )
-            add_result = self.client.add_entry(group_dn, attributes, object_classes)
-            if add_result.is_success:
-                self._processing_result.add_success()
-                logger.debug("Group entry added successfully: %s", group_dn)
-                return r[bool].ok(value=True)
-            if self._target.config.get("update_existing_entries", False):
-                modify_result = self.client.modify_entry(group_dn, attributes)
-                if modify_result.is_success:
-                    self._processing_result.add_success()
-                    logger.debug("Group entry modified successfully: %s", group_dn)
-                    return r[bool].ok(value=True)
-                self._processing_result.add_error(
-                    f"Failed to modify group {group_dn}: {modify_result.error}",
-                )
-                return r[bool].fail(
-                    f"Failed to modify group {group_dn}: {modify_result.error}",
-                )
-            self._processing_result.add_error(
-                f"Failed to add group {group_dn}: {add_result.error}",
-            )
-            return r[bool].fail(f"Failed to add group {group_dn}: {add_result.error}")
-        except (RuntimeError, ValueError, TypeError) as e:
-            error_msg: str = f"Error processing group record: {e}"
-            logger.exception(error_msg)
-            self._processing_result.add_error(error_msg)
-            return r[bool].fail(error_msg)
-
-    def _build_group_attributes(
-        self,
-        record: Mapping[str, t.ContainerValue],
-    ) -> MutableMapping[str, t.ContainerValue]:
-        """Build LDAP attributes for group entry."""
-        object_classes = self._target.config.get(
-            "group_object_classes",
-            ["groupOfNames"],
-        )
-        attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": list(object_classes)
-            if _is_container_list(object_classes)
-            else ["groupOfNames"],
-        }
-        obj_classes = attributes.get("objectClass")
-        if _is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
-            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
-            obj_classes_mut.append("groupOfNames")
-            attributes["objectClass"] = obj_classes_mut
-        field_mapping = {
-            "name": "cn",
-            "description": "description",
-            "members": "member",
-        }
-        for singer_field, ldap_attr in field_mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                if _is_container_list(value):
-                    attributes[ldap_attr] = value
-                else:
-                    attributes[ldap_attr] = [str(value)]
-        mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: MutableMapping[str, str] = {}
-        for k, v in raw_mapping.items():
-            match v:
-                case str():
-                    mapping[k] = str(v)
-                case _:
-                    pass
-        for singer_field, mapped_attr in mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                if _is_container_list(value):
-                    attributes[mapped_attr] = value
-                else:
-                    attributes[mapped_attr] = [str(value)]
-        return attributes
-
-
-class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
-    """LDAP sink for organizational unit entries with organizationalUnit t.NormalizedValue class."""
-
-    @override
-    def process_record(
-        self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
-    ) -> r[bool]:
-        """Process an organizational unit record."""
-        if not self.client:
-            self._processing_result.add_error("LDAP client not initialized")
-            return r[bool].fail("LDAP client not initialized")
-        try:
-            ou_name = _record.get("name") or _record.get("ou")
-            if not ou_name:
-                self._processing_result.add_error("No OU name found in record")
-                return r[bool].fail("No OU name found in record")
-            base_dn_val = self._target.config.get("base_dn", "dc=example,dc=com")
-            ou_dn = f"ou={ou_name},{base_dn_val}"
-            attributes = self._build_ou_attributes(_record)
-            add_result: r[bool] = self.client.add_entry(ou_dn, attributes)
-            if add_result.is_success:
-                self._processing_result.add_success()
-                logger.debug("OU entry added successfully: %s", ou_dn)
-                return r[bool].ok(value=True)
-            if self._target.config.get("update_existing_entries", False):
-                modify_result = self.client.modify_entry(ou_dn, attributes)
-                if modify_result.is_success:
-                    self._processing_result.add_success()
-                    logger.debug("OU entry modified successfully: %s", ou_dn)
-                    return r[bool].ok(value=True)
-                self._processing_result.add_error(
-                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
-                )
-                return r[bool].fail(
-                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
-                )
-            self._processing_result.add_error(
-                f"Failed to add OU {ou_dn}: {add_result.error}",
-            )
-            return r[bool].fail(f"Failed to add OU {ou_dn}: {add_result.error}")
-        except (RuntimeError, ValueError, TypeError) as e:
-            error_msg: str = f"Error processing OU record: {e}"
-            logger.exception(error_msg)
-            self._processing_result.add_error(error_msg)
-            return r[bool].fail(error_msg)
-
-    def _build_ou_attributes(
-        self,
-        record: Mapping[str, t.ContainerValue],
-    ) -> MutableMapping[str, t.ContainerValue]:
-        """Build LDAP attributes for OU entry."""
-        attributes: MutableMapping[str, t.ContainerValue] = {
-            "objectClass": ["organizationalUnit"],
-        }
-        field_mapping = {"name": "ou", "description": "description"}
-        for singer_field, ldap_attr in field_mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = [str(value)]
-        mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: MutableMapping[str, str] = {}
-        for k, v in raw_mapping.items():
-            match v:
-                case str():
-                    mapping[k] = str(v)
-                case _:
-                    pass
-        for singer_field, mapped_attr in mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[mapped_attr] = [str(value)]
-        return attributes
-
-
-class FlextTargetLdap(FlextTargetLdapTarget):
-    """Enterprise LDAP target implementation using flext-core patterns.
-
-    This target provides complete Singer protocol implementation with
-    LDAP operations via flext-ldap integration.
-    """
-
-    name = "target-ldap"
-    config_class = FlextTargetLdapSettings
-
-    @override
-    def __init__(
-        self,
-        *,
-        config: MutableMapping[str, t.ContainerValue] | None = None,
-        validate_config: bool = True,
-    ) -> None:
-        """Initialize LDAP target."""
-        super().__init__(config=config or {})
-        if validate_config:
-            self.validate_config()
-        self._container: p.Container | None = None
-
-    @property
-    def singer_catalog(self) -> Mapping[str, t.ContainerValue]:
-        """Return the Singer catalog for this target."""
-        return build_singer_catalog()
-
-    def cli(self) -> None:
-        """Run CLI."""
-        logger.info("CLI execution from target_client.py")
-
-    def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:
-        """Return the appropriate sink class for the stream."""
-        sink_mapping = {
-            "users": FlextTargetLdapUsersSink,
-            "groups": FlextTargetLdapGroupsSink,
-            "organizational_units": FlextTargetLdapOrganizationalUnitsSink,
-        }
-        sink_class = sink_mapping.get(stream_name)
-        if not sink_class:
-            logger.warning(
-                "No specific sink found for stream '%s', using base sink",
-                stream_name,
-            )
-            return FlextTargetLdapBaseSink
-        logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
-        return sink_class
-
-    def get_sink(self, stream_name: str) -> FlextTargetLdapSink:
-        """Get a sink instance for the stream, processing configuration as needed."""
-        dn_templates = self.config.get("dn_templates", {})
-        if (
-            isinstance(dn_templates, dict)
-            and stream_name in dn_templates
-            and isinstance(self.config, MutableMapping)
-        ):
-            self.config[f"{stream_name}_dn_template"] = dn_templates[stream_name]
-
-        default_object_classes = self.config.get("default_object_classes", {})
-        if (
-            isinstance(default_object_classes, dict)
-            and stream_name in default_object_classes
-            and isinstance(self.config, MutableMapping)
-        ):
-            self.config[f"{stream_name}_object_classes"] = default_object_classes[
-                stream_name
-            ]
-
-        sink_class = self.get_sink_class(stream_name)
-        schema_val = self.config.get(f"{stream_name}_schema", {})
-        schema: Mapping[str, t.ContainerValue] = (
-            schema_val if isinstance(schema_val, dict) else {}
-        )
-        key_props_val = self.config.get(f"{stream_name}_key_properties", [])
-        key_properties: t.StrSequence = (
-            [str(k) for k in key_props_val] if isinstance(key_props_val, list) else []
-        )
-        return sink_class(
-            target=self,
-            stream_name=stream_name,
-            schema=schema,
-            key_properties=key_properties,
-        )
-
-    def setup(self) -> None:
-        """Set up the LDAP target."""
-        self._container = FlextContainer.get_global()
-        logger.info("DI container initialized successfully")
-        host = self.config.get("host", c.DEFAULT_HOST)
-        host_name = host if isinstance(host, str) else c.DEFAULT_HOST
-        logger.info("LDAP target setup completed for host: %s", host_name)
-
-    def teardown(self) -> None:
-        """Teardown the LDAP target."""
-        if self._container is not None:
-            self._container = None
-            logger.info("DI container cleaned up")
-        logger.info("LDAP target teardown completed")
-
-    def validate_config(self) -> None:
-        """Validate the target configuration."""
-        host = self.config.get("host")
-        if not host:
-            msg = "LDAP host is required"
-            raise ValueError(msg)
-        base_dn = self.config.get("base_dn")
-        if not base_dn:
-            msg = "LDAP base DN is required"
-            raise ValueError(msg)
-        port_obj = self.config.get("port", c.Ldap.ConnectionDefaults.PORT)
-        match port_obj:
-            case bool():
-                port = c.Ldap.ConnectionDefaults.PORT
-            case int():
-                port = port_obj
-            case str():
-                try:
-                    port = int(port_obj)
-                except ValueError:
-                    port = c.Ldap.ConnectionDefaults.PORT
-            case _:
-                port = c.Ldap.ConnectionDefaults.PORT
-        if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
-            msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
-            raise ValueError(msg)
-        use_ssl = self.config.get("use_ssl", False)
-        use_tls = self.config.get("use_tls", False)
-        if use_ssl and use_tls:
-            msg = "Cannot use both SSL and TLS simultaneously"
-            raise ValueError(msg)
-        logger.info("LDAP target configuration validated successfully")
-
-
-def main() -> None:
-    """CLI entry point for target-ldap."""
-    if len(sys.argv) > 1 and sys.argv[1] == "--help":
-        return
-    target = FlextTargetLdap()
-    target.cli()
-
-
-__all__ = [
-    "FlextTargetLdap",
-    "FlextTargetLdapBaseSink",
-    "FlextTargetLdapClient",
-    "FlextTargetLdapGroupsSink",
-    "FlextTargetLdapOrganizationalUnitsSink",
-    "FlextTargetLdapProcessingResult",
-    "FlextTargetLdapSearchEntry",
-    "FlextTargetLdapUsersSink",
-    "main",
-]
+__all__ = ["FlextTargetLdapClient", "FlextTargetLdapSearchEntry"]

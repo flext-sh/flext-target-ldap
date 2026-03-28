@@ -1,338 +1,194 @@
-"""Tests for LDAP client using ldap3.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Tests for the canonical LDAP target client."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
+from flext_core import r
 
-from flext_target_ldap import FlextTargetLdapClient as LdapTargetClient
-from flext_target_ldap.client import LDAPClient, LDAPSearchEntry
+from flext_target_ldap import FlextTargetLdapClient, FlextTargetLdapSearchEntry
 from tests import t
-
-EXPECTED_DATA_COUNT = 3
 
 
 class TestLDAPClient:
-    """Test LDAP client functionality."""
+    """Test LDAP client functionality through flext-ldap."""
 
     @pytest.fixture
-    def client(self, mock_ldap_config: Mapping[str, t.ContainerValue]) -> LDAPClient:
-        """Create test LDAPClient instance."""
-        return LDAPClient(config=mock_ldap_config)
-
-    @pytest.fixture
-    def target_client(
+    def client(
         self,
         mock_ldap_config: Mapping[str, t.ContainerValue],
-    ) -> LdapTargetClient:
-        """Create test LdapTargetClient instance."""
-        return LdapTargetClient(config=mock_ldap_config)
+    ) -> FlextTargetLdapClient:
+        """Create test target client instance."""
+        return FlextTargetLdapClient(config=mock_ldap_config)
 
-    def test_client_initialization(self, target_client: LdapTargetClient) -> None:
+    def test_client_initialization(self, client: FlextTargetLdapClient) -> None:
         """Test LDAP client initialization with configuration values."""
-        if target_client.host != "test.ldap.com":
-            msg_host: str = f"Expected {'test.ldap.com'}, got {target_client.host}"
-            raise AssertionError(msg_host)
-        assert target_client.port == 389
-        if target_client.bind_dn != "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com":
-            msg_dn: str = f"Expected {'cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com'}, got {target_client.bind_dn}"
-            raise AssertionError(msg_dn)
-        assert target_client.password == "test_password"
-        assert not target_client.use_ssl
-        if target_client.timeout != 30:
-            msg_timeout: str = f"Expected {30}, got {target_client.timeout}"
-            raise AssertionError(msg_timeout)
+        assert client.host == "test.ldap.com"
+        assert client.port == 389
+        assert client.bind_dn == "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
+        assert client.password == "test_password"
+        assert not client.use_ssl
+        assert client.timeout == 30
 
-    def test_server_uri_construction(self, target_client: LdapTargetClient) -> None:
+    def test_server_uri_construction(self, client: FlextTargetLdapClient) -> None:
         """Test server URI construction with and without SSL."""
-        if target_client.server_uri != "ldap://test.ldap.com:389":
-            msg_uri: str = (
-                f"Expected {'ldap://test.ldap.com:389'}, got {target_client.server_uri}"
-            )
-            raise AssertionError(msg_uri)
-        # Create new client with SSL enabled to test LDAPS URI
-        ssl_config: Mapping[str, t.ContainerValue] = {
-            "host": "test.ldap.com",
-            "port": 389,
-            "use_ssl": True,
-            "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-            "password": "test_password",
-            "timeout": 30,
-        }
-        ssl_client = LdapTargetClient(config=ssl_config)
-        if ssl_client.server_uri != "ldaps://test.ldap.com:389":
-            msg_ssl_uri: str = (
-                f"Expected {'ldaps://test.ldap.com:389'}, got {ssl_client.server_uri}"
-            )
-            raise AssertionError(msg_ssl_uri)
-
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.Server")
-    def test_get_connection(
-        self,
-        mock_server_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
-    ) -> None:
-        """Test getting LDAP connection with proper binding and cleanup."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection_class.return_value = mock_connection
-        mock_server = MagicMock()
-        mock_server_class.return_value = mock_server
-        with client.get_connection() as conn:
-            if conn != mock_connection:
-                msg: str = f"Expected {mock_connection}, got {conn}"
-                raise AssertionError(msg)
-        mock_connection_class.assert_called_once_with(
-            mock_server,
-            user=client._bind_dn,
-            password=client._password,
+        assert client.server_uri == "ldap://test.ldap.com:389"
+        ssl_client = FlextTargetLdapClient(
+            config={
+                "host": "test.ldap.com",
+                "port": 389,
+                "use_ssl": True,
+                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+                "password": "test_password",
+                "timeout": 30,
+            },
         )
-        mock_connection.bind.assert_called_once()
-        mock_connection.unbind.assert_called_once()
+        assert ssl_client.server_uri == "ldaps://test.ldap.com:389"
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_add_entry(
+    def test_connect_delegates_to_flext_ldap_api(
         self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
+        client: FlextTargetLdapClient,
     ) -> None:
-        """Test adding a new LDAP entry."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection.add.return_value = True
-        mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
+        """Test connect delegates to the flext-ldap facade."""
+        client._api = MagicMock()
+        client._api.connect.return_value = r[bool].ok(True)
+
+        result = client.connect()
+
+        assert result.is_success
+        assert result.value is True
+        client._api.connect.assert_called_once_with(client.config)
+        client._api.disconnect.assert_called_once()
+
+    def test_disconnect_calls_flext_ldap_api(
+        self,
+        client: FlextTargetLdapClient,
+    ) -> None:
+        """Test disconnect delegates to the flext-ldap facade."""
+        client._api = MagicMock()
+
+        result = client.disconnect()
+
+        assert result.is_success
+        assert result.value is True
+        client._api.disconnect.assert_called_once_with()
+
+    def test_add_entry_uses_real_ldif_entry(
+        self,
+        client: FlextTargetLdapClient,
+    ) -> None:
+        """Test add_entry converts payloads into real LDIF entries."""
+        client._api = MagicMock()
+        client._api.connect.return_value = r[bool].ok(True)
+        client._api.add.return_value = MagicMock(is_success=True, error=None)
+
         result = client.add_entry(
             dn="uid=test,dc=test,dc=com",
             object_classes=["inetOrgPerson", "person"],
             attributes={"cn": "Test User", "sn": "User"},
         )
+
         assert result.is_success
-        if not result.value:
-            msg: str = f"Expected True, got {result.value}"
-            raise AssertionError(msg)
-        mock_connection.add.assert_called_once()
+        assert result.value is True
+        client._api.connect.assert_called_once_with(client.config)
+        client._api.add.assert_called_once()
+        entry = client._api.add.call_args.args[0]
+        assert entry.dn.value == "uid=test,dc=test,dc=com"
+        assert entry.attributes.attributes["objectClass"] == [
+            "inetOrgPerson",
+            "person",
+        ]
+        client._api.disconnect.assert_called_once()
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_add_entry_already_exists(
+    def test_modify_entry_uses_real_modify_changes(
         self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
+        client: FlextTargetLdapClient,
     ) -> None:
-        """Test adding an LDAP entry that already exists."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection.add.side_effect = Exception("Entry already exists")
-        mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
-        result = client.add_entry(
-            dn="uid=test,dc=test,dc=com",
-            object_classes=["person"],
-            attributes={"cn": "Test"},
-        )
-        assert not result.is_success
-        assert result.error is not None
-        if "Entry already exists" not in result.error:
-            msg: str = f"Expected {'Entry already exists'} in {result.error}"
-            raise AssertionError(msg)
+        """Test modify_entry delegates actual LDAP modify operations."""
+        client._api = MagicMock()
+        client._api.connect.return_value = r[bool].ok(True)
+        client._api.modify.return_value = MagicMock(is_success=True, error=None)
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_modify_entry(
-        self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
-    ) -> None:
-        """Test modifying an existing LDAP entry."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection.modify.return_value = True
-        mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
         result = client.modify_entry(
             dn="uid=test,dc=test,dc=com",
             changes={"mail": "new@test.com", "telephoneNumber": "123-456"},
         )
-        assert result.is_success
-        if not result.value:
-            msg: str = f"Expected True, got {result.value}"
-            raise AssertionError(msg)
-        mock_connection.modify.assert_called_once()
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_delete_entry(
+        assert result.is_success
+        assert result.value is True
+        client._api.modify.assert_called_once_with(
+            "uid=test,dc=test,dc=com",
+            {
+                "mail": [(2, ["new@test.com"])],
+                "telephoneNumber": [(2, ["123-456"])],
+            },
+        )
+        client._api.disconnect.assert_called_once()
+
+    def test_delete_entry_delegates_to_flext_ldap_api(
         self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
+        client: FlextTargetLdapClient,
     ) -> None:
-        """Test deleting an LDAP entry."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection.delete.return_value = True
-        mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
+        """Test delete_entry delegates actual LDAP delete operations."""
+        client._api = MagicMock()
+        client._api.connect.return_value = r[bool].ok(True)
+        client._api.delete.return_value = MagicMock(is_success=True, error=None)
+
         result = client.delete_entry("uid=test,dc=test,dc=com")
-        assert result.is_success
-        if not result.value:
-            msg: str = f"Expected True, got {result.value}"
-            raise AssertionError(msg)
-        mock_connection.delete.assert_called_once_with("uid=test,dc=test,dc=com")
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_search_entry(
+        assert result.is_success
+        assert result.value is True
+        client._api.delete.assert_called_once_with("uid=test,dc=test,dc=com")
+        client._api.disconnect.assert_called_once()
+
+    def test_search_entry_maps_search_results(
         self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
+        client: FlextTargetLdapClient,
     ) -> None:
-        """Test searching for LDAP entries."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection.search.return_value = True
-        mock_entry = LDAPSearchEntry(
-            dn="uid=test,dc=test,dc=com",
-            attributes={"cn": ["Test User"], "mail": ["test@example.com"]},
+        """Test search_entry converts LDAP results to target search entries."""
+        client._api = MagicMock()
+        client._api.connect.return_value = r[bool].ok(True)
+        client._api.search.return_value = MagicMock(
+            is_success=True,
+            value=MagicMock(
+                entries=[
+                    {
+                        "dn": "uid=test,dc=test,dc=com",
+                        "cn": ["Test User"],
+                    },
+                ],
+            ),
         )
-        mock_connection.entries = [mock_entry]
-        mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
-        result = client.search_entry("dc=test,dc=com")
-        assert result.is_success
-        entries = result.value
-        if len(entries) != 1:
-            msg_count: str = f"Expected {1}, got {len(entries)}"
-            raise AssertionError(msg_count)
-        assert entries[0].dn == "uid=test,dc=test,dc=com"
-        if entries[0].attributes["cn"] != ["Test User"]:
-            msg_cn: str = f"Expected {['Test User']}, got {entries[0].attributes['cn']}"
-            raise AssertionError(msg_cn)
-        assert entries[0].attributes["mail"] == ["test@example.com"]
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_entry_exists(
-        self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
-    ) -> None:
-        """Test checking if an LDAP entry exists."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection.search.return_value = True
-        mock_entry = LDAPSearchEntry(
-            dn="uid=test,dc=test,dc=com",
-            attributes={"cn": ["Test User"]},
+        result = client.search_entry(
+            base_dn="dc=test,dc=com",
+            search_filter="(uid=test)",
+            attributes=["cn"],
         )
-        mock_connection.entries = [mock_entry]
-        mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
-        result = client.entry_exists("uid=test,dc=test,dc=com")
-        assert result.is_success
-        if not result.value:
-            msg_true: str = f"Expected True, got {result.value}"
-            raise AssertionError(msg_true)
-        empty_entries: list[LDAPSearchEntry] = []
-        mock_connection.entries = empty_entries
-        result = client.entry_exists("uid=notfound,dc=test,dc=com")
-        assert result.is_success
-        if result.value:
-            msg_false: str = f"Expected False, got {result.value}"
-            raise AssertionError(msg_false)
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_get_entry(
+        assert result.is_success
+        assert result.value is not None
+        assert len(result.value) == 1
+        entry = result.value[0]
+        assert isinstance(entry, FlextTargetLdapSearchEntry)
+        assert entry.dn == "uid=test,dc=test,dc=com"
+        assert entry.attributes == {"cn": ["Test User"]}
+
+    def test_get_connection_returns_real_wrapper(
         self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
+        client: FlextTargetLdapClient,
     ) -> None:
-        """Test getting a specific LDAP entry."""
-        mock_connection = MagicMock()
-        mock_connection.bind.return_value = True
-        mock_connection.bound = True
-        mock_connection.search.return_value = True
-        mock_entry = LDAPSearchEntry(
-            dn="uid=test,dc=test,dc=com",
-            attributes={"cn": ["Test User"], "mail": ["test@example.com"]},
-        )
-        mock_connection.entries = [mock_entry]
-        mock_connection_class.return_value = mock_connection
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
-        result = client.get_entry("uid=test,dc=test,dc=com")
-        assert result.is_success
-        entry = result.value
-        assert entry is not None
-        if entry.dn != "uid=test,dc=test,dc=com":
-            msg: str = f"Expected {'uid=test,dc=test,dc=com'}, got {entry.dn}"
-            raise AssertionError(msg)
-        assert entry.attributes["cn"] == ["Test User"]
-        empty_entries: list[LDAPSearchEntry] = []
-        mock_connection.entries = empty_entries
-        result = client.get_entry("uid=notfound,dc=test,dc=com")
-        assert result.is_success
-        assert result.value is None
+        """Test get_connection exposes a live wrapper around flext-ldap."""
+        client._api = MagicMock()
+        client._api.connect.return_value = r[bool].ok(True)
 
-    @patch("flext_target_ldap.client.ldap3.Connection")
-    @patch("flext_target_ldap.client.ldap3.ServerPool")
-    def test_connection_error_handling(
-        self,
-        mock_pool_class: MagicMock,
-        mock_connection_class: MagicMock,
-        client: LDAPClient,
-    ) -> None:
-        """Test handling of LDAP connection errors."""
-        mock_connection_class.side_effect = RuntimeError("Connection failed")
-        mock_pool = MagicMock()
-        mock_pool_class.return_value = mock_pool
-        with pytest.raises(RuntimeError), client.get_connection():
-            pass
+        with client.get_connection() as wrapper:
+            assert wrapper.bind() is True
+            assert wrapper.bound
+
+        client._api.disconnect.assert_called_once()
 
 
-def test_connection_wrapper_unbind_cleans_state_and_disconnects() -> None:
-
-    class _ConnectResult:
-        is_success = True
-
-    fake_api = MagicMock()
-    fake_api.connect.return_value = _ConnectResult()
-    client = LDAPClient({"host": "ldap.local", "port": 389})
-    client._api = fake_api
-    wrapper = client._get_flext_ldap_wrapper()
-    wrapper.entries = [{"dn": "cn=entry"}]
-    wrapper.unbind()
-    assert wrapper.bound is False
-    assert wrapper.entries == []
-    fake_api.disconnect.assert_called_once()
+__all__ = ["TestLDAPClient"]
