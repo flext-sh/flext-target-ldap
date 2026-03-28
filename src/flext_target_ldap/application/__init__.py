@@ -26,7 +26,10 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextTargetLdapOrchestrator": ["flext_target_ldap.application.orchestrator", "FlextTargetLdapOrchestrator"],
+    "FlextTargetLdapOrchestrator": [
+        "flext_target_ldap.application.orchestrator",
+        "FlextTargetLdapOrchestrator",
+    ],
     "logger": ["flext_target_ldap.application.orchestrator", "logger"],
 }
 
