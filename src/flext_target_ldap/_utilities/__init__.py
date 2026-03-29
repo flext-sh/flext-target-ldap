@@ -34,17 +34,47 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextTargetLdapApiService": ["flext_target_ldap._utilities.services", "FlextTargetLdapApiService"],
-    "FlextTargetLdapClient": ["flext_target_ldap._utilities.client", "FlextTargetLdapClient"],
-    "FlextTargetLdapConnectionService": ["flext_target_ldap._utilities.services", "FlextTargetLdapConnectionService"],
-    "FlextTargetLdapMigrationValidator": ["flext_target_ldap._utilities.transformation", "FlextTargetLdapMigrationValidator"],
-    "FlextTargetLdapOrchestrator": ["flext_target_ldap._utilities.services", "FlextTargetLdapOrchestrator"],
-    "FlextTargetLdapSearchEntry": ["flext_target_ldap._utilities.client", "FlextTargetLdapSearchEntry"],
-    "FlextTargetLdapTransformationEngine": ["flext_target_ldap._utilities.transformation", "FlextTargetLdapTransformationEngine"],
-    "FlextTargetLdapTransformationService": ["flext_target_ldap._utilities.services", "FlextTargetLdapTransformationService"],
-    "create_default_ldap_target_config": ["flext_target_ldap._utilities.config", "create_default_ldap_target_config"],
+    "FlextTargetLdapApiService": [
+        "flext_target_ldap._utilities.services",
+        "FlextTargetLdapApiService",
+    ],
+    "FlextTargetLdapClient": [
+        "flext_target_ldap._utilities.client",
+        "FlextTargetLdapClient",
+    ],
+    "FlextTargetLdapConnectionService": [
+        "flext_target_ldap._utilities.services",
+        "FlextTargetLdapConnectionService",
+    ],
+    "FlextTargetLdapMigrationValidator": [
+        "flext_target_ldap._utilities.transformation",
+        "FlextTargetLdapMigrationValidator",
+    ],
+    "FlextTargetLdapOrchestrator": [
+        "flext_target_ldap._utilities.services",
+        "FlextTargetLdapOrchestrator",
+    ],
+    "FlextTargetLdapSearchEntry": [
+        "flext_target_ldap._utilities.client",
+        "FlextTargetLdapSearchEntry",
+    ],
+    "FlextTargetLdapTransformationEngine": [
+        "flext_target_ldap._utilities.transformation",
+        "FlextTargetLdapTransformationEngine",
+    ],
+    "FlextTargetLdapTransformationService": [
+        "flext_target_ldap._utilities.services",
+        "FlextTargetLdapTransformationService",
+    ],
+    "create_default_ldap_target_config": [
+        "flext_target_ldap._utilities.config",
+        "create_default_ldap_target_config",
+    ],
     "logger": ["flext_target_ldap._utilities.transformation", "logger"],
-    "validate_ldap_target_config": ["flext_target_ldap._utilities.config", "validate_ldap_target_config"],
+    "validate_ldap_target_config": [
+        "flext_target_ldap._utilities.config",
+        "validate_ldap_target_config",
+    ],
 }
 
 __all__ = [
