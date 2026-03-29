@@ -16,7 +16,7 @@ from typing import override
 
 from flext_core import FlextLogger, r
 
-from flext_target_ldap import p, t
+from flext_target_ldap import c, p, t
 
 logger: p.Logger = FlextLogger(__name__)
 
@@ -68,15 +68,7 @@ class FlextTargetLdapSingerTarget:
                 processed_count,
             )
             return r[Mapping[str, int | str]].ok(result)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             logger.exception("Singer message processing failed")
             return r[Mapping[str, int | str]].fail(
                 f"Message processing failed: {e}",
@@ -95,15 +87,7 @@ class FlextTargetLdapSingerTarget:
                 if field not in self.config:
                     return r[bool].fail(f"Missing required field: {field}")
             return r[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 

@@ -33,7 +33,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     Constants are accessed via constants module:
         c.Ldap.ConnectionDefaults.PORT (389)
         c.TargetLdap.Connection.LDAPS_DEFAULT_PORT (636)
-        c.DEFAULT_BATCH_SIZE
+        c.DEFAULT_SIZE
     """
 
     @override
@@ -308,15 +308,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     if not u.TargetLdap.LdapDataProcessing.split(full_dn):
                         return r[str].fail(f"Invalid DN format: {full_dn}")
                     return r[str].ok(full_dn)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     return r[str].fail(f"Error building DN: {e}")
 
             @staticmethod
@@ -350,15 +342,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         else:
                             ldap_attrs[ldap_attr] = [str(value).encode("utf-8")]
                     return r[Mapping[str, Sequence[bytes]]].ok(ldap_attrs)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     return r[Mapping[str, Sequence[bytes]]].fail(
                         f"Error converting to LDAP attributes: {e}",
                     )
@@ -447,9 +431,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
                 """
                 if record_count <= 0:
-                    return c.DEFAULT_BATCH_SIZE
+                    return c.DEFAULT_SIZE
                 calculated_size = max(1, record_count // target_batches)
-                return min(calculated_size, c.DEFAULT_BATCH_SIZE)
+                return min(calculated_size, c.DEFAULT_SIZE)
 
             @staticmethod
             def generate_ldap_stream_metadata(
@@ -628,7 +612,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         )
                 batch_size = config.get(
                     "batch_size",
-                    c.DEFAULT_BATCH_SIZE,
+                    c.DEFAULT_SIZE,
                 )
                 match batch_size:
                     case bool():

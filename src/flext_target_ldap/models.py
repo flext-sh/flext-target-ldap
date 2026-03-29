@@ -20,7 +20,7 @@ from flext_ldap import FlextLdapModels, r
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, field_validator
 
-from flext_target_ldap import t
+from flext_target_ldap import c, t
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
@@ -111,15 +111,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                             )
 
                     return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Attribute mapping validation failed: {e}",
                     )
@@ -232,15 +224,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     if errors:
                         return r[bool].fail("; ".join(errors))
                     return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     return r[bool].fail(f"LDAP entry validation failed: {e}")
 
         class TransformationResult(FlextLdapModels.Entity):
@@ -319,15 +303,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                         )
 
                     return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Transformation result validation failed: {e}",
                     )
@@ -466,15 +442,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                         )
 
                     return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Batch processing validation failed: {e}",
                     )
@@ -601,15 +569,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                         )
 
                     return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
+                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Operation statistics validation failed: {e}",
                     )

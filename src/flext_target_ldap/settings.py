@@ -50,16 +50,21 @@ class FlextTargetLdapSettings(m.Entity):
                     "use_ssl": config.get("use_ssl", False),
                     "bind_dn": config.get("bind_dn", ""),
                     "bind_password": config.get("password", ""),
-                    "timeout": config.get("timeout", c.DEFAULT_TIMEOUT_SECONDS),
+                    "timeout": config.get(
+                        "timeout",
+                        c.DEFAULT_TIMEOUT_SECONDS,
+                    ),
                 },
                 "base_dn": config.get("base_dn", ""),
                 "search_filter": config.get("search_filter", "(objectClass=*)"),
                 "search_scope": config.get("search_scope", "SUBTREE"),
                 "connect_timeout": config.get(
-                    "connect_timeout", c.DEFAULT_TIMEOUT_SECONDS // 3
+                    "connect_timeout",
+                    c.DEFAULT_TIMEOUT_SECONDS // 3,
                 ),
                 "receive_timeout": config.get(
-                    "receive_timeout", c.DEFAULT_TIMEOUT_SECONDS
+                    "receive_timeout",
+                    c.DEFAULT_TIMEOUT_SECONDS,
                 ),
                 "batch_size": config.get("batch_size", c.DEFAULT_SIZE),
                 "max_records": config.get("max_records"),

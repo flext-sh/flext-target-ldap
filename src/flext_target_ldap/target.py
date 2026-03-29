@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextContainer, FlextLogger
-from pydantic import ConfigDict, TypeAdapter, ValidationError
+from pydantic import ConfigDict, TypeAdapter
 
 from flext_target_ldap import (
     FlextTargetLdapClient,
@@ -193,16 +193,7 @@ def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
     try:
         content = Path(config_path).read_text(encoding="utf-8")
         return _CONTAINER_VALUE_MAP_ADAPTER.validate_json(content)
-    except (
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-        OSError,
-        RuntimeError,
-        ImportError,
-        ValidationError,
-    ) as e:
+    except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
         msg = f"Failed to load configuration from {config_path}: {e}"
         raise RuntimeError(msg) from e
 
@@ -213,7 +204,7 @@ def _get_ldap_api(
     """Get LDAP target client backed by flext-ldap."""
     try:
         return FlextTargetLdapClient(config=config)
-    except (RuntimeError, ValueError, TypeError, AttributeError, ImportError) as exc:
+    except c.Meltano.Singer.SAFE_EXCEPTIONS as exc:
         logger.warning(
             "Failed to initialize LDAP target client",
             error=exc,
@@ -263,15 +254,7 @@ def _process_record_message(
             else:
                 api.add_entry(dn, record)
                 seen_dns.add(dn)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             logger.warning(f"Failed to add entry {dn}, attempting modify: {e}")
             api.modify_entry(dn, record)
 
@@ -322,28 +305,10 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                         api,
                         seen_dns,
                     )
-            except (
-                ValueError,
-                TypeError,
-                KeyError,
-                AttributeError,
-                OSError,
-                RuntimeError,
-                ImportError,
-                ValidationError,
-            ):
+            except c.Meltano.Singer.SAFE_EXCEPTIONS:
                 logger.exception("Malformed input line failed")
                 raise
-    except (
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-        OSError,
-        RuntimeError,
-        ImportError,
-        ValidationError,
-    ):
+    except c.Meltano.Singer.SAFE_EXCEPTIONS:
         logger.exception("Unexpected error in CLI execution")
         raise
 
