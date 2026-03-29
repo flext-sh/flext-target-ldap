@@ -56,15 +56,6 @@ class _CompatibleEntry:
     "LDAP connection wrapper delegating to flext-ldap API."
 
 
-def _container_mapping_from_value(
-    value: t.ContainerValue | None,
-) -> Mapping[str, t.ContainerValue]:
-    if isinstance(value, dict):
-        return {str(k): v for k, v in value.items()}
-    msg = f"Expected dict for attribute mapping, got {type(value).__name__}: {value!r}"
-    raise TypeError(msg)
-
-
 def _is_container_list(
     value: t.ContainerValue | None,
 ) -> TypeIs[Sequence[t.ContainerValue]]:
