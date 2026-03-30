@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from flext_core import FlextLogger
 
-from flext_target_ldap._utilities.transformation import (
+from flext_target_ldap import (
     FlextTargetLdapMigrationValidator,
     FlextTargetLdapTransformationEngine,
 )

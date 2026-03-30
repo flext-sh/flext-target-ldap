@@ -13,14 +13,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 from flext_core import r
 
-from flext_target_ldap.sinks import (
+from flext_target_ldap import (
+    FlextTargetLdap as TargetLdap,
     FlextTargetLdapBaseSink as LdapBaseSink,
     FlextTargetLdapGroupsSink as LdapGroupsSink,
     FlextTargetLdapSink as Sink,
     FlextTargetLdapTarget as Target,
     FlextTargetLdapUsersSink as LdapUsersSink,
+    _default_cli_helper,
 )
-from flext_target_ldap.target import FlextTargetLdap as TargetLdap, _default_cli_helper
 from tests import t
 
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsModels
 
-from flext_target_ldap.models import FlextTargetLdapModels
+from flext_target_ldap import FlextTargetLdapModels
 
 
 class FlextTargetLdapTestModels(FlextTestsModels, FlextTargetLdapModels):

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_ldap._utilities.services import (
+from flext_target_ldap import (
     FlextTargetLdapApiService,
     FlextTargetLdapConnectionService,
     FlextTargetLdapTransformationService,

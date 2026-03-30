@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_ldap.protocols import p
+from flext_target_ldap import p
 
 
 class FlextTargetLdapProcessingCounters:

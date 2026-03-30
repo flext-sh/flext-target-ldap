@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_ldap._utilities.config import (
+from flext_target_ldap import (
     create_default_ldap_target_config,
     validate_ldap_target_config,
 )

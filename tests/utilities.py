@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsUtilities
 
-from flext_target_ldap.utilities import FlextTargetLdapUtilities
+from flext_target_ldap import FlextTargetLdapUtilities
 
 
 class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):

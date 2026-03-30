@@ -22,8 +22,7 @@ from flext_ldap import (
     m,
 )
 
-from flext_target_ldap.constants import c
-from flext_target_ldap.typings import t
+from flext_target_ldap import c, t
 
 logger = FlextLogger(__name__)
 

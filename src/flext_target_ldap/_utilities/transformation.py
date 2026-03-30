@@ -12,9 +12,7 @@ from typing import override
 
 from flext_core import FlextLogger, r
 
-from flext_target_ldap.constants import c
-from flext_target_ldap.models import m
-from flext_target_ldap.typings import t
+from flext_target_ldap import c, m, t
 
 logger = FlextLogger(__name__)
 

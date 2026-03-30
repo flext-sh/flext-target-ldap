@@ -8,15 +8,17 @@ from typing import TYPE_CHECKING, override
 
 from flext_core import r
 
-from flext_target_ldap._utilities.config import validate_ldap_target_config
-from flext_target_ldap.constants import c
-from flext_target_ldap.models import m
-from flext_target_ldap.settings import FlextTargetLdapSettings
-from flext_target_ldap.typings import t
-from flext_target_ldap.utilities import u
+from flext_target_ldap import (
+    FlextTargetLdapSettings,
+    c,
+    m,
+    t,
+    u,
+    validate_ldap_target_config,
+)
 
 if TYPE_CHECKING:
-    from flext_target_ldap.target import FlextTargetLdap as _FlextTargetLdap
+    from flext_target_ldap import FlextTargetLdap as _FlextTargetLdap
 
 
 def _resolve_target_class() -> type[_FlextTargetLdap]:

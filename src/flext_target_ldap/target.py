@@ -16,21 +16,19 @@ from flext_core import FlextContainer, FlextLogger
 from pydantic import ConfigDict, TypeAdapter
 
 from flext_target_ldap import (
+    FlextTargetLdapBaseSink,
     FlextTargetLdapClient,
+    FlextTargetLdapGroupsSink,
+    FlextTargetLdapOrchestrator,
+    FlextTargetLdapOrganizationalUnitsSink,
     FlextTargetLdapSettings,
+    FlextTargetLdapSink,
+    FlextTargetLdapTarget,
+    FlextTargetLdapUsersSink,
     build_singer_catalog,
     c,
     p,
     t,
-)
-from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
-from flext_target_ldap.sinks import (
-    FlextTargetLdapBaseSink,
-    FlextTargetLdapGroupsSink,
-    FlextTargetLdapOrganizationalUnitsSink,
-    FlextTargetLdapSink,
-    FlextTargetLdapTarget,
-    FlextTargetLdapUsersSink,
 )
 
 _SINGER_MSG_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(

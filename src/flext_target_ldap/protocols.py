@@ -15,8 +15,7 @@ from flext_meltano import FlextMeltanoProtocols
 from flext_target_ldap import t
 
 if TYPE_CHECKING:
-    from flext_target_ldap.models import m as _m
-    from flext_target_ldap.target import FlextTargetLdap as _FlextTargetLdap
+    from flext_target_ldap import FlextTargetLdap as _FlextTargetLdap, m as _m
 
 
 class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
@@ -32,7 +31,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     - PROVIDES: Root-level alias `p` for convenient access
 
     Usage:
-    from flext_target_ldap.protocols import p
+    from flext_target_ldap import p
 
     # Foundation protocols (inherited)
     result: p.Result[str]

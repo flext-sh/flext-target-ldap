@@ -12,12 +12,12 @@ from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger, r
 
-from flext_target_ldap._models.processing_result import (
+from flext_target_ldap import (
+    FlextTargetLdapClient,
     FlextTargetLdapProcessingCounters,
+    c,
+    t,
 )
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from flext_target_ldap.constants import c
-from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapSink:

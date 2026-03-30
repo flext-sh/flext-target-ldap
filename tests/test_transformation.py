@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from flext_target_ldap.models import m
-from flext_target_ldap.transformation import (
+from flext_target_ldap import (
     DataTransformationEngine,
     MigrationValidator,
+    m,
 )
 from tests import t
 

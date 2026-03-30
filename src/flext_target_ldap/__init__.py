@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
     from flext_target_ldap import _models, _utilities, application, patterns, singer
     from flext_target_ldap.__version__ import (
-        __all__,
         __author__,
         __author_email__,
         __description__,
@@ -248,7 +247,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "FlextTargetLdapValidationError",
     ],
     "MigrationValidator": ["flext_target_ldap.transformation", "MigrationValidator"],
-    "__all__": ["flext_target_ldap.__version__", "__all__"],
     "__author__": ["flext_target_ldap.__version__", "__author__"],
     "__author_email__": ["flext_target_ldap.__version__", "__author_email__"],
     "__description__": ["flext_target_ldap.__version__", "__description__"],
@@ -328,7 +326,6 @@ __all__ = [
     "FlextTargetLdapUtilities",
     "FlextTargetLdapValidationError",
     "MigrationValidator",
-    "__all__",
     "__author__",
     "__author_email__",
     "__description__",
