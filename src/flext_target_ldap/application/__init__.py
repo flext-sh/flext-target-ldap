@@ -20,6 +20,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from flext_target_ldap.application import orchestrator
     from flext_target_ldap.application.orchestrator import (
         FlextTargetLdapOrchestrator,
         logger,
@@ -31,11 +32,13 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "FlextTargetLdapOrchestrator",
     ],
     "logger": ["flext_target_ldap.application.orchestrator", "logger"],
+    "orchestrator": ["flext_target_ldap.application.orchestrator", ""],
 }
 
 __all__ = [
     "FlextTargetLdapOrchestrator",
     "logger",
+    "orchestrator",
 ]
 
 

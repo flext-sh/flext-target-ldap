@@ -13,6 +13,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from flext_target_ldap._models import processing_result, sinks
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
     )
@@ -58,6 +59,8 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "FlextTargetLdapUsersSink",
     ],
     "logger": ["flext_target_ldap._models.sinks", "logger"],
+    "processing_result": ["flext_target_ldap._models.processing_result", ""],
+    "sinks": ["flext_target_ldap._models.sinks", ""],
 }
 
 __all__ = [
@@ -70,6 +73,8 @@ __all__ = [
     "FlextTargetLdapTarget",
     "FlextTargetLdapUsersSink",
     "logger",
+    "processing_result",
+    "sinks",
 ]
 
 

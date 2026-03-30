@@ -18,6 +18,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from flext_target_ldap.patterns import ldap_patterns
     from flext_target_ldap.patterns.ldap_patterns import (
         FlextTargetLdapDataTransformer,
         FlextTargetLdapEntryManager,
@@ -43,6 +44,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_ldap.patterns.ldap_patterns",
         "FlextTargetLdapTypeConverter",
     ],
+    "ldap_patterns": ["flext_target_ldap.patterns.ldap_patterns", ""],
     "logger": ["flext_target_ldap.patterns.ldap_patterns", "logger"],
 }
 
@@ -51,6 +53,7 @@ __all__ = [
     "FlextTargetLdapEntryManager",
     "FlextTargetLdapSchemaMapper",
     "FlextTargetLdapTypeConverter",
+    "ldap_patterns",
     "logger",
 ]
 

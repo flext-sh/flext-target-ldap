@@ -13,6 +13,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from flext_target_ldap._utilities import client, config, services, transformation
     from flext_target_ldap._utilities.client import (
         FlextTargetLdapClient,
         FlextTargetLdapSearchEntry,
@@ -66,11 +67,15 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_ldap._utilities.services",
         "FlextTargetLdapTransformationService",
     ],
+    "client": ["flext_target_ldap._utilities.client", ""],
+    "config": ["flext_target_ldap._utilities.config", ""],
     "create_default_ldap_target_config": [
         "flext_target_ldap._utilities.config",
         "create_default_ldap_target_config",
     ],
     "logger": ["flext_target_ldap._utilities.transformation", "logger"],
+    "services": ["flext_target_ldap._utilities.services", ""],
+    "transformation": ["flext_target_ldap._utilities.transformation", ""],
     "validate_ldap_target_config": [
         "flext_target_ldap._utilities.config",
         "validate_ldap_target_config",
@@ -86,8 +91,12 @@ __all__ = [
     "FlextTargetLdapSearchEntry",
     "FlextTargetLdapTransformationEngine",
     "FlextTargetLdapTransformationService",
+    "client",
+    "config",
     "create_default_ldap_target_config",
     "logger",
+    "services",
+    "transformation",
     "validate_ldap_target_config",
 ]
 
