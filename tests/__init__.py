@@ -10,83 +10,84 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
+from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_core import FlextTypes
     from flext_tests import d, e, h, r, s, x
 
     from tests import (
-        conftest,
-        constants,
-        models,
-        protocols,
-        test_client,
-        test_integration,
-        test_sinks,
-        test_target,
-        test_transformation,
-        typings,
-        utilities,
+        conftest as conftest,
+        constants as constants,
+        models as models,
+        protocols as protocols,
+        test_client as test_client,
+        test_integration as test_integration,
+        test_sinks as test_sinks,
+        test_target as test_target,
+        test_transformation as test_transformation,
+        typings as typings,
+        utilities as utilities,
     )
     from tests.conftest import (
-        mock_ldap_client,
-        mock_ldap_config,
-        mock_ldap_config_internal,
-        mock_target,
-        sample_group_record,
-        sample_ou_record,
-        sample_user_record,
-        shared_ldap_container,
-        singer_message_record,
-        singer_message_schema,
-        singer_message_state,
+        mock_ldap_client as mock_ldap_client,
+        mock_ldap_config as mock_ldap_config,
+        mock_ldap_config_internal as mock_ldap_config_internal,
+        mock_target as mock_target,
+        sample_group_record as sample_group_record,
+        sample_ou_record as sample_ou_record,
+        sample_user_record as sample_user_record,
+        shared_ldap_container as shared_ldap_container,
+        singer_message_record as singer_message_record,
+        singer_message_schema as singer_message_schema,
+        singer_message_state as singer_message_state,
     )
     from tests.constants import (
-        FlextTargetLdapTestConstants,
+        FlextTargetLdapTestConstants as FlextTargetLdapTestConstants,
         FlextTargetLdapTestConstants as c,
     )
     from tests.models import (
-        FlextTargetLdapTestModels,
+        FlextTargetLdapTestModels as FlextTargetLdapTestModels,
         FlextTargetLdapTestModels as m,
-        tm,
+        tm as tm,
     )
     from tests.protocols import (
-        FlextTargetLdapTestProtocols,
+        FlextTargetLdapTestProtocols as FlextTargetLdapTestProtocols,
         FlextTargetLdapTestProtocols as p,
     )
-    from tests.test_client import TestLDAPClient
-    from tests.test_integration import TestTargetLDAPIntegration
+    from tests.test_client import TestLDAPClient as TestLDAPClient
+    from tests.test_integration import (
+        TestTargetLDAPIntegration as TestTargetLDAPIntegration,
+    )
     from tests.test_sinks import (
-        TestGroupsSink,
-        TestLDAPBaseSink,
-        TestLDAPGenericSink,
-        TestOrganizationalUnitsSink,
-        TestUsersSink,
+        TestGroupsSink as TestGroupsSink,
+        TestLDAPBaseSink as TestLDAPBaseSink,
+        TestLDAPGenericSink as TestLDAPGenericSink,
+        TestOrganizationalUnitsSink as TestOrganizationalUnitsSink,
+        TestUsersSink as TestUsersSink,
     )
     from tests.test_target import (
-        TestTargetLDAPUnit,
-        test_default_cli_helper_logs_with_flext_logger,
-        test_sink_process_record_delegates_to_target_handler,
+        TestTargetLDAPUnit as TestTargetLDAPUnit,
+        test_default_cli_helper_logs_with_flext_logger as test_default_cli_helper_logs_with_flext_logger,
+        test_sink_process_record_delegates_to_target_handler as test_sink_process_record_delegates_to_target_handler,
     )
     from tests.test_transformation import (
-        EXPECTED_DATA_COUNT,
-        TestDataTransformationEngine,
-        TestIntegratedTransformation,
-        TestMigrationValidator,
-        TestTransformationRule,
-        TransformationRule,
+        EXPECTED_DATA_COUNT as EXPECTED_DATA_COUNT,
+        TestDataTransformationEngine as TestDataTransformationEngine,
+        TestIntegratedTransformation as TestIntegratedTransformation,
+        TestMigrationValidator as TestMigrationValidator,
+        TestTransformationRule as TestTransformationRule,
+        TransformationRule as TransformationRule,
     )
     from tests.typings import (
-        FlextTargetLdapTestTypes,
+        FlextTargetLdapTestTypes as FlextTargetLdapTestTypes,
         FlextTargetLdapTestTypes as t,
-        tt,
+        tt as tt,
     )
     from tests.utilities import (
-        FlextTargetLdapTestUtilities,
+        FlextTargetLdapTestUtilities as FlextTargetLdapTestUtilities,
         FlextTargetLdapTestUtilities as u,
     )
 
@@ -97,24 +98,15 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "FlextTargetLdapTestProtocols": ["tests.protocols", "FlextTargetLdapTestProtocols"],
     "FlextTargetLdapTestTypes": ["tests.typings", "FlextTargetLdapTestTypes"],
     "FlextTargetLdapTestUtilities": ["tests.utilities", "FlextTargetLdapTestUtilities"],
-    "TestDataTransformationEngine": [
-        "tests.test_transformation",
-        "TestDataTransformationEngine",
-    ],
+    "TestDataTransformationEngine": ["tests.test_transformation", "TestDataTransformationEngine"],
     "TestGroupsSink": ["tests.test_sinks", "TestGroupsSink"],
-    "TestIntegratedTransformation": [
-        "tests.test_transformation",
-        "TestIntegratedTransformation",
-    ],
+    "TestIntegratedTransformation": ["tests.test_transformation", "TestIntegratedTransformation"],
     "TestLDAPBaseSink": ["tests.test_sinks", "TestLDAPBaseSink"],
     "TestLDAPClient": ["tests.test_client", "TestLDAPClient"],
     "TestLDAPGenericSink": ["tests.test_sinks", "TestLDAPGenericSink"],
     "TestMigrationValidator": ["tests.test_transformation", "TestMigrationValidator"],
     "TestOrganizationalUnitsSink": ["tests.test_sinks", "TestOrganizationalUnitsSink"],
-    "TestTargetLDAPIntegration": [
-        "tests.test_integration",
-        "TestTargetLDAPIntegration",
-    ],
+    "TestTargetLDAPIntegration": ["tests.test_integration", "TestTargetLDAPIntegration"],
     "TestTargetLDAPUnit": ["tests.test_target", "TestTargetLDAPUnit"],
     "TestTransformationRule": ["tests.test_transformation", "TestTransformationRule"],
     "TestUsersSink": ["tests.test_sinks", "TestUsersSink"],
@@ -144,15 +136,9 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "singer_message_state": ["tests.conftest", "singer_message_state"],
     "t": ["tests.typings", "FlextTargetLdapTestTypes"],
     "test_client": ["tests.test_client", ""],
-    "test_default_cli_helper_logs_with_flext_logger": [
-        "tests.test_target",
-        "test_default_cli_helper_logs_with_flext_logger",
-    ],
+    "test_default_cli_helper_logs_with_flext_logger": ["tests.test_target", "test_default_cli_helper_logs_with_flext_logger"],
     "test_integration": ["tests.test_integration", ""],
-    "test_sink_process_record_delegates_to_target_handler": [
-        "tests.test_target",
-        "test_sink_process_record_delegates_to_target_handler",
-    ],
+    "test_sink_process_record_delegates_to_target_handler": ["tests.test_target", "test_sink_process_record_delegates_to_target_handler"],
     "test_sinks": ["tests.test_sinks", ""],
     "test_target": ["tests.test_target", ""],
     "test_transformation": ["tests.test_transformation", ""],
@@ -164,7 +150,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "x": ["flext_tests", "x"],
 }
 
-__all__ = [
+_EXPORTS: Sequence[str] = [
     "EXPECTED_DATA_COUNT",
     "FlextTargetLdapTestConstants",
     "FlextTargetLdapTestModels",
@@ -224,41 +210,4 @@ __all__ = [
 ]
 
 
-_LAZY_CACHE: MutableMapping[str, FlextTypes.ModuleExport] = {}
-
-
-def __getattr__(name: str) -> FlextTypes.ModuleExport:
-    """Lazy-load module attributes on first access (PEP 562).
-
-    A local cache ``_LAZY_CACHE`` persists resolved objects across repeated
-    accesses during process lifetime.
-
-    Args:
-        name: Attribute name requested by dir()/import.
-
-    Returns:
-        Lazy-loaded module export type.
-
-    Raises:
-        AttributeError: If attribute not registered.
-
-    """
-    if name in _LAZY_CACHE:
-        return _LAZY_CACHE[name]
-
-    value = lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
-    _LAZY_CACHE[name] = value
-    return value
-
-
-def __dir__() -> Sequence[str]:
-    """Return list of available attributes for dir() and autocomplete.
-
-    Returns:
-        List of public names from module exports.
-
-    """
-    return sorted(__all__)
-
-
-cleanup_submodule_namespace(__name__, _LAZY_IMPORTS)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, _EXPORTS)
