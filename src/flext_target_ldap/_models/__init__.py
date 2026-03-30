@@ -11,72 +11,23 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_target_ldap._models import (
-        processing_result as processing_result,
-        sinks as sinks,
-    )
-    from flext_target_ldap._models.processing_result import (
-        FlextTargetLdapProcessingCounters as FlextTargetLdapProcessingCounters,
-    )
-    from flext_target_ldap._models.sinks import (
-        FlextTargetLdapBaseSink as FlextTargetLdapBaseSink,
-        FlextTargetLdapGroupsSink as FlextTargetLdapGroupsSink,
-        FlextTargetLdapOrganizationalUnitsSink as FlextTargetLdapOrganizationalUnitsSink,
-        FlextTargetLdapProcessingResult as FlextTargetLdapProcessingResult,
-        FlextTargetLdapSink as FlextTargetLdapSink,
-        FlextTargetLdapTarget as FlextTargetLdapTarget,
-        FlextTargetLdapUsersSink as FlextTargetLdapUsersSink,
-        logger as logger,
-    )
+    from flext_target_ldap._models import processing_result, sinks
+    from flext_target_ldap._models.processing_result import *
+    from flext_target_ldap._models.sinks import *
 
-_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextTargetLdapBaseSink": [
-        "flext_target_ldap._models.sinks",
-        "FlextTargetLdapBaseSink",
-    ],
-    "FlextTargetLdapGroupsSink": [
-        "flext_target_ldap._models.sinks",
-        "FlextTargetLdapGroupsSink",
-    ],
-    "FlextTargetLdapOrganizationalUnitsSink": [
-        "flext_target_ldap._models.sinks",
-        "FlextTargetLdapOrganizationalUnitsSink",
-    ],
-    "FlextTargetLdapProcessingCounters": [
-        "flext_target_ldap._models.processing_result",
-        "FlextTargetLdapProcessingCounters",
-    ],
-    "FlextTargetLdapProcessingResult": [
-        "flext_target_ldap._models.sinks",
-        "FlextTargetLdapProcessingResult",
-    ],
-    "FlextTargetLdapSink": ["flext_target_ldap._models.sinks", "FlextTargetLdapSink"],
-    "FlextTargetLdapTarget": [
-        "flext_target_ldap._models.sinks",
-        "FlextTargetLdapTarget",
-    ],
-    "FlextTargetLdapUsersSink": [
-        "flext_target_ldap._models.sinks",
-        "FlextTargetLdapUsersSink",
-    ],
-    "logger": ["flext_target_ldap._models.sinks", "logger"],
-    "processing_result": ["flext_target_ldap._models.processing_result", ""],
-    "sinks": ["flext_target_ldap._models.sinks", ""],
+_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+    "FlextTargetLdapBaseSink": "flext_target_ldap._models.sinks",
+    "FlextTargetLdapGroupsSink": "flext_target_ldap._models.sinks",
+    "FlextTargetLdapOrganizationalUnitsSink": "flext_target_ldap._models.sinks",
+    "FlextTargetLdapProcessingCounters": "flext_target_ldap._models.processing_result",
+    "FlextTargetLdapProcessingResult": "flext_target_ldap._models.sinks",
+    "FlextTargetLdapSink": "flext_target_ldap._models.sinks",
+    "FlextTargetLdapTarget": "flext_target_ldap._models.sinks",
+    "FlextTargetLdapUsersSink": "flext_target_ldap._models.sinks",
+    "logger": "flext_target_ldap._models.sinks",
+    "processing_result": "flext_target_ldap._models.processing_result",
+    "sinks": "flext_target_ldap._models.sinks",
 }
 
-_EXPORTS: Sequence[str] = [
-    "FlextTargetLdapBaseSink",
-    "FlextTargetLdapGroupsSink",
-    "FlextTargetLdapOrganizationalUnitsSink",
-    "FlextTargetLdapProcessingCounters",
-    "FlextTargetLdapProcessingResult",
-    "FlextTargetLdapSink",
-    "FlextTargetLdapTarget",
-    "FlextTargetLdapUsersSink",
-    "logger",
-    "processing_result",
-    "sinks",
-]
 
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, _EXPORTS)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, sorted(_LAZY_IMPORTS))

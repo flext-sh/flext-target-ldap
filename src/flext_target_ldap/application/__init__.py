@@ -18,26 +18,14 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_target_ldap.application import orchestrator as orchestrator
-    from flext_target_ldap.application.orchestrator import (
-        FlextTargetLdapOrchestrator as FlextTargetLdapOrchestrator,
-        logger as logger,
-    )
+    from flext_target_ldap.application import orchestrator
+    from flext_target_ldap.application.orchestrator import *
 
-_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextTargetLdapOrchestrator": [
-        "flext_target_ldap.application.orchestrator",
-        "FlextTargetLdapOrchestrator",
-    ],
-    "logger": ["flext_target_ldap.application.orchestrator", "logger"],
-    "orchestrator": ["flext_target_ldap.application.orchestrator", ""],
+_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+    "FlextTargetLdapOrchestrator": "flext_target_ldap.application.orchestrator",
+    "logger": "flext_target_ldap.application.orchestrator",
+    "orchestrator": "flext_target_ldap.application.orchestrator",
 }
 
-_EXPORTS: Sequence[str] = [
-    "FlextTargetLdapOrchestrator",
-    "logger",
-    "orchestrator",
-]
 
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, _EXPORTS)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, sorted(_LAZY_IMPORTS))
