@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 def _resolve_target_class() -> type[_FlextTargetLdap]:
     """Resolve FlextTargetLdap at runtime to avoid circular import."""
-    import flext_target_ldap  # noqa: PLC0415
+    import flext_target_ldap
 
     return flext_target_ldap.FlextTargetLdap
 
