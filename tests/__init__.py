@@ -19,10 +19,45 @@ if _TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_tests import d, e, h, r, s, x
 
-    from tests.conftest import *
-    from tests.constants import *
-    from tests.models import *
-    from tests.protocols import *
+    from tests import (
+        conftest,
+        constants,
+        models,
+        protocols,
+        test_client,
+        test_integration,
+        test_sinks,
+        test_target,
+        test_transformation,
+        typings,
+        utilities,
+    )
+    from tests.conftest import (
+        mock_ldap_client,
+        mock_ldap_config,
+        mock_ldap_config_internal,
+        mock_target,
+        sample_group_record,
+        sample_ou_record,
+        sample_user_record,
+        shared_ldap_container,
+        singer_message_record,
+        singer_message_schema,
+        singer_message_state,
+    )
+    from tests.constants import (
+        FlextTargetLdapTestConstants,
+        FlextTargetLdapTestConstants as c,
+    )
+    from tests.models import (
+        FlextTargetLdapTestModels,
+        FlextTargetLdapTestModels as m,
+        tm,
+    )
+    from tests.protocols import (
+        FlextTargetLdapTestProtocols,
+        FlextTargetLdapTestProtocols as p,
+    )
     from tests.test_client import TestLDAPClient
     from tests.test_integration import TestTargetLDAPIntegration
     from tests.test_sinks import (
@@ -45,8 +80,15 @@ if _TYPE_CHECKING:
         TestTransformationRule,
         TransformationRule,
     )
-    from tests.typings import *
-    from tests.utilities import *
+    from tests.typings import (
+        FlextTargetLdapTestTypes,
+        FlextTargetLdapTestTypes as t,
+        tt,
+    )
+    from tests.utilities import (
+        FlextTargetLdapTestUtilities,
+        FlextTargetLdapTestUtilities as u,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "EXPECTED_DATA_COUNT": "tests.test_transformation",

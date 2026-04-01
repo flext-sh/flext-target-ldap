@@ -18,7 +18,14 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from flext_target_ldap.patterns.ldap_patterns import *
+    from flext_target_ldap.patterns import ldap_patterns
+    from flext_target_ldap.patterns.ldap_patterns import (
+        FlextTargetLdapDataTransformer,
+        FlextTargetLdapEntryManager,
+        FlextTargetLdapSchemaMapper,
+        FlextTargetLdapTypeConverter,
+        logger,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "FlextTargetLdapDataTransformer": "flext_target_ldap.patterns.ldap_patterns",

@@ -13,10 +13,26 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from flext_target_ldap._utilities.client import *
-    from flext_target_ldap._utilities.config import *
-    from flext_target_ldap._utilities.services import *
-    from flext_target_ldap._utilities.transformation import *
+    from flext_target_ldap._utilities import client, config, services, transformation
+    from flext_target_ldap._utilities.client import (
+        FlextTargetLdapClient,
+        FlextTargetLdapSearchEntry,
+    )
+    from flext_target_ldap._utilities.config import (
+        create_default_ldap_target_config,
+        validate_ldap_target_config,
+    )
+    from flext_target_ldap._utilities.services import (
+        FlextTargetLdapApiService,
+        FlextTargetLdapConnectionService,
+        FlextTargetLdapOrchestrator,
+        FlextTargetLdapTransformationService,
+    )
+    from flext_target_ldap._utilities.transformation import (
+        FlextTargetLdapMigrationValidator,
+        FlextTargetLdapTransformationEngine,
+        logger,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "FlextTargetLdapApiService": "flext_target_ldap._utilities.services",

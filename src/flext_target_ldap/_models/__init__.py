@@ -13,8 +13,20 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from flext_target_ldap._models.processing_result import *
-    from flext_target_ldap._models.sinks import *
+    from flext_target_ldap._models import processing_result, sinks
+    from flext_target_ldap._models.processing_result import (
+        FlextTargetLdapProcessingCounters,
+    )
+    from flext_target_ldap._models.sinks import (
+        FlextTargetLdapBaseSink,
+        FlextTargetLdapGroupsSink,
+        FlextTargetLdapOrganizationalUnitsSink,
+        FlextTargetLdapProcessingResult,
+        FlextTargetLdapSink,
+        FlextTargetLdapTarget,
+        FlextTargetLdapUsersSink,
+        logger,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "FlextTargetLdapBaseSink": "flext_target_ldap._models.sinks",
