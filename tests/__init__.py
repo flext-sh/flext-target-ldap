@@ -23,11 +23,28 @@ if _TYPE_CHECKING:
     from tests.constants import *
     from tests.models import *
     from tests.protocols import *
-    from tests.test_client import *
-    from tests.test_integration import *
-    from tests.test_sinks import *
-    from tests.test_target import *
-    from tests.test_transformation import *
+    from tests.test_client import TestLDAPClient
+    from tests.test_integration import TestTargetLDAPIntegration
+    from tests.test_sinks import (
+        TestGroupsSink,
+        TestLDAPBaseSink,
+        TestLDAPGenericSink,
+        TestOrganizationalUnitsSink,
+        TestUsersSink,
+    )
+    from tests.test_target import (
+        TestTargetLDAPUnit,
+        test_default_cli_helper_logs_with_flext_logger,
+        test_sink_process_record_delegates_to_target_handler,
+    )
+    from tests.test_transformation import (
+        EXPECTED_DATA_COUNT,
+        TestDataTransformationEngine,
+        TestIntegratedTransformation,
+        TestMigrationValidator,
+        TestTransformationRule,
+        TransformationRule,
+    )
     from tests.typings import *
     from tests.utilities import *
 
