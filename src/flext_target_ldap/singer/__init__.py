@@ -14,6 +14,8 @@ from typing import TYPE_CHECKING as _TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
+    from flext_core import FlextTypes
+
     from flext_target_ldap.singer.catalog import *
     from flext_target_ldap.singer.stream import *
     from flext_target_ldap.singer.target import *
