@@ -24,7 +24,6 @@ if _TYPE_CHECKING:
         FlextTargetLdapSink,
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
-        logger,
     )
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
@@ -36,7 +35,6 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapSink": "flext_target_ldap._models.sinks",
     "FlextTargetLdapTarget": "flext_target_ldap._models.sinks",
     "FlextTargetLdapUsersSink": "flext_target_ldap._models.sinks",
-    "logger": "flext_target_ldap._models.sinks",
     "processing_result": "flext_target_ldap._models.processing_result",
     "sinks": "flext_target_ldap._models.sinks",
 }

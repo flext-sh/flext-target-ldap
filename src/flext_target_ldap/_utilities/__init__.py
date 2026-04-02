@@ -39,7 +39,6 @@ if _TYPE_CHECKING:
     from flext_target_ldap._utilities.transformation import (
         FlextTargetLdapMigrationValidator,
         FlextTargetLdapTransformationEngine,
-        logger,
     )
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
@@ -55,7 +54,6 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "client": "flext_target_ldap._utilities.client",
     "config": "flext_target_ldap._utilities.config",
     "create_default_ldap_target_config": "flext_target_ldap._utilities.config",
-    "logger": "flext_target_ldap._utilities.transformation",
     "service_runtime": "flext_target_ldap._utilities.service_runtime",
     "services": "flext_target_ldap._utilities.services",
     "transformation": "flext_target_ldap._utilities.transformation",

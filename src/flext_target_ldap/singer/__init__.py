@@ -21,7 +21,7 @@ if _TYPE_CHECKING:
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
     )
-    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget, logger
+    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapCatalogManager": "flext_target_ldap.singer.catalog",
@@ -29,7 +29,6 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapStreamProcessingStats": "flext_target_ldap.singer.stream",
     "FlextTargetLdapStreamProcessor": "flext_target_ldap.singer.stream",
     "catalog": "flext_target_ldap.singer.catalog",
-    "logger": "flext_target_ldap.singer.target",
     "stream": "flext_target_ldap.singer.stream",
     "target": "flext_target_ldap.singer.target",
 }

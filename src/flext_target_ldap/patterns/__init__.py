@@ -23,7 +23,6 @@ if _TYPE_CHECKING:
         FlextTargetLdapEntryManager,
         FlextTargetLdapSchemaMapper,
         FlextTargetLdapTypeConverter,
-        logger,
     )
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
@@ -32,7 +31,6 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapSchemaMapper": "flext_target_ldap.patterns.ldap_patterns",
     "FlextTargetLdapTypeConverter": "flext_target_ldap.patterns.ldap_patterns",
     "ldap_patterns": "flext_target_ldap.patterns.ldap_patterns",
-    "logger": "flext_target_ldap.patterns.ldap_patterns",
 }
 
 
