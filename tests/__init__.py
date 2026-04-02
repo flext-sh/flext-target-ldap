@@ -78,7 +78,6 @@ if _TYPE_CHECKING:
         TestIntegratedTransformation,
         TestMigrationValidator,
         TestTransformationRule,
-        TransformationRule,
     )
     from tests.typings import (
         FlextTargetLdapTestTypes,
@@ -109,7 +108,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "TestTargetLDAPUnit": "tests.test_target",
     "TestTransformationRule": "tests.test_transformation",
     "TestUsersSink": "tests.test_sinks",
-    "TransformationRule": "tests.test_transformation",
     "c": ("tests.constants", "FlextTargetLdapTestConstants"),
     "conftest": "tests.conftest",
     "constants": "tests.constants",

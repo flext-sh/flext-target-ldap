@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from flext_target_ldap import _target_ldap_flext_cli
+from flext_target_ldap.target import _target_ldap_flext_cli
 from tests import t
 
 

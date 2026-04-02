@@ -28,6 +28,7 @@ if _TYPE_CHECKING:
     from flext_target_ldap import (
         _models,
         _utilities,
+        api,
         application,
         catalog,
         constants,
@@ -71,6 +72,7 @@ if _TYPE_CHECKING:
         services,
         validate_ldap_target_config,
     )
+    from flext_target_ldap.api import FlextTargetLdapService
     from flext_target_ldap.application import FlextTargetLdapOrchestrator, orchestrator
     from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.constants import (
@@ -142,6 +144,7 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "FlextTargetLdapModels": "flext_target_ldap.models",
         "FlextTargetLdapProcessingError": "flext_target_ldap.errors",
         "FlextTargetLdapProtocols": "flext_target_ldap.protocols",
+        "FlextTargetLdapService": "flext_target_ldap.api",
         "FlextTargetLdapSettings": "flext_target_ldap.settings",
         "FlextTargetLdapTimeoutError": "flext_target_ldap.errors",
         "FlextTargetLdapTypes": "flext_target_ldap.typings",
@@ -150,6 +153,7 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "MigrationValidator": "flext_target_ldap.transformation",
         "_models": "flext_target_ldap._models",
         "_utilities": "flext_target_ldap._utilities",
+        "api": "flext_target_ldap.api",
         "application": "flext_target_ldap.application",
         "build_singer_catalog": "flext_target_ldap.catalog",
         "c": ("flext_target_ldap.constants", "FlextTargetLdapConstants"),

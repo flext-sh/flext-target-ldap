@@ -12,11 +12,8 @@ from collections.abc import Mapping, Sequence
 from flext_target_ldap import (
     DataTransformationEngine,
     MigrationValidator,
-    m,
 )
-from tests import t
-
-TransformationRule = m.TargetLdap.TransformationRule
+from tests import m, t
 
 EXPECTED_DATA_COUNT = 3
 
@@ -27,7 +24,13 @@ class TestDataTransformationEngine:
     def test_initialization(self) -> None:
         """Test method."""
         "Test initialization function."
-        rules = [TransformationRule(name="test", pattern="test", replacement="test")]
+        rules = [
+            m.TargetLdap.TransformationRule(
+                name="test",
+                pattern="test",
+                replacement="test",
+            )
+        ]
         engine = DataTransformationEngine(rules)
         if len(engine.rules) != 1:
             msg: str = f"Expected {1}, got {len(engine.rules)}"
@@ -37,7 +40,7 @@ class TestDataTransformationEngine:
     def test_transform_oracle_dn_structure(self) -> None:
         """Test method."""
         "Test transform oracle dn structure function."
-        rule = TransformationRule(
+        rule = m.TargetLdap.TransformationRule(
             name="oracle_dn_structure_transform",
             pattern="dc=invaliddc",
             replacement="dc=network,dc=invaliddc",
@@ -63,7 +66,7 @@ class TestDataTransformationEngine:
     def test_transform_oracle_objectclasses(self) -> None:
         """Test method."""
         "Test transform oracle objectclasses function."
-        rule = TransformationRule(
+        rule = m.TargetLdap.TransformationRule(
             name="oracle_objectclass_conversion",
             pattern="orclUser",
             replacement="inetOrgPerson",
@@ -88,12 +91,12 @@ class TestDataTransformationEngine:
         """Test method."""
         "Test transform oracle attributes function."
         rules = [
-            TransformationRule(
+            m.TargetLdap.TransformationRule(
                 name="oracle_user_prefix_removal",
                 pattern="orcl",
                 replacement="",
             ),
-            TransformationRule(
+            m.TargetLdap.TransformationRule(
                 name="normalize_case",
                 pattern="User",
                 replacement="user",
@@ -122,7 +125,7 @@ class TestDataTransformationEngine:
     def test_remove_empty_attributes(self) -> None:
         """Test method."""
         "Test remove empty attributes function."
-        rule = TransformationRule(
+        rule = m.TargetLdap.TransformationRule(
             name="clean_empty_attributes",
             pattern="empty",
             replacement="",
@@ -145,7 +148,7 @@ class TestDataTransformationEngine:
     def test_dry_run_transformation(self) -> None:
         """Test method."""
         "Test dry run transformation function."
-        rule = TransformationRule(
+        rule = m.TargetLdap.TransformationRule(
             name="test_rule",
             pattern="orclUser",
             replacement="inetOrgPerson",
@@ -167,7 +170,7 @@ class TestDataTransformationEngine:
     def test_transformation_statistics(self) -> None:
         """Test method."""
         "Test transformation statistics function."
-        rule = TransformationRule(
+        rule = m.TargetLdap.TransformationRule(
             name="orcl_to_inetorgperson",
             pattern="orclUser",
             replacement="inetOrgPerson",
@@ -289,7 +292,7 @@ class TestTransformationRule:
     def test_transformation_rule_creation(self) -> None:
         """Test method."""
         "Test transformation rule creation function."
-        rule = TransformationRule(
+        rule = m.TargetLdap.TransformationRule(
             name="test_rule",
             pattern="orclUser",
             replacement="person",
@@ -314,12 +317,12 @@ class TestIntegratedTransformation:
         """Test method."""
         "Test full oracle migration workflow function."
         rules = [
-            TransformationRule(
+            m.TargetLdap.TransformationRule(
                 name="oracle_dn_transform",
                 pattern="dc=invaliddc",
                 replacement="dc=network,dc=invaliddc",
             ),
-            TransformationRule(
+            m.TargetLdap.TransformationRule(
                 name="oracle_objectclass",
                 pattern="orclUser",
                 replacement="inetOrgPerson",
@@ -365,7 +368,7 @@ class TestIntegratedTransformation:
     def test_classification_and_transformation_integration(self) -> None:
         """Test method."""
         "Test classification and transformation integration function."
-        rule = TransformationRule(
+        rule = m.TargetLdap.TransformationRule(
             name="general_transform",
             pattern="orclUser",
             replacement="inetOrgPerson",
