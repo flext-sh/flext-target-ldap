@@ -39,8 +39,8 @@ class FlextTargetLdapSink:
 
     def process_record(
         self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
+        _record: Mapping[str, t.NormalizedValue],
+        _context: Mapping[str, t.NormalizedValue],
     ) -> r[bool]:
         """Process a record using the target."""
         try:
@@ -90,7 +90,7 @@ logger = FlextLogger(__name__)
 
 
 def _is_container_list(
-    value: t.ContainerValue | None,
+    value: t.NormalizedValue,
 ) -> TypeIs[Sequence[t.ContainerValue]]:
     return isinstance(value, list)
 
@@ -206,8 +206,8 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
+        _record: Mapping[str, t.NormalizedValue],
+        _context: Mapping[str, t.NormalizedValue],
     ) -> r[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
@@ -317,7 +317,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
 
     def build_user_attributes(
         self,
-        record: Mapping[str, t.ContainerValue],
+        record: Mapping[str, t.NormalizedValue],
     ) -> MutableMapping[str, t.ContainerValue]:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
@@ -380,8 +380,8 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
+        _record: Mapping[str, t.NormalizedValue],
+        _context: Mapping[str, t.NormalizedValue],
     ) -> r[bool]:
         """Process a user record."""
         if not self.client:
@@ -491,8 +491,8 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
+        _record: Mapping[str, t.NormalizedValue],
+        _context: Mapping[str, t.NormalizedValue],
     ) -> r[bool]:
         """Process a group record."""
         if not self.client:
@@ -554,7 +554,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
 
     def _build_group_attributes(
         self,
-        record: Mapping[str, t.ContainerValue],
+        record: Mapping[str, t.NormalizedValue],
     ) -> MutableMapping[str, t.ContainerValue]:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
@@ -608,8 +608,8 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.ContainerValue],
-        _context: Mapping[str, t.ContainerValue],
+        _record: Mapping[str, t.NormalizedValue],
+        _context: Mapping[str, t.NormalizedValue],
     ) -> r[bool]:
         """Process an organizational unit record."""
         if not self.client:
@@ -660,7 +660,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: Mapping[str, t.ContainerValue],
+        record: Mapping[str, t.NormalizedValue],
     ) -> MutableMapping[str, t.ContainerValue]:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(

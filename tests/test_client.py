@@ -176,18 +176,28 @@ class TestLDAPClient:
         assert entry.dn == "uid=test,dc=test,dc=com"
         assert entry.attributes == {"cn": ["Test User"]}
 
-    def test_get_connection_returns_real_wrapper(
+    def test_search_entry_disconnects_after_search(
         self,
         client: FlextTargetLdapClient,
     ) -> None:
-        """Test get_connection exposes a live wrapper around flext-ldap."""
+        """Test search_entry closes the delegated LDAP session."""
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
+        client._api.search.return_value = MagicMock(
+            is_success=True,
+            value=MagicMock(
+                entries=[
+                    {
+                        "dn": "uid=test,dc=test,dc=com",
+                        "cn": ["Test User"],
+                    },
+                ],
+            ),
+        )
 
-        with client.get_connection() as wrapper:
-            assert wrapper.bind() is True
-            assert wrapper.bound
+        result = client.search_entry("dc=test,dc=com")
 
+        assert result.is_success
         client._api.disconnect.assert_called_once()
 
 

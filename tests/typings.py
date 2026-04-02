@@ -20,10 +20,15 @@ class FlextTargetLdapTestTypes(FlextTestsTypes, FlextTargetLdapTypes):
     """Test types for flext-target-ldap extending both test and project types."""
 
     class TargetLdap:
-        """TargetLdap test namespace."""
+        """Target LDAP domain test type namespace."""
 
-        class Tests:
-            """Internal tests declarations."""
+        class Tests(FlextTestsTypes.Tests):
+            """Target LDAP-specific test type aliases."""
+
+            type ProcessCall = tuple[
+                FlextTargetLdapTypes.StrMapping,
+                FlextTargetLdapTypes.StrMapping,
+            ]
 
 
 t = FlextTargetLdapTestTypes

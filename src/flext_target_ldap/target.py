@@ -15,21 +15,21 @@ from typing import ClassVar, override
 from flext_core import FlextContainer, FlextLogger
 from pydantic import ConfigDict, TypeAdapter
 
-from flext_target_ldap import (
+from flext_target_ldap import FlextTargetLdapClient
+from flext_target_ldap._models.sinks import (
     FlextTargetLdapBaseSink,
-    FlextTargetLdapClient,
     FlextTargetLdapGroupsSink,
-    FlextTargetLdapOrchestrator,
     FlextTargetLdapOrganizationalUnitsSink,
-    FlextTargetLdapSettings,
     FlextTargetLdapSink,
     FlextTargetLdapTarget,
     FlextTargetLdapUsersSink,
-    build_singer_catalog,
-    c,
-    p,
-    t,
 )
+from flext_target_ldap.application import FlextTargetLdapOrchestrator
+from flext_target_ldap.catalog import build_singer_catalog
+from flext_target_ldap.constants import c
+from flext_target_ldap.protocols import p
+from flext_target_ldap.settings import FlextTargetLdapSettings
+from flext_target_ldap.typings import t
 
 _SINGER_MSG_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
     t.ContainerMapping,
@@ -97,7 +97,8 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                         normalized_config[key] = value
                     case _:
                         normalized_config[key] = str(value)
-            self._orchestrator = FlextTargetLdapOrchestrator(normalized_config)
+            settings = FlextTargetLdapSettings.model_validate(normalized_config)
+            self._orchestrator = FlextTargetLdapOrchestrator(settings)
         return self._orchestrator
 
     @property

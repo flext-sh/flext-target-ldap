@@ -11,9 +11,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import MutableSequence
+
 from flext_tests import FlextTestsUtilities
 
-from flext_target_ldap import FlextTargetLdapUtilities
+from flext_target_ldap import FlextTargetLdapTarget, FlextTargetLdapUtilities
+from tests.typings import FlextTargetLdapTestTypes
 
 
 class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
@@ -23,7 +26,26 @@ class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities
         """TargetLdap test namespace."""
 
         class Tests:
-            """Internal tests declarations."""
+            """Target LDAP-specific test helpers."""
+
+            class ProcessTarget(FlextTargetLdapTarget):
+                """Target stub that records delegated sink calls."""
+
+                def __init__(self) -> None:
+                    """Initialize the recording target with minimal config."""
+                    super().__init__({"base_dn": "dc=test,dc=com"})
+                    self.calls: MutableSequence[
+                        FlextTargetLdapTestTypes.TargetLdap.Tests.ProcessCall
+                    ] = []
+
+                def process_record(
+                    self,
+                    record: FlextTargetLdapTestTypes.StrMapping,
+                    context: FlextTargetLdapTestTypes.StrMapping,
+                ) -> bool:
+                    """Record the delegated call and report success."""
+                    self.calls.append((record, context))
+                    return True
 
 
 u = FlextTargetLdapTestUtilities

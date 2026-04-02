@@ -10,8 +10,8 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from flext_target_ldap import (
-    DataTransformationEngine,
-    MigrationValidator,
+    FlextTargetLdapMigrationValidator,
+    FlextTargetLdapTransformationEngine,
 )
 from tests import m, t
 
@@ -31,7 +31,7 @@ class TestDataTransformationEngine:
                 replacement="test",
             )
         ]
-        engine = DataTransformationEngine(rules)
+        engine = FlextTargetLdapTransformationEngine(rules)
         if len(engine.rules) != 1:
             msg: str = f"Expected {1}, got {len(engine.rules)}"
             raise AssertionError(msg)
@@ -45,7 +45,7 @@ class TestDataTransformationEngine:
             pattern="dc=invaliddc",
             replacement="dc=network,dc=invaliddc",
         )
-        engine = DataTransformationEngine([rule])
+        engine = FlextTargetLdapTransformationEngine([rule])
         entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "person"],
@@ -71,7 +71,7 @@ class TestDataTransformationEngine:
             pattern="orclUser",
             replacement="inetOrgPerson",
         )
-        engine = DataTransformationEngine([rule])
+        engine = FlextTargetLdapTransformationEngine([rule])
         entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser", "top"],
@@ -102,7 +102,7 @@ class TestDataTransformationEngine:
                 replacement="user",
             ),
         ]
-        engine = DataTransformationEngine(rules)
+        engine = FlextTargetLdapTransformationEngine(rules)
         entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser"],
@@ -130,7 +130,7 @@ class TestDataTransformationEngine:
             pattern="empty",
             replacement="",
         )
-        engine = DataTransformationEngine([rule])
+        engine = FlextTargetLdapTransformationEngine([rule])
         entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["person"],
@@ -153,7 +153,7 @@ class TestDataTransformationEngine:
             pattern="orclUser",
             replacement="inetOrgPerson",
         )
-        engine = DataTransformationEngine([rule])
+        engine = FlextTargetLdapTransformationEngine([rule])
         entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser"],
@@ -175,7 +175,7 @@ class TestDataTransformationEngine:
             pattern="orclUser",
             replacement="inetOrgPerson",
         )
-        engine = DataTransformationEngine([rule])
+        engine = FlextTargetLdapTransformationEngine([rule])
         entries: Sequence[Mapping[str, t.ContainerValue]] = [
             {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
             {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
@@ -199,7 +199,7 @@ class TestMigrationValidator:
 
     def test_validate_valid_entry(self) -> None:
         """Test validate valid entry function."""
-        validator = MigrationValidator()
+        validator = FlextTargetLdapMigrationValidator()
         data: Mapping[str, t.ContainerValue] = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "cn": "testuser",
@@ -212,7 +212,7 @@ class TestMigrationValidator:
 
     def test_validate_missing_dn(self) -> None:
         """Test validate missing dn function."""
-        validator = MigrationValidator()
+        validator = FlextTargetLdapMigrationValidator()
         result = validator.validate("", {"cn": "testuser"}, ["person"])
         assert not result.is_success
         assert result.error is not None
@@ -224,14 +224,14 @@ class TestMigrationValidator:
 
     def test_validate_invalid_dn_syntax(self) -> None:
         """Test validate invalid dn syntax function."""
-        validator = MigrationValidator()
+        validator = FlextTargetLdapMigrationValidator()
         result = validator.validate("invalid_dn_format", {"cn": "testuser"}, ["person"])
         assert result is not None
 
     def test_validate_missing_objectclass(self) -> None:
         """Test method."""
         "Test validate missing objectclass function."
-        validator = MigrationValidator()
+        validator = FlextTargetLdapMigrationValidator()
         result = validator.validate(
             "cn=testuser,dc=example,dc=com",
             {"cn": "testuser"},
@@ -246,7 +246,7 @@ class TestMigrationValidator:
     def test_validate_missing_required_attributes(self) -> None:
         """Test method."""
         "Test validate missing required attributes function."
-        validator = MigrationValidator()
+        validator = FlextTargetLdapMigrationValidator()
         result = validator.validate(
             "cn=testuser,ou=people,dc=example,dc=com",
             {"cn": "testuser"},
@@ -257,7 +257,7 @@ class TestMigrationValidator:
     def test_validate_invalid_email(self) -> None:
         """Test method."""
         "Test validate invalid email function."
-        validator = MigrationValidator()
+        validator = FlextTargetLdapMigrationValidator()
         result = validator.validate(
             "cn=testuser,ou=people,dc=example,dc=com",
             {"cn": "testuser", "sn": "User", "mail": "invalid-email"},
@@ -268,7 +268,7 @@ class TestMigrationValidator:
     def test_validation_statistics(self) -> None:
         """Test method."""
         "Test validation statistics function."
-        validator = MigrationValidator()
+        validator = FlextTargetLdapMigrationValidator()
         test_cases = [
             ("cn=user1,dc=example,dc=com", {"cn": "user1", "sn": "One"}, ["person"]),
             ("invalid", {"cn": "user2"}, ["person"]),
@@ -328,8 +328,8 @@ class TestIntegratedTransformation:
                 replacement="inetOrgPerson",
             ),
         ]
-        transformation_engine = DataTransformationEngine(rules)
-        validator = MigrationValidator(strict_mode=False)
+        transformation_engine = FlextTargetLdapTransformationEngine(rules)
+        validator = FlextTargetLdapMigrationValidator(strict_mode=False)
         oracle_entry: Mapping[str, t.ContainerValue] = {
             "dn": "cn=john.doe,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "top"],
@@ -373,7 +373,7 @@ class TestIntegratedTransformation:
             pattern="orclUser",
             replacement="inetOrgPerson",
         )
-        engine = DataTransformationEngine([rule])
+        engine = FlextTargetLdapTransformationEngine([rule])
         test_entries: Sequence[Mapping[str, t.ContainerValue]] = [
             {
                 "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",

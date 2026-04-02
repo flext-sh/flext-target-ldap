@@ -1,28 +1,17 @@
-"""LDAP target services: connection, transformation, orchestration, and API facade."""
+"""LDAP target services: connection, transformation, and orchestration."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from flext_core import r
 
-from flext_target_ldap import (
-    FlextTargetLdapSettings,
-    c,
-    m,
-    t,
-    u,
-    validate_ldap_target_config,
-)
-
-if TYPE_CHECKING:
-    from flext_target_ldap import FlextTargetLdap as _FlextTargetLdap
-
-
-def _resolve_target_class() -> type[_FlextTargetLdap]:
-    """Resolve FlextTargetLdap at runtime to avoid circular import."""
+from flext_target_ldap.constants import c
+from flext_target_ldap.models import m
+from flext_target_ldap.settings import FlextTargetLdapSettings
+from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapConnectionService:
@@ -182,140 +171,7 @@ class FlextTargetLdapTransformationService:
         return "generic"
 
 
-class FlextTargetLdapOrchestrator:
-    """Orchestrates connection, transformation, and data loading for the LDAP target."""
-
-    @override
-    def __init__(self, config: FlextTargetLdapSettings | None = None) -> None:
-        """Initialize with optional LDAP target settings."""
-        self._typed_config = config
-
-    def get_connection_service(self) -> FlextTargetLdapConnectionService | None:
-        """Return a connection service instance if config is set."""
-        if self._typed_config is None:
-            return None
-        return FlextTargetLdapConnectionService(self._typed_config)
-
-    def get_transformation_service(self) -> FlextTargetLdapTransformationService | None:
-        """Return a transformation service instance if config is set."""
-        if self._typed_config is None:
-            return None
-        return FlextTargetLdapTransformationService(self._typed_config)
-
-    def get_typed_config(self) -> FlextTargetLdapSettings | None:
-        """Return the current typed settings, if any."""
-        return self._typed_config
-
-    def orchestrate_data_loading(
-        self,
-        records: Sequence[Mapping[str, t.ContainerValue]],
-        config: FlextTargetLdapSettings | None = None,
-    ) -> r[Mapping[str, t.ContainerValue]]:
-        """Load records using default mappings and return a summary result."""
-        working = config or self._typed_config
-        if working is None:
-            return r[t.ContainerValueMapping].fail(
-                "Configuration is required",
-            )
-        transformation = FlextTargetLdapTransformationService(working)
-        object_classes = working.object_classes
-        base_dn = working.base_dn
-        stream_type = "users"
-        mappings = transformation.get_default_mappings(stream_type)
-        processed = 0
-        errors: MutableSequence[t.ContainerValue] = []
-        for record in records:
-            transformed = transformation.transform_record(
-                record=record,
-                mappings=mappings,
-                object_classes=object_classes,
-                base_dn=base_dn,
-            )
-            if transformed.is_success:
-                processed += 1
-            else:
-                errors.append(transformed.error or "Transformation failed")
-        result: Mapping[str, t.ContainerValue] = {
-            "processed_records": processed,
-            "total_records": len(records),
-            "transformation_errors": errors,
-            "status": "completed" if not errors else "completed_with_errors",
-        }
-        return r[t.ContainerValueMapping].ok(result)
-
-    def validate_target_configuration(
-        self,
-        config: FlextTargetLdapSettings | None = None,
-    ) -> r[bool]:
-        """Validate target configuration and test connection."""
-        working = config or self._typed_config
-        if working is None:
-            return r[bool].fail("Configuration is required")
-        return FlextTargetLdapConnectionService(working).test_connection()
-
-
-class FlextTargetLdapApiService:
-    """API facade for creating targets and loading users/groups to LDAP."""
-
-    @override
-    def __init__(self) -> None:
-        """Initialize the API service and internal orchestrator cache."""
-        self._orchestrators: MutableMapping[str, FlextTargetLdapOrchestrator] = {}
-
-    def create_ldap_target(
-        self,
-        config: Mapping[str, t.ContainerValue],
-    ) -> r[_FlextTargetLdap]:
-        """Create an LDAP target from raw config dict."""
-        return u.try_(
-            lambda: _resolve_target_class()(config=dict(config)),
-            catch=(RuntimeError, ValueError, TypeError),
-        ).map_error(lambda exc: str(exc))
-
-    def load_groups_to_ldap(
-        self,
-        groups: Sequence[Mapping[str, t.ContainerValue]],
-        config: Mapping[str, t.ContainerValue],
-    ) -> r[int]:
-        """Load group records into LDAP using the default groups sink."""
-        target_result = self.create_ldap_target(config)
-        if target_result.is_failure:
-            return r[int].fail(target_result.error or "Target creation failed")
-        target = target_result.value
-        sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
-        for group in groups:
-            sink.process_record(dict(group), {})
-        return r[int].ok(len(groups))
-
-    def load_users_to_ldap(
-        self,
-        users: Sequence[Mapping[str, t.ContainerValue]],
-        config: Mapping[str, t.ContainerValue],
-    ) -> r[int]:
-        """Load user records into LDAP using the default users sink."""
-        target_result = self.create_ldap_target(config)
-        if target_result.is_failure:
-            return r[int].fail(target_result.error or "Target creation failed")
-        target = target_result.value
-        sink = target.get_sink_class("users")(target, "users", {}, ["username"])
-        for user in users:
-            sink.process_record(dict(user), {})
-        return r[int].ok(len(users))
-
-    def test_ldap_connection(
-        self,
-        config: Mapping[str, t.ContainerValue],
-    ) -> r[bool]:
-        """Validate config and test the LDAP connection."""
-        validated = validate_ldap_target_config(config)
-        if validated.is_failure:
-            return r[bool].fail(validated.error or "Configuration validation failed")
-        return FlextTargetLdapConnectionService(validated.value).test_connection()
-
-
 __all__ = [
-    "FlextTargetLdapApiService",
     "FlextTargetLdapConnectionService",
-    "FlextTargetLdapOrchestrator",
     "FlextTargetLdapTransformationService",
 ]

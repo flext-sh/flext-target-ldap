@@ -13,7 +13,15 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from flext_target_ldap._utilities import client, config, services, transformation
+    from flext_target_ldap._utilities import (
+        api_service,
+        client,
+        config,
+        service_runtime,
+        services,
+        transformation,
+    )
+    from flext_target_ldap._utilities.api_service import FlextTargetLdapApiService
     from flext_target_ldap._utilities.client import (
         FlextTargetLdapClient,
         FlextTargetLdapSearchEntry,
@@ -22,10 +30,11 @@ if _TYPE_CHECKING:
         create_default_ldap_target_config,
         validate_ldap_target_config,
     )
+    from flext_target_ldap._utilities.service_runtime import (
+        FlextTargetLdapServiceRuntime,
+    )
     from flext_target_ldap._utilities.services import (
-        FlextTargetLdapApiService,
         FlextTargetLdapConnectionService,
-        FlextTargetLdapOrchestrator,
         FlextTargetLdapTransformationService,
     )
     from flext_target_ldap._utilities.transformation import (
@@ -35,18 +44,20 @@ if _TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
-    "FlextTargetLdapApiService": "flext_target_ldap._utilities.services",
+    "FlextTargetLdapApiService": "flext_target_ldap._utilities.api_service",
     "FlextTargetLdapClient": "flext_target_ldap._utilities.client",
     "FlextTargetLdapConnectionService": "flext_target_ldap._utilities.services",
     "FlextTargetLdapMigrationValidator": "flext_target_ldap._utilities.transformation",
-    "FlextTargetLdapOrchestrator": "flext_target_ldap._utilities.services",
     "FlextTargetLdapSearchEntry": "flext_target_ldap._utilities.client",
+    "FlextTargetLdapServiceRuntime": "flext_target_ldap._utilities.service_runtime",
     "FlextTargetLdapTransformationEngine": "flext_target_ldap._utilities.transformation",
     "FlextTargetLdapTransformationService": "flext_target_ldap._utilities.services",
+    "api_service": "flext_target_ldap._utilities.api_service",
     "client": "flext_target_ldap._utilities.client",
     "config": "flext_target_ldap._utilities.config",
     "create_default_ldap_target_config": "flext_target_ldap._utilities.config",
     "logger": "flext_target_ldap._utilities.transformation",
+    "service_runtime": "flext_target_ldap._utilities.service_runtime",
     "services": "flext_target_ldap._utilities.services",
     "transformation": "flext_target_ldap._utilities.transformation",
     "validate_ldap_target_config": "flext_target_ldap._utilities.config",

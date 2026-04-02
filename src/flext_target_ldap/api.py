@@ -13,7 +13,8 @@ from typing import override
 
 from flext_meltano import FlextMeltanoSingerSinkBase, FlextMeltanoTargetServiceBase
 
-from flext_target_ldap import FlextTargetLdapSink, FlextTargetLdapTarget, t
+from flext_target_ldap._utilities.service_runtime import FlextTargetLdapServiceRuntime
+from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapService(FlextMeltanoTargetServiceBase):
@@ -28,12 +29,13 @@ class FlextTargetLdapService(FlextMeltanoTargetServiceBase):
         schema: t.FlatContainerMapping,
     ) -> FlextMeltanoSingerSinkBase:
         """Create an LDAP sink for a stream."""
-        target = FlextTargetLdapTarget(config={}, validate_config=False)
-        return FlextTargetLdapSink(
-            target=target,
+        target_config: t.ContainerMapping = (
+            self.config_overrides if self.config_overrides is not None else {}
+        )
+        return FlextTargetLdapServiceRuntime.create_sink(
             stream_name=stream_name,
-            schema=dict(schema),
-            key_properties=[],
+            schema=schema,
+            target_config=target_config,
         )
 
 

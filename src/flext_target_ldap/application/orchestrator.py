@@ -16,6 +16,7 @@ from typing import override
 from flext_core import FlextLogger, r
 
 from flext_target_ldap import c, p, t
+from flext_target_ldap.settings import FlextTargetLdapSettings
 
 logger: p.Logger = FlextLogger(__name__)
 
@@ -24,16 +25,25 @@ class FlextTargetLdapOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
     config: t.ConfigurationMapping
+    _typed_config: FlextTargetLdapSettings | None
 
     @override
-    def __init__(self, config: t.ConfigurationMapping | None = None) -> None:
+    def __init__(
+        self,
+        config: FlextTargetLdapSettings | t.ConfigurationMapping | None = None,
+    ) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
         config: Configuration dictionary
 
         """
-        self.config = dict(config) if config is not None else {}
+        if isinstance(config, FlextTargetLdapSettings):
+            self._typed_config = config
+            self.config = dict(config.model_dump(mode="python"))
+        else:
+            self._typed_config = None
+            self.config = dict(config) if config is not None else {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(

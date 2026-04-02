@@ -35,16 +35,10 @@ if _TYPE_CHECKING:
         errors,
         models,
         patterns,
-        processing_result,
         protocols,
         settings,
         singer,
-        sinks,
         target,
-        target_client,
-        target_config,
-        target_services,
-        transformation,
         typings,
         utilities,
     )
@@ -57,6 +51,8 @@ if _TYPE_CHECKING:
         FlextTargetLdapSink,
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
+        processing_result,
+        sinks,
     )
     from flext_target_ldap._utilities import (
         FlextTargetLdapApiService,
@@ -64,12 +60,16 @@ if _TYPE_CHECKING:
         FlextTargetLdapConnectionService,
         FlextTargetLdapMigrationValidator,
         FlextTargetLdapSearchEntry,
+        FlextTargetLdapServiceRuntime,
         FlextTargetLdapTransformationEngine,
         FlextTargetLdapTransformationService,
+        api_service,
         client,
         config,
         create_default_ldap_target_config,
+        service_runtime,
         services,
+        transformation,
         validate_ldap_target_config,
     )
     from flext_target_ldap.api import FlextTargetLdapService
@@ -112,10 +112,6 @@ if _TYPE_CHECKING:
         stream,
     )
     from flext_target_ldap.target import FlextTargetLdap, logger, main
-    from flext_target_ldap.transformation import (
-        DataTransformationEngine,
-        MigrationValidator,
-    )
     from flext_target_ldap.typings import (
         FlextTargetLdapTypes,
         FlextTargetLdapTypes as t,
@@ -134,7 +130,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "flext_target_ldap.singer",
     ),
     {
-        "DataTransformationEngine": "flext_target_ldap.transformation",
         "FlextTargetLdap": "flext_target_ldap.target",
         "FlextTargetLdapAuthenticationError": "flext_target_ldap.errors",
         "FlextTargetLdapConfigurationError": "flext_target_ldap.errors",
@@ -150,7 +145,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "FlextTargetLdapTypes": "flext_target_ldap.typings",
         "FlextTargetLdapUtilities": "flext_target_ldap.utilities",
         "FlextTargetLdapValidationError": "flext_target_ldap.errors",
-        "MigrationValidator": "flext_target_ldap.transformation",
         "_models": "flext_target_ldap._models",
         "_utilities": "flext_target_ldap._utilities",
         "api": "flext_target_ldap.api",
@@ -169,19 +163,13 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "models": "flext_target_ldap.models",
         "p": ("flext_target_ldap.protocols", "FlextTargetLdapProtocols"),
         "patterns": "flext_target_ldap.patterns",
-        "processing_result": "flext_target_ldap.processing_result",
         "protocols": "flext_target_ldap.protocols",
         "r": "flext_ldap",
         "s": "flext_ldap",
         "settings": "flext_target_ldap.settings",
         "singer": "flext_target_ldap.singer",
-        "sinks": "flext_target_ldap.sinks",
         "t": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
         "target": "flext_target_ldap.target",
-        "target_client": "flext_target_ldap.target_client",
-        "target_config": "flext_target_ldap.target_config",
-        "target_services": "flext_target_ldap.target_services",
-        "transformation": "flext_target_ldap.transformation",
         "typings": "flext_target_ldap.typings",
         "u": ("flext_target_ldap.utilities", "FlextTargetLdapUtilities"),
         "utilities": "flext_target_ldap.utilities",

@@ -7,13 +7,11 @@ SPDX-License-Identifier: MIT.
 from __future__ import annotations
 
 from collections.abc import (
-    Generator,
     Mapping,
     MutableMapping,
     MutableSequence,
     Sequence,
 )
-from contextlib import AbstractContextManager, contextmanager
 from typing import TypeIs, override
 
 from flext_core import FlextLogger, r
@@ -21,38 +19,20 @@ from flext_ldap import (
     ldap,
     m,
 )
+from pydantic import BaseModel, ConfigDict
 
 from flext_target_ldap import c, t
 
 logger = FlextLogger(__name__)
 
 
-class FlextTargetLdapSearchEntry:
-    """LDAP search result entry for backward compatibility."""
+class FlextTargetLdapSearchEntry(BaseModel):
+    """Canonical LDAP search result entry."""
 
-    @override
-    def __init__(
-        self,
-        dn: str,
-        attributes: Mapping[str, t.ContainerValue],
-    ) -> None:
-        """Initialize search entry."""
-        self.dn = dn
-        self.attributes = attributes
+    model_config = ConfigDict(frozen=True)
 
-
-class _CompatibleEntry:
-    """Compatible LDAP entry t.NormalizedValue."""
-
-    @override
-    def __init__(self, dn: str, attrs: Mapping[str, t.ContainerValue]) -> None:
-        """Initialize compatible entry."""
-        self.entry_dn = dn
-        self.entry_attributes = list(attrs.keys())
-        for key, values in attrs.items():
-            setattr(self, key, values)
-
-    "LDAP connection wrapper delegating to flext-ldap API."
+    dn: str
+    attributes: Mapping[str, t.ContainerValue]
 
 
 def _is_container_list(
@@ -108,97 +88,10 @@ def _build_modify_changes(
     }
 
 
-class _LdapConnectionWrapper:
-    @override
-    def __init__(
-        self,
-        api: ldap,
-        config: m.Ldap.ConnectionConfig,
-    ) -> None:
-        """Initialize wrapper."""
-        self.api = api
-        self.config = config
-        self.bound = True
-        self.entries: MutableSequence[_CompatibleEntry] = []
-
-    def add(
-        self,
-        dn: str,
-        object_classes: t.StrSequence,
-        attributes: Mapping[str, t.ContainerValue],
-    ) -> bool:
-        """Add entry to LDAP."""
-        entry = _build_ldif_entry(dn, attributes, object_classes)
-        result = self.api.add(entry)
-        return result.is_success
-
-    def bind(self) -> bool:
-        """Bind to LDAP server."""
-        result = self.api.connect(self.config)
-        self.bound = result.is_success
-        return self.bound
-
-    def delete(self, dn: str) -> bool:
-        """Delete entry from LDAP."""
-        result = self.api.delete(dn)
-        return result.is_success
-
-    def modify(self, dn: str, changes: Mapping[str, t.ContainerValue]) -> bool:
-        """Modify entry in LDAP."""
-        result = self.api.modify(dn, _build_modify_changes(changes))
-        return result.is_success
-
-    def search(
-        self,
-        base_dn: str,
-        search_filter: str,
-        attributes: t.StrSequence | None = None,
-    ) -> bool:
-        """Search LDAP directory."""
-        try:
-            connect_result = self.api.connect(self.config)
-            if connect_result.is_failure:
-                self.entries = list[_CompatibleEntry]()
-                return False
-            search_options = m.Ldap.SearchOptions(
-                base_dn=base_dn,
-                filter_str=search_filter,
-                attributes=attributes,
-            )
-            search_result = self.api.search(search_options)
-            self.api.disconnect()
-            if search_result.is_success and search_result.value:
-                search_res = search_result.value
-                entries: Sequence[Mapping[str, t.StrSequence]] = search_res.entries
-                self.entries = list[_CompatibleEntry]()
-                for entry in entries:
-                    dn = str(entry.get("dn", ""))
-                    attrs: MutableMapping[str, t.ContainerValue] = {
-                        str(k): _to_container_list(v)
-                        for k, v in entry.items()
-                        if str(k) != "dn"
-                    }
-                    compat_entry = _CompatibleEntry(dn, attrs)
-                    self.entries.append(compat_entry)
-            else:
-                self.entries = list[_CompatibleEntry]()
-            return True
-        except c.Meltano.Singer.SAFE_EXCEPTIONS:
-            self.entries = list[_CompatibleEntry]()
-            return False
-
-    def unbind(self) -> None:
-        """Unbind from LDAP server."""
-        self.api.disconnect()
-        self.bound = False
-        self.entries.clear()
-
-
 class FlextTargetLdapClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
 
-    This client provides backward compatibility while delegating all LDAP operations
-    to the flext-ldap library, eliminating code duplication.
+    This client delegates LDAP operations to flext-ldap without compatibility layers.
     """
 
     @override
@@ -368,26 +261,6 @@ class FlextTargetLdapClient:
             logger.exception("Failed to check entry existence: %s", dn)
             return r[bool].fail(f"Entry exists check failed: {e}")
 
-    def get_connection(self) -> AbstractContextManager[_LdapConnectionWrapper]:
-        """Get LDAP connection context manager (compatibility method).
-
-        Returns a real LDAP connection wrapper compatible with the existing interface.
-
-        Returns:
-        _GeneratorContextManager: LDAP connection context manager.
-
-        """
-
-        @contextmanager
-        def connection_context() -> Generator[_LdapConnectionWrapper]:
-            wrapper = self._create_connection_wrapper(self._api)
-            try:
-                yield wrapper
-            finally:
-                wrapper.unbind()
-
-        return connection_context()
-
     def get_entry(
         self,
         dn: str,
@@ -471,8 +344,12 @@ class FlextTargetLdapClient:
                         for k, v in entry.items()
                         if str(k) != "dn"
                     }
-                    compat_entry = FlextTargetLdapSearchEntry(dn, attrs)
-                    entries.append(compat_entry)
+                    entries.append(
+                        FlextTargetLdapSearchEntry.model_validate({
+                            "dn": dn,
+                            "attributes": attrs,
+                        }),
+                    )
                 logger.debug(f"Successfully found {len(entries)} LDAP entries")
                 return r[Sequence[FlextTargetLdapSearchEntry]].ok(entries)
             logger.debug("No LDAP entries found")
@@ -480,10 +357,6 @@ class FlextTargetLdapClient:
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
             return r[Sequence[FlextTargetLdapSearchEntry]].fail(f"Search failed: {e}")
-
-    def _create_connection_wrapper(self, api: ldap) -> _LdapConnectionWrapper:
-        """Create LDAP connection wrapper for delegation."""
-        return _LdapConnectionWrapper(api, self.config)
 
 
 __all__ = ["FlextTargetLdapClient", "FlextTargetLdapSearchEntry"]

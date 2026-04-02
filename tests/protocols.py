@@ -17,20 +17,15 @@ from flext_target_ldap import FlextTargetLdapProtocols
 class FlextTargetLdapTestProtocols(FlextTestsProtocols, FlextTargetLdapProtocols):
     """Test protocols combining FlextTestsProtocols and FlextTargetLdapProtocols.
 
-    Provides access to:
-    - p.Tests.Docker.* (from FlextTestsProtocols)
-    - p.Tests.Factory.* (from FlextTestsProtocols)
-    - p.TargetLdap.* (from FlextTargetLdapProtocols)
+    Provides access to the project-local `p.TargetLdap.Tests.*` namespace while
+    preserving the inherited test and domain protocol surfaces.
     """
 
-    class Tests(FlextTestsProtocols.Tests):
-        """Project-specific test protocols.
+    class TargetLdap(FlextTargetLdapProtocols.TargetLdap):
+        """Target LDAP domain test protocols namespace."""
 
-        Extends FlextTestsProtocols.Tests with TargetLdap-specific protocols.
-        """
-
-        class TargetLdap:
-            """TargetLdap-specific test protocols."""
+        class Tests(FlextTestsProtocols.Tests):
+            """Target LDAP-specific test protocols."""
 
 
 p = FlextTargetLdapTestProtocols

@@ -22,19 +22,18 @@ class FlextTargetLdapTestModels(FlextTestsModels, FlextTargetLdapModels):
     2. FlextTargetLdapModels - for domain models
 
     Access patterns:
-    - tm.Tests.* (generic test models from FlextTestsModels)
-    - tm.* (Target LDAP domain models)
-    - m.* (production models via alternative alias)
+    - m.TargetLdap.Tests.* (project-local Domain.Tests fixtures)
+    - tm.TargetLdap.Tests.* (compat alias for the same runtime namespace)
+    - m.* / tm.* (Target LDAP domain models via shared MRO)
     """
 
-    class Tests(FlextTestsModels.Tests):
-        """Project-specific test fixtures namespace."""
+    class TargetLdap(FlextTargetLdapModels.TargetLdap):
+        """Target LDAP domain test models namespace."""
 
-        class TargetLdap:
+        class Tests(FlextTestsModels.Tests):
             """Target LDAP-specific test fixtures."""
 
 
-# Short aliases per FLEXT convention
 tm = FlextTargetLdapTestModels
 m = FlextTargetLdapTestModels
 

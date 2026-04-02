@@ -16,6 +16,12 @@ from flext_target_ldap import FlextTargetLdapConstants
 class FlextTargetLdapTestConstants(FlextTestsConstants, FlextTargetLdapConstants):
     """Test constants for flext-target-ldap."""
 
+    class TargetLdap(FlextTargetLdapConstants.TargetLdap):
+        """Target LDAP domain test constants namespace."""
+
+        class Tests(FlextTestsConstants.Tests):
+            """Target LDAP-specific test constants."""
+
 
 c = FlextTargetLdapTestConstants
 __all__ = ["FlextTargetLdapTestConstants", "c"]

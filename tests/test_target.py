@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, MutableSequence
+from collections.abc import Mapping, MutableMapping
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -18,11 +18,10 @@ from flext_target_ldap import (
     FlextTargetLdapBaseSink as LdapBaseSink,
     FlextTargetLdapGroupsSink as LdapGroupsSink,
     FlextTargetLdapSink as Sink,
-    FlextTargetLdapTarget as Target,
     FlextTargetLdapUsersSink as LdapUsersSink,
 )
 from flext_target_ldap.target import _default_cli_helper
-from tests import t
+from tests import t, u
 
 
 class TestTargetLDAPUnit:
@@ -166,17 +165,7 @@ def test_default_cli_helper_logs_with_flext_logger() -> None:
 
 
 def test_sink_process_record_delegates_to_target_handler() -> None:
-
-    class _ProcessTarget(Target):
-        def __init__(self) -> None:
-            super().__init__({"base_dn": "dc=test,dc=com"})
-            self.calls: MutableSequence[tuple[t.StrMapping, t.StrMapping]] = []
-
-        def process_record(self, record: t.StrMapping, context: t.StrMapping) -> bool:
-            self.calls.append((record, context))
-            return True
-
-    target = _ProcessTarget()
+    target = u.TargetLdap.Tests.ProcessTarget()
     sink = Sink(
         target=target,
         stream_name="users",
