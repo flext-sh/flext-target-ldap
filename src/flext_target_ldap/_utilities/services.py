@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import override
 
@@ -18,7 +18,7 @@ class FlextTargetLdapConnectionService:
         """Initialize with LDAP target settings."""
         self._config = config
 
-    def get_connection_info(self) -> Mapping[str, t.ContainerValue]:
+    def get_connection_info(self) -> t.ContainerValueMapping:
         """Return connection parameters as a dict for logging or debugging."""
         return {
             "host": self._config.connection.host,
@@ -96,7 +96,7 @@ class FlextTargetLdapTransformationService:
 
     def transform_record(
         self,
-        record: Mapping[str, t.ContainerValue],
+        record: t.ContainerValueMapping,
         mappings: Sequence[m.TargetLdap.AttributeMapping],
         object_classes: t.StrSequence,
         base_dn: str,

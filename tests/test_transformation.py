@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 
 from flext_target_ldap import (
     FlextTargetLdapMigrationValidator,
@@ -46,7 +46,7 @@ class TestDataTransformationEngine:
             replacement="dc=network,dc=invaliddc",
         )
         engine = FlextTargetLdapTransformationEngine([rule])
-        entry: Mapping[str, t.ContainerValue] = {
+        entry: t.ContainerValueMapping = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "person"],
             "cn": "testuser",
@@ -72,7 +72,7 @@ class TestDataTransformationEngine:
             replacement="inetOrgPerson",
         )
         engine = FlextTargetLdapTransformationEngine([rule])
-        entry: Mapping[str, t.ContainerValue] = {
+        entry: t.ContainerValueMapping = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser", "top"],
             "cn": "testuser",
@@ -103,7 +103,7 @@ class TestDataTransformationEngine:
             ),
         ]
         engine = FlextTargetLdapTransformationEngine(rules)
-        entry: Mapping[str, t.ContainerValue] = {
+        entry: t.ContainerValueMapping = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["orclUser"],
             "description": "Oracle User Account",
@@ -131,7 +131,7 @@ class TestDataTransformationEngine:
             replacement="",
         )
         engine = FlextTargetLdapTransformationEngine([rule])
-        entry: Mapping[str, t.ContainerValue] = {
+        entry: t.ContainerValueMapping = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "objectClass": ["person"],
             "cn": "testuser",
@@ -154,7 +154,7 @@ class TestDataTransformationEngine:
             replacement="inetOrgPerson",
         )
         engine = FlextTargetLdapTransformationEngine([rule])
-        entry: Mapping[str, t.ContainerValue] = {
+        entry: t.ContainerValueMapping = {
             "dn": "cn=testuser,ou=people,dc=invaliddc",
             "objectClass": ["orclUser"],
             "cn": "testuser",
@@ -176,7 +176,7 @@ class TestDataTransformationEngine:
             replacement="inetOrgPerson",
         )
         engine = FlextTargetLdapTransformationEngine([rule])
-        entries: Sequence[Mapping[str, t.ContainerValue]] = [
+        entries: Sequence[t.ContainerValueMapping] = [
             {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
             {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
             {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
@@ -200,7 +200,7 @@ class TestMigrationValidator:
     def test_validate_valid_entry(self) -> None:
         """Test validate valid entry function."""
         validator = FlextTargetLdapMigrationValidator()
-        data: Mapping[str, t.ContainerValue] = {
+        data: t.ContainerValueMapping = {
             "dn": "cn=testuser,ou=people,dc=example,dc=com",
             "cn": "testuser",
             "sn": "User",
@@ -330,7 +330,7 @@ class TestIntegratedTransformation:
         ]
         transformation_engine = FlextTargetLdapTransformationEngine(rules)
         validator = FlextTargetLdapMigrationValidator(strict_mode=False)
-        oracle_entry: Mapping[str, t.ContainerValue] = {
+        oracle_entry: t.ContainerValueMapping = {
             "dn": "cn=john.doe,ou=people,dc=invaliddc",
             "objectClass": ["orclUser", "top"],
             "orclSamAccountName": "john.doe",
@@ -374,7 +374,7 @@ class TestIntegratedTransformation:
             replacement="inetOrgPerson",
         )
         engine = FlextTargetLdapTransformationEngine([rule])
-        test_entries: Sequence[Mapping[str, t.ContainerValue]] = [
+        test_entries: Sequence[t.ContainerValueMapping] = [
             {
                 "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",
                 "objectClass": ["orclContext"],

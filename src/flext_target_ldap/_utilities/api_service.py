@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 
 from flext_core import r
 from flext_target_ldap import (
@@ -19,7 +19,7 @@ class FlextTargetLdapApiService:
 
     def create_ldap_target(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: t.ContainerValueMapping,
     ) -> r[FlextTargetLdap]:
         """Create an LDAP target from raw config dict."""
         return u.try_(
@@ -29,8 +29,8 @@ class FlextTargetLdapApiService:
 
     def load_groups_to_ldap(
         self,
-        groups: Sequence[Mapping[str, t.ContainerValue]],
-        config: Mapping[str, t.ContainerValue],
+        groups: Sequence[t.ContainerValueMapping],
+        config: t.ContainerValueMapping,
     ) -> r[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
@@ -44,8 +44,8 @@ class FlextTargetLdapApiService:
 
     def load_users_to_ldap(
         self,
-        users: Sequence[Mapping[str, t.ContainerValue]],
-        config: Mapping[str, t.ContainerValue],
+        users: Sequence[t.ContainerValueMapping],
+        config: t.ContainerValueMapping,
     ) -> r[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
@@ -59,7 +59,7 @@ class FlextTargetLdapApiService:
 
     def test_ldap_connection(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: t.ContainerValueMapping,
     ) -> r[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)

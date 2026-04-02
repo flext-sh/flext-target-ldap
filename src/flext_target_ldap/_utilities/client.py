@@ -47,7 +47,7 @@ def _to_str_values(value: t.ContainerValue) -> t.StrSequence:
 
 def _build_ldif_entry(
     dn: str,
-    attributes: Mapping[str, t.ContainerValue],
+    attributes: t.ContainerValueMapping,
     object_classes: t.StrSequence | None = None,
 ) -> m.Ldif.Entry:
     entry_attributes: MutableMapping[str, t.StrSequence] = {
@@ -72,7 +72,7 @@ def _build_ldif_entry(
 
 
 def _build_modify_changes(
-    changes: Mapping[str, t.ContainerValue],
+    changes: t.ContainerValueMapping,
 ) -> t.Ldap.OperationChanges:
     return {
         key: [(c.Ldap.ModifyOperation.REPLACE, _to_str_values(value))]
@@ -98,7 +98,7 @@ class FlextTargetLdapClient:
             self._bind_dn = config.bind_dn or ""
             self._password = config.bind_password or ""
         elif isinstance(config, dict):
-            config_map: Mapping[str, t.ContainerValue] = {
+            config_map: t.ContainerValueMapping = {
                 t.TargetLdap.STRING_ADAPTER.validate_python(k): v
                 for k, v in config.items()
             }
@@ -174,7 +174,7 @@ class FlextTargetLdapClient:
     def add_entry(
         self,
         dn: str,
-        attributes: Mapping[str, t.ContainerValue],
+        attributes: t.ContainerValueMapping,
         object_classes: t.StrSequence | None = None,
     ) -> r[bool]:
         """Add LDAP entry using flext-ldap API."""
@@ -283,7 +283,7 @@ class FlextTargetLdapClient:
     def modify_entry(
         self,
         dn: str,
-        changes: Mapping[str, t.ContainerValue],
+        changes: t.ContainerValueMapping,
     ) -> r[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
@@ -340,7 +340,7 @@ class FlextTargetLdapClient:
                 ldap_entries: Sequence[Mapping[str, t.StrSequence]] = search_res.entries
                 for entry in ldap_entries:
                     dn = str(entry.get("dn", ""))
-                    attrs: MutableMapping[str, t.ContainerValue] = {
+                    attrs: t.MutableContainerValueMapping = {
                         str(k): _to_container_list(v)
                         for k, v in entry.items()
                         if str(k) != "dn"

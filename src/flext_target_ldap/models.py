@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import MutableMapping, MutableSequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
@@ -137,7 +137,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ] = Field(default_factory=list)
             attributes: Annotated[
-                MutableMapping[str, MutableSequence[str]],
+                t.MutableStrSequenceMapping,
                 Field(
                     description="LDAP attributes with values",
                 ),
@@ -593,9 +593,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             tap_stream_id: t.NonEmptyStr
             stream: t.NonEmptyStr
-            stream_schema: MutableMapping[str, t.ContainerValue] = Field(
-                default_factory=dict
-            )
+            stream_schema: t.MutableContainerValueMapping = Field(default_factory=dict)
 
         class TransformationRule(FlextLdapModels.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
@@ -608,7 +606,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class DataTransformationResult(FlextLdapModels.Value):
             """Lightweight result of data transformation engine operations."""
 
-            transformed_data: MutableMapping[str, t.ContainerValue] = Field(
+            transformed_data: t.MutableContainerValueMapping = Field(
                 default_factory=dict
             )
             applied_rules: MutableSequence[str] = Field(default_factory=list)
@@ -617,13 +615,13 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """Canonical LDAP search result entry."""
 
             dn: str
-            attributes: Mapping[str, t.ContainerValue] = Field(default_factory=dict)
+            attributes: t.ContainerValueMapping = Field(default_factory=dict)
 
 
 # Export the unified models class
 m = FlextTargetLdapModels
 
-__all__: Sequence[str] = [
+__all__: t.StrSequence = [
     "FlextTargetLdapModels",
     "m",
 ]

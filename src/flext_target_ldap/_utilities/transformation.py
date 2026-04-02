@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import MutableSequence, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r
@@ -24,17 +24,17 @@ class FlextTargetLdapTransformationEngine:
         """Initialize transformation engine."""
         self.rules = rules
 
-    def get_statistics(self) -> Mapping[str, int]:
+    def get_statistics(self) -> t.IntMapping:
         """Get transformation statistics."""
         return {"total_rules": len(self.rules), "transformations_applied": 0}
 
     def transform(
         self,
-        data: Mapping[str, t.ContainerValue],
+        data: t.ContainerValueMapping,
     ) -> r[m.TargetLdap.DataTransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: MutableMapping[str, t.ContainerValue] = dict(data)
+            transformed_data: t.MutableContainerValueMapping = dict(data)
             applied_rules: MutableSequence[str] = []
             for rule in self.rules:
                 if not rule.enabled:
@@ -87,14 +87,14 @@ class FlextTargetLdapMigrationValidator:
             "validation_warnings": 0,
         }
 
-    def get_validation_statistics(self) -> Mapping[str, int]:
+    def get_validation_statistics(self) -> t.IntMapping:
         """Get validation statistics."""
         return self._stats.copy()
 
     def validate(
         self,
-        data: Mapping[str, t.ContainerValue] | str,
-        attributes: Mapping[str, t.ContainerValue] | None = None,
+        data: t.ContainerValueMapping | str,
+        attributes: t.ContainerValueMapping | None = None,
         object_classes: Sequence[t.ContainerValue] | None = None,
     ) -> r[bool]:
         """Validate migration data."""
@@ -129,7 +129,7 @@ class FlextTargetLdapMigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: Mapping[str, t.ContainerValue],
+        attributes: t.ContainerValueMapping,
         object_classes: t.StrSequence,
     ) -> r[bool]:
         """Validate individual LDAP entry - alias for validate method."""

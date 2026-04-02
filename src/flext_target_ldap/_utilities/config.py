@@ -14,14 +14,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-
 from flext_core import r
 from flext_target_ldap import FlextTargetLdapSettings, c, m, t, u
 
 
 def validate_ldap_target_config(
-    config: Mapping[str, t.ContainerValue],
+    config: t.ContainerValueMapping,
 ) -> r[FlextTargetLdapSettings]:
     """Validate and create LDAP target configuration with proper error handling."""
     try:

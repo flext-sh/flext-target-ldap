@@ -157,7 +157,7 @@ class FlextTargetLdapSchemaMapper:
     ) -> r[t.StrMapping]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
-            ldap_attributes: MutableMapping[str, str] = {}
+            ldap_attributes: t.MutableStrMapping = {}
             schema_model = m.TargetLdap.SingerSchemaDefinition.model_validate(schema)
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)

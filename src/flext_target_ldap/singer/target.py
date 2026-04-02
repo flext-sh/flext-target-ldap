@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from typing import override
 
 from flext_core import FlextLogger, r
@@ -26,7 +26,7 @@ class FlextTargetLdapSingerTarget:
     @override
     def __init__(
         self,
-        config: Mapping[str, t.ContainerValue] | None = None,
+        config: t.ContainerValueMapping | None = None,
     ) -> None:
         """Initialize Singer LDAP target.
 
@@ -37,13 +37,13 @@ class FlextTargetLdapSingerTarget:
         t.NormalizedValue: Description of return value.
 
         """
-        self.config: Mapping[str, t.ContainerValue] = config or {}
+        self.config: t.ContainerValueMapping = config or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
         self,
-        messages: Sequence[Mapping[str, t.ContainerValue]],
-    ) -> r[Mapping[str, int | str]]:
+        messages: Sequence[t.ContainerValueMapping],
+    ) -> r[t.HeaderMapping]:
         """Process Singer messages for LDAP target.
 
         Args:
@@ -66,10 +66,10 @@ class FlextTargetLdapSingerTarget:
                 "Singer message processing completed: %d messages",
                 processed_count,
             )
-            return r[Mapping[str, int | str]].ok(result)
+            return r[t.HeaderMapping].ok(result)
         except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             logger.exception("Singer message processing failed")
-            return r[Mapping[str, int | str]].fail(
+            return r[t.HeaderMapping].fail(
                 f"Message processing failed: {e}",
             )
 

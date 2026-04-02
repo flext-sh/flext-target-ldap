@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import MutableSequence, Sequence
 from typing import ClassVar, TypeIs, override
 
 from flext_core import FlextLogger, r
@@ -27,7 +27,7 @@ class FlextTargetLdapSink:
         self,
         target: FlextTargetLdapTarget,
         stream_name: str,
-        schema: Mapping[str, t.ContainerValue],
+        schema: t.ContainerValueMapping,
         key_properties: t.StrSequence,
     ) -> None:
         """Initialize sink with Singer protocol parameters."""
@@ -38,8 +38,8 @@ class FlextTargetLdapSink:
 
     def process_record(
         self,
-        _record: Mapping[str, t.NormalizedValue],
-        _context: Mapping[str, t.NormalizedValue],
+        _record: t.ContainerMapping,
+        _context: t.ContainerMapping,
     ) -> r[bool]:
         """Process a record using the target."""
         try:
@@ -78,11 +78,11 @@ class FlextTargetLdapTarget:
     @override
     def __init__(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: t.ContainerValueMapping,
         **kwargs: t.Scalar,
     ) -> None:
         """Initialize target with configuration."""
-        self.config: Mapping[str, t.ContainerValue] = config
+        self.config: t.ContainerValueMapping = config
 
 
 logger = FlextLogger(__name__)
@@ -96,7 +96,7 @@ def _is_container_list(
 
 def _container_mapping_from_value(
     value: t.ContainerValue,
-) -> Mapping[str, t.ContainerValue]:
+) -> t.ContainerValueMapping:
     if isinstance(value, dict):
         return {str(k): v for k, v in value.items()}
     msg = f"Expected dict for attribute mapping, got {type(value).__name__}: {value!r}"
@@ -123,7 +123,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         self,
         target: FlextTargetLdapTarget,
         stream_name: str,
-        schema: Mapping[str, t.ContainerValue],
+        schema: t.ContainerValueMapping,
         key_properties: t.StrSequence,
     ) -> None:
         """Initialize LDAP sink."""
@@ -137,14 +137,14 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
 
     def build_attributes(
         self,
-        _record: Mapping[str, t.ContainerValue],
-    ) -> r[Mapping[str, t.ContainerValue]]:
+        _record: t.ContainerValueMapping,
+    ) -> r[t.ContainerValueMapping]:
         """Build LDAP attributes from record. Override in subclasses."""
         return r[t.ContainerValueMapping].fail(
             "build_attributes must be implemented in subclass",
         )
 
-    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
+    def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
         """Build distinguished name from record. Override in subclasses."""
         dn = record.get("dn")
         if isinstance(dn, str) and dn:
@@ -159,7 +159,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
 
     def get_object_classes(
         self,
-        record: Mapping[str, t.ContainerValue],
+        record: t.ContainerValueMapping,
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for entry."""
         record_classes = record.get("object_classes")
@@ -176,7 +176,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         """Get processing results."""
         return self._processing_result
 
-    def process_batch(self, _context: Mapping[str, t.ContainerValue]) -> None:
+    def process_batch(self, _context: t.ContainerValueMapping) -> None:
         """Process a batch of records."""
         setup_result: r[FlextTargetLdapClient] = self.setup_client()
         if not setup_result.is_success:
@@ -184,7 +184,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             return
         try:
             records_raw = _context.get("records", [])
-            records: MutableSequence[Mapping[str, t.ContainerValue]] = []
+            records: MutableSequence[t.ContainerValueMapping] = []
             if isinstance(records_raw, list):
                 records.extend(item for item in records_raw if isinstance(item, dict))
             logger.info(
@@ -192,7 +192,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             )
             for record in records:
                 if isinstance(record, dict):
-                    normalized_record: MutableMapping[str, t.ContainerValue] = {}
+                    normalized_record: t.MutableContainerValueMapping = {}
                     for k, v in record.items():
                         normalized_record[str(k)] = v
                     self.process_record(normalized_record, _context)
@@ -205,8 +205,8 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.NormalizedValue],
-        _context: Mapping[str, t.NormalizedValue],
+        _record: t.ContainerMapping,
+        _context: t.ContainerMapping,
     ) -> r[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
@@ -259,7 +259,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     def validate_entry(
         self,
         dn: str,
-        attributes: Mapping[str, t.ContainerValue],
+        attributes: t.ContainerValueMapping,
         object_classes: t.StrSequence,
     ) -> r[bool]:
         """Validate LDAP entry before writing."""
@@ -292,10 +292,10 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     @override
     def build_attributes(
         self,
-        _record: Mapping[str, t.ContainerValue],
-    ) -> r[Mapping[str, t.ContainerValue]]:
+        _record: t.ContainerValueMapping,
+    ) -> r[t.ContainerValueMapping]:
         """Build LDAP attributes for user entry."""
-        attrs: MutableMapping[str, t.ContainerValue] = {}
+        attrs: t.MutableContainerValueMapping = {}
         for k, v in _record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
             if _is_container_list(v):
@@ -305,7 +305,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         return r[t.ContainerValueMapping].ok(attrs)
 
     @override
-    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
+    def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
         """Build DN for user entry."""
         rdn_attr = str(self._target.config.get("user_rdn_attribute", "uid"))
         uid = record.get(rdn_attr)
@@ -316,14 +316,14 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
 
     def build_user_attributes(
         self,
-        record: Mapping[str, t.NormalizedValue],
-    ) -> MutableMapping[str, t.ContainerValue]:
+        record: t.ContainerMapping,
+    ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.config.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
-        attributes: MutableMapping[str, t.ContainerValue] = {
+        attributes: t.MutableContainerValueMapping = {
             "objectClass": list(object_classes)
             if _is_container_list(object_classes)
             else ["inetOrgPerson", "person"],
@@ -352,7 +352,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: MutableMapping[str, str] = {}
+        mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -368,7 +368,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     @override
     def get_object_classes(
         self,
-        record: Mapping[str, t.ContainerValue],
+        record: t.ContainerValueMapping,
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for user entry."""
         configured = self._target.config.get("users_object_classes")
@@ -379,8 +379,8 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.NormalizedValue],
-        _context: Mapping[str, t.NormalizedValue],
+        _record: t.ContainerMapping,
+        _context: t.ContainerMapping,
     ) -> r[bool]:
         """Process a user record."""
         if not self.client:
@@ -405,7 +405,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 if _is_container_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
-            attributes_dict: MutableMapping[str, t.ContainerValue] = {}
+            attributes_dict: t.MutableContainerValueMapping = {}
             for k, v in attributes.items():
                 if k != "objectClass":
                     if _is_container_list(v):
@@ -453,10 +453,10 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     @override
     def build_attributes(
         self,
-        _record: Mapping[str, t.ContainerValue],
-    ) -> r[Mapping[str, t.ContainerValue]]:
+        _record: t.ContainerValueMapping,
+    ) -> r[t.ContainerValueMapping]:
         """Build LDAP attributes for group entry."""
-        attrs: MutableMapping[str, t.ContainerValue] = {}
+        attrs: t.MutableContainerValueMapping = {}
         field_map = {"members": "member"}
         for k, v in _record.items():
             target_key = field_map.get(k, k)
@@ -467,7 +467,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         return r[t.ContainerValueMapping].ok(attrs)
 
     @override
-    def build_dn(self, record: Mapping[str, t.ContainerValue]) -> r[str]:
+    def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
         """Build DN for group entry."""
         rdn_attr = str(self._target.config.get("group_rdn_attribute", "cn"))
         cn = record.get(rdn_attr)
@@ -479,7 +479,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     @override
     def get_object_classes(
         self,
-        record: Mapping[str, t.ContainerValue],
+        record: t.ContainerValueMapping,
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
@@ -490,8 +490,8 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.NormalizedValue],
-        _context: Mapping[str, t.NormalizedValue],
+        _record: t.ContainerMapping,
+        _context: t.ContainerMapping,
     ) -> r[bool]:
         """Process a group record."""
         if not self.client:
@@ -510,7 +510,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                 if _is_container_list(object_classes_raw)
                 else ["groupOfNames"]
             )
-            attributes_dict: MutableMapping[str, t.ContainerValue] = {}
+            attributes_dict: t.MutableContainerValueMapping = {}
             for k, v in attributes.items():
                 if k != "objectClass":
                     if _is_container_list(v):
@@ -553,14 +553,14 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
 
     def _build_group_attributes(
         self,
-        record: Mapping[str, t.NormalizedValue],
-    ) -> MutableMapping[str, t.ContainerValue]:
+        record: t.ContainerMapping,
+    ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.config.get(
             "group_object_classes",
             ["groupOfNames"],
         )
-        attributes: MutableMapping[str, t.ContainerValue] = {
+        attributes: t.MutableContainerValueMapping = {
             "objectClass": list(object_classes)
             if _is_container_list(object_classes)
             else ["groupOfNames"],
@@ -584,7 +584,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: MutableMapping[str, str] = {}
+        mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():
@@ -607,8 +607,8 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: Mapping[str, t.NormalizedValue],
-        _context: Mapping[str, t.NormalizedValue],
+        _record: t.ContainerMapping,
+        _context: t.ContainerMapping,
     ) -> r[bool]:
         """Process an organizational unit record."""
         if not self.client:
@@ -621,7 +621,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                 return r[bool].fail("No OU name found in record")
             ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
             attributes = self._build_ou_attributes(_record)
-            attributes_dict: MutableMapping[str, t.ContainerValue] = {}
+            attributes_dict: t.MutableContainerValueMapping = {}
             for k, v in attributes.items():
                 if _is_container_list(v):
                     attributes_dict[k] = list(v)
@@ -659,14 +659,14 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: Mapping[str, t.NormalizedValue],
-    ) -> MutableMapping[str, t.ContainerValue]:
+        record: t.ContainerMapping,
+    ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.config.get(
             "object_classes",
             ["organizationalUnit"],
         )
-        attributes: MutableMapping[str, t.ContainerValue] = {
+        attributes: t.MutableContainerValueMapping = {
             "objectClass": list(default_classes)
             if _is_container_list(default_classes)
             else ["organizationalUnit"],
@@ -683,7 +683,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
         raw_mapping = _container_mapping_from_value(mapping_val)
-        mapping: MutableMapping[str, str] = {}
+        mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
             match v:
                 case str():

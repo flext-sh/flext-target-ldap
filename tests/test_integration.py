@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import io
 import json
-from collections.abc import MutableMapping
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
@@ -179,7 +178,7 @@ class TestTargetLDAPIntegration:
         self,
         mock_api: MagicMock,
         tmp_path: Path,
-        mock_ldap_config: MutableMapping[str, t.ContainerValue],
+        mock_ldap_config: t.MutableContainerValueMapping,
     ) -> None:
         """Test DN template usage for record processing."""
         mock_ldap_config["dn_templates"] = {

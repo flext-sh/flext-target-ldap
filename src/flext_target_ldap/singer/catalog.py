@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping
+from collections.abc import MutableMapping
 from typing import override
 
 from flext_core import FlextLogger, r
@@ -30,7 +30,7 @@ class FlextTargetLdapCatalogManager:
     def add_stream(
         self,
         stream_name: str,
-        schema: Mapping[str, t.ContainerValue],
+        schema: t.ContainerValueMapping,
     ) -> r[bool]:
         """Add LDAP stream to catalog."""
         try:

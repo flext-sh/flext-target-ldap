@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-
 from flext_target_ldap import t
 
 
-def build_singer_catalog() -> Mapping[str, t.ContainerValue]:
+def build_singer_catalog() -> t.ContainerValueMapping:
     """Build the canonical Singer catalog for LDAP targets."""
     return {
         "streams": [

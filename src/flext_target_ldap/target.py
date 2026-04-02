@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable, Mapping, MutableMapping
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import ClassVar, override
 
@@ -62,14 +62,14 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: Mapping[str, t.ContainerValue]
+    config: t.ContainerValueMapping
     cli: ClassVar[Callable[..., None] | None] = None
 
     @override
     def __init__(
         self,
         *,
-        config: Mapping[str, t.ContainerValue] | None = None,
+        config: t.ContainerValueMapping | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -81,7 +81,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            normalized_config: MutableMapping[str, t.Scalar] = {}
+            normalized_config: t.MutableScalarMapping = {}
             for key, value in self.config.items():
                 match value:
                     case bool() | int() | str():
@@ -95,7 +95,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> Mapping[str, t.ContainerValue]:
+    def singer_catalog(self) -> t.ContainerValueMapping:
         """Return the Singer catalog for this target."""
         return build_singer_catalog()
 
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     main()
 
 
-def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
+def _load_config_from_file(config_path: str) -> t.ContainerValueMapping:
     """Load configuration from JSON file."""
     try:
         content = Path(config_path).read_text(encoding="utf-8")
@@ -194,7 +194,7 @@ def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
 
 
 def _get_ldap_api(
-    config: Mapping[str, t.ContainerValue],
+    config: t.ContainerValueMapping,
 ) -> FlextTargetLdapClient | None:
     """Get LDAP target client backed by flext-ldap."""
     try:
@@ -210,7 +210,7 @@ def _get_ldap_api(
 
 def _construct_dn(
     stream: str,
-    record: Mapping[str, t.ContainerValue],
+    record: t.ContainerValueMapping,
     base_dn: str,
 ) -> str:
     """Construct DN from record based on stream type."""
@@ -225,9 +225,9 @@ def _construct_dn(
 
 
 def _process_record_message(
-    record: Mapping[str, t.ContainerValue],
+    record: t.ContainerValueMapping,
     stream: str,
-    cfg: Mapping[str, t.ContainerValue],
+    cfg: t.ContainerValueMapping,
     api: FlextTargetLdapClient | None,
     seen_dns: set[str],
 ) -> None:
@@ -261,9 +261,7 @@ def _process_record_message(
 def _target_ldap_flext_cli(config: str | None = None) -> None:
     """Process Singer JSONL; echo STATE lines to stdout."""
     try:
-        cfg: Mapping[str, t.ContainerValue] = (
-            _load_config_from_file(config) if config else {}
-        )
+        cfg: t.ContainerValueMapping = _load_config_from_file(config) if config else {}
         current_stream: str | None = None
         api = _get_ldap_api(cfg)
         seen_dns: set[str] = set()
@@ -275,7 +273,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                     cli_helper = _default_cli_helper(quiet=True)
                     cli_helper.print(line.strip())
                 elif msg_type == "SCHEMA":
-                    _schema: MutableMapping[str, t.ContainerValue] = {}
+                    _schema: t.MutableContainerValueMapping = {}
                     raw_stream = raw.get("stream")
                     current_stream = str(raw_stream) if raw_stream is not None else None
                 elif msg_type == "RECORD" and api is not None:
@@ -286,7 +284,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
                         if raw_rec_stream is not None
                         else (current_stream or "users")
                     )
-                    normalized_record: MutableMapping[str, t.ContainerValue] = {}
+                    normalized_record: t.MutableContainerValueMapping = {}
                     if not isinstance(record_data, Mapping):
                         continue
                     for key, value in record_data.items():

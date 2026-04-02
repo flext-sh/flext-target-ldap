@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -28,7 +27,7 @@ class TestTargetLDAPUnit:
     """Unit tests for TargetLDAP."""
 
     @pytest.fixture
-    def config(self) -> MutableMapping[str, t.ContainerValue]:
+    def config(self) -> t.MutableContainerValueMapping:
         """Create test configuration for LDAP target."""
         return {
             "host": "test.ldap.com",
@@ -42,7 +41,7 @@ class TestTargetLDAPUnit:
 
     def test_target_initialization(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: t.ContainerValueMapping,
     ) -> None:
         """Test target LDAP initialization with name and config."""
         target = TargetLdap(config=config)
@@ -51,7 +50,7 @@ class TestTargetLDAPUnit:
             raise AssertionError(msg)
         assert target.config == config
 
-    def test_get_sink_class_users(self, config: Mapping[str, t.ContainerValue]) -> None:
+    def test_get_sink_class_users(self, config: t.ContainerValueMapping) -> None:
         """Test getting users sink class."""
         target = TargetLdap(config=config)
         sink_class = target.get_sink_class("users")
@@ -61,7 +60,7 @@ class TestTargetLDAPUnit:
 
     def test_get_sink_class_groups(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: t.ContainerValueMapping,
     ) -> None:
         """Test getting groups sink class."""
         target = TargetLdap(config=config)
@@ -72,7 +71,7 @@ class TestTargetLDAPUnit:
 
     def test_get_sink_class_generic(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: t.ContainerValueMapping,
     ) -> None:
         """Test getting generic sink class for unknown stream."""
         target = TargetLdap(config=config)
@@ -83,7 +82,7 @@ class TestTargetLDAPUnit:
 
     def test_dn_template_processing(
         self,
-        config: MutableMapping[str, t.ContainerValue],
+        config: t.MutableContainerValueMapping,
     ) -> None:
         """Test DN template configuration via user_rdn_attribute."""
         config["user_rdn_attribute"] = "uid"
@@ -97,7 +96,7 @@ class TestTargetLDAPUnit:
 
     def test_object_classes_processing(
         self,
-        config: MutableMapping[str, t.ContainerValue],
+        config: t.MutableContainerValueMapping,
     ) -> None:
         """Test object classes configuration read by UsersSink."""
         config["users_object_classes"] = ["customPerson", "top"]
@@ -107,7 +106,7 @@ class TestTargetLDAPUnit:
         object_classes = sink.get_object_classes({})
         assert object_classes == ["customPerson", "top"]
 
-    def test_process_record(self, config: Mapping[str, t.ContainerValue]) -> None:
+    def test_process_record(self, config: t.ContainerValueMapping) -> None:
         """Test processing a record through the LDAP target."""
         mock_client = MagicMock()
         mock_client.add_entry.return_value = r[bool].ok(value=True)
@@ -115,7 +114,7 @@ class TestTargetLDAPUnit:
         sink = target.get_sink("users")
         assert isinstance(sink, LdapBaseSink)
         sink.client = mock_client
-        record: Mapping[str, t.ContainerValue] = {
+        record: t.ContainerValueMapping = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
             "uid": "jdoe",
             "cn": "John Doe",
@@ -133,7 +132,7 @@ class TestTargetLDAPUnit:
 
     def test_process_delete_record(
         self,
-        config: Mapping[str, t.ContainerValue],
+        config: t.ContainerValueMapping,
     ) -> None:
         """Test processing a delete record through the LDAP target.
 
@@ -146,7 +145,7 @@ class TestTargetLDAPUnit:
         sink = target.get_sink("users")
         assert isinstance(sink, LdapBaseSink)
         sink.client = mock_client
-        record: Mapping[str, t.ContainerValue] = {
+        record: t.ContainerValueMapping = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
             "_sdc_deleted_at": "2024-01-15T10:30:00Z",
         }

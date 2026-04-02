@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from pathlib import Path
 from typing import override
 
@@ -44,7 +43,7 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_batch(
             self,
-            context: Mapping[str, t.NormalizedValue],
+            context: t.ContainerMapping,
         ) -> None:
             """Singer batch hook is handled record-by-record by the runtime sink."""
             _ = context
@@ -52,8 +51,8 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_record(
             self,
-            record: Mapping[str, t.NormalizedValue],
-            context: Mapping[str, t.NormalizedValue],
+            record: t.ContainerMapping,
+            context: t.ContainerMapping,
         ) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
@@ -99,7 +98,7 @@ class FlextTargetLdapServiceRuntime:
     @classmethod
     def normalize_singer_mapping(
         cls,
-        source: Mapping[str, t.NormalizedValue],
+        source: t.ContainerMapping,
     ) -> dict[str, t.ContainerValue]:
         """Normalize a Singer payload mapping to the LDAP runtime contract."""
         normalized: dict[str, t.ContainerValue] = {}

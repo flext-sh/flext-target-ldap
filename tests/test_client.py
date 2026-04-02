@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,7 +17,7 @@ class TestLDAPClient:
     @pytest.fixture
     def client(
         self,
-        mock_ldap_config: Mapping[str, t.ContainerValue],
+        mock_ldap_config: t.ContainerValueMapping,
     ) -> FlextTargetLdapClient:
         """Create test target client instance."""
         return FlextTargetLdapClient(config=mock_ldap_config)
