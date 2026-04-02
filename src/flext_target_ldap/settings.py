@@ -14,9 +14,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from flext_core import r
 from pydantic import Field, ValidationError
 
+from flext_core import r
 from flext_target_ldap import c, m, t
 
 

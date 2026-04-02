@@ -6,8 +6,8 @@ from collections.abc import Mapping
 from unittest.mock import MagicMock
 
 import pytest
-from flext_core import r
 
+from flext_core import r
 from flext_target_ldap import FlextTargetLdapClient, FlextTargetLdapSearchEntry
 from tests import t
 

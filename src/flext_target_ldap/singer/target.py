@@ -15,7 +15,6 @@ from collections.abc import Mapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r
-
 from flext_target_ldap import c, p, t
 
 logger: p.Logger = FlextLogger(__name__)
@@ -59,7 +58,7 @@ class FlextTargetLdapSingerTarget:
             processed_count = 0
             for _message in messages:
                 processed_count += 1
-            result: Mapping[str, int | str] = {
+            result: t.HeaderMapping = {
                 "processed_messages": processed_count,
                 "status": "completed",
             }

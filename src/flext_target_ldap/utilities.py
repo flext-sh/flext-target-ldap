@@ -11,16 +11,12 @@ import re
 from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import datetime
 
+from pydantic import BaseModel, ValidationError
+
 from flext_core import r
-from flext_ldap import FlextLdapUtilities, m as ldap_m
+from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
-from pydantic import BaseModel, TypeAdapter
-
-from flext_target_ldap import c, t
-
-_CONFIG_MAP_ADAPTER: TypeAdapter[Mapping[str, t.ConfigMap]] = TypeAdapter(
-    Mapping[str, t.ConfigMap],
-)
+from flext_target_ldap import c, m, t
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -90,15 +86,28 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             @staticmethod
             def build_connection_config(
                 config: Mapping[str, t.ConfigMap | t.ContainerValue],
-            ) -> ldap_m.Ldap.ConnectionConfig:
+            ) -> m.Ldap.ConnectionConfig:
                 """Build LDAP ConnectionConfig from a flat config mapping."""
-                return ldap_m.Ldap.ConnectionConfig(
-                    host=str(config.get("host", "localhost")),
-                    port=int(str(config.get("port", c.Ldap.ConnectionDefaults.PORT))),
+                return m.Ldap.ConnectionConfig(
+                    host=u.TargetLdap.TypeConversion.to_str(
+                        config.get("host", "localhost"),
+                        default="localhost",
+                    ),
+                    port=u.TargetLdap.TypeConversion.to_int(
+                        config.get("port", c.Ldap.ConnectionDefaults.PORT),
+                        default=c.Ldap.ConnectionDefaults.PORT,
+                    ),
                     use_ssl=bool(config.get("use_ssl", False)),
-                    bind_dn=str(config.get("bind_dn", "")),
-                    bind_password=str(config.get("password", "")),
-                    timeout=int(str(config.get("timeout", 30))),
+                    bind_dn=u.TargetLdap.TypeConversion.to_str(
+                        config.get("bind_dn", ""),
+                    ),
+                    bind_password=u.TargetLdap.TypeConversion.to_str(
+                        config.get("password", ""),
+                    ),
+                    timeout=u.TargetLdap.TypeConversion.to_int(
+                        config.get("timeout", 30),
+                        default=30,
+                    ),
                 )
 
             @staticmethod
@@ -109,7 +118,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """Coerce a config value to str."""
                 if value is None:
                     return default
-                return str(value)
+                try:
+                    return t.TargetLdap.STRING_ADAPTER.validate_python(value)
+                except ValidationError:
+                    return default
 
             @staticmethod
             def to_int(
@@ -124,13 +136,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         return default
                     case int():
                         return value
-                    case str():
+                    case str() | float():
                         try:
-                            return int(value)
-                        except ValueError:
+                            return t.TargetLdap.INTEGER_ADAPTER.validate_python(value)
+                        except ValidationError:
                             return default
-                    case float():
-                        return int(value)
                     case _:
                         return default
 
@@ -158,7 +168,18 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """Extract attribute mapping from config."""
                 raw = config.get("attribute_mapping", {})
                 if isinstance(raw, Mapping):
-                    return {str(k): str(v) for k, v in raw.items()}
+                    normalized_mapping: dict[str, str] = {}
+                    for key, value in raw.items():
+                        normalized_key = t.TargetLdap.STRING_ADAPTER.validate_python(
+                            key
+                        )
+                        normalized_value = t.TargetLdap.STRING_ADAPTER.validate_python(
+                            value,
+                        )
+                        normalized_mapping[normalized_key] = normalized_value
+                    return t.TargetLdap.STR_MAPPING_ADAPTER.validate_python(
+                        normalized_mapping,
+                    )
                 msg = f"Expected Mapping for 'attribute_mapping', got {type(raw).__name__}: {raw!r}"
                 raise TypeError(msg)
 
@@ -169,7 +190,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """Extract object classes from config."""
                 raw = config.get("object_classes")
                 if isinstance(raw, list):
-                    return [str(oc) for oc in raw if oc]
+                    normalized_object_classes = [
+                        t.TargetLdap.STRING_ADAPTER.validate_python(object_class)
+                        for object_class in raw
+                        if object_class
+                    ]
+                    return t.TargetLdap.STR_SEQUENCE_ADAPTER.validate_python(
+                        normalized_object_classes,
+                    )
                 if isinstance(raw, str):
                     return [raw]
                 return ["top"]
@@ -342,7 +370,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         "Host must be a non-empty string",
                     )
                 bind_dn_raw = config["bind_dn"]
-                bind_dn = str(bind_dn_raw)
+                bind_dn = u.TargetLdap.TypeConversion.to_str(bind_dn_raw)
                 if not bind_dn:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Bind DN must be a string",
@@ -352,7 +380,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         f"Invalid bind DN format: {bind_dn}",
                     )
                 base_dn_raw = config["base_dn"]
-                base_dn = str(base_dn_raw)
+                base_dn = u.TargetLdap.TypeConversion.to_str(base_dn_raw)
                 if not base_dn:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Base DN must be a string",
@@ -370,8 +398,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 if "port" in config:
                     port_raw = config["port"]
                     try:
-                        port_int = int(str(port_raw))
-                    except (ValueError, TypeError):
+                        port_int = t.TargetLdap.INTEGER_ADAPTER.validate_python(
+                            port_raw,
+                        )
+                    except ValidationError:
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )

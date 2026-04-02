@@ -7,11 +7,7 @@ from datetime import UTC, datetime
 from typing import override
 
 from flext_core import r
-
-from flext_target_ldap.constants import c
-from flext_target_ldap.models import m
-from flext_target_ldap.settings import FlextTargetLdapSettings
-from flext_target_ldap.typings import t
+from flext_target_ldap import FlextTargetLdapSettings, c, m, t
 
 
 class FlextTargetLdapConnectionService:

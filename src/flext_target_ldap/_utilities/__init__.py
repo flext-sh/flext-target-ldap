@@ -12,7 +12,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from flext_target_ldap._utilities import (
         api_service,
         client,
@@ -43,7 +42,7 @@ if _TYPE_CHECKING:
         logger,
     )
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapApiService": "flext_target_ldap._utilities.api_service",
     "FlextTargetLdapClient": "flext_target_ldap._utilities.client",
     "FlextTargetLdapConnectionService": "flext_target_ldap._utilities.services",

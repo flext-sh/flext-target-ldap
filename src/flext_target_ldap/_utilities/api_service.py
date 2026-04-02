@@ -5,12 +5,13 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 
 from flext_core import r
-
-from flext_target_ldap._utilities.config import validate_ldap_target_config
-from flext_target_ldap._utilities.services import FlextTargetLdapConnectionService
-from flext_target_ldap.target import FlextTargetLdap
-from flext_target_ldap.typings import t
-from flext_target_ldap.utilities import u
+from flext_target_ldap import (
+    FlextTargetLdap,
+    FlextTargetLdapConnectionService,
+    t,
+    u,
+    validate_ldap_target_config,
+)
 
 
 class FlextTargetLdapApiService:

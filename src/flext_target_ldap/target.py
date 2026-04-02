@@ -13,30 +13,21 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextContainer, FlextLogger
-from pydantic import ConfigDict, TypeAdapter
-
-from flext_target_ldap import FlextTargetLdapClient
-from flext_target_ldap._models.sinks import (
+from flext_target_ldap import (
     FlextTargetLdapBaseSink,
+    FlextTargetLdapClient,
     FlextTargetLdapGroupsSink,
+    FlextTargetLdapOrchestrator,
     FlextTargetLdapOrganizationalUnitsSink,
+    FlextTargetLdapSettings,
     FlextTargetLdapSink,
     FlextTargetLdapTarget,
     FlextTargetLdapUsersSink,
-)
-from flext_target_ldap.application import FlextTargetLdapOrchestrator
-from flext_target_ldap.catalog import build_singer_catalog
-from flext_target_ldap.constants import c
-from flext_target_ldap.protocols import p
-from flext_target_ldap.settings import FlextTargetLdapSettings
-from flext_target_ldap.typings import t
-
-_SINGER_MSG_ADAPTER: TypeAdapter[t.ContainerMapping] = TypeAdapter(
-    t.ContainerMapping,
-    config=ConfigDict(strict=False),
-)
-_CONTAINER_VALUE_MAP_ADAPTER: TypeAdapter[t.ContainerValueMapping] = TypeAdapter(
-    t.ContainerValueMapping,
+    build_singer_catalog,
+    c,
+    p,
+    t,
+    u,
 )
 
 
@@ -96,7 +87,9 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                     case bool() | int() | str():
                         normalized_config[key] = value
                     case _:
-                        normalized_config[key] = str(value)
+                        normalized_config[key] = (
+                            t.TargetLdap.STRING_ADAPTER.validate_python(value)
+                        )
             settings = FlextTargetLdapSettings.model_validate(normalized_config)
             self._orchestrator = FlextTargetLdapOrchestrator(settings)
         return self._orchestrator
@@ -139,7 +132,10 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         logger.info("Orchestrator initialized successfully")
         self._container = FlextContainer.get_global()
         logger.info("DI container initialized successfully")
-        host = str(self.config.get("host", "localhost"))
+        host = u.TargetLdap.TypeConversion.to_str(
+            self.config.get("host", "localhost"),
+            default="localhost",
+        )
         logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:
@@ -164,8 +160,8 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             raise ValueError(msg)
         port_obj = self.config.get("port", c.Ldap.ConnectionDefaults.PORT)
         try:
-            port = int(str(port_obj))
-        except (TypeError, ValueError):
+            port = t.TargetLdap.INTEGER_ADAPTER.validate_python(port_obj)
+        except Exception:
             port = c.Ldap.ConnectionDefaults.PORT
         if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
@@ -191,7 +187,7 @@ def _load_config_from_file(config_path: str) -> Mapping[str, t.ContainerValue]:
     """Load configuration from JSON file."""
     try:
         content = Path(config_path).read_text(encoding="utf-8")
-        return _CONTAINER_VALUE_MAP_ADAPTER.validate_json(content)
+        return t.TargetLdap.CONTAINER_VALUE_MAP_ADAPTER.validate_json(content)
     except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
         msg = f"Failed to load configuration from {config_path}: {e}"
         raise RuntimeError(msg) from e
@@ -239,11 +235,15 @@ def _process_record_message(
     if api is None:
         return
     dn_value = record.get("dn")
-    if dn_value is None or not str(dn_value).strip():
-        base_dn = str(cfg.get("base_dn", "dc=test,dc=com"))
+    dn_text = "" if dn_value is None else u.TargetLdap.TypeConversion.to_str(dn_value)
+    if not dn_text.strip():
+        base_dn = u.TargetLdap.TypeConversion.to_str(
+            cfg.get("base_dn", "dc=test,dc=com"),
+            default="dc=test,dc=com",
+        )
         dn = _construct_dn(stream, record, base_dn)
     else:
-        dn = str(dn_value)
+        dn = dn_text
     if record.get("_sdc_deleted_at"):
         api.delete_entry(dn)
     else:
@@ -269,7 +269,7 @@ def _target_ldap_flext_cli(config: str | None = None) -> None:
         seen_dns: set[str] = set()
         for line in sys.stdin:
             try:
-                raw = _SINGER_MSG_ADAPTER.validate_json(line)
+                raw = t.TargetLdap.SINGER_MESSAGE_ADAPTER.validate_json(line)
                 msg_type = raw.get("type")
                 if msg_type == "STATE":
                     cli_helper = _default_cli_helper(quiet=True)

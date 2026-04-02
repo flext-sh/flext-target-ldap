@@ -14,9 +14,7 @@ from collections.abc import Mapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r
-
-from flext_target_ldap import c, p, t
-from flext_target_ldap.settings import FlextTargetLdapSettings
+from flext_target_ldap import FlextTargetLdapSettings, c, p, t
 
 logger: p.Logger = FlextLogger(__name__)
 
@@ -49,7 +47,7 @@ class FlextTargetLdapOrchestrator:
     def orchestrate_data_loading(
         self,
         records: Sequence[Mapping[str, t.Scalar | None]],
-    ) -> r[Mapping[str, str | int]]:
+    ) -> r[t.HeaderMapping]:
         """Orchestrate data loading to LDAP target.
 
         Args:
@@ -64,15 +62,15 @@ class FlextTargetLdapOrchestrator:
             processed_count = 0
             for _record in records:
                 processed_count += 1
-            result_dict: Mapping[str, str | int] = {
+            result_dict: t.HeaderMapping = {
                 "loaded_records": processed_count,
                 "status": "completed",
             }
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return r[Mapping[str, str | int]].ok(result_dict)
+            return r[t.HeaderMapping].ok(result_dict)
         except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             logger.exception("LDAP data loading orchestration failed")
-            return r[Mapping[str, str | int]].fail(
+            return r[t.HeaderMapping].fail(
                 f"Data loading orchestration failed: {e}",
             )
 

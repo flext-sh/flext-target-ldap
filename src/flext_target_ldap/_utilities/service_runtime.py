@@ -7,11 +7,7 @@ from pathlib import Path
 from typing import override
 
 from flext_meltano import FlextMeltanoSingerSinkBase, FlextMeltanoSingerTargetBase
-
-from flext_target_ldap import u
-from flext_target_ldap._models.sinks import FlextTargetLdapSink
-from flext_target_ldap.target import FlextTargetLdap
-from flext_target_ldap.typings import t
+from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, t, u
 
 
 class FlextTargetLdapServiceRuntime:

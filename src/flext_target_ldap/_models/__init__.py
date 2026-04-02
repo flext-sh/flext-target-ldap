@@ -12,7 +12,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from flext_target_ldap._models import processing_result, sinks
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -28,7 +27,7 @@ if _TYPE_CHECKING:
         logger,
     )
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapBaseSink": "flext_target_ldap._models.sinks",
     "FlextTargetLdapGroupsSink": "flext_target_ldap._models.sinks",
     "FlextTargetLdapOrganizationalUnitsSink": "flext_target_ldap._models.sinks",

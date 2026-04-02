@@ -10,7 +10,6 @@ from collections.abc import Mapping, MutableMapping, Sequence
 from typing import override
 
 from flext_core import FlextLogger, r
-
 from flext_target_ldap import m, t
 
 logger = FlextLogger(__name__)
@@ -95,10 +94,10 @@ class FlextTargetLdapDataTransformer:
         schema: m.TargetLdap.SingerSchemaDefinition
         | Mapping[str, Mapping[str, t.StrMapping | str]]
         | None = None,
-    ) -> r[Mapping[str, str | None]]:
+    ) -> r[t.OptionalStrMapping]:
         """Transform Singer record for LDAP storage."""
         try:
-            transformed: MutableMapping[str, str | None] = {}
+            transformed: t.MutableOptionalStrMapping = {}
             schema_model = m.TargetLdap.SingerSchemaDefinition.model_validate(
                 schema or {},
             )
@@ -111,14 +110,14 @@ class FlextTargetLdapDataTransformer:
                     value,
                 )
                 if convert_result.is_failure:
-                    return r[Mapping[str, str | None]].fail(
+                    return r[t.OptionalStrMapping].fail(
                         f"Conversion failed for '{key}': {convert_result.error}",
                     )
                 transformed[ldap_key] = convert_result.value
-            return r[Mapping[str, str | None]].ok(transformed)
+            return r[t.OptionalStrMapping].ok(transformed)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
-            return r[Mapping[str, str | None]].fail(
+            return r[t.OptionalStrMapping].fail(
                 f"Record transformation failed: {e}",
             )
 

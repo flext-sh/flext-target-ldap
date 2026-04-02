@@ -15,7 +15,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from flext_target_ldap.singer import catalog, stream, target
     from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
     from flext_target_ldap.singer.stream import (
@@ -24,7 +23,7 @@ if _TYPE_CHECKING:
     )
     from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget, logger
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapCatalogManager": "flext_target_ldap.singer.catalog",
     "FlextTargetLdapSingerTarget": "flext_target_ldap.singer.target",
     "FlextTargetLdapStreamProcessingStats": "flext_target_ldap.singer.stream",

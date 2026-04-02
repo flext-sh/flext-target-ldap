@@ -11,16 +11,16 @@ from collections.abc import Mapping, MutableMapping
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import r
 
+from flext_core import r
 from flext_target_ldap import (
     FlextTargetLdap as TargetLdap,
     FlextTargetLdapBaseSink as LdapBaseSink,
     FlextTargetLdapGroupsSink as LdapGroupsSink,
     FlextTargetLdapSink as Sink,
     FlextTargetLdapUsersSink as LdapUsersSink,
+    _default_cli_helper,
 )
-from flext_target_ldap.target import _default_cli_helper
 from tests import t, u
 
 

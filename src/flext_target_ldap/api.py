@@ -12,9 +12,7 @@ from __future__ import annotations
 from typing import override
 
 from flext_meltano import FlextMeltanoSingerSinkBase, FlextMeltanoTargetServiceBase
-
-from flext_target_ldap._utilities.service_runtime import FlextTargetLdapServiceRuntime
-from flext_target_ldap.typings import t
+from flext_target_ldap import FlextTargetLdapServiceRuntime, t
 
 
 class FlextTargetLdapService(FlextMeltanoTargetServiceBase):

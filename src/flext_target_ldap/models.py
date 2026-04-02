@@ -12,14 +12,14 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import math
-from collections.abc import MutableMapping, MutableSequence, Sequence
+from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_ldap import FlextLdapModels, r
-from flext_meltano import FlextMeltanoModels
 from pydantic import Field, field_validator
 
+from flext_ldap import FlextLdapModels, r
+from flext_meltano import FlextMeltanoModels
 from flext_target_ldap import c, t
 
 
@@ -612,6 +612,12 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 default_factory=dict
             )
             applied_rules: MutableSequence[str] = Field(default_factory=list)
+
+        class SearchEntry(FlextLdapModels.Value):
+            """Canonical LDAP search result entry."""
+
+            dn: str
+            attributes: Mapping[str, t.ContainerValue] = Field(default_factory=dict)
 
 
 # Export the unified models class

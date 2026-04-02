@@ -17,7 +17,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from flext_target_ldap.patterns import ldap_patterns
     from flext_target_ldap.patterns.ldap_patterns import (
         FlextTargetLdapDataTransformer,
@@ -27,7 +26,7 @@ if _TYPE_CHECKING:
         logger,
     )
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextTargetLdapDataTransformer": "flext_target_ldap.patterns.ldap_patterns",
     "FlextTargetLdapEntryManager": "flext_target_ldap.patterns.ldap_patterns",
     "FlextTargetLdapSchemaMapper": "flext_target_ldap.patterns.ldap_patterns",

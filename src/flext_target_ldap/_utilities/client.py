@@ -19,20 +19,12 @@ from flext_ldap import (
     ldap,
     m,
 )
-from pydantic import BaseModel, ConfigDict
-
 from flext_target_ldap import c, t
+from flext_target_ldap.models import FlextTargetLdapModels as _TargetModels
 
 logger = FlextLogger(__name__)
 
-
-class FlextTargetLdapSearchEntry(BaseModel):
-    """Canonical LDAP search result entry."""
-
-    model_config = ConfigDict(frozen=True)
-
-    dn: str
-    attributes: Mapping[str, t.ContainerValue]
+FlextTargetLdapSearchEntry = _TargetModels.TargetLdap.SearchEntry
 
 
 def _is_container_list(
@@ -107,18 +99,27 @@ class FlextTargetLdapClient:
             self._password = config.bind_password or ""
         elif isinstance(config, dict):
             config_map: Mapping[str, t.ContainerValue] = {
-                str(k): v for k, v in config.items()
+                t.TargetLdap.STRING_ADAPTER.validate_python(k): v
+                for k, v in config.items()
             }
             self.config = m.Ldap.ConnectionConfig(
-                host=str(config_map.get("host", "localhost")),
-                port=int(
-                    str(config_map.get("port", c.Ldap.ConnectionDefaults.PORT)),
+                host=t.TargetLdap.STRING_ADAPTER.validate_python(
+                    config_map.get("host", "localhost"),
+                ),
+                port=t.TargetLdap.INTEGER_ADAPTER.validate_python(
+                    config_map.get("port", c.Ldap.ConnectionDefaults.PORT),
                 ),
                 use_ssl=bool(config_map.get("use_ssl")),
-                timeout=int(str(config_map.get("timeout", 30))),
+                timeout=t.TargetLdap.INTEGER_ADAPTER.validate_python(
+                    config_map.get("timeout", 30),
+                ),
             )
-            self._bind_dn = str(config_map.get("bind_dn", ""))
-            self._password = str(config_map.get("password", ""))
+            self._bind_dn = t.TargetLdap.STRING_ADAPTER.validate_python(
+                config_map.get("bind_dn", ""),
+            )
+            self._password = t.TargetLdap.STRING_ADAPTER.validate_python(
+                config_map.get("password", ""),
+            )
         else:
             self.config = m.Ldap.ConnectionConfig(
                 host="localhost",
