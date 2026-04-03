@@ -1,12 +1,7 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
 # Regenerate with: make gen
 #
-"""Test initialization module.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Tests package."""
 
 from __future__ import annotations
 
@@ -23,7 +18,7 @@ if _TYPE_CHECKING:
     from flext_core.mixins import FlextMixins as x
     from flext_core.result import FlextResult as r
     from flext_core.service import FlextService as s
-    from tests import (
+    from flext_target_ldap import (
         conftest,
         constants,
         models,
@@ -36,7 +31,7 @@ if _TYPE_CHECKING:
         typings,
         utilities,
     )
-    from tests.conftest import (
+    from flext_target_ldap.conftest import (
         mock_ldap_client,
         mock_ldap_config,
         mock_ldap_config_internal,
@@ -49,105 +44,83 @@ if _TYPE_CHECKING:
         singer_message_schema,
         singer_message_state,
     )
-    from tests.constants import (
+    from flext_target_ldap.constants import (
         FlextTargetLdapTestConstants,
         FlextTargetLdapTestConstants as c,
     )
-    from tests.models import (
+    from flext_target_ldap.models import (
         FlextTargetLdapTestModels,
         FlextTargetLdapTestModels as m,
         tm,
     )
-    from tests.protocols import (
+    from flext_target_ldap.protocols import (
         FlextTargetLdapTestProtocols,
         FlextTargetLdapTestProtocols as p,
     )
-    from tests.test_client import TestLDAPClient
-    from tests.test_integration import TestTargetLDAPIntegration
-    from tests.test_sinks import (
-        TestGroupsSink,
-        TestLDAPBaseSink,
-        TestLDAPGenericSink,
-        TestOrganizationalUnitsSink,
-        TestUsersSink,
-    )
-    from tests.test_target import (
-        TestTargetLDAPUnit,
-        test_default_cli_helper_logs_with_flext_logger,
-        test_sink_process_record_delegates_to_target_handler,
-    )
-    from tests.test_transformation import (
+    from flext_target_ldap.test_client import TestLDAPClient
+    from flext_target_ldap.test_integration import TestTargetLDAPIntegration
+    from flext_target_ldap.test_sinks import TestLDAPBaseSink
+    from flext_target_ldap.test_target import TestTargetLDAPUnit
+    from flext_target_ldap.test_transformation import (
         EXPECTED_DATA_COUNT,
         TestDataTransformationEngine,
-        TestIntegratedTransformation,
-        TestMigrationValidator,
-        TestTransformationRule,
     )
-    from tests.typings import (
+    from flext_target_ldap.typings import (
         FlextTargetLdapTestTypes,
         FlextTargetLdapTestTypes as t,
         tt,
     )
-    from tests.utilities import (
+    from flext_target_ldap.utilities import (
         FlextTargetLdapTestUtilities,
         FlextTargetLdapTestUtilities as u,
     )
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
-    "EXPECTED_DATA_COUNT": "tests.test_transformation",
-    "FlextTargetLdapTestConstants": "tests.constants",
-    "FlextTargetLdapTestModels": "tests.models",
-    "FlextTargetLdapTestProtocols": "tests.protocols",
-    "FlextTargetLdapTestTypes": "tests.typings",
-    "FlextTargetLdapTestUtilities": "tests.utilities",
-    "TestDataTransformationEngine": "tests.test_transformation",
-    "TestGroupsSink": "tests.test_sinks",
-    "TestIntegratedTransformation": "tests.test_transformation",
-    "TestLDAPBaseSink": "tests.test_sinks",
-    "TestLDAPClient": "tests.test_client",
-    "TestLDAPGenericSink": "tests.test_sinks",
-    "TestMigrationValidator": "tests.test_transformation",
-    "TestOrganizationalUnitsSink": "tests.test_sinks",
-    "TestTargetLDAPIntegration": "tests.test_integration",
-    "TestTargetLDAPUnit": "tests.test_target",
-    "TestTransformationRule": "tests.test_transformation",
-    "TestUsersSink": "tests.test_sinks",
-    "c": ("tests.constants", "FlextTargetLdapTestConstants"),
-    "conftest": "tests.conftest",
-    "constants": "tests.constants",
+    "EXPECTED_DATA_COUNT": "flext_target_ldap.test_transformation",
+    "FlextTargetLdapTestConstants": "flext_target_ldap.constants",
+    "FlextTargetLdapTestModels": "flext_target_ldap.models",
+    "FlextTargetLdapTestProtocols": "flext_target_ldap.protocols",
+    "FlextTargetLdapTestTypes": "flext_target_ldap.typings",
+    "FlextTargetLdapTestUtilities": "flext_target_ldap.utilities",
+    "TestDataTransformationEngine": "flext_target_ldap.test_transformation",
+    "TestLDAPBaseSink": "flext_target_ldap.test_sinks",
+    "TestLDAPClient": "flext_target_ldap.test_client",
+    "TestTargetLDAPIntegration": "flext_target_ldap.test_integration",
+    "TestTargetLDAPUnit": "flext_target_ldap.test_target",
+    "c": ("flext_target_ldap.constants", "FlextTargetLdapTestConstants"),
+    "conftest": "flext_target_ldap.conftest",
+    "constants": "flext_target_ldap.constants",
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
     "h": ("flext_core.handlers", "FlextHandlers"),
-    "m": ("tests.models", "FlextTargetLdapTestModels"),
-    "mock_ldap_client": "tests.conftest",
-    "mock_ldap_config": "tests.conftest",
-    "mock_ldap_config_internal": "tests.conftest",
-    "mock_target": "tests.conftest",
-    "models": "tests.models",
-    "p": ("tests.protocols", "FlextTargetLdapTestProtocols"),
-    "protocols": "tests.protocols",
+    "m": ("flext_target_ldap.models", "FlextTargetLdapTestModels"),
+    "mock_ldap_client": "flext_target_ldap.conftest",
+    "mock_ldap_config": "flext_target_ldap.conftest",
+    "mock_ldap_config_internal": "flext_target_ldap.conftest",
+    "mock_target": "flext_target_ldap.conftest",
+    "models": "flext_target_ldap.models",
+    "p": ("flext_target_ldap.protocols", "FlextTargetLdapTestProtocols"),
+    "protocols": "flext_target_ldap.protocols",
     "r": ("flext_core.result", "FlextResult"),
     "s": ("flext_core.service", "FlextService"),
-    "sample_group_record": "tests.conftest",
-    "sample_ou_record": "tests.conftest",
-    "sample_user_record": "tests.conftest",
-    "shared_ldap_container": "tests.conftest",
-    "singer_message_record": "tests.conftest",
-    "singer_message_schema": "tests.conftest",
-    "singer_message_state": "tests.conftest",
-    "t": ("tests.typings", "FlextTargetLdapTestTypes"),
-    "test_client": "tests.test_client",
-    "test_default_cli_helper_logs_with_flext_logger": "tests.test_target",
-    "test_integration": "tests.test_integration",
-    "test_sink_process_record_delegates_to_target_handler": "tests.test_target",
-    "test_sinks": "tests.test_sinks",
-    "test_target": "tests.test_target",
-    "test_transformation": "tests.test_transformation",
-    "tm": "tests.models",
-    "tt": "tests.typings",
-    "typings": "tests.typings",
-    "u": ("tests.utilities", "FlextTargetLdapTestUtilities"),
-    "utilities": "tests.utilities",
+    "sample_group_record": "flext_target_ldap.conftest",
+    "sample_ou_record": "flext_target_ldap.conftest",
+    "sample_user_record": "flext_target_ldap.conftest",
+    "shared_ldap_container": "flext_target_ldap.conftest",
+    "singer_message_record": "flext_target_ldap.conftest",
+    "singer_message_schema": "flext_target_ldap.conftest",
+    "singer_message_state": "flext_target_ldap.conftest",
+    "t": ("flext_target_ldap.typings", "FlextTargetLdapTestTypes"),
+    "test_client": "flext_target_ldap.test_client",
+    "test_integration": "flext_target_ldap.test_integration",
+    "test_sinks": "flext_target_ldap.test_sinks",
+    "test_target": "flext_target_ldap.test_target",
+    "test_transformation": "flext_target_ldap.test_transformation",
+    "tm": "flext_target_ldap.models",
+    "tt": "flext_target_ldap.typings",
+    "typings": "flext_target_ldap.typings",
+    "u": ("flext_target_ldap.utilities", "FlextTargetLdapTestUtilities"),
+    "utilities": "flext_target_ldap.utilities",
     "x": ("flext_core.mixins", "FlextMixins"),
 }
 

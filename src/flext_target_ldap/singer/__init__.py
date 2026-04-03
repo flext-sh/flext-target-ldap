@@ -1,10 +1,7 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
 # Regenerate with: make gen
 #
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-
-SPDX-License-Identifier: MIT.
-"""
+"""Singer package."""
 
 from __future__ import annotations
 
@@ -15,22 +12,41 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-    from flext_target_ldap.singer import catalog, stream, target
-    from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
-    from flext_target_ldap.singer.stream import (
-        FlextTargetLdapStreamProcessingStats,
-        FlextTargetLdapStreamProcessor,
-    )
-    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
+    from flext_core.constants import FlextConstants as c
+    from flext_core.decorators import FlextDecorators as d
+    from flext_core.exceptions import FlextExceptions as e
+    from flext_core.handlers import FlextHandlers as h
+    from flext_core.mixins import FlextMixins as x
+    from flext_core.models import FlextModels as m
+    from flext_core.protocols import FlextProtocols as p
+    from flext_core.result import FlextResult as r
+    from flext_core.service import FlextService as s
+    from flext_core.typings import FlextTypes as t
+    from flext_core.utilities import FlextUtilities as u
+    from flext_target_ldap import catalog, stream, target
+    from flext_target_ldap.catalog import FlextTargetLdapCatalogManager
+    from flext_target_ldap.stream import FlextTargetLdapStreamProcessingStats, logger
+    from flext_target_ldap.target import FlextTargetLdapSingerTarget
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
-    "FlextTargetLdapCatalogManager": "flext_target_ldap.singer.catalog",
-    "FlextTargetLdapSingerTarget": "flext_target_ldap.singer.target",
-    "FlextTargetLdapStreamProcessingStats": "flext_target_ldap.singer.stream",
-    "FlextTargetLdapStreamProcessor": "flext_target_ldap.singer.stream",
-    "catalog": "flext_target_ldap.singer.catalog",
-    "stream": "flext_target_ldap.singer.stream",
-    "target": "flext_target_ldap.singer.target",
+    "FlextTargetLdapCatalogManager": "flext_target_ldap.catalog",
+    "FlextTargetLdapSingerTarget": "flext_target_ldap.target",
+    "FlextTargetLdapStreamProcessingStats": "flext_target_ldap.stream",
+    "c": ("flext_core.constants", "FlextConstants"),
+    "catalog": "flext_target_ldap.catalog",
+    "d": ("flext_core.decorators", "FlextDecorators"),
+    "e": ("flext_core.exceptions", "FlextExceptions"),
+    "h": ("flext_core.handlers", "FlextHandlers"),
+    "logger": "flext_target_ldap.stream",
+    "m": ("flext_core.models", "FlextModels"),
+    "p": ("flext_core.protocols", "FlextProtocols"),
+    "r": ("flext_core.result", "FlextResult"),
+    "s": ("flext_core.service", "FlextService"),
+    "stream": "flext_target_ldap.stream",
+    "t": ("flext_core.typings", "FlextTypes"),
+    "target": "flext_target_ldap.target",
+    "u": ("flext_core.utilities", "FlextUtilities"),
+    "x": ("flext_core.mixins", "FlextMixins"),
 }
 
 
