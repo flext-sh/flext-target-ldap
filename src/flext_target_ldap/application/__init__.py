@@ -23,17 +23,17 @@ if _TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from flext_target_ldap import orchestrator
-    from flext_target_ldap.orchestrator import FlextTargetLdapOrchestrator
+    from flext_target_ldap.application import orchestrator
+    from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
-    "FlextTargetLdapOrchestrator": "flext_target_ldap.orchestrator",
+    "FlextTargetLdapOrchestrator": "flext_target_ldap.application.orchestrator",
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
     "h": ("flext_core.handlers", "FlextHandlers"),
     "m": ("flext_core.models", "FlextModels"),
-    "orchestrator": "flext_target_ldap.orchestrator",
+    "orchestrator": "flext_target_ldap.application.orchestrator",
     "p": ("flext_core.protocols", "FlextProtocols"),
     "r": ("flext_core.result", "FlextResult"),
     "s": ("flext_core.service", "FlextService"),

@@ -23,17 +23,24 @@ if _TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from flext_target_ldap import ldap_patterns
-    from flext_target_ldap.ldap_patterns import FlextTargetLdapTypeConverter, logger
+    from flext_target_ldap.patterns import ldap_patterns
+    from flext_target_ldap.patterns.ldap_patterns import (
+        FlextTargetLdapDataTransformer,
+        FlextTargetLdapEntryManager,
+        FlextTargetLdapSchemaMapper,
+        FlextTargetLdapTypeConverter,
+    )
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
-    "FlextTargetLdapTypeConverter": "flext_target_ldap.ldap_patterns",
+    "FlextTargetLdapDataTransformer": "flext_target_ldap.patterns.ldap_patterns",
+    "FlextTargetLdapEntryManager": "flext_target_ldap.patterns.ldap_patterns",
+    "FlextTargetLdapSchemaMapper": "flext_target_ldap.patterns.ldap_patterns",
+    "FlextTargetLdapTypeConverter": "flext_target_ldap.patterns.ldap_patterns",
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
     "h": ("flext_core.handlers", "FlextHandlers"),
-    "ldap_patterns": "flext_target_ldap.ldap_patterns",
-    "logger": "flext_target_ldap.ldap_patterns",
+    "ldap_patterns": "flext_target_ldap.patterns.ldap_patterns",
     "m": ("flext_core.models", "FlextModels"),
     "p": ("flext_core.protocols", "FlextProtocols"),
     "r": ("flext_core.result", "FlextResult"),

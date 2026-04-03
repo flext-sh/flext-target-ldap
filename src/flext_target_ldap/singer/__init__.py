@@ -23,28 +23,31 @@ if _TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from flext_target_ldap import catalog, stream, target
-    from flext_target_ldap.catalog import FlextTargetLdapCatalogManager
-    from flext_target_ldap.stream import FlextTargetLdapStreamProcessingStats, logger
-    from flext_target_ldap.target import FlextTargetLdapSingerTarget
+    from flext_target_ldap.singer import catalog, stream, target
+    from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
+    from flext_target_ldap.singer.stream import (
+        FlextTargetLdapStreamProcessingStats,
+        FlextTargetLdapStreamProcessor,
+    )
+    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
-    "FlextTargetLdapCatalogManager": "flext_target_ldap.catalog",
-    "FlextTargetLdapSingerTarget": "flext_target_ldap.target",
-    "FlextTargetLdapStreamProcessingStats": "flext_target_ldap.stream",
+    "FlextTargetLdapCatalogManager": "flext_target_ldap.singer.catalog",
+    "FlextTargetLdapSingerTarget": "flext_target_ldap.singer.target",
+    "FlextTargetLdapStreamProcessingStats": "flext_target_ldap.singer.stream",
+    "FlextTargetLdapStreamProcessor": "flext_target_ldap.singer.stream",
     "c": ("flext_core.constants", "FlextConstants"),
-    "catalog": "flext_target_ldap.catalog",
+    "catalog": "flext_target_ldap.singer.catalog",
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
     "h": ("flext_core.handlers", "FlextHandlers"),
-    "logger": "flext_target_ldap.stream",
     "m": ("flext_core.models", "FlextModels"),
     "p": ("flext_core.protocols", "FlextProtocols"),
     "r": ("flext_core.result", "FlextResult"),
     "s": ("flext_core.service", "FlextService"),
-    "stream": "flext_target_ldap.stream",
+    "stream": "flext_target_ldap.singer.stream",
     "t": ("flext_core.typings", "FlextTypes"),
-    "target": "flext_target_ldap.target",
+    "target": "flext_target_ldap.singer.target",
     "u": ("flext_core.utilities", "FlextUtilities"),
     "x": ("flext_core.mixins", "FlextMixins"),
 }
