@@ -5,28 +5,31 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING as _TYPE_CHECKING
+import typing as _t
 
 from flext_core.lazy import install_lazy_exports
 
-if _TYPE_CHECKING:
-    from flext_core import FlextTypes
-    from flext_target_ldap._models import processing_result, sinks
-    from flext_target_ldap._models.processing_result import (
-        FlextTargetLdapProcessingCounters,
-    )
-    from flext_target_ldap._models.sinks import (
+if _t.TYPE_CHECKING:
+    import flext_target_ldap._models.processing_result as _flext_target_ldap__models_processing_result
+
+    processing_result = _flext_target_ldap__models_processing_result
+    import flext_target_ldap._models.sinks as _flext_target_ldap__models_sinks
+
+    sinks = _flext_target_ldap__models_sinks
+
+    _ = (
         FlextTargetLdapBaseSink,
         FlextTargetLdapGroupsSink,
         FlextTargetLdapOrganizationalUnitsSink,
+        FlextTargetLdapProcessingCounters,
         FlextTargetLdapProcessingResult,
         FlextTargetLdapSink,
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
+        processing_result,
+        sinks,
     )
-
-_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
+_LAZY_IMPORTS = {
     "FlextTargetLdapBaseSink": "flext_target_ldap._models.sinks",
     "FlextTargetLdapGroupsSink": "flext_target_ldap._models.sinks",
     "FlextTargetLdapOrganizationalUnitsSink": "flext_target_ldap._models.sinks",
@@ -38,6 +41,19 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "processing_result": "flext_target_ldap._models.processing_result",
     "sinks": "flext_target_ldap._models.sinks",
 }
+
+__all__ = [
+    "FlextTargetLdapBaseSink",
+    "FlextTargetLdapGroupsSink",
+    "FlextTargetLdapOrganizationalUnitsSink",
+    "FlextTargetLdapProcessingCounters",
+    "FlextTargetLdapProcessingResult",
+    "FlextTargetLdapSink",
+    "FlextTargetLdapTarget",
+    "FlextTargetLdapUsersSink",
+    "processing_result",
+    "sinks",
+]
 
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)

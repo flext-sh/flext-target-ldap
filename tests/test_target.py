@@ -18,8 +18,8 @@ from flext_target_ldap import (
     FlextTargetLdapGroupsSink as LdapGroupsSink,
     FlextTargetLdapSink as Sink,
     FlextTargetLdapUsersSink as LdapUsersSink,
+    _default_cli_helper,
 )
-from flext_target_ldap.target import _default_cli_helper
 from tests import t, u
 
 

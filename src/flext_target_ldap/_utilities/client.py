@@ -19,8 +19,7 @@ from flext_ldap import (
     ldap,
     m,
 )
-from flext_target_ldap import c, t
-from flext_target_ldap.models import FlextTargetLdapModels as _TargetModels
+from flext_target_ldap import FlextTargetLdapModels as _TargetModels, c, t
 
 logger = FlextLogger(__name__)
 
