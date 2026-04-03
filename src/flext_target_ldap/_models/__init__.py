@@ -14,20 +14,19 @@ if _t.TYPE_CHECKING:
 
     processing_result = _flext_target_ldap__models_processing_result
     import flext_target_ldap._models.sinks as _flext_target_ldap__models_sinks
+    from flext_target_ldap._models.processing_result import (
+        FlextTargetLdapProcessingCounters,
+    )
 
     sinks = _flext_target_ldap__models_sinks
-
-    _ = (
+    from flext_target_ldap._models.sinks import (
         FlextTargetLdapBaseSink,
         FlextTargetLdapGroupsSink,
         FlextTargetLdapOrganizationalUnitsSink,
-        FlextTargetLdapProcessingCounters,
         FlextTargetLdapProcessingResult,
         FlextTargetLdapSink,
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
-        processing_result,
-        sinks,
     )
 _LAZY_IMPORTS = {
     "FlextTargetLdapBaseSink": "flext_target_ldap._models.sinks",
