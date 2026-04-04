@@ -66,17 +66,17 @@ class TestTargetLDAPIntegration:
     ) -> None:
         """Test basic LDAP data loading functionality."""
         mock_conn = MagicMock()
-        mock_conn.add.return_value = True
-        mock_conn.delete.return_value = True
-        mock_conn.modify.return_value = True
+        mock_conn.add_entry.return_value = True
+        mock_conn.delete_entry.return_value = True
+        mock_conn.modify_entry.return_value = True
         mock_api.return_value = mock_conn
 
         input_text = input_file.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
             _target_ldap_flext_cli(config=str(config_file))
 
-        assert mock_conn.add.called
-        assert mock_conn.add.call_count >= 1
+        assert mock_conn.add_entry.called
+        assert mock_conn.add_entry.call_count >= 1
 
     @patch("flext_target_ldap.target._get_ldap_api")
     def test_upsert_behavior(
@@ -117,19 +117,19 @@ class TestTargetLDAPIntegration:
             )
 
         mock_conn = MagicMock()
-        mock_conn.add.return_value = True
-        mock_conn.modify.return_value = True
+        mock_conn.add_entry.return_value = True
+        mock_conn.modify_entry.return_value = True
         mock_api.return_value = mock_conn
 
         input_text = input_path.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
             _target_ldap_flext_cli(config=str(config_file))
 
-        if mock_conn.add.call_count < 1:
-            add_msg: str = f"Expected {mock_conn.add.call_count} >= {1}"
+        if mock_conn.add_entry.call_count < 1:
+            add_msg: str = f"Expected {mock_conn.add_entry.call_count} >= {1}"
             raise AssertionError(add_msg)
         # Second record with same DN should trigger modify (upsert)
-        assert mock_conn.modify.call_count >= 1
+        assert mock_conn.modify_entry.call_count >= 1
 
     @patch("flext_target_ldap.target._get_ldap_api")
     def test_delete_records(
@@ -163,14 +163,14 @@ class TestTargetLDAPIntegration:
             )
 
         mock_conn = MagicMock()
-        mock_conn.delete.return_value = True
+        mock_conn.delete_entry.return_value = True
         mock_api.return_value = mock_conn
 
         input_text = input_path.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
             _target_ldap_flext_cli(config=str(config_file))
 
-        mock_conn.delete.assert_called_once_with("uid=deleted,dc=test,dc=com")
+        mock_conn.delete_entry.assert_called_once_with("uid=deleted,dc=test,dc=com")
 
     @pytest.mark.usefixtures("config_file")
     @patch("flext_target_ldap.target._get_ldap_api")
@@ -212,7 +212,7 @@ class TestTargetLDAPIntegration:
             )
 
         mock_conn = MagicMock()
-        mock_conn.add.return_value = True
+        mock_conn.add_entry.return_value = True
         mock_api.return_value = mock_conn
 
         # _process_record_message constructs DN via _construct_dn for records
@@ -222,7 +222,7 @@ class TestTargetLDAPIntegration:
         with patch("sys.stdin", io.StringIO(input_text)):
             _target_ldap_flext_cli(config=str(config_path))
 
-        add_calls = mock_conn.add.call_args_list
+        add_calls = mock_conn.add_entry.call_args_list
         assert add_calls
         # _construct_dn uses base_dn from config: "dc=test,dc=com"
         # For users stream with uid=testuser: "uid=testuser,dc=test,dc=com"
@@ -288,13 +288,13 @@ class TestTargetLDAPIntegration:
             f.writelines(json.dumps(msg) + "\n" for msg in messages)
 
         mock_conn = MagicMock()
-        mock_conn.add.return_value = True
+        mock_conn.add_entry.return_value = True
         mock_api.return_value = mock_conn
 
         input_text = input_path.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
             _target_ldap_flext_cli(config=str(config_file))
 
-        if mock_conn.add.call_count < 2:
-            count_msg: str = f"Expected {mock_conn.add.call_count} >= {2}"
+        if mock_conn.add_entry.call_count < 2:
+            count_msg: str = f"Expected {mock_conn.add_entry.call_count} >= {2}"
             raise AssertionError(count_msg)

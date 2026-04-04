@@ -130,7 +130,7 @@ def singer_message_schema() -> str:
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "t.NormalizedValue",
+            "type": "object",
             "properties": {
                 "dn": {"type": "string"},
                 "uid": {"type": "string"},
