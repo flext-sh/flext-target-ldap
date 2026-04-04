@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from flext_target_ldap import _target_ldap_flext_cli
+from flext_target_ldap import FlextTargetLdap
 from tests import t
 
 
@@ -73,7 +73,9 @@ class TestTargetLDAPIntegration:
 
         input_text = input_file.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
-            _target_ldap_flext_cli(config=str(config_file))
+            cli_fn = FlextTargetLdap.cli
+            assert cli_fn is not None
+            cli_fn(config=str(config_file))
 
         assert mock_conn.add_entry.called
         assert mock_conn.add_entry.call_count >= 1
@@ -123,7 +125,9 @@ class TestTargetLDAPIntegration:
 
         input_text = input_path.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
-            _target_ldap_flext_cli(config=str(config_file))
+            cli_fn = FlextTargetLdap.cli
+            assert cli_fn is not None
+            cli_fn(config=str(config_file))
 
         if mock_conn.add_entry.call_count < 1:
             add_msg: str = f"Expected {mock_conn.add_entry.call_count} >= {1}"
@@ -168,7 +172,9 @@ class TestTargetLDAPIntegration:
 
         input_text = input_path.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
-            _target_ldap_flext_cli(config=str(config_file))
+            cli_fn = FlextTargetLdap.cli
+            assert cli_fn is not None
+            cli_fn(config=str(config_file))
 
         mock_conn.delete_entry.assert_called_once_with("uid=deleted,dc=test,dc=com")
 
@@ -220,7 +226,9 @@ class TestTargetLDAPIntegration:
         # so _construct_dn returns "uid=testuser,dc=test,dc=com" (using base_dn).
         input_text = input_path.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
-            _target_ldap_flext_cli(config=str(config_path))
+            cli_fn = FlextTargetLdap.cli
+            assert cli_fn is not None
+            cli_fn(config=str(config_path))
 
         add_calls = mock_conn.add_entry.call_args_list
         assert add_calls
@@ -293,7 +301,9 @@ class TestTargetLDAPIntegration:
 
         input_text = input_path.read_text(encoding="utf-8")
         with patch("sys.stdin", io.StringIO(input_text)):
-            _target_ldap_flext_cli(config=str(config_file))
+            cli_fn = FlextTargetLdap.cli
+            assert cli_fn is not None
+            cli_fn(config=str(config_file))
 
         if mock_conn.add_entry.call_count < 2:
             count_msg: str = f"Expected {mock_conn.add_entry.call_count} >= {2}"

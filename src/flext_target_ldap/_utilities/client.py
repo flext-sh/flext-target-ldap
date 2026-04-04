@@ -14,16 +14,13 @@ from collections.abc import (
 )
 from typing import TypeIs, override
 
-from flext_core import FlextLogger, r
-from flext_ldap import (
-    ldap,
-    m,
-)
-from flext_target_ldap import FlextTargetLdapModels as _TargetModels, c, t
+from flext_core import FlextLogger
+from flext_ldap import ldap
+from flext_target_ldap import c, m, r, t
 
 logger = FlextLogger(__name__)
 
-FlextTargetLdapSearchEntry = _TargetModels.TargetLdap.SearchEntry
+FlextTargetLdapSearchEntry = m.TargetLdap.SearchEntry
 
 
 def _is_container_list(
