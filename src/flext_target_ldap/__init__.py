@@ -24,65 +24,39 @@ if _t.TYPE_CHECKING:
     )
 
     _models = _flext_target_ldap__models
-    import flext_target_ldap._models.processing_result as _flext_target_ldap__models_processing_result
-
-    processing_result = _flext_target_ldap__models_processing_result
-    import flext_target_ldap._models.sinks as _flext_target_ldap__models_sinks
-    from flext_target_ldap._models.processing_result import (
-        FlextTargetLdapProcessingCounters,
-    )
-
-    sinks = _flext_target_ldap__models_sinks
     import flext_target_ldap._utilities as _flext_target_ldap__utilities
-    from flext_target_ldap._models.sinks import (
+    from flext_target_ldap._models import (
         FlextTargetLdapBaseSink,
         FlextTargetLdapGroupsSink,
         FlextTargetLdapOrganizationalUnitsSink,
+        FlextTargetLdapProcessingCounters,
         FlextTargetLdapProcessingResult,
         FlextTargetLdapSink,
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
+        processing_result,
+        sinks,
     )
 
     _utilities = _flext_target_ldap__utilities
-    import flext_target_ldap._utilities.api_service as _flext_target_ldap__utilities_api_service
-
-    api_service = _flext_target_ldap__utilities_api_service
-    import flext_target_ldap._utilities.client as _flext_target_ldap__utilities_client
-    from flext_target_ldap._utilities.api_service import FlextTargetLdapApiService
-
-    client = _flext_target_ldap__utilities_client
-    import flext_target_ldap._utilities.config as _flext_target_ldap__utilities_config
-    from flext_target_ldap._utilities.client import (
-        FlextTargetLdapClient,
-        FlextTargetLdapSearchEntry,
-    )
-
-    config = _flext_target_ldap__utilities_config
-    import flext_target_ldap._utilities.service_runtime as _flext_target_ldap__utilities_service_runtime
-    from flext_target_ldap._utilities.config import (
-        create_default_ldap_target_config,
-        validate_ldap_target_config,
-    )
-
-    service_runtime = _flext_target_ldap__utilities_service_runtime
-    import flext_target_ldap._utilities.services as _flext_target_ldap__utilities_services
-    from flext_target_ldap._utilities.service_runtime import (
-        FlextTargetLdapServiceRuntime,
-    )
-
-    services = _flext_target_ldap__utilities_services
-    import flext_target_ldap._utilities.transformation as _flext_target_ldap__utilities_transformation
-    from flext_target_ldap._utilities.services import (
-        FlextTargetLdapConnectionService,
-        FlextTargetLdapTransformationService,
-    )
-
-    transformation = _flext_target_ldap__utilities_transformation
     import flext_target_ldap.api as _flext_target_ldap_api
-    from flext_target_ldap._utilities.transformation import (
+    from flext_target_ldap._utilities import (
+        FlextTargetLdapApiService,
+        FlextTargetLdapClient,
+        FlextTargetLdapConnectionService,
         FlextTargetLdapMigrationValidator,
+        FlextTargetLdapSearchEntry,
+        FlextTargetLdapServiceRuntime,
         FlextTargetLdapTransformationEngine,
+        FlextTargetLdapTransformationService,
+        api_service,
+        client,
+        config,
+        create_default_ldap_target_config,
+        service_runtime,
+        services,
+        transformation,
+        validate_ldap_target_config,
     )
 
     api = _flext_target_ldap_api
@@ -90,11 +64,8 @@ if _t.TYPE_CHECKING:
     from flext_target_ldap.api import FlextTargetLdapService
 
     application = _flext_target_ldap_application
-    import flext_target_ldap.application.orchestrator as _flext_target_ldap_application_orchestrator
-
-    orchestrator = _flext_target_ldap_application_orchestrator
     import flext_target_ldap.catalog as _flext_target_ldap_catalog
-    from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+    from flext_target_ldap.application import FlextTargetLdapOrchestrator, orchestrator
 
     catalog = _flext_target_ldap_catalog
     import flext_target_ldap.constants as _flext_target_ldap_constants
@@ -127,15 +98,13 @@ if _t.TYPE_CHECKING:
     )
 
     patterns = _flext_target_ldap_patterns
-    import flext_target_ldap.patterns.ldap_patterns as _flext_target_ldap_patterns_ldap_patterns
-
-    ldap_patterns = _flext_target_ldap_patterns_ldap_patterns
     import flext_target_ldap.protocols as _flext_target_ldap_protocols
-    from flext_target_ldap.patterns.ldap_patterns import (
+    from flext_target_ldap.patterns import (
         FlextTargetLdapDataTransformer,
         FlextTargetLdapEntryManager,
         FlextTargetLdapSchemaMapper,
         FlextTargetLdapTypeConverter,
+        ldap_patterns,
     )
 
     protocols = _flext_target_ldap_protocols
@@ -150,16 +119,14 @@ if _t.TYPE_CHECKING:
     from flext_target_ldap.settings import FlextTargetLdapSettings, validate_ldap_config
 
     singer = _flext_target_ldap_singer
-    import flext_target_ldap.singer.stream as _flext_target_ldap_singer_stream
-    from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
-
-    stream = _flext_target_ldap_singer_stream
     import flext_target_ldap.target as _flext_target_ldap_target
-    from flext_target_ldap.singer.stream import (
+    from flext_target_ldap.singer import (
+        FlextTargetLdapCatalogManager,
+        FlextTargetLdapSingerTarget,
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
+        stream,
     )
-    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
 
     target = _flext_target_ldap_target
     import flext_target_ldap.typings as _flext_target_ldap_typings
