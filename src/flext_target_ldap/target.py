@@ -180,7 +180,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         try:
             content = Path(config_path).read_text(encoding="utf-8")
             return t.TargetLdap.CONTAINER_VALUE_MAP_ADAPTER.validate_json(content)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             msg = f"Failed to load configuration from {config_path}: {e}"
             raise RuntimeError(msg) from e
 
@@ -191,7 +191,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Get LDAP target client backed by flext-ldap."""
         try:
             return FlextTargetLdapClient(config=config)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as exc:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             logger.warning(
                 "Failed to initialize LDAP target client",
                 error=exc,
@@ -247,7 +247,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                 else:
                     api.add_entry(dn, record)
                     seen_dns.add(dn)
-            except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+            except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                 logger.warning(f"Failed to add entry {dn}, attempting modify: {e}")
                 api.modify_entry(dn, record)
 
@@ -300,10 +300,10 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                             api,
                             seen_dns,
                         )
-                except c.Meltano.Singer.SAFE_EXCEPTIONS:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS:
                     logger.exception("Malformed input line failed")
                     raise
-        except c.Meltano.Singer.SAFE_EXCEPTIONS:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS:
             logger.exception("Unexpected error in CLI execution")
             raise
 

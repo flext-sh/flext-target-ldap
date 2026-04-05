@@ -68,7 +68,7 @@ class FlextTargetLdapTransformationEngine:
                 applied_rules=applied_rules,
             )
             return r[m.TargetLdap.DataTransformationResult].ok(result)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             return r[m.TargetLdap.DataTransformationResult].fail(
                 f"Transformation failed: {e}",
             )
@@ -122,7 +122,7 @@ class FlextTargetLdapMigrationValidator:
                 self._stats["validation_errors"] += 1
                 return r[bool].fail(error_msg)
             return r[bool].ok(value=True)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             self._stats["validation_errors"] += 1
             return r[bool].fail(f"Validation failed: {e}")
 

@@ -67,7 +67,7 @@ class FlextTargetLdapSingerTarget:
                 processed_count,
             )
             return r[t.HeaderMapping].ok(result)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             logger.exception("Singer message processing failed")
             return r[t.HeaderMapping].fail(
                 f"Message processing failed: {e}",
@@ -86,7 +86,7 @@ class FlextTargetLdapSingerTarget:
                 if field not in self.config:
                     return r[bool].fail(f"Missing required field: {field}")
             return r[bool].ok(value=True)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             return r[bool].fail(f"Configuration validation failed: {e}")
 
 

@@ -111,7 +111,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                             )
 
                     return r[bool].ok(value=True)
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Attribute mapping validation failed: {e}",
                     )
@@ -226,7 +226,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     if errors:
                         return r[bool].fail("; ".join(errors))
                     return r[bool].ok(value=True)
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail(f"LDAP entry validation failed: {e}")
 
         class TransformationResult(FlextLdapModels.Entity):
@@ -235,6 +235,13 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             Tracks transformation statistics, applied rules, and processing metrics
             for LDAP target operations.
             """
+
+            @staticmethod
+            def _default_applied_mappings() -> MutableSequence[
+                FlextTargetLdapModels.TargetLdap.AttributeMapping
+            ]:
+                """Create the default attribute mapping collection."""
+                return []
 
             original_record: Annotated[
                 t.ConfigurationMapping,
@@ -248,7 +255,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 description="Resulting LDAP entry after transformation",
             )
             applied_mappings: MutableSequence[m.TargetLdap.AttributeMapping] = Field(
-                default_factory=list,
+                default_factory=_default_applied_mappings,
                 description="Attribute mappings applied during transformation",
             )
             transformation_errors: Annotated[
@@ -302,7 +309,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                         )
 
                     return r[bool].ok(value=True)
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Transformation result validation failed: {e}",
                     )
@@ -313,6 +320,13 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             Manages batching of LDAP operations for optimal performance,
             tracking batch size, processed records, and operation statistics.
             """
+
+            @staticmethod
+            def _default_current_batch() -> MutableSequence[
+                FlextTargetLdapModels.TargetLdap.Entry
+            ]:
+                """Create the default current batch collection."""
+                return []
 
             stream_name: Annotated[
                 t.NonEmptyStr,
@@ -329,7 +343,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
             current_batch: MutableSequence[m.TargetLdap.Entry] = Field(
-                default_factory=list,
+                default_factory=_default_current_batch,
                 description="Current batch of LDAP entries pending processing",
             )
             total_processed: Annotated[
@@ -439,7 +453,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                         )
 
                     return r[bool].ok(value=True)
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Batch processing validation failed: {e}",
                     )
@@ -567,7 +581,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                         )
 
                     return r[bool].ok(value=True)
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail(
                         f"Operation statistics validation failed: {e}",
                     )

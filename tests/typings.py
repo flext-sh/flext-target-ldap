@@ -19,7 +19,7 @@ from flext_target_ldap import FlextTargetLdapTypes
 class FlextTargetLdapTestTypes(FlextTestsTypes, FlextTargetLdapTypes):
     """Test types for flext-target-ldap extending both test and project types."""
 
-    class TargetLdap:
+    class TargetLdap(FlextTargetLdapTypes.TargetLdap):
         """Target LDAP domain test type namespace."""
 
         class Tests(FlextTestsTypes.Tests):

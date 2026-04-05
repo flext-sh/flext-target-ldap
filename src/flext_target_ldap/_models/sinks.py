@@ -68,7 +68,7 @@ class FlextTargetLdapSink:
             return r[bool].fail(
                 "Target does not provide process_record/process handlers",
             )
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             return r[bool].fail(f"Record processing failed: {e}")
 
 

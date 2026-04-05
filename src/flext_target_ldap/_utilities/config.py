@@ -114,16 +114,18 @@ class FlextTargetLdapConfigFactory:
                 use_ssl=use_ssl,
                 timeout=c.Ldap.ConnectionDefaults.TIMEOUT,
             )
-            target_config = FlextTargetLdapSettings(
-                connection=connection_config,
-                base_dn=base_dn,
-                batch_size=c.DEFAULT_SIZE,
-                max_records=None,
-                search_filter=c.Ldap.Filters.ALL_ENTRIES_FILTER,
-                search_scope=c.Ldap.SearchDefaults.DEFAULT_SCOPE,
-                attribute_mapping={},
-                object_classes=list(c.TargetLdap.Defaults.DEFAULT_OBJECT_CLASSES),
-            )
+            target_config = FlextTargetLdapSettings.model_validate({
+                "connection": connection_config,
+                "base_dn": base_dn,
+                "batch_size": c.DEFAULT_SIZE,
+                "max_records": None,
+                "search_filter": c.Ldap.Filters.ALL_ENTRIES_FILTER,
+                "search_scope": c.Ldap.SearchDefaults.DEFAULT_SCOPE,
+                "attribute_mapping": {},
+                "object_classes": list(
+                    c.TargetLdap.Defaults.DEFAULT_OBJECT_CLASSES,
+                ),
+            })
             return r[FlextTargetLdapSettings].ok(target_config)
         except (ValueError, TypeError, RuntimeError) as e:
             return r[FlextTargetLdapSettings].fail(

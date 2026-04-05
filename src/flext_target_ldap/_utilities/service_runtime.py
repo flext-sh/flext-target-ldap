@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import override
 
-from flext_meltano import FlextMeltanoSingerSinkBase, FlextMeltanoSingerTargetBase
+from flext_meltano import FlextMeltanoSingerSinkBase, FlextMeltanoSingerTargetBase, p
 from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, t, u
 
 
@@ -22,23 +22,27 @@ class FlextTargetLdapServiceRuntime:
 
         name = "target-ldap-sink"
 
-        def __init__(
-            self,
+        _runtime_sink: FlextTargetLdapSink
+
+        @classmethod
+        def create(
+            cls,
             *,
             runtime_sink: FlextTargetLdapSink,
             target: FlextMeltanoSingerTargetBase,
             stream_name: str,
             schema: dict[str, t.ContainerValue],
             key_properties: t.StrSequence,
-        ) -> None:
-            """Initialize the adapter and keep the LDAP runtime sink."""
-            super().__init__(
+        ) -> FlextTargetLdapServiceRuntime.Sink:
+            """Create an adapter sink and attach the LDAP runtime sink."""
+            service_sink = cls(
                 target=target,
                 stream_name=stream_name,
                 schema=schema,
                 key_properties=key_properties,
             )
-            self._runtime_sink = runtime_sink
+            service_sink._runtime_sink = runtime_sink
+            return service_sink
 
         @override
         def process_batch(
@@ -70,7 +74,7 @@ class FlextTargetLdapServiceRuntime:
         stream_name: str,
         schema: t.FlatContainerMapping,
         target_config: t.ContainerMapping,
-    ) -> FlextMeltanoSingerSinkBase:
+    ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
         normalized_target_config = cls.normalize_singer_mapping(target_config)
         runtime_target = FlextTargetLdap(
@@ -87,7 +91,7 @@ class FlextTargetLdapServiceRuntime:
             schema=normalized_schema,
             key_properties=[],
         )
-        return cls.Sink(
+        return cls.Sink.create(
             runtime_sink=runtime_sink,
             target=cls.Target(config=normalized_target_config, validate_config=False),
             stream_name=stream_name,

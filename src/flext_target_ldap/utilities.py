@@ -287,7 +287,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     if not u.TargetLdap.LdapDataProcessing.split(full_dn):
                         return r[str].fail(f"Invalid DN format: {full_dn}")
                     return r[str].ok(full_dn)
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[str].fail(f"Error building DN: {e}")
 
             @staticmethod
@@ -321,7 +321,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         else:
                             ldap_attrs[ldap_attr] = [str(value).encode("utf-8")]
                     return r[Mapping[str, Sequence[bytes]]].ok(ldap_attrs)
-                except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[Mapping[str, Sequence[bytes]]].fail(
                         f"Error converting to LDAP attributes: {e}",
                     )

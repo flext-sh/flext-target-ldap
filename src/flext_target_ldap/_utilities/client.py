@@ -212,7 +212,7 @@ class FlextTargetLdapClient:
                 f"LDAP connectivity validated for {self.config.host}:{self.config.port}",
             )
             return r[bool].ok(value=True)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             error_msg = f"Connection error: {e}"
             logger.exception(error_msg)
             return r[bool].fail(error_msg)
