@@ -22,6 +22,8 @@ class FlextTargetLdapTestConstants(FlextTestsConstants, FlextTargetLdapConstants
         class Tests(FlextTestsConstants.Tests):
             """Target LDAP-specific test constants."""
 
+            EXPECTED_DATA_COUNT: int = 3
+
 
 c = FlextTargetLdapTestConstants
 __all__ = ["FlextTargetLdapTestConstants", "c"]

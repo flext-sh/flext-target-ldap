@@ -19,6 +19,7 @@ if _t.TYPE_CHECKING:
         mock_ldap_config,
         mock_ldap_config_internal,
         mock_target,
+        pytest_plugins,
         sample_group_record,
         sample_ou_record,
         sample_user_record,
@@ -26,6 +27,7 @@ if _t.TYPE_CHECKING:
         singer_message_record,
         singer_message_schema,
         singer_message_state,
+        target_ldap_settings,
     )
 
     constants = _tests_constants
@@ -138,6 +140,7 @@ _LAZY_IMPORTS = {
     "models": "tests.models",
     "p": ("tests.protocols", "FlextTargetLdapTestProtocols"),
     "protocols": "tests.protocols",
+    "pytest_plugins": "tests.conftest",
     "r": ("flext_core.result", "FlextResult"),
     "s": ("flext_core.service", "FlextService"),
     "sample_group_record": "tests.conftest",
@@ -148,6 +151,7 @@ _LAZY_IMPORTS = {
     "singer_message_schema": "tests.conftest",
     "singer_message_state": "tests.conftest",
     "t": ("tests.typings", "FlextTargetLdapTestTypes"),
+    "target_ldap_settings": "tests.conftest",
     "test_client": "tests.test_client",
     "test_default_cli_helper_logs_with_flext_logger": "tests.test_target",
     "test_integration": "tests.test_integration",
@@ -196,6 +200,7 @@ __all__ = [
     "models",
     "p",
     "protocols",
+    "pytest_plugins",
     "r",
     "s",
     "sample_group_record",
@@ -206,6 +211,7 @@ __all__ = [
     "singer_message_schema",
     "singer_message_state",
     "t",
+    "target_ldap_settings",
     "test_client",
     "test_default_cli_helper_logs_with_flext_logger",
     "test_integration",

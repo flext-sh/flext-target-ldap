@@ -57,7 +57,7 @@ class TestTargetLDAPIntegration:
             f.write(singer_message_state + "\n")
         return input_path
 
-    @patch("flext_target_ldap.target._get_ldap_api")
+    @patch.object(FlextTargetLdap, "_get_ldap_api")
     def test_basic_load(
         self,
         mock_api: MagicMock,
@@ -80,7 +80,7 @@ class TestTargetLDAPIntegration:
         assert mock_conn.add_entry.called
         assert mock_conn.add_entry.call_count >= 1
 
-    @patch("flext_target_ldap.target._get_ldap_api")
+    @patch.object(FlextTargetLdap, "_get_ldap_api")
     def test_upsert_behavior(
         self,
         mock_api: MagicMock,
@@ -135,7 +135,7 @@ class TestTargetLDAPIntegration:
         # Second record with same DN should trigger modify (upsert)
         assert mock_conn.modify_entry.call_count >= 1
 
-    @patch("flext_target_ldap.target._get_ldap_api")
+    @patch.object(FlextTargetLdap, "_get_ldap_api")
     def test_delete_records(
         self,
         mock_api: MagicMock,
@@ -179,7 +179,7 @@ class TestTargetLDAPIntegration:
         mock_conn.delete_entry.assert_called_once_with("uid=deleted,dc=test,dc=com")
 
     @pytest.mark.usefixtures("config_file")
-    @patch("flext_target_ldap.target._get_ldap_api")
+    @patch.object(FlextTargetLdap, "_get_ldap_api")
     def test_dn_template_usage(
         self,
         mock_api: MagicMock,
@@ -259,7 +259,7 @@ class TestTargetLDAPIntegration:
         )
         assert result.exit_code != 0
 
-    @patch("flext_target_ldap.target._get_ldap_api")
+    @patch.object(FlextTargetLdap, "_get_ldap_api")
     def test_multi_stream_handling(
         self,
         mock_api: MagicMock,

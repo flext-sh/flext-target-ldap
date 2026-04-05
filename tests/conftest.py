@@ -14,31 +14,19 @@ from unittest.mock import MagicMock
 import pytest
 from flext_tests import tk
 
-from flext_target_ldap import FlextTargetLdapClient as LdapTargetClient
-from tests import t
+from flext_target_ldap import (
+    FlextTargetLdapClient as LdapTargetClient,
+    FlextTargetLdapSettings,
+)
+from tests import t, u
+
+pytest_plugins = ["flext_tests.conftest_plugin"]
 
 
-def _build_mock_ldap_config(*, bind_dn: str) -> t.ContainerValueMapping:
-    return {
-        "host": "test.ldap.com",
-        "port": 389,
-        "bind_dn": bind_dn,
-        "password": "test_password",
-        "base_dn": "dc=test,dc=com",
-        "use_ssl": False,
-        "timeout": 30,
-        "validate_records": True,
-        "user_rdn_attribute": "uid",
-        "group_rdn_attribute": "cn",
-        "dn_templates": {
-            "users": "uid={uid},ou=users,dc=test,dc=com",
-            "groups": "cn={cn},ou=groups,dc=test,dc=com",
-        },
-        "default_object_classes": {
-            "users": ["inetOrgPerson", "person", "top"],
-            "groups": ["groupOfNames", "top"],
-        },
-    }
+@pytest.fixture
+def target_ldap_settings() -> FlextTargetLdapSettings:
+    """Provide clean FlextTargetLdapSettings for target-ldap tests."""
+    return FlextTargetLdapSettings(debug=True)
 
 
 @pytest.fixture(scope="session")
@@ -56,7 +44,7 @@ def shared_ldap_container(flext_docker: tk) -> str:
 @pytest.fixture
 def mock_ldap_config() -> t.ContainerValueMapping:
     """Create mock LDAP configuration for testing."""
-    return _build_mock_ldap_config(
+    return u.TargetLdap.Tests.build_mock_ldap_config(
         bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
     )
 
@@ -68,7 +56,9 @@ def mock_ldap_config_internal() -> t.ContainerValueMapping:
     Provides a valid LDAP configuration dictionary for use in sink fixtures.
     This fixture is used by sink test classes to initialize target configurations.
     """
-    return _build_mock_ldap_config(bind_dn="cn=admin,dc=test,dc=com")
+    return u.TargetLdap.Tests.build_mock_ldap_config(
+        bind_dn="cn=admin,dc=test,dc=com",
+    )
 
 
 @pytest.fixture

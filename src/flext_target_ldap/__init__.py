@@ -33,6 +33,7 @@ if _t.TYPE_CHECKING:
     from flext_target_ldap._utilities import (
         FlextTargetLdapApiService,
         FlextTargetLdapClient,
+        FlextTargetLdapConfigFactory,
         FlextTargetLdapConnectionService,
         FlextTargetLdapMigrationValidator,
         FlextTargetLdapSearchEntry,
@@ -211,6 +212,7 @@ __all__ = [
     "FlextTargetLdapBaseSink",
     "FlextTargetLdapCatalogManager",
     "FlextTargetLdapClient",
+    "FlextTargetLdapConfigFactory",
     "FlextTargetLdapConfigurationError",
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapConnectionService",

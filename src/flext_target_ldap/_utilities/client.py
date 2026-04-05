@@ -23,64 +23,72 @@ logger = FlextLogger(__name__)
 FlextTargetLdapSearchEntry = m.TargetLdap.SearchEntry
 
 
-def _is_container_list(
-    value: t.ContainerValue | None,
-) -> TypeIs[Sequence[t.ContainerValue]]:
-    return isinstance(value, list)
-
-
-def _to_container_list(values: t.ContainerValue | t.StrSequence) -> t.ContainerValue:
-    if isinstance(values, list):
-        return [str(value) for value in values]
-    return values
-
-
-def _to_str_values(value: t.ContainerValue) -> t.StrSequence:
-    if _is_container_list(value):
-        return [str(item) for item in value]
-    return [str(value)]
-
-
-def _build_ldif_entry(
-    dn: str,
-    attributes: t.ContainerValueMapping,
-    object_classes: t.StrSequence | None = None,
-) -> m.Ldif.Entry:
-    entry_attributes: MutableMapping[str, t.StrSequence] = {
-        key: _to_str_values(value) for key, value in attributes.items()
-    }
-    if object_classes:
-        entry_attributes["objectClass"] = [str(value) for value in object_classes]
-    return m.Ldif.Entry(
-        dn=m.Ldif.DN(
-            value=dn,
-            metadata=m.Ldif.EntryMetadata(),
-        ),
-        attributes=m.Ldif.Attributes.model_validate({
-            "attributes": entry_attributes,
-            "attribute_metadata": {},
-            "metadata": None,
-        }),
-        changetype=None,
-        metadata=None,
-        validation_metadata=None,
-    )
-
-
-def _build_modify_changes(
-    changes: t.ContainerValueMapping,
-) -> t.Ldap.OperationChanges:
-    return {
-        key: [(c.Ldap.ModifyOperation.REPLACE, _to_str_values(value))]
-        for key, value in changes.items()
-    }
-
-
 class FlextTargetLdapClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
 
     This client delegates LDAP operations to flext-ldap without compatibility layers.
     """
+
+    @staticmethod
+    def _is_container_list(
+        value: t.ContainerValue | None,
+    ) -> TypeIs[Sequence[t.ContainerValue]]:
+        return isinstance(value, list)
+
+    @staticmethod
+    def _to_container_list(
+        values: t.ContainerValue | t.StrSequence,
+    ) -> t.ContainerValue:
+        if isinstance(values, list):
+            return [str(value) for value in values]
+        return values
+
+    @staticmethod
+    def _to_str_values(value: t.ContainerValue) -> t.StrSequence:
+        if isinstance(value, list):
+            return [str(item) for item in value]
+        return [str(value)]
+
+    @staticmethod
+    def _build_ldif_entry(
+        dn: str,
+        attributes: t.ContainerValueMapping,
+        object_classes: t.StrSequence | None = None,
+    ) -> m.Ldif.Entry:
+        entry_attributes: MutableMapping[str, t.StrSequence] = {
+            key: FlextTargetLdapClient._to_str_values(value)
+            for key, value in attributes.items()
+        }
+        if object_classes:
+            entry_attributes["objectClass"] = [str(value) for value in object_classes]
+        return m.Ldif.Entry(
+            dn=m.Ldif.DN(
+                value=dn,
+                metadata=m.Ldif.EntryMetadata(),
+            ),
+            attributes=m.Ldif.Attributes.model_validate({
+                "attributes": entry_attributes,
+                "attribute_metadata": {},
+                "metadata": None,
+            }),
+            changetype=None,
+            metadata=None,
+            validation_metadata=None,
+        )
+
+    @staticmethod
+    def _build_modify_changes(
+        changes: t.ContainerValueMapping,
+    ) -> t.Ldap.OperationChanges:
+        return {
+            key: [
+                (
+                    c.Ldap.ModifyOperation.REPLACE,
+                    FlextTargetLdapClient._to_str_values(value),
+                )
+            ]
+            for key, value in changes.items()
+        }
 
     @override
     def __init__(
@@ -180,7 +188,7 @@ class FlextTargetLdapClient:
             if connect_result.is_failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
-                ldap_entry = _build_ldif_entry(dn, attributes, object_classes)
+                ldap_entry = self._build_ldif_entry(dn, attributes, object_classes)
                 result_op = self._api.add(ldap_entry)
                 if result_op.is_success:
                     return r[bool].ok(value=True)
@@ -288,7 +296,7 @@ class FlextTargetLdapClient:
             if connect_result.is_failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
-                result = self._api.modify(dn, _build_modify_changes(changes))
+                result = self._api.modify(dn, self._build_modify_changes(changes))
                 if result.is_success:
                     logger.debug("Successfully modified LDAP entry: %s", dn)
                     return r[bool].ok(value=True)
@@ -337,7 +345,7 @@ class FlextTargetLdapClient:
                 for entry in ldap_entries:
                     dn = str(entry.get("dn", ""))
                     attrs: t.MutableContainerValueMapping = {
-                        str(k): _to_container_list(v)
+                        str(k): self._to_container_list(v)
                         for k, v in entry.items()
                         if str(k) != "dn"
                     }

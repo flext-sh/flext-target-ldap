@@ -13,9 +13,10 @@ from flext_target_ldap import (
     FlextTargetLdapMigrationValidator,
     FlextTargetLdapTransformationEngine,
 )
-from tests import m, t
+from tests import c, m, t
 
-EXPECTED_DATA_COUNT = 3
+# Re-export for auto-generated tests/__init__.py
+EXPECTED_DATA_COUNT = c.TargetLdap.Tests.EXPECTED_DATA_COUNT
 
 
 class TestDataTransformationEngine:
@@ -277,7 +278,7 @@ class TestMigrationValidator:
         for dn, attributes, object_classes in test_cases:
             validator.validate(dn, attributes, object_classes)
         stats = validator.get_validation_statistics()
-        if stats["entries_validated"] != EXPECTED_DATA_COUNT:
+        if stats["entries_validated"] != c.TargetLdap.Tests.EXPECTED_DATA_COUNT:
             msg_count: str = f"Expected {3}, got {stats['entries_validated']}"
             raise AssertionError(msg_count)
         if stats["validation_errors"] < 0:

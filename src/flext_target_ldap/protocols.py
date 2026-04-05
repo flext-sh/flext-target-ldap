@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import MutableSequence
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoProtocols
@@ -45,6 +45,7 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     class TargetLdap:
         """Singer Target domain protocols."""
 
+        @runtime_checkable
         class LdapProcessingState(Protocol):
             """Protocol for LDAP processing state tracking."""
 

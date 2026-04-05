@@ -88,21 +88,6 @@ class FlextTargetLdapTarget:
 logger = FlextLogger(__name__)
 
 
-def _is_container_list(
-    value: t.NormalizedValue,
-) -> TypeIs[Sequence[t.ContainerValue]]:
-    return isinstance(value, list)
-
-
-def _container_mapping_from_value(
-    value: t.ContainerValue,
-) -> t.ContainerValueMapping:
-    if isinstance(value, dict):
-        return {str(k): v for k, v in value.items()}
-    msg = f"Expected dict for attribute mapping, got {type(value).__name__}: {value!r}"
-    raise TypeError(msg)
-
-
 class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
     """Result of LDAP processing operations - mutable for performance tracking."""
 
@@ -117,6 +102,23 @@ class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
 
 class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     """Base LDAP sink with common functionality."""
+
+    @staticmethod
+    def _is_container_list(
+        value: t.NormalizedValue,
+    ) -> TypeIs[Sequence[t.ContainerValue]]:
+        """Check if a value is a container list."""
+        return isinstance(value, list)
+
+    @staticmethod
+    def _container_mapping_from_value(
+        value: t.ContainerValue,
+    ) -> t.ContainerValueMapping:
+        """Convert a container value to a container value mapping."""
+        if isinstance(value, dict):
+            return {str(k): v for k, v in value.items()}
+        msg = f"Expected dict for attribute mapping, got {type(value).__name__}: {value!r}"
+        raise TypeError(msg)
 
     @override
     def __init__(
@@ -163,12 +165,12 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for entry."""
         record_classes = record.get("object_classes")
-        if _is_container_list(record_classes):
+        if self._is_container_list(record_classes):
             return [str(c) for c in record_classes]
         if isinstance(record_classes, str):
             return [record_classes]
         configured_classes = self._target.config.get("generic_object_classes")
-        if _is_container_list(configured_classes):
+        if self._is_container_list(configured_classes):
             return [str(c) for c in configured_classes]
         return ["top"]
 
@@ -298,7 +300,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         attrs: t.MutableContainerValueMapping = {}
         for k, v in _record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
-            if _is_container_list(v):
+            if self._is_container_list(v):
                 attrs[target_key] = [str(i) for i in v]
             else:
                 attrs[target_key] = [str(v)]
@@ -325,11 +327,11 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         )
         attributes: t.MutableContainerValueMapping = {
             "objectClass": list(object_classes)
-            if _is_container_list(object_classes)
+            if self._is_container_list(object_classes)
             else ["inetOrgPerson", "person"],
         }
         obj_classes = attributes.get("objectClass")
-        if _is_container_list(obj_classes):
+        if self._is_container_list(obj_classes):
             obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             if "person" not in obj_classes_mut:
                 obj_classes_mut.append("person")
@@ -351,7 +353,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = _container_mapping_from_value(mapping_val)
+        raw_mapping = self._container_mapping_from_value(mapping_val)
         mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
             match v:
@@ -372,7 +374,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for user entry."""
         configured = self._target.config.get("users_object_classes")
-        if _is_container_list(configured):
+        if self._is_container_list(configured):
             return [str(c) for c in configured]
         return ["inetOrgPerson", "organizationalPerson", "person", "top"]
 
@@ -402,13 +404,13 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             )
             object_classes: t.StrSequence = (
                 [str(oc) for oc in object_classes_raw]
-                if _is_container_list(object_classes_raw)
+                if self._is_container_list(object_classes_raw)
                 else ["inetOrgPerson", "person"]
             )
             attributes_dict: t.MutableContainerValueMapping = {}
             for k, v in attributes.items():
                 if k != "objectClass":
-                    if _is_container_list(v):
+                    if self._is_container_list(v):
                         attributes_dict[k] = [str(i) for i in v]
                     else:
                         attributes_dict[k] = [str(v)]
@@ -460,7 +462,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         field_map = {"members": "member"}
         for k, v in _record.items():
             target_key = field_map.get(k, k)
-            if _is_container_list(v):
+            if self._is_container_list(v):
                 attrs[target_key] = [str(i) for i in v]
             else:
                 attrs[target_key] = [str(v)]
@@ -483,7 +485,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for group entry."""
         configured = self._target.config.get("groups_object_classes")
-        if _is_container_list(configured):
+        if self._is_container_list(configured):
             return [str(c) for c in configured]
         return ["groupOfNames", "top"]
 
@@ -507,13 +509,13 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: t.StrSequence = (
                 [str(oc) for oc in object_classes_raw]
-                if _is_container_list(object_classes_raw)
+                if self._is_container_list(object_classes_raw)
                 else ["groupOfNames"]
             )
             attributes_dict: t.MutableContainerValueMapping = {}
             for k, v in attributes.items():
                 if k != "objectClass":
-                    if _is_container_list(v):
+                    if self._is_container_list(v):
                         attributes_dict[k] = list(v)
                     else:
                         attributes_dict[k] = v
@@ -562,11 +564,11 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         )
         attributes: t.MutableContainerValueMapping = {
             "objectClass": list(object_classes)
-            if _is_container_list(object_classes)
+            if self._is_container_list(object_classes)
             else ["groupOfNames"],
         }
         obj_classes = attributes.get("objectClass")
-        if _is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
+        if self._is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
             obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             obj_classes_mut.append("groupOfNames")
             attributes["objectClass"] = obj_classes_mut
@@ -578,12 +580,12 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if _is_container_list(value):
+                if self._is_container_list(value):
                     attributes[ldap_attr] = value
                 else:
                     attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = _container_mapping_from_value(mapping_val)
+        raw_mapping = self._container_mapping_from_value(mapping_val)
         mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
             match v:
@@ -594,7 +596,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
             if value is not None:
-                if _is_container_list(value):
+                if self._is_container_list(value):
                     attributes[mapped_attr] = value
                 else:
                     attributes[mapped_attr] = [str(value)]
@@ -623,7 +625,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             attributes = self._build_ou_attributes(_record)
             attributes_dict: t.MutableContainerValueMapping = {}
             for k, v in attributes.items():
-                if _is_container_list(v):
+                if self._is_container_list(v):
                     attributes_dict[k] = list(v)
                 else:
                     attributes_dict[k] = v
@@ -668,11 +670,14 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         )
         attributes: t.MutableContainerValueMapping = {
             "objectClass": list(default_classes)
-            if _is_container_list(default_classes)
+            if self._is_container_list(default_classes)
             else ["organizationalUnit"],
         }
         obj_classes = attributes.get("objectClass")
-        if _is_container_list(obj_classes) and "organizationalUnit" not in obj_classes:
+        if (
+            self._is_container_list(obj_classes)
+            and "organizationalUnit" not in obj_classes
+        ):
             obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
             obj_classes_mut.append("organizationalUnit")
             attributes["objectClass"] = obj_classes_mut
@@ -682,7 +687,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
         mapping_val = self._target.config.get("attribute_mapping", {})
-        raw_mapping = _container_mapping_from_value(mapping_val)
+        raw_mapping = self._container_mapping_from_value(mapping_val)
         mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
             match v:

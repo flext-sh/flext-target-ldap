@@ -1,53 +1,16 @@
-"""Shared Singer catalog definitions for LDAP targets."""
+"""Shared Singer catalog definitions for LDAP targets.
+
+Re-export of ``u.TargetLdap.build_singer_catalog`` for backward compatibility.
+"""
 
 from __future__ import annotations
 
-from flext_target_ldap import t
+from flext_target_ldap import t, u
 
 
 def build_singer_catalog() -> t.ContainerValueMapping:
-    """Build the canonical Singer catalog for LDAP targets."""
-    return {
-        "streams": [
-            {
-                "tap_stream_id": "users",
-                "schema": {
-                    "type": "t.NormalizedValue",
-                    "properties": {
-                        "username": {"type": "string"},
-                        "email": {"type": "string"},
-                        "first_name": {"type": "string"},
-                        "last_name": {"type": "string"},
-                        "full_name": {"type": "string"},
-                        "phone": {"type": "string"},
-                        "department": {"type": "string"},
-                        "title": {"type": "string"},
-                    },
-                    "required": ["username"],
-                },
-            },
-            {
-                "tap_stream_id": "groups",
-                "schema": {
-                    "type": "t.NormalizedValue",
-                    "properties": {
-                        "name": {"type": "string"},
-                        "description": {"type": "string"},
-                        "members": {"type": "array", "items": {"type": "string"}},
-                    },
-                    "required": ["name"],
-                },
-            },
-            {
-                "tap_stream_id": "organizational_units",
-                "schema": {
-                    "type": "t.NormalizedValue",
-                    "properties": {
-                        "name": {"type": "string"},
-                        "description": {"type": "string"},
-                    },
-                    "required": ["name"],
-                },
-            },
-        ],
-    }
+    """Build the canonical Singer catalog for LDAP targets.
+
+    Delegates to ``u.TargetLdap.build_singer_catalog()``.
+    """
+    return u.TargetLdap.build_singer_catalog()

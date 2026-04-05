@@ -13,13 +13,12 @@ import pytest
 
 from flext_core import r
 from flext_target_ldap import (
-    FlextTargetLdap as TargetLdap,
+    FlextTargetLdap,
     FlextTargetLdapBaseSink as LdapBaseSink,
     FlextTargetLdapGroupsSink as LdapGroupsSink,
     FlextTargetLdapSink as Sink,
     FlextTargetLdapUsersSink as LdapUsersSink,
 )
-from flext_target_ldap.target import _default_cli_helper
 from tests import t, u
 
 
@@ -44,7 +43,7 @@ class TestTargetLDAPUnit:
         config: t.ContainerValueMapping,
     ) -> None:
         """Test target LDAP initialization with name and config."""
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         if target.name != "target-ldap":
             msg: str = f"Expected {'target-ldap'}, got {target.name}"
             raise AssertionError(msg)
@@ -52,7 +51,7 @@ class TestTargetLDAPUnit:
 
     def test_get_sink_class_users(self, config: t.ContainerValueMapping) -> None:
         """Test getting users sink class."""
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         sink_class = target.get_sink_class("users")
         if sink_class != LdapUsersSink:
             msg: str = f"Expected {LdapUsersSink}, got {sink_class}"
@@ -63,7 +62,7 @@ class TestTargetLDAPUnit:
         config: t.ContainerValueMapping,
     ) -> None:
         """Test getting groups sink class."""
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         sink_class = target.get_sink_class("groups")
         if sink_class != LdapGroupsSink:
             msg: str = f"Expected {LdapGroupsSink}, got {sink_class}"
@@ -74,7 +73,7 @@ class TestTargetLDAPUnit:
         config: t.ContainerValueMapping,
     ) -> None:
         """Test getting generic sink class for unknown stream."""
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         sink_class = target.get_sink_class("custom_stream")
         if sink_class != LdapBaseSink:
             msg: str = f"Expected {LdapBaseSink}, got {sink_class}"
@@ -87,7 +86,7 @@ class TestTargetLDAPUnit:
         """Test DN template configuration via user_rdn_attribute."""
         config["user_rdn_attribute"] = "uid"
         config["base_dn"] = "ou=people,dc=test,dc=com"
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         sink = target.get_sink("users")
         assert isinstance(sink, LdapUsersSink)
         dn_result = sink.build_dn({"uid": "jdoe"})
@@ -100,7 +99,7 @@ class TestTargetLDAPUnit:
     ) -> None:
         """Test object classes configuration read by UsersSink."""
         config["users_object_classes"] = ["customPerson", "top"]
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         sink = target.get_sink("users")
         assert isinstance(sink, LdapUsersSink)
         object_classes = sink.get_object_classes({})
@@ -110,7 +109,7 @@ class TestTargetLDAPUnit:
         """Test processing a record through the LDAP target."""
         mock_client = MagicMock()
         mock_client.add_entry.return_value = r[bool].ok(value=True)
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         sink = target.get_sink("users")
         assert isinstance(sink, LdapBaseSink)
         sink.client = mock_client
@@ -141,7 +140,7 @@ class TestTargetLDAPUnit:
         """
         mock_client = MagicMock()
         mock_client.add_entry.return_value = r[bool].fail("Entry already exists")
-        target = TargetLdap(config=config)
+        target = FlextTargetLdap(config=config)
         sink = target.get_sink("users")
         assert isinstance(sink, LdapBaseSink)
         sink.client = mock_client
@@ -157,7 +156,7 @@ class TestTargetLDAPUnit:
 
 def test_default_cli_helper_logs_with_flext_logger() -> None:
     mock_logger = MagicMock()
-    helper = _default_cli_helper(quiet=False)
+    helper = FlextTargetLdap._create_cli_helper(quiet=False)
     with patch.object(helper, "_logger", mock_logger):
         helper.print("state-line")
     mock_logger.info.assert_called_once_with("state-line")

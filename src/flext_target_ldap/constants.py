@@ -35,12 +35,22 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
     class TargetLdap:
         """Target LDAP domain-specific constants namespace."""
 
+        ENV_PREFIX: Final[str] = "FLEXT_TARGET_LDAP_"
+
         class Connection:
             """LDAP connection configuration constants for target operations."""
 
             CONNECT_TIMEOUT: Final[int] = 10
             MAX_PORT_NUMBER: Final[int] = 65535
             LDAPS_DEFAULT_PORT: Final[int] = 636
+
+        class Defaults:
+            """Default values for target LDAP settings fields."""
+
+            CREATE_MISSING_ENTRIES: Final[bool] = True
+            UPDATE_EXISTING_ENTRIES: Final[bool] = True
+            DELETE_REMOVED_ENTRIES: Final[bool] = False
+            DEFAULT_OBJECT_CLASSES: Final[tuple[str, ...]] = ("top",)
 
 
 c = FlextTargetLdapConstants

@@ -28,6 +28,33 @@ class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities
         class Tests:
             """Target LDAP-specific test helpers."""
 
+            @staticmethod
+            def build_mock_ldap_config(
+                *,
+                bind_dn: str,
+            ) -> FlextTargetLdapTestTypes.ContainerValueMapping:
+                """Build a standard mock LDAP configuration for testing."""
+                return {
+                    "host": "test.ldap.com",
+                    "port": 389,
+                    "bind_dn": bind_dn,
+                    "password": "test_password",
+                    "base_dn": "dc=test,dc=com",
+                    "use_ssl": False,
+                    "timeout": 30,
+                    "validate_records": True,
+                    "user_rdn_attribute": "uid",
+                    "group_rdn_attribute": "cn",
+                    "dn_templates": {
+                        "users": "uid={uid},ou=users,dc=test,dc=com",
+                        "groups": "cn={cn},ou=groups,dc=test,dc=com",
+                    },
+                    "default_object_classes": {
+                        "users": ["inetOrgPerson", "person", "top"],
+                        "groups": ["groupOfNames", "top"],
+                    },
+                }
+
             class ProcessTarget(FlextTargetLdapTarget):
                 """Target stub that records delegated sink calls."""
 
