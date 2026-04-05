@@ -1,0 +1,27 @@
+src/flext_target_ldap/models.py
+  9a954a2992caac77 136-137,144,246,250-253,257-258,272,331-334,500,578-591,599-602,607-625,630-655,660-672,678-690
+src/flext_target_ldap/settings.py
+  9a954a2992caac77 34-48,50-53,55,57-62,64-90,92-97,99-104,106-119,121-122
+src/flext_target_ldap/protocols.py
+  9a954a2992caac77 10,48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "daa882021ff9e4dd3b9a18f3e8df5a1311a1d7f8",
+  "prompts": {
+    "9a954a2992caac77": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96cd52da-bde6-4c41-a6a9-6cbe307afb2c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "FLEXT Bot",
+      "messages": [],
+      "total_additions": 235,
+      "total_deletions": 81,
+      "accepted_lines": 189,
+      "overriden_lines": 9
+    }
+  }
+}
