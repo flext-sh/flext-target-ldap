@@ -20,7 +20,6 @@ if _t.TYPE_CHECKING:
     import flext_target_ldap._utilities.config as _flext_target_ldap__utilities_config
     from flext_target_ldap._utilities.client import (
         FlextTargetLdapClient,
-        FlextTargetLdapSearchEntry,
     )
 
     config = _flext_target_ldap__utilities_config
@@ -70,10 +69,6 @@ _LAZY_IMPORTS = {
         "flext_target_ldap._utilities.transformation",
         "FlextTargetLdapMigrationValidator",
     ),
-    "FlextTargetLdapSearchEntry": (
-        "flext_target_ldap._utilities.client",
-        "FlextTargetLdapSearchEntry",
-    ),
     "FlextTargetLdapServiceRuntime": (
         "flext_target_ldap._utilities.service_runtime",
         "FlextTargetLdapServiceRuntime",
@@ -108,7 +103,6 @@ __all__ = [
     "FlextTargetLdapConfigFactory",
     "FlextTargetLdapConnectionService",
     "FlextTargetLdapMigrationValidator",
-    "FlextTargetLdapSearchEntry",
     "FlextTargetLdapServiceRuntime",
     "FlextTargetLdapTransformationEngine",
     "FlextTargetLdapTransformationService",

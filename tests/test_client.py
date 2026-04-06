@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from flext_core import r
-from flext_target_ldap import FlextTargetLdapClient, FlextTargetLdapSearchEntry
+from flext_target_ldap import FlextTargetLdapClient, m
 from tests import t
 
 
@@ -171,7 +171,7 @@ class TestLDAPClient:
         assert result.value is not None
         assert len(result.value) == 1
         entry = result.value[0]
-        assert isinstance(entry, FlextTargetLdapSearchEntry)
+        assert isinstance(entry, m.TargetLdap.SearchEntry)
         assert entry.dn == "uid=test,dc=test,dc=com"
         assert entry.attributes == {"cn": ["Test User"]}
 

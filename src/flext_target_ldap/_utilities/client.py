@@ -20,8 +20,6 @@ from flext_target_ldap import c, m, r, t
 
 logger = FlextLogger(__name__)
 
-FlextTargetLdapSearchEntry = m.TargetLdap.SearchEntry
-
 
 class FlextTargetLdapClient:
     """Enterprise LDAP client using flext-ldap API for all operations.
@@ -270,19 +268,19 @@ class FlextTargetLdapClient:
         self,
         dn: str,
         attributes: t.StrSequence | None = None,
-    ) -> r[FlextTargetLdapSearchEntry | None]:
+    ) -> r[m.TargetLdap.SearchEntry | None]:
         """Get LDAP entry using flext-ldap API."""
         try:
             if not dn:
-                return r[FlextTargetLdapSearchEntry | None].fail("DN required")
+                return r[m.TargetLdap.SearchEntry | None].fail("DN required")
             logger.info("Getting LDAP entry: %s", dn)
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
             if search_result.is_success and search_result.value:
-                return r[FlextTargetLdapSearchEntry | None].ok(search_result.value[0])
-            return r[FlextTargetLdapSearchEntry | None].ok(None)
+                return r[m.TargetLdap.SearchEntry | None].ok(search_result.value[0])
+            return r[m.TargetLdap.SearchEntry | None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to get entry: %s", dn)
-            return r[FlextTargetLdapSearchEntry | None].fail(f"Get entry failed: {e}")
+            return r[m.TargetLdap.SearchEntry | None].fail(f"Get entry failed: {e}")
 
     def modify_entry(
         self,
@@ -314,11 +312,11 @@ class FlextTargetLdapClient:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: t.StrSequence | None = None,
-    ) -> r[Sequence[FlextTargetLdapSearchEntry]]:
+    ) -> r[Sequence[m.TargetLdap.SearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:
-                return r[Sequence[FlextTargetLdapSearchEntry]].fail("Base DN required")
+                return r[Sequence[m.TargetLdap.SearchEntry]].fail("Base DN required")
             logger.info(
                 "Searching LDAP entries using flext-ldap API: %s with filter %s",
                 base_dn,
@@ -326,7 +324,7 @@ class FlextTargetLdapClient:
             )
             connect_result = self._api.connect(self.config)
             if connect_result.is_failure:
-                return r[Sequence[FlextTargetLdapSearchEntry]].fail(
+                return r[Sequence[m.TargetLdap.SearchEntry]].fail(
                     f"Connection failed: {connect_result.error}",
                 )
             try:
@@ -339,7 +337,7 @@ class FlextTargetLdapClient:
             finally:
                 self._api.disconnect()
             if result.is_success and result.value:
-                entries: MutableSequence[FlextTargetLdapSearchEntry] = []
+                entries: MutableSequence[m.TargetLdap.SearchEntry] = []
                 search_res = result.value
                 ldap_entries: Sequence[Mapping[str, t.StrSequence]] = search_res.entries
                 for entry in ldap_entries:
@@ -350,18 +348,18 @@ class FlextTargetLdapClient:
                         if str(k) != "dn"
                     }
                     entries.append(
-                        FlextTargetLdapSearchEntry.model_validate({
+                        m.TargetLdap.SearchEntry.model_validate({
                             "dn": dn,
                             "attributes": attrs,
                         }),
                     )
                 logger.debug(f"Successfully found {len(entries)} LDAP entries")
-                return r[Sequence[FlextTargetLdapSearchEntry]].ok(entries)
+                return r[Sequence[m.TargetLdap.SearchEntry]].ok(entries)
             logger.debug("No LDAP entries found")
-            return r[Sequence[FlextTargetLdapSearchEntry]].ok([])
+            return r[Sequence[m.TargetLdap.SearchEntry]].ok([])
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to search entries in %s", base_dn)
-            return r[Sequence[FlextTargetLdapSearchEntry]].fail(f"Search failed: {e}")
+            return r[Sequence[m.TargetLdap.SearchEntry]].fail(f"Search failed: {e}")
 
 
-__all__ = ["FlextTargetLdapClient", "FlextTargetLdapSearchEntry"]
+__all__ = ["FlextTargetLdapClient"]
