@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from flext_cli import u as cli_u
+from flext_cli import u
 from flext_target_ldap import FlextTargetLdap
 from tests import t
 
@@ -36,7 +36,7 @@ class TestTargetLDAPIntegration:
     def config_file(self, tmp_path: Path, mock_ldap_config: t.ContainerMapping) -> Path:
         """Create temporary configuration file for testing."""
         config_path = tmp_path / "config.json"
-        cli_u.Cli.json_write(config_path, mock_ldap_config)
+        u.Cli.json_write(config_path, mock_ldap_config)
         return config_path
 
     @pytest.fixture
@@ -189,7 +189,7 @@ class TestTargetLDAPIntegration:
             "users": "uid={uid},ou=people,dc=test,dc=com",
         }
         config_path = tmp_path / "template_config.json"
-        cli_u.Cli.json_write(config_path, mock_ldap_config)
+        u.Cli.json_write(config_path, mock_ldap_config)
         input_path = tmp_path / "template_input.jsonl"
         schema_msg = {
             "type": "SCHEMA",
@@ -239,7 +239,7 @@ class TestTargetLDAPIntegration:
         """Test error handling for invalid configurations."""
         bad_config = {"invalid": "config"}
         config_path = tmp_path / "bad_config.json"
-        cli_u.Cli.json_write(config_path, bad_config)
+        u.Cli.json_write(config_path, bad_config)
         mock_result = Mock()
         mock_result.exit_code = 1
         mock_result.output = "Configuration error"
