@@ -29,14 +29,35 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapUsersSink,
     )
 _LAZY_IMPORTS = {
-    "FlextTargetLdapBaseSink": "flext_target_ldap._models.sinks",
-    "FlextTargetLdapGroupsSink": "flext_target_ldap._models.sinks",
-    "FlextTargetLdapOrganizationalUnitsSink": "flext_target_ldap._models.sinks",
-    "FlextTargetLdapProcessingCounters": "flext_target_ldap._models.processing_result",
-    "FlextTargetLdapProcessingResult": "flext_target_ldap._models.sinks",
-    "FlextTargetLdapSink": "flext_target_ldap._models.sinks",
-    "FlextTargetLdapTarget": "flext_target_ldap._models.sinks",
-    "FlextTargetLdapUsersSink": "flext_target_ldap._models.sinks",
+    "FlextTargetLdapBaseSink": (
+        "flext_target_ldap._models.sinks",
+        "FlextTargetLdapBaseSink",
+    ),
+    "FlextTargetLdapGroupsSink": (
+        "flext_target_ldap._models.sinks",
+        "FlextTargetLdapGroupsSink",
+    ),
+    "FlextTargetLdapOrganizationalUnitsSink": (
+        "flext_target_ldap._models.sinks",
+        "FlextTargetLdapOrganizationalUnitsSink",
+    ),
+    "FlextTargetLdapProcessingCounters": (
+        "flext_target_ldap._models.processing_result",
+        "FlextTargetLdapProcessingCounters",
+    ),
+    "FlextTargetLdapProcessingResult": (
+        "flext_target_ldap._models.sinks",
+        "FlextTargetLdapProcessingResult",
+    ),
+    "FlextTargetLdapSink": ("flext_target_ldap._models.sinks", "FlextTargetLdapSink"),
+    "FlextTargetLdapTarget": (
+        "flext_target_ldap._models.sinks",
+        "FlextTargetLdapTarget",
+    ),
+    "FlextTargetLdapUsersSink": (
+        "flext_target_ldap._models.sinks",
+        "FlextTargetLdapUsersSink",
+    ),
     "processing_result": "flext_target_ldap._models.processing_result",
     "sinks": "flext_target_ldap._models.sinks",
 }

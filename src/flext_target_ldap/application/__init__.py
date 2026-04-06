@@ -26,7 +26,10 @@ if _t.TYPE_CHECKING:
     from flext_core.utilities import FlextUtilities as u
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
 _LAZY_IMPORTS = {
-    "FlextTargetLdapOrchestrator": "flext_target_ldap.application.orchestrator",
+    "FlextTargetLdapOrchestrator": (
+        "flext_target_ldap.application.orchestrator",
+        "FlextTargetLdapOrchestrator",
+    ),
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),

@@ -37,10 +37,22 @@ if _t.TYPE_CHECKING:
     from flext_core.utilities import FlextUtilities as u
     from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
 _LAZY_IMPORTS = {
-    "FlextTargetLdapCatalogManager": "flext_target_ldap.singer.catalog",
-    "FlextTargetLdapSingerTarget": "flext_target_ldap.singer.target",
-    "FlextTargetLdapStreamProcessingStats": "flext_target_ldap.singer.stream",
-    "FlextTargetLdapStreamProcessor": "flext_target_ldap.singer.stream",
+    "FlextTargetLdapCatalogManager": (
+        "flext_target_ldap.singer.catalog",
+        "FlextTargetLdapCatalogManager",
+    ),
+    "FlextTargetLdapSingerTarget": (
+        "flext_target_ldap.singer.target",
+        "FlextTargetLdapSingerTarget",
+    ),
+    "FlextTargetLdapStreamProcessingStats": (
+        "flext_target_ldap.singer.stream",
+        "FlextTargetLdapStreamProcessingStats",
+    ),
+    "FlextTargetLdapStreamProcessor": (
+        "flext_target_ldap.singer.stream",
+        "FlextTargetLdapStreamProcessor",
+    ),
     "c": ("flext_core.constants", "FlextConstants"),
     "catalog": "flext_target_ldap.singer.catalog",
     "d": ("flext_core.decorators", "FlextDecorators"),

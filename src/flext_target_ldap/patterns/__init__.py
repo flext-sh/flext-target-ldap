@@ -31,10 +31,22 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapTypeConverter,
     )
 _LAZY_IMPORTS = {
-    "FlextTargetLdapDataTransformer": "flext_target_ldap.patterns.ldap_patterns",
-    "FlextTargetLdapEntryManager": "flext_target_ldap.patterns.ldap_patterns",
-    "FlextTargetLdapSchemaMapper": "flext_target_ldap.patterns.ldap_patterns",
-    "FlextTargetLdapTypeConverter": "flext_target_ldap.patterns.ldap_patterns",
+    "FlextTargetLdapDataTransformer": (
+        "flext_target_ldap.patterns.ldap_patterns",
+        "FlextTargetLdapDataTransformer",
+    ),
+    "FlextTargetLdapEntryManager": (
+        "flext_target_ldap.patterns.ldap_patterns",
+        "FlextTargetLdapEntryManager",
+    ),
+    "FlextTargetLdapSchemaMapper": (
+        "flext_target_ldap.patterns.ldap_patterns",
+        "FlextTargetLdapSchemaMapper",
+    ),
+    "FlextTargetLdapTypeConverter": (
+        "flext_target_ldap.patterns.ldap_patterns",
+        "FlextTargetLdapTypeConverter",
+    ),
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
