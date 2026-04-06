@@ -18,9 +18,7 @@ if _t.TYPE_CHECKING:
 
     client = _flext_target_ldap__utilities_client
     import flext_target_ldap._utilities.config as _flext_target_ldap__utilities_config
-    from flext_target_ldap._utilities.client import (
-        FlextTargetLdapClient,
-    )
+    from flext_target_ldap._utilities.client import FlextTargetLdapClient
 
     config = _flext_target_ldap__utilities_config
     import flext_target_ldap._utilities.service_runtime as _flext_target_ldap__utilities_service_runtime
