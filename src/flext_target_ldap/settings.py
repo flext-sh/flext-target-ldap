@@ -181,6 +181,3 @@ class FlextTargetLdapSettings(FlextSettings):
             return r[FlextTargetLdapSettings].fail(
                 f"Configuration validation failed: {e}",
             )
-
-
-validate_ldap_config = FlextTargetLdapSettings.validate_ldap_config

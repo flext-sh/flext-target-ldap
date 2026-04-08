@@ -706,8 +706,3 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
 # Export the unified models class
 m = FlextTargetLdapModels
-
-__all__: t.StrSequence = [
-    "FlextTargetLdapModels",
-    "m",
-]

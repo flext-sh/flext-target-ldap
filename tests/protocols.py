@@ -1,6 +1,6 @@
 """Test protocol definitions for flext-target-ldap.
 
-Provides FlextTargetLdapTestProtocols, combining FlextTestsProtocols with
+Provides TestsFlextTargetLdapProtocols, combining TestsFlextProtocols with
 FlextTargetLdapProtocols for test-specific protocol definitions.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -14,8 +14,8 @@ from flext_tests import FlextTestsProtocols
 from flext_target_ldap import FlextTargetLdapProtocols
 
 
-class FlextTargetLdapTestProtocols(FlextTestsProtocols, FlextTargetLdapProtocols):
-    """Test protocols combining FlextTestsProtocols and FlextTargetLdapProtocols.
+class TestsFlextTargetLdapProtocols(FlextTestsProtocols, FlextTargetLdapProtocols):
+    """Test protocols combining TestsFlextProtocols and FlextTargetLdapProtocols.
 
     Provides access to the project-local `p.TargetLdap.Tests.*` namespace while
     preserving the inherited test and domain protocol surfaces.
@@ -28,5 +28,5 @@ class FlextTargetLdapTestProtocols(FlextTestsProtocols, FlextTargetLdapProtocols
             """Target LDAP-specific test protocols."""
 
 
-p = FlextTargetLdapTestProtocols
-__all__ = ["FlextTargetLdapTestProtocols", "p"]
+p = TestsFlextTargetLdapProtocols
+__all__ = ["TestsFlextTargetLdapProtocols", "p"]

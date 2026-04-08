@@ -2,7 +2,7 @@
 
 This module provides test-specific utilities that extend the main flext-target-ldap utilities.
 Uses the unified namespace pattern u.TargetLdap.Tests.* for test-only objects.
-Combines FlextTestsUtilities functionality with project-specific test utilities.
+Combines TestsFlextUtilities functionality with project-specific test utilities.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -16,10 +16,10 @@ from collections.abc import MutableSequence
 from flext_tests import FlextTestsUtilities
 
 from flext_target_ldap import FlextTargetLdapTarget, FlextTargetLdapUtilities
-from tests import FlextTargetLdapTestTypes
+from tests import TestsFlextTargetLdapTypes
 
 
-class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
+class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
     """Test utilities for flext-target-ldap extending both test and project utilities."""
 
     class TargetLdap(FlextTargetLdapUtilities.TargetLdap):
@@ -32,7 +32,7 @@ class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities
             def build_mock_ldap_config(
                 *,
                 bind_dn: str,
-            ) -> FlextTargetLdapTestTypes.ContainerValueMapping:
+            ) -> TestsFlextTargetLdapTypes.ContainerValueMapping:
                 """Build a standard mock LDAP configuration for testing."""
                 return {
                     "host": "test.ldap.com",
@@ -62,18 +62,18 @@ class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities
                     """Initialize the recording target with minimal config."""
                     super().__init__({"base_dn": "dc=test,dc=com"})
                     self.calls: MutableSequence[
-                        FlextTargetLdapTestTypes.TargetLdap.Tests.ProcessCall
+                        TestsFlextTargetLdapTypes.TargetLdap.Tests.ProcessCall
                     ] = []
 
                 def process_record(
                     self,
-                    record: FlextTargetLdapTestTypes.StrMapping,
-                    context: FlextTargetLdapTestTypes.StrMapping,
+                    record: TestsFlextTargetLdapTypes.StrMapping,
+                    context: TestsFlextTargetLdapTypes.StrMapping,
                 ) -> bool:
                     """Record the delegated call and report success."""
                     self.calls.append((record, context))
                     return True
 
 
-u = FlextTargetLdapTestUtilities
-__all__ = ["FlextTargetLdapTestUtilities", "u"]
+u = TestsFlextTargetLdapUtilities
+__all__ = ["TestsFlextTargetLdapUtilities", "u"]

@@ -1,4 +1,4 @@
-"""Module skeleton for FlextTargetLdapTestConstants.
+"""Module skeleton for TestsFlextTargetLdapConstants.
 
 Test constants for flext-target-ldap.
 
@@ -13,7 +13,7 @@ from flext_tests import FlextTestsConstants
 from flext_target_ldap import FlextTargetLdapConstants
 
 
-class FlextTargetLdapTestConstants(FlextTestsConstants, FlextTargetLdapConstants):
+class TestsFlextTargetLdapConstants(FlextTestsConstants, FlextTargetLdapConstants):
     """Test constants for flext-target-ldap."""
 
     class TargetLdap(FlextTargetLdapConstants.TargetLdap):
@@ -25,5 +25,5 @@ class FlextTargetLdapTestConstants(FlextTestsConstants, FlextTargetLdapConstants
             EXPECTED_DATA_COUNT: int = 3
 
 
-c = FlextTargetLdapTestConstants
-__all__ = ["FlextTargetLdapTestConstants", "c"]
+c = TestsFlextTargetLdapConstants
+__all__ = ["TestsFlextTargetLdapConstants", "c"]
