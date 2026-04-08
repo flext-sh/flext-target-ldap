@@ -37,8 +37,6 @@ _LAZY_IMPORTS = {
         "flext_target_ldap._models.sinks",
         "FlextTargetLdapUsersSink",
     ),
-    "processing_result": "flext_target_ldap._models.processing_result",
-    "sinks": "flext_target_ldap._models.sinks",
 }
 
 

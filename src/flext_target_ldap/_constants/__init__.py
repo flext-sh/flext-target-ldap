@@ -12,7 +12,6 @@ _LAZY_IMPORTS = {
         "flext_target_ldap._constants.base",
         "FlextTargetLdapConstantsBase",
     ),
-    "base": "flext_target_ldap._constants.base",
 }
 
 

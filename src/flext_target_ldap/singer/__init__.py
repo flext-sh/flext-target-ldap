@@ -24,20 +24,6 @@ _LAZY_IMPORTS = {
         "flext_target_ldap.singer.stream",
         "FlextTargetLdapStreamProcessor",
     ),
-    "c": ("flext_core.constants", "FlextConstants"),
-    "catalog": "flext_target_ldap.singer.catalog",
-    "d": ("flext_core.decorators", "FlextDecorators"),
-    "e": ("flext_core.exceptions", "FlextExceptions"),
-    "h": ("flext_core.handlers", "FlextHandlers"),
-    "m": ("flext_core.models", "FlextModels"),
-    "p": ("flext_core.protocols", "FlextProtocols"),
-    "r": ("flext_core.result", "FlextResult"),
-    "s": ("flext_core.service", "FlextService"),
-    "stream": "flext_target_ldap.singer.stream",
-    "t": ("flext_core.typings", "FlextTypes"),
-    "target": "flext_target_ldap.singer.target",
-    "u": ("flext_core.utilities", "FlextUtilities"),
-    "x": ("flext_core.mixins", "FlextMixins"),
 }
 
 

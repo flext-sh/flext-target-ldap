@@ -40,16 +40,10 @@ _LAZY_IMPORTS = {
         "flext_target_ldap._utilities.services",
         "FlextTargetLdapTransformationService",
     ),
-    "api_service": "flext_target_ldap._utilities.api_service",
-    "client": "flext_target_ldap._utilities.client",
-    "config": "flext_target_ldap._utilities.config",
     "create_default_ldap_target_config": (
         "flext_target_ldap._utilities.config",
         "create_default_ldap_target_config",
     ),
-    "service_runtime": "flext_target_ldap._utilities.service_runtime",
-    "services": "flext_target_ldap._utilities.services",
-    "transformation": "flext_target_ldap._utilities.transformation",
     "validate_ldap_target_config": (
         "flext_target_ldap._utilities.config",
         "validate_ldap_target_config",
