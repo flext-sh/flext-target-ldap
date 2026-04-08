@@ -60,7 +60,7 @@ class FlextTargetLdapSettings(FlextSettings):
     connect_timeout: Annotated[
         t.PositiveInt,
         Field(
-            default=c.CONNECT_TIMEOUT,
+            default=c.TargetLdap.CONNECT_TIMEOUT,
             description="Connection timeout in seconds",
         ),
     ]
@@ -88,21 +88,21 @@ class FlextTargetLdapSettings(FlextSettings):
     create_missing_entries: Annotated[
         bool,
         Field(
-            default=c.CREATE_MISSING_ENTRIES,
+            default=c.TargetLdap.CREATE_MISSING_ENTRIES,
             description="Whether to create LDAP entries that do not exist",
         ),
     ]
     update_existing_entries: Annotated[
         bool,
         Field(
-            default=c.UPDATE_EXISTING_ENTRIES,
+            default=c.TargetLdap.UPDATE_EXISTING_ENTRIES,
             description="Whether to update LDAP entries that already exist",
         ),
     ]
     delete_removed_entries: Annotated[
         bool,
         Field(
-            default=c.DELETE_REMOVED_ENTRIES,
+            default=c.TargetLdap.DELETE_REMOVED_ENTRIES,
             description="Whether to delete LDAP entries removed from source",
         ),
     ]
@@ -117,7 +117,7 @@ class FlextTargetLdapSettings(FlextSettings):
         t.StrSequence,
         Field(
             description="LDAP object classes to assign to created entries",
-            default_factory=lambda: list(c.DEFAULT_OBJECT_CLASSES),
+            default_factory=lambda: list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
         ),
     ]
 

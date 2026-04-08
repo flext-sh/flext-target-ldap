@@ -1,16 +1,9 @@
-"""Shared Singer catalog definitions for LDAP targets.
-
-Re-export of ``u.TargetLdap.build_singer_catalog`` for backward compatibility.
-"""
+"""Shared Singer catalog definitions for LDAP targets."""
 
 from __future__ import annotations
 
-from flext_target_ldap import t, u
+from flext_target_ldap.utilities import FlextTargetLdapUtilities
 
+build_singer_catalog = FlextTargetLdapUtilities.TargetLdap.build_singer_catalog
 
-def build_singer_catalog() -> t.ContainerValueMapping:
-    """Build the canonical Singer catalog for LDAP targets.
-
-    Delegates to ``u.TargetLdap.build_singer_catalog()``.
-    """
-    return u.TargetLdap.build_singer_catalog()
+__all__ = ["build_singer_catalog"]
