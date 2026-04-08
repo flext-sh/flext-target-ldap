@@ -11,64 +11,70 @@ from flext_core.lazy import install_lazy_exports, merge_lazy_imports
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
-    import flext_target_ldap._constants as _flext_target_ldap__constants
-
-    _constants = _flext_target_ldap__constants
-    import flext_target_ldap._models as _flext_target_ldap__models
-    from flext_target_ldap._constants import FlextTargetLdapConstantsBase
-
-    _models = _flext_target_ldap__models
-    import flext_target_ldap._utilities as _flext_target_ldap__utilities
-    from flext_target_ldap._models import (
+    from flext_core.decorators import FlextDecorators as d
+    from flext_core.exceptions import FlextExceptions as e
+    from flext_core.handlers import FlextHandlers as h
+    from flext_core.mixins import FlextMixins as x
+    from flext_core.result import FlextResult as r
+    from flext_target_ldap import (
+        _constants,
+        _models,
+        _utilities,
+        api,
+        application,
+        catalog,
+        constants,
+        errors,
+        models,
+        patterns,
+        protocols,
+        settings,
+        singer,
+        target,
+        typings,
+        utilities,
+    )
+    from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
+    from flext_target_ldap._models.processing_result import (
+        FlextTargetLdapProcessingCounters,
+    )
+    from flext_target_ldap._models.sinks import (
         FlextTargetLdapBaseSink,
         FlextTargetLdapGroupsSink,
         FlextTargetLdapOrganizationalUnitsSink,
-        FlextTargetLdapProcessingCounters,
         FlextTargetLdapProcessingResult,
         FlextTargetLdapSink,
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
     )
-
-    _utilities = _flext_target_ldap__utilities
-    import flext_target_ldap.api as _flext_target_ldap_api
-    from flext_target_ldap._utilities import (
-        FlextTargetLdapApiService,
-        FlextTargetLdapClient,
+    from flext_target_ldap._utilities.api_service import FlextTargetLdapApiService
+    from flext_target_ldap._utilities.client import FlextTargetLdapClient
+    from flext_target_ldap._utilities.config import (
         FlextTargetLdapConfigFactory,
-        FlextTargetLdapConnectionService,
-        FlextTargetLdapMigrationValidator,
-        FlextTargetLdapServiceRuntime,
-        FlextTargetLdapTransformationEngine,
-        FlextTargetLdapTransformationService,
         create_default_ldap_target_config,
         validate_ldap_target_config,
     )
-
-    api = _flext_target_ldap_api
-    import flext_target_ldap.application as _flext_target_ldap_application
+    from flext_target_ldap._utilities.service_runtime import (
+        FlextTargetLdapServiceRuntime,
+    )
+    from flext_target_ldap._utilities.services import (
+        FlextTargetLdapConnectionService,
+        FlextTargetLdapTransformationService,
+    )
+    from flext_target_ldap._utilities.transformation import (
+        FlextTargetLdapMigrationValidator,
+        FlextTargetLdapTransformationEngine,
+    )
     from flext_target_ldap.api import (
         FlextTargetLdapService,
         FlextTargetLdapService as s,
     )
-
-    application = _flext_target_ldap_application
-    import flext_target_ldap.catalog as _flext_target_ldap_catalog
-    from flext_target_ldap.application import FlextTargetLdapOrchestrator
-
-    catalog = _flext_target_ldap_catalog
-    import flext_target_ldap.constants as _flext_target_ldap_constants
+    from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
     from flext_target_ldap.catalog import build_singer_catalog
-
-    constants = _flext_target_ldap_constants
-    import flext_target_ldap.errors as _flext_target_ldap_errors
     from flext_target_ldap.constants import (
         FlextTargetLdapConstants,
         FlextTargetLdapConstants as c,
     )
-
-    errors = _flext_target_ldap_errors
-    import flext_target_ldap.models as _flext_target_ldap_models
     from flext_target_ldap.errors import (
         FlextTargetLdapAuthenticationError,
         FlextTargetLdapConfigurationError,
@@ -78,60 +84,32 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapTimeoutError,
         FlextTargetLdapValidationError,
     )
-
-    models = _flext_target_ldap_models
-    import flext_target_ldap.patterns as _flext_target_ldap_patterns
     from flext_target_ldap.models import (
         FlextTargetLdapModels,
         FlextTargetLdapModels as m,
     )
-
-    patterns = _flext_target_ldap_patterns
-    import flext_target_ldap.protocols as _flext_target_ldap_protocols
-    from flext_target_ldap.patterns import (
+    from flext_target_ldap.patterns.ldap_patterns import (
         FlextTargetLdapDataTransformer,
         FlextTargetLdapEntryManager,
         FlextTargetLdapSchemaMapper,
         FlextTargetLdapTypeConverter,
     )
-
-    protocols = _flext_target_ldap_protocols
-    import flext_target_ldap.settings as _flext_target_ldap_settings
     from flext_target_ldap.protocols import (
         FlextTargetLdapProtocols,
         FlextTargetLdapProtocols as p,
     )
-
-    settings = _flext_target_ldap_settings
-    import flext_target_ldap.singer as _flext_target_ldap_singer
     from flext_target_ldap.settings import FlextTargetLdapSettings
-
-    singer = _flext_target_ldap_singer
-    import flext_target_ldap.target as _flext_target_ldap_target
-    from flext_target_ldap.singer import (
-        FlextTargetLdapCatalogManager,
-        FlextTargetLdapSingerTarget,
+    from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
+    from flext_target_ldap.singer.stream import (
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
     )
-
-    target = _flext_target_ldap_target
-    import flext_target_ldap.typings as _flext_target_ldap_typings
+    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
     from flext_target_ldap.target import FlextTargetLdap
-
-    typings = _flext_target_ldap_typings
-    import flext_target_ldap.utilities as _flext_target_ldap_utilities
     from flext_target_ldap.typings import (
         FlextTargetLdapTypes,
         FlextTargetLdapTypes as t,
     )
-
-    utilities = _flext_target_ldap_utilities
-    from flext_core.decorators import FlextDecorators as d
-    from flext_core.exceptions import FlextExceptions as e
-    from flext_core.handlers import FlextHandlers as h
-    from flext_core.mixins import FlextMixins as x
-    from flext_core.result import FlextResult as r
     from flext_target_ldap.utilities import (
         FlextTargetLdapUtilities,
         FlextTargetLdapUtilities as u,
