@@ -11,7 +11,11 @@ from flext_core.lazy import install_lazy_exports, merge_lazy_imports
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
+    import flext_target_ldap._constants as _flext_target_ldap__constants
+
+    _constants = _flext_target_ldap__constants
     import flext_target_ldap._models as _flext_target_ldap__models
+    from flext_target_ldap._constants import FlextTargetLdapConstantsBase, base
 
     _models = _flext_target_ldap__models
     import flext_target_ldap._utilities as _flext_target_ldap__utilities
@@ -142,6 +146,7 @@ if _t.TYPE_CHECKING:
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     (
+        "flext_target_ldap._constants",
         "flext_target_ldap._models",
         "flext_target_ldap._utilities",
         "flext_target_ldap.application",
@@ -202,6 +207,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "__url__": ("flext_target_ldap.__version__", "__url__"),
         "__version__": ("flext_target_ldap.__version__", "__version__"),
         "__version_info__": ("flext_target_ldap.__version__", "__version_info__"),
+        "_constants": "flext_target_ldap._constants",
         "_models": "flext_target_ldap._models",
         "_utilities": "flext_target_ldap._utilities",
         "api": "flext_target_ldap.api",
@@ -252,6 +258,7 @@ __all__ = [
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapConnectionService",
     "FlextTargetLdapConstants",
+    "FlextTargetLdapConstantsBase",
     "FlextTargetLdapDataTransformer",
     "FlextTargetLdapEntryManager",
     "FlextTargetLdapError",
@@ -289,11 +296,13 @@ __all__ = [
     "__url__",
     "__version__",
     "__version_info__",
+    "_constants",
     "_models",
     "_utilities",
     "api",
     "api_service",
     "application",
+    "base",
     "build_singer_catalog",
     "c",
     "catalog",

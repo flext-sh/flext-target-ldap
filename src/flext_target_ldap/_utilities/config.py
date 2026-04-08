@@ -51,23 +51,23 @@ class FlextTargetLdapConfigFactory:
             create_missing_entries = u.TargetLdap.TypeConversion.to_bool(
                 config.get(
                     "create_missing_entries",
-                    c.TargetLdap.Defaults.CREATE_MISSING_ENTRIES,
+                    c.TargetLdap.CREATE_MISSING_ENTRIES,
                 ),
-                default=c.TargetLdap.Defaults.CREATE_MISSING_ENTRIES,
+                default=c.TargetLdap.CREATE_MISSING_ENTRIES,
             )
             update_existing_entries = u.TargetLdap.TypeConversion.to_bool(
                 config.get(
                     "update_existing_entries",
-                    c.TargetLdap.Defaults.UPDATE_EXISTING_ENTRIES,
+                    c.TargetLdap.UPDATE_EXISTING_ENTRIES,
                 ),
-                default=c.TargetLdap.Defaults.UPDATE_EXISTING_ENTRIES,
+                default=c.TargetLdap.UPDATE_EXISTING_ENTRIES,
             )
             delete_removed_entries = u.TargetLdap.TypeConversion.to_bool(
                 config.get(
                     "delete_removed_entries",
-                    c.TargetLdap.Defaults.DELETE_REMOVED_ENTRIES,
+                    c.TargetLdap.DELETE_REMOVED_ENTRIES,
                 ),
-                default=c.TargetLdap.Defaults.DELETE_REMOVED_ENTRIES,
+                default=c.TargetLdap.DELETE_REMOVED_ENTRIES,
             )
             attribute_mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
                 config
@@ -123,7 +123,7 @@ class FlextTargetLdapConfigFactory:
                 "search_scope": c.Ldap.SearchDefaults.DEFAULT_SCOPE,
                 "attribute_mapping": {},
                 "object_classes": list(
-                    c.TargetLdap.Defaults.DEFAULT_OBJECT_CLASSES,
+                    c.TargetLdap.DEFAULT_OBJECT_CLASSES,
                 ),
             })
             return r[FlextTargetLdapSettings].ok(target_config)

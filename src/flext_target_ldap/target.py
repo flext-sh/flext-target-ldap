@@ -157,8 +157,8 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             port = t.TargetLdap.INTEGER_ADAPTER.validate_python(port_obj)
         except Exception:
             port = c.Ldap.ConnectionDefaults.PORT
-        if port <= 0 or port > c.TargetLdap.Connection.MAX_PORT_NUMBER:
-            msg = f"LDAP port must be between 1 and {c.TargetLdap.Connection.MAX_PORT_NUMBER}"
+        if port <= 0 or port > c.MAX_PORT_NUMBER:
+            msg = f"LDAP port must be between 1 and {c.MAX_PORT_NUMBER}"
             raise ValueError(msg)
         use_ssl = self.config.get("use_ssl", False)
         use_tls = self.config.get("use_tls", False)

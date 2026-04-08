@@ -27,7 +27,7 @@ class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration with connection and operation settings."""
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        env_prefix=c.TargetLdap.ENV_PREFIX,
+        env_prefix=c.ENV_PREFIX,
         extra=c.EXTRA_IGNORE,
     )
 
@@ -60,7 +60,7 @@ class FlextTargetLdapSettings(FlextSettings):
     connect_timeout: Annotated[
         t.PositiveInt,
         Field(
-            default=c.TargetLdap.Connection.CONNECT_TIMEOUT,
+            default=c.CONNECT_TIMEOUT,
             description="Connection timeout in seconds",
         ),
     ]
@@ -88,21 +88,21 @@ class FlextTargetLdapSettings(FlextSettings):
     create_missing_entries: Annotated[
         bool,
         Field(
-            default=c.TargetLdap.Defaults.CREATE_MISSING_ENTRIES,
+            default=c.CREATE_MISSING_ENTRIES,
             description="Whether to create LDAP entries that do not exist",
         ),
     ]
     update_existing_entries: Annotated[
         bool,
         Field(
-            default=c.TargetLdap.Defaults.UPDATE_EXISTING_ENTRIES,
+            default=c.UPDATE_EXISTING_ENTRIES,
             description="Whether to update LDAP entries that already exist",
         ),
     ]
     delete_removed_entries: Annotated[
         bool,
         Field(
-            default=c.TargetLdap.Defaults.DELETE_REMOVED_ENTRIES,
+            default=c.DELETE_REMOVED_ENTRIES,
             description="Whether to delete LDAP entries removed from source",
         ),
     ]
@@ -117,7 +117,7 @@ class FlextTargetLdapSettings(FlextSettings):
         t.StrSequence,
         Field(
             description="LDAP object classes to assign to created entries",
-            default_factory=lambda: list(c.TargetLdap.Defaults.DEFAULT_OBJECT_CLASSES),
+            default_factory=lambda: list(c.DEFAULT_OBJECT_CLASSES),
         ),
     ]
 
@@ -150,7 +150,7 @@ class FlextTargetLdapSettings(FlextSettings):
                 ),
                 "connect_timeout": config.get(
                     "connect_timeout",
-                    c.TargetLdap.Connection.CONNECT_TIMEOUT,
+                    c.TargetLdap.CONNECT_TIMEOUT,
                 ),
                 "receive_timeout": config.get(
                     "receive_timeout",
@@ -160,20 +160,20 @@ class FlextTargetLdapSettings(FlextSettings):
                 "max_records": config.get("max_records"),
                 "create_missing_entries": config.get(
                     "create_missing_entries",
-                    c.TargetLdap.Defaults.CREATE_MISSING_ENTRIES,
+                    c.TargetLdap.CREATE_MISSING_ENTRIES,
                 ),
                 "update_existing_entries": config.get(
                     "update_existing_entries",
-                    c.TargetLdap.Defaults.UPDATE_EXISTING_ENTRIES,
+                    c.TargetLdap.UPDATE_EXISTING_ENTRIES,
                 ),
                 "delete_removed_entries": config.get(
                     "delete_removed_entries",
-                    c.TargetLdap.Defaults.DELETE_REMOVED_ENTRIES,
+                    c.TargetLdap.DELETE_REMOVED_ENTRIES,
                 ),
                 "attribute_mapping": config.get("attribute_mapping", {}),
                 "object_classes": config.get(
                     "object_classes",
-                    list(c.TargetLdap.Defaults.DEFAULT_OBJECT_CLASSES),
+                    list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
                 ),
             })
             return r[FlextTargetLdapSettings].ok(validated_config)

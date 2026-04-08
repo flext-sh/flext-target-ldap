@@ -27,7 +27,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
     Constants are accessed via constants module:
         c.Ldap.ConnectionDefaults.PORT (389)
-        c.TargetLdap.Connection.LDAPS_DEFAULT_PORT (636)
+        c.LDAPS_DEFAULT_PORT (636)
         c.DEFAULT_SIZE
     """
 
@@ -456,7 +456,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )
-                    if not (0 < port_int <= c.TargetLdap.Connection.MAX_PORT_NUMBER):
+                    if not (0 < port_int <= c.MAX_PORT_NUMBER):
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )
