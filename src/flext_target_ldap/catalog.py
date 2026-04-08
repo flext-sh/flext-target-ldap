@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_ldap.utilities import FlextTargetLdapUtilities
+from flext_target_ldap import FlextTargetLdapUtilities
 
 build_singer_catalog = FlextTargetLdapUtilities.TargetLdap.build_singer_catalog
 

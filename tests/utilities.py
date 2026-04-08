@@ -16,7 +16,7 @@ from collections.abc import MutableSequence
 from flext_tests import FlextTestsUtilities
 
 from flext_target_ldap import FlextTargetLdapTarget, FlextTargetLdapUtilities
-from tests.typings import FlextTargetLdapTestTypes
+from tests import FlextTargetLdapTestTypes
 
 
 class FlextTargetLdapTestUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
