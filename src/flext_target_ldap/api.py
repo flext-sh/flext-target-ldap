@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_meltano import FlextMeltanoTargetServiceBase, p
-from flext_target_ldap import FlextTargetLdapServiceRuntime, t
+from flext_meltano import FlextMeltanoTargetServiceBase
+from flext_target_ldap import FlextTargetLdapServiceRuntime, p, t
 
 
 class FlextTargetLdapService(FlextMeltanoTargetServiceBase):
