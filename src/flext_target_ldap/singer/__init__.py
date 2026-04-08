@@ -8,22 +8,10 @@ from __future__ import annotations
 from flext_core.lazy import install_lazy_exports
 
 _LAZY_IMPORTS = {
-    "FlextTargetLdapCatalogManager": (
-        "flext_target_ldap.singer.catalog",
-        "FlextTargetLdapCatalogManager",
-    ),
-    "FlextTargetLdapSingerTarget": (
-        "flext_target_ldap.singer.target",
-        "FlextTargetLdapSingerTarget",
-    ),
-    "FlextTargetLdapStreamProcessingStats": (
-        "flext_target_ldap.singer.stream",
-        "FlextTargetLdapStreamProcessingStats",
-    ),
-    "FlextTargetLdapStreamProcessor": (
-        "flext_target_ldap.singer.stream",
-        "FlextTargetLdapStreamProcessor",
-    ),
+    "FlextTargetLdapCatalogManager": ".catalog",
+    "FlextTargetLdapSingerTarget": ".target",
+    "FlextTargetLdapStreamProcessingStats": ".stream",
+    "FlextTargetLdapStreamProcessor": ".stream",
 }
 
 

@@ -8,22 +8,10 @@ from __future__ import annotations
 from flext_core.lazy import install_lazy_exports
 
 _LAZY_IMPORTS = {
-    "FlextTargetLdapDataTransformer": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapDataTransformer",
-    ),
-    "FlextTargetLdapEntryManager": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapEntryManager",
-    ),
-    "FlextTargetLdapSchemaMapper": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapSchemaMapper",
-    ),
-    "FlextTargetLdapTypeConverter": (
-        "flext_target_ldap.patterns.ldap_patterns",
-        "FlextTargetLdapTypeConverter",
-    ),
+    "FlextTargetLdapDataTransformer": ".ldap_patterns",
+    "FlextTargetLdapEntryManager": ".ldap_patterns",
+    "FlextTargetLdapSchemaMapper": ".ldap_patterns",
+    "FlextTargetLdapTypeConverter": ".ldap_patterns",
 }
 
 

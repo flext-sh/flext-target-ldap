@@ -31,30 +31,21 @@ if _t.TYPE_CHECKING:
         TestsFlextTargetLdapUtilities as u,
     )
 _LAZY_IMPORTS = {
-    "TestsFlextTargetLdapConstants": (
-        "tests.constants",
-        "TestsFlextTargetLdapConstants",
-    ),
-    "TestsFlextTargetLdapModels": ("tests.models", "TestsFlextTargetLdapModels"),
-    "TestsFlextTargetLdapProtocols": (
-        "tests.protocols",
-        "TestsFlextTargetLdapProtocols",
-    ),
-    "TestsFlextTargetLdapTypes": ("tests.typings", "TestsFlextTargetLdapTypes"),
-    "TestsFlextTargetLdapUtilities": (
-        "tests.utilities",
-        "TestsFlextTargetLdapUtilities",
-    ),
-    "c": ("tests.constants", "TestsFlextTargetLdapConstants"),
+    "TestsFlextTargetLdapConstants": ".constants",
+    "TestsFlextTargetLdapModels": ".models",
+    "TestsFlextTargetLdapProtocols": ".protocols",
+    "TestsFlextTargetLdapTypes": ".typings",
+    "TestsFlextTargetLdapUtilities": ".utilities",
+    "c": (".constants", "TestsFlextTargetLdapConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
     "h": ("flext_core.handlers", "FlextHandlers"),
-    "m": ("tests.models", "TestsFlextTargetLdapModels"),
-    "p": ("tests.protocols", "TestsFlextTargetLdapProtocols"),
+    "m": (".models", "TestsFlextTargetLdapModels"),
+    "p": (".protocols", "TestsFlextTargetLdapProtocols"),
     "r": ("flext_core.result", "FlextResult"),
     "s": ("flext_core.service", "FlextService"),
-    "t": ("tests.typings", "TestsFlextTargetLdapTypes"),
-    "u": ("tests.utilities", "TestsFlextTargetLdapUtilities"),
+    "t": (".typings", "TestsFlextTargetLdapTypes"),
+    "u": (".utilities", "TestsFlextTargetLdapUtilities"),
     "x": ("flext_core.mixins", "FlextMixins"),
 }
 
