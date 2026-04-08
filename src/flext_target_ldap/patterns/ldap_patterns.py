@@ -282,10 +282,10 @@ class FlextTargetLdapEntryManager:
         self,
         current_attrs: Mapping[str, str | t.StrSequence | None],
         new_attrs: Mapping[str, str | t.StrSequence | None],
-    ) -> r[Mapping[str, Sequence[tuple[str, t.StrSequence]]]]:
+    ) -> r[Mapping[str, Sequence[t.Pair[str, t.StrSequence]]]]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: MutableMapping[str, Sequence[tuple[str, t.StrSequence]]] = {}
+            changes: MutableMapping[str, Sequence[t.Pair[str, t.StrSequence]]] = {}
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
             for attr in all_attrs:
                 current_value = current_attrs.get(attr)
@@ -361,7 +361,8 @@ class FlextTargetLdapEntryManager:
             case str() as text:
                 return [text]
             case _:
-                return []
+                empty_values: t.MutableSequenceOf[str] = []
+                return empty_values
 
 
 __all__: t.StrSequence = [

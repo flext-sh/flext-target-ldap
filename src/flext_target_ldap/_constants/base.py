@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Final
 
+from flext_target_ldap import t
+
 
 class FlextTargetLdapConstantsBase:
     """Base constants for Target LDAP domain."""
@@ -22,4 +24,4 @@ class FlextTargetLdapConstantsBase:
     CREATE_MISSING_ENTRIES: Final[bool] = True
     UPDATE_EXISTING_ENTRIES: Final[bool] = True
     DELETE_REMOVED_ENTRIES: Final[bool] = False
-    DEFAULT_OBJECT_CLASSES: Final[tuple[str, ...]] = ("top",)
+    DEFAULT_OBJECT_CLASSES: Final[t.VariadicTuple[str]] = ("top",)

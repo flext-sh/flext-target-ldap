@@ -219,7 +219,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 """Extract attribute mapping from config."""
                 raw = config.get("attribute_mapping", {})
                 if isinstance(raw, Mapping):
-                    normalized_mapping: dict[str, str] = {}
+                    normalized_mapping: t.MutableMappingKV[str, str] = {}
                     for key, value in raw.items():
                         normalized_key = t.TargetLdap.STRING_ADAPTER.validate_python(
                             key

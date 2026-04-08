@@ -319,4 +319,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 
-__all__: list[str] = ["FlextTargetLdap", "main"]
+__all__: t.MutableSequenceOf[str] = ["FlextTargetLdap", "main"]
