@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import typing as _t
 
-from flext_core.lazy import install_lazy_exports
+from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if _t.TYPE_CHECKING:
     from flext_core.decorators import FlextDecorators as d
@@ -28,24 +28,28 @@ if _t.TYPE_CHECKING:
         TestsFlextTargetLdapUtilities,
         TestsFlextTargetLdapUtilities as u,
     )
-_LAZY_IMPORTS = {
-    "TestsFlextTargetLdapConstants": ".constants",
-    "TestsFlextTargetLdapModels": ".models",
-    "TestsFlextTargetLdapProtocols": ".protocols",
-    "TestsFlextTargetLdapTypes": ".typings",
-    "TestsFlextTargetLdapUtilities": ".utilities",
-    "c": (".constants", "TestsFlextTargetLdapConstants"),
-    "d": ("flext_core.decorators", "FlextDecorators"),
-    "e": ("flext_core.exceptions", "FlextExceptions"),
-    "h": ("flext_core.handlers", "FlextHandlers"),
-    "m": (".models", "TestsFlextTargetLdapModels"),
-    "p": (".protocols", "TestsFlextTargetLdapProtocols"),
-    "r": ("flext_core.result", "FlextResult"),
-    "s": ("flext_core.service", "FlextService"),
-    "t": (".typings", "TestsFlextTargetLdapTypes"),
-    "u": (".utilities", "TestsFlextTargetLdapUtilities"),
-    "x": ("flext_core.mixins", "FlextMixins"),
-}
+_LAZY_IMPORTS = build_lazy_import_map(
+    {
+        ".constants": ("TestsFlextTargetLdapConstants",),
+        ".models": ("TestsFlextTargetLdapModels",),
+        ".protocols": ("TestsFlextTargetLdapProtocols",),
+        ".typings": ("TestsFlextTargetLdapTypes",),
+        ".utilities": ("TestsFlextTargetLdapUtilities",),
+    },
+    alias_groups={
+        ".constants": (("c", "TestsFlextTargetLdapConstants"),),
+        ".models": (("m", "TestsFlextTargetLdapModels"),),
+        ".protocols": (("p", "TestsFlextTargetLdapProtocols"),),
+        ".typings": (("t", "TestsFlextTargetLdapTypes"),),
+        ".utilities": (("u", "TestsFlextTargetLdapUtilities"),),
+        "flext_core.decorators": (("d", "FlextDecorators"),),
+        "flext_core.exceptions": (("e", "FlextExceptions"),),
+        "flext_core.handlers": (("h", "FlextHandlers"),),
+        "flext_core.mixins": (("x", "FlextMixins"),),
+        "flext_core.result": (("r", "FlextResult"),),
+        "flext_core.service": (("s", "FlextService"),),
+    },
+)
 
 __all__ = [
     "TestsFlextTargetLdapConstants",

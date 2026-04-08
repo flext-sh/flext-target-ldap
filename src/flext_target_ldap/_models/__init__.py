@@ -3,18 +3,22 @@
 
 from __future__ import annotations
 
-from flext_core.lazy import install_lazy_exports
+from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
-_LAZY_IMPORTS = {
-    "FlextTargetLdapBaseSink": ".sinks",
-    "FlextTargetLdapGroupsSink": ".sinks",
-    "FlextTargetLdapOrganizationalUnitsSink": ".sinks",
-    "FlextTargetLdapProcessingCounters": ".processing_result",
-    "FlextTargetLdapProcessingResult": ".sinks",
-    "FlextTargetLdapSink": ".sinks",
-    "FlextTargetLdapTarget": ".sinks",
-    "FlextTargetLdapUsersSink": ".sinks",
-}
+_LAZY_IMPORTS = build_lazy_import_map(
+    {
+        ".processing_result": ("FlextTargetLdapProcessingCounters",),
+        ".sinks": (
+            "FlextTargetLdapBaseSink",
+            "FlextTargetLdapGroupsSink",
+            "FlextTargetLdapOrganizationalUnitsSink",
+            "FlextTargetLdapProcessingResult",
+            "FlextTargetLdapSink",
+            "FlextTargetLdapTarget",
+            "FlextTargetLdapUsersSink",
+        ),
+    },
+)
 
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)
