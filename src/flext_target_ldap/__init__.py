@@ -15,7 +15,7 @@ if _t.TYPE_CHECKING:
 
     _constants = _flext_target_ldap__constants
     import flext_target_ldap._models as _flext_target_ldap__models
-    from flext_target_ldap._constants import FlextTargetLdapConstantsBase, base
+    from flext_target_ldap._constants import FlextTargetLdapConstantsBase
 
     _models = _flext_target_ldap__models
     import flext_target_ldap._utilities as _flext_target_ldap__utilities
@@ -28,8 +28,6 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapSink,
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
-        processing_result,
-        sinks,
     )
 
     _utilities = _flext_target_ldap__utilities
@@ -43,23 +41,17 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapServiceRuntime,
         FlextTargetLdapTransformationEngine,
         FlextTargetLdapTransformationService,
-        api_service,
-        client,
-        config,
         create_default_ldap_target_config,
-        service_runtime,
-        services,
-        transformation,
         validate_ldap_target_config,
     )
 
     api = _flext_target_ldap_api
-    import flext_target_ldap.application as _flext_target_ldap_application
-    from flext_target_ldap.api import FlextTargetLdapService
-
-    application = _flext_target_ldap_application
     import flext_target_ldap.catalog as _flext_target_ldap_catalog
-    from flext_target_ldap.application import FlextTargetLdapOrchestrator, orchestrator
+    from flext_target_ldap.api import (
+        FlextTargetLdapService,
+        FlextTargetLdapService as s,
+    )
+    from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
 
     catalog = _flext_target_ldap_catalog
     import flext_target_ldap.constants as _flext_target_ldap_constants
@@ -85,20 +77,16 @@ if _t.TYPE_CHECKING:
     )
 
     models = _flext_target_ldap_models
-    import flext_target_ldap.patterns as _flext_target_ldap_patterns
+    import flext_target_ldap.protocols as _flext_target_ldap_protocols
     from flext_target_ldap.models import (
         FlextTargetLdapModels,
         FlextTargetLdapModels as m,
     )
-
-    patterns = _flext_target_ldap_patterns
-    import flext_target_ldap.protocols as _flext_target_ldap_protocols
-    from flext_target_ldap.patterns import (
+    from flext_target_ldap.patterns.ldap_patterns import (
         FlextTargetLdapDataTransformer,
         FlextTargetLdapEntryManager,
         FlextTargetLdapSchemaMapper,
         FlextTargetLdapTypeConverter,
-        ldap_patterns,
     )
 
     protocols = _flext_target_ldap_protocols
@@ -109,18 +97,14 @@ if _t.TYPE_CHECKING:
     )
 
     settings = _flext_target_ldap_settings
-    import flext_target_ldap.singer as _flext_target_ldap_singer
-    from flext_target_ldap.settings import FlextTargetLdapSettings, validate_ldap_config
-
-    singer = _flext_target_ldap_singer
     import flext_target_ldap.target as _flext_target_ldap_target
-    from flext_target_ldap.singer import (
-        FlextTargetLdapCatalogManager,
-        FlextTargetLdapSingerTarget,
+    from flext_target_ldap.settings import FlextTargetLdapSettings, validate_ldap_config
+    from flext_target_ldap.singer.catalog import FlextTargetLdapCatalogManager
+    from flext_target_ldap.singer.stream import (
         FlextTargetLdapStreamProcessingStats,
         FlextTargetLdapStreamProcessor,
-        stream,
     )
+    from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
 
     target = _flext_target_ldap_target
     import flext_target_ldap.typings as _flext_target_ldap_typings
@@ -139,7 +123,6 @@ if _t.TYPE_CHECKING:
     from flext_core.handlers import FlextHandlers as h
     from flext_core.mixins import FlextMixins as x
     from flext_core.result import FlextResult as r
-    from flext_core.service import FlextService as s
     from flext_target_ldap.utilities import (
         FlextTargetLdapUtilities,
         FlextTargetLdapUtilities as u,
@@ -149,15 +132,16 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "flext_target_ldap._constants",
         "flext_target_ldap._models",
         "flext_target_ldap._utilities",
-        "flext_target_ldap.application",
-        "flext_target_ldap.patterns",
-        "flext_target_ldap.singer",
     ),
     {
         "FlextTargetLdap": ("flext_target_ldap.target", "FlextTargetLdap"),
         "FlextTargetLdapAuthenticationError": (
             "flext_target_ldap.errors",
             "FlextTargetLdapAuthenticationError",
+        ),
+        "FlextTargetLdapCatalogManager": (
+            "flext_target_ldap.singer.catalog",
+            "FlextTargetLdapCatalogManager",
         ),
         "FlextTargetLdapConfigurationError": (
             "flext_target_ldap.errors",
@@ -171,8 +155,20 @@ _LAZY_IMPORTS = merge_lazy_imports(
             "flext_target_ldap.constants",
             "FlextTargetLdapConstants",
         ),
+        "FlextTargetLdapDataTransformer": (
+            "flext_target_ldap.patterns.ldap_patterns",
+            "FlextTargetLdapDataTransformer",
+        ),
+        "FlextTargetLdapEntryManager": (
+            "flext_target_ldap.patterns.ldap_patterns",
+            "FlextTargetLdapEntryManager",
+        ),
         "FlextTargetLdapError": ("flext_target_ldap.errors", "FlextTargetLdapError"),
         "FlextTargetLdapModels": ("flext_target_ldap.models", "FlextTargetLdapModels"),
+        "FlextTargetLdapOrchestrator": (
+            "flext_target_ldap.application.orchestrator",
+            "FlextTargetLdapOrchestrator",
+        ),
         "FlextTargetLdapProcessingError": (
             "flext_target_ldap.errors",
             "FlextTargetLdapProcessingError",
@@ -181,14 +177,34 @@ _LAZY_IMPORTS = merge_lazy_imports(
             "flext_target_ldap.protocols",
             "FlextTargetLdapProtocols",
         ),
+        "FlextTargetLdapSchemaMapper": (
+            "flext_target_ldap.patterns.ldap_patterns",
+            "FlextTargetLdapSchemaMapper",
+        ),
         "FlextTargetLdapService": ("flext_target_ldap.api", "FlextTargetLdapService"),
         "FlextTargetLdapSettings": (
             "flext_target_ldap.settings",
             "FlextTargetLdapSettings",
         ),
+        "FlextTargetLdapSingerTarget": (
+            "flext_target_ldap.singer.target",
+            "FlextTargetLdapSingerTarget",
+        ),
+        "FlextTargetLdapStreamProcessingStats": (
+            "flext_target_ldap.singer.stream",
+            "FlextTargetLdapStreamProcessingStats",
+        ),
+        "FlextTargetLdapStreamProcessor": (
+            "flext_target_ldap.singer.stream",
+            "FlextTargetLdapStreamProcessor",
+        ),
         "FlextTargetLdapTimeoutError": (
             "flext_target_ldap.errors",
             "FlextTargetLdapTimeoutError",
+        ),
+        "FlextTargetLdapTypeConverter": (
+            "flext_target_ldap.patterns.ldap_patterns",
+            "FlextTargetLdapTypeConverter",
         ),
         "FlextTargetLdapTypes": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
         "FlextTargetLdapUtilities": (
@@ -211,7 +227,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "_models": "flext_target_ldap._models",
         "_utilities": "flext_target_ldap._utilities",
         "api": "flext_target_ldap.api",
-        "application": "flext_target_ldap.application",
         "build_singer_catalog": ("flext_target_ldap.catalog", "build_singer_catalog"),
         "c": ("flext_target_ldap.constants", "FlextTargetLdapConstants"),
         "catalog": "flext_target_ldap.catalog",
@@ -224,12 +239,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "main": ("flext_target_ldap.target", "main"),
         "models": "flext_target_ldap.models",
         "p": ("flext_target_ldap.protocols", "FlextTargetLdapProtocols"),
-        "patterns": "flext_target_ldap.patterns",
         "protocols": "flext_target_ldap.protocols",
         "r": ("flext_core.result", "FlextResult"),
-        "s": ("flext_core.service", "FlextService"),
+        "s": ("flext_target_ldap.api", "FlextTargetLdapService"),
         "settings": "flext_target_ldap.settings",
-        "singer": "flext_target_ldap.singer",
         "t": ("flext_target_ldap.typings", "FlextTargetLdapTypes"),
         "target": "flext_target_ldap.target",
         "typings": "flext_target_ldap.typings",
@@ -300,40 +313,25 @@ __all__ = [
     "_models",
     "_utilities",
     "api",
-    "api_service",
-    "application",
-    "base",
     "build_singer_catalog",
     "c",
     "catalog",
-    "client",
-    "config",
     "constants",
     "create_default_ldap_target_config",
     "d",
     "e",
     "errors",
     "h",
-    "ldap_patterns",
     "m",
     "main",
     "models",
-    "orchestrator",
     "p",
-    "patterns",
-    "processing_result",
     "protocols",
     "r",
     "s",
-    "service_runtime",
-    "services",
     "settings",
-    "singer",
-    "sinks",
-    "stream",
     "t",
     "target",
-    "transformation",
     "typings",
     "u",
     "utilities",
