@@ -7,34 +7,34 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextExceptions
+from flext_core import e
 
 
-class FlextTargetLdapError(FlextExceptions.BaseError):
+class FlextTargetLdapError(e.BaseError):
     """Generic LDAP target errors."""
 
 
-class FlextTargetLdapValidationError(FlextExceptions.ValidationError):
+class FlextTargetLdapValidationError(e.ValidationError):
     """LDAP target validation-specific errors."""
 
 
-class FlextTargetLdapConfigurationError(FlextExceptions.ConfigurationError):
+class FlextTargetLdapConfigurationError(e.ConfigurationError):
     """LDAP target configuration-specific errors."""
 
 
-class FlextTargetLdapProcessingError(FlextExceptions.OperationError):
+class FlextTargetLdapProcessingError(e.OperationError):
     """LDAP target processing-specific errors."""
 
 
-class FlextTargetLdapConnectionError(FlextExceptions.ConnectionError):
+class FlextTargetLdapConnectionError(e.ConnectionError):
     """LDAP target connection-specific errors."""
 
 
-class FlextTargetLdapAuthenticationError(FlextExceptions.AuthenticationError):
+class FlextTargetLdapAuthenticationError(e.AuthenticationError):
     """LDAP target authentication-specific errors."""
 
 
-class FlextTargetLdapTimeoutError(FlextExceptions.TimeoutError):
+class FlextTargetLdapTimeoutError(e.TimeoutError):
     """LDAP target timeout-specific errors."""
 
 

@@ -13,11 +13,11 @@ from flext_core.lazy import (
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_core.decorators import FlextDecorators as d
-    from flext_core.exceptions import FlextExceptions as e
-    from flext_core.handlers import FlextHandlers as h
-    from flext_core.mixins import FlextMixins as x
-    from flext_core.result import FlextResult as r
+    from flext_core.decorators import d
+    from flext_core.exceptions import e
+    from flext_core.handlers import h
+    from flext_core.mixins import x
+    from flext_core.result import r
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -137,6 +137,11 @@ _LAZY_IMPORTS = merge_lazy_imports(
             ".target": ("FlextTargetLdap",),
             ".typings": ("FlextTargetLdapTypes",),
             ".utilities": ("FlextTargetLdapUtilities",),
+            "flext_core.decorators": ("d",),
+            "flext_core.exceptions": ("e",),
+            "flext_core.handlers": ("h",),
+            "flext_core.mixins": ("x",),
+            "flext_core.result": ("r",),
         },
         alias_groups={
             ".api": (("s", "FlextTargetLdapService"),),
@@ -145,11 +150,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
             ".protocols": (("p", "FlextTargetLdapProtocols"),),
             ".typings": (("t", "FlextTargetLdapTypes"),),
             ".utilities": (("u", "FlextTargetLdapUtilities"),),
-            "flext_core.decorators": (("d", "FlextDecorators"),),
-            "flext_core.exceptions": (("e", "FlextExceptions"),),
-            "flext_core.handlers": (("h", "FlextHandlers"),),
-            "flext_core.mixins": (("x", "FlextMixins"),),
-            "flext_core.result": (("r", "FlextResult"),),
         },
     ),
     exclude_names=(
