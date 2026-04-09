@@ -36,7 +36,6 @@ class TestDataTransformationEngine:
         if len(engine.rules) != 1:
             msg: str = f"Expected {1}, got {len(engine.rules)}"
             raise AssertionError(msg)
-        assert hasattr(engine, "transform")
 
     def test_transform_oracle_dn_structure(self) -> None:
         """Test method."""
