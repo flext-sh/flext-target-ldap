@@ -2,12 +2,13 @@
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+
+import pytest
 
 from flext_target_ldap import (
     FlextTargetLdapMigrationValidator,
@@ -15,379 +16,334 @@ from flext_target_ldap import (
 )
 from tests import c, m, t
 
-# Re-export for auto-generated tests/__init__.py
 EXPECTED_DATA_COUNT = c.TargetLdap.Tests.EXPECTED_DATA_COUNT
 
 
-class TestDataTransformationEngine:
-    """Test data transformation engine."""
-
-    def test_initialization(self) -> None:
-        """Test method."""
-        "Test initialization function."
-        rules = [
-            m.TargetLdap.TransformationRule(
-                name="test",
-                pattern="test",
-                replacement="test",
-            )
-        ]
-        engine = FlextTargetLdapTransformationEngine(rules)
-        if len(engine.rules) != 1:
-            msg: str = f"Expected {1}, got {len(engine.rules)}"
-            raise AssertionError(msg)
-
-    def test_transform_oracle_dn_structure(self) -> None:
-        """Test method."""
-        "Test transform oracle dn structure function."
-        rule = m.TargetLdap.TransformationRule(
-            name="oracle_dn_structure_transform",
-            pattern="dc=invaliddc",
-            replacement="dc=network,dc=invaliddc",
+def test_transformation_engine_initialization() -> None:
+    rules = [
+        m.TargetLdap.TransformationRule(
+            name="test",
+            pattern="test",
+            replacement="test",
         )
-        engine = FlextTargetLdapTransformationEngine([rule])
-        entry: t.ContainerValueMapping = {
-            "dn": "cn=testuser,ou=people,dc=invaliddc",
-            "objectClass": ["orclUser", "person"],
-            "cn": "testuser",
-        }
-        result = engine.transform(entry)
-        assert result.is_success
-        transform_result = result.value
-        assert transform_result is not None
-        assert (
-            transform_result.transformed_data["dn"]
-            == "cn=testuser,ou=people,dc=network,dc=invaliddc"
-        )
-        if "oracle_dn_structure_transform" not in transform_result.applied_rules:
-            msg: str = f"Expected {'oracle_dn_structure_transform'} in {transform_result.applied_rules}"
-            raise AssertionError(msg)
+    ]
+    engine = FlextTargetLdapTransformationEngine(rules)
+    assert len(engine.rules) == 1
 
-    def test_transform_oracle_objectclasses(self) -> None:
-        """Test method."""
-        "Test transform oracle objectclasses function."
-        rule = m.TargetLdap.TransformationRule(
-            name="oracle_objectclass_conversion",
-            pattern="orclUser",
-            replacement="inetOrgPerson",
-        )
-        engine = FlextTargetLdapTransformationEngine([rule])
-        entry: t.ContainerValueMapping = {
-            "dn": "cn=testuser,ou=people,dc=example,dc=com",
-            "objectClass": ["orclUser", "top"],
-            "cn": "testuser",
-        }
-        result = engine.transform(entry)
-        assert result.is_success
-        transform_result = result.value
-        assert transform_result is not None
-        object_classes = transform_result.transformed_data["objectClass"]
-        if "inetOrgPerson" not in str(object_classes):
-            msg: str = f"Expected {'inetOrgPerson'} in {object_classes!s}"
-            raise AssertionError(msg)
-        assert "oracle_objectclass_conversion" in transform_result.applied_rules
 
-    def test_transform_oracle_attributes(self) -> None:
-        """Test method."""
-        "Test transform oracle attributes function."
-        rules = [
-            m.TargetLdap.TransformationRule(
-                name="oracle_user_prefix_removal",
-                pattern="orcl",
-                replacement="",
-            ),
-            m.TargetLdap.TransformationRule(
-                name="normalize_case",
-                pattern="User",
-                replacement="user",
-            ),
-        ]
-        engine = FlextTargetLdapTransformationEngine(rules)
-        entry: t.ContainerValueMapping = {
-            "dn": "cn=testuser,ou=people,dc=example,dc=com",
-            "objectClass": ["orclUser"],
-            "description": "Oracle User Account",
-            "title": "Test User",
-        }
-        result = engine.transform(entry)
-        assert result.is_success
-        transform_result = result.value
-        assert transform_result is not None
-        assert transform_result.applied_rules
-        expected_object_class = ["user"]
-        if transform_result.transformed_data["objectClass"] != expected_object_class:
-            msg_oc: str = f"Expected {expected_object_class}, got {transform_result.transformed_data['objectClass']}"
-            raise AssertionError(msg_oc)
-        if transform_result.transformed_data["title"] != "Test user":
-            msg_title: str = f"Expected 'Test user', got {transform_result.transformed_data['title']}"
-            raise AssertionError(msg_title)
+@pytest.mark.parametrize(
+    ("rules", "entry", "expected_dn", "expected_rule"),
+    [
+        (
+            [
+                m.TargetLdap.TransformationRule(
+                    name="oracle_dn_structure_transform",
+                    pattern="dc=invaliddc",
+                    replacement="dc=network,dc=invaliddc",
+                )
+            ],
+            {
+                "dn": "cn=testuser,ou=people,dc=invaliddc",
+                "objectClass": ["orclUser", "person"],
+                "cn": "testuser",
+            },
+            "cn=testuser,ou=people,dc=network,dc=invaliddc",
+            "oracle_dn_structure_transform",
+        ),
+    ],
+)
+def test_transform_oracle_dn_structure(
+    rules: list[m.TargetLdap.TransformationRule],
+    entry: t.ContainerValueMapping,
+    expected_dn: str,
+    expected_rule: str,
+) -> None:
+    engine = FlextTargetLdapTransformationEngine(rules)
+    result = engine.transform(entry)
+    assert result.is_success
+    transform_result = result.value
+    assert transform_result is not None
+    assert transform_result.transformed_data["dn"] == expected_dn
+    assert expected_rule in transform_result.applied_rules
 
-    def test_remove_empty_attributes(self) -> None:
-        """Test method."""
-        "Test remove empty attributes function."
-        rule = m.TargetLdap.TransformationRule(
+
+def test_transform_oracle_objectclasses() -> None:
+    rule = m.TargetLdap.TransformationRule(
+        name="oracle_objectclass_conversion",
+        pattern="orclUser",
+        replacement="inetOrgPerson",
+    )
+    engine = FlextTargetLdapTransformationEngine([rule])
+    entry: t.ContainerValueMapping = {
+        "dn": "cn=testuser,ou=people,dc=example,dc=com",
+        "objectClass": ["orclUser", "top"],
+        "cn": "testuser",
+    }
+    result = engine.transform(entry)
+    assert result.is_success
+    transform_result = result.value
+    assert transform_result is not None
+    object_classes = transform_result.transformed_data["objectClass"]
+    assert "inetOrgPerson" in (
+        object_classes if isinstance(object_classes, list) else str(object_classes)
+    )
+    assert "oracle_objectclass_conversion" in transform_result.applied_rules
+
+
+def test_transform_oracle_attributes_and_title_case() -> None:
+    engine = FlextTargetLdapTransformationEngine([
+        m.TargetLdap.TransformationRule(
+            name="oracle_user_prefix_removal",
+            pattern="orcl",
+            replacement="",
+        ),
+        m.TargetLdap.TransformationRule(
+            name="normalize_case",
+            pattern="User",
+            replacement="user",
+        ),
+    ])
+    entry: t.ContainerValueMapping = {
+        "dn": "cn=testuser,ou=people,dc=example,dc=com",
+        "objectClass": ["orclUser"],
+        "description": "Oracle User Account",
+        "title": "Test User",
+    }
+    result = engine.transform(entry)
+    assert result.is_success
+    transform_result = result.value
+    assert transform_result is not None
+    assert transform_result.transformed_data["objectClass"] == ["user"]
+    assert transform_result.transformed_data["title"] == "Test user"
+
+
+def test_remove_empty_attributes() -> None:
+    engine = FlextTargetLdapTransformationEngine([
+        m.TargetLdap.TransformationRule(
             name="clean_empty_attributes",
             pattern="empty",
             replacement="",
         )
-        engine = FlextTargetLdapTransformationEngine([rule])
-        entry: t.ContainerValueMapping = {
-            "dn": "cn=testuser,ou=people,dc=example,dc=com",
-            "objectClass": ["person"],
-            "cn": "testuser",
-            "description": "",
-        }
-        result = engine.transform(entry)
-        assert result.is_success
-        transform_result = result.value
-        assert transform_result is not None
-        if "cn" not in transform_result.transformed_data:
-            msg: str = f"Expected {'cn'} in {transform_result.transformed_data}"
-            raise AssertionError(msg)
+    ])
+    entry: t.ContainerValueMapping = {
+        "dn": "cn=testuser,ou=people,dc=example,dc=com",
+        "objectClass": ["person"],
+        "cn": "testuser",
+        "description": "",
+    }
+    result = engine.transform(entry)
+    assert result.is_success
+    transform_result = result.value
+    assert transform_result is not None
+    assert "cn" in transform_result.transformed_data
 
-    def test_dry_run_transformation(self) -> None:
-        """Test method."""
-        "Test dry run transformation function."
-        rule = m.TargetLdap.TransformationRule(
-            name="test_rule",
-            pattern="orclUser",
-            replacement="inetOrgPerson",
-        )
-        engine = FlextTargetLdapTransformationEngine([rule])
-        entry: t.ContainerValueMapping = {
-            "dn": "cn=testuser,ou=people,dc=invaliddc",
-            "objectClass": ["orclUser"],
-            "cn": "testuser",
-        }
-        result = engine.transform(entry)
-        assert result.is_success
-        transform_result = result.value
-        assert transform_result is not None
-        if transform_result.transformed_data["objectClass"] != ["inetOrgPerson"]:
-            msg: str = f"Expected {['inetOrgPerson']}, got {transform_result.transformed_data['objectClass']}"
-            raise AssertionError(msg)
 
-    def test_transformation_statistics(self) -> None:
-        """Test method."""
-        "Test transformation statistics function."
-        rule = m.TargetLdap.TransformationRule(
+def test_dry_run_transformation() -> None:
+    rule = m.TargetLdap.TransformationRule(
+        name="test_rule",
+        pattern="orclUser",
+        replacement="inetOrgPerson",
+    )
+    engine = FlextTargetLdapTransformationEngine([rule])
+    entry: t.ContainerValueMapping = {
+        "dn": "cn=testuser,ou=people,dc=invaliddc",
+        "objectClass": ["orclUser"],
+        "cn": "testuser",
+    }
+    result = engine.transform(entry)
+    assert result.is_success
+    transform_result = result.value
+    assert transform_result is not None
+    assert transform_result.transformed_data["objectClass"] == ["inetOrgPerson"]
+
+
+def test_transformation_statistics() -> None:
+    engine = FlextTargetLdapTransformationEngine([
+        m.TargetLdap.TransformationRule(
             name="orcl_to_inetorgperson",
             pattern="orclUser",
             replacement="inetOrgPerson",
         )
-        engine = FlextTargetLdapTransformationEngine([rule])
-        entries: Sequence[t.ContainerValueMapping] = [
-            {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
-            {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
-            {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
-        ]
-        applied_rules_count = 0
-        for entry in entries:
-            result = engine.transform(entry)
-            assert result.is_success
-            transform_result = result.value
-            assert transform_result is not None
-            applied_rules_count += len(transform_result.applied_rules)
-        assert applied_rules_count >= 2
-        stats = engine.get_statistics()
-        assert stats["total_rules"] == 1
-        assert stats["transformations_applied"] == 0
-
-
-class TestMigrationValidator:
-    """Test migration validator."""
-
-    def test_validate_valid_entry(self) -> None:
-        """Test validate valid entry function."""
-        validator = FlextTargetLdapMigrationValidator()
-        data: t.ContainerValueMapping = {
-            "dn": "cn=testuser,ou=people,dc=example,dc=com",
-            "cn": "testuser",
-            "sn": "User",
-            "mail": "test@example.com",
-            "objectClass": ["inetOrgPerson", "person"],
-        }
-        result = validator.validate(data)
+    ])
+    entries: Sequence[t.ContainerValueMapping] = [
+        {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
+        {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
+        {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
+    ]
+    applied_rules_count = 0
+    for entry in entries:
+        result = engine.transform(entry)
         assert result.is_success
+        transform_result = result.value
+        assert transform_result is not None
+        applied_rules_count += len(transform_result.applied_rules)
+    assert applied_rules_count >= 2
+    stats = engine.get_statistics()
+    assert stats["total_rules"] == 1
+    assert stats["transformations_applied"] == 0
 
-    def test_validate_missing_dn(self) -> None:
-        """Test validate missing dn function."""
-        validator = FlextTargetLdapMigrationValidator()
-        result = validator.validate("", {"cn": "testuser"}, ["person"])
-        assert not result.is_success
-        assert result.error is not None
-        if "DN cannot be empty or whitespace" not in result.error:
-            msg: str = (
-                f"Expected {'DN cannot be empty or whitespace'} in {result.error}"
-            )
-            raise AssertionError(msg)
 
-    def test_validate_invalid_dn_syntax(self) -> None:
-        """Test validate invalid dn syntax function."""
-        validator = FlextTargetLdapMigrationValidator()
-        result = validator.validate("invalid_dn_format", {"cn": "testuser"}, ["person"])
-        assert result is not None
-
-    def test_validate_missing_objectclass(self) -> None:
-        """Test method."""
-        "Test validate missing objectclass function."
-        validator = FlextTargetLdapMigrationValidator()
-        result = validator.validate(
+@pytest.mark.parametrize(
+    (
+        "dn",
+        "attributes",
+        "object_classes",
+        "expected_success",
+        "expected_error_substring",
+    ),
+    [
+        (
+            "cn=testuser,ou=people,dc=example,dc=com",
+            {"cn": "testuser", "sn": "User", "mail": "test@example.com"},
+            ["inetOrgPerson", "person"],
+            True,
+            None,
+        ),
+        (
+            "",
+            {"cn": "testuser"},
+            ["person"],
+            False,
+            "DN cannot be empty or whitespace",
+        ),
+        (
+            "invalid_dn_format",
+            {"cn": "testuser"},
+            ["person"],
+            False,
+            None,
+        ),
+        (
             "cn=testuser,dc=example,dc=com",
             {"cn": "testuser"},
             [],
-        )
-        assert not result.is_success
-        assert result.error is not None
-        if "Object classes must be a non-empty list" not in result.error:
-            msg: str = f"Expected {'Object classes must be a non-empty list'} in {result.error}"
-            raise AssertionError(msg)
-
-    def test_validate_missing_required_attributes(self) -> None:
-        """Test method."""
-        "Test validate missing required attributes function."
-        validator = FlextTargetLdapMigrationValidator()
-        result = validator.validate(
-            "cn=testuser,ou=people,dc=example,dc=com",
-            {"cn": "testuser"},
-            ["person"],
-        )
-        assert result is not None
-
-    def test_validate_invalid_email(self) -> None:
-        """Test method."""
-        "Test validate invalid email function."
-        validator = FlextTargetLdapMigrationValidator()
-        result = validator.validate(
+            False,
+            "Object classes must be a non-empty list",
+        ),
+        (
             "cn=testuser,ou=people,dc=example,dc=com",
             {"cn": "testuser", "sn": "User", "mail": "invalid-email"},
             ["inetOrgPerson", "person"],
-        )
-        assert result is not None
-
-    def test_validation_statistics(self) -> None:
-        """Test method."""
-        "Test validation statistics function."
-        validator = FlextTargetLdapMigrationValidator()
-        test_cases = [
-            ("cn=user1,dc=example,dc=com", {"cn": "user1", "sn": "One"}, ["person"]),
-            ("invalid", {"cn": "user2"}, ["person"]),
-            ("", {"cn": "user3"}, ["person"]),
-        ]
-        for dn, attributes, object_classes in test_cases:
-            validator.validate(dn, attributes, object_classes)
-        stats = validator.get_validation_statistics()
-        if stats["entries_validated"] != c.TargetLdap.Tests.EXPECTED_DATA_COUNT:
-            msg_count: str = f"Expected {3}, got {stats['entries_validated']}"
-            raise AssertionError(msg_count)
-        if stats["validation_errors"] < 0:
-            msg_errors: str = f"Expected {stats['validation_errors']} >= {0}"
-            raise AssertionError(msg_errors)
-        assert stats["validation_warnings"] >= 0
+            True,
+            None,
+        ),
+    ],
+)
+def test_migration_validator_various_inputs(
+    dn: str,
+    attributes: t.ContainerValueMapping,
+    object_classes: list[str],
+    expected_success: bool,
+    expected_error_substring: str | None,
+) -> None:
+    validator = FlextTargetLdapMigrationValidator()
+    result = validator.validate(dn, attributes, object_classes)
+    assert result.is_success == expected_success
+    if expected_error_substring is not None:
+        assert result.error is not None
+        assert expected_error_substring in result.error
 
 
-class TestTransformationRule:
-    """Test transformation rule configuration."""
+def test_validation_statistics() -> None:
+    validator = FlextTargetLdapMigrationValidator()
+    test_cases = [
+        ("cn=user1,dc=example,dc=com", {"cn": "user1", "sn": "One"}, ["person"]),
+        ("invalid", {"cn": "user2"}, ["person"]),
+        ("", {"cn": "user3"}, ["person"]),
+    ]
+    for dn, attributes, object_classes in test_cases:
+        validator.validate(dn, attributes, object_classes)
 
-    def test_transformation_rule_creation(self) -> None:
-        """Test method."""
-        "Test transformation rule creation function."
-        rule = m.TargetLdap.TransformationRule(
-            name="test_rule",
+    stats = validator.get_validation_statistics()
+    assert stats["entries_validated"] == EXPECTED_DATA_COUNT
+    assert stats["validation_errors"] >= 0
+    assert stats["validation_warnings"] >= 0
+
+
+def test_transformation_rule_creation() -> None:
+    rule = m.TargetLdap.TransformationRule(
+        name="test_rule",
+        pattern="orclUser",
+        replacement="person",
+        enabled=True,
+    )
+    assert rule.name == "test_rule"
+    assert rule.enabled
+    assert rule.pattern == "orclUser"
+    assert rule.replacement == "person"
+
+
+def test_full_oracle_migration_workflow() -> None:
+    rules = [
+        m.TargetLdap.TransformationRule(
+            name="oracle_dn_transform",
+            pattern="dc=invaliddc",
+            replacement="dc=network,dc=invaliddc",
+        ),
+        m.TargetLdap.TransformationRule(
+            name="oracle_objectclass",
             pattern="orclUser",
-            replacement="person",
-            enabled=True,
-        )
-        if rule.name != "test_rule":
-            msg_name: str = f"Expected 'test_rule', got {rule.name}"
-            raise AssertionError(msg_name)
-        if not rule.enabled:
-            msg_enabled: str = f"Expected True, got {rule.enabled}"
-            raise AssertionError(msg_enabled)
-        if rule.pattern != "orclUser":
-            msg_pattern: str = f"Expected 'orclUser', got {rule.pattern}"
-            raise AssertionError(msg_pattern)
-        assert rule.replacement == "person"
+            replacement="inetOrgPerson",
+        ),
+    ]
+    transformation_engine = FlextTargetLdapTransformationEngine(rules)
+    validator = FlextTargetLdapMigrationValidator(strict_mode=False)
+    oracle_entry: t.ContainerValueMapping = {
+        "dn": "cn=john.doe,ou=people,dc=invaliddc",
+        "objectClass": ["orclUser", "top"],
+        "orclSamAccountName": "john.doe",
+        "orclCommonName": "John Doe",
+        "orclMailNickname": "jdoe",
+        "mail": "john.doe@company.com",
+        "userPassword": "{SSHA}hashedpassword",
+    }
+    transformation_result = transformation_engine.transform(oracle_entry)
+    assert transformation_result.is_success
+    transform = transformation_result.value
+    assert transform is not None
+    transformed_entry = transform.transformed_data
+    assert transformed_entry["dn"] == "cn=john.doe,ou=people,dc=network,dc=invaliddc"
+    raw_classes = transformed_entry["objectClass"]
+    assert "inetOrgPerson" in (
+        raw_classes if isinstance(raw_classes, list) else str(raw_classes)
+    )
+
+    dn = str(transformed_entry["dn"])
+    attributes = {
+        k: v for k, v in transformed_entry.items() if k not in {"dn", "objectClass"}
+    }
+    raw_classes = transformed_entry["objectClass"]
+    obj_classes: t.StrSequence = (
+        [str(item) for item in raw_classes]
+        if isinstance(raw_classes, list)
+        else [str(raw_classes)]
+    )
+    validation_result = validator.validate(dn, attributes, obj_classes)
+    assert validation_result.is_success
 
 
-class TestIntegratedTransformation:
-    """Test integrated transformation workflow."""
-
-    def test_full_oracle_migration_workflow(self) -> None:
-        """Test method."""
-        "Test full oracle migration workflow function."
-        rules = [
-            m.TargetLdap.TransformationRule(
-                name="oracle_dn_transform",
-                pattern="dc=invaliddc",
-                replacement="dc=network,dc=invaliddc",
-            ),
-            m.TargetLdap.TransformationRule(
-                name="oracle_objectclass",
-                pattern="orclUser",
-                replacement="inetOrgPerson",
-            ),
-        ]
-        transformation_engine = FlextTargetLdapTransformationEngine(rules)
-        validator = FlextTargetLdapMigrationValidator(strict_mode=False)
-        oracle_entry: t.ContainerValueMapping = {
-            "dn": "cn=john.doe,ou=people,dc=invaliddc",
-            "objectClass": ["orclUser", "top"],
-            "orclSamAccountName": "john.doe",
-            "orclCommonName": "John Doe",
-            "orclMailNickname": "jdoe",
-            "mail": "john.doe@company.com",
-            "userPassword": "{SSHA}hashedpassword",
-        }
-        transformation_result = transformation_engine.transform(oracle_entry)
-        assert transformation_result.is_success
-        transform = transformation_result.value
-        assert transform is not None
-        assert transform.applied_rules
-        transformed_entry = transform.transformed_data
-        if transformed_entry["dn"] != "cn=john.doe,ou=people,dc=network,dc=invaliddc":
-            msg_dn: str = f"Expected {'cn=john.doe,ou=people,dc=network,dc=invaliddc'}, got {transformed_entry['dn']}"
-            raise AssertionError(msg_dn)
-        object_classes = transformed_entry["objectClass"]
-        if "inetOrgPerson" not in str(object_classes):
-            msg_oc: str = f"Expected {'inetOrgPerson'} in {object_classes!s}"
-            raise AssertionError(msg_oc)
-        dn = str(transformed_entry["dn"])
-        attributes = {
-            k: v for k, v in transformed_entry.items() if k not in {"dn", "objectClass"}
-        }
-        raw_classes = transformed_entry["objectClass"]
-        obj_classes: t.StrSequence = (
-            [str(c) for c in raw_classes]
-            if isinstance(raw_classes, list)
-            else [str(raw_classes)]
-        )
-        validation_result = validator.validate(dn, attributes, obj_classes)
-        assert validation_result.is_success
-
-    def test_classification_and_transformation_integration(self) -> None:
-        """Test method."""
-        "Test classification and transformation integration function."
-        rule = m.TargetLdap.TransformationRule(
+def test_classification_and_transformation_integration() -> None:
+    engine = FlextTargetLdapTransformationEngine([
+        m.TargetLdap.TransformationRule(
             name="general_transform",
             pattern="orclUser",
             replacement="inetOrgPerson",
         )
-        engine = FlextTargetLdapTransformationEngine([rule])
-        test_entries: Sequence[t.ContainerValueMapping] = [
-            {
-                "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",
-                "objectClass": ["orclContext"],
-            },
-            {"dn": "cn=testuser,ou=people,dc=invaliddc", "objectClass": ["orclUser"]},
-            {
-                "dn": "uid=standard.user,ou=people,dc=example,dc=com",
-                "objectClass": ["inetOrgPerson"],
-            },
-        ]
-        for entry in test_entries:
-            result = engine.transform(entry)
-            assert result.is_success
-            transform = result.value
-            assert transform is not None
-            assert transform.transformed_data is not None
+    ])
+    test_entries: Sequence[t.ContainerValueMapping] = [
+        {
+            "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",
+            "objectClass": ["orclContext"],
+        },
+        {"dn": "cn=testuser,ou=people,dc=invaliddc", "objectClass": ["orclUser"]},
+        {
+            "dn": "uid=standard.user,ou=people,dc=example,dc=com",
+            "objectClass": ["inetOrgPerson"],
+        },
+    ]
+    for entry in test_entries:
+        result = engine.transform(entry)
+        assert result.is_success
+        transform = result.value
+        assert transform is not None
+        assert transform.transformed_data is not None

@@ -50,7 +50,7 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapMigrationValidator,
         FlextTargetLdapTransformationEngine,
     )
-    from flext_target_ldap.api import FlextTargetLdapApi
+    from flext_target_ldap.api import FlextTargetLdap, target_ldap
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
     from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.constants import (
@@ -87,7 +87,6 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapStreamProcessor,
     )
     from flext_target_ldap.singer.target import FlextTargetLdapSingerTarget
-    from flext_target_ldap.target import FlextTargetLdap
     from flext_target_ldap.typings import (
         FlextTargetLdapTypes,
         FlextTargetLdapTypes as t,
@@ -117,7 +116,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "__version__",
                 "__version_info__",
             ),
-            ".api": ("FlextTargetLdapApi",),
+            ".api": (
+                "FlextTargetLdap",
+                "target_ldap",
+            ),
             ".catalog": ("build_singer_catalog",),
             ".constants": ("FlextTargetLdapConstants",),
             ".errors": (
@@ -132,7 +134,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
             ".models": ("FlextTargetLdapModels",),
             ".protocols": ("FlextTargetLdapProtocols",),
             ".settings": ("FlextTargetLdapSettings",),
-            ".target": ("FlextTargetLdap",),
             ".typings": ("FlextTargetLdapTypes",),
             ".utilities": ("FlextTargetLdapUtilities",),
             "flext_core.decorators": ("d",),
@@ -164,7 +165,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
 
 __all__ = [
     "FlextTargetLdap",
-    "FlextTargetLdapApi",
     "FlextTargetLdapApiService",
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapBaseSink",
@@ -223,6 +223,7 @@ __all__ = [
     "r",
     "s",
     "t",
+    "target_ldap",
     "u",
     "validate_ldap_target_config",
     "x",
