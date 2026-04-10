@@ -18,6 +18,7 @@ if _t.TYPE_CHECKING:
     from flext_core.handlers import h
     from flext_core.mixins import x
     from flext_core.result import r
+    from flext_core.service import s
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -49,10 +50,7 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapMigrationValidator,
         FlextTargetLdapTransformationEngine,
     )
-    from flext_target_ldap.api import (
-        FlextTargetLdapService,
-        FlextTargetLdapService as s,
-    )
+    from flext_target_ldap.api import FlextTargetLdapApi
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
     from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.constants import (
@@ -119,7 +117,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "__version__",
                 "__version_info__",
             ),
-            ".api": ("FlextTargetLdapService",),
+            ".api": ("FlextTargetLdapApi",),
             ".catalog": ("build_singer_catalog",),
             ".constants": ("FlextTargetLdapConstants",),
             ".errors": (
@@ -142,9 +140,9 @@ _LAZY_IMPORTS = merge_lazy_imports(
             "flext_core.handlers": ("h",),
             "flext_core.mixins": ("x",),
             "flext_core.result": ("r",),
+            "flext_core.service": ("s",),
         },
         alias_groups={
-            ".api": (("s", "FlextTargetLdapService"),),
             ".constants": (("c", "FlextTargetLdapConstants"),),
             ".models": (("m", "FlextTargetLdapModels"),),
             ".protocols": (("p", "FlextTargetLdapProtocols"),),
@@ -166,6 +164,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
 
 __all__ = [
     "FlextTargetLdap",
+    "FlextTargetLdapApi",
     "FlextTargetLdapApiService",
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapBaseSink",
@@ -190,7 +189,6 @@ __all__ = [
     "FlextTargetLdapProcessingResult",
     "FlextTargetLdapProtocols",
     "FlextTargetLdapSchemaMapper",
-    "FlextTargetLdapService",
     "FlextTargetLdapServiceRuntime",
     "FlextTargetLdapSettings",
     "FlextTargetLdapSingerTarget",
