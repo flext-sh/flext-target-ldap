@@ -13,12 +13,7 @@ from flext_core.lazy import (
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_cli.base import s
-    from flext_core.decorators import d
-    from flext_core.exceptions import e
-    from flext_core.handlers import h
-    from flext_core.mixins import x
-    from flext_core.result import r
+    from flext_meltano import d, e, h, r, s, x
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -34,11 +29,7 @@ if _t.TYPE_CHECKING:
     )
     from flext_target_ldap._utilities.api_service import FlextTargetLdapApiService
     from flext_target_ldap._utilities.client import FlextTargetLdapClient
-    from flext_target_ldap._utilities.config import (
-        FlextTargetLdapConfigFactory,
-        create_default_ldap_target_config,
-        validate_ldap_target_config,
-    )
+    from flext_target_ldap._utilities.config import FlextTargetLdapConfigFactory
     from flext_target_ldap._utilities.service_runtime import (
         FlextTargetLdapServiceRuntime,
     )
@@ -52,7 +43,6 @@ if _t.TYPE_CHECKING:
     )
     from flext_target_ldap.api import FlextTargetLdap, target_ldap
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
-    from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
     from flext_target_ldap.errors import (
         FlextTargetLdapAuthenticationError,
@@ -105,7 +95,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdap",
                 "target_ldap",
             ),
-            ".catalog": ("build_singer_catalog",),
             ".constants": (
                 "FlextTargetLdapConstants",
                 "c",
@@ -136,12 +125,14 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdapUtilities",
                 "u",
             ),
-            "flext_cli.base": ("s",),
-            "flext_core.decorators": ("d",),
-            "flext_core.exceptions": ("e",),
-            "flext_core.handlers": ("h",),
-            "flext_core.mixins": ("x",),
-            "flext_core.result": ("r",),
+            "flext_meltano": (
+                "d",
+                "e",
+                "h",
+                "r",
+                "s",
+                "x",
+            ),
         },
     ),
     exclude_names=(
@@ -208,9 +199,7 @@ __all__ = [
     "__url__",
     "__version__",
     "__version_info__",
-    "build_singer_catalog",
     "c",
-    "create_default_ldap_target_config",
     "d",
     "e",
     "h",
@@ -221,6 +210,5 @@ __all__ = [
     "t",
     "target_ldap",
     "u",
-    "validate_ldap_target_config",
     "x",
 ]

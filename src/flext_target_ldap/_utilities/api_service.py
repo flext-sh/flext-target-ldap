@@ -34,7 +34,7 @@ class FlextTargetLdapApiService:
     ) -> r[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(config)
-        if target_result.is_failure:
+        if target_result.failure:
             return r[int].fail(target_result.error or "Target creation failed")
         target = target_result.value
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
@@ -49,7 +49,7 @@ class FlextTargetLdapApiService:
     ) -> r[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(config)
-        if target_result.is_failure:
+        if target_result.failure:
             return r[int].fail(target_result.error or "Target creation failed")
         target = target_result.value
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
@@ -63,7 +63,7 @@ class FlextTargetLdapApiService:
     ) -> r[bool]:
         """Validate config and test the LDAP connection."""
         validated = validate_ldap_target_config(config)
-        if validated.is_failure:
+        if validated.failure:
             return r[bool].fail(validated.error or "Configuration validation failed")
         return FlextTargetLdapConnectionService(validated.value).test_connection()
 

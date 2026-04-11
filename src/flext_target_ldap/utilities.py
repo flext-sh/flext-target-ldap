@@ -486,7 +486,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         config,
                     )
                 )
-                if ldap_result.is_failure:
+                if ldap_result.failure:
                     return ldap_result
                 operation_mode = config.get("operation_mode", "upsert")
                 valid_modes = ["insert", "update", "upsert", "delete"]

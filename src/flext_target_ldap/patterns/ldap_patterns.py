@@ -109,7 +109,7 @@ class FlextTargetLdapDataTransformer:
                     singer_type,
                     value,
                 )
-                if convert_result.is_failure:
+                if convert_result.failure:
                     return r[t.OptionalStrMapping].fail(
                         f"Conversion failed for '{key}': {convert_result.error}",
                     )
@@ -162,7 +162,7 @@ class FlextTargetLdapSchemaMapper:
             for prop_name, prop_def in schema_model.properties.items():
                 ldap_name = self._normalize_attribute_name(prop_name)
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
-                if ldap_type_result.is_failure:
+                if ldap_type_result.failure:
                     return r[t.StrMapping].fail(
                         f"Type mapping failed for '{prop_name}': {ldap_type_result.error}",
                     )

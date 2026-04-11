@@ -48,7 +48,7 @@ def test_dn_template_processing(mock_ldap_config) -> None:
     sink = target.get_sink("users")
     assert isinstance(sink, FlextTargetLdapUsersSink)
     dn_result = sink.build_dn({"uid": "jdoe"})
-    assert dn_result.is_success
+    assert dn_result.success
     assert dn_result.value == "uid=jdoe,ou=people,dc=test,dc=com"
 
 
@@ -69,7 +69,7 @@ def test_process_record(mock_ldap_config, sample_user_record) -> None:
     assert isinstance(sink, FlextTargetLdapBaseSink)
     sink.client = mock_client
     result = sink.process_record(sample_user_record, {})
-    assert result.is_success
+    assert result.success
     mock_client.add_entry.assert_called_once()
 
 
@@ -85,7 +85,7 @@ def test_process_delete_record(mock_ldap_config) -> None:
         "_sdc_deleted_at": "2024-01-15T10:30:00Z",
     }
     result = sink.process_record(record, {})
-    assert result.is_failure
+    assert result.failure
     assert result.error and "No username found" in result.error
 
 
@@ -98,5 +98,5 @@ def test_sink_process_record_delegates_to_target_handler() -> None:
         key_properties=["id"],
     )
     result = sink.process_record({"id": "42"}, {"batch": "1"})
-    assert result.is_success
+    assert result.success
     assert target.calls == [({"id": "42"}, {"batch": "1"})]

@@ -47,7 +47,7 @@ class FlextTargetLdapSink:
             if callable(process_record_fn):
                 result = process_record_fn(_record, _context)
                 if isinstance(result, r):
-                    if result.is_success:
+                    if result.success:
                         return r[bool].ok(value=True)
                     return r[bool].fail(result.error or "Target rejected record")
                 if isinstance(result, bool):
@@ -58,7 +58,7 @@ class FlextTargetLdapSink:
             if callable(process_fn):
                 result = process_fn(self.stream_name, _record, _context)
                 if isinstance(result, r):
-                    if result.is_success:
+                    if result.success:
                         return r[bool].ok(value=True)
                     return r[bool].fail(result.error or "Target rejected record")
                 if isinstance(result, bool):
@@ -181,7 +181,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     def process_batch(self, _context: t.ContainerValueMapping) -> None:
         """Process a batch of records."""
         setup_result: r[FlextTargetLdapClient] = self.setup_client()
-        if not setup_result.is_success:
+        if not setup_result.success:
             logger.error(f"Cannot process batch: {setup_result.error or ''}")
             return
         try:
@@ -240,7 +240,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             }
             self.client = FlextTargetLdapClient(connection_config)
             connect_result = self.client.connect()
-            if not connect_result.is_success:
+            if not connect_result.success:
                 return r[FlextTargetLdapClient].fail(
                     f"LDAP connection failed: {connect_result.error}",
                 )
@@ -278,7 +278,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         )
         if validate_fn is not None and callable(validate_fn):
             dn_result = validate_fn(dn)
-            if isinstance(dn_result, r) and dn_result.is_failure:
+            if isinstance(dn_result, r) and dn_result.failure:
                 return r[bool].fail(f"Invalid DN: {dn}")
         return r[bool].ok(value=True)
 
@@ -419,7 +419,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 attributes_dict,
                 object_classes,
             )
-            if add_result.is_success:
+            if add_result.success:
                 self._processing_result.add_success()
                 logger.debug("User entry added successfully: %s", user_dn)
                 return r[bool].ok(value=True)
@@ -428,7 +428,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                     user_dn,
                     attributes_dict,
                 )
-                if modify_result.is_success:
+                if modify_result.success:
                     self._processing_result.add_success()
                     logger.debug("User entry modified successfully: %s", user_dn)
                     return r[bool].ok(value=True)
@@ -524,7 +524,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                 attributes_dict,
                 object_classes,
             )
-            if add_result.is_success:
+            if add_result.success:
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
                 return r[bool].ok(value=True)
@@ -533,7 +533,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                     group_dn,
                     attributes_dict,
                 )
-                if modify_result.is_success:
+                if modify_result.success:
                     self._processing_result.add_success()
                     logger.debug("Group entry modified successfully: %s", group_dn)
                     return r[bool].ok(value=True)
@@ -630,7 +630,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                 else:
                     attributes_dict[k] = v
             add_result: r[bool] = self.client.add_entry(ou_dn, attributes_dict)
-            if add_result.is_success:
+            if add_result.success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
                 return r[bool].ok(value=True)
@@ -639,7 +639,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                     ou_dn,
                     attributes_dict,
                 )
-                if modify_result.is_success:
+                if modify_result.success:
                     self._processing_result.add_success()
                     logger.debug("OU entry modified successfully: %s", ou_dn)
                     return r[bool].ok(value=True)

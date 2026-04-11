@@ -60,7 +60,7 @@ def test_transform_oracle_dn_structure(
 ) -> None:
     engine = FlextTargetLdapTransformationEngine(rules)
     result = engine.transform(entry)
-    assert result.is_success
+    assert result.success
     transform_result = result.value
     assert transform_result is not None
     assert transform_result.transformed_data["dn"] == expected_dn
@@ -80,7 +80,7 @@ def test_transform_oracle_objectclasses() -> None:
         "cn": "testuser",
     }
     result = engine.transform(entry)
-    assert result.is_success
+    assert result.success
     transform_result = result.value
     assert transform_result is not None
     object_classes = transform_result.transformed_data["objectClass"]
@@ -110,7 +110,7 @@ def test_transform_oracle_attributes_and_title_case() -> None:
         "title": "Test User",
     }
     result = engine.transform(entry)
-    assert result.is_success
+    assert result.success
     transform_result = result.value
     assert transform_result is not None
     assert transform_result.transformed_data["objectClass"] == ["user"]
@@ -132,7 +132,7 @@ def test_remove_empty_attributes() -> None:
         "description": "",
     }
     result = engine.transform(entry)
-    assert result.is_success
+    assert result.success
     transform_result = result.value
     assert transform_result is not None
     assert "cn" in transform_result.transformed_data
@@ -151,7 +151,7 @@ def test_dry_run_transformation() -> None:
         "cn": "testuser",
     }
     result = engine.transform(entry)
-    assert result.is_success
+    assert result.success
     transform_result = result.value
     assert transform_result is not None
     assert transform_result.transformed_data["objectClass"] == ["inetOrgPerson"]
@@ -173,7 +173,7 @@ def test_transformation_statistics() -> None:
     applied_rules_count = 0
     for entry in entries:
         result = engine.transform(entry)
-        assert result.is_success
+        assert result.success
         transform_result = result.value
         assert transform_result is not None
         applied_rules_count += len(transform_result.applied_rules)
@@ -238,7 +238,7 @@ def test_migration_validator_various_inputs(
 ) -> None:
     validator = FlextTargetLdapMigrationValidator()
     result = validator.validate(dn, attributes, object_classes)
-    assert result.is_success == expected_success
+    assert result.success == expected_success
     if expected_error_substring is not None:
         assert result.error is not None
         assert expected_error_substring in result.error
@@ -298,7 +298,7 @@ def test_full_oracle_migration_workflow() -> None:
         "userPassword": "{SSHA}hashedpassword",
     }
     transformation_result = transformation_engine.transform(oracle_entry)
-    assert transformation_result.is_success
+    assert transformation_result.success
     transform = transformation_result.value
     assert transform is not None
     transformed_entry = transform.transformed_data
@@ -319,7 +319,7 @@ def test_full_oracle_migration_workflow() -> None:
         else [str(raw_classes)]
     )
     validation_result = validator.validate(dn, attributes, obj_classes)
-    assert validation_result.is_success
+    assert validation_result.success
 
 
 def test_classification_and_transformation_integration() -> None:
@@ -343,7 +343,7 @@ def test_classification_and_transformation_integration() -> None:
     ]
     for entry in test_entries:
         result = engine.transform(entry)
-        assert result.is_success
+        assert result.success
         transform = result.value
         assert transform is not None
         assert transform.transformed_data is not None

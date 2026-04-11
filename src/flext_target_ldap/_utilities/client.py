@@ -187,12 +187,12 @@ class FlextTargetLdapClient:
                 dn,
             )
             connect_result = self._api.connect(self.config)
-            if connect_result.is_failure:
+            if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
                 ldap_entry = self._build_ldif_entry(dn, attributes, object_classes)
                 result_op = self._api.add(ldap_entry)
-                if result_op.is_success:
+                if result_op.success:
                     return r[bool].ok(value=True)
                 return r[bool].fail(
                     str(result_op.error) if result_op.error else "LDAP add failed",
@@ -207,7 +207,7 @@ class FlextTargetLdapClient:
         """Validate connectivity to LDAP server using flext-ldap API."""
         try:
             connect_result = self._api.connect(self.config)
-            if connect_result.is_failure:
+            if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             self._api.disconnect()
             FlextTargetLdapClient._logger.info(
@@ -229,11 +229,11 @@ class FlextTargetLdapClient:
                 dn,
             )
             connect_result = self._api.connect(self.config)
-            if connect_result.is_failure:
+            if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
                 result = self._api.delete(dn)
-                if result.is_success:
+                if result.success:
                     FlextTargetLdapClient._logger.debug(
                         "Successfully deleted LDAP entry: %s",
                         dn,
@@ -269,7 +269,7 @@ class FlextTargetLdapClient:
                 search_filter="(objectClass=*)",
                 attributes=["dn"],
             )
-            if search_result.is_success:
+            if search_result.success:
                 return r[bool].ok(bool(search_result.value))
             return r[bool].ok(value=False)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -290,7 +290,7 @@ class FlextTargetLdapClient:
                 return r[m.TargetLdap.SearchEntry | None].fail("DN required")
             FlextTargetLdapClient._logger.info("Getting LDAP entry: %s", dn)
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
-            if search_result.is_success and search_result.value:
+            if search_result.success and search_result.value:
                 return r[m.TargetLdap.SearchEntry | None].ok(search_result.value[0])
             return r[m.TargetLdap.SearchEntry | None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
@@ -309,11 +309,11 @@ class FlextTargetLdapClient:
                 dn,
             )
             connect_result = self._api.connect(self.config)
-            if connect_result.is_failure:
+            if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
                 result = self._api.modify(dn, self._build_modify_changes(changes))
-                if result.is_success:
+                if result.success:
                     FlextTargetLdapClient._logger.debug(
                         "Successfully modified LDAP entry: %s",
                         dn,
@@ -344,7 +344,7 @@ class FlextTargetLdapClient:
                 search_filter,
             )
             connect_result = self._api.connect(self.config)
-            if connect_result.is_failure:
+            if connect_result.failure:
                 return r[Sequence[m.TargetLdap.SearchEntry]].fail(
                     f"Connection failed: {connect_result.error}",
                 )
@@ -357,7 +357,7 @@ class FlextTargetLdapClient:
                 result = self._api.search(search_options)
             finally:
                 self._api.disconnect()
-            if result.is_success and result.value:
+            if result.success and result.value:
                 entries: MutableSequence[m.TargetLdap.SearchEntry] = []
                 search_res = result.value
                 ldap_entries: Sequence[Mapping[str, t.StrSequence]] = search_res.entries

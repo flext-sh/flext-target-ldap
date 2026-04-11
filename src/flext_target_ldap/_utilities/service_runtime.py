@@ -66,7 +66,7 @@ class FlextTargetLdapServiceRuntime:
                 FlextTargetLdapServiceRuntime.normalize_singer_mapping(record),
                 FlextTargetLdapServiceRuntime.normalize_singer_mapping(context),
             )
-            if result.is_failure:
+            if result.failure:
                 msg = result.error or "LDAP runtime sink rejected the record"
                 raise RuntimeError(msg)
 

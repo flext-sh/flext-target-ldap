@@ -303,7 +303,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
                     # Validate transformed entry is valid
                     entry_validation = self.transformed_entry.validate_business_rules()
-                    if not entry_validation.is_success:
+                    if not entry_validation.success:
                         return r[bool].fail(
                             f"Transformed entry is invalid: {entry_validation.error}",
                         )

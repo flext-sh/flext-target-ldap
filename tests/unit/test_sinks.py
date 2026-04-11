@@ -132,7 +132,7 @@ def test_base_sink_validation_failures(
         result = ldap_base_sink.build_dn(record)
     else:
         result = ldap_base_sink.build_attributes(record)
-    assert not result.is_success
+    assert not result.success
     assert result.error is not None and expected_error in str(result.error)
 
 
@@ -144,12 +144,12 @@ def test_get_object_classes_default(ldap_base_sink: LDAPBaseSink) -> None:
 
 def test_validate_entry_success(ldap_base_sink: LDAPBaseSink) -> None:
     mock_client = MagicMock()
-    mock_client.validate_dn.return_value.is_success = True
+    mock_client.validate_dn.return_value.success = True
     ldap_base_sink._client = mock_client
     result = ldap_base_sink.validate_entry(
         "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
     )
-    assert result.is_success
+    assert result.success
 
 
 @pytest.mark.parametrize(
@@ -173,20 +173,20 @@ def test_validate_entry_failure_cases(
     expected_message: str,
 ) -> None:
     result = ldap_base_sink.validate_entry(dn, attributes, object_classes)
-    assert not result.is_success
+    assert not result.success
     assert result.error is not None and expected_message in str(result.error)
 
 
 def test_users_build_dn_success(users_sink: UsersSink) -> None:
     record = {"uid": "testuser", "cn": "Test User"}
     result = users_sink.build_dn(record)
-    assert result.is_success
+    assert result.success
     assert result.value == "uid=testuser,dc=example,dc=com"
 
 
 def test_users_build_dn_missing_uid(users_sink: UsersSink) -> None:
     result = users_sink.build_dn({"cn": "Test User"})
-    assert not result.is_success
+    assert not result.success
     assert result.error is not None and "No value found for RDN attribute 'uid'" in str(
         result.error
     )
@@ -200,7 +200,7 @@ def test_users_build_attributes_basic(users_sink: UsersSink) -> None:
         "sn": "User",
         "givenName": "Test",
     })
-    assert result.is_success
+    assert result.success
     assert result.value is not None
     assert result.value["uid"] == ["testuser"]
     assert result.value["cn"] == ["Test User"]
@@ -215,7 +215,7 @@ def test_users_build_attributes_multivalued(users_sink: UsersSink) -> None:
         "emails": ["test1@example.com", "test2@example.com"],
         "phone_numbers": ["123-456-7890", "098-765-4321"],
     })
-    assert result.is_success
+    assert result.success
     assert result.value is not None
     assert result.value["mail"] == ["test1@example.com", "test2@example.com"]
     assert result.value["telephoneNumber"] == ["123-456-7890", "098-765-4321"]
@@ -243,13 +243,13 @@ def test_users_get_object_classes_configured(mock_target: MagicMock) -> None:
 
 def test_groups_build_dn_success(groups_sink: GroupsSink) -> None:
     result = groups_sink.build_dn({"cn": "testgroup", "description": "Test Group"})
-    assert result.is_success
+    assert result.success
     assert result.value == "cn=testgroup,dc=example,dc=com"
 
 
 def test_groups_build_dn_missing_cn(groups_sink: GroupsSink) -> None:
     result = groups_sink.build_dn({"description": "Test Group"})
-    assert not result.is_success
+    assert not result.success
     assert result.error is not None and "No value found for RDN attribute 'cn'" in str(
         result.error
     )
@@ -261,7 +261,7 @@ def test_groups_build_attributes_basic(groups_sink: GroupsSink) -> None:
         "description": "Test Group",
         "members": ["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
     })
-    assert result.is_success
+    assert result.success
     assert result.value is not None
     assert result.value["cn"] == ["testgroup"]
     assert result.value["description"] == ["Test Group"]
@@ -277,19 +277,19 @@ def test_groups_get_object_classes_default(groups_sink: GroupsSink) -> None:
 
 def test_ou_build_dn_success(ou_sink: OrganizationalUnitsSink) -> None:
     result = ou_sink.build_dn({"name": "testou", "description": "Test OU"})
-    assert result.is_success
+    assert result.success
     assert "testou" in result.value
 
 
 def test_ou_build_dn_missing_ou(ou_sink: OrganizationalUnitsSink) -> None:
     result = ou_sink.build_dn({"description": "Test OU"})
-    assert not result.is_success
+    assert not result.success
     assert result.error is not None
 
 
 def test_ou_build_attributes_basic(ou_sink: OrganizationalUnitsSink) -> None:
     result = ou_sink.build_attributes({"ou": "testou", "description": "Test OU"})
-    assert not result.is_success
+    assert not result.success
 
 
 def test_ou_get_object_classes_default(ou_sink: OrganizationalUnitsSink) -> None:
@@ -298,19 +298,19 @@ def test_ou_get_object_classes_default(ou_sink: OrganizationalUnitsSink) -> None
 
 def test_generic_build_dn_explicit(generic_sink: LDAPBaseSink) -> None:
     result = generic_sink.build_dn({"dn": "cn=test,dc=example,dc=com"})
-    assert result.is_success
+    assert result.success
     assert result.value == "cn=test,dc=example,dc=com"
 
 
 def test_generic_build_dn_id_field(generic_sink: LDAPBaseSink) -> None:
     result = generic_sink.build_dn({"id": "testentry", "cn": "Test Entry"})
-    assert result.is_success
+    assert result.success
     assert result.value == "cn=testentry,dc=example,dc=com"
 
 
 def test_generic_build_dn_no_identifier(generic_sink: LDAPBaseSink) -> None:
     result = generic_sink.build_dn({"description": "Test Entry"})
-    assert not result.is_success
+    assert not result.success
     assert result.error is not None and "No ID or name found for generic entry" in str(
         result.error
     )
@@ -322,7 +322,7 @@ def test_generic_build_attributes_basic(generic_sink: LDAPBaseSink) -> None:
         "cn": "Test Entry",
         "description": "A test entry",
     })
-    assert not result.is_success
+    assert not result.success
     assert result.error is not None and "must be implemented in subclass" in str(
         result.error
     )

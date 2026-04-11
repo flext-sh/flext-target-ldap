@@ -42,7 +42,7 @@ def test_connect_delegates_to_flext_ldap_api(client: FlextTargetLdapClient) -> N
     client._api = MagicMock()
     client._api.connect.return_value = r[bool].ok(True)
     result = client.connect()
-    assert result.is_success
+    assert result.success
     assert result.value is True
     client._api.connect.assert_called_once_with(client.config)
     client._api.disconnect.assert_called_once()
@@ -51,7 +51,7 @@ def test_connect_delegates_to_flext_ldap_api(client: FlextTargetLdapClient) -> N
 def test_disconnect_calls_flext_ldap_api(client: FlextTargetLdapClient) -> None:
     client._api = MagicMock()
     result = client.disconnect()
-    assert result.is_success
+    assert result.success
     assert result.value is True
     client._api.disconnect.assert_called_once_with()
 
@@ -59,13 +59,13 @@ def test_disconnect_calls_flext_ldap_api(client: FlextTargetLdapClient) -> None:
 def test_add_entry_uses_real_ldif_entry(client: FlextTargetLdapClient) -> None:
     client._api = MagicMock()
     client._api.connect.return_value = r[bool].ok(True)
-    client._api.add.return_value = MagicMock(is_success=True, error=None)
+    client._api.add.return_value = MagicMock(success=True, error=None)
     result = client.add_entry(
         dn="uid=test,dc=test,dc=com",
         object_classes=["inetOrgPerson", "person"],
         attributes={"cn": "Test User", "sn": "User"},
     )
-    assert result.is_success
+    assert result.success
     assert result.value is True
     client._api.connect.assert_called_once_with(client.config)
     client._api.add.assert_called_once()
@@ -78,12 +78,12 @@ def test_add_entry_uses_real_ldif_entry(client: FlextTargetLdapClient) -> None:
 def test_modify_entry_uses_real_modify_changes(client: FlextTargetLdapClient) -> None:
     client._api = MagicMock()
     client._api.connect.return_value = r[bool].ok(True)
-    client._api.modify.return_value = MagicMock(is_success=True, error=None)
+    client._api.modify.return_value = MagicMock(success=True, error=None)
     result = client.modify_entry(
         dn="uid=test,dc=test,dc=com",
         changes={"mail": "new@test.com", "telephoneNumber": "123-456"},
     )
-    assert result.is_success
+    assert result.success
     assert result.value is True
     client._api.modify.assert_called_once_with(
         "uid=test,dc=test,dc=com",
@@ -100,9 +100,9 @@ def test_delete_entry_delegates_to_flext_ldap_api(
 ) -> None:
     client._api = MagicMock()
     client._api.connect.return_value = r[bool].ok(True)
-    client._api.delete.return_value = MagicMock(is_success=True, error=None)
+    client._api.delete.return_value = MagicMock(success=True, error=None)
     result = client.delete_entry("uid=test,dc=test,dc=com")
-    assert result.is_success
+    assert result.success
     assert result.value is True
     client._api.delete.assert_called_once_with("uid=test,dc=test,dc=com")
     client._api.disconnect.assert_called_once()
@@ -112,7 +112,7 @@ def test_search_entry_maps_search_results(client: FlextTargetLdapClient) -> None
     client._api = MagicMock()
     client._api.connect.return_value = r[bool].ok(True)
     client._api.search.return_value = MagicMock(
-        is_success=True,
+        success=True,
         value=MagicMock(
             entries=[{"dn": "uid=test,dc=test,dc=com", "cn": ["Test User"]}],
         ),
@@ -122,7 +122,7 @@ def test_search_entry_maps_search_results(client: FlextTargetLdapClient) -> None
         search_filter="(uid=test)",
         attributes=["cn"],
     )
-    assert result.is_success
+    assert result.success
     assert result.value is not None
     assert len(result.value) == 1
     entry = result.value[0]
@@ -135,11 +135,11 @@ def test_search_entry_disconnects_after_search(client: FlextTargetLdapClient) ->
     client._api = MagicMock()
     client._api.connect.return_value = r[bool].ok(True)
     client._api.search.return_value = MagicMock(
-        is_success=True,
+        success=True,
         value=MagicMock(
             entries=[{"dn": "uid=test,dc=test,dc=com", "cn": ["Test User"]}],
         ),
     )
     result = client.search_entry("dc=test,dc=com")
-    assert result.is_success
+    assert result.success
     client._api.disconnect.assert_called_once()
