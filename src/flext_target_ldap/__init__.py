@@ -29,7 +29,11 @@ if _t.TYPE_CHECKING:
     )
     from flext_target_ldap._utilities.api_service import FlextTargetLdapApiService
     from flext_target_ldap._utilities.client import FlextTargetLdapClient
-    from flext_target_ldap._utilities.config import FlextTargetLdapConfigFactory
+    from flext_target_ldap._utilities.config import (
+        FlextTargetLdapConfigFactory,
+        create_default_ldap_target_config,
+        validate_ldap_target_config,
+    )
     from flext_target_ldap._utilities.service_runtime import (
         FlextTargetLdapServiceRuntime,
     )
@@ -43,6 +47,7 @@ if _t.TYPE_CHECKING:
     )
     from flext_target_ldap.api import FlextTargetLdap, target_ldap
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+    from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
     from flext_target_ldap.errors import (
         FlextTargetLdapAuthenticationError,
@@ -95,6 +100,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdap",
                 "target_ldap",
             ),
+            ".catalog": ("build_singer_catalog",),
             ".constants": (
                 "FlextTargetLdapConstants",
                 "c",
@@ -199,7 +205,9 @@ __all__ = [
     "__url__",
     "__version__",
     "__version_info__",
+    "build_singer_catalog",
     "c",
+    "create_default_ldap_target_config",
     "d",
     "e",
     "h",
@@ -210,5 +218,6 @@ __all__ = [
     "t",
     "target_ldap",
     "u",
+    "validate_ldap_target_config",
     "x",
 ]
