@@ -14,7 +14,6 @@ from collections.abc import (
 )
 from typing import ClassVar, TypeIs, override
 
-from flext_core import FlextLogger
 from flext_ldap import FlextLdap
 from flext_target_ldap import c, m, r, t
 
@@ -25,7 +24,7 @@ class FlextTargetLdapClient:
     This client delegates LDAP operations to flext-ldap without compatibility layers.
     """
 
-    _logger: ClassVar = FlextLogger(__name__)
+    _logger: ClassVar = u.fetch_logger(__name__)
 
     @staticmethod
     def _is_container_list(

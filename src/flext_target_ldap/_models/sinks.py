@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import MutableSequence, Sequence
 from typing import ClassVar, TypeIs, override
 
-from flext_core import FlextLogger, r
+from flext_core import r
 from flext_target_ldap import (
     FlextTargetLdapClient,
     FlextTargetLdapProcessingCounters,
@@ -85,7 +85,7 @@ class FlextTargetLdapTarget:
         self.config: t.ContainerValueMapping = config
 
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):

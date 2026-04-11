@@ -10,10 +10,10 @@ from __future__ import annotations
 from collections.abc import MutableSequence, Sequence
 from typing import override
 
-from flext_core import FlextLogger, r
+from flext_core import r
 from flext_target_ldap import c, m, t
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 class FlextTargetLdapTransformationEngine:

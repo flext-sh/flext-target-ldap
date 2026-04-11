@@ -35,7 +35,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     class _DefaultCliHelper:
         """Default CLI helper for printing output."""
 
-        _logger = FlextLogger(__name__)
+        _logger = u.fetch_logger(__name__)
 
         def print(self, msg: str) -> None:
             """Print a message."""
@@ -52,7 +52,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
     config: t.ContainerValueMapping
-    _logger: ClassVar[FlextLogger] = FlextLogger(__name__)
+    _logger: ClassVar[FlextLogger] = u.fetch_logger(__name__)
 
     @override
     def __init__(
@@ -119,7 +119,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Set up the LDAP target."""
         _ = self.orchestrator
         self._logger.info("Orchestrator initialized successfully")
-        self._container = FlextContainer.get_global()
+        self._container = FlextContainer.fetch_global()
         self._logger.info("DI container initialized successfully")
         host = u.TargetLdap.TypeConversion.to_str(
             self.config.get("host", "localhost"),
