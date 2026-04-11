@@ -13,7 +13,7 @@ from flext_core.lazy import (
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_meltano import d, e, h, r, s, x
+    from flext_ldap import d, e, h, r, s, x
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -29,17 +29,17 @@ if _t.TYPE_CHECKING:
     )
     from flext_target_ldap._utilities.api_service import FlextTargetLdapApiService
     from flext_target_ldap._utilities.client import FlextTargetLdapClient
-    from flext_target_ldap._utilities.config import (
-        FlextTargetLdapConfigFactory,
-        create_default_ldap_target_config,
-        validate_ldap_target_config,
-    )
     from flext_target_ldap._utilities.service_runtime import (
         FlextTargetLdapServiceRuntime,
     )
     from flext_target_ldap._utilities.services import (
         FlextTargetLdapConnectionService,
         FlextTargetLdapTransformationService,
+    )
+    from flext_target_ldap._utilities.settings import (
+        FlextTargetLdapConfigFactory,
+        create_default_ldap_target_config,
+        validate_ldap_target_config,
     )
     from flext_target_ldap._utilities.transformation import (
         FlextTargetLdapMigrationValidator,
@@ -131,7 +131,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdapUtilities",
                 "u",
             ),
-            "flext_meltano": (
+            "flext_ldap": (
                 "d",
                 "e",
                 "h",

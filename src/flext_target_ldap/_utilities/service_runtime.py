@@ -81,7 +81,7 @@ class FlextTargetLdapServiceRuntime:
         """Create the service-level Singer sink adapter."""
         normalized_target_config = cls.normalize_singer_mapping(target_config)
         runtime_target = FlextTargetLdap(
-            config=normalized_target_config,
+            settings=normalized_target_config,
             validate_config=False,
         )
         normalized_schema = cls.normalize_flat_schema(schema)
@@ -96,7 +96,7 @@ class FlextTargetLdapServiceRuntime:
         )
         return cls.Sink.create(
             runtime_sink=runtime_sink,
-            target=cls.Target(config=normalized_target_config, validate_config=False),
+            target=cls.Target(settings=normalized_target_config, validate_config=False),
             stream_name=stream_name,
             schema=dict(normalized_schema),
             key_properties=[],

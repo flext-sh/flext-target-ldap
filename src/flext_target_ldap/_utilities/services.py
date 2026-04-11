@@ -14,9 +14,9 @@ class FlextTargetLdapConnectionService:
     """Service for testing and querying LDAP connection settings."""
 
     @override
-    def __init__(self, config: FlextTargetLdapSettings) -> None:
+    def __init__(self, settings: FlextTargetLdapSettings) -> None:
         """Initialize with LDAP target settings."""
-        self._config = config
+        self._config = settings
 
     def get_connection_info(self) -> t.ContainerValueMapping:
         """Return connection parameters as a dict for logging or debugging."""
@@ -41,9 +41,9 @@ class FlextTargetLdapTransformationService:
     """Transform Singer records into LDAP entries with attribute mappings."""
 
     @override
-    def __init__(self, config: FlextTargetLdapSettings) -> None:
+    def __init__(self, settings: FlextTargetLdapSettings) -> None:
         """Initialize with LDAP target settings."""
-        self._config = config
+        self._config = settings
 
     def get_default_mappings(
         self,

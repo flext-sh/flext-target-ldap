@@ -132,31 +132,31 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             }
 
         class TypeConversion:
-            """Type coercion utilities for Singer config values to typed Python values."""
+            """Type coercion utilities for Singer settings values to typed Python values."""
 
             @staticmethod
             def build_connection_config(
-                config: Mapping[str, t.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, t.ConfigMap | t.ContainerValue],
             ) -> m.Ldap.ConnectionConfig:
-                """Build LDAP ConnectionConfig from a flat config mapping."""
+                """Build LDAP ConnectionConfig from a flat settings mapping."""
                 return m.Ldap.ConnectionConfig(
                     host=u.TargetLdap.TypeConversion.to_str(
-                        config.get("host", "localhost"),
+                        settings.get("host", "localhost"),
                         default="localhost",
                     ),
                     port=u.TargetLdap.TypeConversion.to_int(
-                        config.get("port", c.Ldap.ConnectionDefaults.PORT),
+                        settings.get("port", c.Ldap.ConnectionDefaults.PORT),
                         default=c.Ldap.ConnectionDefaults.PORT,
                     ),
-                    use_ssl=bool(config.get("use_ssl", False)),
+                    use_ssl=bool(settings.get("use_ssl", False)),
                     bind_dn=u.TargetLdap.TypeConversion.to_str(
-                        config.get("bind_dn", ""),
+                        settings.get("bind_dn", ""),
                     ),
                     bind_password=u.TargetLdap.TypeConversion.to_str(
-                        config.get("password", ""),
+                        settings.get("password", ""),
                     ),
                     timeout=u.TargetLdap.TypeConversion.to_int(
-                        config.get("timeout", 30),
+                        settings.get("timeout", 30),
                         default=30,
                     ),
                 )
@@ -166,7 +166,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 value: t.ContainerValue | t.ConfigMap | None,
                 default: str = "",
             ) -> str:
-                """Coerce a config value to str."""
+                """Coerce a settings value to str."""
                 if value is None:
                     return default
                 try:
@@ -179,7 +179,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 value: t.ContainerValue | t.ConfigMap | None,
                 default: int = 0,
             ) -> int:
-                """Coerce a config value to int."""
+                """Coerce a settings value to int."""
                 if value is None:
                     return default
                 match value:
@@ -201,7 +201,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 *,
                 default: bool = False,
             ) -> bool:
-                """Coerce a config value to bool."""
+                """Coerce a settings value to bool."""
                 if value is None:
                     return default
                 if isinstance(value, bool):
@@ -214,10 +214,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             @staticmethod
             def extract_attribute_mapping(
-                config: Mapping[str, t.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, t.ConfigMap | t.ContainerValue],
             ) -> t.StrMapping:
-                """Extract attribute mapping from config."""
-                raw = config.get("attribute_mapping", {})
+                """Extract attribute mapping from settings."""
+                raw = settings.get("attribute_mapping", {})
                 if isinstance(raw, Mapping):
                     normalized_mapping: t.MutableMappingKV[str, str] = {}
                     for key, value in raw.items():
@@ -236,10 +236,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             @staticmethod
             def extract_object_classes(
-                config: Mapping[str, t.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, t.ConfigMap | t.ContainerValue],
             ) -> t.StrSequence:
-                """Extract object classes from config."""
-                raw = config.get("object_classes")
+                """Extract object classes from settings."""
+                raw = settings.get("object_classes")
                 if isinstance(raw, list):
                     normalized_object_classes = [
                         t.TargetLdap.STRING_ADAPTER.validate_python(object_class)
@@ -396,31 +396,31 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             @staticmethod
             def validate_ldap_connection_config(
-                config: Mapping[str, t.ConfigMap],
+                settings: Mapping[str, t.ConfigMap],
             ) -> r[Mapping[str, t.ConfigMap]]:
                 """Validate LDAP connection configuration.
 
                 Args:
-                config: Configuration dictionary
+                settings: Configuration dictionary
 
                 Returns:
-                r[Mapping[str, t.ConfigMap]]: Validated config or error
+                r[Mapping[str, t.ConfigMap]]: Validated settings or error
 
                 """
                 required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
                 missing_fields = [
-                    field for field in required_fields if field not in config
+                    field for field in required_fields if field not in settings
                 ]
                 if missing_fields:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Missing required LDAP connection fields: {', '.join(missing_fields)}",
                     )
-                host = config["host"]
+                host = settings["host"]
                 if not isinstance(host, str) or not host.strip():
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Host must be a non-empty string",
                     )
-                bind_dn_raw = config["bind_dn"]
+                bind_dn_raw = settings["bind_dn"]
                 bind_dn = u.TargetLdap.TypeConversion.to_str(bind_dn_raw)
                 if not bind_dn:
                     return r[Mapping[str, t.ConfigMap]].fail(
@@ -430,7 +430,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid bind DN format: {bind_dn}",
                     )
-                base_dn_raw = config["base_dn"]
+                base_dn_raw = settings["base_dn"]
                 base_dn = u.TargetLdap.TypeConversion.to_str(base_dn_raw)
                 if not base_dn:
                     return r[Mapping[str, t.ConfigMap]].fail(
@@ -446,8 +446,8 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
-                if "port" in config:
-                    port_raw = config["port"]
+                if "port" in settings:
+                    port_raw = settings["port"]
                     try:
                         port_int = t.TargetLdap.INTEGER_ADAPTER.validate_python(
                             port_raw,
@@ -460,47 +460,47 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )
-                use_ssl = config.get("use_ssl", False)
-                use_tls = config.get("use_tls", False)
+                use_ssl = settings.get("use_ssl", False)
+                use_tls = settings.get("use_tls", False)
                 if use_ssl and use_tls:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Cannot use both SSL and TLS simultaneously",
                     )
-                return r[Mapping[str, t.ConfigMap]].ok(config)
+                return r[Mapping[str, t.ConfigMap]].ok(settings)
 
             @staticmethod
             def validate_target_config(
-                config: Mapping[str, t.ConfigMap],
+                settings: Mapping[str, t.ConfigMap],
             ) -> r[Mapping[str, t.ConfigMap]]:
                 """Validate target configuration.
 
                 Args:
-                config: Target configuration
+                settings: Target configuration
 
                 Returns:
-                r[Mapping[str, t.ConfigMap]]: Validated config or error
+                r[Mapping[str, t.ConfigMap]]: Validated settings or error
 
                 """
                 ldap_result = (
                     u.TargetLdap.ConfigValidation.validate_ldap_connection_config(
-                        config,
+                        settings,
                     )
                 )
                 if ldap_result.failure:
                     return ldap_result
-                operation_mode = config.get("operation_mode", "upsert")
+                operation_mode = settings.get("operation_mode", "upsert")
                 valid_modes = ["insert", "update", "upsert", "delete"]
                 if operation_mode not in valid_modes:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}",
                     )
-                if "dn_template" in config:
-                    dn_template = config["dn_template"]
+                if "dn_template" in settings:
+                    dn_template = settings["dn_template"]
                     if not isinstance(dn_template, str) or not dn_template.strip():
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "DN template must be a non-empty string",
                         )
-                batch_size = config.get(
+                batch_size = settings.get(
                     "batch_size",
                     c.DEFAULT_SIZE,
                 )
@@ -515,7 +515,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Batch size must be a positive integer",
                         )
-                return r[Mapping[str, t.ConfigMap]].ok(config)
+                return r[Mapping[str, t.ConfigMap]].ok(settings)
 
 
 u = FlextTargetLdapUtilities

@@ -123,55 +123,55 @@ class FlextTargetLdapSettings(FlextSettings):
 
     @staticmethod
     def validate_ldap_config(
-        config: Mapping[str, t.ContainerValue | t.ConfigMap],
+        settings: Mapping[str, t.ContainerValue | t.ConfigMap],
     ) -> r[FlextTargetLdapSettings]:
         """Validate LDAP configuration."""
         try:
             validated_config = FlextTargetLdapSettings.model_validate({
                 "connection": {
-                    "host": config.get("host", c.LOCALHOST),
-                    "port": config.get("port", c.Ldap.ConnectionDefaults.PORT),
-                    "use_ssl": config.get("use_ssl", False),
-                    "bind_dn": config.get("bind_dn", ""),
-                    "bind_password": config.get("password", ""),
-                    "timeout": config.get(
+                    "host": settings.get("host", c.LOCALHOST),
+                    "port": settings.get("port", c.Ldap.ConnectionDefaults.PORT),
+                    "use_ssl": settings.get("use_ssl", False),
+                    "bind_dn": settings.get("bind_dn", ""),
+                    "bind_password": settings.get("password", ""),
+                    "timeout": settings.get(
                         "timeout",
                         c.Ldap.ConnectionDefaults.TIMEOUT,
                     ),
                 },
-                "base_dn": config.get("base_dn", ""),
-                "search_filter": config.get(
+                "base_dn": settings.get("base_dn", ""),
+                "search_filter": settings.get(
                     "search_filter",
                     c.Ldap.Filters.ALL_ENTRIES_FILTER,
                 ),
-                "search_scope": config.get(
+                "search_scope": settings.get(
                     "search_scope",
                     c.Ldap.SearchDefaults.DEFAULT_SCOPE,
                 ),
-                "connect_timeout": config.get(
+                "connect_timeout": settings.get(
                     "connect_timeout",
                     c.TargetLdap.CONNECT_TIMEOUT,
                 ),
-                "receive_timeout": config.get(
+                "receive_timeout": settings.get(
                     "receive_timeout",
                     c.DEFAULT_TIMEOUT_SECONDS,
                 ),
-                "batch_size": config.get("batch_size", c.DEFAULT_SIZE),
-                "max_records": config.get("max_records"),
-                "create_missing_entries": config.get(
+                "batch_size": settings.get("batch_size", c.DEFAULT_SIZE),
+                "max_records": settings.get("max_records"),
+                "create_missing_entries": settings.get(
                     "create_missing_entries",
                     c.TargetLdap.CREATE_MISSING_ENTRIES,
                 ),
-                "update_existing_entries": config.get(
+                "update_existing_entries": settings.get(
                     "update_existing_entries",
                     c.TargetLdap.UPDATE_EXISTING_ENTRIES,
                 ),
-                "delete_removed_entries": config.get(
+                "delete_removed_entries": settings.get(
                     "delete_removed_entries",
                     c.TargetLdap.DELETE_REMOVED_ENTRIES,
                 ),
-                "attribute_mapping": config.get("attribute_mapping", {}),
-                "object_classes": config.get(
+                "attribute_mapping": settings.get("attribute_mapping", {}),
+                "object_classes": settings.get(
                     "object_classes",
                     list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
                 ),

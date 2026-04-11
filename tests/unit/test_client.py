@@ -11,7 +11,7 @@ from tests import t
 
 @pytest.fixture
 def client(mock_ldap_config: t.ContainerValueMapping) -> FlextTargetLdapClient:
-    return FlextTargetLdapClient(config=mock_ldap_config)
+    return FlextTargetLdapClient(settings=mock_ldap_config)
 
 
 def test_client_initialization(client: FlextTargetLdapClient) -> None:
@@ -26,7 +26,7 @@ def test_client_initialization(client: FlextTargetLdapClient) -> None:
 def test_server_uri_construction(client: FlextTargetLdapClient) -> None:
     assert client.server_uri == "ldap://test.ldap.com:389"
     ssl_client = FlextTargetLdapClient(
-        config={
+        settings={
             "host": "test.ldap.com",
             "port": 389,
             "use_ssl": True,
@@ -44,7 +44,7 @@ def test_connect_delegates_to_flext_ldap_api(client: FlextTargetLdapClient) -> N
     result = client.connect()
     assert result.success
     assert result.value is True
-    client._api.connect.assert_called_once_with(client.config)
+    client._api.connect.assert_called_once_with(client.settings)
     client._api.disconnect.assert_called_once()
 
 
@@ -67,7 +67,7 @@ def test_add_entry_uses_real_ldif_entry(client: FlextTargetLdapClient) -> None:
     )
     assert result.success
     assert result.value is True
-    client._api.connect.assert_called_once_with(client.config)
+    client._api.connect.assert_called_once_with(client.settings)
     client._api.add.assert_called_once()
     entry = client._api.add.call_args.args[0]
     assert entry.dn.value == "uid=test,dc=test,dc=com"

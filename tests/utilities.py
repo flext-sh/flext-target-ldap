@@ -59,7 +59,7 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
                 """Target stub that records delegated sink calls."""
 
                 def __init__(self) -> None:
-                    """Initialize the recording target with minimal config."""
+                    """Initialize the recording target with minimal settings."""
                     super().__init__({"base_dn": "dc=test,dc=com"})
                     self.calls: MutableSequence[
                         TestsFlextTargetLdapTypes.TargetLdap.Tests.ProcessCall

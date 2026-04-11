@@ -19,21 +19,21 @@ class FlextTargetLdapApiService:
 
     def create_ldap_target(
         self,
-        config: t.ContainerValueMapping,
+        settings: t.ContainerValueMapping,
     ) -> r[FlextTargetLdap]:
-        """Create an LDAP target from raw config dict."""
+        """Create an LDAP target from raw settings dict."""
         return u.try_(
-            lambda: FlextTargetLdap(config=dict(config)),
+            lambda: FlextTargetLdap(settings=dict(settings)),
             catch=(RuntimeError, ValueError, TypeError),
         ).map_error(lambda exc: str(exc))
 
     def load_groups_to_ldap(
         self,
         groups: Sequence[t.ContainerValueMapping],
-        config: t.ContainerValueMapping,
+        settings: t.ContainerValueMapping,
     ) -> r[int]:
         """Load group records into LDAP using the default groups sink."""
-        target_result = self.create_ldap_target(config)
+        target_result = self.create_ldap_target(settings)
         if target_result.failure:
             return r[int].fail(target_result.error or "Target creation failed")
         target = target_result.value
@@ -45,10 +45,10 @@ class FlextTargetLdapApiService:
     def load_users_to_ldap(
         self,
         users: Sequence[t.ContainerValueMapping],
-        config: t.ContainerValueMapping,
+        settings: t.ContainerValueMapping,
     ) -> r[int]:
         """Load user records into LDAP using the default users sink."""
-        target_result = self.create_ldap_target(config)
+        target_result = self.create_ldap_target(settings)
         if target_result.failure:
             return r[int].fail(target_result.error or "Target creation failed")
         target = target_result.value
@@ -59,10 +59,10 @@ class FlextTargetLdapApiService:
 
     def test_ldap_connection(
         self,
-        config: t.ContainerValueMapping,
+        settings: t.ContainerValueMapping,
     ) -> r[bool]:
-        """Validate config and test the LDAP connection."""
-        validated = validate_ldap_target_config(config)
+        """Validate settings and test the LDAP connection."""
+        validated = validate_ldap_target_config(settings)
         if validated.failure:
             return r[bool].fail(validated.error or "Configuration validation failed")
         return FlextTargetLdapConnectionService(validated.value).test_connection()

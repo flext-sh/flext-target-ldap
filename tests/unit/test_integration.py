@@ -33,7 +33,7 @@ def runner() -> Mock:
 
 @pytest.fixture
 def config_file(tmp_path: Path, mock_ldap_config: t.ContainerMapping) -> Path:
-    config_path = tmp_path / "config.json"
+    config_path = tmp_path / "settings.json"
     u.Cli.json_write(config_path, mock_ldap_config)
     return config_path
 
@@ -65,7 +65,7 @@ def _invoke_target_cli(config_path: Path, input_path: Path) -> None:
     with patch("sys.stdin", io.StringIO(input_text)):
         cli_fn = FlextTargetLdap.cli
         assert cli_fn is not None
-        cli_fn(config=str(config_path))
+        cli_fn(settings=str(config_path))
 
 
 def test_basic_load(
@@ -187,7 +187,7 @@ def test_dn_template_usage(
 
 
 def test_self(runner: Mock, tmp_path: Path) -> None:
-    bad_config = {"invalid": "config"}
+    bad_config = {"invalid": "settings"}
     config_path = tmp_path / "bad_config.json"
     u.Cli.json_write(config_path, bad_config)
     mock_result = Mock()
@@ -197,7 +197,7 @@ def test_self(runner: Mock, tmp_path: Path) -> None:
 
     result = runner.invoke(
         "mock_cli",
-        ["--config", str(config_path)],
+        ["--settings", str(config_path)],
         input='{"type": "RECORD", "stream": "test", "record": {}}',
     )
     assert result.exit_code != 0

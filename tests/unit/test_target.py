@@ -35,14 +35,14 @@ def test_get_sink_class(
     expected_cls: type[FlextTargetLdapBaseSink],
     mock_ldap_config: t.ContainerValueMapping,
 ) -> None:
-    target = FlextTargetLdap(config=mock_ldap_config)
+    target = FlextTargetLdap(settings=mock_ldap_config)
     assert target.get_sink_class(key) is expected_cls
 
 
 def test_target_initialization(mock_ldap_config: t.ContainerValueMapping) -> None:
-    target = FlextTargetLdap(config=mock_ldap_config)
+    target = FlextTargetLdap(settings=mock_ldap_config)
     assert target.name == "target-ldap"
-    assert target.config == mock_ldap_config
+    assert target.settings == mock_ldap_config
 
 
 def test_dn_template_processing(
@@ -50,7 +50,7 @@ def test_dn_template_processing(
 ) -> None:
     mock_ldap_config["user_rdn_attribute"] = "uid"
     mock_ldap_config["base_dn"] = "ou=people,dc=test,dc=com"
-    target = FlextTargetLdap(config=mock_ldap_config)
+    target = FlextTargetLdap(settings=mock_ldap_config)
     sink = target.get_sink("users")
     assert isinstance(sink, FlextTargetLdapUsersSink)
     dn_result = sink.build_dn({"uid": "jdoe"})
@@ -62,7 +62,7 @@ def test_object_classes_processing(
     mock_ldap_config: t.MutableContainerValueMapping,
 ) -> None:
     mock_ldap_config["users_object_classes"] = ["customPerson", "top"]
-    target = FlextTargetLdap(config=mock_ldap_config)
+    target = FlextTargetLdap(settings=mock_ldap_config)
     sink = target.get_sink("users")
     assert isinstance(sink, FlextTargetLdapUsersSink)
     object_classes = sink.get_object_classes({})
@@ -75,7 +75,7 @@ def test_process_record(
 ) -> None:
     mock_client = MagicMock()
     mock_client.add_entry.return_value = r[bool].ok(value=True)
-    target = FlextTargetLdap(config=mock_ldap_config)
+    target = FlextTargetLdap(settings=mock_ldap_config)
     sink = target.get_sink("users")
     assert isinstance(sink, FlextTargetLdapBaseSink)
     sink.client = mock_client
@@ -87,7 +87,7 @@ def test_process_record(
 def test_process_delete_record(mock_ldap_config: t.ContainerValueMapping) -> None:
     mock_client = MagicMock()
     mock_client.add_entry.return_value = r[bool].fail("Entry already exists")
-    target = FlextTargetLdap(config=mock_ldap_config)
+    target = FlextTargetLdap(settings=mock_ldap_config)
     sink = target.get_sink("users")
     assert isinstance(sink, FlextTargetLdapBaseSink)
     sink.client = mock_client

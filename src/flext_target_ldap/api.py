@@ -51,18 +51,18 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    config: t.ContainerValueMapping
+    settings: t.ContainerValueMapping
     _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     @override
     def __init__(
         self,
         *,
-        config: t.ContainerValueMapping | None = None,
+        settings: t.ContainerValueMapping | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
-        super().__init__(config=config or {}, validate_config=validate_config)
+        super().__init__(settings=settings or {}, validate_config=validate_config)
         self._orchestrator: FlextTargetLdapOrchestrator | None = None
         self._container: p.Container | None = None
 
@@ -71,7 +71,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Get or create orchestrator."""
         if self._orchestrator is None:
             normalized_config: t.MutableScalarMapping = {}
-            for key, value in self.config.items():
+            for key, value in self.settings.items():
                 match value:
                     case bool() | int() | str():
                         normalized_config[key] = value
@@ -122,7 +122,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         self._container = FlextContainer.fetch_global()
         self._logger.info("DI container initialized successfully")
         host = u.TargetLdap.TypeConversion.to_str(
-            self.config.get("host", "localhost"),
+            self.settings.get("host", "localhost"),
             default="localhost",
         )
         self._logger.info("LDAP target setup completed for host: %s", host)
@@ -139,15 +139,15 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        host = self.config.get("host")
+        host = self.settings.get("host")
         if not host:
             msg = "LDAP host is required"
             raise ValueError(msg)
-        base_dn = self.config.get("base_dn")
+        base_dn = self.settings.get("base_dn")
         if not base_dn:
             msg = "LDAP base DN is required"
             raise ValueError(msg)
-        port_obj = self.config.get("port", c.Ldap.ConnectionDefaults.PORT)
+        port_obj = self.settings.get("port", c.Ldap.ConnectionDefaults.PORT)
         try:
             port = t.TargetLdap.INTEGER_ADAPTER.validate_python(port_obj)
         except Exception:
@@ -155,8 +155,8 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         if port <= 0 or port > c.MAX_PORT_NUMBER:
             msg = f"LDAP port must be between 1 and {c.MAX_PORT_NUMBER}"
             raise ValueError(msg)
-        use_ssl = self.config.get("use_ssl", False)
-        use_tls = self.config.get("use_tls", False)
+        use_ssl = self.settings.get("use_ssl", False)
+        use_tls = self.settings.get("use_tls", False)
         if use_ssl and use_tls:
             msg = "Cannot use both SSL and TLS simultaneously"
             raise ValueError(msg)
@@ -181,11 +181,11 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     @staticmethod
     def _get_ldap_api(
-        config: t.ContainerValueMapping,
+        settings: t.ContainerValueMapping,
     ) -> FlextTargetLdapClient | None:
         """Get LDAP target client backed by flext-ldap."""
         try:
-            return FlextTargetLdapClient(config=config)
+            return FlextTargetLdapClient(settings=settings)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             FlextTargetLdap._logger.warning(
                 "Failed to initialize LDAP target client",
@@ -249,11 +249,11 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             api.modify_entry(dn, record)
 
     @staticmethod
-    def run_cli(config: str | None = None) -> None:
+    def run_cli(settings: str | None = None) -> None:
         """Process Singer JSONL; echo STATE lines to stdout."""
         try:
             cfg: t.ContainerValueMapping = (
-                FlextTargetLdap._load_config_from_file(config) if config else {}
+                FlextTargetLdap._load_config_from_file(settings) if settings else {}
             )
             current_stream: str | None = None
             api = FlextTargetLdap._get_ldap_api(cfg)

@@ -26,18 +26,18 @@ class FlextTargetLdapSingerTarget:
     @override
     def __init__(
         self,
-        config: t.ContainerValueMapping | None = None,
+        settings: t.ContainerValueMapping | None = None,
     ) -> None:
         """Initialize Singer LDAP target.
 
         Args:
-        config: Configuration dictionary
+        settings: Configuration dictionary
 
         Returns:
         t.NormalizedValue: Description of return value.
 
         """
-        self.config: t.ContainerValueMapping = config or {}
+        self.settings: t.ContainerValueMapping = settings or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
@@ -83,7 +83,7 @@ class FlextTargetLdapSingerTarget:
         try:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
-                if field not in self.config:
+                if field not in self.settings:
                     return r[bool].fail(f"Missing required field: {field}")
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:

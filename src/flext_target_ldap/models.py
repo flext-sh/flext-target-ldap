@@ -18,7 +18,8 @@ from typing import Annotated, Self
 
 from pydantic import Field, field_validator
 
-from flext_ldap import FlextLdapModels, r
+from flext_core import r
+from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from flext_target_ldap import c, t
 

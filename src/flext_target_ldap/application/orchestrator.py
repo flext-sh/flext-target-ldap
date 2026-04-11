@@ -22,26 +22,26 @@ logger: p.Logger = u.fetch_logger(__name__)
 class FlextTargetLdapOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    config: t.ConfigurationMapping
+    settings: t.ConfigurationMapping
     _typed_config: FlextTargetLdapSettings | None
 
     @override
     def __init__(
         self,
-        config: FlextTargetLdapSettings | t.ConfigurationMapping | None = None,
+        settings: FlextTargetLdapSettings | t.ConfigurationMapping | None = None,
     ) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
-        config: Configuration dictionary
+        settings: Configuration dictionary
 
         """
-        if isinstance(config, FlextTargetLdapSettings):
-            self._typed_config = config
-            self.config = dict(config.model_dump(mode="python"))
+        if isinstance(settings, FlextTargetLdapSettings):
+            self._typed_config = settings
+            self.settings = dict(settings.model_dump(mode="python"))
         else:
             self._typed_config = None
-            self.config = dict(config) if config is not None else {}
+            self.settings = dict(settings) if settings is not None else {}
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
@@ -84,7 +84,7 @@ class FlextTargetLdapOrchestrator:
         try:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
-                if field not in self.config:
+                if field not in self.settings:
                     return r[bool].fail(f"Missing required field: {field}")
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:

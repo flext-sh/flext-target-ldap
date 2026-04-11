@@ -91,20 +91,20 @@ class FlextTargetLdapClient:
     @override
     def __init__(
         self,
-        config: m.Ldap.ConnectionConfig | t.ContainerValueMapping,
+        settings: m.Ldap.ConnectionConfig | t.ContainerValueMapping,
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        self.config: m.Ldap.ConnectionConfig
-        if isinstance(config, m.Ldap.ConnectionConfig):
-            self.config = config
-            self._bind_dn = config.bind_dn or ""
-            self._password = config.bind_password or ""
-        elif isinstance(config, dict):
+        self.settings: m.Ldap.ConnectionConfig
+        if isinstance(settings, m.Ldap.ConnectionConfig):
+            self.settings = settings
+            self._bind_dn = settings.bind_dn or ""
+            self._password = settings.bind_password or ""
+        elif isinstance(settings, dict):
             config_map: t.ContainerValueMapping = {
                 t.TargetLdap.STRING_ADAPTER.validate_python(k): v
-                for k, v in config.items()
+                for k, v in settings.items()
             }
-            self.config = m.Ldap.ConnectionConfig(
+            self.settings = m.Ldap.ConnectionConfig(
                 host=t.TargetLdap.STRING_ADAPTER.validate_python(
                     config_map.get("host", "localhost"),
                 ),
@@ -123,7 +123,7 @@ class FlextTargetLdapClient:
                 config_map.get("password", ""),
             )
         else:
-            self.config = m.Ldap.ConnectionConfig(
+            self.settings = m.Ldap.ConnectionConfig(
                 host="localhost",
                 port=c.Ldap.ConnectionDefaults.PORT,
                 use_ssl=False,
@@ -134,7 +134,7 @@ class FlextTargetLdapClient:
         self._api: FlextLdap = FlextLdap.get_instance()
         self._current_session_id: str | None = None
         FlextTargetLdapClient._logger.info(
-            f"Initialized LDAP client using flext-ldap API for {self.config.host}:{self.config.port}",
+            f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",
         )
 
     @property
@@ -145,7 +145,7 @@ class FlextTargetLdapClient:
     @property
     def host(self) -> str:
         """Get server host."""
-        return self.config.host
+        return self.settings.host
 
     @property
     def password(self) -> str:
@@ -155,23 +155,23 @@ class FlextTargetLdapClient:
     @property
     def port(self) -> int:
         """Get server port."""
-        return self.config.port
+        return self.settings.port
 
     @property
     def server_uri(self) -> str:
         """Get server URI."""
-        protocol = "ldaps" if self.config.use_ssl else "ldap"
-        return f"{protocol}://{self.config.host}:{self.config.port}"
+        protocol = "ldaps" if self.settings.use_ssl else "ldap"
+        return f"{protocol}://{self.settings.host}:{self.settings.port}"
 
     @property
     def timeout(self) -> int:
         """Get timeout."""
-        return self.config.timeout
+        return self.settings.timeout
 
     @property
     def use_ssl(self) -> bool:
         """Get SSL usage."""
-        return self.config.use_ssl
+        return self.settings.use_ssl
 
     def add_entry(
         self,
@@ -185,7 +185,7 @@ class FlextTargetLdapClient:
                 "Adding LDAP entry using flext-ldap API: %s",
                 dn,
             )
-            connect_result = self._api.connect(self.config)
+            connect_result = self._api.connect(self.settings)
             if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
@@ -205,12 +205,12 @@ class FlextTargetLdapClient:
     def connect(self) -> r[bool]:
         """Validate connectivity to LDAP server using flext-ldap API."""
         try:
-            connect_result = self._api.connect(self.config)
+            connect_result = self._api.connect(self.settings)
             if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             self._api.disconnect()
             FlextTargetLdapClient._logger.info(
-                f"LDAP connectivity validated for {self.config.host}:{self.config.port}",
+                f"LDAP connectivity validated for {self.settings.host}:{self.settings.port}",
             )
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
@@ -227,7 +227,7 @@ class FlextTargetLdapClient:
                 "Deleting LDAP entry using flext-ldap API: %s",
                 dn,
             )
-            connect_result = self._api.connect(self.config)
+            connect_result = self._api.connect(self.settings)
             if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
@@ -307,7 +307,7 @@ class FlextTargetLdapClient:
                 "Modifying LDAP entry using flext-ldap API: %s",
                 dn,
             )
-            connect_result = self._api.connect(self.config)
+            connect_result = self._api.connect(self.settings)
             if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             try:
@@ -342,7 +342,7 @@ class FlextTargetLdapClient:
                 base_dn,
                 search_filter,
             )
-            connect_result = self._api.connect(self.config)
+            connect_result = self._api.connect(self.settings)
             if connect_result.failure:
                 return r[Sequence[m.TargetLdap.SearchEntry]].fail(
                     f"Connection failed: {connect_result.error}",

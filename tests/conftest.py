@@ -168,5 +168,5 @@ def mock_ldap_client() -> MagicMock:
 def mock_target(mock_ldap_config: t.ContainerValueMapping) -> MagicMock:
     """Create mock LDAP configuration for testing."""
     target = MagicMock()
-    target.config = mock_ldap_config
+    target.settings = mock_ldap_config
     return target

@@ -79,11 +79,11 @@ class FlextTargetLdapTarget:
     @override
     def __init__(
         self,
-        config: t.ContainerValueMapping,
+        settings: t.ContainerValueMapping,
         **kwargs: t.Scalar,
     ) -> None:
         """Initialize target with configuration."""
-        self.config: t.ContainerValueMapping = config
+        self.settings: t.ContainerValueMapping = settings
 
 
 logger = u.fetch_logger(__name__)
@@ -152,7 +152,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         dn = record.get("dn")
         if isinstance(dn, str) and dn:
             return r[str].ok(dn)
-        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+        base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
         entry_id = record.get("id") or record.get("cn") or record.get("name")
         if isinstance(entry_id, str) and entry_id:
             return r[str].ok(f"cn={entry_id},{base_dn}")
@@ -170,7 +170,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             return [str(c) for c in record_classes]
         if isinstance(record_classes, str):
             return [record_classes]
-        configured_classes = self._target.config.get("generic_object_classes")
+        configured_classes = self._target.settings.get("generic_object_classes")
         if self._is_container_list(configured_classes):
             return [str(c) for c in configured_classes]
         return ["top"]
@@ -229,15 +229,15 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         """Set up LDAP client connection."""
         try:
             connection_config = {
-                "host": self._target.config.get("host", "localhost"),
-                "port": self._target.config.get(
+                "host": self._target.settings.get("host", "localhost"),
+                "port": self._target.settings.get(
                     "port",
                     c.Ldap.ConnectionDefaults.PORT,
                 ),
-                "use_ssl": self._target.config.get("use_ssl", False),
-                "bind_dn": self._target.config.get("bind_dn", ""),
-                "password": self._target.config.get("password", ""),
-                "timeout": self._target.config.get("timeout", 30),
+                "use_ssl": self._target.settings.get("use_ssl", False),
+                "bind_dn": self._target.settings.get("bind_dn", ""),
+                "password": self._target.settings.get("password", ""),
+                "timeout": self._target.settings.get("timeout", 30),
             }
             self.client = FlextTargetLdapClient(connection_config)
             connect_result = self.client.connect()
@@ -310,11 +310,11 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     @override
     def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
         """Build DN for user entry."""
-        rdn_attr = str(self._target.config.get("user_rdn_attribute", "uid"))
+        rdn_attr = str(self._target.settings.get("user_rdn_attribute", "uid"))
         uid = record.get(rdn_attr)
         if not uid:
             return r[str].fail(f"No value found for RDN attribute '{rdn_attr}'")
-        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+        base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
         return r[str].ok(f"{rdn_attr}={uid},{base_dn}")
 
     def build_user_attributes(
@@ -322,7 +322,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         record: t.ContainerMapping,
     ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for user entry."""
-        object_classes = self._target.config.get(
+        object_classes = self._target.settings.get(
             "object_classes",
             ["inetOrgPerson", "person"],
         )
@@ -353,7 +353,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             value = record.get(singer_field)
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
-        mapping_val = self._target.config.get("attribute_mapping", {})
+        mapping_val = self._target.settings.get("attribute_mapping", {})
         raw_mapping = self._container_mapping_from_value(mapping_val)
         mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
@@ -374,7 +374,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         record: t.ContainerValueMapping,
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for user entry."""
-        configured = self._target.config.get("users_object_classes")
+        configured = self._target.settings.get("users_object_classes")
         if self._is_container_list(configured):
             return [str(c) for c in configured]
         return ["inetOrgPerson", "organizationalPerson", "person", "top"]
@@ -396,7 +396,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             if not username:
                 self._processing_result.add_error("No username found in record")
                 return r[bool].fail("No username found in record")
-            base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+            base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
             user_dn = f"uid={username},{base_dn}"
             attributes = self.build_user_attributes(_record)
             object_classes_raw = attributes.get(
@@ -424,7 +424,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 self._processing_result.add_success()
                 logger.debug("User entry added successfully: %s", user_dn)
                 return r[bool].ok(value=True)
-            if self._target.config.get("update_existing_entries", False):
+            if self._target.settings.get("update_existing_entries", False):
                 modify_result: r[bool] = self.client.modify_entry(
                     user_dn,
                     attributes_dict,
@@ -472,11 +472,11 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     @override
     def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
         """Build DN for group entry."""
-        rdn_attr = str(self._target.config.get("group_rdn_attribute", "cn"))
+        rdn_attr = str(self._target.settings.get("group_rdn_attribute", "cn"))
         cn = record.get(rdn_attr)
         if not cn:
             return r[str].fail(f"No value found for RDN attribute '{rdn_attr}'")
-        base_dn = self._target.config.get("base_dn", "dc=example,dc=com")
+        base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
         return r[str].ok(f"{rdn_attr}={cn},{base_dn}")
 
     @override
@@ -485,7 +485,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         record: t.ContainerValueMapping,
     ) -> t.StrSequence:
         """Get t.NormalizedValue classes for group entry."""
-        configured = self._target.config.get("groups_object_classes")
+        configured = self._target.settings.get("groups_object_classes")
         if self._is_container_list(configured):
             return [str(c) for c in configured]
         return ["groupOfNames", "top"]
@@ -505,7 +505,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             if not group_name:
                 self._processing_result.add_error("No group name found in record")
                 return r[bool].fail("No group name found in record")
-            group_dn = f"cn={group_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
+            group_dn = f"cn={group_name},{self._target.settings.get('base_dn', 'dc=example,dc=com')}"
             attributes = self._build_group_attributes(_record)
             object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
             object_classes: t.StrSequence = (
@@ -529,7 +529,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                 self._processing_result.add_success()
                 logger.debug("Group entry added successfully: %s", group_dn)
                 return r[bool].ok(value=True)
-            if self._target.config.get("update_existing_entries", False):
+            if self._target.settings.get("update_existing_entries", False):
                 modify_result: r[bool] = self.client.modify_entry(
                     group_dn,
                     attributes_dict,
@@ -559,7 +559,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         record: t.ContainerMapping,
     ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for group entry."""
-        object_classes = self._target.config.get(
+        object_classes = self._target.settings.get(
             "group_object_classes",
             ["groupOfNames"],
         )
@@ -585,7 +585,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                     attributes[ldap_attr] = value
                 else:
                     attributes[ldap_attr] = [str(value)]
-        mapping_val = self._target.config.get("attribute_mapping", {})
+        mapping_val = self._target.settings.get("attribute_mapping", {})
         raw_mapping = self._container_mapping_from_value(mapping_val)
         mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():
@@ -622,7 +622,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             if not ou_name:
                 self._processing_result.add_error("No OU name found in record")
                 return r[bool].fail("No OU name found in record")
-            ou_dn = f"ou={ou_name},{self._target.config.get('base_dn', 'dc=example,dc=com')}"
+            ou_dn = f"ou={ou_name},{self._target.settings.get('base_dn', 'dc=example,dc=com')}"
             attributes = self._build_ou_attributes(_record)
             attributes_dict: t.MutableContainerValueMapping = {}
             for k, v in attributes.items():
@@ -635,7 +635,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
                 return r[bool].ok(value=True)
-            if self._target.config.get("update_existing_entries", False):
+            if self._target.settings.get("update_existing_entries", False):
                 modify_result: r[bool] = self.client.modify_entry(
                     ou_dn,
                     attributes_dict,
@@ -665,7 +665,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         record: t.ContainerMapping,
     ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for OU entry."""
-        default_classes = self._target.config.get(
+        default_classes = self._target.settings.get(
             "object_classes",
             ["organizationalUnit"],
         )
@@ -687,7 +687,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             value = record.get(singer_field)
             if value is not None:
                 attributes[ldap_attr] = [str(value)]
-        mapping_val = self._target.config.get("attribute_mapping", {})
+        mapping_val = self._target.settings.get("attribute_mapping", {})
         raw_mapping = self._container_mapping_from_value(mapping_val)
         mapping: t.MutableStrMapping = {}
         for k, v in raw_mapping.items():

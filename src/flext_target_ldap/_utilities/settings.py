@@ -5,7 +5,7 @@ removing duplication and using proper flext-core + flext-ldap integration.
 
 Architecture: Clean Architecture configuration layer
 Patterns: "FlextSettings", FlextModels, r validation
-Integration: Complete flext-ldap connection config reuse
+Integration: Complete flext-ldap connection settings reuse
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -23,18 +23,18 @@ class FlextTargetLdapConfigFactory:
 
     @staticmethod
     def validate_ldap_target_config(
-        config: t.ContainerValueMapping,
+        settings: t.ContainerValueMapping,
     ) -> r[FlextTargetLdapSettings]:
         """Validate and create LDAP target configuration with proper error handling."""
         try:
             connection_config = u.TargetLdap.TypeConversion.build_connection_config(
-                config
+                settings
             )
-            base_dn = u.TargetLdap.TypeConversion.to_str(config.get("base_dn", ""))
+            base_dn = u.TargetLdap.TypeConversion.to_str(settings.get("base_dn", ""))
             batch_size = u.TargetLdap.TypeConversion.to_int(
-                config.get("batch_size", c.DEFAULT_SIZE), c.DEFAULT_SIZE
+                settings.get("batch_size", c.DEFAULT_SIZE), c.DEFAULT_SIZE
             )
-            max_records_val = config.get("max_records")
+            max_records_val = settings.get("max_records")
             max_records: int | None
             match max_records_val:
                 case bool():
@@ -49,35 +49,37 @@ class FlextTargetLdapConfigFactory:
                 case _:
                     max_records = None
             create_missing_entries = u.TargetLdap.TypeConversion.to_bool(
-                config.get(
+                settings.get(
                     "create_missing_entries",
                     c.TargetLdap.CREATE_MISSING_ENTRIES,
                 ),
                 default=c.TargetLdap.CREATE_MISSING_ENTRIES,
             )
             update_existing_entries = u.TargetLdap.TypeConversion.to_bool(
-                config.get(
+                settings.get(
                     "update_existing_entries",
                     c.TargetLdap.UPDATE_EXISTING_ENTRIES,
                 ),
                 default=c.TargetLdap.UPDATE_EXISTING_ENTRIES,
             )
             delete_removed_entries = u.TargetLdap.TypeConversion.to_bool(
-                config.get(
+                settings.get(
                     "delete_removed_entries",
                     c.TargetLdap.DELETE_REMOVED_ENTRIES,
                 ),
                 default=c.TargetLdap.DELETE_REMOVED_ENTRIES,
             )
             attribute_mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-                config
+                settings
             )
-            object_classes = u.TargetLdap.TypeConversion.extract_object_classes(config)
+            object_classes = u.TargetLdap.TypeConversion.extract_object_classes(
+                settings
+            )
             search_filter = u.TargetLdap.TypeConversion.to_str(
-                config.get("search_filter", c.Ldap.Filters.ALL_ENTRIES_FILTER),
+                settings.get("search_filter", c.Ldap.Filters.ALL_ENTRIES_FILTER),
             )
             search_scope = u.TargetLdap.TypeConversion.to_str(
-                config.get("search_scope", c.Ldap.SearchDefaults.DEFAULT_SCOPE),
+                settings.get("search_scope", c.Ldap.SearchDefaults.DEFAULT_SCOPE),
             )
             validated_config = FlextTargetLdapSettings.model_validate({
                 "connection": connection_config,

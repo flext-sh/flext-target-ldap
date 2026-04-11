@@ -34,7 +34,7 @@
 !.tool-versions
 !.gitignore
 !.gitattributes
-!.pre-commit-config.yaml
+!.pre-commit-settings.yaml
 
 # Environment templates (NOT .env - keep secrets out!)
 !.env.example
@@ -152,8 +152,8 @@ obsolete/
 !pyproject.toml
 !Makefile
 !README.md
-!.pre-commit-config.yaml
-!config.json.example
+!.pre-commit-settings.yaml
+!settings.json.example
 .cursor/
 .cursorrules
 .cursorignore
