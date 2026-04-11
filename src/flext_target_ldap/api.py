@@ -11,7 +11,7 @@ from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import ClassVar, override
 
-from flext_core import FlextContainer, FlextLogger
+from flext_core import FlextContainer
 from flext_target_ldap import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapClient,
@@ -52,7 +52,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
     config: t.ContainerValueMapping
-    _logger: ClassVar[FlextLogger] = u.fetch_logger(__name__)
+    _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     @override
     def __init__(
