@@ -28,7 +28,7 @@ class FlextTargetLdapSettings(FlextSettings):
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_prefix=c.ENV_PREFIX,
-        extra=c.EXTRA_IGNORE,
+        extra=c.ExtraConfig.IGNORE.value,
     )
 
     connection: Annotated[

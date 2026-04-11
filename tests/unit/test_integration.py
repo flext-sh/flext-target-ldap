@@ -54,7 +54,7 @@ def input_file(
 
 
 @pytest.fixture
-def mock_ldap_api(monkeypatch) -> MagicMock:
+def mock_ldap_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     mock_api = MagicMock()
     monkeypatch.setattr(FlextTargetLdap, "_get_ldap_api", mock_api)
     return mock_api

@@ -125,9 +125,9 @@ class FlextTargetLdapServiceRuntime:
             return None
         if isinstance(value, Path):
             return str(value)
-        if u.is_scalar(value):
+        if u.scalar(value):
             return value
-        if u.is_mapping(value):
+        if u.mapping(value):
             return cls.normalize_singer_mapping(value)
         normalized_sequence: t.MutableSequenceOf[t.ContainerValue] = []
         for item in value:

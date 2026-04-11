@@ -11,7 +11,7 @@ from collections.abc import MutableMapping, MutableSequence
 from typing import override
 
 from flext_core import r
-from flext_target_ldap import t
+from flext_target_ldap import t, u
 
 logger = u.fetch_logger(__name__)
 

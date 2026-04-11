@@ -10,7 +10,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 from typing import override
 
 from flext_core import r
-from flext_target_ldap import m, t
+from flext_target_ldap import m, t, u
 
 logger = u.fetch_logger(__name__)
 

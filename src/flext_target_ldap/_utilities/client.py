@@ -15,7 +15,7 @@ from collections.abc import (
 from typing import ClassVar, TypeIs, override
 
 from flext_ldap import FlextLdap
-from flext_target_ldap import c, m, r, t
+from flext_target_ldap import c, m, r, t, u
 
 
 class FlextTargetLdapClient:
