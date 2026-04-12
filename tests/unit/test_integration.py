@@ -197,7 +197,7 @@ def test_self(runner: Mock, tmp_path: Path) -> None:
 
     result = runner.invoke(
         "mock_cli",
-        ["--settings", str(config_path)],
+        ["--config", str(config_path)],
         input='{"type": "RECORD", "stream": "test", "record": {}}',
     )
     assert result.exit_code != 0

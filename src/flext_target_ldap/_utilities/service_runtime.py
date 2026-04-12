@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import override
 
-from flext_meltano import (
+from flext_meltano.services.singer_sdk import (
     Sink as FlextMeltanoSingerSinkBase,
     Target as FlextMeltanoSingerTargetBase,
 )
@@ -96,7 +96,10 @@ class FlextTargetLdapServiceRuntime:
         )
         return cls.Sink.create(
             runtime_sink=runtime_sink,
-            target=cls.Target(settings=normalized_target_config, validate_config=False),
+            target=cls.Target(
+                config=dict(normalized_target_config),
+                validate_config=False,
+            ),
             stream_name=stream_name,
             schema=dict(normalized_schema),
             key_properties=[],
