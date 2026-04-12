@@ -20,8 +20,6 @@ from flext_target_ldap import (
 )
 from tests import t, u
 
-pytest_plugins = ["flext_tests.conftest_plugin"]
-
 
 @pytest.fixture
 def target_ldap_settings() -> FlextTargetLdapSettings:
