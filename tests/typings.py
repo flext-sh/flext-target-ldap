@@ -32,4 +32,4 @@ class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
 
 
 t = TestsFlextTargetLdapTypes
-__all__ = ["TestsFlextTargetLdapTypes", "t"]
+__all__: list[str] = ["TestsFlextTargetLdapTypes", "t"]

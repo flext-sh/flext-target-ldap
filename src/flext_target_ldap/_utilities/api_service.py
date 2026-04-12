@@ -68,4 +68,4 @@ class FlextTargetLdapApiService:
         return FlextTargetLdapConnectionService(validated.value).test_connection()
 
 
-__all__ = ["FlextTargetLdapApiService"]
+__all__: list[str] = ["FlextTargetLdapApiService"]

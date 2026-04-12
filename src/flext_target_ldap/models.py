@@ -16,12 +16,10 @@ from collections.abc import MutableMapping, MutableSequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from pydantic import Field, field_validator
-
 from flext_core import r
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
-from flext_target_ldap import c, t
+from flext_target_ldap import c, t, u
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
@@ -44,35 +42,35 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             singer_field_name: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     ...,
                     description="Singer field name from source data",
                 ),
             ]
             ldap_attribute_name: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     ...,
                     description="Target LDAP attribute name",
                 ),
             ]
             is_required: Annotated[
                 bool,
-                Field(
+                u.Field(
                     default=False,
                     description="Whether this attribute is required for LDAP entry",
                 ),
             ]
             transformation_rule: Annotated[
                 str | None,
-                Field(
+                u.Field(
                     default=None,
                     description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
                 ),
             ]
             default_value: Annotated[
                 str | None,
-                Field(
+                u.Field(
                     default=None,
                     description="Default value if source field is missing",
                 ),
@@ -126,34 +124,34 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             distinguished_name: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     ...,
                     description="LDAP Distinguished Name (DN)",
                 ),
             ]
             object_classes: Annotated[
                 MutableSequence[str],
-                Field(
+                u.Field(
                     description="LDAP object classes for this entry",
                     default_factory=list,
                 ),
             ]
             attributes: Annotated[
                 t.MutableStrSequenceMapping,
-                Field(
+                u.Field(
                     description="LDAP attributes with values",
                     default_factory=dict,
                 ),
             ]
             entry_type: Annotated[
                 str,
-                Field(
+                u.Field(
                     default="generic",
                     description="Type of LDAP entry (user, group, ou, etc.)",
                 ),
             ]
 
-            @field_validator("object_classes")
+            @u.field_validator("object_classes")
             @classmethod
             def validate_object_classes(
                 cls,
@@ -246,36 +244,38 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             original_record: Annotated[
                 t.ConfigurationMapping,
-                Field(
+                u.Field(
                     ...,
                     description="Original Singer record before transformation",
                 ),
             ]
-            transformed_entry: m.TargetLdap.Entry = Field(
-                ...,
-                description="Resulting LDAP entry after transformation",
-            )
-            applied_mappings: MutableSequence[m.TargetLdap.AttributeMapping] = Field(
+            transformed_entry: Annotated[
+                m.TargetLdap.Entry,
+                u.Field(
+                    description="Resulting LDAP entry after transformation",
+                ),
+            ]
+            applied_mappings: MutableSequence[m.TargetLdap.AttributeMapping] = u.Field(
                 default_factory=_default_applied_mappings,
                 description="Attribute mappings applied during transformation",
             )
             transformation_errors: Annotated[
                 MutableSequence[str],
-                Field(
+                u.Field(
                     description="Errors encountered during transformation",
                     default_factory=list,
                 ),
             ]
             processing_time_ms: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Processing time in milliseconds",
                 ),
             ]
             transformation_timestamp: Annotated[
                 datetime,
-                Field(
+                u.Field(
                     description="When transformation was performed",
                     default_factory=lambda: datetime.now(UTC),
                 ),
@@ -331,46 +331,46 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             stream_name: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     ...,
                     description="Singer stream being processed",
                 ),
             ]
             batch_size: Annotated[
                 t.BatchSize,
-                Field(
+                u.Field(
                     ...,
                     description="Maximum records per batch",
                 ),
             ]
-            current_batch: MutableSequence[m.TargetLdap.Entry] = Field(
+            current_batch: MutableSequence[m.TargetLdap.Entry] = u.Field(
                 default_factory=_default_current_batch,
                 description="Current batch of LDAP entries pending processing",
             )
             total_processed: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Total entries processed across all batches",
                 ),
             ]
             successful_operations: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Count of successful LDAP operations",
                 ),
             ]
             failed_operations: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Count of failed LDAP operations",
                 ),
             ]
             last_processed_at: Annotated[
                 datetime | None,
-                Field(
+                u.Field(
                     default=None,
                     description="Timestamp of last batch processing",
                 ),
@@ -468,56 +468,56 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             total_entries_processed: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Total LDAP entries processed",
                 ),
             ]
             successful_adds: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Successful LDAP add operations",
                 ),
             ]
             successful_updates: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Successful LDAP modify operations",
                 ),
             ]
             successful_deletes: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Successful LDAP delete operations",
                 ),
             ]
             failed_operations: Annotated[
                 t.NonNegativeInt,
-                Field(
+                u.Field(
                     default=0,
                     description="Total failed operations",
                 ),
             ]
             average_processing_time_ms: Annotated[
                 t.NonNegativeFloat,
-                Field(
+                u.Field(
                     default=0.0,
                     description="Average processing time per entry in milliseconds",
                 ),
             ]
             start_time: Annotated[
                 datetime,
-                Field(
+                u.Field(
                     description="When processing started",
                     default_factory=lambda: datetime.now(UTC),
                 ),
             ]
             end_time: Annotated[
                 datetime | None,
-                Field(
+                u.Field(
                     default=None,
                     description="When processing completed",
                 ),
@@ -592,14 +592,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             type: Annotated[
                 str,
-                Field(
+                u.Field(
                     default="string",
                     description="Singer property data type",
                 ),
             ]
             format: Annotated[
                 str | None,
-                Field(
+                u.Field(
                     default=None,
                     description="Optional format qualifier for the property type",
                 ),
@@ -611,7 +611,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             properties: MutableMapping[
                 str,
                 m.TargetLdap.SingerPropertyDefinition,
-            ] = Field(
+            ] = u.Field(
                 default_factory=dict,
                 description="Mapping of property names to their Singer definitions",
             )
@@ -621,19 +621,19 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             tap_stream_id: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     description="Unique identifier for the Singer tap stream",
                 ),
             ]
             stream: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     description="Singer stream name for this catalog entry",
                 ),
             ]
             stream_schema: Annotated[
                 t.MutableContainerValueMapping,
-                Field(
+                u.Field(
                     description="Schema definition for the Singer stream",
                     default_factory=dict,
                 ),
@@ -644,26 +644,26 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             name: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     description="Unique name identifying this transformation rule",
                 ),
             ]
             pattern: Annotated[
                 t.NonEmptyStr,
-                Field(
+                u.Field(
                     description="Regex pattern to match in source data",
                 ),
             ]
             replacement: Annotated[
                 str,
-                Field(
+                u.Field(
                     default="",
                     description="Replacement string applied when pattern matches",
                 ),
             ]
             enabled: Annotated[
                 bool,
-                Field(
+                u.Field(
                     default=True,
                     description="Whether this transformation rule is active",
                 ),
@@ -674,14 +674,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             transformed_data: Annotated[
                 t.MutableContainerValueMapping,
-                Field(
+                u.Field(
                     description="Data after applying transformation rules",
                     default_factory=dict,
                 ),
             ]
             applied_rules: Annotated[
                 MutableSequence[str],
-                Field(
+                u.Field(
                     description="Names of transformation rules that were applied",
                     default_factory=list,
                 ),
@@ -692,13 +692,13 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             dn: Annotated[
                 str,
-                Field(
+                u.Field(
                     description="Distinguished Name of the LDAP search result entry",
                 ),
             ]
             attributes: Annotated[
                 t.ContainerValueMapping,
-                Field(
+                u.Field(
                     description="LDAP attributes returned by the search operation",
                     default_factory=dict,
                 ),

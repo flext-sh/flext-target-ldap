@@ -76,4 +76,4 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
 
 
 u = TestsFlextTargetLdapUtilities
-__all__ = ["TestsFlextTargetLdapUtilities", "u"]
+__all__: list[str] = ["TestsFlextTargetLdapUtilities", "u"]

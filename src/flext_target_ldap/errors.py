@@ -38,7 +38,7 @@ class FlextTargetLdapTimeoutError(e.TimeoutError):
     """LDAP target timeout-specific errors."""
 
 
-__all__ = [
+__all__: list[str] = [
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapConfigurationError",
     "FlextTargetLdapConnectionError",

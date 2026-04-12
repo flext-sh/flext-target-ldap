@@ -15,106 +15,103 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated, ClassVar
 
-from pydantic import Field, ValidationError
-from pydantic_settings import SettingsConfigDict
-
 from flext_core import FlextSettings, r
-from flext_target_ldap import c, m, t
+from flext_target_ldap import c, m, t, u
 
 
 @FlextSettings.auto_register("target-ldap")
 class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration with connection and operation settings."""
 
-    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
+    model_config: ClassVar[c.SettingsConfigDict] = c.SettingsConfigDict(
         env_prefix=c.ENV_PREFIX, extra=c.ExtraConfig.IGNORE.value
     )
 
     connection: Annotated[
         m.Ldap.ConnectionConfig,
-        Field(
+        u.Field(
             description="LDAP server connection configuration",
         ),
     ]
     base_dn: Annotated[
         t.NonEmptyStr,
-        Field(
+        u.Field(
             description="Base Distinguished Name for LDAP operations",
         ),
     ]
     search_filter: Annotated[
         str,
-        Field(
+        u.Field(
             default=c.Ldap.Filters.ALL_ENTRIES_FILTER,
             description="LDAP search filter expression",
         ),
     ]
     search_scope: Annotated[
         t.Ldap.Ldap3SearchScope,
-        Field(
+        u.Field(
             default=c.Ldap.SearchDefaults.DEFAULT_SCOPE,
             description="LDAP search scope (BASE, ONELEVEL, or SUBTREE)",
         ),
     ]
     connect_timeout: Annotated[
         t.PositiveInt,
-        Field(
+        u.Field(
             default=c.TargetLdap.CONNECT_TIMEOUT,
             description="Connection timeout in seconds",
         ),
     ]
     receive_timeout: Annotated[
         t.PositiveInt,
-        Field(
+        u.Field(
             default=c.DEFAULT_TIMEOUT_SECONDS,
             description="Receive timeout in seconds for LDAP responses",
         ),
     ]
     batch_size: Annotated[
         t.BatchSize,
-        Field(
+        u.Field(
             default=c.DEFAULT_SIZE,
             description="Maximum number of entries per batch operation",
         ),
     ]
     max_records: Annotated[
         int | None,
-        Field(
+        u.Field(
             default=None,
             description="Maximum total records to process, or None for unlimited",
         ),
     ]
     create_missing_entries: Annotated[
         bool,
-        Field(
+        u.Field(
             default=c.TargetLdap.CREATE_MISSING_ENTRIES,
             description="Whether to create LDAP entries that do not exist",
         ),
     ]
     update_existing_entries: Annotated[
         bool,
-        Field(
+        u.Field(
             default=c.TargetLdap.UPDATE_EXISTING_ENTRIES,
             description="Whether to update LDAP entries that already exist",
         ),
     ]
     delete_removed_entries: Annotated[
         bool,
-        Field(
+        u.Field(
             default=c.TargetLdap.DELETE_REMOVED_ENTRIES,
             description="Whether to delete LDAP entries removed from source",
         ),
     ]
     attribute_mapping: Annotated[
         t.StrMapping,
-        Field(
+        u.Field(
             description="Mapping of source field names to LDAP attribute names",
             default_factory=dict,
         ),
     ]
     object_classes: Annotated[
         t.StrSequence,
-        Field(
+        u.Field(
             description="LDAP object classes to assign to created entries",
             default_factory=lambda: list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
         ),
@@ -176,7 +173,7 @@ class FlextTargetLdapSettings(FlextSettings):
                 ),
             })
             return r[FlextTargetLdapSettings].ok(validated_config)
-        except ValidationError as e:
+        except c.ValidationError as e:
             return r[FlextTargetLdapSettings].fail(
                 f"Configuration validation failed: {e}",
             )

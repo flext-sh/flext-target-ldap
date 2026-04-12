@@ -388,4 +388,4 @@ class FlextTargetLdapClient:
             return r[Sequence[m.TargetLdap.SearchEntry]].fail(f"Search failed: {e}")
 
 
-__all__ = ["FlextTargetLdapClient"]
+__all__: list[str] = ["FlextTargetLdapClient"]

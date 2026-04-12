@@ -140,7 +140,7 @@ create_default_ldap_target_config = (
     FlextTargetLdapConfigFactory.create_default_ldap_target_config
 )
 
-__all__ = [
+__all__: list[str] = [
     "FlextTargetLdapConfigFactory",
     "create_default_ldap_target_config",
     "validate_ldap_target_config",

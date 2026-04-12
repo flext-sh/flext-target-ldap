@@ -150,4 +150,4 @@ class FlextTargetLdapServiceRuntime:
         }
 
 
-__all__ = ["FlextTargetLdapServiceRuntime"]
+__all__: list[str] = ["FlextTargetLdapServiceRuntime"]

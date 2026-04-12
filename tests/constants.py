@@ -26,4 +26,4 @@ class TestsFlextTargetLdapConstants(FlextTestsConstants, FlextTargetLdapConstant
 
 
 c = TestsFlextTargetLdapConstants
-__all__ = ["TestsFlextTargetLdapConstants", "c"]
+__all__: list[str] = ["TestsFlextTargetLdapConstants", "c"]

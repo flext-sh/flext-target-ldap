@@ -35,7 +35,7 @@ class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
 
 m = TestsFlextTargetLdapModels
 
-__all__ = [
+__all__: list[str] = [
     "TestsFlextTargetLdapModels",
     "m",
 ]

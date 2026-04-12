@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from pydantic import ConfigDict, TypeAdapter
-
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
+from flext_target_ldap import c, u
 
 
 class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
@@ -20,35 +19,39 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     class TargetLdap:
         """Target LDAP-specific types and centralized adapters."""
 
-        STRING_ADAPTER: TypeAdapter[FlextMeltanoTypes.TextValue] = TypeAdapter(
+        STRING_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.TextValue] = u.TypeAdapter(
             FlextMeltanoTypes.TextValue,
         )
-        INTEGER_ADAPTER: TypeAdapter[FlextMeltanoTypes.IntegerValue] = TypeAdapter(
+        INTEGER_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.IntegerValue] = u.TypeAdapter(
             FlextMeltanoTypes.IntegerValue,
         )
-        STR_MAPPING_ADAPTER: TypeAdapter[FlextMeltanoTypes.StrMapping] = TypeAdapter(
-            FlextMeltanoTypes.StrMapping,
+        STR_MAPPING_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.StrMapping] = (
+            u.TypeAdapter(
+                FlextMeltanoTypes.StrMapping,
+            )
         )
-        STR_SEQUENCE_ADAPTER: TypeAdapter[FlextMeltanoTypes.StrSequence] = TypeAdapter(
-            FlextMeltanoTypes.StrSequence,
+        STR_SEQUENCE_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.StrSequence] = (
+            u.TypeAdapter(
+                FlextMeltanoTypes.StrSequence,
+            )
         )
-        CONFIG_MAP_ADAPTER: TypeAdapter[Mapping[str, FlextMeltanoTypes.ConfigMap]] = (
-            TypeAdapter(
+        CONFIG_MAP_ADAPTER: u.TypeAdapter[Mapping[str, FlextMeltanoTypes.ConfigMap]] = (
+            u.TypeAdapter(
                 Mapping[str, FlextMeltanoTypes.ConfigMap],
             )
         )
-        SINGER_MESSAGE_ADAPTER: TypeAdapter[FlextMeltanoTypes.ContainerMapping] = (
-            TypeAdapter(
+        SINGER_MESSAGE_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.ContainerMapping] = (
+            u.TypeAdapter(
                 FlextMeltanoTypes.ContainerMapping,
-                config=ConfigDict(strict=False),
+                config=c.ConfigDict(strict=False),
             )
         )
-        CONTAINER_VALUE_MAP_ADAPTER: TypeAdapter[
+        CONTAINER_VALUE_MAP_ADAPTER: u.TypeAdapter[
             FlextMeltanoTypes.ContainerValueMapping
-        ] = TypeAdapter(
+        ] = u.TypeAdapter(
             FlextMeltanoTypes.ContainerValueMapping,
         )
 
 
 t = FlextTargetLdapTypes
-__all__ = ["FlextTargetLdapTypes", "t"]
+__all__: list[str] = ["FlextTargetLdapTypes", "t"]

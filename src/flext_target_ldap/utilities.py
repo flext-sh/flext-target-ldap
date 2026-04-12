@@ -11,8 +11,6 @@ import re
 from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import datetime
 
-from pydantic import BaseModel, ValidationError
-
 from flext_core import r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
@@ -48,7 +46,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             the value cannot be coerced.
 
         """
-        if isinstance(value, BaseModel):
+        if isinstance(value, m.BaseModel):
             return u.coerce_container_value(value.model_dump())
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
@@ -171,7 +169,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     return default
                 try:
                     return t.TargetLdap.STRING_ADAPTER.validate_python(value)
-                except ValidationError:
+                except c.ValidationError:
                     return default
 
             @staticmethod
@@ -190,7 +188,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     case str() | float():
                         try:
                             return t.TargetLdap.INTEGER_ADAPTER.validate_python(value)
-                        except ValidationError:
+                        except c.ValidationError:
                             return default
                     case _:
                         return default
@@ -452,7 +450,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         port_int = t.TargetLdap.INTEGER_ADAPTER.validate_python(
                             port_raw,
                         )
-                    except ValidationError:
+                    except c.ValidationError:
                         return r[Mapping[str, t.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )
@@ -519,4 +517,4 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
 
 u = FlextTargetLdapUtilities
-__all__ = ["FlextTargetLdapUtilities", "u"]
+__all__: list[str] = ["FlextTargetLdapUtilities", "u"]

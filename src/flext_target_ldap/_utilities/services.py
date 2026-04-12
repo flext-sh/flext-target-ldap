@@ -167,7 +167,7 @@ class FlextTargetLdapTransformationService:
         return "generic"
 
 
-__all__ = [
+__all__: list[str] = [
     "FlextTargetLdapConnectionService",
     "FlextTargetLdapTransformationService",
 ]

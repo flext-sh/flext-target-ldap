@@ -33,4 +33,4 @@ class FlextTargetLdapConstants(
 
 
 c = FlextTargetLdapConstants
-__all__ = ["FlextTargetLdapConstants", "c"]
+__all__: list[str] = ["FlextTargetLdapConstants", "c"]
