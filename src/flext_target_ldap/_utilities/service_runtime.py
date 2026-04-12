@@ -50,7 +50,7 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_batch(
             self,
-            context: t.ContainerMapping,
+            context: t.RecursiveContainerMapping,
         ) -> None:
             """Singer batch hook is handled record-by-record by the runtime sink."""
             _ = context
@@ -58,8 +58,8 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_record(
             self,
-            record: t.ContainerMapping,
-            context: t.ContainerMapping,
+            record: t.RecursiveContainerMapping,
+            context: t.RecursiveContainerMapping,
         ) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
@@ -76,7 +76,7 @@ class FlextTargetLdapServiceRuntime:
         *,
         stream_name: str,
         schema: t.FlatContainerMapping,
-        target_config: t.ContainerMapping,
+        target_config: t.RecursiveContainerMapping,
     ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
         normalized_target_config = cls.normalize_singer_mapping(target_config)
@@ -108,7 +108,7 @@ class FlextTargetLdapServiceRuntime:
     @classmethod
     def normalize_singer_mapping(
         cls,
-        source: t.ContainerMapping,
+        source: t.RecursiveContainerMapping,
     ) -> t.MutableMappingKV[str, t.ContainerValue]:
         """Normalize a Singer payload mapping to the LDAP runtime contract."""
         normalized: t.MutableMappingKV[str, t.ContainerValue] = {}
@@ -121,7 +121,7 @@ class FlextTargetLdapServiceRuntime:
     @classmethod
     def normalize_singer_value(
         cls,
-        value: t.NormalizedValue,
+        value: t.RecursiveContainer,
     ) -> t.ContainerValue | None:
         """Normalize a Singer payload value to the LDAP runtime contract."""
         if value is None:

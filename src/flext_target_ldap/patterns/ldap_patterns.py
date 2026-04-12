@@ -18,7 +18,7 @@ logger = u.fetch_logger(__name__)
 class FlextTargetLdapTypeConverter:
     """Convert Singer values to LDAP-safe string values."""
 
-    _COMPLEX_KIND = "t.NormalizedValue"
+    _COMPLEX_KIND = "t.RecursiveContainer"
 
     @override
     def __init__(self) -> None:
@@ -192,7 +192,7 @@ class FlextTargetLdapSchemaMapper:
                 return r[str].ok("Integer")
             if prop_type == "boolean":
                 return r[str].ok("Boolean")
-            if prop_type in {"t.NormalizedValue", "array"}:
+            if prop_type in {"t.RecursiveContainer", "array"}:
                 return r[str].ok("OctetString")
             return r[str].ok("DirectoryString")
         except (RuntimeError, ValueError, TypeError) as e:
@@ -223,7 +223,7 @@ class FlextTargetLdapEntryManager:
         record: t.ConfigurationMapping,
         stream_name: str,
     ) -> r[t.StrSequence]:
-        """Determine appropriate t.NormalizedValue classes for LDAP entry."""
+        """Determine appropriate t.RecursiveContainer classes for LDAP entry."""
         try:
             object_classes = ["top"]
             stream_lower = stream_name.lower()
@@ -311,7 +311,7 @@ class FlextTargetLdapEntryManager:
         attributes: Mapping[str, t.StrSequence],
         object_classes: t.StrSequence,
     ) -> r[bool]:
-        """Validate LDAP entry attributes against t.NormalizedValue class requirements."""
+        """Validate LDAP entry attributes against t.RecursiveContainer class requirements."""
         try:
             required_attrs: set[str] = set()
             for obj_class in object_classes:

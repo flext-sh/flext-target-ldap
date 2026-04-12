@@ -36,7 +36,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class AttributeMapping(FlextLdapModels.Entity):
             """LDAP attribute mapping configuration with validation.
 
-            Immutable value t.NormalizedValue defining how Singer fields map to LDAP attributes
+            Immutable value t.RecursiveContainer defining how Singer fields map to LDAP attributes
             with business rule validation and transformation support.
             """
 
@@ -118,8 +118,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         class Entry(FlextLdapModels.Entity):
             """LDAP entry representation with validation and business rules.
 
-            Immutable value t.NormalizedValue representing a complete LDAP entry with
-            DN, t.NormalizedValue classes, and attributes, including validation rules.
+            Immutable value t.RecursiveContainer representing a complete LDAP entry with
+            DN, t.RecursiveContainer classes, and attributes, including validation rules.
             """
 
             distinguished_name: Annotated[
@@ -157,7 +157,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 cls,
                 v: MutableSequence[str],
             ) -> MutableSequence[str]:
-                """Validate t.NormalizedValue classes contain 'top'."""
+                """Validate t.RecursiveContainer classes contain 'top'."""
                 if "top" not in v:
                     v.append("top")
                 return v
@@ -179,7 +179,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 return self.distinguished_name.split(",")[0].strip()
 
             def has_object_class(self, object_class: str) -> bool:
-                """Check if entry has a specific t.NormalizedValue class."""
+                """Check if entry has a specific t.RecursiveContainer class."""
                 return object_class.lower() in [
                     oc.lower() for oc in self.object_classes
                 ]
@@ -198,10 +198,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                             "DN must contain attribute=value pairs separated by commas",
                         )
 
-                    # Validate t.NormalizedValue classes
+                    # Validate t.RecursiveContainer classes
                     if not self.object_classes:
                         errors.append(
-                            "Entry must have at least one t.NormalizedValue class",
+                            "Entry must have at least one t.RecursiveContainer class",
                         )
 
                     # Validate person entries have required attributes

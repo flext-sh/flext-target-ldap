@@ -105,7 +105,7 @@ def test_sink_process_record_delegates_to_target_handler() -> None:
     sink = FlextTargetLdapSink(
         target=target,
         stream_name="users",
-        schema={"type": "t.NormalizedValue"},
+        schema={"type": "t.RecursiveContainer"},
         key_properties=["id"],
     )
     result = sink.process_record({"id": "42"}, {"batch": "1"})

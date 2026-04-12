@@ -34,7 +34,7 @@ class FlextTargetLdapSingerTarget:
         settings: Configuration dictionary
 
         Returns:
-        t.NormalizedValue: Description of return value.
+        t.RecursiveContainer: Description of return value.
 
         """
         self.settings: t.ContainerValueMapping = settings or {}

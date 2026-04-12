@@ -32,7 +32,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     @staticmethod
     def coerce_container_value(
         value: t.ConfigMap | t.ValueOrModel,
-    ) -> t.ConfigMap | t.ContainerValueList | t.NormalizedValue | None:
+    ) -> t.ConfigMap | t.ContainerValueList | t.RecursiveContainer | None:
         """Coerce a container value to a normalized form for LDAP operations.
 
         Recursively normalizes BaseModel, scalar, list, and Mapping values into
@@ -86,7 +86,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     {
                         "tap_stream_id": "users",
                         "schema": {
-                            "type": "t.NormalizedValue",
+                            "type": "t.RecursiveContainer",
                             "properties": {
                                 "username": {"type": "string"},
                                 "email": {"type": "string"},
@@ -103,7 +103,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     {
                         "tap_stream_id": "groups",
                         "schema": {
-                            "type": "t.NormalizedValue",
+                            "type": "t.RecursiveContainer",
                             "properties": {
                                 "name": {"type": "string"},
                                 "description": {"type": "string"},
@@ -118,7 +118,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     {
                         "tap_stream_id": "organizational_units",
                         "schema": {
-                            "type": "t.NormalizedValue",
+                            "type": "t.RecursiveContainer",
                             "properties": {
                                 "name": {"type": "string"},
                                 "description": {"type": "string"},
@@ -329,14 +329,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 record: Mapping[str, t.ConfigMap],
                 default_object_classes: t.StrSequence | None = None,
             ) -> t.StrSequence:
-                """Extract t.NormalizedValue classes for LDAP entry.
+                """Extract t.RecursiveContainer classes for LDAP entry.
 
                 Args:
                 record: Singer record data
-                default_object_classes: Default t.NormalizedValue classes if not in record
+                default_object_classes: Default t.RecursiveContainer classes if not in record
 
                 Returns:
-                t.StrSequence: List of t.NormalizedValue classes
+                t.StrSequence: List of t.RecursiveContainer classes
 
                 """
                 object_classes = record.get("objectClass") or record.get("objectclass")
