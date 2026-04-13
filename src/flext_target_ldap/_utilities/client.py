@@ -15,7 +15,7 @@ from collections.abc import (
 from typing import ClassVar, TypeIs, override
 
 from flext_ldap import FlextLdap
-from flext_target_ldap import c, m, r, t, u
+from flext_target_ldap import c, m, p, r, t, u
 
 
 class FlextTargetLdapClient:
@@ -178,7 +178,7 @@ class FlextTargetLdapClient:
         dn: str,
         attributes: t.ContainerValueMapping,
         object_classes: t.StrSequence | None = None,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
             FlextTargetLdapClient._logger.info(
@@ -202,7 +202,7 @@ class FlextTargetLdapClient:
             FlextTargetLdapClient._logger.exception("Failed to add entry %s", dn)
             return r[bool].fail(f"Add entry failed: {e}")
 
-    def connect(self) -> r[bool]:
+    def connect(self) -> p.Result[bool]:
         """Validate connectivity to LDAP server using flext-ldap API."""
         try:
             connect_result = self._api.connect(self.settings)
@@ -218,7 +218,7 @@ class FlextTargetLdapClient:
             FlextTargetLdapClient._logger.exception(error_msg)
             return r[bool].fail(error_msg)
 
-    def delete_entry(self, dn: str) -> r[bool]:
+    def delete_entry(self, dn: str) -> p.Result[bool]:
         """Delete LDAP entry using flext-ldap API."""
         try:
             if not dn:
@@ -245,7 +245,7 @@ class FlextTargetLdapClient:
             FlextTargetLdapClient._logger.exception("Failed to delete entry %s", dn)
             return r[bool].fail(f"Delete entry failed: {e}")
 
-    def disconnect(self) -> r[bool]:
+    def disconnect(self) -> p.Result[bool]:
         """Disconnect LDAP session through flext-ldap."""
         try:
             self._api.disconnect()
@@ -257,7 +257,7 @@ class FlextTargetLdapClient:
             )
             return r[bool].fail(f"Disconnect failed: {e}")
 
-    def entry_exists(self, dn: str) -> r[bool]:
+    def entry_exists(self, dn: str) -> p.Result[bool]:
         """Check if LDAP entry exists using flext-ldap API."""
         try:
             if not dn:
@@ -282,7 +282,7 @@ class FlextTargetLdapClient:
         self,
         dn: str,
         attributes: t.StrSequence | None = None,
-    ) -> r[m.TargetLdap.SearchEntry | None]:
+    ) -> p.Result[m.TargetLdap.SearchEntry | None]:
         """Get LDAP entry using flext-ldap API."""
         try:
             if not dn:
@@ -300,7 +300,7 @@ class FlextTargetLdapClient:
         self,
         dn: str,
         changes: t.ContainerValueMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
             FlextTargetLdapClient._logger.info(
@@ -332,7 +332,7 @@ class FlextTargetLdapClient:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: t.StrSequence | None = None,
-    ) -> r[Sequence[m.TargetLdap.SearchEntry]]:
+    ) -> p.Result[Sequence[m.TargetLdap.SearchEntry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:

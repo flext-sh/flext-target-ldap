@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import MutableSequence, Sequence
 from typing import override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import c, m, t, u
 
 logger = u.fetch_logger(__name__)
@@ -31,7 +31,7 @@ class FlextTargetLdapTransformationEngine:
     def transform(
         self,
         data: t.ContainerValueMapping,
-    ) -> r[m.TargetLdap.DataTransformationResult]:
+    ) -> p.Result[m.TargetLdap.DataTransformationResult]:
         """Transform data using rules."""
         try:
             transformed_data: t.MutableContainerValueMapping = dict(data)
@@ -96,7 +96,7 @@ class FlextTargetLdapMigrationValidator:
         data: t.ContainerValueMapping | str,
         attributes: t.ContainerValueMapping | None = None,
         object_classes: Sequence[t.ContainerValue] | None = None,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Validate migration data."""
         try:
             self._stats["entries_validated"] += 1
@@ -129,7 +129,7 @@ class FlextTargetLdapMigrationValidator:
         dn: str,
         attributes: t.ContainerValueMapping,
         object_classes: t.StrSequence,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Validate individual LDAP entry - alias for validate method."""
         return self.validate(dn, attributes, object_classes)
 

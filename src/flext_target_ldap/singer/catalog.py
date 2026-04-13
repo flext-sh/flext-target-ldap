@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import MutableMapping
 from typing import override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import m, t, u
 
 logger = u.fetch_logger(__name__)
@@ -31,7 +31,7 @@ class FlextTargetLdapCatalogManager:
         self,
         stream_name: str,
         schema: t.ContainerValueMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Add LDAP stream to catalog."""
         try:
             entry = m.TargetLdap.SingerLDAPCatalogEntry(
@@ -46,7 +46,9 @@ class FlextTargetLdapCatalogManager:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
             return r[bool].fail(f"Stream addition failed: {e}")
 
-    def get_stream(self, stream_name: str) -> r[m.TargetLdap.SingerLDAPCatalogEntry]:
+    def get_stream(
+        self, stream_name: str
+    ) -> p.Result[m.TargetLdap.SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
             return r[m.TargetLdap.SingerLDAPCatalogEntry].fail(

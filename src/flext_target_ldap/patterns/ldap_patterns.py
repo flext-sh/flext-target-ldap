@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import Mapping, MutableMapping, Sequence
 from typing import override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import m, t, u
 
 logger = u.fetch_logger(__name__)
@@ -28,7 +28,7 @@ class FlextTargetLdapTypeConverter:
         self,
         singer_type: str,
         value: t.Scalar,
-    ) -> r[str | None]:
+    ) -> p.Result[str | None]:
         """Convert Singer scalar/list/map values for LDAP persistence."""
         try:
             if singer_type in {"string", "text", "integer", "number"}:
@@ -74,7 +74,7 @@ class FlextTargetLdapDataTransformer:
         self,
         record: t.ConfigurationMapping,
         object_classes: t.StrSequence,
-    ) -> r[Mapping[str, t.StrSequence]]:
+    ) -> p.Result[Mapping[str, t.StrSequence]]:
         """Prepare attributes for LDAP entry creation."""
         try:
             attributes: MutableMapping[str, t.StrSequence] = {}
@@ -94,7 +94,7 @@ class FlextTargetLdapDataTransformer:
         schema: m.TargetLdap.SingerSchemaDefinition
         | Mapping[str, Mapping[str, t.StrMapping | str]]
         | None = None,
-    ) -> r[t.OptionalStrMapping]:
+    ) -> p.Result[t.OptionalStrMapping]:
         """Transform Singer record for LDAP storage."""
         try:
             transformed: t.MutableOptionalStrMapping = {}
@@ -154,7 +154,7 @@ class FlextTargetLdapSchemaMapper:
         schema: m.TargetLdap.SingerSchemaDefinition
         | Mapping[str, Mapping[str, t.StrMapping | str]],
         object_class: str = "inetOrgPerson",
-    ) -> r[t.StrMapping]:
+    ) -> p.Result[t.StrMapping]:
         """Map Singer schema to LDAP attribute definitions."""
         try:
             ldap_attributes: t.MutableStrMapping = {}
@@ -181,7 +181,7 @@ class FlextTargetLdapSchemaMapper:
         self,
         prop_def: m.TargetLdap.SingerPropertyDefinition,
         _object_class: str,
-    ) -> r[str]:
+    ) -> p.Result[str]:
         """Map Singer property definition to LDAP attribute syntax."""
         try:
             prop_type = prop_def.type
@@ -222,7 +222,7 @@ class FlextTargetLdapEntryManager:
         self,
         record: t.ConfigurationMapping,
         stream_name: str,
-    ) -> r[t.StrSequence]:
+    ) -> p.Result[t.StrSequence]:
         """Determine appropriate t.RecursiveContainer classes for LDAP entry."""
         try:
             object_classes = ["top"]
@@ -256,7 +256,7 @@ class FlextTargetLdapEntryManager:
         record: t.ConfigurationMapping,
         base_dn: str,
         rdn_attribute: str = "cn",
-    ) -> r[str]:
+    ) -> p.Result[str]:
         """Generate Distinguished Name for LDAP entry."""
         try:
             rdn_value = record.get(rdn_attribute)
@@ -282,7 +282,7 @@ class FlextTargetLdapEntryManager:
         self,
         current_attrs: Mapping[str, str | t.StrSequence | None],
         new_attrs: Mapping[str, str | t.StrSequence | None],
-    ) -> r[Mapping[str, Sequence[t.Pair[str, t.StrSequence]]]]:
+    ) -> p.Result[Mapping[str, Sequence[t.Pair[str, t.StrSequence]]]]:
         """Prepare modification changes for LDAP entry."""
         try:
             changes: MutableMapping[str, Sequence[t.Pair[str, t.StrSequence]]] = {}
@@ -310,7 +310,7 @@ class FlextTargetLdapEntryManager:
         self,
         attributes: Mapping[str, t.StrSequence],
         object_classes: t.StrSequence,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Validate LDAP entry attributes against t.RecursiveContainer class requirements."""
         try:
             required_attrs: set[str] = set()

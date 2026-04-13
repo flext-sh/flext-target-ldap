@@ -11,7 +11,7 @@ import re
 from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import datetime
 
-from flext_core import r
+from flext_core import p, r
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 from flext_target_ldap import c, m, t
@@ -259,7 +259,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                 record: Mapping[str, t.ConfigMap],
                 dn_template: str,
                 base_dn: str,
-            ) -> r[str]:
+            ) -> p.Result[str]:
                 """Build LDAP Distinguished Name from record data.
 
                 Args:
@@ -292,7 +292,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             def convert_record_to_ldap_attributes(
                 record: Mapping[str, t.ConfigMap],
                 attribute_mapping: t.StrMapping | None = None,
-            ) -> r[Mapping[str, Sequence[bytes]]]:
+            ) -> p.Result[Mapping[str, Sequence[bytes]]]:
                 """Convert Singer record to LDAP attributes format.
 
                 Args:
@@ -395,7 +395,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             @staticmethod
             def validate_ldap_connection_config(
                 settings: Mapping[str, t.ConfigMap],
-            ) -> r[Mapping[str, t.ConfigMap]]:
+            ) -> p.Result[Mapping[str, t.ConfigMap]]:
                 """Validate LDAP connection configuration.
 
                 Args:
@@ -469,7 +469,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             @staticmethod
             def validate_target_config(
                 settings: Mapping[str, t.ConfigMap],
-            ) -> r[Mapping[str, t.ConfigMap]]:
+            ) -> p.Result[Mapping[str, t.ConfigMap]]:
                 """Validate target configuration.
 
                 Args:

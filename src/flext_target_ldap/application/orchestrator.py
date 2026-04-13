@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
 
 logger: p.Logger = u.fetch_logger(__name__)
@@ -47,7 +47,7 @@ class FlextTargetLdapOrchestrator:
     def orchestrate_data_loading(
         self,
         records: Sequence[Mapping[str, t.Scalar | None]],
-    ) -> r[t.HeaderMapping]:
+    ) -> p.Result[t.HeaderMapping]:
         """Orchestrate data loading to LDAP target.
 
         Args:
@@ -74,7 +74,7 @@ class FlextTargetLdapOrchestrator:
                 f"Data loading orchestration failed: {e}",
             )
 
-    def validate_target_configuration(self) -> r[bool]:
+    def validate_target_configuration(self) -> p.Result[bool]:
         """Validate LDAP target configuration.
 
         Returns:

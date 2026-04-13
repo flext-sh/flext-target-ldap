@@ -6,7 +6,7 @@ from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import FlextTargetLdapSettings, c, m, t
 
 
@@ -28,7 +28,7 @@ class FlextTargetLdapConnectionService:
             "timeout": self._config.connection.timeout,
         }
 
-    def test_connection(self) -> r[bool]:
+    def test_connection(self) -> p.Result[bool]:
         """Verify LDAP host and base_dn are configured and connection is valid."""
         if not self._config.connection.host:
             return r[bool].fail("LDAP host is required")
@@ -100,7 +100,7 @@ class FlextTargetLdapTransformationService:
         mappings: Sequence[m.TargetLdap.AttributeMapping],
         object_classes: t.StrSequence,
         base_dn: str,
-    ) -> r[m.TargetLdap.TransformationResult]:
+    ) -> p.Result[m.TargetLdap.TransformationResult]:
         """Transform a single record into an LDAP entry using mappings."""
         mapping_errors: MutableSequence[str] = []
         ldap_attributes: MutableMapping[str, t.StrSequence] = {}
@@ -152,7 +152,7 @@ class FlextTargetLdapTransformationService:
         })
         return r[m.TargetLdap.TransformationResult].ok(result)
 
-    def validate_entry(self, entry: m.TargetLdap.Entry) -> r[bool]:
+    def validate_entry(self, entry: m.TargetLdap.Entry) -> p.Result[bool]:
         """Run business-rule validation on an LDAP entry."""
         return entry.validate_business_rules()
 

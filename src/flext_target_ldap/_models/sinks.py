@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import MutableSequence, Sequence
 from typing import ClassVar, TypeIs, override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import (
     FlextTargetLdapClient,
     FlextTargetLdapProcessingCounters,
@@ -41,7 +41,7 @@ class FlextTargetLdapSink:
         self,
         _record: t.RecursiveContainerMapping,
         _context: t.RecursiveContainerMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Process a record using the target."""
         try:
             process_record_fn = getattr(self.target, "process_record", None)
@@ -141,13 +141,13 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     def build_attributes(
         self,
         _record: t.ContainerValueMapping,
-    ) -> r[t.ContainerValueMapping]:
+    ) -> p.Result[t.ContainerValueMapping]:
         """Build LDAP attributes from record. Override in subclasses."""
         return r[t.ContainerValueMapping].fail(
             "build_attributes must be implemented in subclass",
         )
 
-    def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
+    def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
         """Build distinguished name from record. Override in subclasses."""
         dn = record.get("dn")
         if isinstance(dn, str) and dn:
@@ -210,7 +210,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         self,
         _record: t.RecursiveContainerMapping,
         _context: t.RecursiveContainerMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -225,7 +225,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             self._processing_result.add_error(error_msg)
             return r[bool].fail(error_msg)
 
-    def setup_client(self) -> r[FlextTargetLdapClient]:
+    def setup_client(self) -> p.Result[FlextTargetLdapClient]:
         """Set up LDAP client connection."""
         try:
             connection_config = {
@@ -264,7 +264,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         dn: str,
         attributes: t.ContainerValueMapping,
         object_classes: t.StrSequence,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Validate LDAP entry before writing."""
         if not dn:
             return r[bool].fail("DN cannot be empty")
@@ -296,7 +296,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     def build_attributes(
         self,
         _record: t.ContainerValueMapping,
-    ) -> r[t.ContainerValueMapping]:
+    ) -> p.Result[t.ContainerValueMapping]:
         """Build LDAP attributes for user entry."""
         attrs: t.MutableContainerValueMapping = {}
         for k, v in _record.items():
@@ -308,7 +308,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         return r[t.ContainerValueMapping].ok(attrs)
 
     @override
-    def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
+    def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
         """Build DN for user entry."""
         rdn_attr = str(self._target.settings.get("user_rdn_attribute", "uid"))
         uid = record.get(rdn_attr)
@@ -384,7 +384,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         self,
         _record: t.RecursiveContainerMapping,
         _context: t.RecursiveContainerMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Process a user record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -457,7 +457,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     def build_attributes(
         self,
         _record: t.ContainerValueMapping,
-    ) -> r[t.ContainerValueMapping]:
+    ) -> p.Result[t.ContainerValueMapping]:
         """Build LDAP attributes for group entry."""
         attrs: t.MutableContainerValueMapping = {}
         field_map = {"members": "member"}
@@ -470,7 +470,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         return r[t.ContainerValueMapping].ok(attrs)
 
     @override
-    def build_dn(self, record: t.ContainerValueMapping) -> r[str]:
+    def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
         """Build DN for group entry."""
         rdn_attr = str(self._target.settings.get("group_rdn_attribute", "cn"))
         cn = record.get(rdn_attr)
@@ -495,7 +495,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         self,
         _record: t.RecursiveContainerMapping,
         _context: t.RecursiveContainerMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Process a group record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")
@@ -612,7 +612,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         self,
         _record: t.RecursiveContainerMapping,
         _context: t.RecursiveContainerMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Process an organizational unit record."""
         if not self.client:
             self._processing_result.add_error("LDAP client not initialized")

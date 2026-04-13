@@ -120,7 +120,7 @@ class FlextTargetLdapSettings(FlextSettings):
     @staticmethod
     def validate_ldap_config(
         settings: Mapping[str, t.ContainerValue | t.ConfigMap],
-    ) -> r[FlextTargetLdapSettings]:
+    ) -> p.Result[FlextTargetLdapSettings]:
         """Validate LDAP configuration."""
         try:
             validated_config = FlextTargetLdapSettings.model_validate({

@@ -14,7 +14,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import c, p, t, u
 
 logger: p.Logger = u.fetch_logger(__name__)
@@ -43,7 +43,7 @@ class FlextTargetLdapSingerTarget:
     def process_singer_messages(
         self,
         messages: Sequence[t.ContainerValueMapping],
-    ) -> r[t.HeaderMapping]:
+    ) -> p.Result[t.HeaderMapping]:
         """Process Singer messages for LDAP target.
 
         Args:
@@ -73,7 +73,7 @@ class FlextTargetLdapSingerTarget:
                 f"Message processing failed: {e}",
             )
 
-    def validate_singer_config(self) -> r[bool]:
+    def validate_singer_config(self) -> p.Result[bool]:
         """Validate Singer LDAP target configuration.
 
         Returns:

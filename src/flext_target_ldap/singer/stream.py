@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import MutableMapping, MutableSequence
 from typing import override
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import t, u
 
 logger = u.fetch_logger(__name__)
@@ -50,7 +50,7 @@ class FlextTargetLdapStreamProcessor:
     def get_stream_stats(
         self,
         stream_name: str,
-    ) -> r[FlextTargetLdapStreamProcessingStats]:
+    ) -> p.Result[FlextTargetLdapStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
             return r[FlextTargetLdapStreamProcessingStats].fail(
@@ -60,7 +60,7 @@ class FlextTargetLdapStreamProcessor:
             self._stream_stats[stream_name],
         )
 
-    def initialize_stream(self, stream_name: str) -> r[bool]:
+    def initialize_stream(self, stream_name: str) -> p.Result[bool]:
         """Initialize LDAP stream processing."""
         try:
             self._stream_stats[stream_name] = FlextTargetLdapStreamProcessingStats(

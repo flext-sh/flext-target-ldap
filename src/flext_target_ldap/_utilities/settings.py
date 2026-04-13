@@ -14,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_ldap import FlextTargetLdapSettings, c, m, t, u
 
 
@@ -24,7 +24,7 @@ class FlextTargetLdapConfigFactory:
     @staticmethod
     def validate_ldap_target_config(
         settings: t.ContainerValueMapping,
-    ) -> r[FlextTargetLdapSettings]:
+    ) -> p.Result[FlextTargetLdapSettings]:
         """Validate and create LDAP target configuration with proper error handling."""
         try:
             connection_config = u.TargetLdap.TypeConversion.build_connection_config(
@@ -107,7 +107,7 @@ class FlextTargetLdapConfigFactory:
         *,
         port: int = c.Ldap.ConnectionDefaults.PORT,
         use_ssl: bool = False,
-    ) -> r[FlextTargetLdapSettings]:
+    ) -> p.Result[FlextTargetLdapSettings]:
         """Create default LDAP target configuration with minimal parameters."""
         try:
             connection_config = m.Ldap.ConnectionConfig(

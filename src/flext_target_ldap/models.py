@@ -16,7 +16,7 @@ from collections.abc import MutableMapping, MutableSequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_core import r
+from flext_core import p, r
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 from flext_target_ldap import c, t, u
@@ -76,7 +76,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 ),
             ]
 
-            def validate_business_rules(self) -> r[bool]:
+            def validate_business_rules(self) -> p.Result[bool]:
                 """Validate attribute mapping business rules."""
                 try:
                     # Validate field name format
@@ -184,7 +184,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     oc.lower() for oc in self.object_classes
                 ]
 
-            def validate_business_rules(self) -> r[bool]:
+            def validate_business_rules(self) -> p.Result[bool]:
                 """Validate LDAP entry business rules."""
                 try:
                     errors: MutableSequence[str] = []
@@ -295,7 +295,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 """Check if transformation has any errors."""
                 return bool(self.transformation_errors)
 
-            def validate_business_rules(self) -> r[bool]:
+            def validate_business_rules(self) -> p.Result[bool]:
                 """Validate transformation result business rules."""
                 try:
                     # Validate we have meaningful data
@@ -435,7 +435,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     },
                 )
 
-            def validate_business_rules(self) -> r[bool]:
+            def validate_business_rules(self) -> p.Result[bool]:
                 """Validate batch processing business rules."""
                 try:
                     # Validate batch size doesn't exceed current batch
@@ -558,7 +558,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     },
                 )
 
-            def validate_business_rules(self) -> r[bool]:
+            def validate_business_rules(self) -> p.Result[bool]:
                 """Validate operation statistics business rules."""
                 try:
                     # Validate that successful operations don't exceed total
