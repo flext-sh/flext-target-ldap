@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import e
+from flext_target_ldap import e
 
 
 class FlextTargetLdapError(e.BaseError):

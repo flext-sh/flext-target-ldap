@@ -14,8 +14,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import p, r
-from flext_target_ldap import FlextTargetLdapSettings, c, m, t, u
+from flext_target_ldap import FlextTargetLdapSettings, c, m, p, r, t, u
 
 
 class FlextTargetLdapConfigFactory:

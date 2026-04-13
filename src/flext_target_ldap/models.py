@@ -16,13 +16,12 @@ from collections.abc import MutableMapping, MutableSequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_core import p, r
 from flext_ldap import FlextLdapModels
-from flext_meltano import FlextMeltanoModels
-from flext_target_ldap import c, t, u
+from flext_meltano import m
+from flext_target_ldap import c, p, r, t, u
 
 
-class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
+class FlextTargetLdapModels(m, FlextLdapModels):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes

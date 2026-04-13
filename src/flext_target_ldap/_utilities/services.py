@@ -6,8 +6,7 @@ from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 from typing import override
 
-from flext_core import p, r
-from flext_target_ldap import FlextTargetLdapSettings, c, m, t
+from flext_target_ldap import FlextTargetLdapSettings, c, m, p, r, t
 
 
 class FlextTargetLdapConnectionService:

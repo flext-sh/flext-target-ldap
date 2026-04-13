@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from flext_core import p, r
 from flext_target_ldap import (
     FlextTargetLdap,
     FlextTargetLdapConnectionService,
+    p,
+    r,
     t,
     u,
     validate_ldap_target_config,

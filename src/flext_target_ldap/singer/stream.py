@@ -10,8 +10,7 @@ from __future__ import annotations
 from collections.abc import MutableMapping, MutableSequence
 from typing import override
 
-from flext_core import p, r
-from flext_target_ldap import t, u
+from flext_target_ldap import p, r, t, u
 
 logger = u.fetch_logger(__name__)
 

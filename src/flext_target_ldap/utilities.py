@@ -11,13 +11,12 @@ import re
 from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
 from datetime import datetime
 
-from flext_core import p, r
 from flext_ldap import FlextLdapUtilities
-from flext_meltano import FlextMeltanoUtilities
-from flext_target_ldap import c, m, t
+from flext_meltano import u
+from flext_target_ldap import c, m, p, r, t
 
 
-class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
+class FlextTargetLdapUtilities(u, FlextLdapUtilities):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for

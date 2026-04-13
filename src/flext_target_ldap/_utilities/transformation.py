@@ -10,8 +10,8 @@ from __future__ import annotations
 from collections.abc import MutableSequence, Sequence
 from typing import override
 
-from flext_core import p, r
-from flext_target_ldap import c, m, t, u
+from flext_meltano import u
+from flext_target_ldap import c, m, p, r, t
 
 logger = u.fetch_logger(__name__)
 
@@ -63,10 +63,10 @@ class FlextTargetLdapTransformationEngine:
                                 applied_rules.append(rule.name)
                         case _:
                             pass
-            result = m.TargetLdap.DataTransformationResult(
-                transformed_data=transformed_data,
-                applied_rules=applied_rules,
-            )
+            result = m.TargetLdap.DataTransformationResult.model_validate({
+                "transformed_data": transformed_data,
+                "applied_rules": list(applied_rules),
+            })
             return r[m.TargetLdap.DataTransformationResult].ok(result)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             return r[m.TargetLdap.DataTransformationResult].fail(

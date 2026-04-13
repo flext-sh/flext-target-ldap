@@ -10,11 +10,12 @@ from __future__ import annotations
 from collections.abc import MutableSequence, Sequence
 from typing import ClassVar, TypeIs, override
 
-from flext_core import p, r
 from flext_target_ldap import (
     FlextTargetLdapClient,
     FlextTargetLdapProcessingCounters,
     c,
+    p,
+    r,
     t,
     u,
 )
@@ -181,7 +182,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
 
     def process_batch(self, _context: t.ContainerValueMapping) -> None:
         """Process a batch of records."""
-        setup_result: r[FlextTargetLdapClient] = self.setup_client()
+        setup_result: p.Result[FlextTargetLdapClient] = self.setup_client()
         if not setup_result.success:
             logger.error(f"Cannot process batch: {setup_result.error or ''}")
             return
@@ -415,7 +416,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                         attributes_dict[k] = [str(i) for i in v]
                     else:
                         attributes_dict[k] = [str(v)]
-            add_result: r[bool] = self.client.add_entry(
+            add_result: p.Result[bool] = self.client.add_entry(
                 user_dn,
                 attributes_dict,
                 object_classes,
@@ -425,7 +426,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 logger.debug("User entry added successfully: %s", user_dn)
                 return r[bool].ok(value=True)
             if self._target.settings.get("update_existing_entries", False):
-                modify_result: r[bool] = self.client.modify_entry(
+                modify_result: p.Result[bool] = self.client.modify_entry(
                     user_dn,
                     attributes_dict,
                 )
@@ -520,7 +521,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                         attributes_dict[k] = list(v)
                     else:
                         attributes_dict[k] = v
-            add_result: r[bool] = self.client.add_entry(
+            add_result: p.Result[bool] = self.client.add_entry(
                 group_dn,
                 attributes_dict,
                 object_classes,
@@ -530,7 +531,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                 logger.debug("Group entry added successfully: %s", group_dn)
                 return r[bool].ok(value=True)
             if self._target.settings.get("update_existing_entries", False):
-                modify_result: r[bool] = self.client.modify_entry(
+                modify_result: p.Result[bool] = self.client.modify_entry(
                     group_dn,
                     attributes_dict,
                 )
@@ -630,13 +631,13 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                     attributes_dict[k] = list(v)
                 else:
                     attributes_dict[k] = v
-            add_result: r[bool] = self.client.add_entry(ou_dn, attributes_dict)
+            add_result: p.Result[bool] = self.client.add_entry(ou_dn, attributes_dict)
             if add_result.success:
                 self._processing_result.add_success()
                 logger.debug("OU entry added successfully: %s", ou_dn)
                 return r[bool].ok(value=True)
             if self._target.settings.get("update_existing_entries", False):
-                modify_result: r[bool] = self.client.modify_entry(
+                modify_result: p.Result[bool] = self.client.modify_entry(
                     ou_dn,
                     attributes_dict,
                 )
