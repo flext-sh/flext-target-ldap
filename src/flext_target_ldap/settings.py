@@ -15,8 +15,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated, ClassVar
 
-from flext_core import FlextSettings, r
-from flext_target_ldap import c, m, t, u
+from flext_core import FlextSettings
+from flext_target_ldap import c, m, p, r, t, u
 
 
 @FlextSettings.auto_register("target-ldap")
