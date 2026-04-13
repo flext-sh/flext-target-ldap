@@ -13,8 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import override
 
-from flext_core import p, r
-from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
+from flext_target_ldap import FlextTargetLdapSettings, c, p, r, t, u
 
 logger: p.Logger = u.fetch_logger(__name__)
 
