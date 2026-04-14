@@ -249,12 +249,14 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                 ),
             ]
             transformed_entry: Annotated[
-                m.TargetLdap.Entry,
+                FlextTargetLdapModels.TargetLdap.Entry,
                 u.Field(
                     description="Resulting LDAP entry after transformation",
                 ),
             ]
-            applied_mappings: MutableSequence[m.TargetLdap.AttributeMapping] = u.Field(
+            applied_mappings: MutableSequence[
+                FlextTargetLdapModels.TargetLdap.AttributeMapping
+            ] = u.Field(
                 default_factory=_default_applied_mappings,
                 description="Attribute mappings applied during transformation",
             )
@@ -342,7 +344,9 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                     description="Maximum records per batch",
                 ),
             ]
-            current_batch: MutableSequence[m.TargetLdap.Entry] = u.Field(
+            current_batch: MutableSequence[
+                FlextTargetLdapModels.TargetLdap.Entry
+            ] = u.Field(
                 default_factory=_default_current_batch,
                 description="Current batch of LDAP entries pending processing",
             )
@@ -395,7 +399,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
 
             def add_entry(
                 self,
-                entry: m.TargetLdap.Entry,
+                entry: FlextTargetLdapModels.TargetLdap.Entry,
             ) -> Self:
                 """Add entry to current batch (immutable operation)."""
                 new_batch = list(self.current_batch)
@@ -609,7 +613,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
 
             properties: MutableMapping[
                 str,
-                m.TargetLdap.SingerPropertyDefinition,
+                FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition,
             ] = u.Field(
                 default_factory=dict,
                 description="Mapping of property names to their Singer definitions",
