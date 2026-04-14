@@ -344,11 +344,11 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                     description="Maximum records per batch",
                 ),
             ]
-            current_batch: MutableSequence[
-                FlextTargetLdapModels.TargetLdap.Entry
-            ] = u.Field(
-                default_factory=_default_current_batch,
-                description="Current batch of LDAP entries pending processing",
+            current_batch: MutableSequence[FlextTargetLdapModels.TargetLdap.Entry] = (
+                u.Field(
+                    default_factory=_default_current_batch,
+                    description="Current batch of LDAP entries pending processing",
+                )
             )
             total_processed: Annotated[
                 t.NonNegativeInt,

@@ -281,7 +281,9 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     if "{" in dn_rdn and "}" in dn_rdn:
                         return r[str].fail(f"Unresolved placeholders in DN: {dn_rdn}")
                     full_dn = f"{dn_rdn},{base_dn}"
-                    if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(full_dn):
+                    if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                        full_dn
+                    ):
                         return r[str].fail(f"Invalid DN format: {full_dn}")
                     return r[str].ok(full_dn)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
@@ -418,22 +420,30 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         "Host must be a non-empty string",
                     )
                 bind_dn_raw = settings["bind_dn"]
-                bind_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(bind_dn_raw)
+                bind_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                    bind_dn_raw
+                )
                 if not bind_dn:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Bind DN must be a string",
                     )
-                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(bind_dn):
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    bind_dn
+                ):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid bind DN format: {bind_dn}",
                     )
                 base_dn_raw = settings["base_dn"]
-                base_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(base_dn_raw)
+                base_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                    base_dn_raw
+                )
                 if not base_dn:
                     return r[Mapping[str, t.ConfigMap]].fail(
                         "Base DN must be a string",
                     )
-                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(base_dn):
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    base_dn
+                ):
                     return r[Mapping[str, t.ConfigMap]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
@@ -478,10 +488,8 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 r[Mapping[str, t.ConfigMap]]: Validated settings or error
 
                 """
-                ldap_result = (
-                    FlextTargetLdapUtilities.TargetLdap.ConfigValidation.validate_ldap_connection_config(
-                        settings,
-                    )
+                ldap_result = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.validate_ldap_connection_config(
+                    settings,
                 )
                 if ldap_result.failure:
                     return ldap_result
