@@ -710,3 +710,8 @@ class FlextTargetLdapModels(m, FlextLdapModels):
 
 # Export the unified models class
 m = FlextTargetLdapModels
+
+__all__: list[str] = [
+    "FlextTargetLdapModels",
+    "m",
+]

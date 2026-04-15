@@ -46,6 +46,14 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
         """Singer Target domain protocols."""
 
         @runtime_checkable
+        class LdapApi(
+            FlextLdapProtocols.Ldap.LdapClient,
+            FlextLdapProtocols.Ldap.LdapConnection,
+            Protocol,
+        ):
+            """Combined LDAP runtime contract used by target-ldap consumers."""
+
+        @runtime_checkable
         class LdapProcessingState(Protocol):
             """Protocol for LDAP processing state tracking."""
 

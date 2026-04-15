@@ -13,7 +13,7 @@ from flext_core.lazy import (
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_ldap import d, e, h, m, r, s, x
+    from flext_ldap import d, e, h, r, s, x
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -45,6 +45,7 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapMigrationValidator,
         FlextTargetLdapTransformationEngine,
     )
+    from flext_target_ldap.api import FlextTargetLdap, target_ldap
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
     from flext_target_ldap.catalog import build_singer_catalog
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
@@ -57,6 +58,7 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapTimeoutError,
         FlextTargetLdapValidationError,
     )
+    from flext_target_ldap.models import FlextTargetLdapModels, m
     from flext_target_ldap.patterns.ldap_patterns import (
         FlextTargetLdapDataTransformer,
         FlextTargetLdapEntryManager,
@@ -94,6 +96,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "__version__",
                 "__version_info__",
             ),
+            ".api": (
+                "FlextTargetLdap",
+                "target_ldap",
+            ),
             ".catalog": ("build_singer_catalog",),
             ".constants": (
                 "FlextTargetLdapConstants",
@@ -107,6 +113,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdapProcessingError",
                 "FlextTargetLdapTimeoutError",
                 "FlextTargetLdapValidationError",
+            ),
+            ".models": (
+                "FlextTargetLdapModels",
+                "m",
             ),
             ".protocols": (
                 "FlextTargetLdapProtocols",
@@ -125,7 +135,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "d",
                 "e",
                 "h",
-                "m",
                 "r",
                 "s",
                 "x",
@@ -148,6 +157,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__: list[str] = [
+    "FlextTargetLdap",
     "FlextTargetLdapApiService",
     "FlextTargetLdapAuthenticationError",
     "FlextTargetLdapBaseSink",
@@ -164,6 +174,7 @@ __all__: list[str] = [
     "FlextTargetLdapError",
     "FlextTargetLdapGroupsSink",
     "FlextTargetLdapMigrationValidator",
+    "FlextTargetLdapModels",
     "FlextTargetLdapOrchestrator",
     "FlextTargetLdapOrganizationalUnitsSink",
     "FlextTargetLdapProcessingCounters",
@@ -205,6 +216,7 @@ __all__: list[str] = [
     "r",
     "s",
     "t",
+    "target_ldap",
     "u",
     "validate_ldap_target_config",
     "x",

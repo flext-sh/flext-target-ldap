@@ -7,14 +7,13 @@ SPDX-License-Identifier: MIT.
 from __future__ import annotations
 
 from collections.abc import (
-    Mapping,
     MutableMapping,
     MutableSequence,
     Sequence,
 )
 from typing import ClassVar, TypeIs, override
 
-from flext_ldap import FlextLdap
+from flext_ldap import ldap
 from flext_target_ldap import c, m, p, r, t, u
 
 
@@ -131,7 +130,13 @@ class FlextTargetLdapClient:
             )
             self._bind_dn = ""
             self._password = ""
-        self._api: FlextLdap = FlextLdap.get_instance()
+        if isinstance(ldap, p.TargetLdap.LdapApi):
+            self._api: p.TargetLdap.LdapApi = ldap
+        else:
+            msg = (
+                "flext-ldap public singleton does not satisfy target LDAP API protocol"
+            )
+            raise TypeError(msg)
         self._current_session_id: str | None = None
         FlextTargetLdapClient._logger.info(
             f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",
@@ -359,13 +364,17 @@ class FlextTargetLdapClient:
             if result.success and result.value:
                 entries: MutableSequence[m.TargetLdap.SearchEntry] = []
                 search_res = result.value
-                ldap_entries: Sequence[Mapping[str, t.StrSequence]] = search_res.entries
+                ldap_entries: Sequence[p.Ldif.Entry] = search_res.entries
                 for entry in ldap_entries:
-                    dn = str(entry.get("dn", ""))
+                    dn = str(entry.dn.value) if entry.dn is not None else ""
+                    attributes_model = entry.attributes
                     attrs: t.MutableContainerValueMapping = {
                         str(k): self._to_container_list(v)
-                        for k, v in entry.items()
-                        if str(k) != "dn"
+                        for k, v in (
+                            attributes_model.attributes.items()
+                            if attributes_model is not None
+                            else ()
+                        )
                     }
                     entries.append(
                         m.TargetLdap.SearchEntry.model_validate({
