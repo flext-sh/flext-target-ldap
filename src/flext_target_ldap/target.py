@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_ldap.api import FlextTargetLdap
+from flext_target_ldap import FlextTargetLdap
 
 
 def main() -> None:

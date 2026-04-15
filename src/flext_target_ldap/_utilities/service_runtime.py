@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import override
 
-from flext_meltano.services.singer_sdk import (
+from flext_meltano import (
     Sink as FlextMeltanoSingerSinkBase,
     Target as FlextMeltanoSingerTargetBase,
 )
