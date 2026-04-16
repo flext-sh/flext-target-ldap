@@ -96,10 +96,38 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "__version__",
                 "__version_info__",
             ),
+            "._constants.base": ("FlextTargetLdapConstantsBase",),
+            "._models.processing_result": ("FlextTargetLdapProcessingCounters",),
+            "._models.sinks": (
+                "FlextTargetLdapBaseSink",
+                "FlextTargetLdapGroupsSink",
+                "FlextTargetLdapOrganizationalUnitsSink",
+                "FlextTargetLdapProcessingResult",
+                "FlextTargetLdapSink",
+                "FlextTargetLdapTarget",
+                "FlextTargetLdapUsersSink",
+            ),
+            "._utilities.api_service": ("FlextTargetLdapApiService",),
+            "._utilities.client": ("FlextTargetLdapClient",),
+            "._utilities.service_runtime": ("FlextTargetLdapServiceRuntime",),
+            "._utilities.services": (
+                "FlextTargetLdapConnectionService",
+                "FlextTargetLdapTransformationService",
+            ),
+            "._utilities.settings": (
+                "FlextTargetLdapConfigFactory",
+                "create_default_ldap_target_config",
+                "validate_ldap_target_config",
+            ),
+            "._utilities.transformation": (
+                "FlextTargetLdapMigrationValidator",
+                "FlextTargetLdapTransformationEngine",
+            ),
             ".api": (
                 "FlextTargetLdap",
                 "target_ldap",
             ),
+            ".application.orchestrator": ("FlextTargetLdapOrchestrator",),
             ".catalog": ("build_singer_catalog",),
             ".constants": (
                 "FlextTargetLdapConstants",
@@ -118,11 +146,23 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdapModels",
                 "m",
             ),
+            ".patterns.ldap_patterns": (
+                "FlextTargetLdapDataTransformer",
+                "FlextTargetLdapEntryManager",
+                "FlextTargetLdapSchemaMapper",
+                "FlextTargetLdapTypeConverter",
+            ),
             ".protocols": (
                 "FlextTargetLdapProtocols",
                 "p",
             ),
             ".settings": ("FlextTargetLdapSettings",),
+            ".singer.catalog": ("FlextTargetLdapCatalogManager",),
+            ".singer.stream": (
+                "FlextTargetLdapStreamProcessingStats",
+                "FlextTargetLdapStreamProcessor",
+            ),
+            ".singer.target": ("FlextTargetLdapSingerTarget",),
             ".typings": (
                 "FlextTargetLdapTypes",
                 "t",

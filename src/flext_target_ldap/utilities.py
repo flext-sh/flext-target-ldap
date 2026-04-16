@@ -85,7 +85,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     {
                         "tap_stream_id": "users",
                         "schema": {
-                            "type": "t.RecursiveContainer",
+                            "type": "object",
                             "properties": {
                                 "username": {"type": "string"},
                                 "email": {"type": "string"},
@@ -102,7 +102,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     {
                         "tap_stream_id": "groups",
                         "schema": {
-                            "type": "t.RecursiveContainer",
+                            "type": "object",
                             "properties": {
                                 "name": {"type": "string"},
                                 "description": {"type": "string"},
@@ -117,7 +117,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     {
                         "tap_stream_id": "organizational_units",
                         "schema": {
-                            "type": "t.RecursiveContainer",
+                            "type": "object",
                             "properties": {
                                 "name": {"type": "string"},
                                 "description": {"type": "string"},
@@ -330,14 +330,14 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 record: Mapping[str, t.ConfigMap],
                 default_object_classes: t.StrSequence | None = None,
             ) -> t.StrSequence:
-                """Extract t.RecursiveContainer classes for LDAP entry.
+                """Extract object classes for LDAP entry.
 
                 Args:
                 record: Singer record data
-                default_object_classes: Default t.RecursiveContainer classes if not in record
+                default_object_classes: Default object classes if not in record
 
                 Returns:
-                t.StrSequence: List of t.RecursiveContainer classes
+                t.StrSequence: List of object classes
 
                 """
                 object_classes = record.get("objectClass") or record.get("objectclass")

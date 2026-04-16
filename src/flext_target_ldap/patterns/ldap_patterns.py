@@ -222,7 +222,7 @@ class FlextTargetLdapEntryManager:
         record: t.ConfigurationMapping,
         stream_name: str,
     ) -> p.Result[t.StrSequence]:
-        """Determine appropriate t.RecursiveContainer classes for LDAP entry."""
+        """Determine appropriate object classes for LDAP entry."""
         try:
             object_classes = ["top"]
             stream_lower = stream_name.lower()
@@ -310,7 +310,7 @@ class FlextTargetLdapEntryManager:
         attributes: Mapping[str, t.StrSequence],
         object_classes: t.StrSequence,
     ) -> p.Result[bool]:
-        """Validate LDAP entry attributes against t.RecursiveContainer class requirements."""
+        """Validate LDAP entry attributes against object class requirements."""
         try:
             required_attrs: set[str] = set()
             for obj_class in object_classes:

@@ -165,7 +165,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         self,
         record: t.ContainerValueMapping,
     ) -> t.StrSequence:
-        """Get t.RecursiveContainer classes for entry."""
+        """Get object classes for entry."""
         record_classes = record.get("object_classes")
         if self._is_container_list(record_classes):
             return [str(c) for c in record_classes]
@@ -374,7 +374,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         self,
         record: t.ContainerValueMapping,
     ) -> t.StrSequence:
-        """Get t.RecursiveContainer classes for user entry."""
+        """Get object classes for user entry."""
         configured = self._target.settings.get("users_object_classes")
         if self._is_container_list(configured):
             return [str(c) for c in configured]
@@ -485,7 +485,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         self,
         record: t.ContainerValueMapping,
     ) -> t.StrSequence:
-        """Get t.RecursiveContainer classes for group entry."""
+        """Get object classes for group entry."""
         configured = self._target.settings.get("groups_object_classes")
         if self._is_container_list(configured):
             return [str(c) for c in configured]
