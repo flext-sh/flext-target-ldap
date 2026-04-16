@@ -23,7 +23,7 @@ from flext_target_ldap import c, m, p, r, t, u
 class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration with connection and operation settings."""
 
-    model_config: ClassVar[c.SettingsConfigDict] = c.SettingsConfigDict(
+    model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
         env_prefix=c.ENV_PREFIX, extra=c.ExtraConfig.IGNORE.value
     )
 

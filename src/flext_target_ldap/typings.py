@@ -6,7 +6,7 @@ from collections.abc import Mapping
 
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
-from flext_target_ldap import c, u
+from flext_target_ldap import m, u
 
 
 class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
@@ -43,7 +43,7 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
         SINGER_MESSAGE_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.ContainerMapping] = (
             u.TypeAdapter(
                 FlextMeltanoTypes.ContainerMapping,
-                config=c.ConfigDict(strict=False),
+                config=m.ConfigDict(strict=False),
             )
         )
         CONTAINER_VALUE_MAP_ADAPTER: u.TypeAdapter[
