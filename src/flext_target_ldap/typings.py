@@ -40,11 +40,11 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
                 Mapping[str, FlextMeltanoTypes.ConfigMap],
             )
         )
-        SINGER_MESSAGE_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.ContainerMapping] = (
-            u.TypeAdapter(
-                FlextMeltanoTypes.ContainerMapping,
-                config=m.ConfigDict(strict=False),
-            )
+        SINGER_MESSAGE_ADAPTER: u.TypeAdapter[
+            FlextMeltanoTypes.RecursiveContainerMapping
+        ] = u.TypeAdapter(
+            FlextMeltanoTypes.RecursiveContainerMapping,
+            config=m.ConfigDict(strict=False),
         )
         CONTAINER_VALUE_MAP_ADAPTER: u.TypeAdapter[
             FlextMeltanoTypes.ContainerValueMapping
