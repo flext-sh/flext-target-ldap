@@ -12,19 +12,6 @@ _LAZY_IMPORTS = build_lazy_import_map(
         ".test_sinks": ("test_sinks",),
         ".test_target": ("test_target",),
         ".test_transformation": ("test_transformation",),
-        "flext_target_ldap": (
-            "c",
-            "d",
-            "e",
-            "h",
-            "m",
-            "p",
-            "r",
-            "s",
-            "t",
-            "u",
-            "x",
-        ),
     },
 )
 
