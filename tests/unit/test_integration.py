@@ -32,7 +32,7 @@ def runner() -> Mock:
 
 
 @pytest.fixture
-def config_file(tmp_path: Path, mock_ldap_config: t.RecursiveContainerMapping) -> Path:
+def config_file(tmp_path: Path, mock_ldap_config: Mapping[str, t.Container]) -> Path:
     config_path = tmp_path / "settings.json"
     u.Cli.json_write(config_path, mock_ldap_config)
     return config_path

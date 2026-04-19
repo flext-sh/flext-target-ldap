@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import MutableSequence, Sequence
+from collections.abc import Mapping, MutableSequence, Sequence
 from typing import ClassVar, TypeIs, override
 
 from flext_target_ldap import (
@@ -40,8 +40,8 @@ class FlextTargetLdapSink:
 
     def process_record(
         self,
-        _record: t.RecursiveContainerMapping,
-        _context: t.RecursiveContainerMapping,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
     ) -> p.Result[bool]:
         """Process a record using the target."""
         try:
@@ -107,7 +107,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
 
     @staticmethod
     def _is_container_list(
-        value: t.RecursiveContainer,
+        value: t.Container,
     ) -> TypeIs[Sequence[t.ContainerValue]]:
         """Check if a value is a container list."""
         return isinstance(value, list)
@@ -209,8 +209,8 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     @override
     def process_record(
         self,
-        _record: t.RecursiveContainerMapping,
-        _context: t.RecursiveContainerMapping,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
     ) -> p.Result[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
@@ -320,7 +320,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
 
     def build_user_attributes(
         self,
-        record: t.RecursiveContainerMapping,
+        record: Mapping[str, t.Container],
     ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for user entry."""
         object_classes = self._target.settings.get(
@@ -383,8 +383,8 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: t.RecursiveContainerMapping,
-        _context: t.RecursiveContainerMapping,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
     ) -> p.Result[bool]:
         """Process a user record."""
         if not self.client:
@@ -494,8 +494,8 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: t.RecursiveContainerMapping,
-        _context: t.RecursiveContainerMapping,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
     ) -> p.Result[bool]:
         """Process a group record."""
         if not self.client:
@@ -557,7 +557,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
 
     def _build_group_attributes(
         self,
-        record: t.RecursiveContainerMapping,
+        record: Mapping[str, t.Container],
     ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for group entry."""
         object_classes = self._target.settings.get(
@@ -611,8 +611,8 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
     @override
     def process_record(
         self,
-        _record: t.RecursiveContainerMapping,
-        _context: t.RecursiveContainerMapping,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
     ) -> p.Result[bool]:
         """Process an organizational unit record."""
         if not self.client:
@@ -663,7 +663,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
 
     def _build_ou_attributes(
         self,
-        record: t.RecursiveContainerMapping,
+        record: Mapping[str, t.Container],
     ) -> t.MutableContainerValueMapping:
         """Build LDAP attributes for OU entry."""
         default_classes = self._target.settings.get(

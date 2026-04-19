@@ -30,8 +30,8 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
     @staticmethod
     def coerce_container_value(
-        value: t.ConfigMap | t.ValueOrModel,
-    ) -> t.ConfigMap | t.ContainerValueList | t.RecursiveContainer | None:
+        value: m.ConfigMap | t.ValueOrModel,
+    ) -> m.ConfigMap | t.ContainerValueList | t.Container | None:
         """Coerce a container value to a normalized form for LDAP operations.
 
         Recursively normalizes BaseModel, scalar, list, and Mapping values into
@@ -71,7 +71,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         (str, int, float, bool),
                     ):
                         normalized_dict[str(key)] = coerced_item
-            return t.ConfigMap(root=normalized_dict)
+            return m.ConfigMap(root=normalized_dict)
         return None
 
     class TargetLdap:
@@ -133,7 +133,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def build_connection_config(
-                settings: Mapping[str, t.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
             ) -> m.Ldap.ConnectionConfig:
                 """Build LDAP ConnectionConfig from a flat settings mapping."""
                 return m.Ldap.ConnectionConfig(
@@ -160,7 +160,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def to_str(
-                value: t.ContainerValue | t.ConfigMap | None,
+                value: t.ContainerValue | m.ConfigMap | None,
                 default: str = "",
             ) -> str:
                 """Coerce a settings value to str."""
@@ -173,7 +173,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def to_int(
-                value: t.ContainerValue | t.ConfigMap | None,
+                value: t.ContainerValue | m.ConfigMap | None,
                 default: int = 0,
             ) -> int:
                 """Coerce a settings value to int."""
@@ -194,7 +194,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def to_bool(
-                value: t.ContainerValue | t.ConfigMap | None,
+                value: t.ContainerValue | m.ConfigMap | None,
                 *,
                 default: bool = False,
             ) -> bool:
@@ -211,7 +211,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def extract_attribute_mapping(
-                settings: Mapping[str, t.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
             ) -> t.StrMapping:
                 """Extract attribute mapping from settings."""
                 raw = settings.get("attribute_mapping", {})
@@ -233,7 +233,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def extract_object_classes(
-                settings: Mapping[str, t.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
             ) -> t.StrSequence:
                 """Extract object classes from settings."""
                 raw = settings.get("object_classes")
@@ -255,7 +255,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def build_ldap_dn(
-                record: Mapping[str, t.ConfigMap],
+                record: Mapping[str, m.ConfigMap],
                 dn_template: str,
                 base_dn: str,
             ) -> p.Result[str]:
@@ -291,7 +291,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def convert_record_to_ldap_attributes(
-                record: Mapping[str, t.ConfigMap],
+                record: Mapping[str, m.ConfigMap],
                 attribute_mapping: t.StrMapping | None = None,
             ) -> p.Result[Mapping[str, Sequence[bytes]]]:
                 """Convert Singer record to LDAP attributes format.
@@ -327,7 +327,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def extract_object_classes(
-                record: Mapping[str, t.ConfigMap],
+                record: Mapping[str, m.ConfigMap],
                 default_object_classes: t.StrSequence | None = None,
             ) -> t.StrSequence:
                 """Extract object classes for LDAP entry.
@@ -395,15 +395,15 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def validate_ldap_connection_config(
-                settings: Mapping[str, t.ConfigMap],
-            ) -> p.Result[Mapping[str, t.ConfigMap]]:
+                settings: Mapping[str, m.ConfigMap],
+            ) -> p.Result[Mapping[str, m.ConfigMap]]:
                 """Validate LDAP connection configuration.
 
                 Args:
                 settings: Configuration dictionary
 
                 Returns:
-                r[Mapping[str, t.ConfigMap]]: Validated settings or error
+                r[Mapping[str, m.ConfigMap]]: Validated settings or error
 
                 """
                 required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
@@ -411,12 +411,12 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     field for field in required_fields if field not in settings
                 ]
                 if missing_fields:
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         f"Missing required LDAP connection fields: {', '.join(missing_fields)}",
                     )
                 host = settings["host"]
                 if not isinstance(host, str) or not host.strip():
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         "Host must be a non-empty string",
                     )
                 bind_dn_raw = settings["bind_dn"]
@@ -424,13 +424,13 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     bind_dn_raw
                 )
                 if not bind_dn:
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         "Bind DN must be a string",
                     )
                 if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
                     bind_dn
                 ):
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         f"Invalid bind DN format: {bind_dn}",
                     )
                 base_dn_raw = settings["base_dn"]
@@ -438,19 +438,19 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     base_dn_raw
                 )
                 if not base_dn:
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         "Base DN must be a string",
                     )
                 if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
                     base_dn
                 ):
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
                 if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
                     base_dn,
                 ):
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
                 if "port" in settings:
@@ -460,32 +460,32 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                             port_raw,
                         )
                     except c.ValidationError:
-                        return r[Mapping[str, t.ConfigMap]].fail(
+                        return r[Mapping[str, m.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )
                     if not (0 < port_int <= c.MAX_PORT_NUMBER):
-                        return r[Mapping[str, t.ConfigMap]].fail(
+                        return r[Mapping[str, m.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )
                 use_ssl = settings.get("use_ssl", False)
                 use_tls = settings.get("use_tls", False)
                 if use_ssl and use_tls:
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         "Cannot use both SSL and TLS simultaneously",
                     )
-                return r[Mapping[str, t.ConfigMap]].ok(settings)
+                return r[Mapping[str, m.ConfigMap]].ok(settings)
 
             @staticmethod
             def validate_target_config(
-                settings: Mapping[str, t.ConfigMap],
-            ) -> p.Result[Mapping[str, t.ConfigMap]]:
+                settings: Mapping[str, m.ConfigMap],
+            ) -> p.Result[Mapping[str, m.ConfigMap]]:
                 """Validate target configuration.
 
                 Args:
                 settings: Target configuration
 
                 Returns:
-                r[Mapping[str, t.ConfigMap]]: Validated settings or error
+                r[Mapping[str, m.ConfigMap]]: Validated settings or error
 
                 """
                 ldap_result = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.validate_ldap_connection_config(
@@ -496,13 +496,13 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 operation_mode = settings.get("operation_mode", "upsert")
                 valid_modes = ["insert", "update", "upsert", "delete"]
                 if operation_mode not in valid_modes:
-                    return r[Mapping[str, t.ConfigMap]].fail(
+                    return r[Mapping[str, m.ConfigMap]].fail(
                         f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}",
                     )
                 if "dn_template" in settings:
                     dn_template = settings["dn_template"]
                     if not isinstance(dn_template, str) or not dn_template.strip():
-                        return r[Mapping[str, t.ConfigMap]].fail(
+                        return r[Mapping[str, m.ConfigMap]].fail(
                             "DN template must be a non-empty string",
                         )
                 batch_size = settings.get(
@@ -511,16 +511,16 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 )
                 match batch_size:
                     case bool():
-                        return r[Mapping[str, t.ConfigMap]].fail(
+                        return r[Mapping[str, m.ConfigMap]].fail(
                             "Batch size must be a positive integer",
                         )
                     case int() if batch_size > 0:
                         pass
                     case _:
-                        return r[Mapping[str, t.ConfigMap]].fail(
+                        return r[Mapping[str, m.ConfigMap]].fail(
                             "Batch size must be a positive integer",
                         )
-                return r[Mapping[str, t.ConfigMap]].ok(settings)
+                return r[Mapping[str, m.ConfigMap]].ok(settings)
 
 
 u = FlextTargetLdapUtilities
