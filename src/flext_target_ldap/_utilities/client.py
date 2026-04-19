@@ -11,10 +11,10 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
-from typing import ClassVar, TypeIs, override
+from typing import ClassVar, TypeIs, cast, override
 
-from flext_ldap import ldap
-from flext_target_ldap import c, m, p, r, t, u
+from flext_ldap import ldap, u
+from flext_target_ldap import c, m, p, r, t
 
 
 class FlextTargetLdapClient:
@@ -130,7 +130,7 @@ class FlextTargetLdapClient:
             )
             self._bind_dn = ""
             self._password = ""
-        self._api: p.TargetLdap.LdapApi = ldap
+        self._api: p.TargetLdap.LdapApi = cast("p.TargetLdap.LdapApi", ldap)
         self._current_session_id: str | None = None
         FlextTargetLdapClient._logger.info(
             f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",

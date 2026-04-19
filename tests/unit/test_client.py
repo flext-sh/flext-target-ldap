@@ -4,9 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from flext_core import r
-from flext_target_ldap import FlextTargetLdapClient, m
-from tests import t
+from flext_target_ldap import FlextTargetLdapClient
+from tests import m, r, t
 
 
 @pytest.fixture

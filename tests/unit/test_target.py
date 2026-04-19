@@ -11,7 +11,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from flext_core import r
 from flext_target_ldap import (
     FlextTargetLdap,
     FlextTargetLdapBaseSink,
@@ -19,7 +18,7 @@ from flext_target_ldap import (
     FlextTargetLdapSink,
     FlextTargetLdapUsersSink,
 )
-from tests import t, u
+from tests import r, t, u
 
 
 @pytest.mark.parametrize(

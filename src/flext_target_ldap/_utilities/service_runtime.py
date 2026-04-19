@@ -5,22 +5,18 @@ from __future__ import annotations
 from pathlib import Path
 from typing import override
 
-from flext_meltano import (
-    Sink as FlextMeltanoSingerSinkBase,
-    Target as FlextMeltanoSingerTargetBase,
-)
-from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, p, t, u
+from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, m, p, t, u
 
 
 class FlextTargetLdapServiceRuntime:
     """Service-runtime adapters used by the target-ldap facade."""
 
-    class Target(FlextMeltanoSingerTargetBase):
+    class Target(m.Meltano.SingerTargetBase):
         """Minimal Singer target used by the service facade."""
 
         name = "target-ldap"
 
-    class Sink(FlextMeltanoSingerSinkBase):
+    class Sink(m.Meltano.SingerSinkBase):
         """Singer sink adapter that delegates to the LDAP runtime sink."""
 
         name = "target-ldap-sink"
@@ -32,7 +28,7 @@ class FlextTargetLdapServiceRuntime:
             cls,
             *,
             runtime_sink: FlextTargetLdapSink,
-            target: FlextMeltanoSingerTargetBase,
+            target: m.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.MutableMappingKV[str, t.ContainerValue],
             key_properties: t.StrSequence,

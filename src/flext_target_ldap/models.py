@@ -16,7 +16,7 @@ from collections.abc import MutableMapping, MutableSequence
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_ldap import FlextLdapModels
+from flext_ldap.models import FlextLdapModels
 from flext_meltano import m
 from flext_target_ldap import c, p, r, t, u
 
