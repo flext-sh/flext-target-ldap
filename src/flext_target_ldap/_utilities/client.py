@@ -130,13 +130,7 @@ class FlextTargetLdapClient:
             )
             self._bind_dn = ""
             self._password = ""
-        if isinstance(ldap, p.TargetLdap.LdapApi):
-            self._api: p.TargetLdap.LdapApi = ldap
-        else:
-            msg = (
-                "flext-ldap public singleton does not satisfy target LDAP API protocol"
-            )
-            raise TypeError(msg)
+        self._api: p.TargetLdap.LdapApi = ldap
         self._current_session_id: str | None = None
         FlextTargetLdapClient._logger.info(
             f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",
