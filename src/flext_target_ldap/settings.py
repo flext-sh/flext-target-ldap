@@ -12,7 +12,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated, ClassVar
+from collections.abc import Mapping
+from typing import Annotated, ClassVar, Self
 
 from flext_core import FlextSettings
 
@@ -26,6 +27,54 @@ class FlextTargetLdapSettings(FlextSettings):
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
         env_prefix=c.ENV_PREFIX, extra="ignore"
     )
+
+    @u.model_validator(mode="before")
+    @classmethod
+    def normalize_flat_settings(
+        cls,
+        data: Mapping[str, t.ValueOrModel | None] | Self,
+    ) -> Mapping[str, t.ValueOrModel | None] | Self:
+        """Normalize flat Singer settings into the canonical nested shape."""
+        if isinstance(data, cls) or not isinstance(data, Mapping):
+            return data
+        if "connection" in data:
+            return data
+
+        normalized: dict[str, t.ValueOrModel | None] = dict(data)
+        bind_password = normalized.get("bind_password", normalized.get("password"))
+        search_scope = normalized.get("search_scope")
+        if isinstance(search_scope, str):
+            normalized["search_scope"] = search_scope.upper()
+        normalized["connection"] = m.Ldap.ConnectionConfig.model_validate({
+            "host": normalized.get("host", c.LOCALHOST),
+            "port": normalized.get("port", c.Ldap.ConnectionDefaults.PORT),
+            "use_ssl": normalized.get(
+                "use_ssl",
+                c.Ldap.ConnectionDefaults.DEFAULT_USE_SSL,
+            ),
+            "use_tls": normalized.get(
+                "use_tls",
+                c.Ldap.ConnectionDefaults.DEFAULT_USE_TLS,
+            ),
+            "bind_dn": normalized.get(
+                "bind_dn",
+                c.Ldap.ConnectionDefaults.DEFAULT_BIND_DN,
+            ),
+            "bind_password": bind_password,
+            "timeout": normalized.get(
+                "timeout",
+                c.Ldap.ConnectionDefaults.TIMEOUT,
+            ),
+            "auto_bind": normalized.get(
+                "auto_bind",
+                c.Ldap.ConnectionDefaults.AUTO_BIND,
+            ),
+            "auto_range": normalized.get(
+                "auto_range",
+                c.Ldap.ConnectionDefaults.AUTO_RANGE,
+            ),
+        })
+        return normalized
 
     connection: Annotated[
         m.Ldap.ConnectionConfig,

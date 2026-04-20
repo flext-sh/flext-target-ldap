@@ -35,7 +35,6 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapServiceRuntime,
     )
     from flext_target_ldap._utilities.settings import (
-        FlextTargetLdapConfigFactory,
         create_default_ldap_target_config,
         validate_ldap_target_config,
     )
@@ -109,7 +108,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
             "._utilities.client": ("FlextTargetLdapClient",),
             "._utilities.service_runtime": ("FlextTargetLdapServiceRuntime",),
             "._utilities.settings": (
-                "FlextTargetLdapConfigFactory",
                 "create_default_ldap_target_config",
                 "validate_ldap_target_config",
             ),
@@ -197,7 +195,6 @@ __all__: list[str] = [
     "FlextTargetLdapBaseSink",
     "FlextTargetLdapCatalogManager",
     "FlextTargetLdapClient",
-    "FlextTargetLdapConfigFactory",
     "FlextTargetLdapConfigurationError",
     "FlextTargetLdapConnectionError",
     "FlextTargetLdapConstants",

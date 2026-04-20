@@ -74,16 +74,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
         """Get or create orchestrator."""
         if self._orchestrator is None:
-            normalized_config: t.MutableScalarMapping = {}
-            for key, value in self.settings.items():
-                match value:
-                    case bool() | int() | str():
-                        normalized_config[key] = value
-                    case _:
-                        normalized_config[key] = (
-                            t.Meltano.STRING_ADAPTER.validate_python(value)
-                        )
-            settings = FlextTargetLdapSettings.model_validate(normalized_config)
+            settings = FlextTargetLdapSettings.model_validate(self.settings)
             self._orchestrator = FlextTargetLdapOrchestrator(settings)
         return self._orchestrator
 
@@ -125,11 +116,11 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         self._logger.info("Orchestrator initialized successfully")
         self._container = FlextContainer.shared()
         self._logger.info("DI container initialized successfully")
-        host = u.TargetLdap.TypeConversion.to_str(
-            self.settings.get("host", "localhost"),
-            default="localhost",
+        validated_settings = FlextTargetLdapSettings.model_validate(self.settings)
+        self._logger.info(
+            "LDAP target setup completed for host: %s",
+            validated_settings.connection.host,
         )
-        self._logger.info("LDAP target setup completed for host: %s", host)
 
     def teardown(self) -> None:
         """Teardown the LDAP target."""
@@ -143,27 +134,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        host = self.settings.get("host")
-        if not host:
-            msg = "LDAP host is required"
-            raise ValueError(msg)
-        base_dn = self.settings.get("base_dn")
-        if not base_dn:
-            msg = "LDAP base DN is required"
-            raise ValueError(msg)
-        port_obj = self.settings.get("port", c.Ldap.ConnectionDefaults.PORT)
-        try:
-            port = t.Meltano.INTEGER_ADAPTER.validate_python(port_obj)
-        except Exception:
-            port = c.Ldap.ConnectionDefaults.PORT
-        if port <= 0 or port > c.MAX_PORT_NUMBER:
-            msg = f"LDAP port must be between 1 and {c.MAX_PORT_NUMBER}"
-            raise ValueError(msg)
-        use_ssl = self.settings.get("use_ssl", False)
-        use_tls = self.settings.get("use_tls", False)
-        if use_ssl and use_tls:
-            msg = "Cannot use both SSL and TLS simultaneously"
-            raise ValueError(msg)
+        _ = FlextTargetLdapSettings.model_validate(self.settings)
         self._logger.info("LDAP target configuration validated successfully")
 
     @staticmethod
@@ -182,21 +153,6 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to load configuration from {config_path}: {exc}"
             raise RuntimeError(msg) from exc
-
-    @staticmethod
-    def _get_ldap_api(
-        settings: t.ContainerValueMapping,
-    ) -> FlextTargetLdapClient | None:
-        """Get LDAP target client backed by flext-ldap."""
-        try:
-            return FlextTargetLdapClient(settings=settings)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
-            FlextTargetLdap._logger.warning(
-                "Failed to initialize LDAP target client",
-                error=exc,
-                error_type=type(exc).__name__,
-            )
-            return None
 
     @staticmethod
     def _construct_dn(
@@ -218,23 +174,15 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def _process_record_message(
         record: t.ContainerValueMapping,
         stream: str,
-        cfg: t.ContainerValueMapping,
-        api: FlextTargetLdapClient | None,
+        cfg: FlextTargetLdapSettings,
+        api: FlextTargetLdapClient,
         seen_dns: set[str],
     ) -> None:
         """Process a RECORD message."""
-        if api is None:
-            return
         dn_value = record.get("dn")
-        dn_text = (
-            "" if dn_value is None else u.TargetLdap.TypeConversion.to_str(dn_value)
-        )
+        dn_text = "" if dn_value is None else str(dn_value)
         if not dn_text.strip():
-            base_dn = u.TargetLdap.TypeConversion.to_str(
-                cfg.get("base_dn", "dc=test,dc=com"),
-                default="dc=test,dc=com",
-            )
-            dn = FlextTargetLdap._construct_dn(stream, record, base_dn)
+            dn = FlextTargetLdap._construct_dn(stream, record, cfg.base_dn)
         else:
             dn = dn_text
         if record.get("_sdc_deleted_at"):
@@ -259,8 +207,9 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             cfg: t.ContainerValueMapping = (
                 FlextTargetLdap._load_config_from_file(settings) if settings else {}
             )
+            validated_settings = FlextTargetLdapSettings.model_validate(cfg)
             current_stream: str | None = None
-            api = FlextTargetLdap._get_ldap_api(cfg)
+            api = FlextTargetLdapClient(validated_settings)
             seen_dns: set[str] = set()
             for line in sys.stdin:
                 try:
@@ -276,7 +225,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                             str(raw_stream) if raw_stream is not None else None
                         )
                         continue
-                    if msg_type != "RECORD" or api is None:
+                    if msg_type != "RECORD":
                         continue
                     record_data = raw.get("record", {})
                     raw_stream = raw.get("stream")
@@ -289,17 +238,11 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                         continue
                     normalized_record: t.MutableContainerValueMapping = {}
                     for key, value in record_data.items():
-                        match value:
-                            case bool() | int() | float() | str():
-                                normalized_record[str(key)] = value
-                            case Path():
-                                normalized_record[str(key)] = str(value)
-                            case _:
-                                normalized_record[str(key)] = str(value)
+                        normalized_record[str(key)] = value
                     FlextTargetLdap._process_record_message(
                         normalized_record,
                         stream,
-                        cfg,
+                        validated_settings,
                         api,
                         seen_dns,
                     )

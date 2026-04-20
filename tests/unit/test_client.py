@@ -125,9 +125,11 @@ def test_search_entry_maps_search_results(client: FlextTargetLdapClient) -> None
     assert result.value is not None
     assert len(result.value) == 1
     entry = result.value[0]
-    assert isinstance(entry, m.TargetLdap.SearchEntry)
-    assert entry.dn == "uid=test,dc=test,dc=com"
-    assert entry.attributes == {"cn": ["Test User"]}
+    assert isinstance(entry, m.Ldif.Entry)
+    assert entry.dn is not None
+    assert entry.attributes is not None
+    assert entry.dn.value == "uid=test,dc=test,dc=com"
+    assert entry.attributes.attributes == {"cn": ["Test User"]}
 
 
 def test_search_entry_disconnects_after_search(client: FlextTargetLdapClient) -> None:

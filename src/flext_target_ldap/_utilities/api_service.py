@@ -8,11 +8,11 @@ from collections.abc import (
 
 from flext_target_ldap import (
     FlextTargetLdap,
+    FlextTargetLdapClient,
+    FlextTargetLdapSettings,
     p,
     r,
     t,
-    u,
-    validate_ldap_target_config,
 )
 
 
@@ -24,10 +24,10 @@ class FlextTargetLdapApiService:
         settings: t.ContainerValueMapping,
     ) -> p.Result[FlextTargetLdap]:
         """Create an LDAP target from raw settings dict."""
-        return u.try_(
-            lambda: FlextTargetLdap(settings=dict(settings)),
-            catch=(RuntimeError, ValueError, TypeError),
-        ).map_error(lambda exc: str(exc))
+        try:
+            return r[FlextTargetLdap].ok(FlextTargetLdap(settings=dict(settings)))
+        except (RuntimeError, ValueError, TypeError) as exc:
+            return r[FlextTargetLdap].fail(str(exc))
 
     def load_groups_to_ldap(
         self,
@@ -64,10 +64,11 @@ class FlextTargetLdapApiService:
         settings: t.ContainerValueMapping,
     ) -> p.Result[bool]:
         """Validate settings and test the LDAP connection."""
-        validated = validate_ldap_target_config(settings)
-        if validated.failure:
-            return r[bool].fail(validated.error or "Configuration validation failed")
-        return r[bool].ok(value=True)
+        try:
+            validated_settings = FlextTargetLdapSettings.model_validate(settings)
+            return FlextTargetLdapClient(validated_settings).connect()
+        except (RuntimeError, ValueError, TypeError) as exc:
+            return r[bool].fail(f"Configuration validation failed: {exc}")
 
 
 __all__: list[str] = ["FlextTargetLdapApiService"]

@@ -11,11 +11,11 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
-from typing import ClassVar, TypeIs, override
+from typing import ClassVar, override
 
 from flext_ldap import ldap, u
 
-from flext_target_ldap import c, m, p, r, t
+from flext_target_ldap import FlextTargetLdapSettings, c, m, p, r, t
 
 
 class FlextTargetLdapClient:
@@ -25,20 +25,6 @@ class FlextTargetLdapClient:
     """
 
     _logger: ClassVar = u.fetch_logger(__name__)
-
-    @staticmethod
-    def _is_container_list(
-        value: t.Container | Sequence[t.Container] | None,
-    ) -> TypeIs[Sequence[t.Container]]:
-        return isinstance(value, list)
-
-    @staticmethod
-    def _to_container_list(
-        values: t.Container | t.StrSequence,
-    ) -> t.Container:
-        if isinstance(values, list):
-            return [str(value) for value in values]
-        return values
 
     @staticmethod
     def to_str_values(value: t.Container) -> t.StrSequence:
@@ -91,46 +77,26 @@ class FlextTargetLdapClient:
     @override
     def __init__(
         self,
-        settings: m.Ldap.ConnectionConfig | t.ContainerValueMapping,
+        settings: (
+            FlextTargetLdapSettings | m.Ldap.ConnectionConfig | t.ContainerValueMapping
+        ),
     ) -> None:
         """Initialize LDAP client with connection configuration."""
-        self.settings: m.Ldap.ConnectionConfig
+        connection_settings: m.Ldap.ConnectionConfig
         if isinstance(settings, m.Ldap.ConnectionConfig):
-            self.settings = settings
-            self._bind_dn = settings.bind_dn or ""
-            self._password = settings.bind_password or ""
+            connection_settings = settings
+        elif isinstance(settings, FlextTargetLdapSettings):
+            connection_settings = settings.connection
         elif isinstance(settings, dict):
-            config_map: t.ContainerValueMapping = {
-                t.Meltano.STRING_ADAPTER.validate_python(k): v
-                for k, v in settings.items()
-            }
-            self.settings = m.Ldap.ConnectionConfig(
-                host=t.Meltano.STRING_ADAPTER.validate_python(
-                    config_map.get("host", "localhost"),
-                ),
-                port=t.Meltano.INTEGER_ADAPTER.validate_python(
-                    config_map.get("port", c.Ldap.ConnectionDefaults.PORT),
-                ),
-                use_ssl=bool(config_map.get("use_ssl")),
-                timeout=t.Meltano.INTEGER_ADAPTER.validate_python(
-                    config_map.get("timeout", 30),
-                ),
-            )
-            self._bind_dn = t.Meltano.STRING_ADAPTER.validate_python(
-                config_map.get("bind_dn", ""),
-            )
-            self._password = t.Meltano.STRING_ADAPTER.validate_python(
-                config_map.get("password", ""),
-            )
+            connection_settings = FlextTargetLdapSettings.model_validate(
+                settings,
+            ).connection
         else:
-            self.settings = m.Ldap.ConnectionConfig(
-                host="localhost",
-                port=c.Ldap.ConnectionDefaults.PORT,
-                use_ssl=False,
-                timeout=30,
-            )
-            self._bind_dn = ""
-            self._password = ""
+            msg = f"Unsupported LDAP client settings type: {type(settings).__name__}"
+            raise TypeError(msg)
+        self.settings = connection_settings
+        self._bind_dn = connection_settings.bind_dn or ""
+        self._password = connection_settings.bind_password or ""
         self._api = ldap
         self._current_session_id: str | None = None
         FlextTargetLdapClient._logger.info(

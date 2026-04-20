@@ -14,133 +14,47 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import FlextTargetLdapSettings, c, m, p, r, t, u
+from flext_target_ldap import FlextTargetLdapSettings, c, p, r, t
 
 
-class FlextTargetLdapConfigFactory:
-    """Factory for creating and validating LDAP target configuration."""
+def validate_ldap_target_config(
+    settings: t.ContainerValueMapping,
+) -> p.Result[FlextTargetLdapSettings]:
+    """Validate raw target settings with the canonical settings model."""
+    try:
+        return r[FlextTargetLdapSettings].ok(
+            FlextTargetLdapSettings.model_validate(settings),
+        )
+    except (ValueError, TypeError, RuntimeError) as e:
+        return r[FlextTargetLdapSettings].fail(
+            f"Configuration validation failed: {e}",
+        )
 
-    @staticmethod
-    def validate_ldap_target_config(
-        settings: t.ContainerValueMapping,
-    ) -> p.Result[FlextTargetLdapSettings]:
-        """Validate and create LDAP target configuration with proper error handling."""
-        try:
-            connection_config = u.TargetLdap.TypeConversion.build_connection_config(
-                settings
-            )
-            base_dn = u.TargetLdap.TypeConversion.to_str(settings.get("base_dn", ""))
-            batch_size = u.TargetLdap.TypeConversion.to_int(
-                settings.get("batch_size", c.DEFAULT_SIZE), c.DEFAULT_SIZE
-            )
-            max_records_val = settings.get("max_records")
-            max_records: int | None
-            match max_records_val:
-                case bool():
-                    max_records = None
-                case int():
-                    max_records = max_records_val
-                case str():
-                    try:
-                        max_records = int(max_records_val)
-                    except ValueError:
-                        max_records = None
-                case _:
-                    max_records = None
-            create_missing_entries = u.TargetLdap.TypeConversion.to_bool(
-                settings.get(
-                    "create_missing_entries",
-                    c.TargetLdap.CREATE_MISSING_ENTRIES,
-                ),
-                default=c.TargetLdap.CREATE_MISSING_ENTRIES,
-            )
-            update_existing_entries = u.TargetLdap.TypeConversion.to_bool(
-                settings.get(
-                    "update_existing_entries",
-                    c.TargetLdap.UPDATE_EXISTING_ENTRIES,
-                ),
-                default=c.TargetLdap.UPDATE_EXISTING_ENTRIES,
-            )
-            delete_removed_entries = u.TargetLdap.TypeConversion.to_bool(
-                settings.get(
-                    "delete_removed_entries",
-                    c.TargetLdap.DELETE_REMOVED_ENTRIES,
-                ),
-                default=c.TargetLdap.DELETE_REMOVED_ENTRIES,
-            )
-            attribute_mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-                settings
-            )
-            object_classes = u.TargetLdap.TypeConversion.extract_object_classes(
-                settings
-            )
-            search_filter = u.TargetLdap.TypeConversion.to_str(
-                settings.get("search_filter", c.Ldap.Filters.ALL_ENTRIES_FILTER),
-            )
-            search_scope = u.TargetLdap.TypeConversion.to_str(
-                settings.get("search_scope", c.Ldap.SearchDefaults.DEFAULT_SCOPE),
-            )
-            validated_config = FlextTargetLdapSettings.model_validate({
-                "connection": connection_config,
+
+def create_default_ldap_target_config(
+    host: str,
+    base_dn: str,
+    *,
+    port: int = c.Ldap.ConnectionDefaults.PORT,
+    use_ssl: bool = False,
+) -> p.Result[FlextTargetLdapSettings]:
+    """Create the minimal canonical target settings payload."""
+    try:
+        return r[FlextTargetLdapSettings].ok(
+            FlextTargetLdapSettings.model_validate({
+                "host": host,
                 "base_dn": base_dn,
-                "batch_size": batch_size,
-                "max_records": max_records,
-                "create_missing_entries": create_missing_entries,
-                "update_existing_entries": update_existing_entries,
-                "delete_removed_entries": delete_removed_entries,
-                "attribute_mapping": attribute_mapping,
-                "object_classes": object_classes,
-                "search_filter": search_filter,
-                "search_scope": search_scope,
-            })
-            return r[FlextTargetLdapSettings].ok(validated_config)
-        except (ValueError, TypeError, RuntimeError) as e:
-            return r[FlextTargetLdapSettings].fail(
-                f"Configuration validation failed: {e}"
-            )
+                "port": port,
+                "use_ssl": use_ssl,
+            }),
+        )
+    except (ValueError, TypeError, RuntimeError) as e:
+        return r[FlextTargetLdapSettings].fail(
+            f"Default configuration creation failed: {e}",
+        )
 
-    @staticmethod
-    def create_default_ldap_target_config(
-        host: str,
-        base_dn: str,
-        *,
-        port: int = c.Ldap.ConnectionDefaults.PORT,
-        use_ssl: bool = False,
-    ) -> p.Result[FlextTargetLdapSettings]:
-        """Create default LDAP target configuration with minimal parameters."""
-        try:
-            connection_config = m.Ldap.ConnectionConfig(
-                host=host,
-                port=port,
-                use_ssl=use_ssl,
-                timeout=c.Ldap.ConnectionDefaults.TIMEOUT,
-            )
-            target_config = FlextTargetLdapSettings.model_validate({
-                "connection": connection_config,
-                "base_dn": base_dn,
-                "batch_size": c.DEFAULT_SIZE,
-                "max_records": None,
-                "search_filter": c.Ldap.Filters.ALL_ENTRIES_FILTER,
-                "search_scope": c.Ldap.SearchDefaults.DEFAULT_SCOPE,
-                "attribute_mapping": {},
-                "object_classes": list(
-                    c.TargetLdap.DEFAULT_OBJECT_CLASSES,
-                ),
-            })
-            return r[FlextTargetLdapSettings].ok(target_config)
-        except (ValueError, TypeError, RuntimeError) as e:
-            return r[FlextTargetLdapSettings].fail(
-                f"Default configuration creation failed: {e}",
-            )
-
-
-validate_ldap_target_config = FlextTargetLdapConfigFactory.validate_ldap_target_config
-create_default_ldap_target_config = (
-    FlextTargetLdapConfigFactory.create_default_ldap_target_config
-)
 
 __all__: list[str] = [
-    "FlextTargetLdapConfigFactory",
     "create_default_ldap_target_config",
     "validate_ldap_target_config",
 ]
