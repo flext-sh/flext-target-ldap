@@ -51,7 +51,7 @@ class FlextTargetLdapTransformationEngine:
                             )
                             applied_rules.append(rule.name)
                         case list() as items:
-                            new_items: MutableSequence[t.ContainerValue] = []
+                            new_items: MutableSequence[t.Container] = []
                             matched = False
                             for item in items:
                                 if isinstance(item, str) and rule.pattern in item:
@@ -98,7 +98,7 @@ class FlextTargetLdapMigrationValidator:
         self,
         data: t.ContainerValueMapping | str,
         attributes: t.ContainerValueMapping | None = None,
-        object_classes: Sequence[t.ContainerValue] | None = None,
+        object_classes: Sequence[t.Container] | None = None,
     ) -> p.Result[bool]:
         """Validate migration data."""
         try:

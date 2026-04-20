@@ -27,20 +27,20 @@ class FlextTargetLdapClient:
 
     @staticmethod
     def _is_container_list(
-        value: t.ContainerValue | None,
-    ) -> TypeIs[Sequence[t.ContainerValue]]:
+        value: t.Container | None,
+    ) -> TypeIs[Sequence[t.Container]]:
         return isinstance(value, list)
 
     @staticmethod
     def _to_container_list(
-        values: t.ContainerValue | t.StrSequence,
-    ) -> t.ContainerValue:
+        values: t.Container | t.StrSequence,
+    ) -> t.Container:
         if isinstance(values, list):
             return [str(value) for value in values]
         return values
 
     @staticmethod
-    def _to_str_values(value: t.ContainerValue) -> t.StrSequence:
+    def _to_str_values(value: t.Container) -> t.StrSequence:
         if isinstance(value, list):
             return [str(item) for item in value]
         return [str(value)]

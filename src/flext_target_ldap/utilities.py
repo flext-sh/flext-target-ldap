@@ -55,7 +55,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
         if isinstance(value, list):
-            normalized_list: MutableSequence[t.ContainerValue] = []
+            normalized_list: MutableSequence[t.Container] = []
             for item in value:
                 if isinstance(item, (str, int, float, bool, datetime, list, dict)):
                     coerced_item = FlextTargetLdapUtilities.coerce_container_value(
@@ -138,7 +138,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def build_connection_config(
-                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, m.ConfigMap | t.Container],
             ) -> m.Ldap.ConnectionConfig:
                 """Build LDAP ConnectionConfig from a flat settings mapping."""
                 return m.Ldap.ConnectionConfig(
@@ -165,7 +165,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def to_str(
-                value: t.ContainerValue | m.ConfigMap | None,
+                value: t.Container | m.ConfigMap | None,
                 default: str = "",
             ) -> str:
                 """Coerce a settings value to str."""
@@ -178,7 +178,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def to_int(
-                value: t.ContainerValue | m.ConfigMap | None,
+                value: t.Container | m.ConfigMap | None,
                 default: int = 0,
             ) -> int:
                 """Coerce a settings value to int."""
@@ -199,7 +199,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def to_bool(
-                value: t.ContainerValue | m.ConfigMap | None,
+                value: t.Container | m.ConfigMap | None,
                 *,
                 default: bool = False,
             ) -> bool:
@@ -216,7 +216,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def extract_attribute_mapping(
-                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, m.ConfigMap | t.Container],
             ) -> t.StrMapping:
                 """Extract attribute mapping from settings."""
                 raw = settings.get("attribute_mapping", {})
@@ -238,7 +238,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
 
             @staticmethod
             def extract_object_classes(
-                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
+                settings: Mapping[str, m.ConfigMap | t.Container],
             ) -> t.StrSequence:
                 """Extract object classes from settings."""
                 raw = settings.get("object_classes")

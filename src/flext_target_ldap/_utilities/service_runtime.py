@@ -33,7 +33,7 @@ class FlextTargetLdapServiceRuntime:
             runtime_sink: FlextTargetLdapSink,
             target: m.Meltano.SingerTargetBase,
             stream_name: str,
-            schema: t.MutableMappingKV[str, t.ContainerValue],
+            schema: t.MutableMappingKV[str, t.Container],
             key_properties: t.StrSequence,
         ) -> FlextTargetLdapServiceRuntime.Sink:
             """Create an adapter sink and attach the LDAP runtime sink."""
@@ -108,9 +108,9 @@ class FlextTargetLdapServiceRuntime:
     def normalize_singer_mapping(
         cls,
         source: Mapping[str, t.Container],
-    ) -> t.MutableMappingKV[str, t.ContainerValue]:
+    ) -> t.MutableMappingKV[str, t.Container]:
         """Normalize a Singer payload mapping to the LDAP runtime contract."""
-        normalized: t.MutableMappingKV[str, t.ContainerValue] = {}
+        normalized: t.MutableMappingKV[str, t.Container] = {}
         for key, value in source.items():
             normalized_value = cls.normalize_singer_value(value)
             if normalized_value is not None:
@@ -121,7 +121,7 @@ class FlextTargetLdapServiceRuntime:
     def normalize_singer_value(
         cls,
         value: t.Container,
-    ) -> t.ContainerValue | None:
+    ) -> t.Container | None:
         """Normalize a Singer payload value to the LDAP runtime contract."""
         if value is None:
             return None
@@ -131,7 +131,7 @@ class FlextTargetLdapServiceRuntime:
             return value
         if u.mapping(value):
             return cls.normalize_singer_mapping(value)
-        normalized_sequence: t.MutableSequenceOf[t.ContainerValue] = []
+        normalized_sequence: t.MutableSequenceOf[t.Container] = []
         for item in value:
             normalized_item = cls.normalize_singer_value(item)
             if normalized_item is not None:
@@ -141,7 +141,7 @@ class FlextTargetLdapServiceRuntime:
     @staticmethod
     def normalize_flat_schema(
         schema: t.FlatContainerMapping,
-    ) -> t.MutableMappingKV[str, t.ContainerValue]:
+    ) -> t.MutableMappingKV[str, t.Container]:
         """Normalize a flat Singer schema to the LDAP runtime contract."""
         return {
             key: (str(value) if isinstance(value, Path) else value)

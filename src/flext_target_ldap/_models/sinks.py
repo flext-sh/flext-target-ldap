@@ -112,13 +112,13 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     @staticmethod
     def _is_container_list(
         value: t.Container,
-    ) -> TypeIs[Sequence[t.ContainerValue]]:
+    ) -> TypeIs[Sequence[t.Container]]:
         """Check if a value is a container list."""
         return isinstance(value, list)
 
     @staticmethod
     def _container_mapping_from_value(
-        value: t.ContainerValue,
+        value: t.Container,
     ) -> t.ContainerValueMapping:
         """Convert a container value to a container value mapping."""
         if isinstance(value, dict):
@@ -338,7 +338,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         }
         obj_classes = attributes.get("objectClass")
         if self._is_container_list(obj_classes):
-            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
+            obj_classes_mut: MutableSequence[t.Container] = list(obj_classes)
             if "person" not in obj_classes_mut:
                 obj_classes_mut.append("person")
             if "inetOrgPerson" not in obj_classes_mut:
@@ -575,7 +575,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         }
         obj_classes = attributes.get("objectClass")
         if self._is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
-            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
+            obj_classes_mut: MutableSequence[t.Container] = list(obj_classes)
             obj_classes_mut.append("groupOfNames")
             attributes["objectClass"] = obj_classes_mut
         field_mapping = {
@@ -684,7 +684,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             self._is_container_list(obj_classes)
             and "organizationalUnit" not in obj_classes
         ):
-            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
+            obj_classes_mut: MutableSequence[t.Container] = list(obj_classes)
             obj_classes_mut.append("organizationalUnit")
             attributes["objectClass"] = obj_classes_mut
         field_mapping = {"name": "ou", "description": "description"}
