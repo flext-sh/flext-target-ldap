@@ -10,10 +10,12 @@ from flext_core.lazy import (
     install_lazy_exports,
     merge_lazy_imports,
 )
+
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
     from flext_ldap import d, e, h, r, s, x
+
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -31,10 +33,6 @@ if _t.TYPE_CHECKING:
     from flext_target_ldap._utilities.client import FlextTargetLdapClient
     from flext_target_ldap._utilities.service_runtime import (
         FlextTargetLdapServiceRuntime,
-    )
-    from flext_target_ldap._utilities.services import (
-        FlextTargetLdapConnectionService,
-        FlextTargetLdapTransformationService,
     )
     from flext_target_ldap._utilities.settings import (
         FlextTargetLdapConfigFactory,
@@ -110,10 +108,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
             "._utilities.api_service": ("FlextTargetLdapApiService",),
             "._utilities.client": ("FlextTargetLdapClient",),
             "._utilities.service_runtime": ("FlextTargetLdapServiceRuntime",),
-            "._utilities.services": (
-                "FlextTargetLdapConnectionService",
-                "FlextTargetLdapTransformationService",
-            ),
             "._utilities.settings": (
                 "FlextTargetLdapConfigFactory",
                 "create_default_ldap_target_config",
@@ -206,7 +200,6 @@ __all__: list[str] = [
     "FlextTargetLdapConfigFactory",
     "FlextTargetLdapConfigurationError",
     "FlextTargetLdapConnectionError",
-    "FlextTargetLdapConnectionService",
     "FlextTargetLdapConstants",
     "FlextTargetLdapConstantsBase",
     "FlextTargetLdapDataTransformer",
@@ -231,7 +224,6 @@ __all__: list[str] = [
     "FlextTargetLdapTarget",
     "FlextTargetLdapTimeoutError",
     "FlextTargetLdapTransformationEngine",
-    "FlextTargetLdapTransformationService",
     "FlextTargetLdapTypeConverter",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUsersSink",

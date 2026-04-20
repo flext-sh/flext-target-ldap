@@ -12,13 +12,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-)
 from typing import Annotated, ClassVar
 
 from flext_core import FlextSettings
-from flext_target_ldap import c, m, p, r, t, u
+
+from flext_target_ldap import c, m, t, u
 
 
 @FlextSettings.auto_register("target-ldap")
@@ -58,7 +56,7 @@ class FlextTargetLdapSettings(FlextSettings):
     connect_timeout: Annotated[
         t.PositiveInt,
         u.Field(
-            default=c.TargetLdap.CONNECT_TIMEOUT,
+            default=c.Ldap.ConnectionDefaults.TIMEOUT,
             description="Connection timeout in seconds",
         ),
     ]
@@ -118,64 +116,3 @@ class FlextTargetLdapSettings(FlextSettings):
             default_factory=lambda: list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
         ),
     ]
-
-    @staticmethod
-    def validate_ldap_config(
-        settings: Mapping[str, t.Container | m.ConfigMap],
-    ) -> p.Result[FlextTargetLdapSettings]:
-        """Validate LDAP configuration."""
-        try:
-            validated_config = FlextTargetLdapSettings.model_validate({
-                "connection": {
-                    "host": settings.get("host", c.LOCALHOST),
-                    "port": settings.get("port", c.Ldap.ConnectionDefaults.PORT),
-                    "use_ssl": settings.get("use_ssl", False),
-                    "bind_dn": settings.get("bind_dn", ""),
-                    "bind_password": settings.get("password", ""),
-                    "timeout": settings.get(
-                        "timeout",
-                        c.Ldap.ConnectionDefaults.TIMEOUT,
-                    ),
-                },
-                "base_dn": settings.get("base_dn", ""),
-                "search_filter": settings.get(
-                    "search_filter",
-                    c.Ldap.Filters.ALL_ENTRIES_FILTER,
-                ),
-                "search_scope": settings.get(
-                    "search_scope",
-                    c.Ldap.SearchDefaults.DEFAULT_SCOPE,
-                ),
-                "connect_timeout": settings.get(
-                    "connect_timeout",
-                    c.TargetLdap.CONNECT_TIMEOUT,
-                ),
-                "receive_timeout": settings.get(
-                    "receive_timeout",
-                    c.DEFAULT_TIMEOUT_SECONDS,
-                ),
-                "batch_size": settings.get("batch_size", c.DEFAULT_SIZE),
-                "max_records": settings.get("max_records"),
-                "create_missing_entries": settings.get(
-                    "create_missing_entries",
-                    c.TargetLdap.CREATE_MISSING_ENTRIES,
-                ),
-                "update_existing_entries": settings.get(
-                    "update_existing_entries",
-                    c.TargetLdap.UPDATE_EXISTING_ENTRIES,
-                ),
-                "delete_removed_entries": settings.get(
-                    "delete_removed_entries",
-                    c.TargetLdap.DELETE_REMOVED_ENTRIES,
-                ),
-                "attribute_mapping": settings.get("attribute_mapping", {}),
-                "object_classes": settings.get(
-                    "object_classes",
-                    list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
-                ),
-            })
-            return r[FlextTargetLdapSettings].ok(validated_config)
-        except c.ValidationError as e:
-            return r[FlextTargetLdapSettings].fail(
-                f"Configuration validation failed: {e}",
-            )

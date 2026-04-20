@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextContainer
+
 from flext_target_ldap import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapClient,
@@ -80,7 +81,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                         normalized_config[key] = value
                     case _:
                         normalized_config[key] = (
-                            t.TargetLdap.STRING_ADAPTER.validate_python(value)
+                            t.Meltano.STRING_ADAPTER.validate_python(value)
                         )
             settings = FlextTargetLdapSettings.model_validate(normalized_config)
             self._orchestrator = FlextTargetLdapOrchestrator(settings)
@@ -152,7 +153,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             raise ValueError(msg)
         port_obj = self.settings.get("port", c.Ldap.ConnectionDefaults.PORT)
         try:
-            port = t.TargetLdap.INTEGER_ADAPTER.validate_python(port_obj)
+            port = t.Meltano.INTEGER_ADAPTER.validate_python(port_obj)
         except Exception:
             port = c.Ldap.ConnectionDefaults.PORT
         if port <= 0 or port > c.MAX_PORT_NUMBER:
@@ -177,7 +178,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Load configuration from JSON file."""
         try:
             content = Path(config_path).read_text(encoding="utf-8")
-            return t.TargetLdap.CONTAINER_VALUE_MAP_ADAPTER.validate_json(content)
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(content)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to load configuration from {config_path}: {exc}"
             raise RuntimeError(msg) from exc
@@ -263,7 +264,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             seen_dns: set[str] = set()
             for line in sys.stdin:
                 try:
-                    raw = t.TargetLdap.SINGER_MESSAGE_ADAPTER.validate_json(line)
+                    raw = t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
                     msg_type = raw.get("type")
                     if msg_type == "STATE":
                         cli_helper = FlextTargetLdap._create_cli_helper(quiet=True)

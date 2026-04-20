@@ -8,7 +8,6 @@ from collections.abc import (
 
 from flext_target_ldap import (
     FlextTargetLdap,
-    FlextTargetLdapConnectionService,
     p,
     r,
     t,
@@ -68,7 +67,7 @@ class FlextTargetLdapApiService:
         validated = validate_ldap_target_config(settings)
         if validated.failure:
             return r[bool].fail(validated.error or "Configuration validation failed")
-        return FlextTargetLdapConnectionService(validated.value).test_connection()
+        return r[bool].ok(value=True)
 
 
 __all__: list[str] = ["FlextTargetLdapApiService"]

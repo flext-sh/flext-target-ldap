@@ -18,6 +18,7 @@ from datetime import datetime
 
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import u
+
 from flext_target_ldap import c, m, p, r, t
 
 
@@ -85,53 +86,55 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
         @staticmethod
         def build_singer_catalog() -> t.ContainerValueMapping:
             """Build the canonical Singer catalog for LDAP targets."""
-            return {
-                "streams": [
-                    {
-                        "tap_stream_id": "users",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "username": {"type": "string"},
-                                "email": {"type": "string"},
-                                "first_name": {"type": "string"},
-                                "last_name": {"type": "string"},
-                                "full_name": {"type": "string"},
-                                "phone": {"type": "string"},
-                                "department": {"type": "string"},
-                                "title": {"type": "string"},
-                            },
-                            "required": ["username"],
-                        },
-                    },
-                    {
-                        "tap_stream_id": "groups",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"},
-                                "description": {"type": "string"},
-                                "members": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+                u.Cli.normalize_json_value({
+                    "streams": [
+                        {
+                            "tap_stream_id": "users",
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "username": {"type": "string"},
+                                    "email": {"type": "string"},
+                                    "first_name": {"type": "string"},
+                                    "last_name": {"type": "string"},
+                                    "full_name": {"type": "string"},
+                                    "phone": {"type": "string"},
+                                    "department": {"type": "string"},
+                                    "title": {"type": "string"},
                                 },
+                                "required": ["username"],
                             },
-                            "required": ["name"],
                         },
-                    },
-                    {
-                        "tap_stream_id": "organizational_units",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "name": {"type": "string"},
-                                "description": {"type": "string"},
+                        {
+                            "tap_stream_id": "groups",
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                    "members": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                },
+                                "required": ["name"],
                             },
-                            "required": ["name"],
                         },
-                    },
-                ],
-            }
+                        {
+                            "tap_stream_id": "organizational_units",
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["name"],
+                            },
+                        },
+                    ],
+                })
+            )
 
         class TypeConversion:
             """Type coercion utilities for Singer settings values to typed Python values."""
@@ -172,7 +175,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 if value is None:
                     return default
                 try:
-                    return t.TargetLdap.STRING_ADAPTER.validate_python(value)
+                    return t.Meltano.STRING_ADAPTER.validate_python(value)
                 except c.ValidationError:
                     return default
 
@@ -191,7 +194,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         return value
                     case str() | float():
                         try:
-                            return t.TargetLdap.INTEGER_ADAPTER.validate_python(value)
+                            return t.Meltano.INTEGER_ADAPTER.validate_python(value)
                         except c.ValidationError:
                             return default
                     case _:
@@ -223,14 +226,12 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 if isinstance(raw, Mapping):
                     normalized_mapping: t.MutableMappingKV[str, str] = {}
                     for key, value in raw.items():
-                        normalized_key = t.TargetLdap.STRING_ADAPTER.validate_python(
-                            key
-                        )
-                        normalized_value = t.TargetLdap.STRING_ADAPTER.validate_python(
+                        normalized_key = t.Meltano.STRING_ADAPTER.validate_python(key)
+                        normalized_value = t.Meltano.STRING_ADAPTER.validate_python(
                             value,
                         )
                         normalized_mapping[normalized_key] = normalized_value
-                    return t.TargetLdap.STR_MAPPING_ADAPTER.validate_python(
+                    return t.Meltano.STR_MAPPING_ADAPTER.validate_python(
                         normalized_mapping,
                     )
                 msg = f"Expected Mapping for 'attribute_mapping', got {type(raw).__name__}: {raw!r}"
@@ -244,11 +245,11 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 raw = settings.get("object_classes")
                 if isinstance(raw, list):
                     normalized_object_classes = [
-                        t.TargetLdap.STRING_ADAPTER.validate_python(object_class)
+                        t.Meltano.STRING_ADAPTER.validate_python(object_class)
                         for object_class in raw
                         if object_class
                     ]
-                    return t.TargetLdap.STR_SEQUENCE_ADAPTER.validate_python(
+                    return t.Meltano.STR_SEQUENCE_ADAPTER.validate_python(
                         normalized_object_classes,
                     )
                 if isinstance(raw, str):
@@ -461,7 +462,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 if "port" in settings:
                     port_raw = settings["port"]
                     try:
-                        port_int = t.TargetLdap.INTEGER_ADAPTER.validate_python(
+                        port_int = t.Meltano.INTEGER_ADAPTER.validate_python(
                             port_raw,
                         )
                     except c.ValidationError:

@@ -21,6 +21,7 @@ from typing import Annotated, Self
 
 from flext_ldap.models import FlextLdapModels
 from flext_meltano import m
+
 from flext_target_ldap import c, p, r, t, u
 
 
@@ -690,23 +691,6 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                 u.Field(
                     description="Names of transformation rules that were applied",
                     default_factory=list,
-                ),
-            ]
-
-        class SearchEntry(FlextLdapModels.Value):
-            """Canonical LDAP search result entry."""
-
-            dn: Annotated[
-                str,
-                u.Field(
-                    description="Distinguished Name of the LDAP search result entry",
-                ),
-            ]
-            attributes: Annotated[
-                t.ContainerValueMapping,
-                u.Field(
-                    description="LDAP attributes returned by the search operation",
-                    default_factory=dict,
                 ),
             ]
 

@@ -10,10 +10,6 @@ _LAZY_IMPORTS = build_lazy_import_map(
         ".api_service": ("FlextTargetLdapApiService",),
         ".client": ("FlextTargetLdapClient",),
         ".service_runtime": ("FlextTargetLdapServiceRuntime",),
-        ".services": (
-            "FlextTargetLdapConnectionService",
-            "FlextTargetLdapTransformationService",
-        ),
         ".settings": (
             "FlextTargetLdapConfigFactory",
             "create_default_ldap_target_config",

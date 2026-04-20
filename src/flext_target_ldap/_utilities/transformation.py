@@ -14,6 +14,7 @@ from collections.abc import (
 from typing import override
 
 from flext_meltano import u
+
 from flext_target_ldap import c, m, p, r, t
 
 logger = u.fetch_logger(__name__)
@@ -37,12 +38,14 @@ class FlextTargetLdapTransformationEngine:
     ) -> p.Result[m.TargetLdap.DataTransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: t.MutableContainerValueMapping = dict(data)
+            transformed_data: t.MutableContainerValueMapping = {
+                str(key): value for key, value in data.items()
+            }
             applied_rules: MutableSequence[str] = []
             for rule in self.rules:
                 if not rule.enabled:
                     continue
-                for key, value in transformed_data.items():
+                for key, value in list(transformed_data.items()):
                     match value:
                         case str() as text if rule.pattern in text:
                             transformed_data[key] = text.replace(
@@ -51,7 +54,7 @@ class FlextTargetLdapTransformationEngine:
                             )
                             applied_rules.append(rule.name)
                         case list() as items:
-                            new_items: MutableSequence[t.Container] = []
+                            new_items: list[t.JsonValue] = []
                             matched = False
                             for item in items:
                                 if isinstance(item, str) and rule.pattern in item:
@@ -60,7 +63,7 @@ class FlextTargetLdapTransformationEngine:
                                     )
                                     matched = True
                                 else:
-                                    new_items.append(item)
+                                    new_items.append(u.Cli.normalize_json_value(item))
                             if matched:
                                 transformed_data[key] = new_items
                                 applied_rules.append(rule.name)

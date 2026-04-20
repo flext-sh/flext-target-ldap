@@ -2,26 +2,34 @@
 
 from __future__ import annotations
 
-from flext_target_ldap import p
+from collections.abc import MutableSequence
 
 
 class FlextTargetLdapProcessingCounters:
     """Common counters and mutations for record processing outcomes."""
 
+    processed_count: int
+    success_count: int
+    error_count: int
+    errors: MutableSequence[str]
+
     @property
-    def success_rate(self: p.TargetLdap.LdapProcessingState) -> float:
+    def success_rate(self: FlextTargetLdapProcessingCounters) -> float:
         """Return success percentage for processed records."""
         if self.processed_count == 0:
             return 0.0
         return self.success_count / self.processed_count * 100.0
 
-    def add_error(self: p.TargetLdap.LdapProcessingState, error_message: str) -> None:
+    def add_error(
+        self: FlextTargetLdapProcessingCounters,
+        error_message: str,
+    ) -> None:
         """Record one failed processing attempt."""
         self.processed_count += 1
         self.error_count += 1
         self.errors.append(error_message)
 
-    def add_success(self: p.TargetLdap.LdapProcessingState) -> None:
+    def add_success(self: FlextTargetLdapProcessingCounters) -> None:
         """Record one successful processing attempt."""
         self.processed_count += 1
         self.success_count += 1
