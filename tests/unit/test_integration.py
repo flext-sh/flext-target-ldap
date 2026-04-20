@@ -8,7 +8,10 @@ from __future__ import annotations
 
 import io
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 

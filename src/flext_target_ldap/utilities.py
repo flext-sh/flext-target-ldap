@@ -8,7 +8,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import (
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 from datetime import datetime
 
 from flext_ldap import FlextLdapUtilities

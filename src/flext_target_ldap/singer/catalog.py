@@ -7,7 +7,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import MutableMapping
+from collections.abc import (
+    MutableMapping,
+)
 from typing import override
 
 from flext_target_ldap import m, p, r, t, u

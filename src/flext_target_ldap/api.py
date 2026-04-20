@@ -7,7 +7,10 @@ Owns the public ``FlextTargetLdap`` surface. Legacy runtime logic lives here so
 from __future__ import annotations
 
 import sys
-from collections.abc import Callable, Mapping
+from collections.abc import (
+    Callable,
+    Mapping,
+)
 from pathlib import Path
 from typing import ClassVar, override
 
