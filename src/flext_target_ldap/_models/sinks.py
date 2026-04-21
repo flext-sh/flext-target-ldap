@@ -128,9 +128,9 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     def build_attributes(
         self,
         _record: t.ContainerValueMapping,
-    ) -> p.Result[t.ContainerValueMapping]:
+    ) -> p.Result[t.Ldap.OperationAttributes]:
         """Build LDAP attributes from record. Override in subclasses."""
-        return r[t.ContainerValueMapping].fail(
+        return r[t.Ldap.OperationAttributes].fail(
             "build_attributes must be implemented in subclass",
         )
 
@@ -249,7 +249,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     def validate_entry(
         self,
         dn: str,
-        attributes: t.ContainerValueMapping,
+        attributes: t.Ldap.OperationAttributes,
         object_classes: t.StrSequence,
     ) -> p.Result[bool]:
         """Validate LDAP entry before writing."""
@@ -283,13 +283,13 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     def build_attributes(
         self,
         _record: t.ContainerValueMapping,
-    ) -> p.Result[t.ContainerValueMapping]:
+    ) -> p.Result[t.Ldap.OperationAttributes]:
         """Build LDAP attributes for user entry."""
-        attrs: t.MutableContainerValueMapping = {}
+        attrs: dict[str, list[str]] = {}
         for k, v in _record.items():
             target_key = self._USER_FIELD_MAP.get(k, k)
             attrs[target_key] = FlextTargetLdapClient.to_str_values(v)
-        return r[t.ContainerValueMapping].ok(attrs)
+        return r[t.Ldap.OperationAttributes].ok(attrs)
 
     @override
     def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
@@ -304,7 +304,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     def build_user_attributes(
         self,
         record: Mapping[str, t.Container],
-    ) -> t.MutableContainerValueMapping:
+    ) -> dict[str, list[str]]:
         """Build LDAP attributes for user entry."""
         configured_object_classes = self._target.settings.get(
             "object_classes",
@@ -319,7 +319,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             object_classes.append("inetOrgPerson")
         if "person" not in object_classes:
             object_classes.append("person")
-        attributes: t.MutableContainerValueMapping = {
+        attributes: dict[str, list[str]] = {
             "objectClass": object_classes,
         }
         field_mapping = {
@@ -385,7 +385,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             object_classes: t.StrSequence = FlextTargetLdapClient.to_str_values(
                 object_classes_raw,
             )
-            attributes_dict: t.MutableContainerValueMapping = {
+            attributes_dict: dict[str, list[str]] = {
                 key: FlextTargetLdapClient.to_str_values(value)
                 for key, value in attributes.items()
                 if key != "objectClass"
@@ -432,14 +432,14 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     def build_attributes(
         self,
         _record: t.ContainerValueMapping,
-    ) -> p.Result[t.ContainerValueMapping]:
+    ) -> p.Result[t.Ldap.OperationAttributes]:
         """Build LDAP attributes for group entry."""
-        attrs: t.MutableContainerValueMapping = {}
+        attrs: dict[str, list[str]] = {}
         field_map = {"members": "member"}
         for k, v in _record.items():
             target_key = field_map.get(k, k)
             attrs[target_key] = FlextTargetLdapClient.to_str_values(v)
-        return r[t.ContainerValueMapping].ok(attrs)
+        return r[t.Ldap.OperationAttributes].ok(attrs)
 
     @override
     def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
@@ -485,7 +485,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             object_classes: t.StrSequence = FlextTargetLdapClient.to_str_values(
                 object_classes_raw,
             )
-            attributes_dict: t.MutableContainerValueMapping = {
+            attributes_dict: dict[str, list[str]] = {
                 key: FlextTargetLdapClient.to_str_values(value)
                 for key, value in attributes.items()
                 if key != "objectClass"
@@ -527,7 +527,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     def _build_group_attributes(
         self,
         record: Mapping[str, t.Container],
-    ) -> t.MutableContainerValueMapping:
+    ) -> dict[str, list[str]]:
         """Build LDAP attributes for group entry."""
         configured_object_classes = self._target.settings.get(
             "group_object_classes",
@@ -540,7 +540,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         )
         if "groupOfNames" not in object_classes:
             object_classes.append("groupOfNames")
-        attributes: t.MutableContainerValueMapping = {
+        attributes: dict[str, list[str]] = {
             "objectClass": object_classes,
         }
         field_mapping = {
@@ -582,7 +582,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                 return r[bool].fail("No OU name found in record")
             ou_dn = f"ou={ou_name},{self._target.settings.get('base_dn', 'dc=example,dc=com')}"
             attributes = self._build_ou_attributes(_record)
-            attributes_dict: t.MutableContainerValueMapping = {
+            attributes_dict: dict[str, list[str]] = {
                 key: FlextTargetLdapClient.to_str_values(value)
                 for key, value in attributes.items()
             }
@@ -619,7 +619,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
     def _build_ou_attributes(
         self,
         record: Mapping[str, t.Container],
-    ) -> t.MutableContainerValueMapping:
+    ) -> dict[str, list[str]]:
         """Build LDAP attributes for OU entry."""
         configured_object_classes = self._target.settings.get(
             "object_classes",
@@ -632,7 +632,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         )
         if "organizationalUnit" not in object_classes:
             object_classes.append("organizationalUnit")
-        attributes: t.MutableContainerValueMapping = {
+        attributes: dict[str, list[str]] = {
             "objectClass": object_classes,
         }
         field_mapping = {"name": "ou", "description": "description"}

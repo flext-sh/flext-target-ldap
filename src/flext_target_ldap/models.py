@@ -19,13 +19,13 @@ from collections.abc import (
 from datetime import UTC, datetime
 from typing import Annotated, Self
 
-from flext_ldap.models import FlextLdapModels
-from flext_meltano import m
+from flext_ldap import m
+from flext_meltano import m as meltano_m
 
 from flext_target_ldap import c, p, r, t, u
 
 
-class FlextTargetLdapModels(m, FlextLdapModels):
+class FlextTargetLdapModels(meltano_m, m):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
@@ -36,7 +36,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
     class TargetLdap:
         """TargetLdap domain namespace."""
 
-        class AttributeMapping(FlextLdapModels.Entity):
+        class AttributeMapping(m.Entity):
             """LDAP attribute mapping configuration with validation.
 
             Immutable value object defining how Singer fields map to LDAP attributes
@@ -118,7 +118,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                         f"Attribute mapping validation failed: {e}",
                     )
 
-        class Entry(FlextLdapModels.Entity):
+        class Entry(m.Entity):
             """LDAP entry representation with validation and business rules.
 
             Immutable value object representing a complete LDAP entry with
@@ -231,7 +231,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail(f"LDAP entry validation failed: {e}")
 
-        class TransformationResult(FlextLdapModels.Entity):
+        class TransformationResult(m.Entity):
             """Result of LDAP data transformation operations.
 
             Tracks transformation statistics, applied rules, and processing metrics
@@ -320,7 +320,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                         f"Transformation result validation failed: {e}",
                     )
 
-        class BatchProcessing(FlextLdapModels.Entity):
+        class BatchProcessing(m.Entity):
             """LDAP batch processing configuration and state tracking.
 
             Manages batching of LDAP operations for optimal performance,
@@ -466,7 +466,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                         f"Batch processing validation failed: {e}",
                     )
 
-        class OperationStatistics(FlextLdapModels.Entity):
+        class OperationStatistics(m.Entity):
             """LDAP operation statistics and performance metrics.
 
             Complete tracking of LDAP target operations for performance
@@ -594,7 +594,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                         f"Operation statistics validation failed: {e}",
                     )
 
-        class SingerPropertyDefinition(FlextLdapModels.Value):
+        class SingerPropertyDefinition(m.Value):
             """Singer property definition for LDAP schema mapping."""
 
             type: Annotated[
@@ -612,7 +612,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                 ),
             ]
 
-        class SingerSchemaDefinition(FlextLdapModels.Value):
+        class SingerSchemaDefinition(m.Value):
             """Singer schema definition mapping properties to LDAP attributes."""
 
             properties: MutableMapping[
@@ -623,7 +623,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                 description="Mapping of property names to their Singer definitions",
             )
 
-        class SingerLDAPCatalogEntry(FlextLdapModels.Entity):
+        class SingerLDAPCatalogEntry(m.Entity):
             """Singer LDAP catalog entry with stream metadata."""
 
             tap_stream_id: Annotated[
@@ -646,7 +646,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                 ),
             ]
 
-        class TransformationRule(FlextLdapModels.Value):
+        class TransformationRule(m.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
             name: Annotated[
@@ -676,7 +676,7 @@ class FlextTargetLdapModels(m, FlextLdapModels):
                 ),
             ]
 
-        class DataTransformationResult(FlextLdapModels.Value):
+        class DataTransformationResult(m.Value):
             """Lightweight result of data transformation engine operations."""
 
             transformed_data: Annotated[
@@ -695,7 +695,6 @@ class FlextTargetLdapModels(m, FlextLdapModels):
             ]
 
 
-# Export the unified models class
 m = FlextTargetLdapModels
 
 __all__: list[str] = [

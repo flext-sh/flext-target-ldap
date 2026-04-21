@@ -22,9 +22,9 @@ class TestsFlextTargetLdapProtocols(FlextTestsProtocols, FlextTargetLdapProtocol
     """
 
     class TargetLdap(FlextTargetLdapProtocols.TargetLdap):
-        """Target LDAP domain test protocols namespace."""
+        """Target LDAP local test protocols namespace."""
 
-        class Tests(FlextTestsProtocols.Tests):
+        class Tests:
             """Target LDAP-specific test protocols."""
 
 

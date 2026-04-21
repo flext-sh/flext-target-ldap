@@ -16,13 +16,13 @@ from collections.abc import (
 )
 from datetime import datetime
 
-from flext_ldap import FlextLdapUtilities
+from flext_ldap import u as ldap_u
 from flext_meltano import u
 
 from flext_target_ldap import c, m, p, r, t
 
 
-class FlextTargetLdapUtilities(u, FlextLdapUtilities):
+class FlextTargetLdapUtilities(u, ldap_u):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for
@@ -33,52 +33,6 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
         c.LDAPS_DEFAULT_PORT (636)
         c.DEFAULT_SIZE
     """
-
-    @staticmethod
-    def coerce_container_value(
-        value: m.ConfigMap | t.ValueOrModel,
-    ) -> m.ConfigMap | t.ContainerValueList | t.Container | None:
-        """Coerce a container value to a normalized form for LDAP operations.
-
-        Recursively normalizes BaseModel, scalar, list, and Mapping values into
-        types suitable for LDAP attribute storage.
-
-        Args:
-            value: Value to coerce (ConfigMap, scalar, list, dict, or BaseModel)
-
-        Returns:
-            Normalized value, ConfigMap, list of container values, or None if
-            the value cannot be coerced.
-
-        """
-        if isinstance(value, m.BaseModel):
-            return FlextTargetLdapUtilities.coerce_container_value(value.model_dump())
-        if isinstance(value, (str, int, float, bool, datetime)):
-            return value
-        if isinstance(value, list):
-            normalized_list: MutableSequence[t.Container] = []
-            for item in value:
-                if isinstance(item, (str, int, float, bool, datetime, list, dict)):
-                    coerced_item = FlextTargetLdapUtilities.coerce_container_value(
-                        item,
-                    )
-                    if isinstance(coerced_item, (str, int, float, bool, datetime)):
-                        normalized_list.append(coerced_item)
-            return normalized_list
-        if isinstance(value, Mapping):
-            normalized_dict: MutableMapping[str, t.ValueOrModel] = {}
-            for key, item in value.items():
-                if isinstance(item, (str, int, float, bool, datetime, list, dict)):
-                    coerced_item = FlextTargetLdapUtilities.coerce_container_value(
-                        item,
-                    )
-                    if coerced_item is not None and isinstance(
-                        coerced_item,
-                        (str, int, float, bool),
-                    ):
-                        normalized_dict[str(key)] = coerced_item
-            return m.ConfigMap(root=normalized_dict)
-        return None
 
     class TargetLdap:
         """Singer protocol utilities for target operations."""
@@ -175,8 +129,8 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 if value is None:
                     return default
                 try:
-                    return t.Meltano.STRING_ADAPTER.validate_python(value)
-                except c.ValidationError:
+                    return str(value)
+                except (RuntimeError, TypeError, ValueError):
                     return default
 
             @staticmethod
@@ -194,8 +148,8 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         return value
                     case str() | float():
                         try:
-                            return t.Meltano.INTEGER_ADAPTER.validate_python(value)
-                        except c.ValidationError:
+                            return int(value)
+                        except (RuntimeError, TypeError, ValueError):
                             return default
                     case _:
                         return default
@@ -226,14 +180,10 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 if isinstance(raw, Mapping):
                     normalized_mapping: t.MutableMappingKV[str, str] = {}
                     for key, value in raw.items():
-                        normalized_key = t.Meltano.STRING_ADAPTER.validate_python(key)
-                        normalized_value = t.Meltano.STRING_ADAPTER.validate_python(
-                            value,
-                        )
+                        normalized_key = str(key)
+                        normalized_value = str(value)
                         normalized_mapping[normalized_key] = normalized_value
-                    return t.Meltano.STR_MAPPING_ADAPTER.validate_python(
-                        normalized_mapping,
-                    )
+                    return normalized_mapping
                 msg = f"Expected Mapping for 'attribute_mapping', got {type(raw).__name__}: {raw!r}"
                 raise TypeError(msg)
 
@@ -244,14 +194,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 """Extract object classes from settings."""
                 raw = settings.get("object_classes")
                 if isinstance(raw, list):
-                    normalized_object_classes = [
-                        t.Meltano.STRING_ADAPTER.validate_python(object_class)
-                        for object_class in raw
-                        if object_class
-                    ]
-                    return t.Meltano.STR_SEQUENCE_ADAPTER.validate_python(
-                        normalized_object_classes,
-                    )
+                    return [str(object_class) for object_class in raw if object_class]
                 if isinstance(raw, str):
                     return [raw]
                 return ["top"]
@@ -461,14 +404,24 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     )
                 if "port" in settings:
                     port_raw = settings["port"]
-                    try:
-                        port_int = t.Meltano.INTEGER_ADAPTER.validate_python(
-                            port_raw,
-                        )
-                    except c.ValidationError:
-                        return r[Mapping[str, m.ConfigMap]].fail(
-                            "Port must be a valid integer between 1 and 65535",
-                        )
+                    match port_raw:
+                        case bool() | Mapping() | list():
+                            return r[Mapping[str, m.ConfigMap]].fail(
+                                "Port must be a valid integer between 1 and 65535",
+                            )
+                        case int() as port_int:
+                            pass
+                        case str() | float():
+                            try:
+                                port_int = int(port_raw)
+                            except (RuntimeError, TypeError, ValueError):
+                                return r[Mapping[str, m.ConfigMap]].fail(
+                                    "Port must be a valid integer between 1 and 65535",
+                                )
+                        case _:
+                            return r[Mapping[str, m.ConfigMap]].fail(
+                                "Port must be a valid integer between 1 and 65535",
+                            )
                     if not (0 < port_int <= c.MAX_PORT_NUMBER):
                         return r[Mapping[str, m.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
@@ -528,6 +481,61 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         )
                 return r[Mapping[str, m.ConfigMap]].ok(settings)
 
+            @staticmethod
+            def coerce_container_value(
+                value: m.ConfigMap | t.ValueOrModel,
+            ) -> m.ConfigMap | t.ContainerValueList | t.Container | None:
+                """Coerce a container value to a normalized form for LDAP operations.
+
+                Recursively normalizes BaseModel, scalar, list, and Mapping values into
+                types suitable for LDAP attribute storage.
+
+                Args:
+                    value: Value to coerce (ConfigMap, scalar, list, dict, or BaseModel)
+
+                Returns:
+                    Normalized value, ConfigMap, list of container values, or None if
+                    the value cannot be coerced.
+
+                """
+                if isinstance(value, m.BaseModel):
+                    return FlextTargetLdapUtilities.TargetLdap.ConfigValidation.coerce_container_value(
+                        value.model_dump(),
+                    )
+                if isinstance(value, (str, int, float, bool, datetime)):
+                    return value
+                if isinstance(value, list):
+                    normalized_list: MutableSequence[t.Container] = []
+                    for item in value:
+                        if isinstance(
+                            item, (str, int, float, bool, datetime, list, dict)
+                        ):
+                            coerced_item = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.coerce_container_value(
+                                item,
+                            )
+                            if isinstance(
+                                coerced_item, (str, int, float, bool, datetime)
+                            ):
+                                normalized_list.append(coerced_item)
+                    return normalized_list
+                if isinstance(value, Mapping):
+                    normalized_dict: MutableMapping[str, t.ValueOrModel] = {}
+                    for key, item in value.items():
+                        if isinstance(
+                            item, (str, int, float, bool, datetime, list, dict)
+                        ):
+                            coerced_item = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.coerce_container_value(
+                                item,
+                            )
+                            if coerced_item is not None and isinstance(
+                                coerced_item,
+                                (str, int, float, bool),
+                            ):
+                                normalized_dict[str(key)] = coerced_item
+                    return m.ConfigMap(root=normalized_dict)
+                return None
+
 
 u = FlextTargetLdapUtilities
+
 __all__: list[str] = ["FlextTargetLdapUtilities", "u"]

@@ -5,11 +5,12 @@ from __future__ import annotations
 from collections.abc import (
     Mapping,
 )
-from datetime import datetime
 from pathlib import Path
 from typing import override
 
-from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, m, p, t, u
+from flext_meltano import m, u
+
+from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, p, t
 
 
 class FlextTargetLdapServiceRuntime:
@@ -63,8 +64,8 @@ class FlextTargetLdapServiceRuntime:
         ) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
-                FlextTargetLdapServiceRuntime.normalize_singer_mapping(record),
-                FlextTargetLdapServiceRuntime.normalize_singer_mapping(context),
+                u.Meltano.normalize_runtime_json_mapping(record),
+                u.Meltano.normalize_runtime_json_mapping(context),
             )
             if result.failure:
                 msg = result.error or "LDAP runtime sink rejected the record"
@@ -79,7 +80,9 @@ class FlextTargetLdapServiceRuntime:
         target_config: Mapping[str, t.Container],
     ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
-        normalized_target_config = cls.normalize_singer_mapping(target_config)
+        normalized_target_config = u.Meltano.normalize_runtime_json_mapping(
+            target_config,
+        )
         runtime_target = FlextTargetLdap(
             settings=normalized_target_config,
             validate_config=False,
@@ -104,42 +107,6 @@ class FlextTargetLdapServiceRuntime:
             schema=dict(normalized_schema),
             key_properties=[],
         )
-
-    @classmethod
-    def normalize_singer_mapping(
-        cls,
-        source: Mapping[str, t.Container],
-    ) -> dict[str, t.JsonValue]:
-        """Normalize a Singer payload mapping to the LDAP runtime contract."""
-        normalized: dict[str, t.JsonValue] = {}
-        for key, value in source.items():
-            normalized_value = cls.normalize_singer_value(value)
-            if normalized_value is not None:
-                normalized[str(key)] = normalized_value
-        return normalized
-
-    @classmethod
-    def normalize_singer_value(
-        cls,
-        value: t.Container,
-    ) -> t.JsonValue | None:
-        """Normalize a Singer payload value to the LDAP runtime contract."""
-        if value is None:
-            return None
-        if isinstance(value, (bytes, Path)):
-            return str(value)
-        if isinstance(value, datetime):
-            return value.isoformat()
-        if isinstance(value, (bool, int, float, str)):
-            return value
-        if u.mapping(value):
-            return cls.normalize_singer_mapping(value)
-        normalized_sequence: list[t.JsonValue] = []
-        for item in value:
-            normalized_item = cls.normalize_singer_value(item)
-            if normalized_item is not None:
-                normalized_sequence.append(normalized_item)
-        return normalized_sequence
 
     @staticmethod
     def normalize_flat_schema(

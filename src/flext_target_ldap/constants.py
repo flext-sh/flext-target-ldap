@@ -6,15 +6,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap.constants import FlextLdapConstants
-from flext_meltano import FlextMeltanoConstants
+from flext_ldap import c as ldap_c
+from flext_meltano import c
 
 from flext_target_ldap import FlextTargetLdapConstantsBase
 
 
 class FlextTargetLdapConstants(
-    FlextMeltanoConstants,
-    FlextLdapConstants,
+    c,
+    ldap_c,
 ):
     """LDAP target loading-specific constants following FLEXT unified pattern.
 
@@ -23,8 +23,8 @@ class FlextTargetLdapConstants(
 
     Access patterns:
         - c.ENV_PREFIX, c.CONNECT_TIMEOUT, etc. (target-specific constants)
-        - c.Ldap.* (inherited from FlextLdapConstants)
-        - c.* (inherited from FlextLdifConstants via FlextLdapConstants)
+        - c.Ldap.* (inherited from c)
+        - c.* (inherited from FlextLdifConstants via c)
     """
 
     class TargetLdap(
@@ -34,4 +34,5 @@ class FlextTargetLdapConstants(
 
 
 c = FlextTargetLdapConstants
+
 __all__: list[str] = ["FlextTargetLdapConstants", "c"]

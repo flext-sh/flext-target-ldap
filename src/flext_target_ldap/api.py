@@ -181,6 +181,14 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Process a RECORD message."""
         dn_value = record.get("dn")
         dn_text = "" if dn_value is None else str(dn_value)
+        attributes: dict[str, list[str]] = {
+            str(key): api.to_str_values(value)
+            for key, value in record.items()
+            if key not in {"dn", "_sdc_deleted_at"}
+        }
+        object_classes = attributes.pop("objectClass", None)
+        if object_classes is None:
+            object_classes = attributes.pop("objectclass", None)
         if not dn_text.strip():
             dn = FlextTargetLdap._construct_dn(stream, record, cfg.base_dn)
         else:
@@ -190,15 +198,15 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             return
         try:
             if dn in seen_dns:
-                api.modify_entry(dn, record)
+                api.modify_entry(dn, attributes)
             else:
-                api.add_entry(dn, record)
+                api.add_entry(dn, attributes, object_classes)
                 seen_dns.add(dn)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             FlextTargetLdap._logger.warning(
                 f"Failed to add entry {dn}, attempting modify: {exc}"
             )
-            api.modify_entry(dn, record)
+            api.modify_entry(dn, attributes)
 
     @staticmethod
     def run_cli(settings: str | None = None) -> None:
