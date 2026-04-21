@@ -32,15 +32,15 @@ class FlextTargetLdapSettings(FlextSettings):
     @classmethod
     def normalize_flat_settings(
         cls,
-        data: Mapping[str, t.ValueOrModel | None] | Self,
-    ) -> Mapping[str, t.ValueOrModel | None] | Self:
+        data: Mapping[str, t.RuntimeData | None] | Self,
+    ) -> Mapping[str, t.RuntimeData | None] | Self:
         """Normalize flat Singer settings into the canonical nested shape."""
         if isinstance(data, cls) or not isinstance(data, Mapping):
             return data
         if "connection" in data:
             return data
 
-        normalized: dict[str, t.ValueOrModel | None] = dict(data)
+        normalized: dict[str, t.RuntimeData | None] = dict(data)
         bind_password = normalized.get("bind_password", normalized.get("password"))
         search_scope = normalized.get("search_scope")
         if isinstance(search_scope, str):
