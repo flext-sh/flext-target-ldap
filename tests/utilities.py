@@ -45,17 +45,7 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
                     "base_dn": "dc=test,dc=com",
                     "use_ssl": False,
                     "timeout": 30,
-                    "validate_records": True,
-                    "user_rdn_attribute": "uid",
-                    "group_rdn_attribute": "cn",
-                    "dn_templates": {
-                        "users": "uid={uid},ou=users,dc=test,dc=com",
-                        "groups": "cn={cn},ou=groups,dc=test,dc=com",
-                    },
-                    "default_object_classes": {
-                        "users": ["inetOrgPerson", "person", "top"],
-                        "groups": ["groupOfNames", "top"],
-                    },
+                    "object_classes": ["inetOrgPerson", "person", "top"],
                 }
 
             class ProcessTarget(FlextTargetLdapTarget):

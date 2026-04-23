@@ -47,7 +47,7 @@ class FlextTargetLdapSettings(FlextSettings):
         search_scope = normalized.get("search_scope")
         if isinstance(search_scope, str):
             normalized["search_scope"] = search_scope.upper()
-        normalized["connection"] = m.Ldap.ConnectionConfig.model_validate({
+        connection_config = m.Ldap.ConnectionConfig.model_validate({
             "host": normalized.get("host", c.LOCALHOST),
             "port": normalized.get("port", c.Ldap.ConnectionDefaults.PORT),
             "use_ssl": normalized.get(
@@ -76,6 +76,20 @@ class FlextTargetLdapSettings(FlextSettings):
                 c.Ldap.ConnectionDefaults.AUTO_RANGE,
             ),
         })
+        for consumed_key in (
+            "host",
+            "port",
+            "use_ssl",
+            "use_tls",
+            "bind_dn",
+            "bind_password",
+            "password",
+            "timeout",
+            "auto_bind",
+            "auto_range",
+        ):
+            normalized.pop(consumed_key, None)
+        normalized["connection"] = connection_config
         return normalized
 
     connection: Annotated[
