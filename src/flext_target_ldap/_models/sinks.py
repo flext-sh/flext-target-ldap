@@ -43,11 +43,11 @@ class FlextTargetLdapSink:
     def process_record(
         self,
         _record: t.TargetLdap.RecordPayload,
-        _context: t.TargetLdap.RecordPayload,
+        context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a record using the target."""
         try:
-            return self.target.process_record(_record, _context)
+            return self.target.process_record(_record, context)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             return r[bool].fail(f"Record processing failed: {e}")
 
@@ -67,10 +67,13 @@ class FlextTargetLdapTarget:
     def process_record(
         self,
         _record: t.TargetLdap.RecordPayload,
-        _context: t.TargetLdap.RecordPayload,
+        context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a record with the concrete target runtime."""
-        return r[bool].fail("Target does not implement process_record")
+        context_keys = tuple(sorted(str(key) for key in context))
+        return r[bool].fail(
+            f"Target does not implement process_record for context keys: {context_keys}"
+        )
 
 
 logger = u.fetch_logger(__name__)
@@ -153,14 +156,14 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         """Get processing results."""
         return self._processing_result
 
-    def process_batch(self, _context: t.TargetLdap.RecordPayload) -> None:
+    def process_batch(self, context: t.TargetLdap.RecordPayload) -> None:
         """Process a batch of records."""
         setup_result: p.Result[FlextTargetLdapClient] = self.setup_client()
         if not setup_result.success:
             logger.error(f"Cannot process batch: {setup_result.error or ''}")
             return
         try:
-            records_raw = _context.get("records", [])
+            records_raw = context.get("records", [])
             records: MutableSequence[t.TargetLdap.RecordPayload] = []
             if isinstance(records_raw, list):
                 records.extend(item for item in records_raw if isinstance(item, dict))
@@ -172,7 +175,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
                     normalized_record: t.TargetLdap.MutableRecordPayload = {}
                     for k, v in record.items():
                         normalized_record[str(k)] = v
-                    self.process_record(normalized_record, _context)
+                    self.process_record(normalized_record, context)
             logger.info(
                 f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}",
             )
@@ -183,7 +186,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
     def process_record(
         self,
         _record: t.TargetLdap.RecordPayload,
-        _context: t.TargetLdap.RecordPayload,
+        context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
@@ -349,7 +352,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
     def process_record(
         self,
         _record: t.TargetLdap.RecordPayload,
-        _context: t.TargetLdap.RecordPayload,
+        context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a user record."""
         if not self.client:
@@ -455,7 +458,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
     def process_record(
         self,
         _record: t.TargetLdap.RecordPayload,
-        _context: t.TargetLdap.RecordPayload,
+        context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a group record."""
         if not self.client:
@@ -556,7 +559,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
     def process_record(
         self,
         _record: t.TargetLdap.RecordPayload,
-        _context: t.TargetLdap.RecordPayload,
+        context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process an organizational unit record."""
         if not self.client:

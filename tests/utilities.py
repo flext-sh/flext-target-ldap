@@ -72,10 +72,10 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
                 def process_record(
                     self,
                     _record: TestsFlextTargetLdapTypes.TargetLdap.RecordPayload,
-                    _context: TestsFlextTargetLdapTypes.TargetLdap.RecordPayload,
+                    context: TestsFlextTargetLdapTypes.TargetLdap.RecordPayload,
                 ) -> p.Result[bool]:
                     """Record the delegated call and report success."""
-                    self.calls.append((_record, _context))
+                    self.calls.append((_record, context))
                     return r[bool].ok(value=True)
 
 

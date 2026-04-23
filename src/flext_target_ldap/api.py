@@ -39,11 +39,11 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     class _DefaultCliHelper:
         """Default CLI helper for printing output."""
 
-        _logger = u.fetch_logger(__name__)
+        logger = u.fetch_logger(__name__)
 
         def print(self, msg: str) -> None:
             """Print a message."""
-            self._logger.info(msg)
+            self.logger.info(msg)
 
     class _QuietCliHelper(_DefaultCliHelper):
         """Quiet CLI helper for state messages."""
@@ -51,12 +51,12 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         @override
         def print(self, msg: str) -> None:
             """Print a message at debug level."""
-            self._logger.debug(msg)
+            self.logger.debug(msg)
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
     settings: t.TargetLdap.SettingsPayload
-    _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
+    logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     @override
     def __init__(
@@ -102,22 +102,22 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         }
         sink_class = sink_mapping.get(stream_name)
         if sink_class is None:
-            self._logger.warning(
+            self.logger.warning(
                 "No specific sink found for stream '%s', using base sink",
                 stream_name,
             )
             return FlextTargetLdapBaseSink
-        self._logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
+        self.logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
         return sink_class
 
     def setup(self) -> None:
         """Set up the LDAP target."""
         _ = self.orchestrator
-        self._logger.info("Orchestrator initialized successfully")
+        self.logger.info("Orchestrator initialized successfully")
         self._container = FlextContainer.shared()
-        self._logger.info("DI container initialized successfully")
+        self.logger.info("DI container initialized successfully")
         validated_settings = FlextTargetLdapSettings.model_validate(self.settings)
-        self._logger.info(
+        self.logger.info(
             "LDAP target setup completed for host: %s",
             validated_settings.connection.host,
         )
@@ -126,16 +126,16 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Teardown the LDAP target."""
         if self._orchestrator:
             self._orchestrator = None
-            self._logger.info("Orchestrator cleaned up")
+            self.logger.info("Orchestrator cleaned up")
         if self._container is not None:
             self._container = None
-            self._logger.info("DI container cleaned up")
-        self._logger.info("LDAP target teardown completed")
+            self.logger.info("DI container cleaned up")
+        self.logger.info("LDAP target teardown completed")
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
         _ = FlextTargetLdapSettings.model_validate(self.settings)
-        self._logger.info("LDAP target configuration validated successfully")
+        self.logger.info("LDAP target configuration validated successfully")
 
     @staticmethod
     def _create_cli_helper(*, quiet: bool = False) -> FlextTargetLdap._DefaultCliHelper:
@@ -203,7 +203,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                 api.add_entry(dn, attributes, object_classes)
                 seen_dns.add(dn)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
-            FlextTargetLdap._logger.warning(
+            FlextTargetLdap.logger.warning(
                 f"Failed to add entry {dn}, attempting modify: {exc}"
             )
             api.modify_entry(dn, attributes)
@@ -255,10 +255,10 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                         seen_dns,
                     )
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS:
-                    FlextTargetLdap._logger.exception("Malformed input line failed")
+                    FlextTargetLdap.logger.exception("Malformed input line failed")
                     raise
         except c.Meltano.SINGER_SAFE_EXCEPTIONS:
-            FlextTargetLdap._logger.exception("Unexpected error in CLI execution")
+            FlextTargetLdap.logger.exception("Unexpected error in CLI execution")
             raise
 
     cli: ClassVar[Callable[..., None]] = run_cli

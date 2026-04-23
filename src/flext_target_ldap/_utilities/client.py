@@ -25,7 +25,7 @@ class FlextTargetLdapClient:
     This client delegates LDAP operations to flext-ldap without compatibility layers.
     """
 
-    _logger: ClassVar = u.fetch_logger(__name__)
+    logger: ClassVar = u.fetch_logger(__name__)
 
     @staticmethod
     def to_str_values(
@@ -93,7 +93,7 @@ class FlextTargetLdapClient:
         self._password = connection_settings.bind_password or ""
         self._api = ldap
         self._current_session_id: str | None = None
-        FlextTargetLdapClient._logger.info(
+        FlextTargetLdapClient.logger.info(
             f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",
         )
 
@@ -164,7 +164,7 @@ class FlextTargetLdapClient:
     ) -> p.Result[bool]:
         """Add LDAP entry using flext-ldap API."""
         try:
-            FlextTargetLdapClient._logger.info(
+            FlextTargetLdapClient.logger.info(
                 "Adding LDAP entry using flext-ldap API: %s",
                 dn,
             )
@@ -182,7 +182,7 @@ class FlextTargetLdapClient:
             finally:
                 self._api.disconnect()
         except (RuntimeError, ValueError, TypeError) as e:
-            FlextTargetLdapClient._logger.exception("Failed to add entry %s", dn)
+            FlextTargetLdapClient.logger.exception("Failed to add entry %s", dn)
             return r[bool].fail(f"Add entry failed: {e}")
 
     def connect(self) -> p.Result[bool]:
@@ -192,13 +192,13 @@ class FlextTargetLdapClient:
             if connect_result.failure:
                 return r[bool].fail(f"Connection failed: {connect_result.error}")
             self._api.disconnect()
-            FlextTargetLdapClient._logger.info(
+            FlextTargetLdapClient.logger.info(
                 f"LDAP connectivity validated for {self.settings.host}:{self.settings.port}",
             )
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             error_msg = f"Connection error: {e}"
-            FlextTargetLdapClient._logger.exception(error_msg)
+            FlextTargetLdapClient.logger.exception(error_msg)
             return r[bool].fail(error_msg)
 
     def delete_entry(self, dn: str) -> p.Result[bool]:
@@ -206,7 +206,7 @@ class FlextTargetLdapClient:
         try:
             if not dn:
                 return r[bool].fail("DN required")
-            FlextTargetLdapClient._logger.info(
+            FlextTargetLdapClient.logger.info(
                 "Deleting LDAP entry using flext-ldap API: %s",
                 dn,
             )
@@ -216,7 +216,7 @@ class FlextTargetLdapClient:
             try:
                 result = self._api.delete(dn)
                 if result.success:
-                    FlextTargetLdapClient._logger.debug(
+                    FlextTargetLdapClient.logger.debug(
                         "Successfully deleted LDAP entry: %s",
                         dn,
                     )
@@ -225,7 +225,7 @@ class FlextTargetLdapClient:
             finally:
                 self._api.disconnect()
         except (RuntimeError, ValueError, TypeError) as e:
-            FlextTargetLdapClient._logger.exception("Failed to delete entry %s", dn)
+            FlextTargetLdapClient.logger.exception("Failed to delete entry %s", dn)
             return r[bool].fail(f"Delete entry failed: {e}")
 
     def disconnect(self) -> p.Result[bool]:
@@ -235,7 +235,7 @@ class FlextTargetLdapClient:
             self._current_session_id = None
             return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
-            FlextTargetLdapClient._logger.exception(
+            FlextTargetLdapClient.logger.exception(
                 "Failed to disconnect LDAP client",
             )
             return r[bool].fail(f"Disconnect failed: {e}")
@@ -245,7 +245,7 @@ class FlextTargetLdapClient:
         try:
             if not dn:
                 return r[bool].fail("DN required")
-            FlextTargetLdapClient._logger.info("Checking if LDAP entry exists: %s", dn)
+            FlextTargetLdapClient.logger.info("Checking if LDAP entry exists: %s", dn)
             search_result = self.search_entry(
                 base_dn=dn,
                 search_filter="(objectClass=*)",
@@ -255,7 +255,7 @@ class FlextTargetLdapClient:
                 return r[bool].ok(bool(search_result.value))
             return r[bool].ok(value=False)
         except (RuntimeError, ValueError, TypeError) as e:
-            FlextTargetLdapClient._logger.exception(
+            FlextTargetLdapClient.logger.exception(
                 "Failed to check entry existence: %s",
                 dn,
             )
@@ -270,13 +270,13 @@ class FlextTargetLdapClient:
         try:
             if not dn:
                 return r[m.Ldif.Entry | None].fail("DN required")
-            FlextTargetLdapClient._logger.info("Getting LDAP entry: %s", dn)
+            FlextTargetLdapClient.logger.info("Getting LDAP entry: %s", dn)
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
             if search_result.success and search_result.value:
                 return r[m.Ldif.Entry | None].ok(search_result.value[0])
             return r[m.Ldif.Entry | None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
-            FlextTargetLdapClient._logger.exception("Failed to get entry: %s", dn)
+            FlextTargetLdapClient.logger.exception("Failed to get entry: %s", dn)
             return r[m.Ldif.Entry | None].fail(f"Get entry failed: {e}")
 
     def modify_entry(
@@ -286,7 +286,7 @@ class FlextTargetLdapClient:
     ) -> p.Result[bool]:
         """Modify LDAP entry using flext-ldap API."""
         try:
-            FlextTargetLdapClient._logger.info(
+            FlextTargetLdapClient.logger.info(
                 "Modifying LDAP entry using flext-ldap API: %s",
                 dn,
             )
@@ -296,7 +296,7 @@ class FlextTargetLdapClient:
             try:
                 result = self._api.modify(dn, self._build_modify_changes(changes))
                 if result.success:
-                    FlextTargetLdapClient._logger.debug(
+                    FlextTargetLdapClient.logger.debug(
                         "Successfully modified LDAP entry: %s",
                         dn,
                     )
@@ -304,10 +304,10 @@ class FlextTargetLdapClient:
             finally:
                 self._api.disconnect()
             error_msg = f"Failed to modify entry {dn}: {result.error}"
-            FlextTargetLdapClient._logger.error(error_msg)
+            FlextTargetLdapClient.logger.error(error_msg)
             return r[bool].fail(error_msg)
         except (RuntimeError, ValueError, TypeError) as e:
-            FlextTargetLdapClient._logger.exception("Failed to modify entry %s", dn)
+            FlextTargetLdapClient.logger.exception("Failed to modify entry %s", dn)
             return r[bool].fail(f"Modify entry failed: {e}")
 
     def search_entry(
@@ -320,7 +320,7 @@ class FlextTargetLdapClient:
         try:
             if not base_dn:
                 return r[Sequence[m.Ldif.Entry]].fail("Base DN required")
-            FlextTargetLdapClient._logger.info(
+            FlextTargetLdapClient.logger.info(
                 "Searching LDAP entries using flext-ldap API: %s with filter %s",
                 base_dn,
                 search_filter,
@@ -347,15 +347,15 @@ class FlextTargetLdapClient:
                 ] = search_res.entries
                 for entry in ldap_entries:
                     entries.append(u.Ldap.search_entry_to_ldif_entry(entry))
-                FlextTargetLdapClient._logger.debug(
+                FlextTargetLdapClient.logger.debug(
                     "Successfully found %d LDAP entries",
                     len(entries),
                 )
                 return r[Sequence[m.Ldif.Entry]].ok(entries)
-            FlextTargetLdapClient._logger.debug("No LDAP entries found")
+            FlextTargetLdapClient.logger.debug("No LDAP entries found")
             return r[Sequence[m.Ldif.Entry]].ok([])
         except (RuntimeError, ValueError, TypeError) as e:
-            FlextTargetLdapClient._logger.exception(
+            FlextTargetLdapClient.logger.exception(
                 "Failed to search entries in %s",
                 base_dn,
             )
