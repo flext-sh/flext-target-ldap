@@ -137,9 +137,10 @@ class FlextTargetLdapMigrationValidator:
         object_classes: t.StrSequence,
     ) -> p.Result[bool]:
         """Validate individual LDAP entry - alias for validate method."""
-        attributes_payload: t.TargetLdap.MutableRecordPayload = {
-            str(key): list(value) for key, value in attributes.items()
-        }
+        attributes_payload: t.TargetLdap.MutableRecordPayload = {}
+        for key, value in attributes.items():
+            value_list: list[t.JsonValue] = [str(v) for v in value]
+            attributes_payload[str(key)] = value_list
         return self.validate(dn, attributes_payload, object_classes)
 
 
