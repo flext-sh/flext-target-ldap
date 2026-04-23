@@ -34,11 +34,11 @@ class FlextTargetLdapTransformationEngine:
 
     def transform(
         self,
-        data: t.ContainerValueMapping,
+        data: t.TargetLdap.RecordPayload,
     ) -> p.Result[m.TargetLdap.DataTransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: t.MutableContainerValueMapping = {
+            transformed_data: t.TargetLdap.MutableRecordPayload = {
                 str(key): value for key, value in data.items()
             }
             applied_rules: MutableSequence[str] = []
@@ -99,9 +99,9 @@ class FlextTargetLdapMigrationValidator:
 
     def validate(
         self,
-        data: t.ContainerValueMapping | str,
-        attributes: t.ContainerValueMapping | None = None,
-        object_classes: Sequence[t.Container] | None = None,
+        data: t.TargetLdap.RecordPayload | str,
+        attributes: t.TargetLdap.RecordPayload | None = None,
+        object_classes: t.StrSequence | None = None,
     ) -> p.Result[bool]:
         """Validate migration data."""
         try:
@@ -133,11 +133,14 @@ class FlextTargetLdapMigrationValidator:
     def validate_entry(
         self,
         dn: str,
-        attributes: t.ContainerValueMapping,
+        attributes: t.Ldap.OperationAttributes,
         object_classes: t.StrSequence,
     ) -> p.Result[bool]:
         """Validate individual LDAP entry - alias for validate method."""
-        return self.validate(dn, attributes, object_classes)
+        attributes_payload: t.TargetLdap.MutableRecordPayload = {
+            str(key): list(value) for key, value in attributes.items()
+        }
+        return self.validate(dn, attributes_payload, object_classes)
 
 
 __all__: t.StrSequence = [

@@ -38,64 +38,62 @@ class FlextTargetLdapUtilities(u, ldap_u):
         """Singer protocol utilities for target operations."""
 
         @staticmethod
-        def build_singer_catalog() -> t.ContainerValueMapping:
+        def build_singer_catalog() -> t.TargetLdap.CatalogPayload:
             """Build the canonical Singer catalog for LDAP targets."""
-            return t.Cli.JSON_MAPPING_ADAPTER.validate_python(
-                u.Cli.normalize_json_value({
-                    "streams": [
-                        {
-                            "tap_stream_id": "users",
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "username": {"type": "string"},
-                                    "email": {"type": "string"},
-                                    "first_name": {"type": "string"},
-                                    "last_name": {"type": "string"},
-                                    "full_name": {"type": "string"},
-                                    "phone": {"type": "string"},
-                                    "department": {"type": "string"},
-                                    "title": {"type": "string"},
-                                },
-                                "required": ["username"],
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+                "streams": [
+                    {
+                        "tap_stream_id": "users",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "username": {"type": "string"},
+                                "email": {"type": "string"},
+                                "first_name": {"type": "string"},
+                                "last_name": {"type": "string"},
+                                "full_name": {"type": "string"},
+                                "phone": {"type": "string"},
+                                "department": {"type": "string"},
+                                "title": {"type": "string"},
                             },
+                            "required": ["username"],
                         },
-                        {
-                            "tap_stream_id": "groups",
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"},
-                                    "description": {"type": "string"},
-                                    "members": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                    },
+                    },
+                    {
+                        "tap_stream_id": "groups",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "description": {"type": "string"},
+                                "members": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
                                 },
-                                "required": ["name"],
                             },
+                            "required": ["name"],
                         },
-                        {
-                            "tap_stream_id": "organizational_units",
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"},
-                                    "description": {"type": "string"},
-                                },
-                                "required": ["name"],
+                    },
+                    {
+                        "tap_stream_id": "organizational_units",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "description": {"type": "string"},
                             },
+                            "required": ["name"],
                         },
-                    ],
-                })
-            )
+                    },
+                ],
+            })
 
         class TypeConversion:
             """Type coercion utilities for Singer settings values to typed Python values."""
 
             @staticmethod
             def build_connection_config(
-                settings: Mapping[str, m.ConfigMap | t.Container],
+                settings: t.TargetLdap.SettingsPayload,
             ) -> m.Ldap.ConnectionConfig:
                 """Build LDAP ConnectionConfig from a flat settings mapping."""
                 return m.Ldap.ConnectionConfig(
@@ -122,7 +120,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def to_str(
-                value: t.Container | m.ConfigMap | None,
+                value: t.JsonValue | m.ConfigMap | None,
                 default: str = "",
             ) -> str:
                 """Coerce a settings value to str."""
@@ -135,7 +133,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def to_int(
-                value: t.Container | m.ConfigMap | None,
+                value: t.JsonValue | m.ConfigMap | None,
                 default: int = 0,
             ) -> int:
                 """Coerce a settings value to int."""
@@ -156,7 +154,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def to_bool(
-                value: t.Container | m.ConfigMap | None,
+                value: t.JsonValue | m.ConfigMap | None,
                 *,
                 default: bool = False,
             ) -> bool:
@@ -173,7 +171,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def extract_attribute_mapping(
-                settings: Mapping[str, m.ConfigMap | t.Container],
+                settings: t.TargetLdap.SettingsPayload,
             ) -> t.StrMapping:
                 """Extract attribute mapping from settings."""
                 raw = settings.get("attribute_mapping", {})
@@ -189,7 +187,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def extract_object_classes(
-                settings: Mapping[str, m.ConfigMap | t.Container],
+                settings: t.TargetLdap.SettingsPayload,
             ) -> t.StrSequence:
                 """Extract object classes from settings."""
                 raw = settings.get("object_classes")
@@ -204,7 +202,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def build_ldap_dn(
-                record: Mapping[str, m.ConfigMap],
+                record: t.TargetLdap.RecordPayload,
                 dn_template: str,
                 base_dn: str,
             ) -> p.Result[str]:
@@ -240,7 +238,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def convert_record_to_ldap_attributes(
-                record: Mapping[str, m.ConfigMap],
+                record: t.TargetLdap.RecordPayload,
                 attribute_mapping: t.StrMapping | None = None,
             ) -> p.Result[Mapping[str, Sequence[bytes]]]:
                 """Convert Singer record to LDAP attributes format.
@@ -276,7 +274,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def extract_object_classes(
-                record: Mapping[str, m.ConfigMap],
+                record: t.TargetLdap.RecordPayload,
                 default_object_classes: t.StrSequence | None = None,
             ) -> t.StrSequence:
                 """Extract object classes for LDAP entry.
@@ -484,7 +482,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
             @staticmethod
             def coerce_container_value(
                 value: m.ConfigMap | t.RuntimeData,
-            ) -> m.ConfigMap | t.ContainerValueList | t.Container | None:
+            ) -> m.ConfigMap | t.JsonList | t.JsonValue | None:
                 """Coerce a container value to a normalized form for LDAP operations.
 
                 Recursively normalizes BaseModel, scalar, list, and Mapping values into
@@ -505,7 +503,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
                 if isinstance(value, (str, int, float, bool, datetime)):
                     return value
                 if isinstance(value, list):
-                    normalized_list: MutableSequence[t.Container] = []
+                    normalized_list: MutableSequence[t.JsonValue] = []
                     for item in value:
                         if isinstance(
                             item, (str, int, float, bool, datetime, list, dict)

@@ -18,7 +18,7 @@ from flext_target_ldap import FlextTargetLdapSettings, c, p, r, t
 
 
 def validate_ldap_target_config(
-    settings: t.ContainerValueMapping,
+    settings: t.JsonMapping,
 ) -> p.Result[FlextTargetLdapSettings]:
     """Validate raw target settings with the canonical settings model."""
     try:

@@ -26,8 +26,8 @@ class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
             """Target LDAP-specific test type aliases."""
 
             type ProcessCall = tuple[
-                FlextTargetLdapTypes.StrMapping,
-                FlextTargetLdapTypes.StrMapping,
+                FlextTargetLdapTypes.TargetLdap.RecordPayload,
+                FlextTargetLdapTypes.TargetLdap.RecordPayload,
             ]
 
 

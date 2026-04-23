@@ -35,14 +35,17 @@ class FlextTargetLdapServiceRuntime:
             runtime_sink: FlextTargetLdapSink,
             target: m.Meltano.SingerTargetBase,
             stream_name: str,
-            schema: t.MutableMappingKV[str, t.Container],
+            schema: t.TargetLdap.MutableSchemaPayload,
             key_properties: t.StrSequence,
         ) -> FlextTargetLdapServiceRuntime.Sink:
             """Create an adapter sink and attach the LDAP runtime sink."""
+            schema_dict: dict[str, t.JsonValue] = {
+                str(key): value for key, value in schema.items()
+            }
             service_sink = cls(
                 target=target,
                 stream_name=stream_name,
-                schema=schema,
+                schema=schema_dict,
                 key_properties=key_properties,
             )
             service_sink._runtime_sink = runtime_sink
@@ -51,7 +54,7 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_batch(
             self,
-            context: Mapping[str, t.Container],
+            context: Mapping[str, t.JsonValue],
         ) -> None:
             """Singer batch hook is handled record-by-record by the runtime sink."""
             _ = context
@@ -59,8 +62,8 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_record(
             self,
-            record: Mapping[str, t.Container],
-            context: Mapping[str, t.Container],
+            record: Mapping[str, t.JsonValue],
+            context: Mapping[str, t.JsonValue],
         ) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
@@ -77,7 +80,7 @@ class FlextTargetLdapServiceRuntime:
         *,
         stream_name: str,
         schema: t.FlatContainerMapping,
-        target_config: Mapping[str, t.Container],
+        target_config: Mapping[str, t.JsonValue],
     ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
         normalized_target_config = u.Meltano.normalize_runtime_json_mapping(
@@ -104,17 +107,19 @@ class FlextTargetLdapServiceRuntime:
                 validate_config=False,
             ),
             stream_name=stream_name,
-            schema=dict(normalized_schema),
+            schema=normalized_schema,
             key_properties=[],
         )
 
     @staticmethod
     def normalize_flat_schema(
         schema: t.FlatContainerMapping,
-    ) -> t.MutableMappingKV[str, t.Container]:
+    ) -> t.TargetLdap.MutableSchemaPayload:
         """Normalize a flat Singer schema to the LDAP runtime contract."""
         return {
-            key: (str(value) if isinstance(value, Path) else value)
+            key: u.Cli.normalize_json_value(
+                str(value) if isinstance(value, Path) else value
+            )
             for key, value in schema.items()
         }
 

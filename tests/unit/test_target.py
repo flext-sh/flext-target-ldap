@@ -32,20 +32,20 @@ from tests import r, t, u
 def test_get_sink_class(
     key: str,
     expected_cls: type[FlextTargetLdapBaseSink],
-    mock_ldap_config: t.ContainerValueMapping,
+    mock_ldap_config: t.TargetLdap.SettingsPayload,
 ) -> None:
     target = FlextTargetLdap(settings=mock_ldap_config)
     assert target.get_sink_class(key) is expected_cls
 
 
-def test_target_initialization(mock_ldap_config: t.ContainerValueMapping) -> None:
+def test_target_initialization(mock_ldap_config: t.TargetLdap.SettingsPayload) -> None:
     target = FlextTargetLdap(settings=mock_ldap_config)
     assert target.name == "target-ldap"
     assert target.settings == mock_ldap_config
 
 
 def test_dn_template_processing(
-    mock_ldap_config: t.MutableContainerValueMapping,
+    mock_ldap_config: t.TargetLdap.MutableSettingsPayload,
 ) -> None:
     mock_ldap_config["user_rdn_attribute"] = "uid"
     mock_ldap_config["base_dn"] = "ou=people,dc=test,dc=com"
@@ -58,7 +58,7 @@ def test_dn_template_processing(
 
 
 def test_object_classes_processing(
-    mock_ldap_config: t.MutableContainerValueMapping,
+    mock_ldap_config: t.TargetLdap.MutableSettingsPayload,
 ) -> None:
     mock_ldap_config["users_object_classes"] = ["customPerson", "top"]
     target = FlextTargetLdap(settings=mock_ldap_config)
@@ -69,8 +69,8 @@ def test_object_classes_processing(
 
 
 def test_process_record(
-    mock_ldap_config: t.ContainerValueMapping,
-    sample_user_record: t.ContainerValueMapping,
+    mock_ldap_config: t.TargetLdap.SettingsPayload,
+    sample_user_record: t.TargetLdap.RecordPayload,
 ) -> None:
     mock_client = MagicMock()
     mock_client.add_entry.return_value = r[bool].ok(value=True)
@@ -83,14 +83,16 @@ def test_process_record(
     mock_client.add_entry.assert_called_once()
 
 
-def test_process_delete_record(mock_ldap_config: t.ContainerValueMapping) -> None:
+def test_process_delete_record(
+    mock_ldap_config: t.TargetLdap.SettingsPayload,
+) -> None:
     mock_client = MagicMock()
     mock_client.add_entry.return_value = r[bool].fail("Entry already exists")
     target = FlextTargetLdap(settings=mock_ldap_config)
     sink = target.get_sink("users")
     assert isinstance(sink, FlextTargetLdapBaseSink)
     sink.client = mock_client
-    record = {
+    record: t.TargetLdap.RecordPayload = {
         "dn": "uid=jdoe,ou=users,dc=test,dc=com",
         "_sdc_deleted_at": "2024-01-15T10:30:00Z",
     }

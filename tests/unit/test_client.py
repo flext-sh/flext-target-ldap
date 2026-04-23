@@ -9,7 +9,9 @@ from tests import m, r, t
 
 
 @pytest.fixture
-def client(mock_ldap_config: t.ContainerValueMapping) -> FlextTargetLdapClient:
+def client(
+    mock_ldap_config: t.TargetLdap.SettingsPayload,
+) -> FlextTargetLdapClient:
     return FlextTargetLdapClient(settings=mock_ldap_config)
 
 

@@ -35,7 +35,10 @@ def runner() -> Mock:
 
 
 @pytest.fixture
-def config_file(tmp_path: Path, mock_ldap_config: Mapping[str, t.Container]) -> Path:
+def config_file(
+    tmp_path: Path,
+    mock_ldap_config: t.TargetLdap.SettingsPayload,
+) -> Path:
     config_path = tmp_path / "settings.json"
     u.Cli.json_write(config_path, mock_ldap_config)
     return config_path
@@ -59,7 +62,7 @@ def input_file(
 @pytest.fixture
 def mock_ldap_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
     mock_api = MagicMock()
-    monkeypatch.setattr(FlextTargetLdap, "_get_ldap_api", mock_api)
+    monkeypatch.setattr("flext_target_ldap.api.FlextTargetLdapClient", mock_api)
     return mock_api
 
 
@@ -153,7 +156,7 @@ def test_delete_records(
 def test_dn_template_usage(
     mock_ldap_api: MagicMock,
     tmp_path: Path,
-    mock_ldap_config: t.MutableContainerValueMapping,
+    mock_ldap_config: t.TargetLdap.MutableSettingsPayload,
 ) -> None:
     mock_ldap_config["dn_templates"] = {
         "users": "uid={uid},ou=people,dc=test,dc=com",

@@ -21,7 +21,7 @@ logger = u.fetch_logger(__name__)
 class FlextTargetLdapTypeConverter:
     """Convert Singer values to LDAP-safe string values."""
 
-    _COMPLEX_KIND = "t.Container"
+    _COMPLEX_KIND = "t.JsonValue"
 
     @override
     def __init__(self) -> None:
@@ -195,7 +195,7 @@ class FlextTargetLdapSchemaMapper:
                 return r[str].ok("Integer")
             if prop_type == "boolean":
                 return r[str].ok("Boolean")
-            if prop_type in {"t.Container", "array"}:
+            if prop_type in {"t.JsonValue", "array"}:
                 return r[str].ok("OctetString")
             return r[str].ok("DirectoryString")
         except (RuntimeError, ValueError, TypeError) as e:

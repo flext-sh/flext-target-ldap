@@ -27,7 +27,7 @@ class FlextTargetLdapSingerTarget:
     @override
     def __init__(
         self,
-        settings: t.ContainerValueMapping | None = None,
+        settings: t.JsonMapping | None = None,
     ) -> None:
         """Initialize Singer LDAP target.
 
@@ -35,15 +35,15 @@ class FlextTargetLdapSingerTarget:
         settings: Configuration dictionary
 
         Returns:
-        t.Container: Description of return value.
+        t.JsonValue: Description of return value.
 
         """
-        self.settings: t.ContainerValueMapping = settings or {}
+        self.settings: t.JsonMapping = settings or {}
         logger.debug("Initialized Singer LDAP target")
 
     def process_singer_messages(
         self,
-        messages: Sequence[t.ContainerValueMapping],
+        messages: Sequence[t.JsonMapping],
     ) -> p.Result[t.HeaderMapping]:
         """Process Singer messages for LDAP target.
 

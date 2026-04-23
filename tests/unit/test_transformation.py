@@ -56,7 +56,7 @@ def test_transformation_engine_initialization() -> None:
 )
 def test_transform_oracle_dn_structure(
     rules: list[m.TargetLdap.TransformationRule],
-    entry: t.ContainerValueMapping,
+    entry: t.TargetLdap.RecordPayload,
     expected_dn: str,
     expected_rule: str,
 ) -> None:
@@ -76,7 +76,7 @@ def test_transform_oracle_objectclasses() -> None:
         replacement="inetOrgPerson",
     )
     engine = FlextTargetLdapTransformationEngine([rule])
-    entry: t.ContainerValueMapping = {
+    entry: t.TargetLdap.RecordPayload = {
         "dn": "cn=testuser,ou=people,dc=example,dc=com",
         "objectClass": ["orclUser", "top"],
         "cn": "testuser",
@@ -105,7 +105,7 @@ def test_transform_oracle_attributes_and_title_case() -> None:
             replacement="user",
         ),
     ])
-    entry: t.ContainerValueMapping = {
+    entry: t.TargetLdap.RecordPayload = {
         "dn": "cn=testuser,ou=people,dc=example,dc=com",
         "objectClass": ["orclUser"],
         "description": "Oracle User Account",
@@ -127,7 +127,7 @@ def test_remove_empty_attributes() -> None:
             replacement="",
         )
     ])
-    entry: t.ContainerValueMapping = {
+    entry: t.TargetLdap.RecordPayload = {
         "dn": "cn=testuser,ou=people,dc=example,dc=com",
         "objectClass": ["person"],
         "cn": "testuser",
@@ -147,7 +147,7 @@ def test_dry_run_transformation() -> None:
         replacement="inetOrgPerson",
     )
     engine = FlextTargetLdapTransformationEngine([rule])
-    entry: t.ContainerValueMapping = {
+    entry: t.TargetLdap.RecordPayload = {
         "dn": "cn=testuser,ou=people,dc=invaliddc",
         "objectClass": ["orclUser"],
         "cn": "testuser",
@@ -167,7 +167,7 @@ def test_transformation_statistics() -> None:
             replacement="inetOrgPerson",
         )
     ])
-    entries: Sequence[t.ContainerValueMapping] = [
+    entries: Sequence[t.TargetLdap.RecordPayload] = [
         {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
         {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
         {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
@@ -233,7 +233,7 @@ def test_transformation_statistics() -> None:
 )
 def test_migration_validator_various_inputs(
     dn: str,
-    attributes: t.ContainerValueMapping,
+    attributes: t.TargetLdap.RecordPayload,
     object_classes: list[str],
     expected_success: bool,
     expected_error_substring: str | None,
@@ -290,7 +290,7 @@ def test_full_oracle_migration_workflow() -> None:
     ]
     transformation_engine = FlextTargetLdapTransformationEngine(rules)
     validator = FlextTargetLdapMigrationValidator(strict_mode=False)
-    oracle_entry: t.ContainerValueMapping = {
+    oracle_entry: t.TargetLdap.RecordPayload = {
         "dn": "cn=john.doe,ou=people,dc=invaliddc",
         "objectClass": ["orclUser", "top"],
         "orclSamAccountName": "john.doe",
@@ -332,7 +332,7 @@ def test_classification_and_transformation_integration() -> None:
             replacement="inetOrgPerson",
         )
     ])
-    test_entries: Sequence[t.ContainerValueMapping] = [
+    test_entries: Sequence[t.TargetLdap.RecordPayload] = [
         {
             "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",
             "objectClass": ["orclContext"],

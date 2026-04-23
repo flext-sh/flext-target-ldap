@@ -24,13 +24,13 @@ logger: p.Logger = u.fetch_logger(__name__)
 class FlextTargetLdapOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    settings: t.ConfigurationMapping
+    settings: t.TargetLdap.SettingsPayload
     _typed_config: FlextTargetLdapSettings | None
 
     @override
     def __init__(
         self,
-        settings: FlextTargetLdapSettings | t.ConfigurationMapping | None = None,
+        settings: FlextTargetLdapSettings | t.TargetLdap.SettingsPayload | None = None,
     ) -> None:
         """Initialize LDAP target orchestrator.
 
@@ -43,7 +43,8 @@ class FlextTargetLdapOrchestrator:
             self.settings = dict(settings.model_dump(mode="python"))
         else:
             self._typed_config = None
-            self.settings = dict(settings) if settings is not None else {}
+            empty_settings: t.TargetLdap.SettingsPayload = {}
+            self.settings = dict(settings) if settings is not None else empty_settings
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(

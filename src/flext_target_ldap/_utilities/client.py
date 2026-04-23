@@ -28,7 +28,9 @@ class FlextTargetLdapClient:
     _logger: ClassVar = u.fetch_logger(__name__)
 
     @staticmethod
-    def to_str_values(value: t.Container | t.StrSequence) -> list[str]:
+    def to_str_values(
+        value: t.JsonValue | t.StrSequence,
+    ) -> list[str]:
         if isinstance(value, Sequence) and not isinstance(value, str | bytes):
             return [str(item) for item in value]
         return [str(value)]
@@ -79,7 +81,9 @@ class FlextTargetLdapClient:
     def __init__(
         self,
         settings: (
-            FlextTargetLdapSettings | m.Ldap.ConnectionConfig | t.ContainerValueMapping
+            FlextTargetLdapSettings
+            | m.Ldap.ConnectionConfig
+            | t.TargetLdap.SettingsPayload
         ),
     ) -> None:
         """Initialize LDAP client with connection configuration."""
@@ -111,7 +115,9 @@ class FlextTargetLdapClient:
     @staticmethod
     def _resolve_connection_settings(
         settings: (
-            FlextTargetLdapSettings | m.Ldap.ConnectionConfig | t.ContainerValueMapping
+            FlextTargetLdapSettings
+            | m.Ldap.ConnectionConfig
+            | t.TargetLdap.SettingsPayload
         ),
     ) -> m.Ldap.ConnectionConfig:
         """Resolve any supported settings payload to the connection model."""

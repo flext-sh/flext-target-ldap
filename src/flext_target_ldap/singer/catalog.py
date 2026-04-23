@@ -31,14 +31,14 @@ class FlextTargetLdapCatalogManager:
     def add_stream(
         self,
         stream_name: str,
-        schema: t.ContainerValueMapping,
+        schema: t.TargetLdap.SchemaPayload,
     ) -> p.Result[bool]:
         """Add LDAP stream to catalog."""
         try:
             entry = m.TargetLdap.SingerLDAPCatalogEntry(
                 tap_stream_id=stream_name,
                 stream=stream_name,
-                stream_schema=dict(schema.items()),
+                stream_schema={str(key): value for key, value in schema.items()},
             )
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)

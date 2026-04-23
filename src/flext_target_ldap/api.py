@@ -55,14 +55,14 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    settings: t.ContainerValueMapping
+    settings: t.TargetLdap.SettingsPayload
     _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     @override
     def __init__(
         self,
         *,
-        settings: t.ContainerValueMapping | None = None,
+        settings: t.TargetLdap.SettingsPayload | None = None,
         validate_config: bool = True,
     ) -> None:
         """Initialize LDAP target."""
@@ -79,7 +79,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         return self._orchestrator
 
     @property
-    def singer_catalog(self) -> t.ContainerValueMapping:
+    def singer_catalog(self) -> t.TargetLdap.CatalogPayload:
         """Return the Singer catalog for this target."""
         return u.TargetLdap.build_singer_catalog()
 
@@ -145,7 +145,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         return FlextTargetLdap._DefaultCliHelper()
 
     @staticmethod
-    def _load_config_from_file(config_path: str) -> t.ContainerValueMapping:
+    def _load_config_from_file(config_path: str) -> t.TargetLdap.SettingsPayload:
         """Load configuration from JSON file."""
         try:
             content = Path(config_path).read_text(encoding="utf-8")
@@ -157,7 +157,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     @staticmethod
     def _construct_dn(
         stream: str,
-        record: t.ContainerValueMapping,
+        record: t.TargetLdap.RecordPayload,
         base_dn: str,
     ) -> str:
         """Construct DN from record based on stream type."""
@@ -172,7 +172,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     @staticmethod
     def _process_record_message(
-        record: t.ContainerValueMapping,
+        record: t.TargetLdap.RecordPayload,
         stream: str,
         cfg: FlextTargetLdapSettings,
         api: FlextTargetLdapClient,
@@ -212,7 +212,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def run_cli(settings: str | None = None) -> None:
         """Process Singer JSONL; echo STATE lines to stdout."""
         try:
-            cfg: t.ContainerValueMapping = (
+            cfg: t.TargetLdap.SettingsPayload = (
                 FlextTargetLdap._load_config_from_file(settings) if settings else {}
             )
             validated_settings = FlextTargetLdapSettings.model_validate(cfg)
@@ -244,7 +244,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                     )
                     if not isinstance(record_data, Mapping):
                         continue
-                    normalized_record: t.MutableContainerValueMapping = {}
+                    normalized_record: t.TargetLdap.MutableRecordPayload = {}
                     for key, value in record_data.items():
                         normalized_record[str(key)] = value
                     FlextTargetLdap._process_record_message(

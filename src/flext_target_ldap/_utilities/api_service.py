@@ -21,18 +21,18 @@ class FlextTargetLdapApiService:
 
     def create_ldap_target(
         self,
-        settings: t.ContainerValueMapping,
+        settings: t.TargetLdap.SettingsPayload,
     ) -> p.Result[FlextTargetLdap]:
         """Create an LDAP target from raw settings dict."""
         try:
-            return r[FlextTargetLdap].ok(FlextTargetLdap(settings=dict(settings)))
+            return r[FlextTargetLdap].ok(FlextTargetLdap(settings=settings))
         except (RuntimeError, ValueError, TypeError) as exc:
             return r[FlextTargetLdap].fail(str(exc))
 
     def load_groups_to_ldap(
         self,
-        groups: Sequence[t.ContainerValueMapping],
-        settings: t.ContainerValueMapping,
+        groups: Sequence[t.TargetLdap.RecordPayload],
+        settings: t.TargetLdap.SettingsPayload,
     ) -> p.Result[int]:
         """Load group records into LDAP using the default groups sink."""
         target_result = self.create_ldap_target(settings)
@@ -41,13 +41,13 @@ class FlextTargetLdapApiService:
         target = target_result.value
         sink = target.get_sink_class("groups")(target, "groups", {}, ["name"])
         for group in groups:
-            sink.process_record(dict(group), {})
+            sink.process_record(group, {})
         return r[int].ok(len(groups))
 
     def load_users_to_ldap(
         self,
-        users: Sequence[t.ContainerValueMapping],
-        settings: t.ContainerValueMapping,
+        users: Sequence[t.TargetLdap.RecordPayload],
+        settings: t.TargetLdap.SettingsPayload,
     ) -> p.Result[int]:
         """Load user records into LDAP using the default users sink."""
         target_result = self.create_ldap_target(settings)
@@ -56,12 +56,12 @@ class FlextTargetLdapApiService:
         target = target_result.value
         sink = target.get_sink_class("users")(target, "users", {}, ["username"])
         for user in users:
-            sink.process_record(dict(user), {})
+            sink.process_record(user, {})
         return r[int].ok(len(users))
 
     def test_ldap_connection(
         self,
-        settings: t.ContainerValueMapping,
+        settings: t.TargetLdap.SettingsPayload,
     ) -> p.Result[bool]:
         """Validate settings and test the LDAP connection."""
         try:

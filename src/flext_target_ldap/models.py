@@ -639,7 +639,7 @@ class FlextTargetLdapModels(meltano_m, m):
                 ),
             ]
             stream_schema: Annotated[
-                t.MutableContainerValueMapping,
+                t.TargetLdap.MutableSchemaPayload,
                 u.Field(
                     description="Schema definition for the Singer stream",
                     default_factory=dict,
@@ -680,7 +680,7 @@ class FlextTargetLdapModels(meltano_m, m):
             """Lightweight result of data transformation engine operations."""
 
             transformed_data: Annotated[
-                t.MutableContainerValueMapping,
+                t.TargetLdap.MutableRecordPayload,
                 u.Field(
                     description="Data after applying transformation rules",
                     default_factory=dict,

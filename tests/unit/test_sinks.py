@@ -21,10 +21,10 @@ from tests import t
 
 @pytest.fixture
 def ldap_base_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.ContainerValueMapping
+    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
 ) -> LDAPBaseSink:
     mock_target.settings.update({"base_dn": "dc=example,dc=com"})
-    schema: t.ContainerValueMapping = {
+    schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
     }
     return LDAPBaseSink(
@@ -37,13 +37,13 @@ def ldap_base_sink(
 
 @pytest.fixture
 def users_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.ContainerValueMapping
+    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
 ) -> UsersSink:
     mock_target.settings.update({
         "base_dn": "dc=example,dc=com",
         "user_rdn_attribute": "uid",
     })
-    schema: t.ContainerValueMapping = {
+    schema: t.TargetLdap.SchemaPayload = {
         "properties": {
             "uid": {"type": "string"},
             "cn": {"type": "string"},
@@ -60,13 +60,13 @@ def users_sink(
 
 @pytest.fixture
 def groups_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.ContainerValueMapping
+    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
 ) -> GroupsSink:
     mock_target.settings.update({
         "base_dn": "dc=example,dc=com",
         "group_rdn_attribute": "cn",
     })
-    schema: t.ContainerValueMapping = {
+    schema: t.TargetLdap.SchemaPayload = {
         "properties": {"cn": {"type": "string"}, "member": {"type": "array"}},
     }
     return GroupsSink(
@@ -79,10 +79,10 @@ def groups_sink(
 
 @pytest.fixture
 def ou_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.ContainerValueMapping
+    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
 ) -> OrganizationalUnitsSink:
     mock_target.settings.update({"base_dn": "dc=example,dc=com"})
-    schema: t.ContainerValueMapping = {
+    schema: t.TargetLdap.SchemaPayload = {
         "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
     }
     return OrganizationalUnitsSink(
@@ -95,10 +95,10 @@ def ou_sink(
 
 @pytest.fixture
 def generic_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.ContainerValueMapping
+    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
 ) -> LDAPBaseSink:
     mock_target.settings.update({"base_dn": "dc=example,dc=com"})
-    schema: t.ContainerValueMapping = {
+    schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
     }
     return LDAPBaseSink(
@@ -125,7 +125,9 @@ def test_ldap_sink_initialization(ldap_base_sink: LDAPBaseSink) -> None:
     ],
 )
 def test_base_sink_validation_failures(
-    ldap_base_sink: LDAPBaseSink, record: t.ContainerValueMapping, expected_error: str
+    ldap_base_sink: LDAPBaseSink,
+    record: t.TargetLdap.RecordPayload,
+    expected_error: str,
 ) -> None:
     description = record.get("description")
     if isinstance(description, str) and "id fields" in description:
@@ -137,7 +139,7 @@ def test_base_sink_validation_failures(
 
 
 def test_get_object_classes_default(ldap_base_sink: LDAPBaseSink) -> None:
-    record: t.ContainerValueMapping = {}
+    record: t.TargetLdap.RecordPayload = {}
     classes = ldap_base_sink.get_object_classes(record)
     assert classes == ["top"]
 
@@ -168,7 +170,7 @@ def test_validate_entry_success(ldap_base_sink: LDAPBaseSink) -> None:
 def test_validate_entry_failure_cases(
     ldap_base_sink: LDAPBaseSink,
     dn: str,
-    attributes: t.ContainerValueMapping,
+    attributes: t.Ldap.OperationAttributes,
     object_classes: list[str],
     expected_message: str,
 ) -> None:
