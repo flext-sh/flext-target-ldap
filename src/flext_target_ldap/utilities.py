@@ -481,7 +481,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
 
             @staticmethod
             def coerce_container_value(
-                value: m.ConfigMap | t.RuntimeData,
+                value: m.ConfigMap | t.JsonPayload,
             ) -> m.ConfigMap | t.JsonList | t.JsonValue | None:
                 """Coerce a container value to a normalized form for LDAP operations.
 
@@ -500,7 +500,9 @@ class FlextTargetLdapUtilities(u, ldap_u):
                     return FlextTargetLdapUtilities.TargetLdap.ConfigValidation.coerce_container_value(
                         value.model_dump(),
                     )
-                if isinstance(value, (str, int, float, bool, datetime)):
+                if isinstance(value, datetime):
+                    return value.isoformat()
+                if isinstance(value, (str, int, float, bool)):
                     return value
                 if isinstance(value, list):
                     normalized_list: MutableSequence[t.JsonValue] = []
@@ -517,7 +519,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
                                 normalized_list.append(coerced_item)
                     return normalized_list
                 if isinstance(value, Mapping):
-                    normalized_dict: MutableMapping[str, t.RuntimeData] = {}
+                    normalized_dict: MutableMapping[str, t.JsonPayload] = {}
                     for key, item in value.items():
                         if isinstance(
                             item, (str, int, float, bool, datetime, list, dict)
