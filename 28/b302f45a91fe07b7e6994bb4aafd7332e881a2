@@ -1,0 +1,16 @@
+src/flext_target_ldap/settings.py
+  h_9db9d35f50cf33 37-38,45
+src/flext_target_ldap/utilities.py
+  h_9db9d35f50cf33 484,503-505,522
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "28b302f45a91fe07b7e6994bb4aafd7332e881a2",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
