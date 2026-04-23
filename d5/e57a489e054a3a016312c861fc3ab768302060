@@ -1,0 +1,62 @@
+tests/unit/test_target.py
+  h_9db9d35f50cf33 35,41,48,61,72-73,87,95
+tests/conftest.py
+  h_9db9d35f50cf33 43,51,63,77,92,103,166
+src/flext_target_ldap/_utilities/api_service.py
+  h_9db9d35f50cf33 24,28,34-35,44,49-50,59,64
+src/flext_target_ldap/patterns/ldap_patterns.py
+  h_9db9d35f50cf33 24,198
+src/flext_target_ldap/models.py
+  h_9db9d35f50cf33 642,683
+src/flext_target_ldap/application/orchestrator.py
+  h_9db9d35f50cf33 27,33,46-47
+src/flext_target_ldap/_utilities/transformation.py
+  h_9db9d35f50cf33 37,41,102-104,136,140-143
+tests/utilities.py
+  h_9db9d35f50cf33 17,21,38,71,74-76,78-79
+src/flext_target_ldap/_models/sinks.py
+  h_9db9d35f50cf33 34,45-46,50,61,65-73,99,113,120,135,139-140
+src/flext_target_ldap/utilities.py
+  h_9db9d35f50cf33 41,59,61,74,76,85,87,96,123,136,157,174,190,205,241,277,485,506
+src/flext_target_ldap/_utilities/client.py
+  h_9db9d35f50cf33 32,86,120
+src/flext_target_ldap/singer/catalog.py
+  h_9db9d35f50cf33 34,41
+src/flext_target_ldap/_utilities/settings.py
+  h_9db9d35f50cf33 21
+docs/guides/troubleshooting.md
+  h_9db9d35f50cf33 52,61-63,141,155,675,678
+tests/unit/test_sinks.py
+  h_9db9d35f50cf33 24,27,40,46,63,69,82,85,98,101,129-130,142,173
+src/flext_target_ldap/api.py
+  h_9db9d35f50cf33 58,65,82,148,160,175,215,247
+src/flext_target_ldap/singer/target.py
+  h_9db9d35f50cf33 30,38,41,46
+docs/guides/development.md
+  h_9db9d35f50cf33 84,137,154,193,196,202,295,353,356,405
+tests/unit/test_transformation.py
+  h_9db9d35f50cf33 59,79,108,130,150,170,236,293,335
+src/flext_target_ldap/typings.py
+  h_9db9d35f50cf33 5-8,19-25
+tests/unit/test_client.py
+  h_9db9d35f50cf33 13
+docs/guides/testing.md
+  h_9db9d35f50cf33 528
+tests/typings.py
+  h_9db9d35f50cf33 29-30
+tests/unit/test_integration.py
+  h_9db9d35f50cf33 40,65,159
+src/flext_target_ldap/_utilities/service_runtime.py
+  h_9db9d35f50cf33 38,42-44,48,57,65-66,83,117,120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "d5e57a489e054a3a016312c861fc3ab768302060",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
