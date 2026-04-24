@@ -156,7 +156,7 @@ def test_delete_records(
 def test_dn_template_usage(
     mock_ldap_api: MagicMock,
     tmp_path: Path,
-    mock_ldap_config: t.TargetLdap.MutableSettingsPayload,
+    mock_ldap_config: t.TargetLdap.SettingsPayload,
 ) -> None:
     config_path = tmp_path / "template_config.json"
     u.Cli.json_write(config_path, mock_ldap_config)

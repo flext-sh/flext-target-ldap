@@ -47,22 +47,10 @@ def shared_ldap_container(flext_docker: tk) -> str:
 
 
 @pytest.fixture
-def mock_ldap_config() -> t.TargetLdap.MutableSettingsPayload:
+def mock_ldap_config() -> t.TargetLdap.SettingsPayload:
     """Create mock LDAP configuration for testing."""
     return u.TargetLdap.Tests.build_mock_ldap_config(
         bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-    )
-
-
-@pytest.fixture(name="_mock_ldap_config")
-def mock_ldap_config_internal() -> t.TargetLdap.MutableSettingsPayload:
-    """Create mock LDAP configuration for internal sink testing.
-
-    Provides a valid LDAP configuration dictionary for use in sink fixtures.
-    This fixture is used by sink test classes to initialize target configurations.
-    """
-    return u.TargetLdap.Tests.build_mock_ldap_config(
-        bind_dn="cn=admin,dc=test,dc=com",
     )
 
 
@@ -170,8 +158,8 @@ def mock_ldap_client() -> MagicMock:
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: t.TargetLdap.MutableSettingsPayload) -> MagicMock:
+def mock_target(mock_ldap_config: t.TargetLdap.SettingsPayload) -> MagicMock:
     """Create mock LDAP configuration for testing."""
     target = MagicMock()
-    target.settings = mock_ldap_config
+    target.settings = dict(mock_ldap_config)
     return target

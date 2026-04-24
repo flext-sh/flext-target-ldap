@@ -19,7 +19,7 @@ from typing import override
 from flext_tests import FlextTestsUtilities
 
 from flext_target_ldap import FlextTargetLdapTarget, FlextTargetLdapUtilities, p, r
-from tests import TestsFlextTargetLdapTypes
+from tests import t
 
 
 class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
@@ -35,7 +35,7 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
             def build_mock_ldap_config(
                 *,
                 bind_dn: str,
-            ) -> TestsFlextTargetLdapTypes.TargetLdap.MutableSettingsPayload:
+            ) -> t.TargetLdap.SettingsPayload:
                 """Build a standard mock LDAP configuration for testing."""
                 return {
                     "connection": {
@@ -57,14 +57,14 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
                     """Initialize the recording target with minimal settings."""
                     super().__init__({"base_dn": "dc=test,dc=com"})
                     self.calls: MutableSequence[
-                        TestsFlextTargetLdapTypes.TargetLdap.Tests.ProcessCall
+                        tuple[t.TargetLdap.RecordPayload, t.TargetLdap.RecordPayload]
                     ] = []
 
                 @override
                 def process_record(
                     self,
-                    _record: TestsFlextTargetLdapTypes.TargetLdap.RecordPayload,
-                    context: TestsFlextTargetLdapTypes.TargetLdap.RecordPayload,
+                    _record: t.TargetLdap.RecordPayload,
+                    context: t.TargetLdap.RecordPayload,
                 ) -> p.Result[bool]:
                     """Record the delegated call and report success."""
                     self.calls.append((_record, context))

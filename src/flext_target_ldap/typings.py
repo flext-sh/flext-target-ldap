@@ -17,7 +17,6 @@ class FlextTargetLdapTypes(t, FlextLdapTypes):
         """Target LDAP domain type namespace."""
 
         type SettingsPayload = t.JsonMapping
-        type MutableSettingsPayload = t.MutableJsonMapping
         type RecordPayload = t.JsonMapping
         type MutableRecordPayload = MutableMapping[str, t.JsonValue]
         type SchemaPayload = t.JsonMapping

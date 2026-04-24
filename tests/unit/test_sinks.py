@@ -20,10 +20,8 @@ from tests import t
 
 
 @pytest.fixture
-def ldap_base_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
-) -> LDAPBaseSink:
-    mock_target.settings.update({"base_dn": "dc=example,dc=com"})
+def ldap_base_sink(mock_target: MagicMock) -> LDAPBaseSink:
+    mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
     }
@@ -36,13 +34,12 @@ def ldap_base_sink(
 
 
 @pytest.fixture
-def users_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
-) -> UsersSink:
-    mock_target.settings.update({
+def users_sink(mock_target: MagicMock) -> UsersSink:
+    mock_target.settings = {
+        **mock_target.settings,
         "base_dn": "dc=example,dc=com",
         "user_rdn_attribute": "uid",
-    })
+    }
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {
             "uid": {"type": "string"},
@@ -59,13 +56,12 @@ def users_sink(
 
 
 @pytest.fixture
-def groups_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
-) -> GroupsSink:
-    mock_target.settings.update({
+def groups_sink(mock_target: MagicMock) -> GroupsSink:
+    mock_target.settings = {
+        **mock_target.settings,
         "base_dn": "dc=example,dc=com",
         "group_rdn_attribute": "cn",
-    })
+    }
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"cn": {"type": "string"}, "member": {"type": "array"}},
     }
@@ -78,10 +74,8 @@ def groups_sink(
 
 
 @pytest.fixture
-def ou_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
-) -> OrganizationalUnitsSink:
-    mock_target.settings.update({"base_dn": "dc=example,dc=com"})
+def ou_sink(mock_target: MagicMock) -> OrganizationalUnitsSink:
+    mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
     }
@@ -94,10 +88,8 @@ def ou_sink(
 
 
 @pytest.fixture
-def generic_sink(
-    mock_target: MagicMock, _mock_ldap_config: t.TargetLdap.MutableSettingsPayload
-) -> LDAPBaseSink:
-    mock_target.settings.update({"base_dn": "dc=example,dc=com"})
+def generic_sink(mock_target: MagicMock) -> LDAPBaseSink:
+    mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
     }
@@ -229,11 +221,12 @@ def test_users_get_object_classes_default(users_sink: UsersSink) -> None:
 
 
 def test_users_get_object_classes_configured(mock_target: MagicMock) -> None:
-    mock_target.settings.update({
+    mock_target.settings = {
+        **mock_target.settings,
         "base_dn": "dc=example,dc=com",
         "user_rdn_attribute": "uid",
         "users_object_classes": ["customUser", "top"],
-    })
+    }
     sink = UsersSink(
         target=mock_target,
         stream_name="users",
@@ -347,10 +340,11 @@ def test_generic_get_object_classes_default(generic_sink: LDAPBaseSink) -> None:
 
 
 def test_generic_get_object_classes_configured(mock_target: MagicMock) -> None:
-    mock_target.settings.update({
+    mock_target.settings = {
+        **mock_target.settings,
         "base_dn": "dc=example,dc=com",
         "generic_object_classes": ["customGeneric", "top"],
-    })
+    }
     sink = LDAPBaseSink(
         target=mock_target,
         stream_name="generic",
