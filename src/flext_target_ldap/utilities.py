@@ -420,7 +420,7 @@ class FlextTargetLdapUtilities(u, ldap_u):
                             return r[Mapping[str, m.ConfigMap]].fail(
                                 "Port must be a valid integer between 1 and 65535",
                             )
-                    if not (0 < port_int <= c.MAX_PORT_NUMBER):
+                    if not (0 < port_int <= c.MAX_PORT):
                         return r[Mapping[str, m.ConfigMap]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )

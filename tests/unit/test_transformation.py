@@ -18,8 +18,6 @@ from flext_target_ldap import (
 )
 from tests import c, m, t
 
-EXPECTED_DATA_COUNT = c.TargetLdap.Tests.EXPECTED_DATA_COUNT
-
 
 def test_transformation_engine_initialization() -> None:
     rules = [
@@ -257,7 +255,7 @@ def test_validation_statistics() -> None:
         validator.validate(dn, attributes, object_classes)
 
     stats = validator.get_validation_statistics()
-    assert stats["entries_validated"] == EXPECTED_DATA_COUNT
+    assert stats["entries_validated"] == c.TargetLdap.Tests.EXPECTED_DATA_COUNT
     assert stats["validation_errors"] >= 0
     assert stats["validation_warnings"] >= 0
 
