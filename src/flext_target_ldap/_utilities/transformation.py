@@ -130,19 +130,6 @@ class FlextTargetLdapMigrationValidator:
             self._stats["validation_errors"] += 1
             return r[bool].fail(f"Validation failed: {e}")
 
-    def validate_entry(
-        self,
-        dn: str,
-        attributes: t.Ldap.OperationAttributes,
-        object_classes: t.StrSequence,
-    ) -> p.Result[bool]:
-        """Validate individual LDAP entry - alias for validate method."""
-        attributes_payload: t.TargetLdap.MutableRecordPayload = {}
-        for key, value in attributes.items():
-            value_list: list[t.JsonValue] = [str(v) for v in value]
-            attributes_payload[str(key)] = value_list
-        return self.validate(dn, attributes_payload, object_classes)
-
 
 __all__: t.StrSequence = [
     "FlextTargetLdapMigrationValidator",

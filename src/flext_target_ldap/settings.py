@@ -27,7 +27,7 @@ class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration with connection and operation settings."""
 
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
-        env_prefix=c.ENV_PREFIX, extra="ignore"
+        env_prefix=c.TargetLdap.ENV_PREFIX, extra="ignore"
     )
 
     @u.model_validator(mode="before")

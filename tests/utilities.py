@@ -1,12 +1,7 @@
-"""Utilities for flext-target-ldap tests - uses u.TargetLdap.Tests.* namespace pattern.
-
-This module provides test-specific utilities that extend the main flext-target-ldap utilities.
-Uses the unified namespace pattern u.TargetLdap.Tests.* for test-only objects.
-Combines TestsFlextUtilities functionality with project-specific test utilities.
+"""Utilities for flext-target-ldap tests.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
@@ -28,8 +23,8 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
     class TargetLdap(FlextTargetLdapUtilities.TargetLdap):
         """TargetLdap test namespace."""
 
-        class Tests:
-            """Target LDAP-specific test helpers."""
+        class Tests(FlextTestsUtilities.Tests):
+            """TargetLdap-specific test utilities."""
 
             @staticmethod
             def build_mock_ldap_config(

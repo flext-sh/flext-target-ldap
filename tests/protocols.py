@@ -15,17 +15,13 @@ from flext_target_ldap import FlextTargetLdapProtocols
 
 
 class TestsFlextTargetLdapProtocols(FlextTestsProtocols, FlextTargetLdapProtocols):
-    """Test protocols combining TestsFlextProtocols and FlextTargetLdapProtocols.
-
-    Provides access to the project-local `p.TargetLdap.Tests.*` namespace while
-    preserving the inherited test and domain protocol surfaces.
-    """
+    """Test protocols combining TestsFlextProtocols and FlextTargetLdapProtocols."""
 
     class TargetLdap(FlextTargetLdapProtocols.TargetLdap):
-        """Target LDAP local test protocols namespace."""
+        """TargetLdap test protocols namespace."""
 
-        class Tests:
-            """Target LDAP-specific test protocols."""
+        class Tests(FlextTestsProtocols.Tests):
+            """TargetLdap-specific test protocols."""
 
 
 p = TestsFlextTargetLdapProtocols

@@ -22,7 +22,7 @@ class FlextTargetLdapConstants(
     All constants are accessible via inheritance—do not duplicate parent attributes.
 
     Access patterns:
-        - c.ENV_PREFIX, c.CONNECT_TIMEOUT, etc. (target-specific constants)
+        - c.TargetLdap.ENV_PREFIX, c.CONNECT_TIMEOUT, etc. (target-specific constants)
         - c.Ldap.* (inherited from c)
         - c.* (inherited from FlextLdifConstants via c)
     """
