@@ -38,13 +38,15 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
             ) -> TestsFlextTargetLdapTypes.TargetLdap.MutableSettingsPayload:
                 """Build a standard mock LDAP configuration for testing."""
                 return {
-                    "host": "test.ldap.com",
-                    "port": 389,
-                    "bind_dn": bind_dn,
-                    "password": "test_password",
+                    "connection": {
+                        "host": "test.ldap.com",
+                        "port": 389,
+                        "bind_dn": bind_dn,
+                        "bind_password": "test_password",
+                        "use_ssl": False,
+                        "timeout": 30,
+                    },
                     "base_dn": "dc=test,dc=com",
-                    "use_ssl": False,
-                    "timeout": 30,
                     "object_classes": ["inetOrgPerson", "person", "top"],
                 }
 

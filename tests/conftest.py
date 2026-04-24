@@ -12,6 +12,7 @@ import pathlib
 from unittest.mock import MagicMock
 
 import pytest
+from flext_core import FlextSettings
 from flext_tests import tk
 
 from flext_target_ldap import (
@@ -19,6 +20,12 @@ from flext_target_ldap import (
     FlextTargetLdapSettings,
 )
 from tests import t, u
+
+
+@pytest.fixture(autouse=True)
+def reset_settings_singleton() -> None:
+    """Reset FlextSettings singleton between tests."""
+    FlextSettings.reset_for_testing()
 
 
 @pytest.fixture

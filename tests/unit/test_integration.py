@@ -158,9 +158,6 @@ def test_dn_template_usage(
     tmp_path: Path,
     mock_ldap_config: t.TargetLdap.MutableSettingsPayload,
 ) -> None:
-    mock_ldap_config["dn_templates"] = {
-        "users": "uid={uid},ou=people,dc=test,dc=com",
-    }
     config_path = tmp_path / "template_config.json"
     u.Cli.json_write(config_path, mock_ldap_config)
 
