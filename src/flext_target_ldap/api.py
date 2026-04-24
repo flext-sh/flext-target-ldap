@@ -148,7 +148,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def _load_config_from_file(config_path: str) -> t.TargetLdap.SettingsPayload:
         """Load configuration from JSON file."""
         try:
-            content = Path(config_path).read_text(encoding="utf-8")
+            content = Path(config_path).read_text(encoding=c.DEFAULT_ENCODING)
             return t.Cli.JSON_MAPPING_ADAPTER.validate_json(content)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to load configuration from {config_path}: {exc}"

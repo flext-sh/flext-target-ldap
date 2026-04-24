@@ -261,11 +261,15 @@ class FlextTargetLdapUtilities(u, ldap_u):
                     for key, value in record.items():
                         ldap_attr = mapping.get(key, key)
                         if isinstance(value, list):
-                            ldap_values = [str(item).encode("utf-8") for item in value]
+                            ldap_values = [
+                                str(item).encode(c.DEFAULT_ENCODING) for item in value
+                            ]
                             if ldap_values:
                                 ldap_attrs[ldap_attr] = ldap_values
                         else:
-                            ldap_attrs[ldap_attr] = [str(value).encode("utf-8")]
+                            ldap_attrs[ldap_attr] = [
+                                str(value).encode(c.DEFAULT_ENCODING)
+                            ]
                     return r[Mapping[str, Sequence[bytes]]].ok(ldap_attrs)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[Mapping[str, Sequence[bytes]]].fail(
