@@ -165,21 +165,20 @@ class FlextTargetLdapModels(meltano_m, m):
                     v.append("top")
                 return v
 
-            def get_attribute_values(
-                self,
-                attribute_name: str,
-            ) -> MutableSequence[str]:
-                """Get values for a specific attribute."""
-                return self.attributes.get(attribute_name, [])
-
-            def get_parent_dn(self) -> str:
-                """Get the parent DN by removing the RDN."""
-                parts = self.distinguished_name.split(",", 1)
+            @u.computed_field(return_type=str)
+            @property
+            def parent_dn(self) -> str:
+                """Parent DN derived from the distinguished name."""
+                distinguished_name = str(self.distinguished_name)
+                parts = distinguished_name.split(",", 1)
                 return parts[1].strip() if len(parts) > 1 else ""
 
-            def get_rdn(self) -> str:
-                """Get the Relative Distinguished Name (RDN) from the DN."""
-                return self.distinguished_name.split(",")[0].strip()
+            @u.computed_field(return_type=str)
+            @property
+            def rdn(self) -> str:
+                """Relative distinguished name derived from the DN."""
+                distinguished_name = str(self.distinguished_name)
+                return distinguished_name.split(",", 1)[0].strip()
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has a specific object class."""
@@ -391,15 +390,18 @@ class FlextTargetLdapModels(meltano_m, m):
             @property
             def is_batch_full(self) -> bool:
                 """Check if current batch is full."""
-                return len(self.current_batch) >= self.batch_size
+                batch_size = int(self.batch_size)
+                return len(self.current_batch) >= batch_size
 
             @property
             def success_rate(self) -> float:
                 """Calculate success rate percentage."""
-                total_ops = self.successful_operations + self.failed_operations
+                successful_operations = int(self.successful_operations)
+                failed_operations = int(self.failed_operations)
+                total_ops = successful_operations + failed_operations
                 if total_ops == 0:
                     return 0.0
-                return (self.successful_operations / total_ops) * 100.0
+                return (successful_operations / total_ops) * 100.0
 
             def add_entry(
                 self,
@@ -533,29 +535,32 @@ class FlextTargetLdapModels(meltano_m, m):
             @property
             def operations_per_second(self) -> float:
                 """Calculate operations per second throughput."""
-                duration = self.total_duration_seconds
+                duration = float(self.total_duration_seconds)
                 if math.isclose(duration, 0.0):
                     return 0.0
-                return self.total_entries_processed / duration
+                total_entries_processed = int(self.total_entries_processed)
+                return total_entries_processed / duration
 
             @property
             def success_rate(self) -> float:
                 """Calculate overall success rate percentage."""
-                if self.total_entries_processed == 0:
+                total_entries_processed = int(self.total_entries_processed)
+                if total_entries_processed == 0:
                     return 0.0
                 successful = (
-                    self.successful_adds
-                    + self.successful_updates
-                    + self.successful_deletes
+                    int(self.successful_adds)
+                    + int(self.successful_updates)
+                    + int(self.successful_deletes)
                 )
-                return (successful / self.total_entries_processed) * 100.0
+                return (successful / total_entries_processed) * 100.0
 
             @property
             def total_duration_seconds(self) -> float:
                 """Calculate total processing duration in seconds."""
-                if not self.end_time:
+                end_time = self.end_time
+                if end_time is None:
                     return 0.0
-                return (self.end_time - self.start_time).total_seconds()
+                return float((end_time - self.start_time).total_seconds())
 
             def complete_processing(self) -> Self:
                 """Mark processing as completed (immutable operation)."""
