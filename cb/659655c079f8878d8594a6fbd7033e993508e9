@@ -1,0 +1,14 @@
+src/flext_target_ldap/api.py
+  h_9db9d35f50cf33 151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "cb659655c079f8878d8594a6fbd7033e993508e9",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
