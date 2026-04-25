@@ -36,23 +36,6 @@ from flext_target_ldap import (
 class FlextTargetLdap(FlextTargetLdapTarget):
     """LDAP target facade for Singer using flext-core patterns."""
 
-    class _DefaultCliHelper:
-        """Default CLI helper for printing output."""
-
-        logger = u.fetch_logger(__name__)
-
-        def print(self, msg: str) -> None:
-            """Print a message."""
-            self.logger.info(msg)
-
-    class _QuietCliHelper(_DefaultCliHelper):
-        """Quiet CLI helper for state messages."""
-
-        @override
-        def print(self, msg: str) -> None:
-            """Print a message at debug level."""
-            self.logger.debug(msg)
-
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
     settings: t.TargetLdap.SettingsPayload
@@ -138,13 +121,6 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         self.logger.info("LDAP target configuration validated successfully")
 
     @staticmethod
-    def _create_cli_helper(*, quiet: bool = False) -> FlextTargetLdap._DefaultCliHelper:
-        """Create a CLI helper instance."""
-        if quiet:
-            return FlextTargetLdap._QuietCliHelper()
-        return FlextTargetLdap._DefaultCliHelper()
-
-    @staticmethod
     def _load_config_from_file(config_path: str) -> t.TargetLdap.SettingsPayload:
         """Load configuration from JSON file."""
         try:
@@ -224,8 +200,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                     raw = t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
                     msg_type = raw.get("type")
                     if msg_type == "STATE":
-                        cli_helper = FlextTargetLdap._create_cli_helper(quiet=True)
-                        cli_helper.print(line.strip())
+                        FlextTargetLdap.logger.debug(line.strip())
                         continue
                     if msg_type == "SCHEMA":
                         raw_stream = raw.get("stream")
