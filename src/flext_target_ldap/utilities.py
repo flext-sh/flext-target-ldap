@@ -16,13 +16,13 @@ from collections.abc import (
 )
 from datetime import datetime
 
-from flext_ldap import u as ldap_u
+from flext_ldap import FlextLdapUtilities
 from flext_meltano import u
 
 from flext_target_ldap import c, m, p, r, t
 
 
-class FlextTargetLdapUtilities(u, ldap_u):
+class FlextTargetLdapUtilities(u, FlextLdapUtilities):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for

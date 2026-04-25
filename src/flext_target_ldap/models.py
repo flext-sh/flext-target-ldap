@@ -20,12 +20,12 @@ from datetime import UTC, datetime
 from typing import Annotated, Self
 
 from flext_ldap import m
-from flext_meltano import m as meltano_m
+from flext_meltano import FlextMeltanoModels
 
 from flext_target_ldap import c, p, r, t, u
 
 
-class FlextTargetLdapModels(meltano_m, m):
+class FlextTargetLdapModels(FlextMeltanoModels, m):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes

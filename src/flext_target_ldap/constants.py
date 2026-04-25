@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import c as ldap_c
+from flext_ldap import FlextLdapConstants
 from flext_meltano import c
 
 from flext_target_ldap import FlextTargetLdapConstantsBase
@@ -14,7 +14,7 @@ from flext_target_ldap import FlextTargetLdapConstantsBase
 
 class FlextTargetLdapConstants(
     c,
-    ldap_c,
+    FlextLdapConstants,
 ):
     """LDAP target loading-specific constants following FLEXT unified pattern.
 
