@@ -74,174 +74,174 @@ def _invoke_target_cli(config_path: Path, input_path: Path) -> None:
         cli_fn(settings=str(config_path))
 
 
-def test_basic_load(
-    mock_ldap_api: MagicMock, config_file: Path, input_file: Path
-) -> None:
-    mock_conn = MagicMock()
-    mock_conn.add_entry.return_value = True
-    mock_conn.delete_entry.return_value = True
-    mock_conn.modify_entry.return_value = True
-    mock_ldap_api.return_value = mock_conn
+class TestsFlextTargetLdapIntegration:
+    """Behavior contract for test_integration."""
 
-    _invoke_target_cli(config_file, input_file)
+    def test_basic_load(
+        self, mock_ldap_api: MagicMock, config_file: Path, input_file: Path
+    ) -> None:
+        mock_conn = MagicMock()
+        mock_conn.add_entry.return_value = True
+        mock_conn.delete_entry.return_value = True
+        mock_conn.modify_entry.return_value = True
+        mock_ldap_api.return_value = mock_conn
 
-    assert mock_conn.add_entry.called
-    assert mock_conn.add_entry.call_count >= 1
+        _invoke_target_cli(config_file, input_file)
 
+        assert mock_conn.add_entry.called
+        assert mock_conn.add_entry.call_count >= 1
 
-def test_upsert_behavior(
-    mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
-) -> None:
-    input_path = tmp_path / "upsert_input.jsonl"
-    schema_msg = {
-        "type": "SCHEMA",
-        "stream": "users",
-        "schema": {
-            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
-        },
-        "key_properties": ["dn"],
-    }
-    record1 = {
-        "type": "RECORD",
-        "stream": "users",
-        "record": {"dn": "uid=test,dc=test,dc=com", "cn": "Test User"},
-    }
-    record2 = {
-        "type": "RECORD",
-        "stream": "users",
-        "record": {"dn": "uid=test,dc=test,dc=com", "cn": "Updated Test User"},
-    }
-    _write_jsonl(input_path, [schema_msg, record1, record2])
+    def test_upsert_behavior(
+        self, mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
+    ) -> None:
+        input_path = tmp_path / "upsert_input.jsonl"
+        schema_msg = {
+            "type": "SCHEMA",
+            "stream": "users",
+            "schema": {
+                "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
+            },
+            "key_properties": ["dn"],
+        }
+        record1 = {
+            "type": "RECORD",
+            "stream": "users",
+            "record": {"dn": "uid=test,dc=test,dc=com", "cn": "Test User"},
+        }
+        record2 = {
+            "type": "RECORD",
+            "stream": "users",
+            "record": {"dn": "uid=test,dc=test,dc=com", "cn": "Updated Test User"},
+        }
+        _write_jsonl(input_path, [schema_msg, record1, record2])
 
-    mock_conn = MagicMock()
-    mock_conn.add_entry.return_value = True
-    mock_conn.modify_entry.return_value = True
-    mock_ldap_api.return_value = mock_conn
+        mock_conn = MagicMock()
+        mock_conn.add_entry.return_value = True
+        mock_conn.modify_entry.return_value = True
+        mock_ldap_api.return_value = mock_conn
 
-    _invoke_target_cli(config_file, input_path)
+        _invoke_target_cli(config_file, input_path)
 
-    assert mock_conn.add_entry.call_count >= 1
-    assert mock_conn.modify_entry.call_count >= 1
+        assert mock_conn.add_entry.call_count >= 1
+        assert mock_conn.modify_entry.call_count >= 1
 
-
-def test_delete_records(
-    mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
-) -> None:
-    input_path = tmp_path / "delete_input.jsonl"
-    schema_msg = {
-        "type": "SCHEMA",
-        "stream": "users",
-        "schema": {"properties": {"dn": {"type": "string"}}},
-        "key_properties": ["dn"],
-    }
-    delete_record = {
-        "type": "RECORD",
-        "stream": "users",
-        "record": {
-            "dn": "uid=deleted,dc=test,dc=com",
-            "_sdc_deleted_at": "2024-01-01T12:00:00Z",
-        },
-    }
-    _write_jsonl(input_path, [schema_msg, delete_record])
-
-    mock_conn = MagicMock()
-    mock_conn.delete_entry.return_value = True
-    mock_ldap_api.return_value = mock_conn
-
-    _invoke_target_cli(config_file, input_path)
-
-    mock_conn.delete_entry.assert_called_once_with("uid=deleted,dc=test,dc=com")
-
-
-def test_dn_template_usage(
-    mock_ldap_api: MagicMock,
-    tmp_path: Path,
-    mock_ldap_config: t.TargetLdap.SettingsPayload,
-) -> None:
-    config_path = tmp_path / "template_config.json"
-    u.Cli.json_write(config_path, mock_ldap_config)
-
-    input_path = tmp_path / "template_input.jsonl"
-    schema_msg = {
-        "type": "SCHEMA",
-        "stream": "users",
-        "schema": {
-            "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
-        },
-        "key_properties": ["uid"],
-    }
-    record = {
-        "type": "RECORD",
-        "stream": "users",
-        "record": {"uid": "testuser", "cn": "Test User"},
-    }
-    _write_jsonl(input_path, [schema_msg, record])
-
-    mock_conn = MagicMock()
-    mock_conn.add_entry.return_value = True
-    mock_ldap_api.return_value = mock_conn
-
-    _invoke_target_cli(config_path, input_path)
-
-    add_calls = mock_conn.add_entry.call_args_list
-    assert add_calls
-    actual_dn = add_calls[0][0][0]
-    assert actual_dn == "uid=testuser,dc=test,dc=com"
-
-
-def test_self(runner: Mock, tmp_path: Path) -> None:
-    bad_config = {"invalid": "settings"}
-    config_path = tmp_path / "bad_config.json"
-    u.Cli.json_write(config_path, bad_config)
-    mock_result = Mock()
-    mock_result.exit_code = 1
-    mock_result.output = "Configuration error"
-    runner.invoke.return_value = mock_result
-
-    result = runner.invoke(
-        "mock_cli",
-        ["--config", str(config_path)],
-        input='{"type": "RECORD", "stream": "test", "record": {}}',
-    )
-    assert result.exit_code != 0
-
-
-def test_multi_stream_handling(
-    mock_ldap_api: MagicMock,
-    config_file: Path,
-    tmp_path: Path,
-) -> None:
-    input_path = tmp_path / "multi_stream.jsonl"
-    messages = [
-        {
+    def test_delete_records(
+        self, mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
+    ) -> None:
+        input_path = tmp_path / "delete_input.jsonl"
+        schema_msg = {
             "type": "SCHEMA",
             "stream": "users",
             "schema": {"properties": {"dn": {"type": "string"}}},
             "key_properties": ["dn"],
-        },
-        {
+        }
+        delete_record = {
             "type": "RECORD",
             "stream": "users",
-            "record": {"dn": "uid=user1,dc=test,dc=com"},
-        },
-        {
+            "record": {
+                "dn": "uid=deleted,dc=test,dc=com",
+                "_sdc_deleted_at": "2024-01-01T12:00:00Z",
+            },
+        }
+        _write_jsonl(input_path, [schema_msg, delete_record])
+
+        mock_conn = MagicMock()
+        mock_conn.delete_entry.return_value = True
+        mock_ldap_api.return_value = mock_conn
+
+        _invoke_target_cli(config_file, input_path)
+
+        mock_conn.delete_entry.assert_called_once_with("uid=deleted,dc=test,dc=com")
+
+    def test_dn_template_usage(
+        self,
+        mock_ldap_api: MagicMock,
+        tmp_path: Path,
+        mock_ldap_config: t.TargetLdap.SettingsPayload,
+    ) -> None:
+        config_path = tmp_path / "template_config.json"
+        u.Cli.json_write(config_path, mock_ldap_config)
+
+        input_path = tmp_path / "template_input.jsonl"
+        schema_msg = {
             "type": "SCHEMA",
-            "stream": "groups",
-            "schema": {"properties": {"dn": {"type": "string"}}},
-            "key_properties": ["dn"],
-        },
-        {
+            "stream": "users",
+            "schema": {
+                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
+            },
+            "key_properties": ["uid"],
+        }
+        record = {
             "type": "RECORD",
-            "stream": "groups",
-            "record": {"dn": "cn=group1,dc=test,dc=com"},
-        },
-    ]
-    _write_jsonl(input_path, messages)
+            "stream": "users",
+            "record": {"uid": "testuser", "cn": "Test User"},
+        }
+        _write_jsonl(input_path, [schema_msg, record])
 
-    mock_conn = MagicMock()
-    mock_conn.add_entry.return_value = True
-    mock_ldap_api.return_value = mock_conn
+        mock_conn = MagicMock()
+        mock_conn.add_entry.return_value = True
+        mock_ldap_api.return_value = mock_conn
 
-    _invoke_target_cli(config_file, input_path)
+        _invoke_target_cli(config_path, input_path)
 
-    assert mock_conn.add_entry.call_count >= 2
+        add_calls = mock_conn.add_entry.call_args_list
+        assert add_calls
+        actual_dn = add_calls[0][0][0]
+        assert actual_dn == "uid=testuser,dc=test,dc=com"
+
+    def test_self(self, runner: Mock, tmp_path: Path) -> None:
+        bad_config = {"invalid": "settings"}
+        config_path = tmp_path / "bad_config.json"
+        u.Cli.json_write(config_path, bad_config)
+        mock_result = Mock()
+        mock_result.exit_code = 1
+        mock_result.output = "Configuration error"
+        runner.invoke.return_value = mock_result
+
+        result = runner.invoke(
+            "mock_cli",
+            ["--config", str(config_path)],
+            input='{"type": "RECORD", "stream": "test", "record": {}}',
+        )
+        assert result.exit_code != 0
+
+    def test_multi_stream_handling(
+        self,
+        mock_ldap_api: MagicMock,
+        config_file: Path,
+        tmp_path: Path,
+    ) -> None:
+        input_path = tmp_path / "multi_stream.jsonl"
+        messages = [
+            {
+                "type": "SCHEMA",
+                "stream": "users",
+                "schema": {"properties": {"dn": {"type": "string"}}},
+                "key_properties": ["dn"],
+            },
+            {
+                "type": "RECORD",
+                "stream": "users",
+                "record": {"dn": "uid=user1,dc=test,dc=com"},
+            },
+            {
+                "type": "SCHEMA",
+                "stream": "groups",
+                "schema": {"properties": {"dn": {"type": "string"}}},
+                "key_properties": ["dn"],
+            },
+            {
+                "type": "RECORD",
+                "stream": "groups",
+                "record": {"dn": "cn=group1,dc=test,dc=com"},
+            },
+        ]
+        _write_jsonl(input_path, messages)
+
+        mock_conn = MagicMock()
+        mock_conn.add_entry.return_value = True
+        mock_ldap_api.return_value = mock_conn
+
+        _invoke_target_cli(config_file, input_path)
+
+        assert mock_conn.add_entry.call_count >= 2

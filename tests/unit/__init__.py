@@ -7,11 +7,11 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 _LAZY_IMPORTS = build_lazy_import_map(
     {
-        ".test_client": ("test_client",),
-        ".test_integration": ("test_integration",),
-        ".test_sinks": ("test_sinks",),
-        ".test_target": ("test_target",),
-        ".test_transformation": ("test_transformation",),
+        ".test_client": ("TestsFlextTargetLdapClient",),
+        ".test_integration": ("TestsFlextTargetLdapIntegration",),
+        ".test_sinks": ("TestsFlextTargetLdapSinks",),
+        ".test_target": ("TestsFlextTargetLdapTarget",),
+        ".test_transformation": ("TestsFlextTargetLdapTransformation",),
     },
 )
 

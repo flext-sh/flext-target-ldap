@@ -19,6 +19,11 @@ if _t.TYPE_CHECKING:
     from tests.models import TestsFlextTargetLdapModels, m
     from tests.protocols import TestsFlextTargetLdapProtocols, p
     from tests.typings import TestsFlextTargetLdapTypes, t
+    from tests.unit.test_client import TestsFlextTargetLdapClient
+    from tests.unit.test_integration import TestsFlextTargetLdapIntegration
+    from tests.unit.test_sinks import TestsFlextTargetLdapSinks
+    from tests.unit.test_target import TestsFlextTargetLdapTarget
+    from tests.unit.test_transformation import TestsFlextTargetLdapTransformation
     from tests.utilities import TestsFlextTargetLdapUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
     (".unit",),
@@ -40,6 +45,11 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetLdapTypes",
                 "t",
             ),
+            ".unit.test_client": ("TestsFlextTargetLdapClient",),
+            ".unit.test_integration": ("TestsFlextTargetLdapIntegration",),
+            ".unit.test_sinks": ("TestsFlextTargetLdapSinks",),
+            ".unit.test_target": ("TestsFlextTargetLdapTarget",),
+            ".unit.test_transformation": ("TestsFlextTargetLdapTransformation",),
             ".utilities": (
                 "TestsFlextTargetLdapUtilities",
                 "u",
@@ -87,9 +97,14 @@ _LAZY_IMPORTS = merge_lazy_imports(
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__: list[str] = [
+    "TestsFlextTargetLdapClient",
     "TestsFlextTargetLdapConstants",
+    "TestsFlextTargetLdapIntegration",
     "TestsFlextTargetLdapModels",
     "TestsFlextTargetLdapProtocols",
+    "TestsFlextTargetLdapSinks",
+    "TestsFlextTargetLdapTarget",
+    "TestsFlextTargetLdapTransformation",
     "TestsFlextTargetLdapTypes",
     "TestsFlextTargetLdapUtilities",
     "c",
