@@ -16,7 +16,6 @@ from flext_core import FlextSettings
 from flext_tests import tk
 
 from flext_target_ldap import (
-    FlextTargetLdapClient as LdapTargetClient,
     FlextTargetLdapSettings,
 )
 from tests import t, u
@@ -142,19 +141,6 @@ def singer_message_state() -> str:
         },
     }
     return json.dumps(message)
-
-
-@pytest.fixture
-def mock_ldap_client() -> MagicMock:
-    """Create mock LDAP configuration for testing."""
-    client = MagicMock(spec=LdapTargetClient)
-    client.validate_dn.return_value = True
-    client.entry_exists.return_value = False
-    client.add_entry.return_value = True
-    client.modify_entry.return_value = True
-    client.delete_entry.return_value = True
-    client.upsert_entry.return_value = (True, "add")
-    return client
 
 
 @pytest.fixture
