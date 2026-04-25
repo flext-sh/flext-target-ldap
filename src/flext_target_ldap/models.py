@@ -17,6 +17,7 @@ from collections.abc import (
     MutableSequence,
 )
 from datetime import UTC, datetime
+from types import MappingProxyType
 from typing import Annotated, Self
 
 from flext_ldap import m
@@ -143,7 +144,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 t.MutableStrSequenceMapping,
                 u.Field(
                     description="LDAP attributes with values",
-                    default_factory=dict,
+                    default_factory=lambda: MappingProxyType({}),
                 ),
             ]
             entry_type: Annotated[
@@ -647,7 +648,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 t.TargetLdap.MutableSchemaPayload,
                 u.Field(
                     description="Schema definition for the Singer stream",
-                    default_factory=dict,
+                    default_factory=lambda: MappingProxyType({}),
                 ),
             ]
 
@@ -688,7 +689,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 t.TargetLdap.MutableRecordPayload,
                 u.Field(
                     description="Data after applying transformation rules",
-                    default_factory=dict,
+                    default_factory=lambda: MappingProxyType({}),
                 ),
             ]
             applied_rules: Annotated[

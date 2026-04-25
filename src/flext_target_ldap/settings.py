@@ -15,6 +15,7 @@ from __future__ import annotations
 from collections.abc import (
     Mapping,
 )
+from types import MappingProxyType
 from typing import Annotated, ClassVar, Self
 
 from flext_core import FlextSettings
@@ -171,7 +172,7 @@ class FlextTargetLdapSettings(FlextSettings):
         t.StrMapping,
         u.Field(
             description="Mapping of source field names to LDAP attribute names",
-            default_factory=dict,
+            default_factory=lambda: MappingProxyType({}),
         ),
     ]
     object_classes: Annotated[
