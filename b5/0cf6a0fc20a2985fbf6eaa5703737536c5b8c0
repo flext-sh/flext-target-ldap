@@ -1,0 +1,30 @@
+src/flext_target_ldap/_models/sinks.py
+  h_9db9d35f50cf33 287-288
+  afc29eb099521e6a 234-272,401-402,409-413,473,475-476,483-487,548,554-557
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "b50cf6a0fc20a2985fbf6eaa5703737536c5b8c0",
+  "prompts": {
+    "afc29eb099521e6a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "491e2c5e-762d-4a28-a137-abf6db4cc57c",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "FLEXT Bot",
+      "messages": [],
+      "total_additions": 59,
+      "total_deletions": 99,
+      "accepted_lines": 59,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/c1457bfa2f2484c49b73e86920937f1e0a4439398f136e94a414ee317c3deaf3"
+    }
+  },
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
