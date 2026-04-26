@@ -1,0 +1,24 @@
+tests/unit/test_sinks.py
+  fb2546f80ae92e5c 143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "890d4851c65e640af5910398282eb2a110e3eba4",
+  "prompts": {
+    "fb2546f80ae92e5c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "47401c67-c23f-4bc6-8b20-da4d6af4540d",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "FLEXT Bot",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/c90a35b13ffbdfe6a87ac55898862f63148a8846d80814095a2f861401bbdd2c"
+    }
+  }
+}
