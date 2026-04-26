@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextContainer
-
 from flext_target_ldap import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapClient,

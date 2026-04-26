@@ -10,12 +10,10 @@ from flext_core.lazy import (
     install_lazy_exports,
     merge_lazy_imports,
 )
-
 from flext_target_ldap.__version__ import *
 
 if _t.TYPE_CHECKING:
     from flext_meltano import d, e, h, r, s, x
-
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,

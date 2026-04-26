@@ -12,9 +12,9 @@ import pathlib
 from unittest.mock import MagicMock
 
 import pytest
-from flext_core import FlextSettings
 from flext_tests import tk
 
+from flext_core import FlextSettings
 from flext_target_ldap import (
     FlextTargetLdapSettings,
 )

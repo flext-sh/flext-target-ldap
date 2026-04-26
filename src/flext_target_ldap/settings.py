@@ -19,7 +19,6 @@ from types import MappingProxyType
 from typing import Annotated, ClassVar, Self
 
 from flext_core import FlextSettings
-
 from flext_target_ldap import c, m, t, u
 
 

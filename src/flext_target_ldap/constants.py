@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from flext_ldap import FlextLdapConstants
 from flext_meltano import c
-
 from flext_target_ldap import FlextTargetLdapConstantsBase
 
 

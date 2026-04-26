@@ -22,7 +22,6 @@ from typing import Annotated, Self
 
 from flext_ldap import m
 from flext_meltano import FlextMeltanoModels
-
 from flext_target_ldap import c, p, r, t, u
 
 
