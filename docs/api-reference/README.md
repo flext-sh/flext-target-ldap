@@ -19,7 +19,7 @@ This section is generated from public exports and real docstrings.
 
 ## Surface Summary
 
-- Primary facades: `FlextTargetLdapClient`, `FlextTargetLdapTypeConverter`, `FlextTargetLdapApiService`, `FlextTargetLdapError`, `FlextTargetLdapOrchestrator`, `FlextTargetLdapUtilities` (+31 more)
+- Primary facades: `FlextTargetLdapError`, `FlextTargetLdapOrganizationalUnitsSink`, `FlextTargetLdapProcessingResult`, `FlextTargetLdapTypes`, `FlextTargetLdap`, `FlextTargetLdapEntryManager` (+31 more)
 - Generated module pages: `14`
 
 - [Back to project docs](../index.md)

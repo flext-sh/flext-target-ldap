@@ -7,9 +7,9 @@
 - Description: FLEXT Target for LDAP directory loading
 - Project class: `integration`
 - Keywords: `data-integration`, `etl`, `flext`, `ldap`, `singer`, `target`
-- Main facades: `FlextTargetLdapClient`, `FlextTargetLdapTypeConverter`, `FlextTargetLdapApiService`, `FlextTargetLdapError`, `FlextTargetLdapOrchestrator`, `FlextTargetLdapUtilities`, `FlextTargetLdapOrganizationalUnitsSink`, `FlextTargetLdapDataTransformer` (+29 more)
+- Main facades: `FlextTargetLdapError`, `FlextTargetLdapOrganizationalUnitsSink`, `FlextTargetLdapProcessingResult`, `FlextTargetLdapTypes`, `FlextTargetLdap`, `FlextTargetLdapEntryManager`, `FlextTargetLdapConstants`, `FlextTargetLdapConfigurationError` (+29 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `FlextTargetLdapClient`, `FlextTargetLdapTypeConverter`, `validate_ldap_target_config`, `FlextTargetLdapApiService`, `FlextTargetLdapError`, `FlextTargetLdapOrchestrator`, `target_ldap`, `FlextTargetLdapUtilities`, `FlextTargetLdapOrganizationalUnitsSink`, `FlextTargetLdapDataTransformer` (+30 more)
+- Public symbol exports: `target_ldap`, `FlextTargetLdapError`, `FlextTargetLdapOrganizationalUnitsSink`, `FlextTargetLdapProcessingResult`, `FlextTargetLdapTypes`, `FlextTargetLdap`, `validate_ldap_target_config`, `FlextTargetLdapEntryManager`, `FlextTargetLdapConstants`, `FlextTargetLdapConfigurationError` (+30 more)
 - Exported module shortcuts: _none_
 - Generated module pages: `14`
 
