@@ -140,7 +140,7 @@ class TestsFlextTargetLdapSinks:
     def test_validate_entry_success(self, ldap_base_sink: LDAPBaseSink) -> None:
         mock_client = MagicMock()
         mock_client.validate_dn.return_value.success = True
-        ldap_base_sink._client = mock_client
+        ldap_base_sink.client = mock_client
         result = ldap_base_sink.validate_entry(
             "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
         )
