@@ -35,7 +35,7 @@ def create_default_ldap_target_config(
     host: str,
     base_dn: str,
     *,
-    port: int = c.Ldap.ConnectionDefaults.PORT,
+    port: int = c.Ldap.PORT,
     use_ssl: bool = False,
 ) -> p.Result[FlextTargetLdapSettings]:
     """Create the minimal canonical target settings payload."""

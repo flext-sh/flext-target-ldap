@@ -49,31 +49,31 @@ class FlextTargetLdapSettings(FlextSettings):
             normalized["search_scope"] = search_scope.upper()
         connection_config = m.Ldap.ConnectionConfig.model_validate({
             "host": normalized.get("host", c.LOCALHOST),
-            "port": normalized.get("port", c.Ldap.ConnectionDefaults.PORT),
+            "port": normalized.get("port", c.Ldap.PORT),
             "use_ssl": normalized.get(
                 "use_ssl",
-                c.Ldap.ConnectionDefaults.DEFAULT_USE_SSL,
+                c.Ldap.DEFAULT_USE_SSL,
             ),
             "use_tls": normalized.get(
                 "use_tls",
-                c.Ldap.ConnectionDefaults.DEFAULT_USE_TLS,
+                c.Ldap.DEFAULT_USE_TLS,
             ),
             "bind_dn": normalized.get(
                 "bind_dn",
-                c.Ldap.ConnectionDefaults.DEFAULT_BIND_DN,
+                c.Ldap.DEFAULT_BIND_DN,
             ),
             "bind_password": bind_password,
             "timeout": normalized.get(
                 "timeout",
-                c.Ldap.ConnectionDefaults.TIMEOUT,
+                c.Ldap.TIMEOUT,
             ),
             "auto_bind": normalized.get(
                 "auto_bind",
-                c.Ldap.ConnectionDefaults.AUTO_BIND,
+                c.Ldap.AUTO_BIND,
             ),
             "auto_range": normalized.get(
                 "auto_range",
-                c.Ldap.ConnectionDefaults.AUTO_RANGE,
+                c.Ldap.AUTO_RANGE,
             ),
         })
         for consumed_key in (
@@ -107,21 +107,21 @@ class FlextTargetLdapSettings(FlextSettings):
     search_filter: Annotated[
         str,
         u.Field(
-            default=c.Ldap.Filters.ALL_ENTRIES_FILTER,
+            default=c.Ldap.ALL_ENTRIES_FILTER,
             description="LDAP search filter expression",
         ),
     ]
     search_scope: Annotated[
         t.Ldap.Ldap3SearchScope,
         u.Field(
-            default=c.Ldap.SearchDefaults.DEFAULT_SCOPE,
+            default=c.Ldap.DEFAULT_SCOPE,
             description="LDAP search scope (BASE, ONELEVEL, or SUBTREE)",
         ),
     ]
     connect_timeout: Annotated[
         t.PositiveInt,
         u.Field(
-            default=c.Ldap.ConnectionDefaults.TIMEOUT,
+            default=c.Ldap.TIMEOUT,
             description="Connection timeout in seconds",
         ),
     ]

@@ -121,13 +121,20 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
 
     def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.Result[str]:
         """Build distinguished name from record. Override in subclasses."""
-        dn = record.get("dn")
+        dn = record.get(c.TargetLdap.KEY_DN)
         if isinstance(dn, str) and dn:
             return r[str].ok(dn)
-        base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
-        entry_id = record.get("id") or record.get("cn") or record.get("name")
+        base_dn = self._target.settings.get(
+            c.TargetLdap.KEY_BASE_DN,
+            c.TargetLdap.DEFAULT_BASE_DN,
+        )
+        entry_id = (
+            record.get(c.TargetLdap.KEY_ID)
+            or record.get(c.TargetLdap.KEY_CN)
+            or record.get(c.TargetLdap.KEY_NAME)
+        )
         if isinstance(entry_id, str) and entry_id:
-            return r[str].ok(f"cn={entry_id},{base_dn}")
+            return r[str].ok(f"{c.TargetLdap.KEY_CN}={entry_id},{base_dn}")
         return r[str].fail(
             "build_dn must be implemented in subclass: No ID or name found for generic entry",
         )
@@ -137,18 +144,20 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         record: t.TargetLdap.RecordPayload,
     ) -> t.StrSequence:
         """Get object classes for entry."""
-        record_classes = record.get("object_classes")
+        record_classes = record.get(c.TargetLdap.KEY_OBJECT_CLASSES)
         if isinstance(record_classes, list):
             return [
                 str(object_class) for object_class in record_classes if object_class
             ]
         if isinstance(record_classes, str):
             return [record_classes]
-        configured_classes = self._target.settings.get("generic_object_classes")
+        configured_classes = self._target.settings.get(
+            c.TargetLdap.KEY_GENERIC_OBJECT_CLASSES,
+        )
         if configured_classes is None:
-            return ["top"]
+            return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
         return u.TargetLdap.TypeConversion.extract_object_classes({
-            "object_classes": configured_classes,
+            c.TargetLdap.KEY_OBJECT_CLASSES: configured_classes,
         })
 
     def process_batch(self, context: t.TargetLdap.RecordPayload) -> None:
@@ -158,7 +167,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             logger.error(f"Cannot process batch: {setup_result.error or ''}")
             return
         try:
-            records_raw = context.get("records", [])
+            records_raw = context.get(c.TargetLdap.KEY_RECORDS, [])
             records: MutableSequence[t.TargetLdap.RecordPayload] = []
             if isinstance(records_raw, list):
                 records.extend(item for item in records_raw if isinstance(item, dict))
@@ -201,15 +210,30 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         """Set up LDAP client connection."""
         try:
             connection_config = {
-                "host": self._target.settings.get("host", "localhost"),
-                "port": self._target.settings.get(
-                    "port",
-                    c.Ldap.ConnectionDefaults.PORT,
+                c.TargetLdap.KEY_HOST: self._target.settings.get(
+                    c.TargetLdap.KEY_HOST,
+                    c.TargetLdap.DEFAULT_HOST,
                 ),
-                "use_ssl": self._target.settings.get("use_ssl", False),
-                "bind_dn": self._target.settings.get("bind_dn", ""),
-                "password": self._target.settings.get("password", ""),
-                "timeout": self._target.settings.get("timeout", 30),
+                c.TargetLdap.KEY_PORT: self._target.settings.get(
+                    c.TargetLdap.KEY_PORT,
+                    c.Ldap.PORT,
+                ),
+                c.TargetLdap.KEY_USE_SSL: self._target.settings.get(
+                    c.TargetLdap.KEY_USE_SSL,
+                    c.Ldap.DEFAULT_USE_SSL,
+                ),
+                c.TargetLdap.KEY_BIND_DN: self._target.settings.get(
+                    c.TargetLdap.KEY_BIND_DN,
+                    c.TargetLdap.DEFAULT_BIND_DN,
+                ),
+                c.TargetLdap.KEY_PASSWORD: self._target.settings.get(
+                    c.TargetLdap.KEY_PASSWORD,
+                    c.TargetLdap.DEFAULT_BIND_PASSWORD,
+                ),
+                c.TargetLdap.KEY_TIMEOUT: self._target.settings.get(
+                    c.TargetLdap.KEY_TIMEOUT,
+                    c.Ldap.TIMEOUT,
+                ),
             }
             self.client = FlextTargetLdapClient(connection_config)
             connect_result = self.client.connect()

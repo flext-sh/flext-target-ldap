@@ -28,7 +28,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
     domain-specific Singer target functionality with LDAP directory operations.
 
     Constants are accessed via constants module:
-        c.Ldap.ConnectionDefaults.PORT (389)
+        c.Ldap.PORT (389)
         c.LDAPS_DEFAULT_PORT (636)
         c.DEFAULT_SIZE
     """
@@ -97,29 +97,37 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 """Build LDAP ConnectionConfig from a flat settings mapping."""
                 return m.Ldap.ConnectionConfig(
                     host=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
-                        settings.get("host", "localhost"),
-                        default="localhost",
+                        settings.get(c.TargetLdap.KEY_HOST, c.TargetLdap.DEFAULT_HOST),
+                        default=c.TargetLdap.DEFAULT_HOST,
                     ),
                     port=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
-                        settings.get("port", c.Ldap.ConnectionDefaults.PORT),
-                        default=c.Ldap.ConnectionDefaults.PORT,
+                        settings.get(c.TargetLdap.KEY_PORT, c.Ldap.PORT),
+                        default=c.Ldap.PORT,
                     ),
-                    use_ssl=bool(settings.get("use_ssl", False)),
+                    use_ssl=bool(
+                        settings.get(c.TargetLdap.KEY_USE_SSL, c.Ldap.DEFAULT_USE_SSL)
+                    ),
                     bind_dn=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
-                        settings.get("bind_dn", ""),
+                        settings.get(
+                            c.TargetLdap.KEY_BIND_DN,
+                            c.TargetLdap.DEFAULT_BIND_DN,
+                        ),
                     ),
                     bind_password=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
-                        settings.get("password", ""),
+                        settings.get(
+                            c.TargetLdap.KEY_PASSWORD,
+                            c.TargetLdap.DEFAULT_BIND_PASSWORD,
+                        ),
                     ),
                     timeout=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
-                        settings.get("timeout", 30),
-                        default=30,
+                        settings.get(c.TargetLdap.KEY_TIMEOUT, c.Ldap.TIMEOUT),
+                        default=c.Ldap.TIMEOUT,
                     ),
                 )
 
             @staticmethod
             def to_str(
-                value: t.JsonValue | m.ConfigMap | None,
+                value: t.JsonPayload | None,
                 default: str = "",
             ) -> str:
                 """Coerce a settings value to str."""
@@ -163,7 +171,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 if isinstance(value, bool):
                     return value
                 if isinstance(value, str):
-                    return value.lower() in {"true", "1", "yes"}
+                    return value.lower() in c.TargetLdap.TRUE_STRING_TOKENS
                 if isinstance(value, int):
                     return value != 0
                 return default
@@ -173,7 +181,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 settings: t.TargetLdap.SettingsPayload,
             ) -> t.StrMapping:
                 """Extract attribute mapping from settings."""
-                raw = settings.get("attribute_mapping", {})
+                raw = settings.get(c.TargetLdap.KEY_ATTRIBUTE_MAPPING, {})
                 if isinstance(raw, Mapping):
                     normalized_mapping: t.MutableMappingKV[str, str] = {}
                     for key, value in raw.items():
@@ -189,12 +197,12 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 settings: t.TargetLdap.SettingsPayload,
             ) -> t.StrSequence:
                 """Extract object classes from settings."""
-                raw = settings.get("object_classes")
+                raw = settings.get(c.TargetLdap.KEY_OBJECT_CLASSES)
                 if isinstance(raw, list):
                     return [str(object_class) for object_class in raw if object_class]
                 if isinstance(raw, str):
                     return [raw]
-                return ["top"]
+                return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
 
         class LdapDataProcessing:
             """LDAP-specific data processing utilities."""
@@ -261,13 +269,13 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         ldap_attr = mapping.get(key, key)
                         if isinstance(value, list):
                             ldap_values = [
-                                str(item).encode(c.DEFAULT_ENCODING) for item in value
+                                str(item).encode(c.Ldif.Encoding.UTF8) for item in value
                             ]
                             if ldap_values:
                                 ldap_attrs[ldap_attr] = ldap_values
                         else:
                             ldap_attrs[ldap_attr] = [
-                                str(value).encode(c.DEFAULT_ENCODING)
+                                str(value).encode(c.Ldif.Encoding.UTF8)
                             ]
                     return r[Mapping[str, Sequence[bytes]]].ok(ldap_attrs)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
@@ -290,14 +298,16 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 t.StrSequence: List of object classes
 
                 """
-                object_classes = record.get("objectClass") or record.get("objectclass")
+                object_classes = record.get(
+                    c.TargetLdap.KEY_OBJECT_CLASS_CAMEL,
+                ) or record.get(c.TargetLdap.KEY_OBJECT_CLASS_LOWER)
                 if object_classes:
                     if isinstance(object_classes, list):
                         return [str(oc) for oc in object_classes if oc]
                     return [str(object_classes)]
                 if default_object_classes:
                     return default_object_classes
-                return ["top"]
+                return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
 
             @staticmethod
             def sanitize_ldap_value(value: str) -> str:
@@ -337,77 +347,75 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 """
                 if not dn:
                     return False
-                dn_pattern = "^[a-zA-Z][\\w\\-]*\\s*=\\s*[^,]+(?:\\s*,\\s*[a-zA-Z][\\w\\-]*\\s*=\\s*[^,]+)*$"
-                return bool(re.match(dn_pattern, dn.strip()))
+                return bool(re.match(c.TargetLdap.LDAP_DN_PATTERN, dn.strip()))
 
         class ConfigValidation:
             """Configuration validation utilities."""
 
             @staticmethod
             def validate_ldap_connection_config(
-                settings: Mapping[str, m.ConfigMap],
-            ) -> p.Result[Mapping[str, m.ConfigMap]]:
+                settings: Mapping[str, t.JsonPayload],
+            ) -> p.Result[Mapping[str, t.JsonPayload]]:
                 """Validate LDAP connection configuration.
 
                 Args:
                 settings: Configuration dictionary
 
                 Returns:
-                r[Mapping[str, m.ConfigMap]]: Validated settings or error
+                r[Mapping[str, t.JsonPayload]]: Validated settings or error
 
                 """
-                required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
+                required_fields = [
+                    c.TargetLdap.KEY_HOST,
+                    c.TargetLdap.KEY_BIND_DN,
+                    c.TargetLdap.KEY_BIND_PASSWORD,
+                    c.TargetLdap.KEY_BASE_DN,
+                ]
                 missing_fields = [
                     field for field in required_fields if field not in settings
                 ]
                 if missing_fields:
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         f"Missing required LDAP connection fields: {', '.join(missing_fields)}",
                     )
-                host = settings["host"]
+                host = settings[c.TargetLdap.KEY_HOST]
                 if not isinstance(host, str) or not host.strip():
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         "Host must be a non-empty string",
                     )
-                bind_dn_raw = settings["bind_dn"]
+                bind_dn_raw = settings[c.TargetLdap.KEY_BIND_DN]
                 bind_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
                     bind_dn_raw
                 )
                 if not bind_dn:
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         "Bind DN must be a string",
                     )
                 if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
                     bind_dn
                 ):
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         f"Invalid bind DN format: {bind_dn}",
                     )
-                base_dn_raw = settings["base_dn"]
+                base_dn_raw = settings[c.TargetLdap.KEY_BASE_DN]
                 base_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
                     base_dn_raw
                 )
                 if not base_dn:
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         "Base DN must be a string",
                     )
                 if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
                     base_dn
                 ):
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         f"Invalid base DN format: {base_dn}",
                     )
-                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
-                    base_dn,
-                ):
-                    return r[Mapping[str, m.ConfigMap]].fail(
-                        f"Invalid base DN format: {base_dn}",
-                    )
-                if "port" in settings:
-                    port_raw = settings["port"]
+                if c.TargetLdap.KEY_PORT in settings:
+                    port_raw = settings[c.TargetLdap.KEY_PORT]
                     match port_raw:
                         case bool() | Mapping() | list():
-                            return r[Mapping[str, m.ConfigMap]].fail(
+                            return r[Mapping[str, t.JsonPayload]].fail(
                                 "Port must be a valid integer between 1 and 65535",
                             )
                         case int() as port_int:
@@ -416,36 +424,36 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                             try:
                                 port_int = int(port_raw)
                             except (RuntimeError, TypeError, ValueError):
-                                return r[Mapping[str, m.ConfigMap]].fail(
+                                return r[Mapping[str, t.JsonPayload]].fail(
                                     "Port must be a valid integer between 1 and 65535",
                                 )
                         case _:
-                            return r[Mapping[str, m.ConfigMap]].fail(
+                            return r[Mapping[str, t.JsonPayload]].fail(
                                 "Port must be a valid integer between 1 and 65535",
                             )
                     if not (0 < port_int <= c.MAX_PORT):
-                        return r[Mapping[str, m.ConfigMap]].fail(
+                        return r[Mapping[str, t.JsonPayload]].fail(
                             "Port must be a valid integer between 1 and 65535",
                         )
-                use_ssl = settings.get("use_ssl", False)
-                use_tls = settings.get("use_tls", False)
+                use_ssl = settings.get(c.TargetLdap.KEY_USE_SSL, c.Ldap.DEFAULT_USE_SSL)
+                use_tls = settings.get(c.TargetLdap.KEY_USE_TLS, c.Ldap.DEFAULT_USE_TLS)
                 if use_ssl and use_tls:
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         "Cannot use both SSL and TLS simultaneously",
                     )
-                return r[Mapping[str, m.ConfigMap]].ok(settings)
+                return r[Mapping[str, t.JsonPayload]].ok(settings)
 
             @staticmethod
             def validate_target_config(
-                settings: Mapping[str, m.ConfigMap],
-            ) -> p.Result[Mapping[str, m.ConfigMap]]:
+                settings: Mapping[str, t.JsonPayload],
+            ) -> p.Result[Mapping[str, t.JsonPayload]]:
                 """Validate target configuration.
 
                 Args:
                 settings: Target configuration
 
                 Returns:
-                r[Mapping[str, m.ConfigMap]]: Validated settings or error
+                r[Mapping[str, t.JsonPayload]]: Validated settings or error
 
                 """
                 ldap_result = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.validate_ldap_connection_config(
@@ -453,34 +461,34 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 )
                 if ldap_result.failure:
                     return ldap_result
-                operation_mode = settings.get("operation_mode", "upsert")
-                valid_modes = ["insert", "update", "upsert", "delete"]
+                operation_mode = settings.get(
+                    c.TargetLdap.KEY_OPERATION_MODE,
+                    c.TargetLdap.DEFAULT_OPERATION_MODE,
+                )
+                valid_modes = list(c.TargetLdap.OPERATION_MODES)
                 if operation_mode not in valid_modes:
-                    return r[Mapping[str, m.ConfigMap]].fail(
+                    return r[Mapping[str, t.JsonPayload]].fail(
                         f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}",
                     )
-                if "dn_template" in settings:
-                    dn_template = settings["dn_template"]
+                if c.TargetLdap.KEY_DN_TEMPLATE in settings:
+                    dn_template = settings[c.TargetLdap.KEY_DN_TEMPLATE]
                     if not isinstance(dn_template, str) or not dn_template.strip():
-                        return r[Mapping[str, m.ConfigMap]].fail(
+                        return r[Mapping[str, t.JsonPayload]].fail(
                             "DN template must be a non-empty string",
                         )
-                batch_size = settings.get(
-                    "batch_size",
-                    c.DEFAULT_SIZE,
-                )
+                batch_size = settings.get(c.TargetLdap.KEY_BATCH_SIZE, c.DEFAULT_SIZE)
                 match batch_size:
                     case bool():
-                        return r[Mapping[str, m.ConfigMap]].fail(
+                        return r[Mapping[str, t.JsonPayload]].fail(
                             "Batch size must be a positive integer",
                         )
                     case int() if batch_size > 0:
                         pass
                     case _:
-                        return r[Mapping[str, m.ConfigMap]].fail(
+                        return r[Mapping[str, t.JsonPayload]].fail(
                             "Batch size must be a positive integer",
                         )
-                return r[Mapping[str, m.ConfigMap]].ok(settings)
+                return r[Mapping[str, t.JsonPayload]].ok(settings)
 
             @staticmethod
             def coerce_container_value(
@@ -522,7 +530,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                                 normalized_list.append(coerced_item)
                     return normalized_list
                 if isinstance(value, Mapping):
-                    normalized_dict: MutableMapping[str, t.JsonPayload] = {}
+                    normalized_dict: dict[str, str | int | float | bool] = {}
                     for key, item in value.items():
                         if isinstance(
                             item, (str, int, float, bool, datetime, list, dict)
@@ -535,7 +543,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                                 (str, int, float, bool),
                             ):
                                 normalized_dict[str(key)] = coerced_item
-                    return m.ConfigMap(root=normalized_dict)
+                    return m.ConfigMap.model_validate(normalized_dict)
                 return None
 
 
