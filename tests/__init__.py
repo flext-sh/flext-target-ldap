@@ -12,9 +12,8 @@ from flext_core.lazy import (
 )
 
 if _t.TYPE_CHECKING:
-    from flext_tests import td, tf, tk, tm, tv
+    from flext_tests import d, e, h, r, s, td, tf, tk, tm, tv, x
 
-    from flext_target_ldap import d, e, h, r, s, x
     from tests.constants import TestsFlextTargetLdapConstants, c
     from tests.models import TestsFlextTargetLdapModels, m
     from tests.protocols import TestsFlextTargetLdapProtocols, p
@@ -54,20 +53,18 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetLdapUtilities",
                 "u",
             ),
-            "flext_target_ldap": (
+            "flext_tests": (
                 "d",
                 "e",
                 "h",
                 "r",
                 "s",
-                "x",
-            ),
-            "flext_tests": (
                 "td",
                 "tf",
                 "tk",
                 "tm",
                 "tv",
+                "x",
             ),
         },
     ),

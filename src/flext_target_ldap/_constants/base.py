@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import Final
 
+from flext_ldap import FlextLdapConstants
+from flext_meltano import c
 from flext_target_ldap import t
 
 
@@ -22,3 +24,10 @@ class FlextTargetLdapConstantsBase:
     UPDATE_EXISTING_ENTRIES: Final[bool] = True
     DELETE_REMOVED_ENTRIES: Final[bool] = False
     DEFAULT_OBJECT_CLASSES: Final[t.VariadicTuple[str]] = ("top",)
+
+
+class FlextTargetLdapConstants(c, FlextLdapConstants):
+    """LDAP target constant facade."""
+
+    class TargetLdap(FlextTargetLdapConstantsBase):
+        """LDAP target constant namespace."""
