@@ -1,0 +1,16 @@
+src/flext_target_ldap/constants.py
+  h_9db9d35f50cf33 1,5
+src/flext_target_ldap/_constants/base.py
+  h_9db9d35f50cf33 11-12,28-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "91cd5df66fe5174e77a4466d313ee2a001097705",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
