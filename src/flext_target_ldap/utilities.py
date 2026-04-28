@@ -100,7 +100,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         settings.get(c.TargetLdap.KEY_HOST, c.TargetLdap.DEFAULT_HOST),
                         default=c.TargetLdap.DEFAULT_HOST,
                     ),
-                    port=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
+                    port=u.to_int(
                         settings.get(c.TargetLdap.KEY_PORT, c.Ldap.PORT),
                         default=c.Ldap.PORT,
                     ),
@@ -119,7 +119,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                             c.TargetLdap.DEFAULT_BIND_PASSWORD,
                         ),
                     ),
-                    timeout=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
+                    timeout=u.to_int(
                         settings.get(c.TargetLdap.KEY_TIMEOUT, c.Ldap.TIMEOUT),
                         default=c.Ldap.TIMEOUT,
                     ),
@@ -137,27 +137,6 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     return str(value)
                 except (RuntimeError, TypeError, ValueError):
                     return default
-
-            @staticmethod
-            def to_int(
-                value: t.JsonValue | m.ConfigMap | None,
-                default: int = 0,
-            ) -> int:
-                """Coerce a settings value to int."""
-                if value is None:
-                    return default
-                match value:
-                    case bool():
-                        return default
-                    case int():
-                        return value
-                    case str() | float():
-                        try:
-                            return int(value)
-                        except (RuntimeError, TypeError, ValueError):
-                            return default
-                    case _:
-                        return default
 
             @staticmethod
             def to_bool(

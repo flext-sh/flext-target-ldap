@@ -70,7 +70,7 @@ class FlextTargetLdapTarget:
         context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a record with the concrete target runtime."""
-        context_keys = tuple(sorted(str(key) for key in context))
+        context_keys = tuple(sorted(key for key in context))
         return r[bool].fail(
             f"Target does not implement process_record for context keys: {context_keys}"
         )
