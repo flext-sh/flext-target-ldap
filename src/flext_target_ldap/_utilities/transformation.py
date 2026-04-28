@@ -62,7 +62,7 @@ class FlextTargetLdapTransformationEngine:
                                     )
                                     matched = True
                                 else:
-                                    new_items.append(u.Cli.normalize_json_value(item))
+                                    new_items.append(u.normalize_to_json_value(item))
                             if matched:
                                 transformed_data[key] = new_items
                                 applied_rules.append(rule.name)

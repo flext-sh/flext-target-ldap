@@ -182,9 +182,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has a specific object class."""
-                return object_class.lower() in [
-                    oc.lower() for oc in self.object_classes
-                ]
+                return bool(u.Ldap.norm_in(object_class, self.object_classes))
 
             def validate_business_rules(self) -> p.Result[bool]:
                 """Validate LDAP entry business rules."""

@@ -66,8 +66,8 @@ class FlextTargetLdapServiceRuntime:
         ) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
-                u.Meltano.normalize_runtime_json_mapping(record),
-                u.Meltano.normalize_runtime_json_mapping(context),
+                u.normalize_to_json_mapping(record),
+                u.normalize_to_json_mapping(context),
             )
             if result.failure:
                 msg = result.error or "LDAP runtime sink rejected the record"
@@ -82,7 +82,7 @@ class FlextTargetLdapServiceRuntime:
         target_config: Mapping[str, t.JsonValue],
     ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
-        normalized_target_config = u.Meltano.normalize_runtime_json_mapping(
+        normalized_target_config = u.normalize_to_json_mapping(
             target_config,
         )
         runtime_target = FlextTargetLdap(

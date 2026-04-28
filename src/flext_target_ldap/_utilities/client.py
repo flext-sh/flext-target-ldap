@@ -25,6 +25,7 @@ class FlextTargetLdapClient:
     """
 
     logger: ClassVar = u.fetch_logger(__name__)
+    settings: m.Ldap.ConnectionConfig
 
     @staticmethod
     def to_str_values(
@@ -87,7 +88,7 @@ class FlextTargetLdapClient:
     ) -> None:
         """Initialize LDAP client with connection configuration."""
         connection_settings = self._resolve_connection_settings(settings)
-        self.settings = connection_settings
+        self.settings: m.Ldap.ConnectionConfig = connection_settings
         self._bind_dn = connection_settings.bind_dn or ""
         self._password = connection_settings.bind_password or ""
         self._api = ldap
@@ -104,7 +105,8 @@ class FlextTargetLdapClient:
     @property
     def host(self) -> str:
         """Get server host."""
-        return self.settings.host
+        host: str = self.settings.host
+        return host
 
     @property
     def password(self) -> str:
@@ -137,7 +139,8 @@ class FlextTargetLdapClient:
     @property
     def port(self) -> int:
         """Get server port."""
-        return self.settings.port
+        port: int = self.settings.port
+        return port
 
     @property
     def server_uri(self) -> str:
@@ -148,12 +151,14 @@ class FlextTargetLdapClient:
     @property
     def timeout(self) -> int:
         """Get timeout."""
-        return self.settings.timeout
+        timeout: int = self.settings.timeout
+        return timeout
 
     @property
     def use_ssl(self) -> bool:
         """Get SSL usage."""
-        return self.settings.use_ssl
+        use_ssl: bool = self.settings.use_ssl
+        return use_ssl
 
     def add_entry(
         self,

@@ -96,7 +96,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
             ) -> m.Ldap.ConnectionConfig:
                 """Build LDAP ConnectionConfig from a flat settings mapping."""
                 return m.Ldap.ConnectionConfig(
-                    host=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                    host=u.to_str(
                         settings.get(c.TargetLdap.KEY_HOST, c.TargetLdap.DEFAULT_HOST),
                         default=c.TargetLdap.DEFAULT_HOST,
                     ),
@@ -107,13 +107,13 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                     use_ssl=bool(
                         settings.get(c.TargetLdap.KEY_USE_SSL, c.Ldap.DEFAULT_USE_SSL)
                     ),
-                    bind_dn=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                    bind_dn=u.to_str(
                         settings.get(
                             c.TargetLdap.KEY_BIND_DN,
                             c.TargetLdap.DEFAULT_BIND_DN,
                         ),
                     ),
-                    bind_password=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                    bind_password=u.to_str(
                         settings.get(
                             c.TargetLdap.KEY_PASSWORD,
                             c.TargetLdap.DEFAULT_BIND_PASSWORD,
@@ -124,36 +124,6 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         default=c.Ldap.TIMEOUT,
                     ),
                 )
-
-            @staticmethod
-            def to_str(
-                value: t.JsonPayload | None,
-                default: str = "",
-            ) -> str:
-                """Coerce a settings value to str."""
-                if value is None:
-                    return default
-                try:
-                    return str(value)
-                except (RuntimeError, TypeError, ValueError):
-                    return default
-
-            @staticmethod
-            def to_bool(
-                value: t.JsonValue | m.ConfigMap | None,
-                *,
-                default: bool = False,
-            ) -> bool:
-                """Coerce a settings value to bool."""
-                if value is None:
-                    return default
-                if isinstance(value, bool):
-                    return value
-                if isinstance(value, str):
-                    return value.lower() in c.TargetLdap.TRUE_STRING_TOKENS
-                if isinstance(value, int):
-                    return value != 0
-                return default
 
             @staticmethod
             def extract_attribute_mapping(
@@ -363,9 +333,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         "Host must be a non-empty string",
                     )
                 bind_dn_raw = settings[c.TargetLdap.KEY_BIND_DN]
-                bind_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
-                    bind_dn_raw
-                )
+                bind_dn = u.to_str(bind_dn_raw)
                 if not bind_dn:
                     return r[Mapping[str, t.JsonPayload]].fail(
                         "Bind DN must be a string",
@@ -377,9 +345,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                         f"Invalid bind DN format: {bind_dn}",
                     )
                 base_dn_raw = settings[c.TargetLdap.KEY_BASE_DN]
-                base_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
-                    base_dn_raw
-                )
+                base_dn = u.to_str(base_dn_raw)
                 if not base_dn:
                     return r[Mapping[str, t.JsonPayload]].fail(
                         "Base DN must be a string",
