@@ -37,9 +37,7 @@ class FlextTargetLdapTransformationEngine:
     ) -> p.Result[m.TargetLdap.DataTransformationResult]:
         """Transform data using rules."""
         try:
-            transformed_data: t.TargetLdap.MutableRecordPayload = {
-                str(key): value for key, value in data.items()
-            }
+            transformed_data: t.TargetLdap.MutableRecordPayload = dict(data.items())
             applied_rules: MutableSequence[str] = []
             for rule in self.rules:
                 if not rule.enabled:

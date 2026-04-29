@@ -178,7 +178,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
                 if isinstance(record, dict):
                     normalized_record: t.TargetLdap.MutableRecordPayload = {}
                     for k, v in record.items():
-                        normalized_record[str(k)] = v
+                        normalized_record[k] = v
                     self.process_record(normalized_record, context)
             logger.info(
                 f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}",

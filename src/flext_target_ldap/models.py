@@ -169,7 +169,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             @property
             def parent_dn(self) -> str:
                 """Parent DN derived from the distinguished name."""
-                distinguished_name = str(self.distinguished_name)
+                distinguished_name = self.distinguished_name
                 parts = distinguished_name.split(",", 1)
                 return parts[1].strip() if len(parts) > 1 else ""
 
@@ -177,12 +177,12 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             @property
             def rdn(self) -> str:
                 """Relative distinguished name derived from the DN."""
-                distinguished_name = str(self.distinguished_name)
+                distinguished_name = self.distinguished_name
                 return distinguished_name.split(",", 1)[0].strip()
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has a specific object class."""
-                return bool(u.Ldap.norm_in(object_class, self.object_classes))
+                return u.Ldap.norm_in(object_class, self.object_classes)
 
             def validate_business_rules(self) -> p.Result[bool]:
                 """Validate LDAP entry business rules."""
@@ -388,14 +388,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             @property
             def is_batch_full(self) -> bool:
                 """Check if current batch is full."""
-                batch_size = int(self.batch_size)
+                batch_size = self.batch_size
                 return len(self.current_batch) >= batch_size
 
             @property
             def success_rate(self) -> float:
                 """Calculate success rate percentage."""
-                successful_operations = int(self.successful_operations)
-                failed_operations = int(self.failed_operations)
+                successful_operations = self.successful_operations
+                failed_operations = self.failed_operations
                 total_ops = successful_operations + failed_operations
                 if total_ops == 0:
                     return 0.0
@@ -533,22 +533,22 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             @property
             def operations_per_second(self) -> float:
                 """Calculate operations per second throughput."""
-                duration = float(self.total_duration_seconds)
+                duration = self.total_duration_seconds
                 if math.isclose(duration, 0.0):
                     return 0.0
-                total_entries_processed = int(self.total_entries_processed)
+                total_entries_processed = self.total_entries_processed
                 return total_entries_processed / duration
 
             @property
             def success_rate(self) -> float:
                 """Calculate overall success rate percentage."""
-                total_entries_processed = int(self.total_entries_processed)
+                total_entries_processed = self.total_entries_processed
                 if total_entries_processed == 0:
                     return 0.0
                 successful = (
-                    int(self.successful_adds)
-                    + int(self.successful_updates)
-                    + int(self.successful_deletes)
+                    self.successful_adds
+                    + self.successful_updates
+                    + self.successful_deletes
                 )
                 return (successful / total_entries_processed) * 100.0
 
@@ -558,7 +558,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 end_time = self.end_time
                 if end_time is None:
                     return 0.0
-                return float((end_time - self.start_time).total_seconds())
+                return (end_time - self.start_time).total_seconds()
 
             def complete_processing(self) -> Self:
                 """Mark processing as completed (immutable operation)."""

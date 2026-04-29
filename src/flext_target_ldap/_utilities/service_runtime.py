@@ -38,9 +38,7 @@ class FlextTargetLdapServiceRuntime:
             key_properties: t.StrSequence,
         ) -> FlextTargetLdapServiceRuntime.Sink:
             """Create an adapter sink and attach the LDAP runtime sink."""
-            schema_dict: dict[str, t.JsonValue] = {
-                str(key): value for key, value in schema.items()
-            }
+            schema_dict: dict[str, t.JsonValue] = dict(schema.items())
             service_sink = cls(
                 target=target,
                 stream_name=stream_name,

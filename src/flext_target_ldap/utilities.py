@@ -134,7 +134,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                 if isinstance(raw, Mapping):
                     normalized_mapping: t.MutableMappingKV[str, str] = {}
                     for key, value in raw.items():
-                        normalized_key = str(key)
+                        normalized_key = key
                         normalized_value = str(value)
                         normalized_mapping[normalized_key] = normalized_value
                     return normalized_mapping
@@ -487,7 +487,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                                 coerced_item,
                                 (str, int, float, bool),
                             ):
-                                normalized_dict[str(key)] = coerced_item
+                                normalized_dict[key] = coerced_item
                     return m.ConfigMap.model_validate(normalized_dict)
                 return None
 

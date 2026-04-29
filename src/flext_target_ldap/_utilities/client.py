@@ -46,7 +46,7 @@ class FlextTargetLdapClient:
             for key, value in attributes.items()
         }
         if object_classes:
-            entry_attributes["objectClass"] = [str(value) for value in object_classes]
+            entry_attributes["objectClass"] = list(object_classes)
         return m.Ldif.Entry(
             dn=m.Ldif.DN(
                 value=dn,
@@ -181,7 +181,7 @@ class FlextTargetLdapClient:
                 if result_op.success:
                     return r[bool].ok(value=True)
                 return r[bool].fail(
-                    str(result_op.error) if result_op.error else "LDAP add failed",
+                    result_op.error or "LDAP add failed",
                 )
             finally:
                 self._api.disconnect()

@@ -157,7 +157,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         dn_value = record.get("dn")
         dn_text = "" if dn_value is None else str(dn_value)
         attributes: dict[str, list[str]] = {
-            str(key): api.to_str_values(value)
+            key: api.to_str_values(value)
             for key, value in record.items()
             if key not in {"dn", "_sdc_deleted_at"}
         }
@@ -220,7 +220,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                         continue
                     normalized_record: t.TargetLdap.MutableRecordPayload = {}
                     for key, value in record_data.items():
-                        normalized_record[str(key)] = value
+                        normalized_record[key] = value
                     FlextTargetLdap._process_record_message(
                         normalized_record,
                         stream,

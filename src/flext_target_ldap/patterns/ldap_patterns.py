@@ -169,11 +169,7 @@ class FlextTargetLdapSchemaMapper:
                     return r[t.StrMapping].fail(
                         f"Type mapping failed for '{prop_name}': {ldap_type_result.error}",
                     )
-                mapped_type: str = (
-                    str(ldap_type_result.value)
-                    if ldap_type_result.value
-                    else "DirectoryString"
-                )
+                mapped_type: str = ldap_type_result.value or "DirectoryString"
                 ldap_attributes[ldap_name] = mapped_type
             return r[t.StrMapping].ok(ldap_attributes)
         except (RuntimeError, ValueError, TypeError) as e:

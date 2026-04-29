@@ -130,7 +130,7 @@ class TestsFlextTargetLdapSinks:
         else:
             result = ldap_base_sink.build_attributes(record)
         assert not result.success
-        assert result.error is not None and expected_error in str(result.error)
+        assert result.error is not None and expected_error in result.error
 
     def test_get_object_classes_default(self, ldap_base_sink: LDAPBaseSink) -> None:
         record: t.TargetLdap.RecordPayload = {}
@@ -169,7 +169,7 @@ class TestsFlextTargetLdapSinks:
     ) -> None:
         result = ldap_base_sink.validate_entry(dn, attributes, object_classes)
         assert not result.success
-        assert result.error is not None and expected_message in str(result.error)
+        assert result.error is not None and expected_message in result.error
 
     def test_users_build_dn_success(self, users_sink: UsersSink) -> None:
         record = {"uid": "testuser", "cn": "Test User"}
@@ -182,7 +182,7 @@ class TestsFlextTargetLdapSinks:
         assert not result.success
         assert (
             result.error is not None
-            and "No value found for RDN attribute 'uid'" in str(result.error)
+            and "No value found for RDN attribute 'uid'" in result.error
         )
 
     def test_users_build_attributes_basic(self, users_sink: UsersSink) -> None:
@@ -243,7 +243,7 @@ class TestsFlextTargetLdapSinks:
         assert not result.success
         assert (
             result.error is not None
-            and "No value found for RDN attribute 'cn'" in str(result.error)
+            and "No value found for RDN attribute 'cn'" in result.error
         )
 
     def test_groups_build_attributes_basic(self, groups_sink: GroupsSink) -> None:
@@ -298,7 +298,7 @@ class TestsFlextTargetLdapSinks:
         assert not result.success
         assert (
             result.error is not None
-            and "No ID or name found for generic entry" in str(result.error)
+            and "No ID or name found for generic entry" in result.error
         )
 
     def test_generic_build_attributes_basic(self, generic_sink: LDAPBaseSink) -> None:
@@ -308,8 +308,9 @@ class TestsFlextTargetLdapSinks:
             "description": "A test entry",
         })
         assert not result.success
-        assert result.error is not None and "must be implemented in subclass" in str(
-            result.error
+        assert (
+            result.error is not None
+            and "must be implemented in subclass" in result.error
         )
 
     def test_generic_get_object_classes_from_record(
