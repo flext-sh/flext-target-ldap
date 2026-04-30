@@ -350,7 +350,12 @@ class FlextTargetLdapClient:
                     Mapping[str, t.Ldap.Ldap3AttributeValue | t.StrSequence]
                 ] = search_res.entries
                 for entry in ldap_entries:
-                    entries.append(u.Ldap.search_entry_to_ldif_entry(entry))
+                    entry_result = u.Ldap.search_entry_to_ldif_entry(entry)
+                    if entry_result.failure:
+                        return r[Sequence[m.Ldif.Entry]].fail(
+                            f"Entry conversion failed: {entry_result.error}",
+                        )
+                    entries.append(entry_result.value)
                 FlextTargetLdapClient.logger.debug(
                     "Successfully found %d LDAP entries",
                     len(entries),
