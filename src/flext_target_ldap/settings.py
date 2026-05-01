@@ -112,7 +112,7 @@ class FlextTargetLdapSettings(FlextSettings):
         ),
     ]
     search_scope: Annotated[
-        t.Ldap.Ldap3SearchScope,
+        c.Ldap.Ldap3SearchScope,
         u.Field(
             default=c.Ldap.DEFAULT_SCOPE,
             description="LDAP search scope (BASE, ONELEVEL, or SUBTREE)",

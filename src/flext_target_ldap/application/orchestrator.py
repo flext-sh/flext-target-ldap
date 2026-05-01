@@ -45,7 +45,7 @@ class FlextTargetLdapOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: t.SequenceOf[t.MappingOf[str, t.Scalar | None]],
+        records: t.SequenceOf[t.MappingKV[str, t.Scalar | None]],
     ) -> p.Result[t.HeaderMapping]:
         """Orchestrate data loading to LDAP target.
 

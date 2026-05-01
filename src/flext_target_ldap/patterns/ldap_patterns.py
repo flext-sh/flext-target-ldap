@@ -75,10 +75,10 @@ class FlextTargetLdapDataTransformer:
     ) -> p.Result[t.Ldap.OperationAttributes]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes: t.Ldap.OperationAttributes = {}
-            attributes["objectClass"] = object_classes
+            attributes: t.MutableAttributeMapping = {}
+            attributes["objectClass"] = list(object_classes)
             for key, value in record.items():
-                attributes[key] = self._to_ldap_values(value)
+                attributes[key] = list(self._to_ldap_values(value))
             return r[t.Ldap.OperationAttributes].ok(attributes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
@@ -279,7 +279,7 @@ class FlextTargetLdapEntryManager:
     ) -> p.Result[t.Ldap.LdapModifyChanges]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: t.Ldap.LdapModifyChanges = {}
+            changes: dict[str, list[tuple[c.Ldap.ModifyOperation, t.StrSequence]]] = {}
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
             for attr in all_attrs:
                 current_value = current_attrs.get(attr)
@@ -325,7 +325,7 @@ class FlextTargetLdapEntryManager:
 
     def _escape_dn_value(self, value: str) -> str:
         """Escape special characters in DN values per RFC 4514."""
-        return u.Ldif.DN.esc(value)
+        return u.Ldif.esc(value)
 
     def _normalize_modify_values(
         self,
