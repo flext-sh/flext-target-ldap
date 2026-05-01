@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import (
-    Sequence,
-)
-
 from flext_target_ldap import (
     FlextTargetLdap,
     FlextTargetLdapClient,
@@ -31,7 +27,7 @@ class FlextTargetLdapApiService:
 
     def load_groups_to_ldap(
         self,
-        groups: Sequence[t.TargetLdap.RecordPayload],
+        groups: t.SequenceOf[t.TargetLdap.RecordPayload],
         settings: t.TargetLdap.SettingsPayload,
     ) -> p.Result[int]:
         """Load group records into LDAP using the default groups sink."""
@@ -46,7 +42,7 @@ class FlextTargetLdapApiService:
 
     def load_users_to_ldap(
         self,
-        users: Sequence[t.TargetLdap.RecordPayload],
+        users: t.SequenceOf[t.TargetLdap.RecordPayload],
         settings: t.TargetLdap.SettingsPayload,
     ) -> p.Result[int]:
         """Load user records into LDAP using the default users sink."""

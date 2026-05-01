@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-)
 from pathlib import Path
 from typing import override
 
@@ -51,7 +48,7 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_batch(
             self,
-            context: Mapping[str, t.JsonValue],
+            context: t.MappingKV[str, t.JsonValue],
         ) -> None:
             """Singer batch hook is handled record-by-record by the runtime sink."""
             _ = context
@@ -59,8 +56,8 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_record(
             self,
-            record: Mapping[str, t.JsonValue],
-            context: Mapping[str, t.JsonValue],
+            record: t.MappingKV[str, t.JsonValue],
+            context: t.MappingKV[str, t.JsonValue],
         ) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
@@ -77,7 +74,7 @@ class FlextTargetLdapServiceRuntime:
         *,
         stream_name: str,
         schema: t.FlatContainerMapping,
-        target_config: Mapping[str, t.JsonValue],
+        target_config: t.MappingKV[str, t.JsonValue],
     ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
         normalized_target_config = u.normalize_to_json_mapping(

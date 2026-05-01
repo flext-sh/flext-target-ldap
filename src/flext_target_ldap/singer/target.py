@@ -11,9 +11,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Sequence,
-)
 from typing import override
 
 from flext_target_ldap import c, p, r, t, u
@@ -43,7 +40,7 @@ class FlextTargetLdapSingerTarget:
 
     def process_singer_messages(
         self,
-        messages: Sequence[t.JsonMapping],
+        messages: t.SequenceOf[t.JsonMapping],
     ) -> p.Result[t.HeaderMapping]:
         """Process Singer messages for LDAP target.
 

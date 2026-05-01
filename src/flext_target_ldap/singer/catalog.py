@@ -7,9 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    MutableMapping,
-)
 from typing import override
 
 from flext_target_ldap import m, p, r, t, u
@@ -23,7 +20,7 @@ class FlextTargetLdapCatalogManager:
     @override
     def __init__(self) -> None:
         """Initialize Singer LDAP catalog manager."""
-        self._catalog_entries: MutableMapping[
+        self._catalog_entries: dict[
             str,
             m.TargetLdap.SingerLDAPCatalogEntry,
         ] = {}

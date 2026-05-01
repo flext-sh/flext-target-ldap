@@ -6,14 +6,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-    MutableMapping,
-    Sequence,
-)
 from typing import override
 
-from flext_target_ldap import m, p, r, t, u
+from flext_target_ldap import c, m, p, r, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -77,17 +72,17 @@ class FlextTargetLdapDataTransformer:
         self,
         record: t.ConfigurationMapping,
         object_classes: t.StrSequence,
-    ) -> p.Result[Mapping[str, t.StrSequence]]:
+    ) -> p.Result[t.Ldap.OperationAttributes]:
         """Prepare attributes for LDAP entry creation."""
         try:
-            attributes: MutableMapping[str, t.StrSequence] = {}
+            attributes: t.Ldap.OperationAttributes = {}
             attributes["objectClass"] = object_classes
             for key, value in record.items():
                 attributes[key] = self._to_ldap_values(value)
-            return r[Mapping[str, t.StrSequence]].ok(attributes)
+            return r[t.Ldap.OperationAttributes].ok(attributes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return r[Mapping[str, t.StrSequence]].fail(
+            return r[t.Ldap.OperationAttributes].fail(
                 f"Attribute preparation failed: {e}",
             )
 
@@ -95,7 +90,7 @@ class FlextTargetLdapDataTransformer:
         self,
         record: t.ConfigurationMapping,
         schema: m.TargetLdap.SingerSchemaDefinition
-        | Mapping[str, Mapping[str, t.StrMapping | str]]
+        | t.MappingKV[str, t.MappingKV[str, t.StrMapping | str]]
         | None = None,
     ) -> p.Result[t.OptionalStrMapping]:
         """Transform Singer record for LDAP storage."""
@@ -155,7 +150,7 @@ class FlextTargetLdapSchemaMapper:
     def map_singer_schema_to_ldap(
         self,
         schema: m.TargetLdap.SingerSchemaDefinition
-        | Mapping[str, Mapping[str, t.StrMapping | str]],
+        | t.MappingKV[str, t.MappingKV[str, t.StrMapping | str]],
         object_class: str = "inetOrgPerson",
     ) -> p.Result[t.StrMapping]:
         """Map Singer schema to LDAP attribute definitions."""
@@ -279,35 +274,35 @@ class FlextTargetLdapEntryManager:
 
     def prepare_modify_changes(
         self,
-        current_attrs: Mapping[str, str | t.StrSequence | None],
-        new_attrs: Mapping[str, str | t.StrSequence | None],
-    ) -> p.Result[Mapping[str, Sequence[t.Pair[str, t.StrSequence]]]]:
+        current_attrs: t.MappingKV[str, str | t.StrSequence | None],
+        new_attrs: t.MappingKV[str, str | t.StrSequence | None],
+    ) -> p.Result[t.Ldap.LdapModifyChanges]:
         """Prepare modification changes for LDAP entry."""
         try:
-            changes: MutableMapping[str, Sequence[t.Pair[str, t.StrSequence]]] = {}
+            changes: t.Ldap.LdapModifyChanges = {}
             all_attrs = set(current_attrs.keys()) | set(new_attrs.keys())
             for attr in all_attrs:
                 current_value = current_attrs.get(attr)
                 new_value = new_attrs.get(attr)
                 if current_value != new_value:
                     if new_value is None:
-                        changes[attr] = [("MODIFY_DELETE", [])]
+                        changes[attr] = [(c.Ldap.ModifyOperation.DELETE, [])]
                     elif current_value is None:
                         values = self._normalize_modify_values(new_value)
-                        changes[attr] = [("MODIFY_ADD", values)]
+                        changes[attr] = [(c.Ldap.ModifyOperation.ADD, values)]
                     else:
                         values = self._normalize_modify_values(new_value)
-                        changes[attr] = [("MODIFY_REPLACE", values)]
-            return r[Mapping[str, Sequence[tuple[str, t.StrSequence]]]].ok(changes)
+                        changes[attr] = [(c.Ldap.ModifyOperation.REPLACE, values)]
+            return r[t.Ldap.LdapModifyChanges].ok(changes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return r[Mapping[str, Sequence[tuple[str, t.StrSequence]]]].fail(
+            return r[t.Ldap.LdapModifyChanges].fail(
                 f"Modify changes preparation failed: {e}",
             )
 
     def validate_entry_attributes(
         self,
-        attributes: Mapping[str, t.StrSequence],
+        attributes: t.MappingKV[str, t.StrSequence],
         object_classes: t.StrSequence,
     ) -> p.Result[bool]:
         """Validate LDAP entry attributes against object class requirements."""
@@ -329,25 +324,8 @@ class FlextTargetLdapEntryManager:
             return r[bool].fail(f"Entry validation failed: {e}")
 
     def _escape_dn_value(self, value: str) -> str:
-        """Escape special characters in DN values."""
-        special_chars = {
-            ",": "\\,",
-            "+": "\\+",
-            '"': "\\'",
-            "\\": "\\",
-            "<": "\\<",
-            ">": "\\>",
-            ";": "\\;",
-            "=": "\\=",
-        }
-        escaped = value
-        for char, escaped_char in special_chars.items():
-            escaped = escaped.replace(char, escaped_char)
-        if escaped.startswith(" "):
-            escaped = "\\ " + escaped[1:]
-        if escaped.endswith(" "):
-            escaped = escaped[:-1] + "\\ "
-        return escaped
+        """Escape special characters in DN values per RFC 4514."""
+        return u.Ldif.DN.esc(value)
 
     def _normalize_modify_values(
         self,

@@ -10,10 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-    Sequence,
-)
 from typing import override
 
 from flext_target_ldap import FlextTargetLdapSettings, c, p, r, t, u
@@ -49,7 +45,7 @@ class FlextTargetLdapOrchestrator:
 
     def orchestrate_data_loading(
         self,
-        records: Sequence[Mapping[str, t.Scalar | None]],
+        records: t.SequenceOf[t.MappingOf[str, t.Scalar | None]],
     ) -> p.Result[t.HeaderMapping]:
         """Orchestrate data loading to LDAP target.
 

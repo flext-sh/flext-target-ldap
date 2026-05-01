@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from collections.abc import (
     MutableSequence,
-    Sequence,
 )
 from typing import override
 
@@ -23,7 +22,7 @@ class FlextTargetLdapTransformationEngine:
     """Engine for transforming data using rules."""
 
     @override
-    def __init__(self, rules: Sequence[m.TargetLdap.TransformationRule]) -> None:
+    def __init__(self, rules: t.SequenceOf[m.TargetLdap.TransformationRule]) -> None:
         """Initialize transformation engine."""
         self.rules = rules
 

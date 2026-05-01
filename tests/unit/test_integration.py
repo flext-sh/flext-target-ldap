@@ -10,7 +10,6 @@ import io
 import json
 from collections.abc import (
     Mapping,
-    Sequence,
 )
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
@@ -21,7 +20,7 @@ from flext_target_ldap import FlextTargetLdap
 from tests import t, u
 
 
-def _write_jsonl(path: Path, events: Sequence[Mapping[str, object]]) -> None:
+def _write_jsonl(path: Path, events: t.SequenceOf[Mapping[str, object]]) -> None:
     path.write_text(
         "\n".join(json.dumps(event) for event in events) + "\n", encoding="utf-8"
     )

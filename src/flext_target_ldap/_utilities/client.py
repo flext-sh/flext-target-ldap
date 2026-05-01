@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from collections.abc import (
     Mapping,
-    MutableMapping,
-    MutableSequence,
     Sequence,
 )
 from typing import ClassVar, override
@@ -41,7 +39,7 @@ class FlextTargetLdapClient:
         attributes: t.Ldap.OperationAttributes,
         object_classes: t.StrSequence | None = None,
     ) -> m.Ldif.Entry:
-        entry_attributes: MutableMapping[str, t.StrSequence] = {
+        entry_attributes: dict[str, t.StrSequence] = {
             key: FlextTargetLdapClient.to_str_values(value)
             for key, value in attributes.items()
         }
@@ -65,8 +63,8 @@ class FlextTargetLdapClient:
     @staticmethod
     def _build_modify_changes(
         changes: t.Ldap.OperationAttributes,
-    ) -> dict[str, Sequence[tuple[int, t.StrSequence]]]:
-        built_changes: dict[str, Sequence[tuple[int, t.StrSequence]]] = {
+    ) -> dict[str, t.SequenceOf[tuple[int, t.StrSequence]]]:
+        built_changes: dict[str, t.SequenceOf[tuple[int, t.StrSequence]]] = {
             key: [
                 (
                     c.Ldap.ModifyOperation.REPLACE,
@@ -319,11 +317,11 @@ class FlextTargetLdapClient:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: t.StrSequence | None = None,
-    ) -> p.Result[Sequence[m.Ldif.Entry]]:
+    ) -> p.Result[list[m.Ldif.Entry]]:
         """Search LDAP entries using flext-ldap API."""
         try:
             if not base_dn:
-                return r[Sequence[m.Ldif.Entry]].fail("Base DN required")
+                return r[list[m.Ldif.Entry]].fail("Base DN required")
             FlextTargetLdapClient.logger.info(
                 "Searching LDAP entries using flext-ldap API: %s with filter %s",
                 base_dn,
@@ -331,7 +329,7 @@ class FlextTargetLdapClient:
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
-                return r[Sequence[m.Ldif.Entry]].fail(
+                return r[list[m.Ldif.Entry]].fail(
                     f"Connection failed: {connect_result.error}",
                 )
             try:
@@ -344,31 +342,21 @@ class FlextTargetLdapClient:
             finally:
                 self._api.disconnect()
             if result.success and result.value:
-                entries: MutableSequence[m.Ldif.Entry] = []
                 search_res = result.value
-                ldap_entries: Sequence[
-                    Mapping[str, t.Ldap.Ldap3AttributeValue | t.StrSequence]
-                ] = search_res.entries
-                for entry in ldap_entries:
-                    entry_result = u.Ldap.search_entry_to_ldif_entry(entry)
-                    if entry_result.failure:
-                        return r[Sequence[m.Ldif.Entry]].fail(
-                            f"Entry conversion failed: {entry_result.error}",
-                        )
-                    entries.append(entry_result.value)
+                entries: list[m.Ldif.Entry] = list(search_res.entries)
                 FlextTargetLdapClient.logger.debug(
                     "Successfully found %d LDAP entries",
                     len(entries),
                 )
-                return r[Sequence[m.Ldif.Entry]].ok(entries)
+                return r[list[m.Ldif.Entry]].ok(entries)
             FlextTargetLdapClient.logger.debug("No LDAP entries found")
-            return r[Sequence[m.Ldif.Entry]].ok([])
+            return r[list[m.Ldif.Entry]].ok([])
         except (RuntimeError, ValueError, TypeError) as e:
             FlextTargetLdapClient.logger.exception(
                 "Failed to search entries in %s",
                 base_dn,
             )
-            return r[Sequence[m.Ldif.Entry]].fail(f"Search failed: {e}")
+            return r[list[m.Ldif.Entry]].fail(f"Search failed: {e}")
 
 
 __all__: list[str] = ["FlextTargetLdapClient"]

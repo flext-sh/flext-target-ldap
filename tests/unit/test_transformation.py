@@ -6,10 +6,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Sequence,
-)
-
 import pytest
 
 from flext_target_ldap import (
@@ -163,7 +159,7 @@ class TestsFlextTargetLdapTransformation:
                 replacement="inetOrgPerson",
             )
         ])
-        entries: Sequence[t.TargetLdap.RecordPayload] = [
+        entries: t.SequenceOf[t.TargetLdap.RecordPayload] = [
             {"dn": "cn=user1,dc=example,dc=com", "objectClass": ["orclUser"]},
             {"dn": "cn=user2,dc=example,dc=com", "objectClass": ["person"]},
             {"dn": "cn=user3,dc=invaliddc", "objectClass": ["orclUser"]},
@@ -326,7 +322,7 @@ class TestsFlextTargetLdapTransformation:
                 replacement="inetOrgPerson",
             )
         ])
-        test_entries: Sequence[t.TargetLdap.RecordPayload] = [
+        test_entries: t.SequenceOf[t.TargetLdap.RecordPayload] = [
             {
                 "dn": "cn=oid,cn=oraclecontext,dc=example,dc=com",
                 "objectClass": ["orclContext"],

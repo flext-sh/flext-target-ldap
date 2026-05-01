@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import (
-    MutableSequence,
-)
-
 
 class FlextTargetLdapProcessingCounters:
     """Common counters and mutations for record processing outcomes."""
@@ -13,7 +9,7 @@ class FlextTargetLdapProcessingCounters:
     processed_count: int
     success_count: int
     error_count: int
-    errors: MutableSequence[str]
+    errors: list[str]
 
     @property
     def success_rate(self: FlextTargetLdapProcessingCounters) -> float:

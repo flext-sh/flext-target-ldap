@@ -7,9 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    MutableSequence,
-)
 from typing import ClassVar, override
 
 from flext_target_ldap import (
@@ -88,7 +85,7 @@ class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
         self.processed_count: int = 0
         self.success_count: int = 0
         self.error_count: int = 0
-        self.errors: MutableSequence[str] = []
+        self.errors: list[str] = []
 
 
 class FlextTargetLdapBaseSink(FlextTargetLdapSink):
@@ -168,7 +165,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             return
         try:
             records_raw = context.get(c.TargetLdap.KEY_RECORDS, [])
-            records: MutableSequence[t.TargetLdap.RecordPayload] = []
+            records: list[t.TargetLdap.RecordPayload] = []
             if isinstance(records_raw, list):
                 records.extend(item for item in records_raw if isinstance(item, dict))
             logger.info(

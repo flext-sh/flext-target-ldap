@@ -34,8 +34,8 @@ class FlextTargetLdapSettings(FlextSettings):
     @classmethod
     def normalize_flat_settings(
         cls,
-        data: Mapping[str, t.JsonPayload | None] | Self,
-    ) -> Mapping[str, t.JsonPayload | None] | Self:
+        data: t.MappingKV[str, t.JsonPayload | None] | Self,
+    ) -> t.MappingKV[str, t.JsonPayload | None] | Self:
         """Normalize flat Singer settings into the canonical nested shape."""
         if isinstance(data, cls) or not isinstance(data, Mapping):
             return data
