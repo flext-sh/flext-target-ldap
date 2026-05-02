@@ -80,7 +80,7 @@ class FlextTargetLdapDataTransformer:
             for key, value in record.items():
                 attributes[key] = list(self._to_ldap_values(value))
             return r[t.Ldap.OperationAttributes].ok(attributes)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("LDAP attribute preparation failed")
             return r[t.Ldap.OperationAttributes].fail_op("Attribute preparation", e)
 

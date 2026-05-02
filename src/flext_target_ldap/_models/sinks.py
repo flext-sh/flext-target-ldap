@@ -239,7 +239,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
                 return r[FlextTargetLdapClient].fail_op("LDAP connection", connect_result.error)
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return r[FlextTargetLdapClient].ok(self.client)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             error_msg: str = f"LDAP client setup failed: {e}"
             logger.exception(error_msg)
             return r[FlextTargetLdapClient].fail(error_msg)

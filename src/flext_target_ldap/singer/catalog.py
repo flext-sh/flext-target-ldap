@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_target_ldap import m, p, r, t, u
+from flext_target_ldap import c, m, p, r, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -40,7 +40,7 @@ class FlextTargetLdapCatalogManager:
             self._catalog_entries[stream_name] = entry
             logger.info("Added LDAP stream to catalog: %s", stream_name)
             return r[bool].ok(value=True)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
             return r[bool].fail_op("Stream addition", e)
 

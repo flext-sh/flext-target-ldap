@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_target_ldap import p, r, t, u
+from flext_target_ldap import c, p, r, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -66,7 +66,7 @@ class FlextTargetLdapStreamProcessor:
             )
             logger.info("Initialized LDAP stream processing: %s", stream_name)
             return r[bool].ok(value=True)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("LDAP stream initialization failed: %s", stream_name)
             return r[bool].fail_op("Stream initialization", e)
 

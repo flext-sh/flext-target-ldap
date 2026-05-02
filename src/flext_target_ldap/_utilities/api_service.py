@@ -6,6 +6,7 @@ from flext_target_ldap import (
     FlextTargetLdap,
     FlextTargetLdapClient,
     FlextTargetLdapSettings,
+    c,
     p,
     r,
     t,
@@ -22,7 +23,7 @@ class FlextTargetLdapApiService:
         """Create an LDAP target from raw settings dict."""
         try:
             return r[FlextTargetLdap].ok(FlextTargetLdap(settings=settings))
-        except (RuntimeError, ValueError, TypeError) as exc:
+        except c.EXC_RUNTIME_TYPE as exc:
             return r[FlextTargetLdap].fail(str(exc))
 
     def load_groups_to_ldap(
