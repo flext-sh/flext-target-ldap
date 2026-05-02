@@ -122,7 +122,14 @@ class TestsFlextTargetLdapClient:
         client._api.search.return_value = MagicMock(
             success=True,
             value=MagicMock(
-                entries=[{"dn": "uid=test,dc=test,dc=com", "cn": ["Test User"]}],
+                entries=[
+                    m.Ldif.Entry(
+                        dn=m.Ldif.DN(value="uid=test,dc=test,dc=com"),
+                        attributes=m.Ldif.Attributes(
+                            attributes={"cn": ["Test User"]},
+                        ),
+                    ),
+                ],
             ),
         )
         result = client.search_entry(
