@@ -352,7 +352,7 @@ class FlextTargetLdapClient:
                 return r[list[m.Ldif.Entry]].ok(entries)
             FlextTargetLdapClient.logger.debug("No LDAP entries found")
             return r[list[m.Ldif.Entry]].ok([])
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception(
                 "Failed to search entries in %s",
                 base_dn,

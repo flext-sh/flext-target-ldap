@@ -265,7 +265,7 @@ class FlextTargetLdapEntryManager:
             escaped_value = self._escape_dn_value(str(rdn_value))
             dn = f"{rdn_attribute}={escaped_value},{base_dn}"
             return r[str].ok(dn)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("DN generation failed")
             return r[str].fail_op("DN generation", e)
 
@@ -291,7 +291,7 @@ class FlextTargetLdapEntryManager:
                         values = self._normalize_modify_values(new_value)
                         changes[attr] = [(c.Ldap.ModifyOperation.REPLACE, values)]
             return r[t.Ldap.LdapModifyChanges].ok(changes)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("Modify changes preparation failed")
             return r[t.Ldap.LdapModifyChanges].fail_op("Modify changes preparation", e)
 
@@ -314,7 +314,7 @@ class FlextTargetLdapEntryManager:
             if missing_attrs:
                 return r[bool].fail(f"Missing required attributes: {missing_attrs}")
             return r[bool].ok(value=True)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("Entry validation failed")
             return r[bool].fail_op("Entry validation", e)
 
