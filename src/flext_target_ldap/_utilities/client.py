@@ -256,7 +256,7 @@ class FlextTargetLdapClient:
             if search_result.success:
                 return r[bool].ok(bool(search_result.value))
             return r[bool].ok(value=False)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception(
                 "Failed to check entry existence: %s",
                 dn,

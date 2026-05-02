@@ -164,7 +164,7 @@ class FlextTargetLdapSchemaMapper:
                 mapped_type: str = ldap_type_result.value or "DirectoryString"
                 ldap_attributes[ldap_name] = mapped_type
             return r[t.StrMapping].ok(ldap_attributes)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("LDAP schema mapping failed")
             return r[t.StrMapping].fail_op("Schema mapping", e)
 
