@@ -25,11 +25,10 @@ class FlextTargetLdapConstantsBase:
     DELETE_REMOVED_ENTRIES: Final[bool] = False
     DEFAULT_OBJECT_CLASSES: Final[t.VariadicTuple[str]] = ("top",)
 
-    # Canonical defaults
+    # Canonical defaults (DEFAULT_TIMEOUT_SECONDS comes from c via MRO)
     DEFAULT_HOST: Final[str] = c.LOCALHOST
     DEFAULT_BIND_DN: Final[str] = ""
     DEFAULT_BIND_PASSWORD: Final[str] = ""
-    DEFAULT_TIMEOUT_SECONDS: Final[int] = 30
     DEFAULT_OBJECT_CLASS: Final[str] = "top"
 
     # Reusable scalar tokens
