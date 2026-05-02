@@ -236,7 +236,7 @@ class FlextTargetLdapClient:
             self._api.disconnect()
             self._current_session_id = None
             return r[bool].ok(value=True)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception(
                 "Failed to disconnect LDAP client",
             )

@@ -111,7 +111,7 @@ class FlextTargetLdapDataTransformer:
                     )
                 transformed[ldap_key] = convert_result.value
             return r[t.OptionalStrMapping].ok(transformed)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("LDAP record transformation failed")
             return r[t.OptionalStrMapping].fail_op("Record transformation", e)
 

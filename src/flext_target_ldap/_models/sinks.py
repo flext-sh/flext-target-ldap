@@ -432,7 +432,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 attributes_dict=attributes_dict,
                 object_classes=object_classes,
             )
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             error_msg: str = f"Error processing user record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)
