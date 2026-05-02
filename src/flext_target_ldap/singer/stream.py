@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_target_ldap import c, p, r, t, u
+from flext_target_ldap import c, e, p, r, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -51,9 +51,7 @@ class FlextTargetLdapStreamProcessor:
     ) -> p.Result[FlextTargetLdapStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
-            return r[FlextTargetLdapStreamProcessingStats].fail(
-                f"LDAP stream not found: {stream_name}",
-            )
+            return e.fail_not_found("LDAP stream", stream_name, result_type=r[FlextTargetLdapStreamProcessingStats])
         return r[FlextTargetLdapStreamProcessingStats].ok(
             self._stream_stats[stream_name],
         )

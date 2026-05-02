@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_target_ldap import c, m, p, r, t, u
+from flext_target_ldap import c, e, m, p, r, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -49,9 +49,7 @@ class FlextTargetLdapCatalogManager:
     ) -> p.Result[m.TargetLdap.SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
-            return r[m.TargetLdap.SingerLDAPCatalogEntry].fail(
-                f"LDAP stream not found: {stream_name}",
-            )
+            return e.fail_not_found("LDAP stream", stream_name, result_type=r[m.TargetLdap.SingerLDAPCatalogEntry])
         return r[m.TargetLdap.SingerLDAPCatalogEntry].ok(
             self._catalog_entries[stream_name],
         )
