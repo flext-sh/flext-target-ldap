@@ -169,7 +169,7 @@ class FlextTargetLdapSchemaMapper:
             return r[t.StrMapping].ok(ldap_attributes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP schema mapping failed")
-            return r[t.StrMapping].fail(f"Schema mapping failed: {e}")
+            return r[t.StrMapping].fail_op("Schema mapping", e)
 
     def _map_singer_type_to_ldap(
         self,
@@ -191,7 +191,7 @@ class FlextTargetLdapSchemaMapper:
             return r[str].ok("DirectoryString")
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP type mapping failed")
-            return r[str].fail(f"LDAP type mapping failed: {e}")
+            return r[str].fail_op("LDAP type mapping", e)
 
     def _normalize_attribute_name(self, name: str) -> str:
         """Normalize attribute name for LDAP."""
@@ -243,7 +243,7 @@ class FlextTargetLdapEntryManager:
             return r[t.StrSequence].ok(object_classes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Object class determination failed")
-            return r[t.StrSequence].fail(f"Object class determination failed: {e}")
+            return r[t.StrSequence].fail_op("Object class determination", e)
 
     def generate_dn(
         self,
@@ -270,7 +270,7 @@ class FlextTargetLdapEntryManager:
             return r[str].ok(dn)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("DN generation failed")
-            return r[str].fail(f"DN generation failed: {e}")
+            return r[str].fail_op("DN generation", e)
 
     def prepare_modify_changes(
         self,
@@ -321,7 +321,7 @@ class FlextTargetLdapEntryManager:
             return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Entry validation failed")
-            return r[bool].fail(f"Entry validation failed: {e}")
+            return r[bool].fail_op("Entry validation", e)
 
     def _escape_dn_value(self, value: str) -> str:
         """Escape special characters in DN values per RFC 4514."""
