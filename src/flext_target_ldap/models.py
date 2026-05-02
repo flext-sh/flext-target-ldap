@@ -226,7 +226,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                         return r[bool].fail("; ".join(errors))
                     return r[bool].ok(value=True)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    return r[bool].fail(f"LDAP entry validation failed: {e}")
+                    return r[bool].fail_op("LDAP entry validation", e)
 
         class TransformationResult(m.Entity):
             """Result of LDAP data transformation operations.
