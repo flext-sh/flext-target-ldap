@@ -277,7 +277,7 @@ class FlextTargetLdapClient:
             if search_result.success and search_result.value:
                 return r[m.Ldif.Entry | None].ok(search_result.value[0])
             return r[m.Ldif.Entry | None].ok(None)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception("Failed to get entry: %s", dn)
             return r[m.Ldif.Entry | None].fail_op("Get entry", e)
 

@@ -236,7 +236,9 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             self.client = FlextTargetLdapClient(connection_config)
             connect_result = self.client.connect()
             if not connect_result.success:
-                return r[FlextTargetLdapClient].fail_op("LDAP connection", connect_result.error)
+                return r[FlextTargetLdapClient].fail_op(
+                    "LDAP connection", connect_result.error
+                )
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return r[FlextTargetLdapClient].ok(self.client)
         except c.EXC_RUNTIME_TYPE as e:
@@ -576,7 +578,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                 dn=f"ou={ou_name},{base_dn}",
                 attributes_dict=attributes_dict,
             )
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             error_msg: str = f"Error processing OU record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)

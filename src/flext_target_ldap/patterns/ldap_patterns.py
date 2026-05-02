@@ -186,7 +186,7 @@ class FlextTargetLdapSchemaMapper:
             if prop_type in {"t.JsonValue", "array"}:
                 return r[str].ok("OctetString")
             return r[str].ok("DirectoryString")
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("LDAP type mapping failed")
             return r[str].fail_op("LDAP type mapping", e)
 
