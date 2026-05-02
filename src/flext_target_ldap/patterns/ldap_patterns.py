@@ -161,8 +161,8 @@ class FlextTargetLdapSchemaMapper:
                 ldap_name = self._normalize_attribute_name(prop_name)
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
                 if ldap_type_result.failure:
-                    return r[t.StrMapping].fail(
-                        f"Type mapping failed for '{prop_name}': {ldap_type_result.error}",
+                    return r[t.StrMapping].fail_op(
+                        f"Type mapping for '{prop_name}'", ldap_type_result.error,
                     )
                 mapped_type: str = ldap_type_result.value or "DirectoryString"
                 ldap_attributes[ldap_name] = mapped_type
