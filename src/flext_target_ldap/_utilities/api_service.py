@@ -64,7 +64,7 @@ class FlextTargetLdapApiService:
             validated_settings = FlextTargetLdapSettings.model_validate(settings)
             return FlextTargetLdapClient(validated_settings).connect()
         except (RuntimeError, ValueError, TypeError) as exc:
-            return r[bool].fail(f"Configuration validation failed: {exc}")
+            return r[bool].fail_op("Configuration validation", exc)
 
 
 __all__: list[str] = ["FlextTargetLdapApiService"]

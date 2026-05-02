@@ -67,9 +67,7 @@ class FlextTargetLdapSingerTarget:
             return r[t.HeaderMapping].ok(result)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             logger.exception("Singer message processing failed")
-            return r[t.HeaderMapping].fail(
-                f"Message processing failed: {e}",
-            )
+            return r[t.HeaderMapping].fail_op("Message processing", e)
 
     def validate_singer_config(self) -> p.Result[bool]:
         """Validate Singer LDAP target configuration.
@@ -85,7 +83,7 @@ class FlextTargetLdapSingerTarget:
                     return r[bool].fail(f"Missing required field: {field}")
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            return r[bool].fail(f"Configuration validation failed: {e}")
+            return r[bool].fail_op("Configuration validation", e)
 
 
 __all__: t.StrSequence = ["FlextTargetLdapSingerTarget"]

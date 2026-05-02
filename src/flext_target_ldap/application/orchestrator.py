@@ -69,9 +69,7 @@ class FlextTargetLdapOrchestrator:
             return r[t.HeaderMapping].ok(result_dict)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             logger.exception("LDAP data loading orchestration failed")
-            return r[t.HeaderMapping].fail(
-                f"Data loading orchestration failed: {e}",
-            )
+            return r[t.HeaderMapping].fail_op("Data loading orchestration", e)
 
     def validate_target_configuration(self) -> p.Result[bool]:
         """Validate LDAP target configuration.
@@ -87,7 +85,7 @@ class FlextTargetLdapOrchestrator:
                     return r[bool].fail(f"Missing required field: {field}")
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            return r[bool].fail(f"Configuration validation failed: {e}")
+            return r[bool].fail_op("Configuration validation", e)
 
 
 __all__: t.StrSequence = ["FlextTargetLdapOrchestrator"]

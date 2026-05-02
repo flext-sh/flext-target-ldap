@@ -114,9 +114,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
                     return r[bool].ok(value=True)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    return r[bool].fail(
-                        f"Attribute mapping validation failed: {e}",
-                    )
+                    return r[bool].fail_op("Attribute mapping validation", e)
 
         class Entry(m.Entity):
             """LDAP entry representation with validation and business rules.
@@ -313,9 +311,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
                     return r[bool].ok(value=True)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    return r[bool].fail(
-                        f"Transformation result validation failed: {e}",
-                    )
+                    return r[bool].fail_op("Transformation result validation", e)
 
         class BatchProcessing(m.Entity):
             """LDAP batch processing configuration and state tracking.
@@ -462,9 +458,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
                     return r[bool].ok(value=True)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    return r[bool].fail(
-                        f"Batch processing validation failed: {e}",
-                    )
+                    return r[bool].fail_op("Batch processing validation", e)
 
         class OperationStatistics(m.Entity):
             """LDAP operation statistics and performance metrics.
@@ -593,9 +587,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
                     return r[bool].ok(value=True)
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    return r[bool].fail(
-                        f"Operation statistics validation failed: {e}",
-                    )
+                    return r[bool].fail_op("Operation statistics validation", e)
 
         class SingerPropertyDefinition(m.Value):
             """Singer property definition for LDAP schema mapping."""

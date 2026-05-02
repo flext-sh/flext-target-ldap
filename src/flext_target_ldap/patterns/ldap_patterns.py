@@ -82,9 +82,7 @@ class FlextTargetLdapDataTransformer:
             return r[t.Ldap.OperationAttributes].ok(attributes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP attribute preparation failed")
-            return r[t.Ldap.OperationAttributes].fail(
-                f"Attribute preparation failed: {e}",
-            )
+            return r[t.Ldap.OperationAttributes].fail_op("Attribute preparation", e)
 
     def transform_record(
         self,
@@ -115,9 +113,7 @@ class FlextTargetLdapDataTransformer:
             return r[t.OptionalStrMapping].ok(transformed)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP record transformation failed")
-            return r[t.OptionalStrMapping].fail(
-                f"Record transformation failed: {e}",
-            )
+            return r[t.OptionalStrMapping].fail_op("Record transformation", e)
 
     def _normalize_ldap_attribute_name(self, name: str) -> str:
         """Normalize attribute name for LDAP conventions."""
@@ -162,7 +158,8 @@ class FlextTargetLdapSchemaMapper:
                 ldap_type_result = self._map_singer_type_to_ldap(prop_def, object_class)
                 if ldap_type_result.failure:
                     return r[t.StrMapping].fail_op(
-                        f"Type mapping for '{prop_name}'", ldap_type_result.error,
+                        f"Type mapping for '{prop_name}'",
+                        ldap_type_result.error,
                     )
                 mapped_type: str = ldap_type_result.value or "DirectoryString"
                 ldap_attributes[ldap_name] = mapped_type
@@ -296,9 +293,7 @@ class FlextTargetLdapEntryManager:
             return r[t.Ldap.LdapModifyChanges].ok(changes)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Modify changes preparation failed")
-            return r[t.Ldap.LdapModifyChanges].fail(
-                f"Modify changes preparation failed: {e}",
-            )
+            return r[t.Ldap.LdapModifyChanges].fail_op("Modify changes preparation", e)
 
     def validate_entry_attributes(
         self,

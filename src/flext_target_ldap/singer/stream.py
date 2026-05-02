@@ -68,7 +68,7 @@ class FlextTargetLdapStreamProcessor:
             return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("LDAP stream initialization failed: %s", stream_name)
-            return r[bool].fail(f"Stream initialization failed: {e}")
+            return r[bool].fail_op("Stream initialization", e)
 
 
 __all__: t.StrSequence = [

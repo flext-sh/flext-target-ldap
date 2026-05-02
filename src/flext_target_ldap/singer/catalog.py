@@ -42,7 +42,7 @@ class FlextTargetLdapCatalogManager:
             return r[bool].ok(value=True)
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to add LDAP stream to catalog: %s", stream_name)
-            return r[bool].fail(f"Stream addition failed: {e}")
+            return r[bool].fail_op("Stream addition", e)
 
     def get_stream(
         self, stream_name: str

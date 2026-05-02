@@ -330,7 +330,8 @@ class FlextTargetLdapClient:
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
                 return r[list[m.Ldif.Entry]].fail_op(
-                    "Connection", connect_result.error,
+                    "Connection",
+                    connect_result.error,
                 )
             try:
                 search_options = m.Ldap.SearchOptions(

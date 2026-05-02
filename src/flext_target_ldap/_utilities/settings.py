@@ -26,9 +26,7 @@ def validate_ldap_target_config(
             FlextTargetLdapSettings.model_validate(settings),
         )
     except (ValueError, TypeError, RuntimeError) as e:
-        return r[FlextTargetLdapSettings].fail(
-            f"Configuration validation failed: {e}",
-        )
+        return r[FlextTargetLdapSettings].fail_op("Configuration validation", e)
 
 
 def create_default_ldap_target_config(
@@ -49,9 +47,7 @@ def create_default_ldap_target_config(
             }),
         )
     except (ValueError, TypeError, RuntimeError) as e:
-        return r[FlextTargetLdapSettings].fail(
-            f"Default configuration creation failed: {e}",
-        )
+        return r[FlextTargetLdapSettings].fail_op("Default configuration creation", e)
 
 
 __all__: list[str] = [

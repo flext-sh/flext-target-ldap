@@ -46,7 +46,7 @@ class FlextTargetLdapSink:
         try:
             return self.target.process_record(_record, context)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            return r[bool].fail(f"Record processing failed: {e}")
+            return r[bool].fail_op("Record processing", e)
 
 
 class FlextTargetLdapTarget:
@@ -235,9 +235,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             self.client = FlextTargetLdapClient(connection_config)
             connect_result = self.client.connect()
             if not connect_result.success:
-                return r[FlextTargetLdapClient].fail(
-                    f"LDAP connection failed: {connect_result.error}",
-                )
+                return r[FlextTargetLdapClient].fail_op("LDAP connection", connect_result.error)
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return r[FlextTargetLdapClient].ok(self.client)
         except (RuntimeError, ValueError, TypeError) as e:
