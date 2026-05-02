@@ -49,7 +49,11 @@ class FlextTargetLdapCatalogManager:
     ) -> p.Result[m.TargetLdap.SingerLDAPCatalogEntry]:
         """Get LDAP stream from catalog."""
         if stream_name not in self._catalog_entries:
-            return e.fail_not_found("LDAP stream", stream_name, result_type=r[m.TargetLdap.SingerLDAPCatalogEntry])
+            return e.fail_not_found(
+                "LDAP stream",
+                stream_name,
+                result_type=r[m.TargetLdap.SingerLDAPCatalogEntry],
+            )
         return r[m.TargetLdap.SingerLDAPCatalogEntry].ok(
             self._catalog_entries[stream_name],
         )

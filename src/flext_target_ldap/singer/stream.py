@@ -51,7 +51,11 @@ class FlextTargetLdapStreamProcessor:
     ) -> p.Result[FlextTargetLdapStreamProcessingStats]:
         """Get processing statistics for LDAP stream."""
         if stream_name not in self._stream_stats:
-            return e.fail_not_found("LDAP stream", stream_name, result_type=r[FlextTargetLdapStreamProcessingStats])
+            return e.fail_not_found(
+                "LDAP stream",
+                stream_name,
+                result_type=r[FlextTargetLdapStreamProcessingStats],
+            )
         return r[FlextTargetLdapStreamProcessingStats].ok(
             self._stream_stats[stream_name],
         )
