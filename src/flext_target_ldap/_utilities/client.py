@@ -172,7 +172,7 @@ class FlextTargetLdapClient:
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
-                return r[bool].fail(f"Connection failed: {connect_result.error}")
+                return r[bool].fail_op("Connection", connect_result.error)
             try:
                 ldap_entry = self._build_ldif_entry(dn, attributes, object_classes)
                 result_op = self._api.add(ldap_entry)
@@ -185,14 +185,14 @@ class FlextTargetLdapClient:
                 self._api.disconnect()
         except (RuntimeError, ValueError, TypeError) as e:
             FlextTargetLdapClient.logger.exception("Failed to add entry %s", dn)
-            return r[bool].fail(f"Add entry failed: {e}")
+            return r[bool].fail_op("Add entry", e)
 
     def connect(self) -> p.Result[bool]:
         """Validate connectivity to LDAP server using flext-ldap API."""
         try:
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
-                return r[bool].fail(f"Connection failed: {connect_result.error}")
+                return r[bool].fail_op("Connection", connect_result.error)
             self._api.disconnect()
             FlextTargetLdapClient.logger.info(
                 f"LDAP connectivity validated for {self.settings.host}:{self.settings.port}",
@@ -214,7 +214,7 @@ class FlextTargetLdapClient:
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
-                return r[bool].fail(f"Connection failed: {connect_result.error}")
+                return r[bool].fail_op("Connection", connect_result.error)
             try:
                 result = self._api.delete(dn)
                 if result.success:
@@ -228,7 +228,7 @@ class FlextTargetLdapClient:
                 self._api.disconnect()
         except (RuntimeError, ValueError, TypeError) as e:
             FlextTargetLdapClient.logger.exception("Failed to delete entry %s", dn)
-            return r[bool].fail(f"Delete entry failed: {e}")
+            return r[bool].fail_op("Delete entry", e)
 
     def disconnect(self) -> p.Result[bool]:
         """Disconnect LDAP session through flext-ldap."""
@@ -240,7 +240,7 @@ class FlextTargetLdapClient:
             FlextTargetLdapClient.logger.exception(
                 "Failed to disconnect LDAP client",
             )
-            return r[bool].fail(f"Disconnect failed: {e}")
+            return r[bool].fail_op("Disconnect", e)
 
     def entry_exists(self, dn: str) -> p.Result[bool]:
         """Check if LDAP entry exists using flext-ldap API."""
@@ -261,7 +261,7 @@ class FlextTargetLdapClient:
                 "Failed to check entry existence: %s",
                 dn,
             )
-            return r[bool].fail(f"Entry exists check failed: {e}")
+            return r[bool].fail_op("Entry exists check", e)
 
     def get_entry(
         self,
@@ -279,7 +279,7 @@ class FlextTargetLdapClient:
             return r[m.Ldif.Entry | None].ok(None)
         except (RuntimeError, ValueError, TypeError) as e:
             FlextTargetLdapClient.logger.exception("Failed to get entry: %s", dn)
-            return r[m.Ldif.Entry | None].fail(f"Get entry failed: {e}")
+            return r[m.Ldif.Entry | None].fail_op("Get entry", e)
 
     def modify_entry(
         self,
@@ -294,7 +294,7 @@ class FlextTargetLdapClient:
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
-                return r[bool].fail(f"Connection failed: {connect_result.error}")
+                return r[bool].fail_op("Connection", connect_result.error)
             try:
                 result = self._api.modify(dn, self._build_modify_changes(changes))
                 if result.success:
@@ -310,7 +310,7 @@ class FlextTargetLdapClient:
             return r[bool].fail(error_msg)
         except (RuntimeError, ValueError, TypeError) as e:
             FlextTargetLdapClient.logger.exception("Failed to modify entry %s", dn)
-            return r[bool].fail(f"Modify entry failed: {e}")
+            return r[bool].fail_op("Modify entry", e)
 
     def search_entry(
         self,
@@ -329,8 +329,8 @@ class FlextTargetLdapClient:
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
-                return r[list[m.Ldif.Entry]].fail(
-                    f"Connection failed: {connect_result.error}",
+                return r[list[m.Ldif.Entry]].fail_op(
+                    "Connection", connect_result.error,
                 )
             try:
                 search_options = m.Ldap.SearchOptions(
@@ -356,7 +356,7 @@ class FlextTargetLdapClient:
                 "Failed to search entries in %s",
                 base_dn,
             )
-            return r[list[m.Ldif.Entry]].fail(f"Search failed: {e}")
+            return r[list[m.Ldif.Entry]].fail_op("Search", e)
 
 
 __all__: list[str] = ["FlextTargetLdapClient"]
