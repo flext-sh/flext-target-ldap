@@ -198,7 +198,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             logger.debug(f"Processing record: {_record!r}")
             self._processing_result.add_success()
             return r[bool].ok(value=True)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             error_msg: str = f"Error processing record: {e}"
             logger.exception(error_msg)
             self._processing_result.add_error(error_msg)

@@ -38,7 +38,7 @@ class FlextTargetLdapTypeConverter:
             else:
                 result = str(value)
             return r[str | None].ok(result)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("Type conversion failed for %s", singer_type)
             return r[str | None].fail(f"Type conversion failed for {singer_type}: {e}")
 

@@ -183,7 +183,7 @@ class FlextTargetLdapClient:
                 )
             finally:
                 self._api.disconnect()
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception("Failed to add entry %s", dn)
             return r[bool].fail_op("Add entry", e)
 
