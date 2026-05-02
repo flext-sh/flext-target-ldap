@@ -14,19 +14,18 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import FlextTargetLdapSettings, c, p, r, t
+from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
 
 
 def validate_ldap_target_config(
     settings: t.JsonMapping,
 ) -> p.Result[FlextTargetLdapSettings]:
     """Validate raw target settings with the canonical settings model."""
-    try:
-        return r[FlextTargetLdapSettings].ok(
-            FlextTargetLdapSettings.model_validate(settings),
-        )
-    except (ValueError, TypeError, RuntimeError) as e:
-        return r[FlextTargetLdapSettings].fail_op("Configuration validation", e)
+    return u.try_(
+        lambda: FlextTargetLdapSettings.model_validate(settings),
+        catch=(ValueError, TypeError, RuntimeError),
+        op_name="Configuration validation",
+    )
 
 
 def create_default_ldap_target_config(
@@ -37,17 +36,16 @@ def create_default_ldap_target_config(
     use_ssl: bool = False,
 ) -> p.Result[FlextTargetLdapSettings]:
     """Create the minimal canonical target settings payload."""
-    try:
-        return r[FlextTargetLdapSettings].ok(
-            FlextTargetLdapSettings.model_validate({
-                "host": host,
-                "base_dn": base_dn,
-                "port": port,
-                "use_ssl": use_ssl,
-            }),
-        )
-    except (ValueError, TypeError, RuntimeError) as e:
-        return r[FlextTargetLdapSettings].fail_op("Default configuration creation", e)
+    return u.try_(
+        lambda: FlextTargetLdapSettings.model_validate({
+            "host": host,
+            "base_dn": base_dn,
+            "port": port,
+            "use_ssl": use_ssl,
+        }),
+        catch=(ValueError, TypeError, RuntimeError),
+        op_name="Default configuration creation",
+    )
 
 
 __all__: list[str] = [

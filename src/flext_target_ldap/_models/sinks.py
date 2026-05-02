@@ -43,10 +43,11 @@ class FlextTargetLdapSink:
         context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a record using the target."""
-        try:
-            return self.target.process_record(_record, context)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            return r[bool].fail_op("Record processing", e)
+        return u.guard_result(
+            lambda: self.target.process_record(_record, context),
+            catch=c.Meltano.SINGER_SAFE_EXCEPTIONS,
+            op_name="Record processing",
+        )
 
 
 class FlextTargetLdapTarget:
