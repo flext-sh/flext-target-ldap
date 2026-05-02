@@ -238,7 +238,7 @@ class FlextTargetLdapEntryManager:
                     "inetOrgPerson",
                 ])
             return r[t.StrSequence].ok(object_classes)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             logger.exception("Object class determination failed")
             return r[t.StrSequence].fail_op("Object class determination", e)
 

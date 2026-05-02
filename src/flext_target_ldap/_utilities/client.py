@@ -308,7 +308,7 @@ class FlextTargetLdapClient:
             error_msg = f"Failed to modify entry {dn}: {result.error}"
             FlextTargetLdapClient.logger.error(error_msg)
             return r[bool].fail(error_msg)
-        except (RuntimeError, ValueError, TypeError) as e:
+        except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception("Failed to modify entry %s", dn)
             return r[bool].fail_op("Modify entry", e)
 
