@@ -7,7 +7,6 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 _LAZY_IMPORTS = build_lazy_import_map(
     {
-        ".api_service": ("FlextTargetLdapApiService",),
         ".client": ("FlextTargetLdapClient",),
         ".service_runtime": ("FlextTargetLdapServiceRuntime",),
         ".settings": (
@@ -15,8 +14,6 @@ _LAZY_IMPORTS = build_lazy_import_map(
             "validate_ldap_target_config",
         ),
         ".transformation": (
-            "FlextTargetLdapMigrationValidator",
-            "FlextTargetLdapTransformationEngine",
         ),
     },
 )
