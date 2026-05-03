@@ -223,24 +223,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail_op("LDAP entry validation", e)
 
-        class SingerPropertyDefinition(m.Value):
-            """Singer property definition for LDAP schema mapping."""
-
-            type: Annotated[
-                str,
-                u.Field(
-                    default="string",
-                    description="Singer property data type",
-                ),
-            ]
-            format: Annotated[
-                str | None,
-                u.Field(
-                    default=None,
-                    description="Optional format qualifier for the property type",
-                ),
-            ]
-
         class TransformationRule(m.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
