@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import (
-    MutableMapping,
     MutableSequence,
 )
 from types import MappingProxyType
@@ -242,40 +241,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 ),
             ]
 
-        class SingerSchemaDefinition(m.Value):
-            """Singer schema definition mapping properties to LDAP attributes."""
-
-            properties: MutableMapping[
-                str,
-                FlextTargetLdapModels.TargetLdap.SingerPropertyDefinition,
-            ] = u.Field(
-                default_factory=dict,
-                description="Mapping of property names to their Singer definitions",
-            )
-
-        class SingerLDAPCatalogEntry(m.Entity):
-            """Singer LDAP catalog entry with stream metadata."""
-
-            tap_stream_id: Annotated[
-                t.NonEmptyStr,
-                u.Field(
-                    description="Unique identifier for the Singer tap stream",
-                ),
-            ]
-            stream: Annotated[
-                t.NonEmptyStr,
-                u.Field(
-                    description="Singer stream name for this catalog entry",
-                ),
-            ]
-            stream_schema: Annotated[
-                t.TargetLdap.MutableSchemaPayload,
-                u.Field(
-                    description="Schema definition for the Singer stream",
-                    default_factory=lambda: MappingProxyType({}),
-                ),
-            ]
-
         class TransformationRule(m.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
@@ -303,24 +268,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 u.Field(
                     default=True,
                     description="Whether this transformation rule is active",
-                ),
-            ]
-
-        class DataTransformationResult(m.Value):
-            """Lightweight result of data transformation engine operations."""
-
-            transformed_data: Annotated[
-                t.TargetLdap.MutableRecordPayload,
-                u.Field(
-                    description="Data after applying transformation rules",
-                    default_factory=lambda: MappingProxyType({}),
-                ),
-            ]
-            applied_rules: Annotated[
-                MutableSequence[str],
-                u.Field(
-                    description="Names of transformation rules that were applied",
-                    default_factory=list,
                 ),
             ]
 
