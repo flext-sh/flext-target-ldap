@@ -58,8 +58,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "._models",
         "._utilities",
         ".application",
-        ".patterns",
-        ".singer",
     ),
     build_lazy_import_map(
         {
@@ -90,8 +88,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "create_default_ldap_target_config",
                 "validate_ldap_target_config",
             ),
-            "._utilities.transformation": (
-            ),
             ".api": (
                 "FlextTargetLdap",
                 "target_ldap",
@@ -101,21 +97,15 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdapConstants",
                 "c",
             ),
-            ".errors": (
-            ),
             ".models": (
                 "FlextTargetLdapModels",
                 "m",
-            ),
-            ".patterns.ldap_patterns": (
             ),
             ".protocols": (
                 "FlextTargetLdapProtocols",
                 "p",
             ),
             ".settings": ("FlextTargetLdapSettings",),
-            ".singer.stream": (
-            ),
             ".typings": (
                 "FlextTargetLdapTypes",
                 "t",

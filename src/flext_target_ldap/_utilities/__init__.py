@@ -13,8 +13,6 @@ _LAZY_IMPORTS = build_lazy_import_map(
             "create_default_ldap_target_config",
             "validate_ldap_target_config",
         ),
-        ".transformation": (
-        ),
     },
 )
 
