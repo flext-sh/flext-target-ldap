@@ -32,19 +32,13 @@ class FlextTargetLdapConstantsBase:
     DEFAULT_OBJECT_CLASS: Final[str] = "top"
 
     # Reusable scalar tokens
-    TRUE_STRING_TOKENS: Final[frozenset[str]] = frozenset({"true", "1", "yes"})
-    LDAP_DN_PATTERN: Final[str] = (
-        r"^[a-zA-Z][\w\-]*\s*=\s*[^,]+(?:\s*,\s*[a-zA-Z][\w\-]*\s*=\s*[^,]+)*$"
-    )
 
     # Configuration keys used across utilities/settings/sinks
     KEY_HOST: Final[str] = "host"
     KEY_PORT: Final[str] = "port"
     KEY_USE_SSL: Final[str] = "use_ssl"
-    KEY_USE_TLS: Final[str] = "use_tls"
     KEY_BIND_DN: Final[str] = "bind_dn"
     KEY_PASSWORD: Final[str] = "password"
-    KEY_BIND_PASSWORD: Final[str] = "bind_password"
     KEY_TIMEOUT: Final[str] = "timeout"
     KEY_BASE_DN: Final[str] = "base_dn"
     KEY_ATTRIBUTE_MAPPING: Final[str] = "attribute_mapping"
@@ -55,24 +49,8 @@ class FlextTargetLdapConstantsBase:
     KEY_RECORDS: Final[str] = "records"
     KEY_GENERIC_OBJECT_CLASSES: Final[str] = "generic_object_classes"
     KEY_OBJECT_CLASSES: Final[str] = "object_classes"
-    KEY_OBJECT_CLASS_CAMEL: Final[str] = "objectClass"
-    KEY_OBJECT_CLASS_LOWER: Final[str] = "objectclass"
-    KEY_OPERATION_MODE: Final[str] = "operation_mode"
-    KEY_DN_TEMPLATE: Final[str] = "dn_template"
-    KEY_BATCH_SIZE: Final[str] = "batch_size"
-    KEY_CONNECTION: Final[str] = "connection"
-    KEY_SEARCH_SCOPE: Final[str] = "search_scope"
-    KEY_AUTO_BIND: Final[str] = "auto_bind"
-    KEY_AUTO_RANGE: Final[str] = "auto_range"
 
     # Allowed operation modes
-    OPERATION_MODES: Final[t.VariadicTuple[str]] = (
-        "insert",
-        "update",
-        "upsert",
-        "delete",
-    )
-    DEFAULT_OPERATION_MODE: Final[str] = "upsert"
     DEFAULT_BASE_DN: Final[str] = "dc=example,dc=com"
 
 
