@@ -53,7 +53,8 @@ def singer_message_record(sample_user_record: t.TargetLdap.RecordPayload) -> str
         "record": dict(sample_user_record),
         "time_extracted": "2024-01-01T12:00:00Z",
     }
-    return cli_u.Cli.json_dumps(message).unwrap()
+    rendered: str = cli_u.Cli.json_dumps(message).unwrap()
+    return rendered
 
 
 @pytest.fixture
@@ -74,7 +75,8 @@ def singer_message_schema() -> str:
         },
         "key_properties": ["dn"],
     }
-    return cli_u.Cli.json_dumps(message).unwrap()
+    rendered: str = cli_u.Cli.json_dumps(message).unwrap()
+    return rendered
 
 
 @pytest.fixture
@@ -91,7 +93,8 @@ def singer_message_state() -> str:
             },
         },
     }
-    return cli_u.Cli.json_dumps(message).unwrap()
+    rendered: str = cli_u.Cli.json_dumps(message).unwrap()
+    return rendered
 
 
 @pytest.fixture

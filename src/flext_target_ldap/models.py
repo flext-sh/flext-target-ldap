@@ -173,11 +173,13 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             def rdn(self) -> str:
                 """Relative distinguished name derived from the DN."""
                 distinguished_name = self.distinguished_name
-                return distinguished_name.split(",", 1)[0].strip()
+                rdn_part: str = distinguished_name.split(",", 1)[0].strip()
+                return rdn_part
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has a specific object class."""
-                return u.Ldap.norm_in(object_class, self.object_classes)
+                present: bool = u.Ldap.norm_in(object_class, self.object_classes)
+                return present
 
             def validate_business_rules(self) -> p.Result[bool]:
                 """Validate LDAP entry business rules."""
