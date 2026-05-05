@@ -7,10 +7,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 from unittest.mock import MagicMock
 
 import pytest
+from flext_cli import u as cli_u
 
 from flext_core import FlextSettings
 from tests import t, u
@@ -47,19 +47,19 @@ def sample_user_record() -> t.TargetLdap.RecordPayload:
 @pytest.fixture
 def singer_message_record(sample_user_record: t.TargetLdap.RecordPayload) -> str:
     """Singer RECORD message for testing."""
-    message = {
+    message: dict[str, t.JsonValue] = {
         "type": "RECORD",
         "stream": "users",
-        "record": sample_user_record,
+        "record": dict(sample_user_record),
         "time_extracted": "2024-01-01T12:00:00Z",
     }
-    return json.dumps(message)
+    return cli_u.Cli.json_dumps(message).unwrap()
 
 
 @pytest.fixture
 def singer_message_schema() -> str:
     """Singer SCHEMA message for testing."""
-    message = {
+    message: dict[str, t.JsonValue] = {
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
@@ -74,13 +74,13 @@ def singer_message_schema() -> str:
         },
         "key_properties": ["dn"],
     }
-    return json.dumps(message)
+    return cli_u.Cli.json_dumps(message).unwrap()
 
 
 @pytest.fixture
 def singer_message_state() -> str:
     """Singer STATE message for testing."""
-    message = {
+    message: dict[str, t.JsonValue] = {
         "type": "STATE",
         "value": {
             "bookmarks": {
@@ -91,7 +91,7 @@ def singer_message_state() -> str:
             },
         },
     }
-    return json.dumps(message)
+    return cli_u.Cli.json_dumps(message).unwrap()
 
 
 @pytest.fixture

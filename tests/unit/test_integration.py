@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import io
-import json
+import json as _stdlib_json
 from collections.abc import (
     Mapping,
 )
@@ -21,9 +21,9 @@ from tests import t, u
 
 
 def _write_jsonl(path: Path, events: t.SequenceOf[Mapping[str, object]]) -> None:
-    path.write_text(
-        "\n".join(json.dumps(event) for event in events) + "\n", encoding="utf-8"
-    )
+    """Serialize Singer events as JSONL via stdlib json (test fixture)."""
+    serialized = "\n".join(_stdlib_json.dumps(dict(event)) for event in events)
+    path.write_text(serialized + "\n", encoding="utf-8")
 
 
 @pytest.fixture
