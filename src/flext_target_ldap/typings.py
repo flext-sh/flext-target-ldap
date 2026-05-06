@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import (
-    MutableMapping,
-)
-
 from flext_ldap import FlextLdapTypes
 from flext_meltano import t
 
@@ -18,9 +14,9 @@ class FlextTargetLdapTypes(t, FlextLdapTypes):
 
         type SettingsPayload = t.JsonMapping
         type RecordPayload = t.JsonMapping
-        type MutableRecordPayload = MutableMapping[str, t.JsonValue]
+        type MutableRecordPayload = t.MutableJsonMapping
         type SchemaPayload = t.JsonMapping
-        type MutableSchemaPayload = MutableMapping[str, t.JsonValue]
+        type MutableSchemaPayload = t.MutableJsonMapping
         type CatalogPayload = t.JsonMapping
 
 

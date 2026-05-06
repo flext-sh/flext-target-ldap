@@ -35,7 +35,7 @@ class FlextTargetLdapServiceRuntime:
             key_properties: t.StrSequence,
         ) -> FlextTargetLdapServiceRuntime.Sink:
             """Create an adapter sink and attach the LDAP runtime sink."""
-            schema_dict: dict[str, t.JsonValue] = dict(schema.items())
+            schema_dict: t.JsonDict = dict(schema.items())
             service_sink = cls(
                 target=target,
                 stream_name=stream_name,
@@ -48,7 +48,7 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_batch(
             self,
-            context: t.MappingKV[str, t.JsonValue],
+            context: t.JsonMapping,
         ) -> None:
             """Singer batch hook is handled record-by-record by the runtime sink."""
             _ = context
@@ -56,8 +56,8 @@ class FlextTargetLdapServiceRuntime:
         @override
         def process_record(
             self,
-            record: t.MappingKV[str, t.JsonValue],
-            context: t.MappingKV[str, t.JsonValue],
+            record: t.JsonMapping,
+            context: t.JsonMapping,
         ) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
@@ -74,7 +74,7 @@ class FlextTargetLdapServiceRuntime:
         *,
         stream_name: str,
         schema: t.FlatContainerMapping,
-        target_config: t.MappingKV[str, t.JsonValue],
+        target_config: t.JsonMapping,
     ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
         normalized_target_config = u.normalize_to_json_mapping(
