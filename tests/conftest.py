@@ -10,8 +10,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-from flext_cli import u as cli_u
 
+from flext_cli import u as cli_u
 from flext_core import FlextSettings
 from tests import t, u
 

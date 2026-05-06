@@ -22,7 +22,7 @@ from flext_target_ldap.__version__ import (
 )
 
 if _t.TYPE_CHECKING:
-    from flext_meltano import d, e, h, r, s, x
+    from flext_ldap import d, e, h, r, s, x
     from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
     from flext_target_ldap._models.processing_result import (
         FlextTargetLdapProcessingCounters,
@@ -104,7 +104,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdapUtilities",
                 "u",
             ),
-            "flext_meltano": (
+            "flext_ldap": (
                 "d",
                 "e",
                 "h",

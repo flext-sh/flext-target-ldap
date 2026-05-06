@@ -41,7 +41,7 @@ class FlextTargetLdapSettings(FlextSettingsBase):
         if "connection" in data:
             return data
 
-        normalized: dict[str, t.JsonPayload | None] = dict(data)
+        normalized = t.json_dict_adapter().validate_python(data)
         bind_password = normalized.get("bind_password", normalized.get("password"))
         search_scope = normalized.get("search_scope")
         if isinstance(search_scope, str):

@@ -88,4 +88,4 @@ class FlextTargetLdapOrchestrator:
             return r[bool].fail_op("Configuration validation", e)
 
 
-__all__: t.StrSequence = ["FlextTargetLdapOrchestrator"]
+__all__: t.StrSequence = ("FlextTargetLdapOrchestrator",)

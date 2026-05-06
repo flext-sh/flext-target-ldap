@@ -618,7 +618,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         return attributes
 
 
-__all__: t.StrSequence = [
+__all__: t.StrSequence = (
     "FlextTargetLdapBaseSink",
     "FlextTargetLdapGroupsSink",
     "FlextTargetLdapOrganizationalUnitsSink",
@@ -626,4 +626,4 @@ __all__: t.StrSequence = [
     "FlextTargetLdapSink",
     "FlextTargetLdapTarget",
     "FlextTargetLdapUsersSink",
-]
+)

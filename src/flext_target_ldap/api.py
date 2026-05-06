@@ -38,6 +38,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
     settings: t.TargetLdap.SettingsPayload
+    _container_type: ClassVar[p.ContainerType] = FlextContainer
     logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     @override
@@ -96,7 +97,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Set up the LDAP target."""
         _ = self.orchestrator
         self.logger.info("Orchestrator initialized successfully")
-        self._container = FlextContainer.shared()
+        self._container = self._container_type.shared()
         self.logger.info("DI container initialized successfully")
         validated_settings = FlextTargetLdapSettings.model_validate(self.settings)
         self.logger.info(
