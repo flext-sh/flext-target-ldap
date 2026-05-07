@@ -97,7 +97,7 @@ class FlextTargetLdapServiceRuntime:
         return cls.Sink.create(
             runtime_sink=runtime_sink,
             target=cls.Target(
-                config=dict(normalized_target_config),
+                config=t.json_dict_adapter().validate_python(normalized_target_config),
                 validate_config=False,
             ),
             stream_name=stream_name,

@@ -130,7 +130,7 @@ class FlextTargetLdapClient:
                 return connection_value
             if isinstance(connection_value, Mapping):
                 return m.Ldap.ConnectionConfig.model_validate(connection_value)
-            return m.Ldap.ConnectionConfig.model_validate(dict(settings))
+            return m.Ldap.ConnectionConfig.model_validate(settings)
         msg = f"Unsupported LDAP client settings type: {type(settings).__name__}"
         raise TypeError(msg)
 

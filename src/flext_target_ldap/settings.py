@@ -88,7 +88,7 @@ class FlextTargetLdapSettings(FlextSettingsBase):
             "auto_range",
         ):
             normalized.pop(consumed_key, None)
-        normalized["connection"] = connection_config
+        normalized["connection"] = connection_config.model_dump(mode="python")
         return normalized
 
     connection: Annotated[

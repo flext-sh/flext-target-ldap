@@ -13,7 +13,7 @@ from flext_tests import FlextTestsConstants
 from flext_target_ldap import FlextTargetLdapConstants
 
 
-class TestsFlextTargetLdapConstants(FlextTestsConstants, FlextTargetLdapConstants):
+class TestsFlextTargetLdapConstants(FlextTargetLdapConstants, FlextTestsConstants):
     """Test constants for flext-target-ldap."""
 
     class TargetLdap(FlextTargetLdapConstants.TargetLdap):
