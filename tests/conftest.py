@@ -10,16 +10,12 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
+from flext_tests import reset_settings as _shared_reset_settings
 
 from flext_cli import u as cli_u
-from flext_core import FlextSettings
 from tests import t, u
 
-
-@pytest.fixture(autouse=True)
-def reset_settings_singleton() -> None:
-    """Reset FlextSettings singleton between tests."""
-    FlextSettings.reset_for_testing()
+reset_settings = _shared_reset_settings
 
 
 @pytest.fixture

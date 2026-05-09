@@ -18,7 +18,8 @@ from flext_target_ldap import (
     FlextTargetLdapSink,
     FlextTargetLdapUsersSink,
 )
-from tests import r, t, u
+from tests import m, r, t, u
+from tests.base import s
 
 
 class TestsFlextTargetLdapTarget:
@@ -47,6 +48,12 @@ class TestsFlextTargetLdapTarget:
         target = FlextTargetLdap(settings=mock_ldap_config)
         assert target.name == "target-ldap"
         assert target.settings == mock_ldap_config
+
+    def test_test_service_settings_include_tests_namespace(self) -> None:
+        settings = s.fetch_settings()
+
+        assert isinstance(settings.Tests, m.SettingsValue)
+        assert settings.base_dn
 
     def test_dn_template_processing(
         self,

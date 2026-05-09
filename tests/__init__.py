@@ -12,12 +12,13 @@ from flext_core.lazy import (
 )
 
 if _t.TYPE_CHECKING:
-    from flext_tests import td, tf, tk, tm, tv
+    from flext_tests import d, e, h, r, td, tf, tk, tm, tv, x
 
-    from flext_target_ldap import d, e, h, r, s, x
+    from tests.base import TestsFlextTargetLdapServiceBase, s
     from tests.constants import TestsFlextTargetLdapConstants, c
     from tests.models import TestsFlextTargetLdapModels, m
     from tests.protocols import TestsFlextTargetLdapProtocols, p
+    from tests.settings import TestsFlextTargetLdapSettings
     from tests.typings import TestsFlextTargetLdapTypes, t
     from tests.unit.test_client import TestsFlextTargetLdapClient
     from tests.unit.test_integration import TestsFlextTargetLdapIntegration
@@ -29,6 +30,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
     (".unit",),
     build_lazy_import_map(
         {
+            ".base": (
+                "TestsFlextTargetLdapServiceBase",
+                "s",
+            ),
             ".constants": (
                 "TestsFlextTargetLdapConstants",
                 "c",
@@ -41,6 +46,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetLdapProtocols",
                 "p",
             ),
+            ".settings": ("TestsFlextTargetLdapSettings",),
             ".typings": (
                 "TestsFlextTargetLdapTypes",
                 "t",
@@ -54,20 +60,17 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetLdapUtilities",
                 "u",
             ),
-            "flext_target_ldap": (
+            "flext_tests": (
                 "d",
                 "e",
                 "h",
                 "r",
-                "s",
-                "x",
-            ),
-            "flext_tests": (
                 "td",
                 "tf",
                 "tk",
                 "tm",
                 "tv",
+                "x",
             ),
         },
     ),
@@ -102,6 +105,8 @@ __all__: list[str] = [
     "TestsFlextTargetLdapIntegration",
     "TestsFlextTargetLdapModels",
     "TestsFlextTargetLdapProtocols",
+    "TestsFlextTargetLdapServiceBase",
+    "TestsFlextTargetLdapSettings",
     "TestsFlextTargetLdapSinks",
     "TestsFlextTargetLdapTarget",
     "TestsFlextTargetLdapTransformation",
