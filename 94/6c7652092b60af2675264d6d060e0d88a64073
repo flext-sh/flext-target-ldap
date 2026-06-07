@@ -1,0 +1,27 @@
+docs/guides/testing.md
+  s_73cbfc60e45e37::t_53f94cab4bb182 76,128,176,219,292,333,357,396,439,471,517,588,611,638,658,700
+docs/guides/configuration.md
+  s_73cbfc60e45e37::t_699de024dc4b47 106,144,164,178,231,264,308,344,380,417,455
+docs/guides/development.md
+  s_73cbfc60e45e37::t_8da7c852fe1fe3 152,169,189,228,313,404,432
+docs/guides/troubleshooting.md
+  s_73cbfc60e45e37::t_dc3ca56ef758ae 88,118,139,148,175,196,210,225,255,291,300,315,325,348,357,372,380,397,408,430,442,453,490,527,558,619,642,722,733,771,784,795,808
+docs/guides/getting-started.md
+  s_73cbfc60e45e37::t_834b8be99f7963 101,133,154,207,278
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "946c7652092b60af2675264d6d060e0d88a64073",
+  "prompts": {},
+  "sessions": {
+    "s_73cbfc60e45e37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "80f2c44c-f1f2-49a0-8035-ccac60ac602b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Zed <hi@zed.dev>"
+    }
+  }
+}
