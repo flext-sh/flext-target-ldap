@@ -123,9 +123,12 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     @staticmethod
     def _load_config_from_file(config_path: str) -> t.TargetLdap.SettingsPayload:
         """Load configuration from JSON file."""
+        read = u.Cli.files_read_text(Path(config_path))
+        if read.failure:
+            msg = f"Failed to load configuration from {config_path}: {read.error}"
+            raise RuntimeError(msg)
         try:
-            content = Path(config_path).read_text(encoding=c.Ldif.Encoding.UTF8)
-            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(content)
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(read.value)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to load configuration from {config_path}: {exc}"
             raise RuntimeError(msg) from exc
