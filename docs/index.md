@@ -2,7 +2,7 @@
 
 # flext-target-ldap Documentation
 
-- Version: `unknown`
+- Version: `0.12.0-dev`
 - Project class: `integration`
 - Package: `flext_target_ldap`
 - Description: FLEXT Target for LDAP directory loading
