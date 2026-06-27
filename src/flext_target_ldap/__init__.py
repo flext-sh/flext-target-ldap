@@ -61,23 +61,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
     ),
     build_lazy_import_map(
         {
-            "._constants.base": ("FlextTargetLdapConstantsBase",),
-            "._models.processing_result": ("FlextTargetLdapProcessingCounters",),
-            "._models.sinks": (
-                "FlextTargetLdapBaseSink",
-                "FlextTargetLdapGroupsSink",
-                "FlextTargetLdapOrganizationalUnitsSink",
-                "FlextTargetLdapProcessingResult",
-                "FlextTargetLdapSink",
-                "FlextTargetLdapTarget",
-                "FlextTargetLdapUsersSink",
-            ),
-            "._utilities.client": ("FlextTargetLdapClient",),
-            "._utilities.service_runtime": ("FlextTargetLdapServiceRuntime",),
-            "._utilities.settings": (
-                "create_default_ldap_target_config",
-                "validate_ldap_target_config",
-            ),
             ".api": (
                 "FlextTargetLdap",
                 "target_ldap",
@@ -155,23 +138,12 @@ install_lazy_exports(
 
 __all__: list[str] = [
     "FlextTargetLdap",
-    "FlextTargetLdapBaseSink",
-    "FlextTargetLdapClient",
     "FlextTargetLdapConstants",
-    "FlextTargetLdapConstantsBase",
-    "FlextTargetLdapGroupsSink",
     "FlextTargetLdapModels",
     "FlextTargetLdapOrchestrator",
-    "FlextTargetLdapOrganizationalUnitsSink",
-    "FlextTargetLdapProcessingCounters",
-    "FlextTargetLdapProcessingResult",
     "FlextTargetLdapProtocols",
-    "FlextTargetLdapServiceRuntime",
     "FlextTargetLdapSettings",
-    "FlextTargetLdapSink",
-    "FlextTargetLdapTarget",
     "FlextTargetLdapTypes",
-    "FlextTargetLdapUsersSink",
     "FlextTargetLdapUtilities",
     "__author__",
     "__author_email__",
@@ -182,7 +154,6 @@ __all__: list[str] = [
     "__version__",
     "__version_info__",
     "c",
-    "create_default_ldap_target_config",
     "d",
     "e",
     "h",
@@ -193,6 +164,5 @@ __all__: list[str] = [
     "t",
     "target_ldap",
     "u",
-    "validate_ldap_target_config",
     "x",
 ]
