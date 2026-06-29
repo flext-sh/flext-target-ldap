@@ -3,13 +3,9 @@
 
 from __future__ import annotations
 
-import typing as _t
+from typing import TYPE_CHECKING
 
-from flext_core.lazy import (
-    build_lazy_import_map,
-    install_lazy_exports,
-    merge_lazy_imports,
-)
+from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 from flext_target_ldap.__version__ import (
     __author__,
     __author_email__,
@@ -21,39 +17,11 @@ from flext_target_ldap.__version__ import (
     __version_info__,
 )
 
-if _t.TYPE_CHECKING:
+if TYPE_CHECKING:
     from flext_ldap import d as d, e as e, h as h, r as r, s as s, x as x
-    from flext_target_ldap._constants.base import (
-        FlextTargetLdapConstantsBase as FlextTargetLdapConstantsBase,
-    )
-    from flext_target_ldap._models.processing_result import (
-        FlextTargetLdapProcessingCounters as FlextTargetLdapProcessingCounters,
-    )
-    from flext_target_ldap._models.sinks import (
-        FlextTargetLdapBaseSink as FlextTargetLdapBaseSink,
-        FlextTargetLdapGroupsSink as FlextTargetLdapGroupsSink,
-        FlextTargetLdapOrganizationalUnitsSink as FlextTargetLdapOrganizationalUnitsSink,
-        FlextTargetLdapProcessingResult as FlextTargetLdapProcessingResult,
-        FlextTargetLdapSink as FlextTargetLdapSink,
-        FlextTargetLdapTarget as FlextTargetLdapTarget,
-        FlextTargetLdapUsersSink as FlextTargetLdapUsersSink,
-    )
-    from flext_target_ldap._utilities.client import (
-        FlextTargetLdapClient as FlextTargetLdapClient,
-    )
-    from flext_target_ldap._utilities.service_runtime import (
-        FlextTargetLdapServiceRuntime as FlextTargetLdapServiceRuntime,
-    )
-    from flext_target_ldap._utilities.settings import (
-        create_default_ldap_target_config as create_default_ldap_target_config,
-        validate_ldap_target_config as validate_ldap_target_config,
-    )
     from flext_target_ldap.api import (
         FlextTargetLdap as FlextTargetLdap,
         target_ldap as target_ldap,
-    )
-    from flext_target_ldap.application.orchestrator import (
-        FlextTargetLdapOrchestrator as FlextTargetLdapOrchestrator,
     )
     from flext_target_ldap.constants import (
         FlextTargetLdapConstants as FlextTargetLdapConstants,
@@ -78,112 +46,49 @@ if _t.TYPE_CHECKING:
         FlextTargetLdapUtilities as FlextTargetLdapUtilities,
         u as u,
     )
-_LAZY_IMPORTS = merge_lazy_imports(
-    (
-        "._constants",
-        "._models",
-        "._utilities",
-        ".application",
-    ),
-    build_lazy_import_map(
-        {
-            "._constants.base": ("FlextTargetLdapConstantsBase",),
-            "._models.processing_result": ("FlextTargetLdapProcessingCounters",),
-            "._models.sinks": (
-                "FlextTargetLdapBaseSink",
-                "FlextTargetLdapGroupsSink",
-                "FlextTargetLdapOrganizationalUnitsSink",
-                "FlextTargetLdapProcessingResult",
-                "FlextTargetLdapSink",
-                "FlextTargetLdapTarget",
-                "FlextTargetLdapUsersSink",
-            ),
-            "._utilities.client": ("FlextTargetLdapClient",),
-            "._utilities.service_runtime": ("FlextTargetLdapServiceRuntime",),
-            "._utilities.settings": (
-                "create_default_ldap_target_config",
-                "validate_ldap_target_config",
-            ),
-            ".api": (
-                "FlextTargetLdap",
-                "target_ldap",
-            ),
-            ".application.orchestrator": ("FlextTargetLdapOrchestrator",),
-            ".constants": (
-                "FlextTargetLdapConstants",
-                "c",
-            ),
-            ".models": (
-                "FlextTargetLdapModels",
-                "m",
-            ),
-            ".protocols": (
-                "FlextTargetLdapProtocols",
-                "p",
-            ),
-            ".settings": ("FlextTargetLdapSettings",),
-            ".typings": (
-                "FlextTargetLdapTypes",
-                "t",
-            ),
-            ".utilities": (
-                "FlextTargetLdapUtilities",
-                "u",
-            ),
-            "flext_ldap": (
-                "d",
-                "e",
-                "h",
-                "r",
-                "s",
-                "x",
-            ),
-        },
-    ),
-    exclude_names=(
-        "cleanup_submodule_namespace",
-        "install_lazy_exports",
-        "lazy_getattr",
-        "logger",
-        "merge_lazy_imports",
-        "output",
-        "output_reporting",
-        "pytest_addoption",
-        "pytest_collect_file",
-        "pytest_collection_modifyitems",
-        "pytest_configure",
-        "pytest_runtest_setup",
-        "pytest_runtest_teardown",
-        "pytest_sessionfinish",
-        "pytest_sessionstart",
-        "pytest_terminal_summary",
-        "pytest_warning_recorded",
-    ),
-    module_name=__name__,
+_LAZY_IMPORTS = build_lazy_import_map(
+    {
+        ".api": (
+            "FlextTargetLdap",
+            "target_ldap",
+        ),
+        ".constants": (
+            "FlextTargetLdapConstants",
+            "c",
+        ),
+        ".models": (
+            "FlextTargetLdapModels",
+            "m",
+        ),
+        ".protocols": (
+            "FlextTargetLdapProtocols",
+            "p",
+        ),
+        ".settings": ("FlextTargetLdapSettings",),
+        ".typings": (
+            "FlextTargetLdapTypes",
+            "t",
+        ),
+        ".utilities": (
+            "FlextTargetLdapUtilities",
+            "u",
+        ),
+        "flext_ldap": (
+            "d",
+            "e",
+            "h",
+            "r",
+            "s",
+            "x",
+        ),
+    },
 )
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    [
-        "__author__",
-        "__author_email__",
-        "__description__",
-        "__license__",
-        "__title__",
-        "__url__",
-        "__version__",
-        "__version_info__",
-    ],
-)
-
-__all__: list[str] = [
+__all__: tuple[str, ...] = (
     "FlextTargetLdap",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
-    "FlextTargetLdapOrchestrator",
     "FlextTargetLdapProtocols",
     "FlextTargetLdapSettings",
     "FlextTargetLdapTypes",
@@ -208,4 +113,12 @@ __all__: list[str] = [
     "target_ldap",
     "u",
     "x",
-]
+)
+
+
+install_lazy_exports(
+    __name__,
+    globals(),
+    _LAZY_IMPORTS,
+    public_exports=__all__,
+)

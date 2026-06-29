@@ -3,9 +3,11 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
+from flext_tests import r
 
-from flext_target_ldap import FlextTargetLdapClient
-from tests import m, r, t
+from flext_target_ldap._utilities.client import FlextTargetLdapClient
+from tests.models import m
+from tests.typings import t
 
 
 @pytest.fixture

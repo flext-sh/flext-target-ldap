@@ -13,7 +13,8 @@ import pytest
 from flext_tests import reset_settings as _shared_reset_settings
 
 from flext_cli import u as cli_u
-from tests import t, u
+from tests.typings import t
+from tests.utilities import u
 
 reset_settings = _shared_reset_settings
 
