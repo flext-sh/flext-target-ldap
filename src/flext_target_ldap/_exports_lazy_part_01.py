@@ -7,27 +7,14 @@ from flext_core.lazy import build_lazy_import_map
 
 FLEXT_TARGET_LDAP_LAZY_IMPORTS_PART_01 = build_lazy_import_map(
     {
-        "._constants.base": ("FlextTargetLdapConstantsBase",),
-        "._models.processing_result": ("FlextTargetLdapProcessingCounters",),
-        "._models.sinks": (
-            "FlextTargetLdapBaseSink",
-            "FlextTargetLdapGroupsSink",
-            "FlextTargetLdapOrganizationalUnitsSink",
-            "FlextTargetLdapProcessingResult",
-            "FlextTargetLdapSink",
-            "FlextTargetLdapTarget",
-            "FlextTargetLdapUsersSink",
-        ),
-        "._utilities.client": ("FlextTargetLdapClient",),
-        "._utilities.service_runtime": ("FlextTargetLdapServiceRuntime",),
-        "._utilities.settings": (
-            "create_default_ldap_target_config",
-            "validate_ldap_target_config",
-        ),
+        "._constants": ("_constants",),
+        "._models": ("_models",),
+        "._utilities": ("_utilities",),
         ".api": (
             "FlextTargetLdap",
             "target_ldap",
         ),
+        ".application": ("application",),
         ".application.orchestrator": ("FlextTargetLdapOrchestrator",),
         ".constants": (
             "FlextTargetLdapConstants",
