@@ -10,8 +10,22 @@ PROJECT_NAME := flext-target-ldap
 PYTHON_VERSION ?= 3.13
 SRC_DIR ?= src
 TESTS_DIR ?= tests
-ifneq ("$(wildcard ../base.mk)", "")
-include ../base.mk
+# Detect workspace root by walking up until we find the parent repo's .gitmodules.
+# In a workspace, base.mk lives in flext-infra/ and is the single source of truth.
+FLEXT_WORKSPACE_ROOT := $(shell \
+	current="$(CURDIR)"; \
+	while [ "$$current" != "/" ]; do \
+		if [ -f "$$current/.gitmodules" ]; then echo "$$current"; break; fi; \
+		current="$$(dirname "$$current")"; \
+	done)
+
+ifneq ($(FLEXT_WORKSPACE_ROOT),)
+FLEXT_INFRA_BASE_MK := $(FLEXT_WORKSPACE_ROOT)/flext-infra/base.mk
+ifneq ("$(wildcard $(FLEXT_INFRA_BASE_MK))", "")
+include $(FLEXT_INFRA_BASE_MK)
+else
+$(error flext-infra/base.mk not found at $(FLEXT_INFRA_BASE_MK); run from a valid workspace)
+endif
 else
 # =============================================================================
 # STANDALONE BOOTSTRAP — auto-generates base.mk via flext-infra
@@ -56,7 +70,7 @@ base.mk: Makefile
 	@test -s $@ || { echo "ERROR: base.mk generation failed"; rm -f $@; exit 1; }
 	@echo "==> base.mk generated. Restarting make..."
 
-.PHONY: _bootstrap-venv venv setup help
+.PHONY: _bootstrap-venv venv setup
 
 _bootstrap-venv:
 	@if [ ! -d "$(BOOTSTRAP_VENV)" ]; then \
@@ -91,6 +105,9 @@ setup: venv ## Full standalone setup (venv + dependencies + base.mk)
 		--project-name $(PROJECT_NAME) --output base.mk
 	@echo "==> Setup complete. All 'make' verbs now available."
 
+ifeq ("$(wildcard base.mk)", "")
+.PHONY: help
+
 help: ## Show available commands
 	@echo "================================================"
 	@echo "  $(PROJECT_NAME) (standalone bootstrap)"
@@ -109,6 +126,7 @@ help: ## Show available commands
 	@echo "  check, test, fmt, build, val, clean, docs, pr"
 	@echo ""
 	@echo "Run 'make setup' first, then 'make help' for full verb list."
+endif
 endif
 
 # Project-specific targets (optional, never overwritten by sync)

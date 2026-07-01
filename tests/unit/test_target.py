@@ -10,16 +10,19 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
+from flext_tests import r
 
-from flext_target_ldap import (
-    FlextTargetLdap,
+from flext_target_ldap import FlextTargetLdap
+from flext_target_ldap._models.sinks import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapGroupsSink,
     FlextTargetLdapSink,
     FlextTargetLdapUsersSink,
 )
-from tests import m, r, t, u
 from tests.base import s
+from tests.models import m
+from tests.typings import t
+from tests.utilities import u
 
 
 class TestsFlextTargetLdapTarget:

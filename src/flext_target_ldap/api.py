@@ -16,20 +16,22 @@ from typing import ClassVar, override
 
 from flext_core import FlextContainer
 from flext_target_ldap import (
-    FlextTargetLdapBaseSink,
-    FlextTargetLdapClient,
-    FlextTargetLdapGroupsSink,
-    FlextTargetLdapOrchestrator,
-    FlextTargetLdapOrganizationalUnitsSink,
     FlextTargetLdapSettings,
-    FlextTargetLdapSink,
-    FlextTargetLdapTarget,
-    FlextTargetLdapUsersSink,
     c,
     p,
     t,
     u,
 )
+from flext_target_ldap._models.sinks import (
+    FlextTargetLdapBaseSink,
+    FlextTargetLdapGroupsSink,
+    FlextTargetLdapOrganizationalUnitsSink,
+    FlextTargetLdapSink,
+    FlextTargetLdapTarget,
+    FlextTargetLdapUsersSink,
+)
+from flext_target_ldap._utilities.client import FlextTargetLdapClient
+from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
 
 
 class FlextTargetLdap(FlextTargetLdapTarget):

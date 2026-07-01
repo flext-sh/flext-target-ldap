@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import override
 
 from flext_meltano import m, u
-from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, p, t
+from flext_target_ldap import FlextTargetLdap, p, t
+from flext_target_ldap._models.sinks import FlextTargetLdapSink
 
 
 class FlextTargetLdapServiceRuntime:

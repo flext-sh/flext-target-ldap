@@ -17,7 +17,8 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 from flext_target_ldap import FlextTargetLdap
-from tests import t, u
+from tests.typings import t
+from tests.utilities import u
 
 
 def _write_jsonl(path: Path, events: t.SequenceOf[Mapping[str, object]]) -> None:

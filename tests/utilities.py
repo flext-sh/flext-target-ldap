@@ -13,8 +13,9 @@ from typing import override
 
 from flext_tests import FlextTestsUtilities
 
-from flext_target_ldap import FlextTargetLdapTarget, FlextTargetLdapUtilities, p, r
-from tests import t
+from flext_target_ldap import FlextTargetLdapUtilities, p, r
+from flext_target_ldap._models.sinks import FlextTargetLdapTarget
+from tests.typings import t
 
 
 class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
