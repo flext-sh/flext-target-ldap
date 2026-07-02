@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from typing import Final
 
-from flext_ldap import FlextLdapConstants
-from flext_meltano import c
 from flext_target_ldap import t
 
 
@@ -26,7 +24,7 @@ class FlextTargetLdapConstantsBase:
     DEFAULT_OBJECT_CLASSES: Final[t.VariadicTuple[str]] = ("top",)
 
     # Canonical defaults (DEFAULT_TIMEOUT_SECONDS comes from c via MRO)
-    DEFAULT_HOST: Final[str] = c.LOCALHOST
+    DEFAULT_HOST: Final[str] = "localhost"
     DEFAULT_BIND_DN: Final[str] = ""
     DEFAULT_BIND_PASSWORD: Final[str] = ""
     DEFAULT_OBJECT_CLASS: Final[str] = "top"
@@ -52,10 +50,3 @@ class FlextTargetLdapConstantsBase:
 
     # Allowed operation modes
     DEFAULT_BASE_DN: Final[str] = "dc=example,dc=com"
-
-
-class FlextTargetLdapConstants(c, FlextLdapConstants):
-    """LDAP target constant facade."""
-
-    class TargetLdap(FlextTargetLdapConstantsBase):
-        """LDAP target constant namespace."""
