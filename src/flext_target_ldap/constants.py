@@ -8,7 +8,7 @@ from flext_target_ldap import t
 from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
 
 
-class FlextTargetLdapConstants(c, FlextLdapConstants):
+class FlextTargetLdapConstants(c, FlextLdapConstants, FlextTargetLdapConstantsBase):
     """LDAP target constant facade."""
 
     class TargetLdap(FlextTargetLdapConstantsBase):
