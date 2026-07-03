@@ -25,45 +25,45 @@ if TYPE_CHECKING:
         x as x,
     )
 
-    from tests.base import (
+    from flext_target_ldap.tests.base import (
         TestsFlextTargetLdapServiceBase as TestsFlextTargetLdapServiceBase,
         s as s,
     )
-    from tests.constants import (
+    from flext_target_ldap.tests.constants import (
         TestsFlextTargetLdapConstants as TestsFlextTargetLdapConstants,
         c as c,
     )
-    from tests.models import (
+    from flext_target_ldap.tests.models import (
         TestsFlextTargetLdapModels as TestsFlextTargetLdapModels,
         m as m,
     )
-    from tests.protocols import (
+    from flext_target_ldap.tests.protocols import (
         TestsFlextTargetLdapProtocols as TestsFlextTargetLdapProtocols,
         p as p,
     )
-    from tests.settings import (
+    from flext_target_ldap.tests.settings import (
         TestsFlextTargetLdapSettings as TestsFlextTargetLdapSettings,
     )
-    from tests.typings import (
+    from flext_target_ldap.tests.typings import (
         TestsFlextTargetLdapTypes as TestsFlextTargetLdapTypes,
         t as t,
     )
-    from tests.unit.test_client import (
+    from flext_target_ldap.tests.unit.test_client import (
         TestsFlextTargetLdapClient as TestsFlextTargetLdapClient,
     )
-    from tests.unit.test_integration import (
+    from flext_target_ldap.tests.unit.test_integration import (
         TestsFlextTargetLdapIntegration as TestsFlextTargetLdapIntegration,
     )
-    from tests.unit.test_sinks import (
+    from flext_target_ldap.tests.unit.test_sinks import (
         TestsFlextTargetLdapSinks as TestsFlextTargetLdapSinks,
     )
-    from tests.unit.test_target import (
+    from flext_target_ldap.tests.unit.test_target import (
         TestsFlextTargetLdapTarget as TestsFlextTargetLdapTarget,
     )
-    from tests.unit.test_transformation import (
+    from flext_target_ldap.tests.unit.test_transformation import (
         TestsFlextTargetLdapTransformation as TestsFlextTargetLdapTransformation,
     )
-    from tests.utilities import (
+    from flext_target_ldap.tests.utilities import (
         TestsFlextTargetLdapUtilities as TestsFlextTargetLdapUtilities,
         u as u,
     )
