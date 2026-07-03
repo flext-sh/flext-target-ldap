@@ -18,11 +18,11 @@ from collections.abc import (
 from types import MappingProxyType
 from typing import Annotated, ClassVar, Self
 
-from flext_core import FlextSettingsBase
+from flext_core import FlextSettings
 from flext_target_ldap import c, m, t, u
 
 
-class FlextTargetLdapSettings(FlextSettingsBase):
+class FlextTargetLdapSettings(FlextSettings):
     """LDAP target configuration with connection and operation settings."""
 
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
