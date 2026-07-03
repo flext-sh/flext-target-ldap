@@ -263,7 +263,7 @@ class FlextTargetLdapClient:
             )
             return r[bool].fail_op("Entry exists check", e)
 
-    def get_entry(
+    def fetch_entry(
         self,
         dn: str,
         attributes: t.StrSequence | None = None,
