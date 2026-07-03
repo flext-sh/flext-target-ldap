@@ -37,6 +37,14 @@ FLEXT_TARGET_LDAP_LAZY_IMPORTS_PART_01 = build_lazy_import_map(
             "FlextTargetLdapUtilities",
             "u",
         ),
+        "flext_core": (
+            "d",
+            "e",
+            "h",
+            "r",
+            "s",
+            "x",
+        ),
     },
 )
 
