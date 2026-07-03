@@ -85,7 +85,7 @@ class TestsFlextTargetLdapTarget:
         target = FlextTargetLdap(settings=updated_settings)
         sink = target.get_sink("users")
         assert isinstance(sink, FlextTargetLdapUsersSink)
-        object_classes = sink.get_object_classes({})
+        object_classes = sink.resolve_object_classes({})
         assert object_classes == ["customPerson", "top"]
 
     def test_process_record(

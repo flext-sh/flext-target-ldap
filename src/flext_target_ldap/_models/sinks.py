@@ -139,7 +139,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             "build_dn must be implemented in subclass: No ID or name found for generic entry",
         )
 
-    def get_object_classes(
+    def resolve_object_classes(
         self,
         record: t.TargetLdap.RecordPayload,
     ) -> t.StrSequence:
@@ -394,7 +394,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         return attributes
 
     @override
-    def get_object_classes(
+    def resolve_object_classes(
         self,
         record: t.TargetLdap.RecordPayload,
     ) -> t.StrSequence:
@@ -470,7 +470,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         return r[str].ok(f"{rdn_attr}={cn},{base_dn}")
 
     @override
-    def get_object_classes(
+    def resolve_object_classes(
         self,
         record: t.TargetLdap.RecordPayload,
     ) -> t.StrSequence:

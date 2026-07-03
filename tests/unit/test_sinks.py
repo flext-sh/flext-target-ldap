@@ -132,9 +132,9 @@ class TestsFlextTargetLdapSinks:
         assert not result.success
         assert result.error is not None and expected_error in result.error
 
-    def test_get_object_classes_default(self, ldap_base_sink: LDAPBaseSink) -> None:
+    def test_resolve_object_classes_default(self, ldap_base_sink: LDAPBaseSink) -> None:
         record: t.TargetLdap.RecordPayload = {}
-        classes = ldap_base_sink.get_object_classes(record)
+        classes = ldap_base_sink.resolve_object_classes(record)
         assert classes == ["top"]
 
     def test_validate_entry_success(self, ldap_base_sink: LDAPBaseSink) -> None:
@@ -213,7 +213,7 @@ class TestsFlextTargetLdapSinks:
         assert result.value["telephoneNumber"] == ["123-456-7890", "098-765-4321"]
 
     def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
-        classes = users_sink.get_object_classes({})
+        classes = users_sink.resolve_object_classes({})
         assert classes == ["inetOrgPerson", "organizationalPerson", "person", "top"]
 
     def test_users_get_object_classes_configured(self, mock_target: MagicMock) -> None:
@@ -231,7 +231,7 @@ class TestsFlextTargetLdapSinks:
             },
             key_properties=["uid"],
         )
-        assert sink.get_object_classes({}) == ["customUser", "top"]
+        assert sink.resolve_object_classes({}) == ["customUser", "top"]
 
     def test_groups_build_dn_success(self, groups_sink: GroupsSink) -> None:
         result = groups_sink.build_dn({"cn": "testgroup", "description": "Test Group"})
@@ -262,7 +262,7 @@ class TestsFlextTargetLdapSinks:
         ]
 
     def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
-        assert groups_sink.get_object_classes({}) == ["groupOfNames", "top"]
+        assert groups_sink.resolve_object_classes({}) == ["groupOfNames", "top"]
 
     def test_ou_build_dn_success(self, ou_sink: OrganizationalUnitsSink) -> None:
         result = ou_sink.build_dn({"name": "testou", "description": "Test OU"})
@@ -281,7 +281,7 @@ class TestsFlextTargetLdapSinks:
     def test_ou_get_object_classes_default(
         self, ou_sink: OrganizationalUnitsSink
     ) -> None:
-        assert "top" in ou_sink.get_object_classes({})
+        assert "top" in ou_sink.resolve_object_classes({})
 
     def test_generic_build_dn_explicit(self, generic_sink: LDAPBaseSink) -> None:
         result = generic_sink.build_dn({"dn": "cn=test,dc=example,dc=com"})
@@ -316,21 +316,21 @@ class TestsFlextTargetLdapSinks:
     def test_generic_get_object_classes_from_record(
         self, generic_sink: LDAPBaseSink
     ) -> None:
-        assert generic_sink.get_object_classes({
+        assert generic_sink.resolve_object_classes({
             "object_classes": ["customClass", "top"]
         }) == ["customClass", "top"]
 
     def test_generic_get_object_classes_single_value(
         self, generic_sink: LDAPBaseSink
     ) -> None:
-        assert generic_sink.get_object_classes({"object_classes": "customClass"}) == [
+        assert generic_sink.resolve_object_classes({"object_classes": "customClass"}) == [
             "customClass"
         ]
 
     def test_generic_get_object_classes_default(
         self, generic_sink: LDAPBaseSink
     ) -> None:
-        assert generic_sink.get_object_classes({}) == ["top"]
+        assert generic_sink.resolve_object_classes({}) == ["top"]
 
     def test_generic_get_object_classes_configured(
         self, mock_target: MagicMock
@@ -346,5 +346,5 @@ class TestsFlextTargetLdapSinks:
             schema={"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}},
             key_properties=["id"],
         )
-        classes = sink.get_object_classes({})
+        classes = sink.resolve_object_classes({})
         assert classes == ["customGeneric", "top"]
