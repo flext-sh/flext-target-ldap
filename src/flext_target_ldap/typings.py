@@ -1,52 +1,25 @@
-"""Type aliases and project-specific types for the LDAP target."""
+"""LDAP target type facade via MRO composition."""
 
 from __future__ import annotations
 
-from typing import Literal
-
 from flext_ldap import FlextLdapTypes
-from flext_meltano import FlextMeltanoTypes
+from flext_meltano import t
 
 
-class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
-    """FLEXT Target LDAP Types.
+class FlextTargetLdapTypes(t, FlextLdapTypes):
+    """MRO facade composing Meltano + LDAP type namespaces."""
 
-    Inherits standard types from FlextTypes and adds project-specific
-    domain types.
-    """
+    class TargetLdap:
+        """Target LDAP domain type namespace."""
 
-    class Core:
-        """Core type aliases overrides."""
-
-        type Dict = dict[str, FlextMeltanoTypes.NormalizedValue]
-        type Headers = dict[str, str]
-        type StringList = list[str]
-
-    class Project:
-        """Project-specific type aliases for target-ldap."""
-
-        type TargetLdapProjectType = Literal[
-            "library",
-            "application",
-            "service",
-            "singer-target",
-            "ldap-loader",
-            "directory-loader",
-            "singer-target-ldap",
-            "target-ldap",
-            "ldap-connector",
-            "directory-connector",
-            "singer-protocol",
-            "ldap-integration",
-            "directory-service",
-            "ldap-target",
-            "singer-stream",
-            "etl-target",
-            "data-pipeline",
-            "ldap-sink",
-            "singer-integration",
-        ]
+        type SettingsPayload = t.JsonMapping
+        type RecordPayload = t.JsonMapping
+        type MutableRecordPayload = t.MutableJsonMapping
+        type SchemaPayload = t.JsonMapping
+        type MutableSchemaPayload = t.MutableJsonMapping
+        type CatalogPayload = t.JsonMapping
 
 
 t = FlextTargetLdapTypes
-__all__ = ["FlextTargetLdapTypes", "t"]
+
+__all__: list[str] = ["FlextTargetLdapTypes", "t"]

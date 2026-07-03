@@ -11,19 +11,18 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import math
-from datetime import UTC, datetime
-from typing import Annotated, Self
+from collections.abc import (
+    MutableSequence,
+)
+from types import MappingProxyType
+from typing import Annotated
 
-from flext_core import r, t
-from flext_ldap import FlextLdapModels
+from flext_ldap import m
 from flext_meltano import FlextMeltanoModels
-from pydantic import Field, field_validator
-
-from .constants import c
+from flext_target_ldap import c, p, r, t, u
 
 
-class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
+class FlextTargetLdapModels(FlextMeltanoModels, m):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
@@ -31,13 +30,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     Integrates with flext-core patterns for enterprise LDAP data loading.
     """
 
-    # ObjectClass moved to constants.py as c.TargetLdap.ObjectClass (DRY pattern)
-    ObjectClass = c.TargetLdap.ObjectClass
-
     class TargetLdap:
         """TargetLdap domain namespace."""
 
-        class AttributeMapping(FlextLdapModels.Entity):
+        class AttributeMapping(m.Entity):
             """LDAP attribute mapping configuration with validation.
 
             Immutable value object defining how Singer fields map to LDAP attributes
@@ -45,48 +41,42 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """
 
             singer_field_name: Annotated[
-                str,
-                Field(
+                t.NonEmptyStr,
+                u.Field(
                     ...,
                     description="Singer field name from source data",
-                    min_length=1,
-                    max_length=255,
                 ),
             ]
             ldap_attribute_name: Annotated[
-                str,
-                Field(
+                t.NonEmptyStr,
+                u.Field(
                     ...,
                     description="Target LDAP attribute name",
-                    min_length=1,
-                    max_length=255,
                 ),
             ]
             is_required: Annotated[
                 bool,
-                Field(
+                u.Field(
                     default=False,
                     description="Whether this attribute is required for LDAP entry",
                 ),
             ]
             transformation_rule: Annotated[
                 str | None,
-                Field(
+                u.Field(
                     default=None,
                     description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
-                    max_length=100,
                 ),
             ]
             default_value: Annotated[
                 str | None,
-                Field(
+                u.Field(
                     default=None,
                     description="Default value if source field is missing",
-                    max_length=1000,
                 ),
             ]
 
-            def validate_business_rules(self) -> r[bool]:
+            def validate_business_rules(self) -> p.Result[bool]:
                 """Validate attribute mapping business rules."""
                 try:
                     # Validate field name format
@@ -120,20 +110,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                             )
 
                     return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
-                    return r[bool].fail(
-                        f"Attribute mapping validation failed: {e}",
-                    )
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+                    return r[bool].fail_op("Attribute mapping validation", e)
 
-        class Entry(FlextLdapModels.Entity):
+        class Entry(m.Entity):
             """LDAP entry representation with validation and business rules.
 
             Immutable value object representing a complete LDAP entry with
@@ -141,81 +121,70 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """
 
             distinguished_name: Annotated[
-                str,
-                Field(
+                t.NonEmptyStr,
+                u.Field(
                     ...,
                     description="LDAP Distinguished Name (DN)",
-                    min_length=1,
-                    max_length=1000,
                 ),
             ]
             object_classes: Annotated[
-                list[str],
-                Field(
+                MutableSequence[str],
+                u.Field(
+                    description="LDAP object classes for this entry",
                     default_factory=list,
-                    description="LDAP object classes",
                 ),
             ]
             attributes: Annotated[
-                dict[str, list[str]],
-                Field(
-                    default_factory=dict,
+                t.MutableStrSequenceMapping,
+                u.Field(
                     description="LDAP attributes with values",
+                    default_factory=lambda: MappingProxyType({}),
                 ),
             ]
             entry_type: Annotated[
                 str,
-                Field(
+                u.Field(
                     default="generic",
                     description="Type of LDAP entry (user, group, ou, etc.)",
-                    max_length=50,
-                ),
-            ]
-            created_at: Annotated[
-                datetime,
-                Field(
-                    default_factory=lambda: datetime.now(UTC),
-                    description="Entry creation timestamp",
                 ),
             ]
 
-            @field_validator("object_classes")
+            @u.field_validator("object_classes")
             @classmethod
             def validate_object_classes(
                 cls,
-                v: list[str],
-            ) -> list[str]:
+                v: MutableSequence[str],
+            ) -> MutableSequence[str]:
                 """Validate object classes contain 'top'."""
                 if "top" not in v:
                     v.append("top")
                 return v
 
-            def get_attribute_values(
-                self,
-                attribute_name: str,
-            ) -> list[str]:
-                """Get values for a specific attribute."""
-                return self.attributes.get(attribute_name, [])
-
-            def get_parent_dn(self) -> str:
-                """Get the parent DN by removing the RDN."""
-                parts = self.distinguished_name.split(",", 1)
+            @u.computed_field(return_type=str)
+            @property
+            def parent_dn(self) -> str:
+                """Parent DN derived from the distinguished name."""
+                distinguished_name = self.distinguished_name
+                parts = distinguished_name.split(",", 1)
                 return parts[1].strip() if len(parts) > 1 else ""
 
-            def get_rdn(self) -> str:
-                """Get the Relative Distinguished Name (RDN) from the DN."""
-                return self.distinguished_name.split(",")[0].strip()
+            @u.computed_field(return_type=str)
+            @property
+            def rdn(self) -> str:
+                """Relative distinguished name derived from the DN."""
+                distinguished_name = self.distinguished_name
+                rdn_part: str = distinguished_name.split(",", 1)[0].strip()
+                return rdn_part
 
             def has_object_class(self, object_class: str) -> bool:
                 """Check if entry has a specific object class."""
-                return object_class.lower() in [
-                    oc.lower() for oc in self.object_classes
-                ]
+                present: bool = u.Ldap.norm_in(object_class, self.object_classes)
+                return present
 
-            def validate_business_rules(self) -> r[bool]:
+            def validate_business_rules(self) -> p.Result[bool]:
                 """Validate LDAP entry business rules."""
                 try:
-                    errors: list[str] = []
+                    errors: MutableSequence[str] = []
 
                     # Validate DN format
                     if (
@@ -228,7 +197,9 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
                     # Validate object classes
                     if not self.object_classes:
-                        errors.append("Entry must have at least one object class")
+                        errors.append(
+                            "Entry must have at least one object class",
+                        )
 
                     # Validate person entries have required attributes
                     if "person" in self.object_classes:
@@ -251,413 +222,40 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                     if errors:
                         return r[bool].fail("; ".join(errors))
                     return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
-                    return r[bool].fail(f"LDAP entry validation failed: {e}")
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+                    return r[bool].fail_op("LDAP entry validation", e)
 
-        class TransformationResult(FlextLdapModels.Entity):
-            """Result of LDAP data transformation operations.
+        class TransformationRule(m.Value):
+            """Rule for transforming LDAP data with pattern matching and replacement."""
 
-            Tracks transformation statistics, applied rules, and processing metrics
-            for LDAP target operations.
-            """
-
-            original_record: Annotated[
-                dict[str, t.Scalar],
-                Field(
-                    ...,
-                    description="Original Singer record before transformation",
+            name: Annotated[
+                t.NonEmptyStr,
+                u.Field(
+                    description="Unique name identifying this transformation rule",
                 ),
             ]
-            transformed_entry: Annotated[
-                FlextTargetLdapModels.TargetLdap.Entry,
-                Field(
-                    ...,
-                    description="Resulting LDAP entry after transformation",
+            pattern: Annotated[
+                t.NonEmptyStr,
+                u.Field(
+                    description="Regex pattern to match in source data",
                 ),
             ]
-            applied_mappings: Annotated[
-                list[FlextTargetLdapModels.TargetLdap.AttributeMapping],
-                Field(
-                    default_factory=lambda: list[
-                        FlextTargetLdapModels.TargetLdap.AttributeMapping
-                    ](),
-                    description="Attribute mappings that were applied",
-                ),
-            ]
-            transformation_errors: Annotated[
-                list[str],
-                Field(
-                    default_factory=list,
-                    description="schema errors encountered during transformation",
-                ),
-            ]
-            processing_time_ms: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Processing time in milliseconds",
-                    ge=0,
-                ),
-            ]
-            transformation_timestamp: Annotated[
-                datetime,
-                Field(
-                    default_factory=lambda: datetime.now(UTC),
-                    description="When transformation was performed",
-                ),
-            ]
-
-            @property
-            def success_rate(self) -> float:
-                """Calculate transformation success rate."""
-                total_mappings = len(self.applied_mappings)
-                if total_mappings == 0:
-                    return 0.0
-
-                error_count = len(self.transformation_errors)
-                return ((total_mappings - error_count) / total_mappings) * 100.0
-
-            def has_errors(self) -> bool:
-                """Check if transformation has any errors."""
-                return bool(self.transformation_errors)
-
-            def validate_business_rules(self) -> r[bool]:
-                """Validate transformation result business rules."""
-                try:
-                    # Validate we have meaningful data
-                    if not self.original_record:
-                        return r[bool].fail("Original record cannot be empty")
-
-                    # Validate transformed entry is valid
-                    entry_validation = self.transformed_entry.validate_business_rules()
-                    if not entry_validation.is_success:
-                        return r[bool].fail(
-                            f"Transformed entry is invalid: {entry_validation.error}",
-                        )
-
-                    return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
-                    return r[bool].fail(
-                        f"Transformation result validation failed: {e}",
-                    )
-
-        class BatchProcessing(FlextLdapModels.Entity):
-            """LDAP batch processing configuration and state tracking.
-
-            Manages batching of LDAP operations for optimal performance,
-            tracking batch size, processed records, and operation statistics.
-            """
-
-            stream_name: Annotated[
+            replacement: Annotated[
                 str,
-                Field(
-                    ...,
-                    description="Singer stream being processed",
-                    min_length=1,
-                    max_length=255,
+                u.Field(
+                    default="",
+                    description="Replacement string applied when pattern matches",
                 ),
             ]
-            batch_size: Annotated[
-                int,
-                Field(
-                    ...,
-                    description="Maximum records per batch",
-                    gt=0,
-                    le=10000,
-                ),
-            ]
-            current_batch: Annotated[
-                list[FlextTargetLdapModels.TargetLdap.Entry],
-                Field(
-                    default_factory=lambda: list[
-                        FlextTargetLdapModels.TargetLdap.Entry
-                    ](),
-                    description="Current batch of LDAP entries",
-                ),
-            ]
-            total_processed: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Total entries processed across all batches",
-                    ge=0,
-                ),
-            ]
-            successful_operations: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Count of successful LDAP operations",
-                    ge=0,
-                ),
-            ]
-            failed_operations: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Count of failed LDAP operations",
-                    ge=0,
-                ),
-            ]
-            last_processed_at: Annotated[
-                datetime | None,
-                Field(
-                    default=None,
-                    description="Timestamp of last batch processing",
+            enabled: Annotated[
+                bool,
+                u.Field(
+                    default=True,
+                    description="Whether this transformation rule is active",
                 ),
             ]
 
-            @property
-            def current_batch_size(self) -> int:
-                """Get current batch size."""
-                return len(self.current_batch)
 
-            @property
-            def is_batch_full(self) -> bool:
-                """Check if current batch is full."""
-                return len(self.current_batch) >= self.batch_size
-
-            @property
-            def success_rate(self) -> float:
-                """Calculate success rate percentage."""
-                total_ops = self.successful_operations + self.failed_operations
-                if total_ops == 0:
-                    return 0.0
-                return (self.successful_operations / total_ops) * 100.0
-
-            def add_entry(
-                self,
-                entry: FlextTargetLdapModels.TargetLdap.Entry,
-            ) -> Self:
-                """Add entry to current batch (immutable operation)."""
-                new_batch = self.current_batch.copy()
-                new_batch.append(entry)
-
-                return self.model_copy(
-                    update={
-                        "current_batch": new_batch,
-                    },
-                )
-
-            def clear_batch(self) -> Self:
-                """Clear current batch after processing (immutable operation)."""
-                return self.model_copy(
-                    update={
-                        "current_batch": [],
-                        "total_processed": self.total_processed
-                        + len(self.current_batch),
-                        "last_processed_at": datetime.now(UTC),
-                    },
-                )
-
-            def record_failure(self, count: int = 1) -> Self:
-                """Record failed operations (immutable operation)."""
-                return self.model_copy(
-                    update={
-                        "failed_operations": self.failed_operations + count,
-                    },
-                )
-
-            def record_success(self, count: int = 1) -> Self:
-                """Record successful operations (immutable operation)."""
-                return self.model_copy(
-                    update={
-                        "successful_operations": self.successful_operations + count,
-                    },
-                )
-
-            def validate_business_rules(self) -> r[bool]:
-                """Validate batch processing business rules."""
-                try:
-                    # Validate batch size doesn't exceed current batch
-                    if len(self.current_batch) > self.batch_size:
-                        return r[bool].fail(
-                            f"Current batch size ({len(self.current_batch)}) exceeds maximum ({self.batch_size})",
-                        )
-
-                    # Validate counters are consistent
-                    if (
-                        self.successful_operations + self.failed_operations
-                        > self.total_processed
-                    ):
-                        return r[bool].fail(
-                            "Operation counters exceed total processed count",
-                        )
-
-                    return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
-                    return r[bool].fail(
-                        f"Batch processing validation failed: {e}",
-                    )
-
-        class OperationStatistics(FlextLdapModels.Entity):
-            """LDAP operation statistics and performance metrics.
-
-            Complete tracking of LDAP target operations for performance
-            monitoring, reporting, and optimization analysis.
-            """
-
-            total_entries_processed: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Total LDAP entries processed",
-                    ge=0,
-                ),
-            ]
-            successful_adds: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Successful LDAP add operations",
-                    ge=0,
-                ),
-            ]
-            successful_updates: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Successful LDAP modify operations",
-                    ge=0,
-                ),
-            ]
-            successful_deletes: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Successful LDAP delete operations",
-                    ge=0,
-                ),
-            ]
-            failed_operations: Annotated[
-                int,
-                Field(
-                    default=0,
-                    description="Total failed operations",
-                    ge=0,
-                ),
-            ]
-            average_processing_time_ms: Annotated[
-                float,
-                Field(
-                    default=0.0,
-                    description="Average processing time per entry in milliseconds",
-                    ge=0.0,
-                ),
-            ]
-            start_time: Annotated[
-                datetime,
-                Field(
-                    default_factory=lambda: datetime.now(UTC),
-                    description="When processing started",
-                ),
-            ]
-            end_time: Annotated[
-                datetime | None,
-                Field(
-                    default=None,
-                    description="When processing completed",
-                ),
-            ]
-
-            @property
-            def operations_per_second(self) -> float:
-                """Calculate operations per second throughput."""
-                duration = self.total_duration_seconds
-                if math.isclose(duration, 0.0):
-                    return 0.0
-                return self.total_entries_processed / duration
-
-            @property
-            def success_rate(self) -> float:
-                """Calculate overall success rate percentage."""
-                if self.total_entries_processed == 0:
-                    return 0.0
-                successful = (
-                    self.successful_adds
-                    + self.successful_updates
-                    + self.successful_deletes
-                )
-                return (successful / self.total_entries_processed) * 100.0
-
-            @property
-            def total_duration_seconds(self) -> float:
-                """Calculate total processing duration in seconds."""
-                if not self.end_time:
-                    return 0.0
-                return (self.end_time - self.start_time).total_seconds()
-
-            def complete_processing(self) -> Self:
-                """Mark processing as completed (immutable operation)."""
-                return self.model_copy(
-                    update={
-                        "end_time": datetime.now(UTC),
-                    },
-                )
-
-            def validate_business_rules(self) -> r[bool]:
-                """Validate operation statistics business rules."""
-                try:
-                    # Validate that successful operations don't exceed total
-                    total_successful = (
-                        self.successful_adds
-                        + self.successful_updates
-                        + self.successful_deletes
-                    )
-                    if (
-                        total_successful + self.failed_operations
-                        > self.total_entries_processed
-                    ):
-                        return r[bool].fail(
-                            "Total operations exceed total entries processed",
-                        )
-
-                    # Validate time range
-                    if self.end_time and self.end_time < self.start_time:
-                        return r[bool].fail(
-                            "End time cannot be before start time",
-                        )
-
-                    return r[bool].ok(value=True)
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
-                    return r[bool].fail(
-                        f"Operation statistics validation failed: {e}",
-                    )
-
-
-# Export the unified models class
 m = FlextTargetLdapModels
 
 __all__: list[str] = [

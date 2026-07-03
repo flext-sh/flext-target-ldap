@@ -1,31 +1,21 @@
-"""Types for flext-target-ldap tests - uses t.Ldap.Tests.* namespace pattern.
-
-This module provides test-specific types that extend the main flext-target-ldap types.
-Uses the unified namespace pattern t.Ldap.Tests.* for test-only objects.
-Combines FlextTestsTypes functionality with project-specific test types.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Test types facade via MRO composition."""
 
 from __future__ import annotations
 
 from flext_tests import FlextTestsTypes
 
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from flext_target_ldap import FlextTargetLdapTypes
 
 
 class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
-    """Test types for flext-target-ldap extending both test and project types."""
+    """Test types facade for flext-target-ldap."""
 
-    class TargetLdap:
-        """TargetLdap test namespace."""
+    class TargetLdap(FlextTargetLdapTypes.TargetLdap):
+        """TargetLdap test types namespace."""
 
-        class Tests:
-            """Internal tests declarations."""
+        class Tests(FlextTestsTypes.Tests):
+            """TargetLdap-specific test type aliases."""
 
 
 t = TestsFlextTargetLdapTypes
-tt = TestsFlextTargetLdapTypes
-__all__ = ["TestsFlextTargetLdapTypes", "t", "tt"]
+__all__: list[str] = ["TestsFlextTargetLdapTypes", "t"]

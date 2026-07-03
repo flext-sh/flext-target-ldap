@@ -12,124 +12,171 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated
+from collections.abc import (
+    Mapping,
+)
+from types import MappingProxyType
+from typing import Annotated, ClassVar, Self
 
-from flext_core import FlextModels, r, t
-from flext_ldap import FlextLdapModels
-from pydantic import Field
-
-from .constants import c
-from .utilities import FlextTargetLdapUtilities
+from flext_core import FlextSettingsBase
+from flext_target_ldap import c, m, t, u
 
 
-class FlextTargetLdapSettings(FlextModels.Entity):
+class FlextTargetLdapSettings(FlextSettingsBase):
     """LDAP target configuration with connection and operation settings."""
 
-    connection: FlextLdapModels.Ldap.ConnectionConfig
-    base_dn: str
-    search_filter: str = "(objectClass=*)"
-    search_scope: str = "SUBTREE"
-    connect_timeout: int = c.Network.DEFAULT_TIMEOUT // 3
-    receive_timeout: int = c.Network.DEFAULT_TIMEOUT
-    batch_size: int = c.Performance.BatchProcessing.DEFAULT_SIZE
-    max_records: int | None = None
-    create_missing_entries: bool = True
-    update_existing_entries: bool = True
-    delete_removed_entries: bool = False
-    attribute_mapping: Annotated[dict[str, str], Field(default_factory=dict)]
-    object_classes: Annotated[list[str], Field(default_factory=lambda: ["top"])]
+    model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
+        env_prefix=c.TargetLdap.ENV_PREFIX, extra="ignore"
+    )
 
+    @u.model_validator(mode="before")
+    @classmethod
+    def normalize_flat_settings(
+        cls,
+        data: t.MappingKV[str, t.JsonPayload | None] | Self,
+    ) -> t.MappingKV[str, t.JsonPayload | None] | Self:
+        """Normalize flat Singer settings into the canonical nested shape."""
+        if isinstance(data, cls) or not isinstance(data, Mapping):
+            return data
+        if "connection" in data:
+            return data
 
-class LDAPConnectionSettings(FlextModels.Entity):
-    """LDAP connection settings model."""
+        normalized = t.json_dict_adapter().validate_python(data)
+        bind_password = normalized.get("bind_password", normalized.get("password"))
+        search_scope = normalized.get("search_scope")
+        if isinstance(search_scope, str):
+            normalized["search_scope"] = search_scope.upper()
+        connection_config = m.Ldap.ConnectionConfig.model_validate({
+            "host": normalized.get("host", c.LOCALHOST),
+            "port": normalized.get("port", c.Ldap.PORT),
+            "use_ssl": normalized.get(
+                "use_ssl",
+                c.Ldap.DEFAULT_USE_SSL,
+            ),
+            "use_tls": normalized.get(
+                "use_tls",
+                c.Ldap.DEFAULT_USE_TLS,
+            ),
+            "bind_dn": normalized.get(
+                "bind_dn",
+                c.Ldap.DEFAULT_BIND_DN,
+            ),
+            "bind_password": bind_password,
+            "timeout": normalized.get(
+                "timeout",
+                c.Ldap.TIMEOUT,
+            ),
+            "auto_bind": normalized.get(
+                "auto_bind",
+                c.Ldap.AUTO_BIND,
+            ),
+            "auto_range": normalized.get(
+                "auto_range",
+                c.Ldap.AUTO_RANGE,
+            ),
+        })
+        for consumed_key in (
+            "host",
+            "port",
+            "use_ssl",
+            "use_tls",
+            "bind_dn",
+            "bind_password",
+            "password",
+            "timeout",
+            "auto_bind",
+            "auto_range",
+        ):
+            normalized.pop(consumed_key, None)
+        normalized["connection"] = connection_config.model_dump(mode="python")
+        return normalized
 
-    host: Annotated[str, Field(..., description="LDAP server host")]
-    port: Annotated[
-        int, Field(c.TargetLdap.Connection.DEFAULT_PORT, description="LDAP server port")
+    connection: Annotated[
+        m.Ldap.ConnectionConfig,
+        u.Field(
+            description="LDAP server connection configuration",
+        ),
     ]
-    use_ssl: Annotated[bool, Field(default=False, description="Use SSL connection")]
-    use_tls: Annotated[bool, Field(default=False, description="Use TLS connection")]
-    bind_dn: Annotated[str | None, Field(None, description="Bind DN")]
-    bind_password: Annotated[str | None, Field(None, description="Bind password")]
-    base_dn: Annotated[str, Field(..., description="Base DN")]
+    base_dn: Annotated[
+        t.NonEmptyStr,
+        u.Field(
+            description="Base Distinguished Name for LDAP operations",
+        ),
+    ]
+    search_filter: Annotated[
+        str,
+        u.Field(
+            default=c.Ldap.ALL_ENTRIES_FILTER,
+            description="LDAP search filter expression",
+        ),
+    ]
+    search_scope: Annotated[
+        c.Ldap.Ldap3SearchScope,
+        u.Field(
+            default=c.Ldap.DEFAULT_SCOPE,
+            description="LDAP search scope (BASE, ONELEVEL, or SUBTREE)",
+        ),
+    ]
     connect_timeout: Annotated[
-        int, Field(c.Network.DEFAULT_TIMEOUT // 3, description="Connection timeout")
+        t.PositiveInt,
+        u.Field(
+            default=c.Ldap.TIMEOUT,
+            description="Connection timeout in seconds",
+        ),
     ]
     receive_timeout: Annotated[
-        int, Field(c.Network.DEFAULT_TIMEOUT, description="Receive timeout")
+        t.PositiveInt,
+        u.Field(
+            default=c.DEFAULT_TIMEOUT_SECONDS,
+            description="Receive timeout in seconds for LDAP responses",
+        ),
     ]
-
-
-class LDAPOperationSettings(FlextModels.Entity):
-    """LDAP operation settings model."""
-
     batch_size: Annotated[
-        int, Field(c.Performance.BatchProcessing.DEFAULT_SIZE, description="Batch size")
+        t.BatchSize,
+        u.Field(
+            default=c.DEFAULT_SIZE,
+            description="Maximum number of entries per batch operation",
+        ),
     ]
-    max_records: Annotated[int | None, Field(None, description="Maximum records")]
+    max_records: Annotated[
+        int | None,
+        u.Field(
+            default=None,
+            description="Maximum total records to process, or None for unlimited",
+        ),
+    ]
     create_missing_entries: Annotated[
-        bool, Field(default=True, description="Create missing entries")
+        bool,
+        u.Field(
+            default=c.TargetLdap.CREATE_MISSING_ENTRIES,
+            description="Whether to create LDAP entries that do not exist",
+        ),
     ]
     update_existing_entries: Annotated[
-        bool, Field(default=True, description="Update existing entries")
+        bool,
+        u.Field(
+            default=c.TargetLdap.UPDATE_EXISTING_ENTRIES,
+            description="Whether to update LDAP entries that already exist",
+        ),
     ]
     delete_removed_entries: Annotated[
-        bool, Field(default=False, description="Delete removed entries")
+        bool,
+        u.Field(
+            default=c.TargetLdap.DELETE_REMOVED_ENTRIES,
+            description="Whether to delete LDAP entries removed from source",
+        ),
     ]
-
-
-def validate_ldap_config(
-    config: dict[str, t.ContainerValue],
-) -> r[FlextTargetLdapSettings]:
-    """Validate LDAP configuration."""
-    try:
-        connection_config = (
-            FlextTargetLdapUtilities.TypeConversion.build_connection_config(config)
-        )
-        attribute_mapping = (
-            FlextTargetLdapUtilities.TypeConversion.extract_attribute_mapping(config)
-        )
-        object_classes = FlextTargetLdapUtilities.TypeConversion.extract_object_classes(
-            config
-        )
-        validated_config = FlextTargetLdapSettings(
-            connection=connection_config,
-            base_dn=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("base_dn", "")
-            ),
-            search_filter=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_filter", "(objectClass=*)")
-            ),
-            search_scope=FlextTargetLdapUtilities.TypeConversion.to_str(
-                config.get("search_scope", "SUBTREE")
-            ),
-            connect_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("connect_timeout", c.Network.DEFAULT_TIMEOUT // 3),
-                c.Network.DEFAULT_TIMEOUT // 3,
-            ),
-            receive_timeout=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("receive_timeout", c.Network.DEFAULT_TIMEOUT),
-                c.Network.DEFAULT_TIMEOUT,
-            ),
-            batch_size=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("batch_size", c.Performance.BatchProcessing.DEFAULT_SIZE),
-                c.Performance.BatchProcessing.DEFAULT_SIZE,
-            ),
-            max_records=FlextTargetLdapUtilities.TypeConversion.to_int(
-                config.get("max_records"), 0
-            ),
-            create_missing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("create_missing_entries", True), default=True
-            ),
-            update_existing_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("update_existing_entries", True), default=True
-            ),
-            delete_removed_entries=FlextTargetLdapUtilities.TypeConversion.to_bool(
-                config.get("delete_removed_entries", False), default=False
-            ),
-            attribute_mapping=dict(attribute_mapping),
-            object_classes=object_classes,
-        )
-        return r[FlextTargetLdapSettings].ok(validated_config)
-    except (RuntimeError, ValueError, TypeError) as e:
-        return r[FlextTargetLdapSettings].fail(f"Configuration validation failed: {e}")
+    attribute_mapping: Annotated[
+        t.StrMapping,
+        u.Field(
+            description="Mapping of source field names to LDAP attribute names",
+            default_factory=lambda: MappingProxyType({}),
+        ),
+    ]
+    object_classes: Annotated[
+        t.StrSequence,
+        u.Field(
+            description="LDAP object classes to assign to created entries",
+            default_factory=lambda: list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
+        ),
+    ]

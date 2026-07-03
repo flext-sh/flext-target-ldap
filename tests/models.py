@@ -1,6 +1,6 @@
 """Test models for flext-target-ldap tests.
 
-Provides TestsFlextTargetLdapModels, extending FlextTestsModels with
+Provides TestsFlextTargetLdapModels, extending TestsFlextModels with
 flext-target-ldap-specific models using COMPOSITION INHERITANCE.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -11,35 +11,31 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsModels
 
-from flext_target_ldap.models import FlextTargetLdapModels
+from flext_target_ldap import FlextTargetLdapModels
 
 
 class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
     """Models for flext-target-ldap tests using COMPOSITION INHERITANCE.
 
     MANDATORY: Inherits from BOTH:
-    1. FlextTestsModels - for test infrastructure (.Tests.*)
+    1. TestsFlextModels - for test infrastructure (.Tests.*)
     2. FlextTargetLdapModels - for domain models
 
     Access patterns:
-    - tm.Tests.* (generic test models from FlextTestsModels)
-    - tm.* (Target LDAP domain models)
-    - m.* (production models via alternative alias)
+    - m.TargetLdap.Tests.* (project-local Domain.Tests fixtures)
+    - m.* (Target LDAP domain models via shared MRO)
     """
 
-    class Tests:
-        """Project-specific test fixtures namespace."""
+    class TargetLdap(FlextTargetLdapModels.TargetLdap):
+        """Target LDAP domain test models namespace."""
 
-        class TargetLdap:
+        class Tests(FlextTestsModels.Tests):
             """Target LDAP-specific test fixtures."""
 
 
-# Short aliases per FLEXT convention
-tm = TestsFlextTargetLdapModels
 m = TestsFlextTargetLdapModels
 
-__all__ = [
+__all__: list[str] = [
     "TestsFlextTargetLdapModels",
     "m",
-    "tm",
 ]

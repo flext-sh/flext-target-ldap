@@ -1,131 +1,20 @@
-"""FLEXT Target LDAP Constants - LDAP target loading constants.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Target LDAP constants facade."""
 
 from __future__ import annotations
 
-from enum import StrEnum
-from typing import Final
-
 from flext_ldap import FlextLdapConstants
-from flext_meltano import FlextMeltanoConstants
+from flext_meltano import c
+from flext_target_ldap import t
+from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
 
 
-class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
-    """LDAP target loading-specific constants following FLEXT unified pattern with nested domains.
+class FlextTargetLdapConstants(c, FlextLdapConstants, FlextTargetLdapConstantsBase):
+    """LDAP target constant facade."""
 
-    Extends FlextLdapConstants to inherit all LDAP and LDIF constants, adding
-    target-specific constants in the TargetLdap namespace.
-
-    Hierarchy:
-        FlextConstants (flext-core)
-        └── FlextLdifConstants (flext-ldif)
-            └── FlextLdapConstants (flext-ldap)
-                └── FlextTargetLdapConstants (this module)
-
-    Access patterns:
-        - c.TargetLdap.* (target-specific constants)
-        - c.Ldap.* (inherited from FlextLdapConstants)
-        - c.* (inherited from FlextLdifConstants via FlextLdapConstants)
-        - c.Network.*, c.Errors.*, etc. (inherited from FlextConstants)
-    """
-
-    class TargetLdap:
-        """Target LDAP domain-specific constants namespace."""
-
-        class ObjectClass(StrEnum):
-            """Standard LDAP object classes for target operations.
-
-            Defines the common object classes used in enterprise LDAP directories
-            for users, groups, and organizational structures.
-
-            DRY Pattern:
-                StrEnum is the single source of truth. Use ObjectClass.PERSON.value
-                or ObjectClass.PERSON directly - no base strings needed.
-            """
-
-            TOP = "top"
-            PERSON = "person"
-            ORGANIZATIONAL_PERSON = "organizationalPerson"
-            INET_ORG_PERSON = "inetOrgPerson"
-            GROUP_OF_NAMES = "groupOfNames"
-            GROUP_OF_UNIQUE_NAMES = "groupOfUniqueNames"
-            POSIX_GROUP = "posixGroup"
-            ORGANIZATION = "organization"
-            ORGANIZATIONAL_UNIT = "organizationalUnit"
-            ORGANIZATIONAL_ROLE = "organizationalRole"
-            DOMAIN = "domain"
-            DOMAIN_COMPONENT = "dcObject"
-
-        class Connection:
-            """LDAP connection configuration constants for target operations."""
-
-            DEFAULT_HOST: Final[str] = FlextLdapConstants.Platform.DEFAULT_HOST
-            DEFAULT_PORT: Final[int] = FlextLdapConstants.Ldap.ConnectionDefaults.PORT
-            DEFAULT_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-            )
-            CONNECT_TIMEOUT: Final[int] = 10
-            RECEIVE_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-            )
-            MAX_PORT_NUMBER: Final[int] = 65535
-
-            class Ldaps:
-                """Secure LDAP connection settings."""
-
-                DEFAULT_PORT: Final[int] = 636
-
-        class Processing:
-            """Singer target data processing configuration.
-
-            Note: Does not override parent Processing class to avoid inheritance conflicts.
-            """
-
-            DEFAULT_BATCH_SIZE: Final[int] = 1000
-            MAX_BATCH_SIZE: Final[int] = (
-                FlextLdapConstants.Performance.BatchProcessing.MAX_ITEMS
-            )
-            DEFAULT_PAGE_SIZE: Final[int] = (
-                FlextLdapConstants.Pagination.DEFAULT_PAGE_SIZE
-            )
-
-        class Operations:
-            """LDAP operation types and commands.
-
-            Note: For type-safe operation handling, use c.Ldap.OperationType StrEnum.
-
-            DRY Pattern:
-                TYPES tuple is generated from OperationType StrEnum members to eliminate
-                string duplication. The StrEnum is the single source of truth.
-            """
-
-        class Loading:
-            """Target-specific loading configuration."""
-
-            DEFAULT_LOAD_TIMEOUT: Final[int] = (
-                FlextLdapConstants.Ldap.ConnectionDefaults.TIMEOUT
-            )
-            MAX_LOAD_RETRIES: Final[int] = (
-                FlextLdapConstants.Reliability.MAX_RETRY_ATTEMPTS
-            )
-            LOAD_RETRY_DELAY: Final[float] = (
-                FlextLdapConstants.Reliability.DEFAULT_RETRY_DELAY_SECONDS
-            )
-
-        class Validation:
-            """Target-specific validation configuration.
-
-            Note: Does not override parent Validation class to avoid inheritance conflicts.
-            """
-
-            MAX_DN_LENGTH: Final[int] = (
-                FlextLdapConstants.Ldif.LdifValidation.MAX_DN_LENGTH
-            )
+    class TargetLdap(FlextTargetLdapConstantsBase):
+        """LDAP target constant namespace."""
 
 
 c = FlextTargetLdapConstants
-__all__ = ["FlextTargetLdapConstants", "c"]
+
+__all__: t.StrSequence = ("FlextTargetLdapConstants", "c")

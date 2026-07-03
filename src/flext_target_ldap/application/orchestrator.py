@@ -10,33 +10,47 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextLogger, r, t
+from flext_target_ldap import FlextTargetLdapSettings, c, p, r, t, u
 
-logger: FlextLogger = FlextLogger(__name__)
+logger: p.Logger = u.fetch_logger(__name__)
 
 
-class LDAPTargetOrchestrator:
+class FlextTargetLdapOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
-    config: dict[str, str | int | bool]
+    settings: t.TargetLdap.SettingsPayload
+    _typed_config: FlextTargetLdapSettings | None
 
     @override
-    def __init__(self, config: Mapping[str, str | int | bool] | None = None) -> None:
+    def __init__(
+        self,
+        settings: FlextTargetLdapSettings | t.TargetLdap.SettingsPayload | None = None,
+    ) -> None:
         """Initialize LDAP target orchestrator.
 
         Args:
-        config: Configuration dictionary
+        settings: Configuration dictionary
 
         """
-        self.config = dict(config) if config is not None else {}
+        if isinstance(settings, FlextTargetLdapSettings):
+            self._typed_config = settings
+            self.settings = t.json_dict_adapter().validate_python(
+                settings.model_dump(mode="python"),
+            )
+        else:
+            self._typed_config = None
+            empty_settings: t.TargetLdap.SettingsPayload = {}
+            self.settings = t.json_dict_adapter().validate_python(
+                settings if settings is not None else empty_settings,
+            )
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
-        self, records: list[Mapping[str, t.Scalar | None]]
-    ) -> r[Mapping[str, str | int]]:
+        self,
+        records: t.SequenceOf[t.MappingKV[str, t.Scalar | None]],
+    ) -> p.Result[t.HeaderMapping]:
         """Orchestrate data loading to LDAP target.
 
         Args:
@@ -51,27 +65,17 @@ class LDAPTargetOrchestrator:
             processed_count = 0
             for _record in records:
                 processed_count += 1
-            result_dict: dict[str, str | int] = {
+            result_dict: t.HeaderMapping = {
                 "loaded_records": processed_count,
                 "status": "completed",
             }
             logger.info("LDAP data loading completed: %d records", processed_count)
-            return r[Mapping[str, str | int]].ok(result_dict)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+            return r[t.HeaderMapping].ok(result_dict)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             logger.exception("LDAP data loading orchestration failed")
-            return r[Mapping[str, str | int]].fail(
-                f"Data loading orchestration failed: {e}"
-            )
+            return r[t.HeaderMapping].fail_op("Data loading orchestration", e)
 
-    def validate_target_configuration(self) -> r[bool]:
+    def validate_target_configuration(self) -> p.Result[bool]:
         """Validate LDAP target configuration.
 
         Returns:
@@ -81,19 +85,11 @@ class LDAPTargetOrchestrator:
         try:
             required_fields = ["host", "base_dn"]
             for field in required_fields:
-                if field not in self.config:
+                if field not in self.settings:
                     return r[bool].fail(f"Missing required field: {field}")
             return r[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
-            return r[bool].fail(f"Configuration validation failed: {e}")
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            return r[bool].fail_op("Configuration validation", e)
 
 
-__all__: list[str] = ["LDAPTargetOrchestrator"]
+__all__: t.StrSequence = ("FlextTargetLdapOrchestrator",)

@@ -1,15 +1,26 @@
-"""LDAP application module using flext-core patterns.
-
-This module provides application orchestration components for LDAP target
-operations, following flext-core architectural patterns and principles.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
+# AUTO-GENERATED FILE — Regenerate with: make gen
+"""Application package."""
 
 from __future__ import annotations
 
-from flext_target_ldap.application.orchestrator import LDAPTargetOrchestrator
-from flext_target_ldap.typings import FlextTargetLdapTypes
+from typing import TYPE_CHECKING
 
-__all__: list[str] = ["FlextTargetLdapTypes", "LDAPTargetOrchestrator"]
+from flext_core.lazy import build_lazy_import_map, install_lazy_exports
+
+if TYPE_CHECKING:
+    from flext_target_ldap.application.orchestrator import (
+        FlextTargetLdapOrchestrator as FlextTargetLdapOrchestrator,
+    )
+_LAZY_IMPORTS = build_lazy_import_map(
+    {
+        ".orchestrator": ("FlextTargetLdapOrchestrator",),
+    },
+)
+
+
+install_lazy_exports(
+    __name__,
+    globals(),
+    _LAZY_IMPORTS,
+    publish_all=False,
+)
