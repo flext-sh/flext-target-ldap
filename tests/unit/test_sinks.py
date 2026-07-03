@@ -323,9 +323,9 @@ class TestsFlextTargetLdapSinks:
     def test_generic_get_object_classes_single_value(
         self, generic_sink: LDAPBaseSink
     ) -> None:
-        assert generic_sink.resolve_object_classes({"object_classes": "customClass"}) == [
-            "customClass"
-        ]
+        assert generic_sink.resolve_object_classes({
+            "object_classes": "customClass"
+        }) == ["customClass"]
 
     def test_generic_get_object_classes_default(
         self, generic_sink: LDAPBaseSink
