@@ -72,7 +72,7 @@ class FlextTargetLdapTarget:
         """Process a record with the concrete target runtime."""
         context_keys = tuple(sorted(key for key in context))
         return r[bool].fail(
-            f"Target does not implement process_record for context keys: {context_keys}"
+            f"Target does not implement process_record for context keys: {context_keys}",
         )
 
 
@@ -239,7 +239,8 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             connect_result = self.client.connect()
             if not connect_result.success:
                 return r[FlextTargetLdapClient].fail_op(
-                    "LDAP connection", connect_result.error
+                    "LDAP connection",
+                    connect_result.error,
                 )
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return r[FlextTargetLdapClient].ok(self.client)
@@ -284,7 +285,9 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             if modify_result.success:
                 self._processing_result.add_success()
                 logger.debug(
-                    "%s entry modified successfully: %s", label.capitalize(), dn
+                    "%s entry modified successfully: %s",
+                    label.capitalize(),
+                    dn,
                 )
                 return r[bool].ok(value=True)
             err = f"Failed to modify {label} {dn}: {modify_result.error}"
@@ -361,7 +364,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         object_classes = list(
             u.TargetLdap.TypeConversion.extract_object_classes({
                 "object_classes": configured_object_classes,
-            })
+            }),
         )
         if "inetOrgPerson" not in object_classes:
             object_classes.append("inetOrgPerson")
@@ -536,7 +539,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         object_classes = list(
             u.TargetLdap.TypeConversion.extract_object_classes({
                 "object_classes": configured_object_classes,
-            })
+            }),
         )
         if "groupOfNames" not in object_classes:
             object_classes.append("groupOfNames")
@@ -610,7 +613,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         object_classes = list(
             u.TargetLdap.TypeConversion.extract_object_classes({
                 "object_classes": configured_object_classes,
-            })
+            }),
         )
         if "organizationalUnit" not in object_classes:
             object_classes.append("organizationalUnit")

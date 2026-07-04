@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -21,8 +22,10 @@ from flext_target_ldap._models.sinks import (
 )
 from tests.base import s
 from tests.models import m
-from tests.typings import t
 from tests.utilities import u
+
+if TYPE_CHECKING:
+    from tests.typings import t
 
 
 class TestsFlextTargetLdapTarget:
@@ -46,7 +49,8 @@ class TestsFlextTargetLdapTarget:
         assert target.get_sink_class(key) is expected_cls
 
     def test_target_initialization(
-        self, mock_ldap_config: t.TargetLdap.SettingsPayload
+        self,
+        mock_ldap_config: t.TargetLdap.SettingsPayload,
     ) -> None:
         target = FlextTargetLdap(settings=mock_ldap_config)
         assert target.name == "target-ldap"

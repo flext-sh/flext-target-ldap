@@ -69,7 +69,7 @@ class FlextTargetLdapClient:
                 (
                     c.Ldap.ModifyOperation.REPLACE,
                     FlextTargetLdapClient.to_str_values(value),
-                )
+                ),
             ]
             for key, value in changes.items()
         }

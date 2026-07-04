@@ -185,7 +185,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                 seen_dns.add(dn)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             FlextTargetLdap.logger.warning(
-                f"Failed to add entry {dn}, attempting modify: {exc}"
+                f"Failed to add entry {dn}, attempting modify: {exc}",
             )
             api.modify_entry(dn, attributes)
 

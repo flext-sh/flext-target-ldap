@@ -8,17 +8,21 @@ from __future__ import annotations
 
 import io
 import json as _stdlib_json
-from collections.abc import (
-    Mapping,
-)
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 from flext_target_ldap import FlextTargetLdap
-from tests.typings import t
 from tests.utilities import u
+
+if TYPE_CHECKING:
+    from collections.abc import (
+        Mapping,
+    )
+    from pathlib import Path
+
+    from tests.typings import t
 
 
 def _write_jsonl(path: Path, events: t.SequenceOf[Mapping[str, object]]) -> None:
@@ -78,7 +82,10 @@ class TestsFlextTargetLdapIntegration:
     """Behavior contract for test_integration."""
 
     def test_basic_load(
-        self, mock_ldap_api: MagicMock, config_file: Path, input_file: Path
+        self,
+        mock_ldap_api: MagicMock,
+        config_file: Path,
+        input_file: Path,
     ) -> None:
         mock_conn = MagicMock()
         mock_conn.add_entry.return_value = True
@@ -92,7 +99,10 @@ class TestsFlextTargetLdapIntegration:
         assert mock_conn.add_entry.call_count >= 1
 
     def test_upsert_behavior(
-        self, mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
+        self,
+        mock_ldap_api: MagicMock,
+        config_file: Path,
+        tmp_path: Path,
     ) -> None:
         input_path = tmp_path / "upsert_input.jsonl"
         schema_msg = {
@@ -126,7 +136,10 @@ class TestsFlextTargetLdapIntegration:
         assert mock_conn.modify_entry.call_count >= 1
 
     def test_delete_records(
-        self, mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
+        self,
+        mock_ldap_api: MagicMock,
+        config_file: Path,
+        tmp_path: Path,
     ) -> None:
         input_path = tmp_path / "delete_input.jsonl"
         schema_msg = {

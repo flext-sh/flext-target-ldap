@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -16,7 +17,9 @@ from flext_target_ldap._models.sinks import (
     FlextTargetLdapOrganizationalUnitsSink as OrganizationalUnitsSink,
     FlextTargetLdapUsersSink as UsersSink,
 )
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from tests.typings import t
 
 
 @pytest.fixture
@@ -142,7 +145,9 @@ class TestsFlextTargetLdapSinks:
         mock_client.validate_dn.return_value.success = True
         ldap_base_sink.client = mock_client
         result = ldap_base_sink.validate_entry(
-            "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
+            "cn=test,dc=example,dc=com",
+            {"cn": ["test"]},
+            ["person", "top"],
         )
         assert result.success
 
@@ -227,7 +232,7 @@ class TestsFlextTargetLdapSinks:
             target=mock_target,
             stream_name="users",
             schema={
-                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}
+                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
             },
             key_properties=["uid"],
         )
@@ -279,7 +284,8 @@ class TestsFlextTargetLdapSinks:
         assert not result.success
 
     def test_ou_get_object_classes_default(
-        self, ou_sink: OrganizationalUnitsSink
+        self,
+        ou_sink: OrganizationalUnitsSink,
     ) -> None:
         assert "top" in ou_sink.resolve_object_classes({})
 
@@ -314,26 +320,30 @@ class TestsFlextTargetLdapSinks:
         )
 
     def test_generic_get_object_classes_from_record(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         assert generic_sink.resolve_object_classes({
-            "object_classes": ["customClass", "top"]
+            "object_classes": ["customClass", "top"],
         }) == ["customClass", "top"]
 
     def test_generic_get_object_classes_single_value(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         assert generic_sink.resolve_object_classes({
-            "object_classes": "customClass"
+            "object_classes": "customClass",
         }) == ["customClass"]
 
     def test_generic_get_object_classes_default(
-        self, generic_sink: LDAPBaseSink
+        self,
+        generic_sink: LDAPBaseSink,
     ) -> None:
         assert generic_sink.resolve_object_classes({}) == ["top"]
 
     def test_generic_get_object_classes_configured(
-        self, mock_target: MagicMock
+        self,
+        mock_target: MagicMock,
     ) -> None:
         mock_target.settings = {
             **mock_target.settings,

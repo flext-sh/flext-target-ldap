@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import override
+from typing import TYPE_CHECKING, override
 
 from flext_meltano import m, u
 from flext_target_ldap import FlextTargetLdap, p, t
-from flext_target_ldap._models.sinks import FlextTargetLdapSink
+
+if TYPE_CHECKING:
+    from flext_target_ldap._models.sinks import FlextTargetLdapSink
 
 
 class FlextTargetLdapServiceRuntime:
@@ -87,7 +89,7 @@ class FlextTargetLdapServiceRuntime:
         )
         normalized_schema = cls.normalize_flat_schema(schema)
         sink_class: type[FlextTargetLdapSink] = runtime_target.get_sink_class(
-            stream_name
+            stream_name,
         )
         runtime_sink = sink_class(
             target=runtime_target,
@@ -113,7 +115,7 @@ class FlextTargetLdapServiceRuntime:
         """Normalize a flat Singer schema to the LDAP runtime contract."""
         return {
             key: u.Cli.normalize_json_value(
-                str(value) if isinstance(value, Path) else value
+                str(value) if isinstance(value, Path) else value,
             )
             for key, value in schema.items()
         }

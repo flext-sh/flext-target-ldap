@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -7,7 +8,9 @@ from flext_tests import r
 
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
 from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from tests.typings import t
 
 
 @pytest.fixture
@@ -43,7 +46,8 @@ class TestsFlextTargetLdapClient:
         assert ssl_client.server_uri == "ldaps://test.ldap.com:389"
 
     def test_connect_delegates_to_flext_ldap_api(
-        self, client: FlextTargetLdapClient
+        self,
+        client: FlextTargetLdapClient,
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -54,7 +58,8 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once()
 
     def test_disconnect_calls_flext_ldap_api(
-        self, client: FlextTargetLdapClient
+        self,
+        client: FlextTargetLdapClient,
     ) -> None:
         client._api = MagicMock()
         result = client.disconnect()
@@ -63,7 +68,8 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once_with()
 
     def test_add_entry_uses_real_ldif_entry(
-        self, client: FlextTargetLdapClient
+        self,
+        client: FlextTargetLdapClient,
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -83,7 +89,8 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once()
 
     def test_modify_entry_uses_real_modify_changes(
-        self, client: FlextTargetLdapClient
+        self,
+        client: FlextTargetLdapClient,
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -117,7 +124,8 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once()
 
     def test_search_entry_maps_search_results(
-        self, client: FlextTargetLdapClient
+        self,
+        client: FlextTargetLdapClient,
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -150,7 +158,8 @@ class TestsFlextTargetLdapClient:
         assert entry.attributes.attributes == {"cn": ["Test User"]}
 
     def test_search_entry_disconnects_after_search(
-        self, client: FlextTargetLdapClient
+        self,
+        client: FlextTargetLdapClient,
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
