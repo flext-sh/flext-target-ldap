@@ -97,18 +97,18 @@ class FlextTargetLdapClient:
 
     @property
     def bind_dn(self) -> str:
-        """Get bind DN."""
+        """The bind DN."""
         return self._bind_dn
 
     @property
     def host(self) -> str:
-        """Get server host."""
+        """The server host."""
         host: str = self.settings.host
         return host
 
     @property
     def password(self) -> str:
-        """Get password."""
+        """The password."""
         return self._password
 
     @staticmethod
@@ -136,25 +136,25 @@ class FlextTargetLdapClient:
 
     @property
     def port(self) -> int:
-        """Get server port."""
+        """The server port."""
         port: int = self.settings.port
         return port
 
     @property
     def server_uri(self) -> str:
-        """Get server URI."""
+        """The server URI."""
         protocol = "ldaps" if self.settings.use_ssl else "ldap"
         return f"{protocol}://{self.settings.host}:{self.settings.port}"
 
     @property
     def timeout(self) -> int:
-        """Get timeout."""
+        """The timeout."""
         timeout: int = self.settings.timeout
         return timeout
 
     @property
     def use_ssl(self) -> bool:
-        """Get SSL usage."""
+        """The SSL usage."""
         use_ssl: bool = self.settings.use_ssl
         return use_ssl
 
@@ -268,7 +268,7 @@ class FlextTargetLdapClient:
         dn: str,
         attributes: t.StrSequence | None = None,
     ) -> p.Result[m.Ldif.Entry | None]:
-        """Get LDAP entry using flext-ldap API."""
+        """The LDAP entry using flext-ldap API."""
         try:
             if not dn:
                 return r[m.Ldif.Entry | None].fail("DN required")

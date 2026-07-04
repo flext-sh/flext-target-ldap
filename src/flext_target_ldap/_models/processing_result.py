@@ -13,7 +13,7 @@ class FlextTargetLdapProcessingCounters:
 
     @property
     def success_rate(self: FlextTargetLdapProcessingCounters) -> float:
-        """Return success percentage for processed records."""
+        """The success percentage for processed records."""
         if self.processed_count == 0:
             return 0.0
         return self.success_count / self.processed_count * 100.0
