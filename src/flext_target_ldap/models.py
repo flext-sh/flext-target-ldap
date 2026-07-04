@@ -183,7 +183,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
             def validate_business_rules(self) -> p.Result[bool]:
                 """Validate LDAP entry business rules."""
-                try:
+
+                def _run_validate_business_rules() -> p.Result[bool]:
                     errors: MutableSequence[str] = []
 
                     # Validate DN format
@@ -222,6 +223,9 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                     if errors:
                         return r[bool].fail("; ".join(errors))
                     return r[bool].ok(value=True)
+
+                try:
+                    return _run_validate_business_rules()
                 except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
                     return r[bool].fail_op("LDAP entry validation", e)
 

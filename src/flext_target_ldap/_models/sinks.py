@@ -413,7 +413,8 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a user record."""
-        try:
+
+        def _run_process_record() -> p.Result[bool]:
             username = (
                 _record.get("username") or _record.get("uid") or _record.get("cn")
             )
@@ -436,6 +437,9 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 attributes_dict=attributes_dict,
                 object_classes=object_classes,
             )
+
+        try:
+            return _run_process_record()
         except c.EXC_RUNTIME_TYPE as e:
             error_msg: str = f"Error processing user record: {e}"
             logger.exception(error_msg)
@@ -489,7 +493,8 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process a group record."""
-        try:
+
+        def _run_process_record() -> p.Result[bool]:
             group_name = _record.get("name") or _record.get("cn")
             if not group_name:
                 self._processing_result.add_error("No group name found in record")
@@ -510,6 +515,9 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                 attributes_dict=attributes_dict,
                 object_classes=object_classes,
             )
+
+        try:
+            return _run_process_record()
         except c.EXC_RUNTIME_TYPE as e:
             error_msg: str = f"Error processing group record: {e}"
             logger.exception(error_msg)
@@ -564,7 +572,8 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
         context: t.TargetLdap.RecordPayload,
     ) -> p.Result[bool]:
         """Process an organizational unit record."""
-        try:
+
+        def _run_process_record() -> p.Result[bool]:
             ou_name = _record.get("name") or _record.get("ou")
             if not ou_name:
                 self._processing_result.add_error("No OU name found in record")
@@ -580,6 +589,9 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
                 dn=f"ou={ou_name},{base_dn}",
                 attributes_dict=attributes_dict,
             )
+
+        try:
+            return _run_process_record()
         except c.EXC_RUNTIME_TYPE as e:
             error_msg: str = f"Error processing OU record: {e}"
             logger.exception(error_msg)
