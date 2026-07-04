@@ -193,55 +193,78 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def run_cli(settings: str | None = None) -> None:
         """Process Singer JSONL; echo STATE lines to stdout."""
         try:
-            cfg: t.TargetLdap.SettingsPayload = (
-                FlextTargetLdap._load_config_from_file(settings) if settings else {}
-            )
-            validated_settings = FlextTargetLdapSettings.model_validate(cfg)
-            current_stream: str | None = None
-            api = FlextTargetLdapClient(validated_settings)
-            seen_dns: set[str] = set()
-            for line in sys.stdin:
-                try:
-                    raw = t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
-                    msg_type = raw.get("type")
-                    if msg_type == "STATE":
-                        FlextTargetLdap.logger.debug(line.strip())
-                        continue
-                    if msg_type == "SCHEMA":
-                        raw_stream = raw.get("stream")
-                        current_stream = (
-                            str(raw_stream) if raw_stream is not None else None
-                        )
-                        continue
-                    if msg_type != "RECORD":
-                        continue
-                    record_data = raw.get("record", {})
-                    raw_stream = raw.get("stream")
-                    stream = (
-                        str(raw_stream)
-                        if raw_stream is not None
-                        else (current_stream or "users")
-                    )
-                    if not isinstance(record_data, Mapping):
-                        continue
-                    normalized_record: t.TargetLdap.MutableRecordPayload = {}
-                    for key, value in record_data.items():
-                        normalized_record[key] = value
-                    FlextTargetLdap._process_record_message(
-                        normalized_record,
-                        stream,
-                        validated_settings,
-                        api,
-                        seen_dns,
-                    )
-                except c.Meltano.SINGER_SAFE_EXCEPTIONS:
-                    FlextTargetLdap.logger.exception("Malformed input line failed")
-                    raise
+            FlextTargetLdap._run_cli(settings)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS:
             FlextTargetLdap.logger.exception("Unexpected error in CLI execution")
             raise
 
     cli: ClassVar[Callable[..., None]] = run_cli
+
+    @staticmethod
+    def _run_cli(settings: str | None) -> None:
+        """Run target CLI processing without owning the exception boundary."""
+        cfg: t.TargetLdap.SettingsPayload = (
+            FlextTargetLdap._load_config_from_file(settings) if settings else {}
+        )
+        validated_settings = FlextTargetLdapSettings.model_validate(cfg)
+        current_stream: str | None = None
+        api = FlextTargetLdapClient(validated_settings)
+        seen_dns: set[str] = set()
+        for line in sys.stdin:
+            current_stream = FlextTargetLdap._process_input_line(
+                line,
+                current_stream,
+                validated_settings,
+                api,
+                seen_dns,
+            )
+
+    @staticmethod
+    def _process_input_line(
+        line: str,
+        current_stream: str | None,
+        settings: FlextTargetLdapSettings,
+        api: FlextTargetLdapClient,
+        seen_dns: set[str],
+    ) -> str | None:
+        """Process one Singer input line and return the current stream."""
+        raw = FlextTargetLdap._parse_input_line(line)
+        msg_type = raw.get("type")
+        if msg_type == "STATE":
+            FlextTargetLdap.logger.debug(line.strip())
+            return current_stream
+        if msg_type == "SCHEMA":
+            raw_stream = raw.get("stream")
+            return str(raw_stream) if raw_stream is not None else None
+        if msg_type != "RECORD":
+            return current_stream
+        record_data = raw.get("record", {})
+        raw_stream = raw.get("stream")
+        stream = (
+            str(raw_stream) if raw_stream is not None else (current_stream or "users")
+        )
+        if not isinstance(record_data, Mapping):
+            return current_stream
+        normalized_record: t.TargetLdap.MutableRecordPayload = {}
+        for key, value in record_data.items():
+            normalized_record[key] = value
+        FlextTargetLdap._process_record_message(
+            normalized_record,
+            stream,
+            settings,
+            api,
+            seen_dns,
+        )
+        return current_stream
+
+    @staticmethod
+    def _parse_input_line(line: str) -> t.JsonMapping:
+        """Parse one Singer input line."""
+        try:
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS:
+            FlextTargetLdap.logger.exception("Malformed input line failed")
+            raise
 
 
 target_ldap = FlextTargetLdap
