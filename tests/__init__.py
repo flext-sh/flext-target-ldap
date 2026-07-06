@@ -12,20 +12,61 @@ from flext_core.lazy import (
 )
 
 if TYPE_CHECKING:
-    from flext_tests import d, e, h, r, td, tf, tk, tm, tv, x
+    from flext_tests import (
+        d as d,
+        e as e,
+        h as h,
+        r as r,
+        td as td,
+        tf as tf,
+        tk as tk,
+        tm as tm,
+        tv as tv,
+        x as x,
+    )
 
-    from tests.base import TestsFlextTargetLdapServiceBase, s
-    from tests.constants import TestsFlextTargetLdapConstants, c
-    from tests.models import TestsFlextTargetLdapModels, m
-    from tests.protocols import TestsFlextTargetLdapProtocols, p
-    from tests.settings import TestsFlextTargetLdapSettings
-    from tests.typings import TestsFlextTargetLdapTypes, t
-    from tests.unit.test_client import TestsFlextTargetLdapClient
-    from tests.unit.test_integration import TestsFlextTargetLdapIntegration
-    from tests.unit.test_sinks import TestsFlextTargetLdapSinks
-    from tests.unit.test_target import TestsFlextTargetLdapTarget
-    from tests.unit.test_transformation import TestsFlextTargetLdapTransformation
-    from tests.utilities import TestsFlextTargetLdapUtilities, u
+    from tests.base import (
+        TestsFlextTargetLdapServiceBase as TestsFlextTargetLdapServiceBase,
+        s as s,
+    )
+    from tests.constants import (
+        TestsFlextTargetLdapConstants as TestsFlextTargetLdapConstants,
+        c as c,
+    )
+    from tests.models import (
+        TestsFlextTargetLdapModels as TestsFlextTargetLdapModels,
+        m as m,
+    )
+    from tests.protocols import (
+        TestsFlextTargetLdapProtocols as TestsFlextTargetLdapProtocols,
+        p as p,
+    )
+    from tests.settings import (
+        TestsFlextTargetLdapSettings as TestsFlextTargetLdapSettings,
+    )
+    from tests.typings import (
+        TestsFlextTargetLdapTypes as TestsFlextTargetLdapTypes,
+        t as t,
+    )
+    from tests.unit.test_client import (
+        TestsFlextTargetLdapClient as TestsFlextTargetLdapClient,
+    )
+    from tests.unit.test_integration import (
+        TestsFlextTargetLdapIntegration as TestsFlextTargetLdapIntegration,
+    )
+    from tests.unit.test_sinks import (
+        TestsFlextTargetLdapSinks as TestsFlextTargetLdapSinks,
+    )
+    from tests.unit.test_target import (
+        TestsFlextTargetLdapTarget as TestsFlextTargetLdapTarget,
+    )
+    from tests.unit.test_transformation import (
+        TestsFlextTargetLdapTransformation as TestsFlextTargetLdapTransformation,
+    )
+    from tests.utilities import (
+        TestsFlextTargetLdapUtilities as TestsFlextTargetLdapUtilities,
+        u as u,
+    )
 _LAZY_IMPORTS = merge_lazy_imports(
     (".unit",),
     build_lazy_import_map(

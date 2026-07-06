@@ -22,15 +22,37 @@ from flext_target_ldap.__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import d, e, h, r, s, x
-    from flext_target_ldap.api import FlextTargetLdap, target_ldap
-    from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
-    from flext_target_ldap.constants import FlextTargetLdapConstants, c
-    from flext_target_ldap.models import FlextTargetLdapModels, m
-    from flext_target_ldap.protocols import FlextTargetLdapProtocols, p
-    from flext_target_ldap.settings import FlextTargetLdapSettings
-    from flext_target_ldap.typings import FlextTargetLdapTypes, t
-    from flext_target_ldap.utilities import FlextTargetLdapUtilities, u
+    from flext_ldap import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_target_ldap.api import (
+        FlextTargetLdap as FlextTargetLdap,
+        target_ldap as target_ldap,
+    )
+    from flext_target_ldap.application.orchestrator import (
+        FlextTargetLdapOrchestrator as FlextTargetLdapOrchestrator,
+    )
+    from flext_target_ldap.constants import (
+        FlextTargetLdapConstants as FlextTargetLdapConstants,
+        c as c,
+    )
+    from flext_target_ldap.models import (
+        FlextTargetLdapModels as FlextTargetLdapModels,
+        m as m,
+    )
+    from flext_target_ldap.protocols import (
+        FlextTargetLdapProtocols as FlextTargetLdapProtocols,
+        p as p,
+    )
+    from flext_target_ldap.settings import (
+        FlextTargetLdapSettings as FlextTargetLdapSettings,
+    )
+    from flext_target_ldap.typings import (
+        FlextTargetLdapTypes as FlextTargetLdapTypes,
+        t as t,
+    )
+    from flext_target_ldap.utilities import (
+        FlextTargetLdapUtilities as FlextTargetLdapUtilities,
+        u as u,
+    )
 _LAZY_IMPORTS = merge_lazy_imports(
     (".application",),
     build_lazy_import_map(
