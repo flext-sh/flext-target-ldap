@@ -23,7 +23,7 @@ from flext_target_ldap.__version__ import (
 
 if TYPE_CHECKING:
     from flext_ldap import d, e, h, r, s, x
-    from flext_target_ldap.api import FlextTargetLdap
+    from flext_target_ldap.api import FlextTargetLdap, target_ldap
     from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
     from flext_target_ldap.models import FlextTargetLdapModels, m

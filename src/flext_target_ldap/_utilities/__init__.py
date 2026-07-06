@@ -12,6 +12,10 @@ if TYPE_CHECKING:
     from flext_target_ldap._utilities.service_runtime import (
         FlextTargetLdapServiceRuntime,
     )
+    from flext_target_ldap._utilities.settings import (
+        create_default_ldap_target_config,
+        validate_ldap_target_config,
+    )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
         ".client": ("FlextTargetLdapClient",),
