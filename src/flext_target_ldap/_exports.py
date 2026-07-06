@@ -3,14 +3,50 @@
 
 from __future__ import annotations
 
-from flext_core.lazy import merge_lazy_imports
-from flext_target_ldap._exports_lazy_part_01 import (
-    FLEXT_TARGET_LDAP_LAZY_IMPORTS_PART_01,
-)
+from flext_core.lazy import build_lazy_import_map, merge_lazy_imports
 
-_LOCAL_LAZY_IMPORTS = {
-    **FLEXT_TARGET_LDAP_LAZY_IMPORTS_PART_01,
-}
+_LOCAL_LAZY_IMPORTS = build_lazy_import_map(
+    {
+        "._constants": ("_constants",),
+        "._models": ("_models",),
+        "._utilities": ("_utilities",),
+        ".api": (
+            "FlextTargetLdap",
+            "target_ldap",
+        ),
+        ".application": ("application",),
+        ".application.orchestrator": ("FlextTargetLdapOrchestrator",),
+        ".constants": (
+            "FlextTargetLdapConstants",
+            "c",
+        ),
+        ".models": (
+            "FlextTargetLdapModels",
+            "m",
+        ),
+        ".protocols": (
+            "FlextTargetLdapProtocols",
+            "p",
+        ),
+        ".settings": ("FlextTargetLdapSettings",),
+        ".typings": (
+            "FlextTargetLdapTypes",
+            "t",
+        ),
+        ".utilities": (
+            "FlextTargetLdapUtilities",
+            "u",
+        ),
+        "flext_core._root_typing_parts.facades": (
+            "d",
+            "e",
+            "h",
+            "r",
+            "s",
+            "x",
+        ),
+    },
+)
 
 FLEXT_TARGET_LDAP_LAZY_IMPORTS = merge_lazy_imports(
     (".application",),
