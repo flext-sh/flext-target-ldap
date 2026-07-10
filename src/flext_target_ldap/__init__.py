@@ -42,9 +42,6 @@ if TYPE_CHECKING:
         FlextTargetLdapProtocols as FlextTargetLdapProtocols,
         p as p,
     )
-    from flext_target_ldap.settings import (
-        FlextTargetLdapSettings as FlextTargetLdapSettings,
-    )
     from flext_target_ldap.typings import (
         FlextTargetLdapTypes as FlextTargetLdapTypes,
         t as t,
@@ -57,6 +54,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
     (".application",),
     build_lazy_import_map(
         {
+            "._settings": ("FlextTargetLdapSettings", "settings"),
             ".api": (
                 "FlextTargetLdap",
                 "target_ldap",
@@ -74,7 +72,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetLdapProtocols",
                 "p",
             ),
-            ".settings": ("FlextTargetLdapSettings",),
             ".typings": (
                 "FlextTargetLdapTypes",
                 "t",
@@ -117,12 +114,13 @@ _LAZY_IMPORTS = merge_lazy_imports(
 
 
 __all__: tuple[str, ...] = (
+    "FlextTargetLdapSettings",
+    "settings",
     "FlextTargetLdap",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
     "FlextTargetLdapOrchestrator",
     "FlextTargetLdapProtocols",
-    "FlextTargetLdapSettings",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
     "__author__",

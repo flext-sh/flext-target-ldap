@@ -59,7 +59,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
         """The or create orchestrator."""
         if self._orchestrator is None:
-            settings = FlextTargetLdapSettings.model_validate(self.settings)
+            settings = FlextTargetLdapSettings.model_validate(settings)
             self._orchestrator = FlextTargetLdapOrchestrator(settings)
         return self._orchestrator
 
@@ -101,10 +101,10 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         self.logger.info("Orchestrator initialized successfully")
         self._container = self._container_type.shared()
         self.logger.info("DI container initialized successfully")
-        validated_settings = FlextTargetLdapSettings.model_validate(self.settings)
+        validated_settings = FlextTargetLdapSettings.model_validate(settings)
         self.logger.info(
             "LDAP target setup completed for host: %s",
-            validated_settings.connection.host,
+            validated_settings.TargetLdap.host,
         )
 
     def teardown(self) -> None:
@@ -119,7 +119,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        _ = FlextTargetLdapSettings.model_validate(self.settings)
+        _ = FlextTargetLdapSettings.model_validate(settings)
         self.logger.info("LDAP target configuration validated successfully")
 
     @staticmethod
