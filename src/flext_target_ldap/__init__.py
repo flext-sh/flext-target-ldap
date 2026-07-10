@@ -23,6 +23,10 @@ from flext_target_ldap.__version__ import (
 
 if TYPE_CHECKING:
     from flext_ldap import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_target_ldap._settings import (
+        FlextTargetLdapSettings as FlextTargetLdapSettings,
+        settings as settings,
+    )
     from flext_target_ldap.api import (
         FlextTargetLdap as FlextTargetLdap,
         target_ldap as target_ldap,
