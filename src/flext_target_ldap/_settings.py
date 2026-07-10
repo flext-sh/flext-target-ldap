@@ -18,10 +18,10 @@ from typing import TYPE_CHECKING, Annotated
 from pydantic import BaseModel, Field
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextSettings
+from flext_meltano import FlextMeltanoSettings
 
 
-class FlextTargetLdapSettings(FlextSettings):
+class FlextTargetLdapSettings(FlextMeltanoSettings):
     """LDAP target settings; all project fields under ``settings.TargetLdap.*``."""
 
     model_config = SettingsConfigDict(
@@ -49,10 +49,16 @@ class FlextTargetLdapSettings(FlextSettings):
         ]
         search_scope: Annotated[
             str,
-            Field(default="SUBTREE", description="Search scope (BASE/ONELEVEL/SUBTREE)"),
+            Field(
+                default="SUBTREE", description="Search scope (BASE/ONELEVEL/SUBTREE)"
+            ),
         ]
-        connect_timeout: Annotated[int, Field(default=30, description="Connect timeout (s)")]
-        receive_timeout: Annotated[int, Field(default=30, description="Receive timeout (s)")]
+        connect_timeout: Annotated[
+            int, Field(default=30, description="Connect timeout (s)")
+        ]
+        receive_timeout: Annotated[
+            int, Field(default=30, description="Receive timeout (s)")
+        ]
         batch_size: Annotated[int, Field(default=1000, description="Entries per batch")]
         max_records: Annotated[
             int | None,
@@ -72,7 +78,9 @@ class FlextTargetLdapSettings(FlextSettings):
         ]
         attribute_mapping: Annotated[
             dict[str, str],
-            Field(default_factory=dict, description="Source field -> LDAP attribute map"),
+            Field(
+                default_factory=dict, description="Source field -> LDAP attribute map"
+            ),
         ]
         object_classes: Annotated[
             list[str],
