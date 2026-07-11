@@ -39,7 +39,6 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    settings: t.TargetLdap.SettingsPayload
     _container_type: ClassVar[p.ContainerType] = FlextContainer
     logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
@@ -59,7 +58,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
         """The or create orchestrator."""
         if self._orchestrator is None:
-            settings = FlextTargetLdapSettings.model_validate(settings)
+            settings = FlextTargetLdapSettings.model_validate(self.settings)
             self._orchestrator = FlextTargetLdapOrchestrator(settings)
         return self._orchestrator
 
@@ -101,7 +100,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         self.logger.info("Orchestrator initialized successfully")
         self._container = self._container_type.shared()
         self.logger.info("DI container initialized successfully")
-        validated_settings = FlextTargetLdapSettings.model_validate(settings)
+        validated_settings = FlextTargetLdapSettings.model_validate(self.settings)
         self.logger.info(
             "LDAP target setup completed for host: %s",
             validated_settings.TargetLdap.host,
@@ -119,7 +118,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        _ = FlextTargetLdapSettings.model_validate(settings)
+        _ = FlextTargetLdapSettings.model_validate(self.settings)
         self.logger.info("LDAP target configuration validated successfully")
 
     @staticmethod
@@ -155,7 +154,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def _process_record_message(
         record: t.TargetLdap.RecordPayload,
         stream: str,
-        cfg: FlextTargetLdapSettings,
+        cfg: t.TargetLdap.SettingsPayload,
         api: FlextTargetLdapClient,
         seen_dns: set[str],
     ) -> None:
@@ -171,7 +170,13 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         if object_classes is None:
             object_classes = attributes.pop("objectclass", None)
         if not dn_text.strip():
-            dn = FlextTargetLdap._construct_dn(stream, record, cfg.base_dn)
+            base_dn_value = cfg.get(c.TargetLdap.KEY_BASE_DN)
+            base_dn = (
+                base_dn_value
+                if isinstance(base_dn_value, str)
+                else c.TargetLdap.DEFAULT_BASE_DN
+            )
+            dn = FlextTargetLdap._construct_dn(stream, record, base_dn)
         else:
             dn = dn_text
         if record.get("_sdc_deleted_at"):
@@ -206,15 +211,16 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         cfg: t.TargetLdap.SettingsPayload = (
             FlextTargetLdap._load_config_from_file(settings) if settings else {}
         )
-        validated_settings = FlextTargetLdapSettings.model_validate(cfg)
+        # NOTE (multi-agent): the Singer config payload is the flat public
+        # contract; the client resolves its connection section internally.
+        api = FlextTargetLdapClient(cfg)
         current_stream: str | None = None
-        api = FlextTargetLdapClient(validated_settings)
         seen_dns: set[str] = set()
         for line in sys.stdin:
             current_stream = FlextTargetLdap._process_input_line(
                 line,
                 current_stream,
-                validated_settings,
+                cfg,
                 api,
                 seen_dns,
             )
@@ -223,7 +229,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def _process_input_line(
         line: str,
         current_stream: str | None,
-        settings: FlextTargetLdapSettings,
+        settings: t.TargetLdap.SettingsPayload,
         api: FlextTargetLdapClient,
         seen_dns: set[str],
     ) -> str | None:
