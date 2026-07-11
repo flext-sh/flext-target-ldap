@@ -55,6 +55,8 @@ class FlextTargetLdapSink:
 class FlextTargetLdapTarget:
     """Base Target class for Singer protocol compatibility."""
 
+    settings: t.TargetLdap.SettingsPayload
+
     @override
     def __init__(
         self,
@@ -62,7 +64,7 @@ class FlextTargetLdapTarget:
         **kwargs: t.Scalar,
     ) -> None:
         """Initialize target with configuration."""
-        settings: t.TargetLdap.SettingsPayload = settings
+        self.settings = settings
 
     def process_record(
         self,
