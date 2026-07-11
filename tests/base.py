@@ -13,11 +13,8 @@ from tests.settings import TestsFlextTargetLdapSettings
 class TestsFlextTargetLdapServiceBase(tests_s):
     """Target LDAP test service base with source and test settings namespaces."""
 
-    @classmethod
-    @override
-    def fetch_settings(cls) -> TestsFlextTargetLdapSettings:
-        """Return the typed target LDAP+Tests settings singleton."""
-
+    # NOTE (multi-agent): flext-tests owns fetch_settings; this project
+    # declares only its more-specific bootstrap settings type.
     @classmethod
     @override
     def _runtime_bootstrap_options(cls) -> m.RuntimeBootstrapOptions:
