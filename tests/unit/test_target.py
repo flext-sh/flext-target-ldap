@@ -12,6 +12,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from flext_tests import r
+from pydantic import BaseModel
 
 from flext_target_ldap import FlextTargetLdap
 from flext_target_ldap._models.sinks import (
@@ -21,7 +22,7 @@ from flext_target_ldap._models.sinks import (
     FlextTargetLdapUsersSink,
 )
 from tests.base import s
-from tests.models import m
+from tests.settings import TestsFlextTargetLdapSettings
 from tests.utilities import u
 
 if TYPE_CHECKING:
@@ -59,7 +60,8 @@ class TestsFlextTargetLdapTarget:
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
 
-        assert isinstance(settings.Tests, m.SettingsValue)
+        assert isinstance(settings.Tests, BaseModel)
+        assert isinstance(settings, TestsFlextTargetLdapSettings)
         assert settings.base_dn
 
     def test_dn_template_processing(
