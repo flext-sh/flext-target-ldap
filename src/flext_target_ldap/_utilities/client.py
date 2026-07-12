@@ -286,7 +286,7 @@ class FlextTargetLdapClient:
         dn: str,
         attributes: t.StrSequence | None = None,
     ) -> p.Result[m.Ldif.Entry | None]:
-        """The LDAP entry using flext-ldap API."""
+        """Fetch the LDAP entry using the flext-ldap API."""
         try:
             if not dn:
                 return r[m.Ldif.Entry | None].fail("DN required")
