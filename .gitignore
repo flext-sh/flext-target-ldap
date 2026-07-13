@@ -83,9 +83,6 @@ secrets.yml
 # PROJECT-SPECIFIC RULES: flext-target-ldap
 # ============================================================================
 
-*.py[cod]
-*$py.class
-*.pyd
 *.so
 .Python
 .installed.cfg
@@ -175,10 +172,7 @@ LINT_CORRECTIONS*.md
 *.ai.txt
 *.ai.json
 *.ai.log
-*.py[cod]
-*$py.class
 *.so
-*.pyd
 ENV/
 .Python
 coverage.xml
@@ -286,10 +280,6 @@ Desktop.ini
 # ============================================================================
 # COMMON PATTERNS: Artifacts inside allowed directories
 # ============================================================================
-**/__pycache__/
-**/*.pyc
-**/*.pyo
-**/*.pyd
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -353,7 +343,6 @@ staging/
 .direnv/
 .reports/
 .venv/
-__pycache__/
 base.mk
 !/config/
 !/config/**
@@ -367,6 +356,8 @@ base.mk
 !/examples/**
 !/scripts/
 !/scripts/**
+**/__pycache__/
+**/*.py[cod]
 **/.env
 **/*.key
 **/*.pem
