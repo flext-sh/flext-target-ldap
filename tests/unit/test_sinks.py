@@ -10,9 +10,9 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
+from flext_tests import tm
 
 from flext_target_ldap._models.sinks import (
-from flext_tests import tm
     FlextTargetLdapBaseSink as LDAPBaseSink,
     FlextTargetLdapGroupsSink as GroupsSink,
     FlextTargetLdapOrganizationalUnitsSink as OrganizationalUnitsSink,
