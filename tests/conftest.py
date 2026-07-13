@@ -14,10 +14,10 @@ import pytest
 from flext_tests import reset_settings as _shared_reset_settings
 
 from flext_cli import u as cli_u
-from tests.utilities import u
+from tests import u
 
 if TYPE_CHECKING:
-    from tests.typings import t
+    from tests import t
 
 reset_settings = _shared_reset_settings
 

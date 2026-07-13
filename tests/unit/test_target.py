@@ -21,12 +21,12 @@ from flext_target_ldap._models.sinks import (
     FlextTargetLdapSink,
     FlextTargetLdapUsersSink,
 )
+from tests import u
 from tests.base import s
 from tests.settings import TestsFlextTargetLdapSettings
-from tests.utilities import u
 
 if TYPE_CHECKING:
-    from tests.typings import t
+    from tests import t
 
 
 class TestsFlextTargetLdapTarget:

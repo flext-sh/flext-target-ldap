@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         MutableSequence,
     )
 
-    from tests.typings import t
+    from tests import t
 
 
 class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):

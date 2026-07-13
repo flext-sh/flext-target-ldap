@@ -7,10 +7,10 @@ import pytest
 from flext_tests import r
 
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from tests.models import m
+from tests import m
 
 if TYPE_CHECKING:
-    from tests.typings import t
+    from tests import t
 
 
 @pytest.fixture

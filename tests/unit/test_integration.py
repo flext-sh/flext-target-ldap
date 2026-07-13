@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 from flext_target_ldap import FlextTargetLdap
-from tests.utilities import u
+from tests import u
 
 if TYPE_CHECKING:
     from collections.abc import (
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     )
     from pathlib import Path
 
-    from tests.typings import t
+    from tests import t
 
 
 def _write_jsonl(path: Path, events: t.SequenceOf[Mapping[str, object]]) -> None:

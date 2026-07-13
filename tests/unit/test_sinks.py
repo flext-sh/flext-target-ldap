@@ -19,7 +19,7 @@ from flext_target_ldap._models.sinks import (
 )
 
 if TYPE_CHECKING:
-    from tests.typings import t
+    from tests import t
 
 
 @pytest.fixture
