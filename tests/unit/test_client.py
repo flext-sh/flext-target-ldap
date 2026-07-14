@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from flext_tests import r
+from flext_tests import r, tm
 
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
 from tests import m
@@ -24,15 +24,15 @@ class TestsFlextTargetLdapClient:
     """Behavior contract for test_client."""
 
     def test_client_initialization(self, client: FlextTargetLdapClient) -> None:
-        assert client.host == "test.ldap.com"
-        assert client.port == 389
-        assert client.bind_dn == "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
-        assert client.password == "test_password"
+        tm.that(client.host, eq="test.ldap.com")
+        tm.that(client.port, eq=389)
+        tm.that(client.bind_dn, eq="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com")
+        tm.that(client.password, eq="test_password")
         assert not client.use_ssl
-        assert client.timeout == 30
+        tm.that(client.timeout, eq=30)
 
     def test_server_uri_construction(self, client: FlextTargetLdapClient) -> None:
-        assert client.server_uri == "ldap://test.ldap.com:389"
+        tm.that(client.server_uri, eq="ldap://test.ldap.com:389")
         ssl_client = FlextTargetLdapClient(
             settings={
                 "host": "test.ldap.com",
@@ -43,7 +43,7 @@ class TestsFlextTargetLdapClient:
                 "timeout": 30,
             },
         )
-        assert ssl_client.server_uri == "ldaps://test.ldap.com:389"
+        tm.that(ssl_client.server_uri, eq="ldaps://test.ldap.com:389")
 
     def test_connect_delegates_to_flext_ldap_api(
         self,
@@ -52,8 +52,8 @@ class TestsFlextTargetLdapClient:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
         result = client.connect()
-        assert result.success
-        assert result.value is True
+        tm.ok(result)
+        tm.that(result.value, eq=True)
         client._api.connect.assert_called_once_with(client.settings)
         client._api.disconnect.assert_called_once()
 
@@ -63,8 +63,8 @@ class TestsFlextTargetLdapClient:
     ) -> None:
         client._api = MagicMock()
         result = client.disconnect()
-        assert result.success
-        assert result.value is True
+        tm.ok(result)
+        tm.that(result.value, eq=True)
         client._api.disconnect.assert_called_once_with()
 
     def test_add_entry_uses_real_ldif_entry(
@@ -79,13 +79,15 @@ class TestsFlextTargetLdapClient:
             object_classes=["inetOrgPerson", "person"],
             attributes={"cn": "Test User", "sn": "User"},
         )
-        assert result.success
-        assert result.value is True
+        tm.ok(result)
+        tm.that(result.value, eq=True)
         client._api.connect.assert_called_once_with(client.settings)
         client._api.add.assert_called_once()
         entry = client._api.add.call_args.args[0]
-        assert entry.dn.value == "uid=test,dc=test,dc=com"
-        assert entry.attributes.attributes["objectClass"] == ["inetOrgPerson", "person"]
+        tm.that(entry.dn.value, eq="uid=test,dc=test,dc=com")
+        tm.that(
+            entry.attributes.attributes["objectClass"], eq=["inetOrgPerson", "person"]
+        )
         client._api.disconnect.assert_called_once()
 
     def test_modify_entry_uses_real_modify_changes(
@@ -99,8 +101,8 @@ class TestsFlextTargetLdapClient:
             dn="uid=test,dc=test,dc=com",
             changes={"mail": "new@test.com", "telephoneNumber": "123-456"},
         )
-        assert result.success
-        assert result.value is True
+        tm.ok(result)
+        tm.that(result.value, eq=True)
         client._api.modify.assert_called_once_with(
             "uid=test,dc=test,dc=com",
             {
@@ -118,8 +120,8 @@ class TestsFlextTargetLdapClient:
         client._api.connect.return_value = r[bool].ok(True)
         client._api.delete.return_value = MagicMock(success=True, error=None)
         result = client.delete_entry("uid=test,dc=test,dc=com")
-        assert result.success
-        assert result.value is True
+        tm.ok(result)
+        tm.that(result.value, eq=True)
         client._api.delete.assert_called_once_with("uid=test,dc=test,dc=com")
         client._api.disconnect.assert_called_once()
 
@@ -147,15 +149,15 @@ class TestsFlextTargetLdapClient:
             search_filter="(uid=test)",
             attributes=["cn"],
         )
-        assert result.success
-        assert result.value is not None
-        assert len(result.value) == 1
+        tm.ok(result)
+        tm.that(result.value, none=False)
+        tm.that(len(result.value), eq=1)
         entry = result.value[0]
-        assert isinstance(entry, m.Ldif.Entry)
-        assert entry.dn is not None
-        assert entry.attributes is not None
-        assert entry.dn.value == "uid=test,dc=test,dc=com"
-        assert entry.attributes.attributes == {"cn": ["Test User"]}
+        tm.that(entry, is_=m.Ldif.Entry)
+        tm.that(entry.dn, none=False)
+        tm.that(entry.attributes, none=False)
+        tm.that(entry.dn.value, eq="uid=test,dc=test,dc=com")
+        tm.that(entry.attributes.attributes, eq={"cn": ["Test User"]})
 
     def test_search_entry_disconnects_after_search(
         self,
@@ -170,5 +172,5 @@ class TestsFlextTargetLdapClient:
             ),
         )
         result = client.search_entry("dc=test,dc=com")
-        assert result.success
+        tm.ok(result)
         client._api.disconnect.assert_called_once()

@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from flext_tests import tm
 
 from flext_target_ldap import FlextTargetLdap
 from tests import u
@@ -74,7 +75,7 @@ def _invoke_target_cli(config_path: Path, input_path: Path) -> None:
     input_text = input_path.read_text(encoding="utf-8")
     with patch("sys.stdin", io.StringIO(input_text)):
         cli_fn = FlextTargetLdap.cli
-        assert cli_fn is not None
+        tm.that(cli_fn, none=False)
         cli_fn(settings=str(config_path))
 
 
@@ -200,7 +201,7 @@ class TestsFlextTargetLdapIntegration:
         add_calls = mock_conn.add_entry.call_args_list
         assert add_calls
         actual_dn = add_calls[0][0][0]
-        assert actual_dn == "uid=testuser,dc=test,dc=com"
+        tm.that(actual_dn, eq="uid=testuser,dc=test,dc=com")
 
     def test_self(self, runner: Mock, tmp_path: Path) -> None:
         bad_config = {"invalid": "settings"}
@@ -216,7 +217,7 @@ class TestsFlextTargetLdapIntegration:
             ["--config", str(config_path)],
             input='{"type": "RECORD", "stream": "test", "record": {}}',
         )
-        assert result.exit_code != 0
+        tm.that(result.exit_code, ne=0)
 
     def test_multi_stream_handling(
         self,

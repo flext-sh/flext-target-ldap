@@ -6,6 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_tests import tm
+
 from tests import m
 
 
@@ -19,7 +21,7 @@ class TestsFlextTargetLdapTransformation:
             replacement="person",
             enabled=True,
         )
-        assert rule.name == "test_rule"
+        tm.that(rule.name, eq="test_rule")
         assert rule.enabled
-        assert rule.pattern == "orclUser"
-        assert rule.replacement == "person"
+        tm.that(rule.pattern, eq="orclUser")
+        tm.that(rule.replacement, eq="person")

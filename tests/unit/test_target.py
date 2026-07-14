@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from flext_tests import r
+from flext_tests import r, tm
 from pydantic import BaseModel
 
 from flext_target_ldap import FlextTargetLdap
@@ -54,14 +54,14 @@ class TestsFlextTargetLdapTarget:
         mock_ldap_config: t.TargetLdap.SettingsPayload,
     ) -> None:
         target = FlextTargetLdap(settings=mock_ldap_config)
-        assert target.name == "target-ldap"
-        assert target.settings == mock_ldap_config
+        tm.that(target.name, eq="target-ldap")
+        tm.that(target.settings, eq=mock_ldap_config)
 
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
 
-        assert isinstance(settings.Tests, BaseModel)
-        assert isinstance(settings, TestsFlextTargetLdapSettings)
+        tm.that(settings.Tests, is_=BaseModel)
+        tm.that(settings, is_=TestsFlextTargetLdapSettings)
         assert settings.base_dn
 
     def test_dn_template_processing(
@@ -75,10 +75,10 @@ class TestsFlextTargetLdapTarget:
         }
         target = FlextTargetLdap(settings=updated_settings)
         sink = target.get_sink("users")
-        assert isinstance(sink, FlextTargetLdapUsersSink)
+        tm.that(sink, is_=FlextTargetLdapUsersSink)
         dn_result = sink.build_dn({"uid": "jdoe"})
-        assert dn_result.success
-        assert dn_result.value == "uid=jdoe,ou=people,dc=test,dc=com"
+        tm.ok(dn_result)
+        tm.that(dn_result.value, eq="uid=jdoe,ou=people,dc=test,dc=com")
 
     def test_object_classes_processing(
         self,
@@ -90,9 +90,9 @@ class TestsFlextTargetLdapTarget:
         }
         target = FlextTargetLdap(settings=updated_settings)
         sink = target.get_sink("users")
-        assert isinstance(sink, FlextTargetLdapUsersSink)
+        tm.that(sink, is_=FlextTargetLdapUsersSink)
         object_classes = sink.resolve_object_classes({})
-        assert object_classes == ["customPerson", "top"]
+        tm.that(object_classes, eq=["customPerson", "top"])
 
     def test_process_record(
         self,
@@ -103,10 +103,10 @@ class TestsFlextTargetLdapTarget:
         mock_client.add_entry.return_value = r[bool].ok(value=True)
         target = FlextTargetLdap(settings=mock_ldap_config)
         sink = target.get_sink("users")
-        assert isinstance(sink, FlextTargetLdapBaseSink)
+        tm.that(sink, is_=FlextTargetLdapBaseSink)
         sink.client = mock_client
         result = sink.process_record(sample_user_record, {})
-        assert result.success
+        tm.ok(result)
         mock_client.add_entry.assert_called_once()
 
     def test_process_delete_record(
@@ -117,14 +117,14 @@ class TestsFlextTargetLdapTarget:
         mock_client.add_entry.return_value = r[bool].fail("Entry already exists")
         target = FlextTargetLdap(settings=mock_ldap_config)
         sink = target.get_sink("users")
-        assert isinstance(sink, FlextTargetLdapBaseSink)
+        tm.that(sink, is_=FlextTargetLdapBaseSink)
         sink.client = mock_client
         record: t.TargetLdap.RecordPayload = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
             "_sdc_deleted_at": "2024-01-15T10:30:00Z",
         }
         result = sink.process_record(record, {})
-        assert result.failure
+        tm.fail(result)
         assert result.error and "No username found" in result.error
 
     def test_sink_process_record_delegates_to_target_handler(self) -> None:
@@ -136,5 +136,5 @@ class TestsFlextTargetLdapTarget:
             key_properties=["id"],
         )
         result = sink.process_record({"id": "42"}, {"batch": "1"})
-        assert result.success
-        assert target.calls == [({"id": "42"}, {"batch": "1"})]
+        tm.ok(result)
+        tm.that(target.calls, eq=[({"id": "42"}, {"batch": "1"})])
