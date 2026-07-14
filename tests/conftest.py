@@ -7,17 +7,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
 from flext_tests import reset_settings as _shared_reset_settings
 
 from flext_cli import u as cli_u
-from tests import u
-
-if TYPE_CHECKING:
-    from tests import t
+from tests import t, u
 
 reset_settings = _shared_reset_settings
 

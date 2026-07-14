@@ -6,10 +6,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final
+from typing import Final
 
-if TYPE_CHECKING:
-    from flext_target_ldap import t
+from flext_target_ldap import t
 
 
 class FlextTargetLdapConstantsBase:

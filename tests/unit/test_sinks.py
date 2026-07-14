@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,9 +17,7 @@ from flext_target_ldap._models.sinks import (
     FlextTargetLdapOrganizationalUnitsSink as OrganizationalUnitsSink,
     FlextTargetLdapUsersSink as UsersSink,
 )
-
-if TYPE_CHECKING:
-    from tests import t
+from tests import t
 
 
 @pytest.fixture

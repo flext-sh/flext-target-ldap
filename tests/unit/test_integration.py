@@ -8,22 +8,17 @@ from __future__ import annotations
 
 import io
 import json as _stdlib_json
-from typing import TYPE_CHECKING
+from collections.abc import (
+    Mapping,
+)
+from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from flext_tests import tm
 
 from flext_target_ldap import FlextTargetLdap
-from tests import u
-
-if TYPE_CHECKING:
-    from collections.abc import (
-        Mapping,
-    )
-    from pathlib import Path
-
-    from tests import t
+from tests import t, u
 
 
 def _write_jsonl(path: Path, events: t.SequenceOf[Mapping[str, object]]) -> None:

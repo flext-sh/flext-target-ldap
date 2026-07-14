@@ -1,16 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
 from flext_tests import r, tm
 
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from tests import m
-
-if TYPE_CHECKING:
-    from tests import t
+from tests import m, t
 
 
 @pytest.fixture

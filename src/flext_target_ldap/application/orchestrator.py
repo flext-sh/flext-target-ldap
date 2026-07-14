@@ -36,13 +36,13 @@ class FlextTargetLdapOrchestrator:
         """
         if isinstance(settings, FlextTargetLdapSettings):
             self._typed_config = settings
-            self.settings = t.json_dict_adapter().validate_python(
+            settings = t.json_dict_adapter().validate_python(
                 settings.model_dump(mode="python"),
             )
         else:
             self._typed_config = None
             empty_settings: t.TargetLdap.SettingsPayload = {}
-            self.settings = t.json_dict_adapter().validate_python(
+            settings = t.json_dict_adapter().validate_python(
                 settings if settings is not None else empty_settings,
             )
         logger.debug("Initialized LDAP target orchestrator")
@@ -74,22 +74,6 @@ class FlextTargetLdapOrchestrator:
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             logger.exception("LDAP data loading orchestration failed")
             return r[t.HeaderMapping].fail_op("Data loading orchestration", e)
-
-    def validate_target_configuration(self) -> p.Result[bool]:
-        """Validate LDAP target configuration.
-
-        Returns:
-        r indicating validation success
-
-        """
-        try:
-            required_fields = ["host", "base_dn"]
-            for field in required_fields:
-                if field not in self.settings:
-                    return r[bool].fail(f"Missing required field: {field}")
-            return r[bool].ok(value=True)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            return r[bool].fail_op("Configuration validation", e)
 
 
 __all__: t.StrSequence = ("FlextTargetLdapOrchestrator",)

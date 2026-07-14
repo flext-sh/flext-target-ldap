@@ -6,19 +6,16 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, override
+from collections.abc import (
+    MutableSequence,
+)
+from typing import override
 
 from flext_tests import FlextTestsUtilities
 
 from flext_target_ldap import FlextTargetLdapUtilities, p, r
 from flext_target_ldap._models.sinks import FlextTargetLdapTarget
-
-if TYPE_CHECKING:
-    from collections.abc import (
-        MutableSequence,
-    )
-
-    from tests import t
+from tests import t
 
 
 class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
