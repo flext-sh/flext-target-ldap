@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.protocols import (
         FlextTargetLdapProtocols as FlextTargetLdapProtocols,
-        p as p,
+        p,
     )
     from flext_target_ldap.typings import (
         FlextTargetLdapTypes as FlextTargetLdapTypes,
@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     )
     from flext_target_ldap.utilities import (
         FlextTargetLdapUtilities as FlextTargetLdapUtilities,
-        u as u,
+        u,
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     (".application",),
