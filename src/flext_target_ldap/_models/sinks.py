@@ -64,7 +64,7 @@ class FlextTargetLdapTarget:
         **kwargs: t.Scalar,
     ) -> None:
         """Initialize target with configuration."""
-        settings = settings
+        self.settings = settings
 
     def process_record(
         self,
