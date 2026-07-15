@@ -59,8 +59,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
         """The or create orchestrator."""
         if self._orchestrator is None:
-            settings = FlextTargetLdapSettings.model_validate(settings)
-            self._orchestrator = FlextTargetLdapOrchestrator(settings)
+            self._orchestrator = FlextTargetLdapOrchestrator()
         return self._orchestrator
 
     @property
