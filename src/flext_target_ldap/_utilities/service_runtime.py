@@ -112,7 +112,7 @@ class FlextTargetLdapServiceRuntime:
     ) -> t.TargetLdap.MutableSchemaPayload:
         """Normalize a flat Singer schema to the LDAP runtime contract."""
         return {
-            key: u.Cli.normalize_json_value(
+            key: u.Cli.json_normalize_value(
                 str(value) if isinstance(value, Path) else value,
             )
             for key, value in schema.items()
