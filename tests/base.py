@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_tests import s as tests_s
+from flext_tests import s
 
-from flext_target_ldap import m
+from flext_target_ldap import m, p
 from tests.settings import TestsFlextTargetLdapSettings
 
 
-class TestsFlextTargetLdapServiceBase(tests_s):
+class TestsFlextTargetLdapServiceBase(s):
     """Target LDAP test service base with source and test settings namespaces."""
 
     # NOTE (multi-agent): flext-tests owns fetch_settings; this project
