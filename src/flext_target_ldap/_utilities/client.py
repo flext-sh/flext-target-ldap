@@ -23,7 +23,7 @@ class FlextTargetLdapClient:
     """
 
     logger: ClassVar = u.fetch_logger(__name__)
-    settings: m.Ldap.ConnectionConfig
+    settings: p.Ldap.ConnectionConfig
 
     @staticmethod
     def to_str_values(

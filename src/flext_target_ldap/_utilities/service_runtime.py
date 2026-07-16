@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import override
 
-from flext_meltano import m, u
+from flext_meltano import m, p, u
 from flext_target_ldap import FlextTargetLdap, p, t
 from flext_target_ldap._models.sinks import FlextTargetLdapSink
 
@@ -30,7 +30,7 @@ class FlextTargetLdapServiceRuntime:
             cls,
             *,
             runtime_sink: FlextTargetLdapSink,
-            target: m.Meltano.SingerTargetBase,
+            target: p.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.TargetLdap.MutableSchemaPayload,
             key_properties: t.StrSequence,
