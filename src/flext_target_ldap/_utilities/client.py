@@ -46,10 +46,7 @@ class FlextTargetLdapClient:
         if object_classes:
             entry_attributes["objectClass"] = list(object_classes)
         return m.Ldif.Entry(
-            dn=m.Ldif.DN(
-                value=dn,
-                metadata=m.Ldif.EntryMetadata(),
-            ),
+            dn=m.Ldif.DN(value=dn),
             attributes=m.Ldif.Attributes.model_validate({
                 "attributes": entry_attributes,
                 "attribute_metadata": {},
