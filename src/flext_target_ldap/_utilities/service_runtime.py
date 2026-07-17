@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import override
+from typing import TYPE_CHECKING, override
 
 from flext_meltano import u
 from flext_target_ldap import FlextTargetLdap, m, p, t
-from flext_target_ldap._models.sinks import FlextTargetLdapSink
+
+if TYPE_CHECKING:
+    from flext_target_ldap._models.sinks import FlextTargetLdapSink
 
 
 class FlextTargetLdapServiceRuntime:
