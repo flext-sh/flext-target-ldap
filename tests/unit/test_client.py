@@ -154,10 +154,12 @@ class TestsFlextTargetLdapClient:
         tm.that(len(result.value), eq=1)
         entry = result.value[0]
         tm.that(entry, is_=m.Ldif.Entry)
-        tm.that(entry.dn, none=False)
-        tm.that(entry.attributes, none=False)
-        tm.that(entry.dn.value, eq="uid=test,dc=test,dc=com")
-        tm.that(entry.attributes.attributes, eq={"cn": ["Test User"]})
+        dn = entry.dn
+        attributes = entry.attributes
+        assert dn is not None
+        assert attributes is not None
+        tm.that(dn.value, eq="uid=test,dc=test,dc=com")
+        tm.that(attributes.attributes, eq={"cn": ["Test User"]})
 
     def test_search_entry_disconnects_after_search(
         self,

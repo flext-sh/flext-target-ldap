@@ -59,10 +59,11 @@ class TestsFlextTargetLdapTarget:
 
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
+        assert isinstance(settings, TestsFlextTargetLdapSettings)
 
         tm.that(settings.Tests, is_=BaseModel)
         tm.that(settings, is_=TestsFlextTargetLdapSettings)
-        assert settings.base_dn
+        assert settings.TargetLdap.base_dn
 
     def test_dn_template_processing(
         self,
@@ -76,6 +77,7 @@ class TestsFlextTargetLdapTarget:
         target = FlextTargetLdap(settings=updated_settings)
         sink = target.get_sink("users")
         tm.that(sink, is_=FlextTargetLdapUsersSink)
+        assert isinstance(sink, FlextTargetLdapUsersSink)
         dn_result = sink.build_dn({"uid": "jdoe"})
         tm.ok(dn_result)
         tm.that(dn_result.value, eq="uid=jdoe,ou=people,dc=test,dc=com")
@@ -91,6 +93,7 @@ class TestsFlextTargetLdapTarget:
         target = FlextTargetLdap(settings=updated_settings)
         sink = target.get_sink("users")
         tm.that(sink, is_=FlextTargetLdapUsersSink)
+        assert isinstance(sink, FlextTargetLdapUsersSink)
         object_classes = sink.resolve_object_classes({})
         tm.that(object_classes, eq=["customPerson", "top"])
 
@@ -104,6 +107,7 @@ class TestsFlextTargetLdapTarget:
         target = FlextTargetLdap(settings=mock_ldap_config)
         sink = target.get_sink("users")
         tm.that(sink, is_=FlextTargetLdapBaseSink)
+        assert isinstance(sink, FlextTargetLdapBaseSink)
         sink.client = mock_client
         result = sink.process_record(sample_user_record, {})
         tm.ok(result)
@@ -118,6 +122,7 @@ class TestsFlextTargetLdapTarget:
         target = FlextTargetLdap(settings=mock_ldap_config)
         sink = target.get_sink("users")
         tm.that(sink, is_=FlextTargetLdapBaseSink)
+        assert isinstance(sink, FlextTargetLdapBaseSink)
         sink.client = mock_client
         record: t.TargetLdap.RecordPayload = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
