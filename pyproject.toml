@@ -116,9 +116,9 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/client-atech/flext#readme"
-Homepage = "https://github.com/client-atech/flext"
-Repository = "https://github.com/client-atech/flext"
+Documentation = "https://github.com/flext-sh/flext-target-ldap/blob/main/README.md"
+Homepage = "https://github.com/flext-sh/flext-target-ldap"
+Repository = "https://github.com/flext-sh/flext-target-ldap"
 
 # [MANAGED] codespell
 [tool.codespell]
@@ -207,27 +207,24 @@ project-excludes = [
   "**/typings/**",
   "**/vendor/**",
   "**/venv/**",
-  ".flext-deps/**",
   ".venv/**",
   "typings/**",
   "vendor/**",
 ]
-project-includes = [ "src/**/*.py*", "tests/**/*.py*" ]
+project-includes = [
+  "examples/**/*.py*",
+  "src/**/*.py*",
+  "tests/**/*.py*",
+]
 python-interpreter-path = "../.venv/bin/python"
 python-version = "3.13"
 search-path = [
   ".",
-  "../flext-cli/examples",
   "../flext-cli/src",
-  "../flext-core/examples",
-  "../flext-core/scripts",
   "../flext-core/src",
   "../flext-infra/src",
-  "../flext-infra/tmp_flow_test",
   "../flext-ldap/src",
-  "../flext-ldif/examples",
   "../flext-ldif/src",
-  "../flext-meltano/examples",
   "../flext-meltano/src",
   "../flext-tests/src",
   "src",

@@ -130,7 +130,7 @@ class TestsFlextTargetLdapSinks:
             result = ldap_base_sink.build_dn(record)
         else:
             result = ldap_base_sink.build_attributes(record)
-        tm.fail(result)
+        assert result.failure
         assert result.error is not None and expected_error in result.error
 
     def test_resolve_object_classes_default(self, ldap_base_sink: LDAPBaseSink) -> None:

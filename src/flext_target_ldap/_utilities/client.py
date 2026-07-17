@@ -77,7 +77,7 @@ class FlextTargetLdapClient:
         self,
         settings: (
             FlextTargetLdapSettings
-            | m.Ldap.ConnectionConfig
+            | p.Ldap.ConnectionConfig
             | t.TargetLdap.SettingsPayload
         ),
     ) -> None:
@@ -112,7 +112,7 @@ class FlextTargetLdapClient:
     def _resolve_connection_settings(
         settings: (
             FlextTargetLdapSettings
-            | m.Ldap.ConnectionConfig
+            | p.Ldap.ConnectionConfig
             | t.TargetLdap.SettingsPayload
         ),
     ) -> p.Ldap.ConnectionConfig:
