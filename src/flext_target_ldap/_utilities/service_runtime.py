@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import override
 
-from flext_meltano import m, p, u
-from flext_target_ldap import FlextTargetLdap, p, t
+from flext_meltano import u
+from flext_target_ldap import FlextTargetLdap, m, p, t
 from flext_target_ldap._models.sinks import FlextTargetLdapSink
 
 
