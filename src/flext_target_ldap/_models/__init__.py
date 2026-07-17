@@ -3,4 +3,6 @@
 
 from __future__ import annotations
 
-__all__: tuple[str, ...] = ()
+from .config import FlextTargetLdapConfigModels
+
+__all__: tuple[str, ...] = ("FlextTargetLdapConfigModels",)

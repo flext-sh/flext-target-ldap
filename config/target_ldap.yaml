@@ -1,0 +1,25 @@
+TargetLdap:
+  connection:
+    host: "localhost"
+    port: 389
+    use_ssl: false
+    use_tls: false
+    bind_dn: ""
+    bind_password: ""
+    timeout: 30
+    connect_timeout: 30
+    receive_timeout: 30
+    auto_bind: true
+    auto_range: true
+  search:
+    base_dn: "dc=example,dc=com"
+    filter: "(objectClass=*)"
+    scope: "SUBTREE"
+  operations:
+    batch_size: 1000
+    create_missing_entries: true
+    update_existing_entries: true
+    delete_removed_entries: false
+  object_classes:
+    default:
+      - "top"

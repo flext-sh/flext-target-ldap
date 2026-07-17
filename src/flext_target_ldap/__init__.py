@@ -20,6 +20,7 @@ from flext_target_ldap.__version__ import (
 if TYPE_CHECKING:
     from flext_ldap import d, e, h, r, s, x
 
+    from ._config import FlextTargetLdapConfig, config
     from ._settings import FlextTargetLdapSettings, settings
     from .api import FlextTargetLdap, target_ldap
     from .constants import FlextTargetLdapConstants, FlextTargetLdapConstants as c
@@ -45,6 +46,8 @@ if TYPE_CHECKING:
         r,
         s,
         x,
+        FlextTargetLdapConfig,
+        config,
         FlextTargetLdapSettings,
         settings,
         FlextTargetLdap,
@@ -53,6 +56,10 @@ if TYPE_CHECKING:
 
 
 _LAZY_MODULES: dict[str, tuple[str, ...]] = {
+    "._config": (
+        "FlextTargetLdapConfig",
+        "config",
+    ),
     "._settings": (
         "FlextTargetLdapSettings",
         "settings",
@@ -103,6 +110,7 @@ _LAZY_IMPORTS = build_lazy_import_map(
 
 _DIRECT_IMPORTS: tuple[str, ...] = (
     "FlextTargetLdap",
+    "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
     "FlextTargetLdapProtocols",
@@ -119,6 +127,7 @@ _DIRECT_IMPORTS: tuple[str, ...] = (
     "__version_info__",
     "build_lazy_import_map",
     "c",
+    "config",
     "d",
     "e",
     "h",
@@ -136,6 +145,7 @@ _DIRECT_IMPORTS: tuple[str, ...] = (
 
 __all__: tuple[str, ...] = (
     "FlextTargetLdap",
+    "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
     "FlextTargetLdapProtocols",
@@ -151,6 +161,7 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
+    "config",
     "d",
     "e",
     "h",
