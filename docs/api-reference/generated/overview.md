@@ -3,7 +3,7 @@
 # flext-target-ldap API Overview
 
 - Package: `flext_target_ldap`
-- Version: `0.12.0`
+- Version: `0.20.0`
 - Description: FLEXT Target for LDAP directory loading
 - Doc summary: Flext Target Ldap package.
 - Classifiers: `Development Status :: 3 - Alpha`, `Intended Audience :: Developers`, `Operating System :: OS Independent`, `Programming Language :: Python :: 3 :: Only`, `Programming Language :: Python :: 3.13`, `Topic :: Database` (+3 more)
