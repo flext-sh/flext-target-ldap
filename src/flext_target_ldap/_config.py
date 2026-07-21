@@ -28,7 +28,7 @@ class FlextTargetLdapConfig(FlextMeltanoConfig):
     )
 
     @cached_property
-    def TargetLdap(self) -> FlextTargetLdapConfigModels.TargetLdap:  # noqa: N802
+    def TargetLdap(self) -> FlextTargetLdapConfigModels.TargetLdap:
         """Validated ``TargetLdap`` business-rule config namespace."""
         root = FlextTargetLdapConfigModels.Root.model_validate(
             dict(self.model_extra or {}),

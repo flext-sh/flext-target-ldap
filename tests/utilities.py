@@ -15,9 +15,7 @@ from flext_target_ldap._models.sinks import FlextTargetLdapTarget
 from tests import p, r, t
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        MutableSequence,
-    )
+    from collections.abc import MutableSequence
 
 
 class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):

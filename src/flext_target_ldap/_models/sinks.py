@@ -9,13 +9,7 @@ from __future__ import annotations
 
 from typing import ClassVar, override
 
-from flext_target_ldap import (
-    c,
-    p,
-    r,
-    t,
-    u,
-)
+from flext_target_ldap import c, p, r, t, u
 from flext_target_ldap._models.processing_result import (
     FlextTargetLdapProcessingCounters,
 )

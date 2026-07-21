@@ -18,9 +18,7 @@ from flext_target_ldap import FlextTargetLdap
 from tests import t, u
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        Mapping,
-    )
+    from collections.abc import Mapping
     from pathlib import Path
 
 

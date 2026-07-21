@@ -7,22 +7,12 @@ Owns the public ``FlextTargetLdap`` surface. Legacy runtime logic lives here so
 from __future__ import annotations
 
 import sys
-from collections.abc import (
-    Callable,
-    Mapping,
-)
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextContainer
-from flext_target_ldap import (
-    FlextTargetLdapSettings,
-    c,
-    p,
-    settings,
-    t,
-    u,
-)
+from flext_target_ldap import FlextTargetLdapSettings, c, p, settings, t, u
 from flext_target_ldap._models.sinks import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapGroupsSink,
