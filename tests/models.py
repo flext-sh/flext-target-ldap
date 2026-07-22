@@ -9,9 +9,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import FlextTestsModels
-
 from flext_target_ldap import FlextTargetLdapModels
+from flext_tests import FlextTestsModels
 
 
 class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
@@ -35,7 +34,4 @@ class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
 
 m = TestsFlextTargetLdapModels
 
-__all__: list[str] = [
-    "TestsFlextTargetLdapModels",
-    "m",
-]
+__all__: list[str] = ["TestsFlextTargetLdapModels", "m"]

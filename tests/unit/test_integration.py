@@ -12,15 +12,13 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_tests import tm
 
 from flext_target_ldap import FlextTargetLdap
+from flext_tests import tm
 from tests import u
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        Mapping,
-    )
+    from collections.abc import Mapping
     from pathlib import Path
 
     from tests import t
@@ -40,10 +38,7 @@ def runner() -> Mock:
 
 
 @pytest.fixture
-def config_file(
-    tmp_path: Path,
-    mock_ldap_config: t.TargetLdap.SettingsPayload,
-) -> Path:
+def config_file(tmp_path: Path, mock_ldap_config: t.TargetLdap.SettingsPayload) -> Path:
     config_path = tmp_path / "settings.json"
     u.Cli.json_write(config_path, mock_ldap_config)
     return config_path
@@ -83,10 +78,7 @@ class TestsFlextTargetLdapIntegration:
     """Behavior contract for test_integration."""
 
     def test_basic_load(
-        self,
-        mock_ldap_api: MagicMock,
-        config_file: Path,
-        input_file: Path,
+        self, mock_ldap_api: MagicMock, config_file: Path, input_file: Path
     ) -> None:
         mock_conn = MagicMock()
         mock_conn.add_entry.return_value = True
@@ -100,17 +92,14 @@ class TestsFlextTargetLdapIntegration:
         assert mock_conn.add_entry.call_count >= 1
 
     def test_upsert_behavior(
-        self,
-        mock_ldap_api: MagicMock,
-        config_file: Path,
-        tmp_path: Path,
+        self, mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
     ) -> None:
         input_path = tmp_path / "upsert_input.jsonl"
         schema_msg = {
             "type": "SCHEMA",
             "stream": "users",
             "schema": {
-                "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
+                "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
             },
             "key_properties": ["dn"],
         }
@@ -137,10 +126,7 @@ class TestsFlextTargetLdapIntegration:
         assert mock_conn.modify_entry.call_count >= 1
 
     def test_delete_records(
-        self,
-        mock_ldap_api: MagicMock,
-        config_file: Path,
-        tmp_path: Path,
+        self, mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
     ) -> None:
         input_path = tmp_path / "delete_input.jsonl"
         schema_msg = {
@@ -181,7 +167,7 @@ class TestsFlextTargetLdapIntegration:
             "type": "SCHEMA",
             "stream": "users",
             "schema": {
-                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
+                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}
             },
             "key_properties": ["uid"],
         }
@@ -220,10 +206,7 @@ class TestsFlextTargetLdapIntegration:
         tm.that(result.exit_code, ne=0)
 
     def test_multi_stream_handling(
-        self,
-        mock_ldap_api: MagicMock,
-        config_file: Path,
-        tmp_path: Path,
+        self, mock_ldap_api: MagicMock, config_file: Path, tmp_path: Path
     ) -> None:
         input_path = tmp_path / "multi_stream.jsonl"
         messages = [

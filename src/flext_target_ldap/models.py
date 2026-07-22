@@ -19,9 +19,7 @@ from flext_meltano import FlextMeltanoModels
 from flext_target_ldap import t, u
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        MutableSequence,
-    )
+    from collections.abc import MutableSequence
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, m):
@@ -44,17 +42,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
             singer_field_name: Annotated[
                 t.NonEmptyStr,
-                u.Field(
-                    ...,
-                    description="Singer field name from source data",
-                ),
+                u.Field(..., description="Singer field name from source data"),
             ]
             ldap_attribute_name: Annotated[
-                t.NonEmptyStr,
-                u.Field(
-                    ...,
-                    description="Target LDAP attribute name",
-                ),
+                t.NonEmptyStr, u.Field(..., description="Target LDAP attribute name")
             ]
             is_required: Annotated[
                 bool,
@@ -73,8 +64,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             default_value: Annotated[
                 str | None,
                 u.Field(
-                    default=None,
-                    description="Default value if source field is missing",
+                    default=None, description="Default value if source field is missing"
                 ),
             ]
 
@@ -86,11 +76,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             """
 
             distinguished_name: Annotated[
-                t.NonEmptyStr,
-                u.Field(
-                    ...,
-                    description="LDAP Distinguished Name (DN)",
-                ),
+                t.NonEmptyStr, u.Field(..., description="LDAP Distinguished Name (DN)")
             ]
             object_classes: Annotated[
                 MutableSequence[str],
@@ -117,8 +103,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             @u.field_validator("object_classes")
             @classmethod
             def validate_object_classes(
-                cls,
-                v: MutableSequence[str],
+                cls, v: MutableSequence[str]
             ) -> MutableSequence[str]:
                 """Validate object classes contain 'top'."""
                 if "top" not in v:
@@ -151,15 +136,11 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
             name: Annotated[
                 t.NonEmptyStr,
-                u.Field(
-                    description="Unique name identifying this transformation rule",
-                ),
+                u.Field(description="Unique name identifying this transformation rule"),
             ]
             pattern: Annotated[
                 t.NonEmptyStr,
-                u.Field(
-                    description="Regex pattern to match in source data",
-                ),
+                u.Field(description="Regex pattern to match in source data"),
             ]
             replacement: Annotated[
                 str,
@@ -179,7 +160,4 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
 m = FlextTargetLdapModels
 
-__all__: list[str] = [
-    "FlextTargetLdapModels",
-    "m",
-]
+__all__: list[str] = ["FlextTargetLdapModels", "m"]

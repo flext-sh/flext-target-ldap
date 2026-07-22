@@ -8,15 +8,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, override
 
-from flext_tests import FlextTestsUtilities
-
 from flext_target_ldap import FlextTargetLdapUtilities, p, r
 from flext_target_ldap._models.sinks import FlextTargetLdapTarget
+from flext_tests import FlextTestsUtilities
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        MutableSequence,
-    )
+    from collections.abc import MutableSequence
 
     from tests import t
 
@@ -31,10 +28,7 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
             """TargetLdap-specific test utilities."""
 
             @staticmethod
-            def build_mock_ldap_config(
-                *,
-                bind_dn: str,
-            ) -> t.TargetLdap.SettingsPayload:
+            def build_mock_ldap_config(*, bind_dn: str) -> t.TargetLdap.SettingsPayload:
                 """Build a standard mock LDAP configuration for testing."""
                 return {
                     "connection": {

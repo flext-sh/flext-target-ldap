@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from flext_tests import r, tm
 
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
+from flext_tests import r, tm
 from tests import m
 
 if TYPE_CHECKING:
@@ -14,9 +14,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def client(
-    mock_ldap_config: t.TargetLdap.SettingsPayload,
-) -> FlextTargetLdapClient:
+def client(mock_ldap_config: t.TargetLdap.SettingsPayload) -> FlextTargetLdapClient:
     return FlextTargetLdapClient(settings=mock_ldap_config)
 
 
@@ -41,13 +39,12 @@ class TestsFlextTargetLdapClient:
                 "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
                 "password": "test_password",
                 "timeout": 30,
-            },
+            }
         )
         tm.that(ssl_client.server_uri, eq="ldaps://test.ldap.com:389")
 
     def test_connect_delegates_to_flext_ldap_api(
-        self,
-        client: FlextTargetLdapClient,
+        self, client: FlextTargetLdapClient
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -58,8 +55,7 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once()
 
     def test_disconnect_calls_flext_ldap_api(
-        self,
-        client: FlextTargetLdapClient,
+        self, client: FlextTargetLdapClient
     ) -> None:
         client._api = MagicMock()
         result = client.disconnect()
@@ -68,8 +64,7 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once_with()
 
     def test_add_entry_uses_real_ldif_entry(
-        self,
-        client: FlextTargetLdapClient,
+        self, client: FlextTargetLdapClient
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -91,8 +86,7 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once()
 
     def test_modify_entry_uses_real_modify_changes(
-        self,
-        client: FlextTargetLdapClient,
+        self, client: FlextTargetLdapClient
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -105,16 +99,12 @@ class TestsFlextTargetLdapClient:
         tm.that(result.value, eq=True)
         client._api.modify.assert_called_once_with(
             "uid=test,dc=test,dc=com",
-            {
-                "mail": [(2, ["new@test.com"])],
-                "telephoneNumber": [(2, ["123-456"])],
-            },
+            {"mail": [(2, ["new@test.com"])], "telephoneNumber": [(2, ["123-456"])]},
         )
         client._api.disconnect.assert_called_once()
 
     def test_delete_entry_delegates_to_flext_ldap_api(
-        self,
-        client: FlextTargetLdapClient,
+        self, client: FlextTargetLdapClient
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -126,8 +116,7 @@ class TestsFlextTargetLdapClient:
         client._api.disconnect.assert_called_once()
 
     def test_search_entry_maps_search_results(
-        self,
-        client: FlextTargetLdapClient,
+        self, client: FlextTargetLdapClient
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
@@ -137,17 +126,13 @@ class TestsFlextTargetLdapClient:
                 entries=[
                     m.Ldif.Entry(
                         dn=m.Ldif.DN(value="uid=test,dc=test,dc=com"),
-                        attributes=m.Ldif.Attributes(
-                            attributes={"cn": ["Test User"]},
-                        ),
-                    ),
-                ],
+                        attributes=m.Ldif.Attributes(attributes={"cn": ["Test User"]}),
+                    )
+                ]
             ),
         )
         result = client.search_entry(
-            base_dn="dc=test,dc=com",
-            search_filter="(uid=test)",
-            attributes=["cn"],
+            base_dn="dc=test,dc=com", search_filter="(uid=test)", attributes=["cn"]
         )
         tm.ok(result)
         tm.that(result.value, none=False)
@@ -162,15 +147,14 @@ class TestsFlextTargetLdapClient:
         tm.that(attributes.attributes, eq={"cn": ["Test User"]})
 
     def test_search_entry_disconnects_after_search(
-        self,
-        client: FlextTargetLdapClient,
+        self, client: FlextTargetLdapClient
     ) -> None:
         client._api = MagicMock()
         client._api.connect.return_value = r[bool].ok(True)
         client._api.search.return_value = MagicMock(
             success=True,
             value=MagicMock(
-                entries=[{"dn": "uid=test,dc=test,dc=com", "cn": ["Test User"]}],
+                entries=[{"dn": "uid=test,dc=test,dc=com", "cn": ["Test User"]}]
             ),
         )
         result = client.search_entry("dc=test,dc=com")

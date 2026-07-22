@@ -25,9 +25,7 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
     """LDAP target settings; all project fields under ``settings.TargetLdap.*``."""
 
     model_config = SettingsConfigDict(
-        env_prefix="FLEXT_TARGET_LDAP_",
-        env_nested_delimiter="__",
-        extra="ignore",
+        env_prefix="FLEXT_TARGET_LDAP_", env_nested_delimiter="__", extra="ignore"
     )
 
     class _TargetLdap(BaseModel):
@@ -44,8 +42,7 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         auto_range: Annotated[bool, Field(default=True, description="Auto range")]
         base_dn: Annotated[str, Field(default="", description="Base DN")]
         search_filter: Annotated[
-            str,
-            Field(default="(objectClass=*)", description="LDAP search filter"),
+            str, Field(default="(objectClass=*)", description="LDAP search filter")
         ]
         search_scope: Annotated[
             str,
@@ -91,8 +88,7 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         TargetLdap: _TargetLdap
     else:
         TargetLdap: _TargetLdap = Field(
-            default_factory=_TargetLdap,
-            description="Namespaced LDAP target settings.",
+            default_factory=_TargetLdap, description="Namespaced LDAP target settings."
         )
 
 

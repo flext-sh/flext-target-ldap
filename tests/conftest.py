@@ -11,9 +11,9 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from flext_tests import reset_settings as _shared_reset_settings
 
 from flext_cli import u as cli_u
+from flext_tests import reset_settings as _shared_reset_settings
 from tests import u
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ reset_settings = _shared_reset_settings
 def mock_ldap_config() -> t.TargetLdap.SettingsPayload:
     """Create mock LDAP configuration for testing."""
     return u.TargetLdap.Tests.build_mock_ldap_config(
-        bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
+        bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
     )
 
 
@@ -89,8 +89,8 @@ def singer_message_state() -> str:
                 "users": {
                     "replication_key": "modifyTimestamp",
                     "replication_key_value": "20240101120000Z",
-                },
-            },
+                }
+            }
         },
     }
     rendered: str = cli_u.Cli.json_dumps(message).unwrap()

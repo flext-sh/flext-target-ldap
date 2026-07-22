@@ -9,13 +9,7 @@ from __future__ import annotations
 
 from typing import ClassVar, override
 
-from flext_target_ldap import (
-    c,
-    p,
-    r,
-    t,
-    u,
-)
+from flext_target_ldap import c, p, r, t, u
 from flext_target_ldap._models.processing_result import (
     FlextTargetLdapProcessingCounters,
 )
@@ -40,9 +34,7 @@ class FlextTargetLdapSink:
         self.key_properties = key_properties
 
     def process_record(
-        self,
-        _record: t.TargetLdap.RecordPayload,
-        context: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload
     ) -> p.Result[bool]:
         """Process a record using the target."""
         return u.guard_result(
@@ -59,22 +51,18 @@ class FlextTargetLdapTarget:
 
     @override
     def __init__(
-        self,
-        settings: t.TargetLdap.SettingsPayload,
-        **kwargs: t.Scalar,
+        self, settings: t.TargetLdap.SettingsPayload, **kwargs: t.Scalar
     ) -> None:
         """Initialize target with configuration."""
         self.settings = settings
 
     def process_record(
-        self,
-        _record: t.TargetLdap.RecordPayload,
-        context: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload
     ) -> p.Result[bool]:
         """Process a record with the concrete target runtime."""
         context_keys = tuple(sorted(key for key in context))
         return r[bool].fail(
-            f"Target does not implement process_record for context keys: {context_keys}",
+            f"Target does not implement process_record for context keys: {context_keys}"
         )
 
 
@@ -113,12 +101,11 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         )
 
     def build_attributes(
-        self,
-        _record: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload
     ) -> p.Result[t.Ldap.OperationAttributes]:
         """Build LDAP attributes from record. Override in subclasses."""
         return r[t.Ldap.OperationAttributes].fail(
-            "build_attributes must be implemented in subclass",
+            "build_attributes must be implemented in subclass"
         )
 
     def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.Result[str]:
@@ -127,8 +114,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         if isinstance(dn, str) and dn:
             return r[str].ok(dn)
         base_dn = self._target.settings.get(
-            c.TargetLdap.KEY_BASE_DN,
-            c.TargetLdap.DEFAULT_BASE_DN,
+            c.TargetLdap.KEY_BASE_DN, c.TargetLdap.DEFAULT_BASE_DN
         )
         entry_id = (
             record.get(c.TargetLdap.KEY_ID)
@@ -138,12 +124,11 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         if isinstance(entry_id, str) and entry_id:
             return r[str].ok(f"{c.TargetLdap.KEY_CN}={entry_id},{base_dn}")
         return r[str].fail(
-            "build_dn must be implemented in subclass: No ID or name found for generic entry",
+            "build_dn must be implemented in subclass: No ID or name found for generic entry"
         )
 
     def resolve_object_classes(
-        self,
-        record: t.TargetLdap.RecordPayload,
+        self, record: t.TargetLdap.RecordPayload
     ) -> t.StrSequence:
         """Get object classes for entry."""
         record_classes = record.get(c.TargetLdap.KEY_OBJECT_CLASSES)
@@ -154,12 +139,12 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         if isinstance(record_classes, str):
             return [record_classes]
         configured_classes = self._target.settings.get(
-            c.TargetLdap.KEY_GENERIC_OBJECT_CLASSES,
+            c.TargetLdap.KEY_GENERIC_OBJECT_CLASSES
         )
         if configured_classes is None:
             return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
         return u.TargetLdap.TypeConversion.extract_object_classes({
-            c.TargetLdap.KEY_OBJECT_CLASSES: configured_classes,
+            c.TargetLdap.KEY_OBJECT_CLASSES: configured_classes
         })
 
     def process_batch(self, context: t.TargetLdap.RecordPayload) -> None:
@@ -174,7 +159,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             if isinstance(records_raw, list):
                 records.extend(item for item in records_raw if isinstance(item, dict))
             logger.info(
-                f"Processing batch of {len(records)} records for stream: {self.stream_name}",
+                f"Processing batch of {len(records)} records for stream: {self.stream_name}"
             )
             for record in records:
                 if isinstance(record, dict):
@@ -183,16 +168,14 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
                         normalized_record[k] = v
                     self.process_record(normalized_record, context)
             logger.info(
-                f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}",
+                f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}"
             )
         finally:
             self.teardown_client()
 
     @override
     def process_record(
-        self,
-        _record: t.TargetLdap.RecordPayload,
-        context: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload
     ) -> p.Result[bool]:
         """Process a single record. Override in subclasses."""
         if not self.client:
@@ -213,36 +196,29 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         try:
             connection_config = {
                 c.TargetLdap.KEY_HOST: self._target.settings.get(
-                    c.TargetLdap.KEY_HOST,
-                    c.TargetLdap.DEFAULT_HOST,
+                    c.TargetLdap.KEY_HOST, c.TargetLdap.DEFAULT_HOST
                 ),
                 c.TargetLdap.KEY_PORT: self._target.settings.get(
-                    c.TargetLdap.KEY_PORT,
-                    c.Ldap.PORT,
+                    c.TargetLdap.KEY_PORT, c.Ldap.PORT
                 ),
                 c.TargetLdap.KEY_USE_SSL: self._target.settings.get(
-                    c.TargetLdap.KEY_USE_SSL,
-                    c.Ldap.DEFAULT_USE_SSL,
+                    c.TargetLdap.KEY_USE_SSL, c.Ldap.DEFAULT_USE_SSL
                 ),
                 c.TargetLdap.KEY_BIND_DN: self._target.settings.get(
-                    c.TargetLdap.KEY_BIND_DN,
-                    c.TargetLdap.DEFAULT_BIND_DN,
+                    c.TargetLdap.KEY_BIND_DN, c.TargetLdap.DEFAULT_BIND_DN
                 ),
                 c.TargetLdap.KEY_PASSWORD: self._target.settings.get(
-                    c.TargetLdap.KEY_PASSWORD,
-                    c.TargetLdap.DEFAULT_BIND_PASSWORD,
+                    c.TargetLdap.KEY_PASSWORD, c.TargetLdap.DEFAULT_BIND_PASSWORD
                 ),
                 c.TargetLdap.KEY_TIMEOUT: self._target.settings.get(
-                    c.TargetLdap.KEY_TIMEOUT,
-                    c.Ldap.TIMEOUT,
+                    c.TargetLdap.KEY_TIMEOUT, c.Ldap.TIMEOUT
                 ),
             }
             self.client = FlextTargetLdapClient(connection_config)
             connect_result = self.client.connect()
             if not connect_result.success:
                 return r[FlextTargetLdapClient].fail_op(
-                    "LDAP connection",
-                    connect_result.error,
+                    "LDAP connection", connect_result.error
                 )
             logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
             return r[FlextTargetLdapClient].ok(self.client)
@@ -271,9 +247,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             self._processing_result.add_error("LDAP client not initialized")
             return r[bool].fail("LDAP client not initialized")
         add_result: p.Result[bool] = self.client.add_entry(
-            dn,
-            attributes_dict,
-            object_classes,
+            dn, attributes_dict, object_classes
         )
         if add_result.success:
             self._processing_result.add_success()
@@ -281,15 +255,12 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             return r[bool].ok(value=True)
         if self._target.settings.get("update_existing_entries", False):
             modify_result: p.Result[bool] = self.client.modify_entry(
-                dn,
-                attributes_dict,
+                dn, attributes_dict
             )
             if modify_result.success:
                 self._processing_result.add_success()
                 logger.debug(
-                    "%s entry modified successfully: %s",
-                    label.capitalize(),
-                    dn,
+                    "%s entry modified successfully: %s", label.capitalize(), dn
                 )
                 return r[bool].ok(value=True)
             err = f"Failed to modify {label} {dn}: {modify_result.error}"
@@ -334,8 +305,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
 
     @override
     def build_attributes(
-        self,
-        _record: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload
     ) -> p.Result[t.Ldap.OperationAttributes]:
         """Build LDAP attributes for user entry."""
         attrs: dict[str, list[str]] = {}
@@ -355,26 +325,22 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         return r[str].ok(f"{rdn_attr}={uid},{base_dn}")
 
     def build_user_attributes(
-        self,
-        record: t.TargetLdap.RecordPayload,
+        self, record: t.TargetLdap.RecordPayload
     ) -> dict[str, list[str]]:
         """Build LDAP attributes for user entry."""
         configured_object_classes = self._target.settings.get(
-            "object_classes",
-            ["inetOrgPerson", "person"],
+            "object_classes", ["inetOrgPerson", "person"]
         )
         object_classes = list(
             u.TargetLdap.TypeConversion.extract_object_classes({
-                "object_classes": configured_object_classes,
-            }),
+                "object_classes": configured_object_classes
+            })
         )
         if "inetOrgPerson" not in object_classes:
             object_classes.append("inetOrgPerson")
         if "person" not in object_classes:
             object_classes.append("person")
-        attributes: dict[str, list[str]] = {
-            "objectClass": object_classes,
-        }
+        attributes: dict[str, list[str]] = {"objectClass": object_classes}
         field_mapping = {
             "username": "uid",
             "email": "mail",
@@ -390,7 +356,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             if value is not None:
                 attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(value)
         mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-            self._target.settings,
+            self._target.settings
         )
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
@@ -400,22 +366,19 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
 
     @override
     def resolve_object_classes(
-        self,
-        record: t.TargetLdap.RecordPayload,
+        self, record: t.TargetLdap.RecordPayload
     ) -> t.StrSequence:
         """Get object classes for user entry."""
         configured = self._target.settings.get("users_object_classes")
         if configured is None:
             return ["inetOrgPerson", "organizationalPerson", "person", "top"]
         return u.TargetLdap.TypeConversion.extract_object_classes({
-            "object_classes": configured,
+            "object_classes": configured
         })
 
     @override
     def process_record(
-        self,
-        _record: t.TargetLdap.RecordPayload,
-        context: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload
     ) -> p.Result[bool]:
         """Process a user record."""
 
@@ -429,7 +392,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
             attributes = self.build_user_attributes(_record)
             object_classes = FlextTargetLdapClient.to_str_values(
-                attributes.get("objectClass", ["inetOrgPerson", "person"]),
+                attributes.get("objectClass", ["inetOrgPerson", "person"])
             )
             attributes_dict: dict[str, list[str]] = {
                 key: FlextTargetLdapClient.to_str_values(value)
@@ -457,8 +420,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
 
     @override
     def build_attributes(
-        self,
-        _record: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload
     ) -> p.Result[t.Ldap.OperationAttributes]:
         """Build LDAP attributes for group entry."""
         attrs: dict[str, list[str]] = {}
@@ -480,22 +442,19 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
 
     @override
     def resolve_object_classes(
-        self,
-        record: t.TargetLdap.RecordPayload,
+        self, record: t.TargetLdap.RecordPayload
     ) -> t.StrSequence:
         """Get object classes for group entry."""
         configured = self._target.settings.get("groups_object_classes")
         if configured is not None:
             return u.TargetLdap.TypeConversion.extract_object_classes({
-                "object_classes": configured,
+                "object_classes": configured
             })
         return ["groupOfNames", "top"]
 
     @override
     def process_record(
-        self,
-        _record: t.TargetLdap.RecordPayload,
-        context: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload
     ) -> p.Result[bool]:
         """Process a group record."""
 
@@ -507,7 +466,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
             attributes = self._build_group_attributes(_record)
             object_classes = FlextTargetLdapClient.to_str_values(
-                attributes.get("objectClass", ["groupOfNames"]),
+                attributes.get("objectClass", ["groupOfNames"])
             )
             attributes_dict: dict[str, list[str]] = {
                 key: FlextTargetLdapClient.to_str_values(value)
@@ -530,24 +489,20 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             return r[bool].fail(error_msg)
 
     def _build_group_attributes(
-        self,
-        record: t.TargetLdap.RecordPayload,
+        self, record: t.TargetLdap.RecordPayload
     ) -> dict[str, list[str]]:
         """Build LDAP attributes for group entry."""
         configured_object_classes = self._target.settings.get(
-            "group_object_classes",
-            ["groupOfNames"],
+            "group_object_classes", ["groupOfNames"]
         )
         object_classes = list(
             u.TargetLdap.TypeConversion.extract_object_classes({
-                "object_classes": configured_object_classes,
-            }),
+                "object_classes": configured_object_classes
+            })
         )
         if "groupOfNames" not in object_classes:
             object_classes.append("groupOfNames")
-        attributes: dict[str, list[str]] = {
-            "objectClass": object_classes,
-        }
+        attributes: dict[str, list[str]] = {"objectClass": object_classes}
         field_mapping = {
             "name": "cn",
             "description": "description",
@@ -558,7 +513,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             if value is not None:
                 attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(value)
         mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-            self._target.settings,
+            self._target.settings
         )
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)
@@ -572,9 +527,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
 
     @override
     def process_record(
-        self,
-        _record: t.TargetLdap.RecordPayload,
-        context: t.TargetLdap.RecordPayload,
+        self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload
     ) -> p.Result[bool]:
         """Process an organizational unit record."""
 
@@ -604,31 +557,27 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             return r[bool].fail(error_msg)
 
     def _build_ou_attributes(
-        self,
-        record: t.TargetLdap.RecordPayload,
+        self, record: t.TargetLdap.RecordPayload
     ) -> dict[str, list[str]]:
         """Build LDAP attributes for OU entry."""
         configured_object_classes = self._target.settings.get(
-            "object_classes",
-            ["organizationalUnit"],
+            "object_classes", ["organizationalUnit"]
         )
         object_classes = list(
             u.TargetLdap.TypeConversion.extract_object_classes({
-                "object_classes": configured_object_classes,
-            }),
+                "object_classes": configured_object_classes
+            })
         )
         if "organizationalUnit" not in object_classes:
             object_classes.append("organizationalUnit")
-        attributes: dict[str, list[str]] = {
-            "objectClass": object_classes,
-        }
+        attributes: dict[str, list[str]] = {"objectClass": object_classes}
         field_mapping = {"name": "ou", "description": "description"}
         for singer_field, ldap_attr in field_mapping.items():
             value = record.get(singer_field)
             if value is not None:
                 attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(value)
         mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-            self._target.settings,
+            self._target.settings
         )
         for singer_field, mapped_attr in mapping.items():
             value = record.get(singer_field)

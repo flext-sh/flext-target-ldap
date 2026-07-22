@@ -18,10 +18,7 @@ class FlextTargetLdapProcessingCounters:
             return 0.0
         return self.success_count / self.processed_count * 100.0
 
-    def add_error(
-        self: FlextTargetLdapProcessingCounters,
-        error_message: str,
-    ) -> None:
+    def add_error(self: FlextTargetLdapProcessingCounters, error_message: str) -> None:
         """Record one failed processing attempt."""
         self.processed_count += 1
         self.error_count += 1

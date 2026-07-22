@@ -56,44 +56,17 @@ if TYPE_CHECKING:
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     (".application",),
-    build_lazy_import_map(
-        {
-            "._settings": ("FlextTargetLdapSettings", "settings"),
-            ".api": (
-                "FlextTargetLdap",
-                "target_ldap",
-            ),
-            ".application.orchestrator": ("FlextTargetLdapOrchestrator",),
-            ".constants": (
-                "FlextTargetLdapConstants",
-                "c",
-            ),
-            ".models": (
-                "FlextTargetLdapModels",
-                "m",
-            ),
-            ".protocols": (
-                "FlextTargetLdapProtocols",
-                "p",
-            ),
-            ".typings": (
-                "FlextTargetLdapTypes",
-                "t",
-            ),
-            ".utilities": (
-                "FlextTargetLdapUtilities",
-                "u",
-            ),
-            "flext_ldap": (
-                "d",
-                "e",
-                "h",
-                "r",
-                "s",
-                "x",
-            ),
-        },
-    ),
+    build_lazy_import_map({
+        "._settings": ("FlextTargetLdapSettings", "settings"),
+        ".api": ("FlextTargetLdap", "target_ldap"),
+        ".application.orchestrator": ("FlextTargetLdapOrchestrator",),
+        ".constants": ("FlextTargetLdapConstants", "c"),
+        ".models": ("FlextTargetLdapModels", "m"),
+        ".protocols": ("FlextTargetLdapProtocols", "p"),
+        ".typings": ("FlextTargetLdapTypes", "t"),
+        ".utilities": ("FlextTargetLdapUtilities", "u"),
+        "flext_ldap": ("d", "e", "h", "r", "s", "x"),
+    }),
     exclude_names=(
         "cleanup_submodule_namespace",
         "install_lazy_exports",
@@ -150,9 +123,4 @@ __all__: tuple[str, ...] = (
 )
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    public_exports=__all__,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)
