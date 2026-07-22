@@ -207,7 +207,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
                 c.TargetLdap.KEY_BIND_DN: self._target.settings.get(
                     c.TargetLdap.KEY_BIND_DN, c.TargetLdap.DEFAULT_BIND_DN
                 ),
-                c.TargetLdap.KEY_PASSWORD: self._target.settings.get(
+                c.TargetLdap.KEY_BIND_PASSWORD: self._target.settings.get(
                     c.TargetLdap.KEY_PASSWORD, c.TargetLdap.DEFAULT_BIND_PASSWORD
                 ),
                 c.TargetLdap.KEY_TIMEOUT: self._target.settings.get(

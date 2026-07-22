@@ -8,7 +8,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
 
 import pytest
 from pydantic import BaseModel
@@ -20,10 +19,10 @@ from flext_target_ldap._models.sinks import (
     FlextTargetLdapSink,
     FlextTargetLdapUsersSink,
 )
-from flext_tests import r, tm
+from flext_tests import tm
 from tests import u
 from tests.base import s
-from tests.settings import TestsFlextTargetLdapSettings
+from tests.settings import TestsFlextTargetLdapSettings as TargetLdapTestSettings
 
 if TYPE_CHECKING:
     from tests import t
@@ -58,11 +57,11 @@ class TestsFlextTargetLdapTarget:
 
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
-        assert isinstance(settings, TestsFlextTargetLdapSettings)
+        assert isinstance(settings, TargetLdapTestSettings)
 
         tm.that(settings.Tests, is_=BaseModel)
-        tm.that(settings, is_=TestsFlextTargetLdapSettings)
-        assert settings.TargetLdap.base_dn
+        tm.that(settings, is_=TargetLdapTestSettings)
+        assert settings.base_dn
 
     def test_dn_template_processing(
         self, mock_ldap_config: t.TargetLdap.SettingsPayload
@@ -94,32 +93,41 @@ class TestsFlextTargetLdapTarget:
         object_classes = sink.resolve_object_classes({})
         tm.that(object_classes, eq=["customPerson", "top"])
 
+    @pytest.mark.integration
     def test_process_record(
         self,
-        mock_ldap_config: t.TargetLdap.SettingsPayload,
-        sample_user_record: t.TargetLdap.RecordPayload,
+        real_target_config: t.TargetLdap.SettingsPayload,
+        real_base_dn: str,
     ) -> None:
-        mock_client = MagicMock()
-        mock_client.add_entry.return_value = r[bool].ok(value=True)
-        target = FlextTargetLdap(settings=mock_ldap_config)
+        singer_record: t.TargetLdap.RecordPayload = {
+            "username": "processrec",
+            "full_name": "Process Record",
+            "last_name": "Record",
+        }
+        target = FlextTargetLdap(settings=real_target_config)
         sink = target.get_sink("users")
         tm.that(sink, is_=FlextTargetLdapBaseSink)
         assert isinstance(sink, FlextTargetLdapBaseSink)
-        sink.client = mock_client
-        result = sink.process_record(sample_user_record, {})
-        tm.ok(result)
-        mock_client.add_entry.assert_called_once()
+        setup_result = sink.setup_client()
+        tm.ok(setup_result)
+        try:
+            client = sink.client
+            assert client is not None
+            dn = f"uid=processrec,{real_base_dn}"
+            client.delete_entry(dn)
+            result = sink.process_record(singer_record, {})
+            tm.ok(result)
+            client.delete_entry(dn)
+        finally:
+            sink.teardown_client()
 
     def test_process_delete_record(
         self, mock_ldap_config: t.TargetLdap.SettingsPayload
     ) -> None:
-        mock_client = MagicMock()
-        mock_client.add_entry.return_value = r[bool].fail("Entry already exists")
         target = FlextTargetLdap(settings=mock_ldap_config)
         sink = target.get_sink("users")
         tm.that(sink, is_=FlextTargetLdapBaseSink)
         assert isinstance(sink, FlextTargetLdapBaseSink)
-        sink.client = mock_client
         record: t.TargetLdap.RecordPayload = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
             "_sdc_deleted_at": "2024-01-15T10:30:00Z",
