@@ -61,10 +61,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """Return an instantiated sink for the given stream name."""
         sink_class = self.get_sink_class(stream_name)
         return sink_class(
-            target=self,
-            stream_name=stream_name,
-            schema={},
-            key_properties=[],
+            target=self, stream_name=stream_name, schema={}, key_properties=[]
         )
 
     def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:
@@ -77,8 +74,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         sink_class = sink_mapping.get(stream_name)
         if sink_class is None:
             self.logger.warning(
-                "No specific sink found for stream '%s', using base sink",
-                stream_name,
+                "No specific sink found for stream '%s', using base sink", stream_name
             )
             return FlextTargetLdapBaseSink
         self.logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
@@ -126,9 +122,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     @staticmethod
     def _construct_dn(
-        stream: str,
-        record: t.TargetLdap.RecordPayload,
-        base_dn: str,
+        stream: str, record: t.TargetLdap.RecordPayload, base_dn: str
     ) -> str:
         """Construct DN from record based on stream type."""
         if stream == "users":
@@ -180,7 +174,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
                 seen_dns.add(dn)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             FlextTargetLdap.logger.warning(
-                f"Failed to add entry {dn}, attempting modify: {exc}",
+                f"Failed to add entry {dn}, attempting modify: {exc}"
             )
             api.modify_entry(dn, attributes)
 
@@ -208,11 +202,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         seen_dns: set[str] = set()
         for line in sys.stdin:
             current_stream = FlextTargetLdap._process_input_line(
-                line,
-                current_stream,
-                cfg,
-                api,
-                seen_dns,
+                line, current_stream, cfg, api, seen_dns
             )
 
     @staticmethod
@@ -245,11 +235,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         for key, value in record_data.items():
             normalized_record[key] = value
         FlextTargetLdap._process_record_message(
-            normalized_record,
-            stream,
-            settings,
-            api,
-            seen_dns,
+            normalized_record, stream, settings, api, seen_dns
         )
         return current_stream
 
@@ -265,7 +251,4 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
 target_ldap = FlextTargetLdap
 
-__all__: list[str] = [
-    "FlextTargetLdap",
-    "target_ldap",
-]
+__all__: list[str] = ["FlextTargetLdap", "target_ldap"]

@@ -16,10 +16,7 @@ class TestsFlextTargetLdapTransformation:
 
     def test_transformation_rule_creation(self) -> None:
         rule = m.TargetLdap.TransformationRule(
-            name="test_rule",
-            pattern="orclUser",
-            replacement="person",
-            enabled=True,
+            name="test_rule", pattern="orclUser", replacement="person", enabled=True
         )
         tm.that(rule.name, eq="test_rule")
         assert rule.enabled

@@ -49,19 +49,12 @@ class FlextTargetLdapServiceRuntime:
             return service_sink
 
         @override
-        def process_batch(
-            self,
-            context: t.JsonMapping,
-        ) -> None:
+        def process_batch(self, context: t.JsonMapping) -> None:
             """Singer batch hook is handled record-by-record by the runtime sink."""
             _ = context
 
         @override
-        def process_record(
-            self,
-            record: t.JsonMapping,
-            context: t.JsonMapping,
-        ) -> None:
+        def process_record(self, record: t.JsonMapping, context: t.JsonMapping) -> None:
             """Delegate Singer record handling to the LDAP runtime sink."""
             result = self._runtime_sink.process_record(
                 u.normalize_to_json_mapping(record),
@@ -80,16 +73,13 @@ class FlextTargetLdapServiceRuntime:
         target_config: t.JsonMapping,
     ) -> p.Meltano.SingerDrainSink:
         """Create the service-level Singer sink adapter."""
-        normalized_target_config = u.normalize_to_json_mapping(
-            target_config,
-        )
+        normalized_target_config = u.normalize_to_json_mapping(target_config)
         runtime_target = FlextTargetLdap(
-            settings=normalized_target_config,
-            validate_config=False,
+            settings=normalized_target_config, validate_config=False
         )
         normalized_schema = cls.normalize_flat_schema(schema)
         sink_class: type[FlextTargetLdapSink] = runtime_target.get_sink_class(
-            stream_name,
+            stream_name
         )
         runtime_sink = sink_class(
             target=runtime_target,
@@ -115,7 +105,7 @@ class FlextTargetLdapServiceRuntime:
         """Normalize a flat Singer schema to the LDAP runtime contract."""
         return {
             key: u.Cli.json_normalize_value(
-                str(value) if isinstance(value, Path) else value,
+                str(value) if isinstance(value, Path) else value
             )
             for key, value in schema.items()
         }

@@ -23,15 +23,13 @@ from flext_target_ldap._models.config import FlextTargetLdapConfigModels
 class FlextTargetLdapConfig(FlextMeltanoConfig):
     """TargetLdap config auto-loaded from ``config/*.yaml`` and validated via models."""
 
-    CONFIG_DIR: ClassVar[str] = str(
-        Path(__file__).resolve().parents[2] / "config",
-    )
+    CONFIG_DIR: ClassVar[str] = str(Path(__file__).resolve().parents[2] / "config")
 
     @cached_property
     def TargetLdap(self) -> FlextTargetLdapConfigModels.TargetLdap:
         """Validated ``TargetLdap`` business-rule config namespace."""
         root = FlextTargetLdapConfigModels.Root.model_validate(
-            dict(self.model_extra or {}),
+            dict(self.model_extra or {})
         )
         return root.TargetLdap
 

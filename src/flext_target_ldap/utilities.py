@@ -77,7 +77,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
                             "required": ["name"],
                         },
                     },
-                ],
+                ]
             })
 
         class TypeConversion:

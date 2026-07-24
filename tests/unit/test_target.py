@@ -46,8 +46,7 @@ class TestsFlextTargetLdapTarget:
         assert target.get_sink_class(key) is expected_cls
 
     def test_target_initialization(
-        self,
-        mock_ldap_config: t.TargetLdap.SettingsPayload,
+        self, mock_ldap_config: t.TargetLdap.SettingsPayload
     ) -> None:
         target = FlextTargetLdap(settings=mock_ldap_config)
         tm.that(target.name, eq="target-ldap")
@@ -62,8 +61,7 @@ class TestsFlextTargetLdapTarget:
         assert settings.TargetLdap.base_dn
 
     def test_dn_template_processing(
-        self,
-        mock_ldap_config: t.TargetLdap.SettingsPayload,
+        self, mock_ldap_config: t.TargetLdap.SettingsPayload
     ) -> None:
         updated_settings: t.TargetLdap.SettingsPayload = {
             **mock_ldap_config,
@@ -79,8 +77,7 @@ class TestsFlextTargetLdapTarget:
         tm.that(dn_result.value, eq="uid=jdoe,ou=people,dc=test,dc=com")
 
     def test_object_classes_processing(
-        self,
-        mock_ldap_config: t.TargetLdap.SettingsPayload,
+        self, mock_ldap_config: t.TargetLdap.SettingsPayload
     ) -> None:
         updated_settings: t.TargetLdap.SettingsPayload = {
             **mock_ldap_config,
@@ -110,8 +107,7 @@ class TestsFlextTargetLdapTarget:
         mock_client.add_entry.assert_called_once()
 
     def test_process_delete_record(
-        self,
-        mock_ldap_config: t.TargetLdap.SettingsPayload,
+        self, mock_ldap_config: t.TargetLdap.SettingsPayload
     ) -> None:
         mock_client = MagicMock()
         mock_client.add_entry.return_value = r[bool].fail("Entry already exists")

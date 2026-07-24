@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 def ldap_base_sink(mock_target: MagicMock) -> LDAPBaseSink:
     mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
-        "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
+        "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
     }
     return LDAPBaseSink(
         target=mock_target,
@@ -49,13 +49,10 @@ def users_sink(mock_target: MagicMock) -> UsersSink:
             "uid": {"type": "string"},
             "cn": {"type": "string"},
             "mail": {"type": "string"},
-        },
+        }
     }
     return UsersSink(
-        target=mock_target,
-        stream_name="users",
-        schema=schema,
-        key_properties=["uid"],
+        target=mock_target, stream_name="users", schema=schema, key_properties=["uid"]
     )
 
 
@@ -67,13 +64,10 @@ def groups_sink(mock_target: MagicMock) -> GroupsSink:
         "group_rdn_attribute": "cn",
     }
     schema: t.TargetLdap.SchemaPayload = {
-        "properties": {"cn": {"type": "string"}, "member": {"type": "array"}},
+        "properties": {"cn": {"type": "string"}, "member": {"type": "array"}}
     }
     return GroupsSink(
-        target=mock_target,
-        stream_name="groups",
-        schema=schema,
-        key_properties=["cn"],
+        target=mock_target, stream_name="groups", schema=schema, key_properties=["cn"]
     )
 
 
@@ -81,7 +75,7 @@ def groups_sink(mock_target: MagicMock) -> GroupsSink:
 def ou_sink(mock_target: MagicMock) -> OrganizationalUnitsSink:
     mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
-        "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
+        "properties": {"ou": {"type": "string"}, "description": {"type": "string"}}
     }
     return OrganizationalUnitsSink(
         target=mock_target,
@@ -95,13 +89,10 @@ def ou_sink(mock_target: MagicMock) -> OrganizationalUnitsSink:
 def generic_sink(mock_target: MagicMock) -> LDAPBaseSink:
     mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
-        "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
+        "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
     }
     return LDAPBaseSink(
-        target=mock_target,
-        stream_name="generic",
-        schema=schema,
-        key_properties=["id"],
+        target=mock_target, stream_name="generic", schema=schema, key_properties=["id"]
     )
 
 
@@ -146,9 +137,7 @@ class TestsFlextTargetLdapSinks:
         mock_client.validate_dn.return_value.success = True
         ldap_base_sink.client = mock_client
         result = ldap_base_sink.validate_entry(
-            "cn=test,dc=example,dc=com",
-            {"cn": ["test"]},
-            ["person", "top"],
+            "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
         )
         tm.ok(result)
 
@@ -233,7 +222,7 @@ class TestsFlextTargetLdapSinks:
             target=mock_target,
             stream_name="users",
             schema={
-                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
+                "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}
             },
             key_properties=["uid"],
         )
@@ -264,10 +253,7 @@ class TestsFlextTargetLdapSinks:
         tm.that(result.value["description"], eq=["Test Group"])
         tm.that(
             result.value["member"],
-            eq=[
-                "uid=user1,dc=example,dc=com",
-                "uid=user2,dc=example,dc=com",
-            ],
+            eq=["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
         )
 
     def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
@@ -288,8 +274,7 @@ class TestsFlextTargetLdapSinks:
         tm.fail(result)
 
     def test_ou_get_object_classes_default(
-        self,
-        ou_sink: OrganizationalUnitsSink,
+        self, ou_sink: OrganizationalUnitsSink
     ) -> None:
         tm.that(ou_sink.resolve_object_classes({}), has="top")
 
@@ -324,36 +309,30 @@ class TestsFlextTargetLdapSinks:
         )
 
     def test_generic_get_object_classes_from_record(
-        self,
-        generic_sink: LDAPBaseSink,
+        self, generic_sink: LDAPBaseSink
     ) -> None:
         tm.that(
             generic_sink.resolve_object_classes({
-                "object_classes": ["customClass", "top"],
+                "object_classes": ["customClass", "top"]
             }),
             eq=["customClass", "top"],
         )
 
     def test_generic_get_object_classes_single_value(
-        self,
-        generic_sink: LDAPBaseSink,
+        self, generic_sink: LDAPBaseSink
     ) -> None:
         tm.that(
-            generic_sink.resolve_object_classes({
-                "object_classes": "customClass",
-            }),
+            generic_sink.resolve_object_classes({"object_classes": "customClass"}),
             eq=["customClass"],
         )
 
     def test_generic_get_object_classes_default(
-        self,
-        generic_sink: LDAPBaseSink,
+        self, generic_sink: LDAPBaseSink
     ) -> None:
         tm.that(generic_sink.resolve_object_classes({}), eq=["top"])
 
     def test_generic_get_object_classes_configured(
-        self,
-        mock_target: MagicMock,
+        self, mock_target: MagicMock
     ) -> None:
         mock_target.settings = {
             **mock_target.settings,

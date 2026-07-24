@@ -37,19 +37,18 @@ class FlextTargetLdapOrchestrator:
         if isinstance(settings, FlextTargetLdapSettings):
             self._typed_config = settings
             settings = t.json_dict_adapter().validate_python(
-                settings.model_dump(mode="python"),
+                settings.model_dump(mode="python")
             )
         else:
             self._typed_config = None
             empty_settings: t.TargetLdap.SettingsPayload = {}
             settings = t.json_dict_adapter().validate_python(
-                settings if settings is not None else empty_settings,
+                settings if settings is not None else empty_settings
             )
         logger.debug("Initialized LDAP target orchestrator")
 
     def orchestrate_data_loading(
-        self,
-        records: t.SequenceOf[t.MappingKV[str, t.Scalar | None]],
+        self, records: t.SequenceOf[t.MappingKV[str, t.Scalar | None]]
     ) -> p.Result[t.HeaderMapping]:
         """Orchestrate data loading to LDAP target.
 

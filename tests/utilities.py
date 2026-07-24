@@ -28,10 +28,7 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
             """TargetLdap-specific test utilities."""
 
             @staticmethod
-            def build_mock_ldap_config(
-                *,
-                bind_dn: str,
-            ) -> t.TargetLdap.SettingsPayload:
+            def build_mock_ldap_config(*, bind_dn: str) -> t.TargetLdap.SettingsPayload:
                 """Build a standard mock LDAP configuration for testing."""
                 return {
                     "connection": {
