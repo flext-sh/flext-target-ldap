@@ -11,15 +11,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    MutableSequence,
-)
 from types import MappingProxyType
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from flext_ldap import m
 from flext_meltano import FlextMeltanoModels
-from flext_target_ldap import c, p, r, t, u
+from flext_target_ldap import t, u
+
+if TYPE_CHECKING:
+    from collections.abc import MutableSequence
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, m):
@@ -42,17 +42,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
             singer_field_name: Annotated[
                 t.NonEmptyStr,
-                u.Field(
-                    ...,
-                    description="Singer field name from source data",
-                ),
+                u.Field(..., description="Singer field name from source data"),
             ]
             ldap_attribute_name: Annotated[
-                t.NonEmptyStr,
-                u.Field(
-                    ...,
-                    description="Target LDAP attribute name",
-                ),
+                t.NonEmptyStr, u.Field(..., description="Target LDAP attribute name")
             ]
             is_required: Annotated[
                 bool,
@@ -71,47 +64,9 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             default_value: Annotated[
                 str | None,
                 u.Field(
-                    default=None,
-                    description="Default value if source field is missing",
+                    default=None, description="Default value if source field is missing"
                 ),
             ]
-
-            def validate_business_rules(self) -> p.Result[bool]:
-                """Validate attribute mapping business rules."""
-                try:
-                    # Validate field name format
-                    if (
-                        not self.singer_field_name
-                        .replace("_", "")
-                        .replace("-", "")
-                        .isalnum()
-                    ):
-                        return r[bool].fail(
-                            "Singer field name must be alphanumeric with underscores/hyphens",
-                        )
-
-                    # Validate LDAP attribute format
-                    if not self.ldap_attribute_name.replace("-", "").isalnum():
-                        return r[bool].fail(
-                            "LDAP attribute name must be alphanumeric with hyphens",
-                        )
-
-                    # Validate transformation rule
-                    if self.transformation_rule:
-                        valid_transformations = {
-                            "lowercase",
-                            "uppercase",
-                            "trim",
-                            "normalize",
-                        }
-                        if self.transformation_rule not in valid_transformations:
-                            return r[bool].fail(
-                                f"Invalid transformation rule. Must be one of {valid_transformations}",
-                            )
-
-                    return r[bool].ok(value=True)
-                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    return r[bool].fail_op("Attribute mapping validation", e)
 
         class Entry(m.Entity):
             """LDAP entry representation with validation and business rules.
@@ -121,11 +76,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             """
 
             distinguished_name: Annotated[
-                t.NonEmptyStr,
-                u.Field(
-                    ...,
-                    description="LDAP Distinguished Name (DN)",
-                ),
+                t.NonEmptyStr, u.Field(..., description="LDAP Distinguished Name (DN)")
             ]
             object_classes: Annotated[
                 MutableSequence[str],
@@ -152,8 +103,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             @u.field_validator("object_classes")
             @classmethod
             def validate_object_classes(
-                cls,
-                v: MutableSequence[str],
+                cls, v: MutableSequence[str]
             ) -> MutableSequence[str]:
                 """Validate object classes contain 'top'."""
                 if "top" not in v:
@@ -181,64 +131,16 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 present: bool = u.Ldap.norm_in(object_class, self.object_classes)
                 return present
 
-            def validate_business_rules(self) -> p.Result[bool]:
-                """Validate LDAP entry business rules."""
-                try:
-                    errors: MutableSequence[str] = []
-
-                    # Validate DN format
-                    if (
-                        "=" not in self.distinguished_name
-                        or "," not in self.distinguished_name
-                    ):
-                        errors.append(
-                            "DN must contain attribute=value pairs separated by commas",
-                        )
-
-                    # Validate object classes
-                    if not self.object_classes:
-                        errors.append(
-                            "Entry must have at least one object class",
-                        )
-
-                    # Validate person entries have required attributes
-                    if "person" in self.object_classes:
-                        required_attrs = {"sn", "cn"}
-                        missing_attrs = required_attrs - set(self.attributes.keys())
-                        if missing_attrs:
-                            errors.append(
-                                f"Person entries require attributes: {missing_attrs}",
-                            )
-
-                    # Validate group entries have required attributes
-                    if "groupOfNames" in self.object_classes:
-                        if "cn" not in self.attributes:
-                            errors.append("Group entries require 'cn' attribute")
-                        if "member" not in self.attributes:
-                            errors.append(
-                                "groupOfNames requires at least one 'member' attribute",
-                            )
-
-                    if errors:
-                        return r[bool].fail("; ".join(errors))
-                    return r[bool].ok(value=True)
-                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-                    return r[bool].fail_op("LDAP entry validation", e)
-
         class TransformationRule(m.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
             name: Annotated[
                 t.NonEmptyStr,
-                u.Field(
-                    description="Unique name identifying this transformation rule",
-                ),
+                u.Field(description="Unique name identifying this transformation rule"),
             ]
             pattern: Annotated[
                 t.NonEmptyStr,
-                u.Field(
-                    description="Regex pattern to match in source data",
-                ),
+                u.Field(description="Regex pattern to match in source data"),
             ]
             replacement: Annotated[
                 str,
@@ -258,7 +160,4 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
 m = FlextTargetLdapModels
 
-__all__: list[str] = [
-    "FlextTargetLdapModels",
-    "m",
-]
+__all__: list[str] = ["FlextTargetLdapModels", "m"]

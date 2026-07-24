@@ -20,25 +20,18 @@ if TYPE_CHECKING:
         FlextTargetLdapTarget as FlextTargetLdapTarget,
         FlextTargetLdapUsersSink as FlextTargetLdapUsersSink,
     )
-_LAZY_IMPORTS = build_lazy_import_map(
-    {
-        ".processing_result": ("FlextTargetLdapProcessingCounters",),
-        ".sinks": (
-            "FlextTargetLdapBaseSink",
-            "FlextTargetLdapGroupsSink",
-            "FlextTargetLdapOrganizationalUnitsSink",
-            "FlextTargetLdapProcessingResult",
-            "FlextTargetLdapSink",
-            "FlextTargetLdapTarget",
-            "FlextTargetLdapUsersSink",
-        ),
-    },
-)
+_LAZY_IMPORTS = build_lazy_import_map({
+    ".processing_result": ("FlextTargetLdapProcessingCounters",),
+    ".sinks": (
+        "FlextTargetLdapBaseSink",
+        "FlextTargetLdapGroupsSink",
+        "FlextTargetLdapOrganizationalUnitsSink",
+        "FlextTargetLdapProcessingResult",
+        "FlextTargetLdapSink",
+        "FlextTargetLdapTarget",
+        "FlextTargetLdapUsersSink",
+    ),
+})
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

@@ -11,16 +11,7 @@ if TYPE_CHECKING:
     from flext_target_ldap._constants.base import (
         FlextTargetLdapConstantsBase as FlextTargetLdapConstantsBase,
     )
-_LAZY_IMPORTS = build_lazy_import_map(
-    {
-        ".base": ("FlextTargetLdapConstantsBase",),
-    },
-)
+_LAZY_IMPORTS = build_lazy_import_map({".base": ("FlextTargetLdapConstantsBase",)})
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

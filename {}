@@ -1,0 +1,2180 @@
+"""LDAP sinks for Singer target using flext-core patterns.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+
+"""
+
+from __future__ import annotations
+
+from collections.abc import (
+    Mapping,
+    MutableSequence,
+    Sequence,
+)
+from typing import ClassVar, TypeIs, override
+
+from flext_target_ldap import (
+    FlextTargetLdapClient,
+    FlextTargetLdapProcessingCounters,
+    c,
+    p,
+    r,
+    t,
+    u,
+)
+
+
+class FlextTargetLdapSink:
+    """Base Sink class for Singer protocol compatibility."""
+
+    @override
+    def __init__(
+        self,
+        target: FlextTargetLdapTarget,
+        stream_name: str,
+        schema: t.ContainerValueMapping,
+        key_properties: t.StrSequence,
+    ) -> None:
+        """Initialize sink with Singer protocol parameters."""
+        self.target = target
+        self.stream_name = stream_name
+        self.schema = schema
+        self.key_properties = key_properties
+
+    def process_record(
+        self,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
+    ) -> p.Result[bool]:
+        """Process a record using the target."""
+        try:
+            process_record_fn = getattr(self.target, "process_record", None)
+            if callable(process_record_fn):
+                result = process_record_fn(_record, _context)
+                if isinstance(result, r):
+                    if result.success:
+                        return r[bool].ok(value=True)
+                    return r[bool].fail(result.error or "Target rejected record")
+                if isinstance(result, bool):
+                    if result:
+                        return r[bool].ok(value=True)
+                    return r[bool].fail("Target rejected record")
+            process_fn = getattr(self.target, "process", None)
+            if callable(process_fn):
+                result = process_fn(self.stream_name, _record, _context)
+                if isinstance(result, r):
+                    if result.success:
+                        return r[bool].ok(value=True)
+                    return r[bool].fail(result.error or "Target rejected record")
+                if isinstance(result, bool):
+                    if result:
+                        return r[bool].ok(value=True)
+                    return r[bool].fail("Target rejected record")
+            return r[bool].fail(
+                "Target does not provide process_record/process handlers",
+            )
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            return r[bool].fail(f"Record processing failed: {e}")
+
+
+class FlextTargetLdapTarget:
+    """Base Target class for Singer protocol compatibility."""
+
+    @override
+    def __init__(
+        self,
+        settings: t.ContainerValueMapping,
+        **kwargs: t.Scalar,
+    ) -> None:
+        """Initialize target with configuration."""
+        self.settings: t.ContainerValueMapping = settings
+
+
+logger = u.fetch_logger(__name__)
+
+
+class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
+    """Result of LDAP processing operations - mutable for performance tracking."""
+
+    @override
+    def __init__(self) -> None:
+        """Initialize processing result counters."""
+        self.processed_count: int = 0
+        self.success_count: int = 0
+        self.error_count: int = 0
+        self.errors: MutableSequence[str] = []
+
+
+class FlextTargetLdapBaseSink(FlextTargetLdapSink):
+    """Base LDAP sink with common functionality."""
+
+    @staticmethod
+    def _is_container_list(
+        value: t.Container,
+    ) -> TypeIs[Sequence[t.ContainerValue]]:
+        """Check if a value is a container list."""
+        return isinstance(value, list)
+
+    @staticmethod
+    def _container_mapping_from_value(
+        value: t.ContainerValue,
+    ) -> t.ContainerValueMapping:
+        """Convert a container value to a container value mapping."""
+        if isinstance(value, dict):
+            return {str(k): v for k, v in value.items()}
+        msg = f"Expected dict for attribute mapping, got {type(value).__name__}: {value!r}"
+        raise TypeError(msg)
+
+    @override
+    def __init__(
+        self,
+        target: FlextTargetLdapTarget,
+        stream_name: str,
+        schema: t.ContainerValueMapping,
+        key_properties: t.StrSequence,
+    ) -> None:
+        """Initialize LDAP sink."""
+        super().__init__(target, stream_name, schema, key_properties)
+        self._target = target
+        self.client: FlextTargetLdapClient | None = None
+        self._client: FlextTargetLdapClient | None = None
+        self._processing_result: FlextTargetLdapProcessingResult = (
+            FlextTargetLdapProcessingResult()
+        )
+
+    def build_attributes(
+        self,
+        _record: t.ContainerValueMapping,
+    ) -> p.Result[t.ContainerValueMapping]:
+        """Build LDAP attributes from record. Override in subclasses."""
+        return r[t.ContainerValueMapping].fail(
+            "build_attributes must be implemented in subclass",
+        )
+
+    def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
+        """Build distinguished name from record. Override in subclasses."""
+        dn = record.get("dn")
+        if isinstance(dn, str) and dn:
+            return r[str].ok(dn)
+        base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
+        entry_id = record.get("id") or record.get("cn") or record.get("name")
+        if isinstance(entry_id, str) and entry_id:
+            return r[str].ok(f"cn={entry_id},{base_dn}")
+        return r[str].fail(
+            "build_dn must be implemented in subclass: No ID or name found for generic entry",
+        )
+
+    def get_object_classes(
+        self,
+        record: t.ContainerValueMapping,
+    ) -> t.StrSequence:
+        """Get object classes for entry."""
+        record_classes = record.get("object_classes")
+        if self._is_container_list(record_classes):
+            return [str(c) for c in record_classes]
+        if isinstance(record_classes, str):
+            return [record_classes]
+        configured_classes = self._target.settings.get("generic_object_classes")
+        if self._is_container_list(configured_classes):
+            return [str(c) for c in configured_classes]
+        return ["top"]
+
+    def get_processing_result(self) -> FlextTargetLdapProcessingResult:
+        """Get processing results."""
+        return self._processing_result
+
+    def process_batch(self, _context: t.ContainerValueMapping) -> None:
+        """Process a batch of records."""
+        setup_result: p.Result[FlextTargetLdapClient] = self.setup_client()
+        if not setup_result.success:
+            logger.error(f"Cannot process batch: {setup_result.error or ''}")
+            return
+        try:
+            records_raw = _context.get("records", [])
+            records: MutableSequence[t.ContainerValueMapping] = []
+            if isinstance(records_raw, list):
+                records.extend(item for item in records_raw if isinstance(item, dict))
+            logger.info(
+                f"Processing batch of {len(records)} records for stream: {self.stream_name}",
+            )
+            for record in records:
+                if isinstance(record, dict):
+                    normalized_record: t.MutableContainerValueMapping = {}
+                    for k, v in record.items():
+                        normalized_record[str(k)] = v
+                    self.process_record(normalized_record, _context)
+            logger.info(
+                f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}",
+            )
+        finally:
+            self.teardown_client()
+
+    @override
+    def process_record(
+        self,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
+    ) -> p.Result[bool]:
+        """Process a single record. Override in subclasses."""
+        if not self.client:
+            self._processing_result.add_error("LDAP client not initialized")
+            return r[bool].fail("LDAP client not initialized")
+        try:
+            logger.debug(f"Processing record: {_record!r}")
+            self._processing_result.add_success()
+            return r[bool].ok(value=True)
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg: str = f"Error processing record: {e}"
+            logger.exception(error_msg)
+            self._processing_result.add_error(error_msg)
+            return r[bool].fail(error_msg)
+
+    def setup_client(self) -> p.Result[FlextTargetLdapClient]:
+        """Set up LDAP client connection."""
+        try:
+            connection_config = {
+                "host": self._target.settings.get("host", "localhost"),
+                "port": self._target.settings.get(
+                    "port",
+                    c.Ldap.ConnectionDefaults.PORT,
+                ),
+                "use_ssl": self._target.settings.get("use_ssl", False),
+                "bind_dn": self._target.settings.get("bind_dn", ""),
+                "password": self._target.settings.get("password", ""),
+                "timeout": self._target.settings.get("timeout", 30),
+            }
+            self.client = FlextTargetLdapClient(connection_config)
+            connect_result = self.client.connect()
+            if not connect_result.success:
+                return r[FlextTargetLdapClient].fail(
+                    f"LDAP connection failed: {connect_result.error}",
+                )
+            logger.info(f"LDAP client setup successful for stream: {self.stream_name}")
+            return r[FlextTargetLdapClient].ok(self.client)
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg: str = f"LDAP client setup failed: {e}"
+            logger.exception(error_msg)
+            return r[FlextTargetLdapClient].fail(error_msg)
+
+    def teardown_client(self) -> None:
+        """Teardown LDAP client connection."""
+        if self.client:
+            _ = self.client.disconnect()
+            self.client = None
+            logger.info(f"LDAP client disconnected for stream: {self.stream_name}")
+
+    def validate_entry(
+        self,
+        dn: str,
+        attributes: t.ContainerValueMapping,
+        object_classes: t.StrSequence,
+    ) -> p.Result[bool]:
+        """Validate LDAP entry before writing."""
+        if not dn:
+            return r[bool].fail("DN cannot be empty")
+        if not attributes:
+            return r[bool].fail("Attributes cannot be empty")
+        if not object_classes:
+            return r[bool].fail("Object classes cannot be empty")
+        validate_fn = (
+            getattr(self._client, "validate_dn", None)
+            if self._client is not None
+            else None
+        )
+        if validate_fn is not None and callable(validate_fn):
+            dn_result = validate_fn(dn)
+            if isinstance(dn_result, r) and dn_result.failure:
+                return r[bool].fail(f"Invalid DN: {dn}")
+        return r[bool].ok(value=True)
+
+
+class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
+    """LDAP sink for user entries."""
+
+    _USER_FIELD_MAP: ClassVar[t.StrMapping] = {
+        "emails": "mail",
+        "phone_numbers": "telephoneNumber",
+    }
+
+    @override
+    def build_attributes(
+        self,
+        _record: t.ContainerValueMapping,
+    ) -> p.Result[t.ContainerValueMapping]:
+        """Build LDAP attributes for user entry."""
+        attrs: t.MutableContainerValueMapping = {}
+        for k, v in _record.items():
+            target_key = self._USER_FIELD_MAP.get(k, k)
+            if self._is_container_list(v):
+                attrs[target_key] = [str(i) for i in v]
+            else:
+                attrs[target_key] = [str(v)]
+        return r[t.ContainerValueMapping].ok(attrs)
+
+    @override
+    def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
+        """Build DN for user entry."""
+        rdn_attr = str(self._target.settings.get("user_rdn_attribute", "uid"))
+        uid = record.get(rdn_attr)
+        if not uid:
+            return r[str].fail(f"No value found for RDN attribute '{rdn_attr}'")
+        base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
+        return r[str].ok(f"{rdn_attr}={uid},{base_dn}")
+
+    def build_user_attributes(
+        self,
+        record: Mapping[str, t.Container],
+    ) -> t.MutableContainerValueMapping:
+        """Build LDAP attributes for user entry."""
+        object_classes = self._target.settings.get(
+            "object_classes",
+            ["inetOrgPerson", "person"],
+        )
+        attributes: t.MutableContainerValueMapping = {
+            "objectClass": list(object_classes)
+            if self._is_container_list(object_classes)
+            else ["inetOrgPerson", "person"],
+        }
+        obj_classes = attributes.get("objectClass")
+        if self._is_container_list(obj_classes):
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
+            if "person" not in obj_classes_mut:
+                obj_classes_mut.append("person")
+            if "inetOrgPerson" not in obj_classes_mut:
+                obj_classes_mut.append("inetOrgPerson")
+            attributes["objectClass"] = obj_classes_mut
+        field_mapping = {
+            "username": "uid",
+            "email": "mail",
+            "first_name": "givenName",
+            "last_name": "sn",
+            "full_name": "cn",
+            "phone": "telephoneNumber",
+            "department": "departmentNumber",
+            "title": "title",
+        }
+        for singer_field, ldap_attr in field_mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[ldap_attr] = [str(value)]
+        mapping_val = self._target.settings.get("attribute_mapping", {})
+        raw_mapping = self._container_mapping_from_value(mapping_val)
+        mapping: t.MutableStrMapping = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = [str(value)]
+        return attributes
+
+    @override
+    def get_object_classes(
+        self,
+        record: t.ContainerValueMapping,
+    ) -> t.StrSequence:
+        """Get object classes for user entry."""
+        configured = self._target.settings.get("users_object_classes")
+        if self._is_container_list(configured):
+            return [str(c) for c in configured]
+        return ["inetOrgPerson", "organizationalPerson", "person", "top"]
+
+    @override
+    def process_record(
+        self,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
+    ) -> p.Result[bool]:
+        """Process a user record."""
+        if not self.client:
+            self._processing_result.add_error("LDAP client not initialized")
+            return r[bool].fail("LDAP client not initialized")
+        try:
+            username = (
+                _record.get("username") or _record.get("uid") or _record.get("cn")
+            )
+            if not username:
+                self._processing_result.add_error("No username found in record")
+                return r[bool].fail("No username found in record")
+            base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
+            user_dn = f"uid={username},{base_dn}"
+            attributes = self.build_user_attributes(_record)
+            object_classes_raw = attributes.get(
+                "objectClass",
+                ["inetOrgPerson", "person"],
+            )
+            object_classes: t.StrSequence = (
+                [str(oc) for oc in object_classes_raw]
+                if self._is_container_list(object_classes_raw)
+                else ["inetOrgPerson", "person"]
+            )
+            attributes_dict: t.MutableContainerValueMapping = {}
+            for k, v in attributes.items():
+                if k != "objectClass":
+                    if self._is_container_list(v):
+                        attributes_dict[k] = [str(i) for i in v]
+                    else:
+                        attributes_dict[k] = [str(v)]
+            add_result: p.Result[bool] = self.client.add_entry(
+                user_dn,
+                attributes_dict,
+                object_classes,
+            )
+            if add_result.success:
+                self._processing_result.add_success()
+                logger.debug("User entry added successfully: %s", user_dn)
+                return r[bool].ok(value=True)
+            if self._target.settings.get("update_existing_entries", False):
+                modify_result: p.Result[bool] = self.client.modify_entry(
+                    user_dn,
+                    attributes_dict,
+                )
+                if modify_result.success:
+                    self._processing_result.add_success()
+                    logger.debug("User entry modified successfully: %s", user_dn)
+                    return r[bool].ok(value=True)
+                self._processing_result.add_error(
+                    f"Failed to modify user {user_dn}: {modify_result.error}",
+                )
+                return r[bool].fail(
+                    f"Failed to modify user {user_dn}: {modify_result.error}",
+                )
+            self._processing_result.add_error(
+                f"Failed to add user {user_dn}: {add_result.error}",
+            )
+            return r[bool].fail(f"Failed to add user {user_dn}: {add_result.error}")
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg: str = f"Error processing user record: {e}"
+            logger.exception(error_msg)
+            self._processing_result.add_error(error_msg)
+            return r[bool].fail(error_msg)
+
+
+class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
+    """LDAP sink for group entries."""
+
+    @override
+    def build_attributes(
+        self,
+        _record: t.ContainerValueMapping,
+    ) -> p.Result[t.ContainerValueMapping]:
+        """Build LDAP attributes for group entry."""
+        attrs: t.MutableContainerValueMapping = {}
+        field_map = {"members": "member"}
+        for k, v in _record.items():
+            target_key = field_map.get(k, k)
+            if self._is_container_list(v):
+                attrs[target_key] = [str(i) for i in v]
+            else:
+                attrs[target_key] = [str(v)]
+        return r[t.ContainerValueMapping].ok(attrs)
+
+    @override
+    def build_dn(self, record: t.ContainerValueMapping) -> p.Result[str]:
+        """Build DN for group entry."""
+        rdn_attr = str(self._target.settings.get("group_rdn_attribute", "cn"))
+        cn = record.get(rdn_attr)
+        if not cn:
+            return r[str].fail(f"No value found for RDN attribute '{rdn_attr}'")
+        base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
+        return r[str].ok(f"{rdn_attr}={cn},{base_dn}")
+
+    @override
+    def get_object_classes(
+        self,
+        record: t.ContainerValueMapping,
+    ) -> t.StrSequence:
+        """Get object classes for group entry."""
+        configured = self._target.settings.get("groups_object_classes")
+        if self._is_container_list(configured):
+            return [str(c) for c in configured]
+        return ["groupOfNames", "top"]
+
+    @override
+    def process_record(
+        self,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
+    ) -> p.Result[bool]:
+        """Process a group record."""
+        if not self.client:
+            self._processing_result.add_error("LDAP client not initialized")
+            return r[bool].fail("LDAP client not initialized")
+        try:
+            group_name = _record.get("name") or _record.get("cn")
+            if not group_name:
+                self._processing_result.add_error("No group name found in record")
+                return r[bool].fail("No group name found in record")
+            group_dn = f"cn={group_name},{self._target.settings.get('base_dn', 'dc=example,dc=com')}"
+            attributes = self._build_group_attributes(_record)
+            object_classes_raw = attributes.get("objectClass", ["groupOfNames"])
+            object_classes: t.StrSequence = (
+                [str(oc) for oc in object_classes_raw]
+                if self._is_container_list(object_classes_raw)
+                else ["groupOfNames"]
+            )
+            attributes_dict: t.MutableContainerValueMapping = {}
+            for k, v in attributes.items():
+                if k != "objectClass":
+                    if self._is_container_list(v):
+                        attributes_dict[k] = list(v)
+                    else:
+                        attributes_dict[k] = v
+            add_result: p.Result[bool] = self.client.add_entry(
+                group_dn,
+                attributes_dict,
+                object_classes,
+            )
+            if add_result.success:
+                self._processing_result.add_success()
+                logger.debug("Group entry added successfully: %s", group_dn)
+                return r[bool].ok(value=True)
+            if self._target.settings.get("update_existing_entries", False):
+                modify_result: p.Result[bool] = self.client.modify_entry(
+                    group_dn,
+                    attributes_dict,
+                )
+                if modify_result.success:
+                    self._processing_result.add_success()
+                    logger.debug("Group entry modified successfully: %s", group_dn)
+                    return r[bool].ok(value=True)
+                self._processing_result.add_error(
+                    f"Failed to modify group {group_dn}: {modify_result.error}",
+                )
+                return r[bool].fail(
+                    f"Failed to modify group {group_dn}: {modify_result.error}",
+                )
+            self._processing_result.add_error(
+                f"Failed to add group {group_dn}: {add_result.error}",
+            )
+            return r[bool].fail(f"Failed to add group {group_dn}: {add_result.error}")
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg: str = f"Error processing group record: {e}"
+            logger.exception(error_msg)
+            self._processing_result.add_error(error_msg)
+            return r[bool].fail(error_msg)
+
+    def _build_group_attributes(
+        self,
+        record: Mapping[str, t.Container],
+    ) -> t.MutableContainerValueMapping:
+        """Build LDAP attributes for group entry."""
+        object_classes = self._target.settings.get(
+            "group_object_classes",
+            ["groupOfNames"],
+        )
+        attributes: t.MutableContainerValueMapping = {
+            "objectClass": list(object_classes)
+            if self._is_container_list(object_classes)
+            else ["groupOfNames"],
+        }
+        obj_classes = attributes.get("objectClass")
+        if self._is_container_list(obj_classes) and "groupOfNames" not in obj_classes:
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
+            obj_classes_mut.append("groupOfNames")
+            attributes["objectClass"] = obj_classes_mut
+        field_mapping = {
+            "name": "cn",
+            "description": "description",
+            "members": "member",
+        }
+        for singer_field, ldap_attr in field_mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                if self._is_container_list(value):
+                    attributes[ldap_attr] = value
+                else:
+                    attributes[ldap_attr] = [str(value)]
+        mapping_val = self._target.settings.get("attribute_mapping", {})
+        raw_mapping = self._container_mapping_from_value(mapping_val)
+        mapping: t.MutableStrMapping = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                if self._is_container_list(value):
+                    attributes[mapped_attr] = value
+                else:
+                    attributes[mapped_attr] = [str(value)]
+        return attributes
+
+
+class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
+    """LDAP sink for organizational unit entries."""
+
+    @override
+    def process_record(
+        self,
+        _record: Mapping[str, t.Container],
+        _context: Mapping[str, t.Container],
+    ) -> p.Result[bool]:
+        """Process an organizational unit record."""
+        if not self.client:
+            self._processing_result.add_error("LDAP client not initialized")
+            return r[bool].fail("LDAP client not initialized")
+        try:
+            ou_name = _record.get("name") or _record.get("ou")
+            if not ou_name:
+                self._processing_result.add_error("No OU name found in record")
+                return r[bool].fail("No OU name found in record")
+            ou_dn = f"ou={ou_name},{self._target.settings.get('base_dn', 'dc=example,dc=com')}"
+            attributes = self._build_ou_attributes(_record)
+            attributes_dict: t.MutableContainerValueMapping = {}
+            for k, v in attributes.items():
+                if self._is_container_list(v):
+                    attributes_dict[k] = list(v)
+                else:
+                    attributes_dict[k] = v
+            add_result: p.Result[bool] = self.client.add_entry(ou_dn, attributes_dict)
+            if add_result.success:
+                self._processing_result.add_success()
+                logger.debug("OU entry added successfully: %s", ou_dn)
+                return r[bool].ok(value=True)
+            if self._target.settings.get("update_existing_entries", False):
+                modify_result: p.Result[bool] = self.client.modify_entry(
+                    ou_dn,
+                    attributes_dict,
+                )
+                if modify_result.success:
+                    self._processing_result.add_success()
+                    logger.debug("OU entry modified successfully: %s", ou_dn)
+                    return r[bool].ok(value=True)
+                self._processing_result.add_error(
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
+                )
+                return r[bool].fail(
+                    f"Failed to modify OU {ou_dn}: {modify_result.error}",
+                )
+            self._processing_result.add_error(
+                f"Failed to add OU {ou_dn}: {add_result.error}",
+            )
+            return r[bool].fail(f"Failed to add OU {ou_dn}: {add_result.error}")
+        except (RuntimeError, ValueError, TypeError) as e:
+            error_msg: str = f"Error processing OU record: {e}"
+            logger.exception(error_msg)
+            self._processing_result.add_error(error_msg)
+            return r[bool].fail(error_msg)
+
+    def _build_ou_attributes(
+        self,
+        record: Mapping[str, t.Container],
+    ) -> t.MutableContainerValueMapping:
+        """Build LDAP attributes for OU entry."""
+        default_classes = self._target.settings.get(
+            "object_classes",
+            ["organizationalUnit"],
+        )
+        attributes: t.MutableContainerValueMapping = {
+            "objectClass": list(default_classes)
+            if self._is_container_list(default_classes)
+            else ["organizationalUnit"],
+        }
+        obj_classes = attributes.get("objectClass")
+        if (
+            self._is_container_list(obj_classes)
+            and "organizationalUnit" not in obj_classes
+        ):
+            obj_classes_mut: MutableSequence[t.ContainerValue] = list(obj_classes)
+            obj_classes_mut.append("organizationalUnit")
+            attributes["objectClass"] = obj_classes_mut
+        field_mapping = {"name": "ou", "description": "description"}
+        for singer_field, ldap_attr in field_mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[ldap_attr] = [str(value)]
+        mapping_val = self._target.settings.get("attribute_mapping", {})
+        raw_mapping = self._container_mapping_from_value(mapping_val)
+        mapping: t.MutableStrMapping = {}
+        for k, v in raw_mapping.items():
+            match v:
+                case str():
+                    mapping[k] = str(v)
+                case _:
+                    pass
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = [str(value)]
+        return attributes
+
+
+__all__: t.StrSequence = [
+    "FlextTargetLdapBaseSink",
+    "FlextTargetLdapGroupsSink",
+    "FlextTargetLdapOrganizationalUnitsSink",
+    "FlextTargetLdapProcessingResult",
+    "FlextTargetLdapSink",
+    "FlextTargetLdapTarget",
+    "FlextTargetLdapUsersSink",
+]
+"""LDAP Target Client - PEP8 Consolidation.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from collections.abc import (
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+from typing import ClassVar, TypeIs, cast, override
+
+from flext_ldap import ldap, u
+from flext_target_ldap import c, m, p, r, t
+
+
+class FlextTargetLdapClient:
+    """Enterprise LDAP client using flext-ldap API for all operations.
+
+    This client delegates LDAP operations to flext-ldap without compatibility layers.
+    """
+
+    _logger: ClassVar = u.fetch_logger(__name__)
+
+    @staticmethod
+    def _is_container_list(
+        value: t.ContainerValue | None,
+    ) -> TypeIs[Sequence[t.ContainerValue]]:
+        return isinstance(value, list)
+
+    @staticmethod
+    def _to_container_list(
+        values: t.ContainerValue | t.StrSequence,
+    ) -> t.ContainerValue:
+        if isinstance(values, list):
+            return [str(value) for value in values]
+        return values
+
+    @staticmethod
+    def _to_str_values(value: t.ContainerValue) -> t.StrSequence:
+        if isinstance(value, list):
+            return [str(item) for item in value]
+        return [str(value)]
+
+    @staticmethod
+    def _build_ldif_entry(
+        dn: str,
+        attributes: t.ContainerValueMapping,
+        object_classes: t.StrSequence | None = None,
+    ) -> m.Ldif.Entry:
+        entry_attributes: MutableMapping[str, t.StrSequence] = {
+            key: FlextTargetLdapClient._to_str_values(value)
+            for key, value in attributes.items()
+        }
+        if object_classes:
+            entry_attributes["objectClass"] = [str(value) for value in object_classes]
+        return m.Ldif.Entry(
+            dn=m.Ldif.DN(
+                value=dn,
+                metadata=m.Ldif.EntryMetadata(),
+            ),
+            attributes=m.Ldif.Attributes.model_validate({
+                "attributes": entry_attributes,
+                "attribute_metadata": {},
+                "metadata": None,
+            }),
+            changetype=None,
+            metadata=None,
+            validation_metadata=None,
+        )
+
+    @staticmethod
+    def _build_modify_changes(
+        changes: t.ContainerValueMapping,
+    ) -> dict[str, Sequence[tuple[int, t.StrSequence]]]:
+        built_changes: dict[str, Sequence[tuple[int, t.StrSequence]]] = {
+            key: [
+                (
+                    c.Ldap.ModifyOperation.REPLACE,
+                    FlextTargetLdapClient._to_str_values(value),
+                )
+            ]
+            for key, value in changes.items()
+        }
+        return built_changes
+
+    @override
+    def __init__(
+        self,
+        settings: m.Ldap.ConnectionConfig | t.ContainerValueMapping,
+    ) -> None:
+        """Initialize LDAP client with connection configuration."""
+        self.settings: m.Ldap.ConnectionConfig
+        if isinstance(settings, m.Ldap.ConnectionConfig):
+            self.settings = settings
+            self._bind_dn = settings.bind_dn or ""
+            self._password = settings.bind_password or ""
+        elif isinstance(settings, dict):
+            config_map: t.ContainerValueMapping = {
+                t.TargetLdap.STRING_ADAPTER.validate_python(k): v
+                for k, v in settings.items()
+            }
+            self.settings = m.Ldap.ConnectionConfig(
+                host=t.TargetLdap.STRING_ADAPTER.validate_python(
+                    config_map.get("host", "localhost"),
+                ),
+                port=t.TargetLdap.INTEGER_ADAPTER.validate_python(
+                    config_map.get("port", c.Ldap.ConnectionDefaults.PORT),
+                ),
+                use_ssl=bool(config_map.get("use_ssl")),
+                timeout=t.TargetLdap.INTEGER_ADAPTER.validate_python(
+                    config_map.get("timeout", 30),
+                ),
+            )
+            self._bind_dn = t.TargetLdap.STRING_ADAPTER.validate_python(
+                config_map.get("bind_dn", ""),
+            )
+            self._password = t.TargetLdap.STRING_ADAPTER.validate_python(
+                config_map.get("password", ""),
+            )
+        else:
+            self.settings = m.Ldap.ConnectionConfig(
+                host="localhost",
+                port=c.Ldap.ConnectionDefaults.PORT,
+                use_ssl=False,
+                timeout=30,
+            )
+            self._bind_dn = ""
+            self._password = ""
+        self._api: p.TargetLdap.LdapApi = cast("p.TargetLdap.LdapApi", ldap)
+        self._current_session_id: str | None = None
+        FlextTargetLdapClient._logger.info(
+            f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",
+        )
+
+    @property
+    def bind_dn(self) -> str:
+        """Get bind DN."""
+        return self._bind_dn
+
+    @property
+    def host(self) -> str:
+        """Get server host."""
+        return self.settings.host
+
+    @property
+    def password(self) -> str:
+        """Get password."""
+        return self._password
+
+    @property
+    def port(self) -> int:
+        """Get server port."""
+        return self.settings.port
+
+    @property
+    def server_uri(self) -> str:
+        """Get server URI."""
+        protocol = "ldaps" if self.settings.use_ssl else "ldap"
+        return f"{protocol}://{self.settings.host}:{self.settings.port}"
+
+    @property
+    def timeout(self) -> int:
+        """Get timeout."""
+        return self.settings.timeout
+
+    @property
+    def use_ssl(self) -> bool:
+        """Get SSL usage."""
+        return self.settings.use_ssl
+
+    def add_entry(
+        self,
+        dn: str,
+        attributes: t.ContainerValueMapping,
+        object_classes: t.StrSequence | None = None,
+    ) -> p.Result[bool]:
+        """Add LDAP entry using flext-ldap API."""
+        try:
+            FlextTargetLdapClient._logger.info(
+                "Adding LDAP entry using flext-ldap API: %s",
+                dn,
+            )
+            connect_result = self._api.connect(self.settings)
+            if connect_result.failure:
+                return r[bool].fail(f"Connection failed: {connect_result.error}")
+            try:
+                ldap_entry = self._build_ldif_entry(dn, attributes, object_classes)
+                result_op = self._api.add(ldap_entry)
+                if result_op.success:
+                    return r[bool].ok(value=True)
+                return r[bool].fail(
+                    str(result_op.error) if result_op.error else "LDAP add failed",
+                )
+            finally:
+                self._api.disconnect()
+        except (RuntimeError, ValueError, TypeError) as e:
+            FlextTargetLdapClient._logger.exception("Failed to add entry %s", dn)
+            return r[bool].fail(f"Add entry failed: {e}")
+
+    def connect(self) -> p.Result[bool]:
+        """Validate connectivity to LDAP server using flext-ldap API."""
+        try:
+            connect_result = self._api.connect(self.settings)
+            if connect_result.failure:
+                return r[bool].fail(f"Connection failed: {connect_result.error}")
+            self._api.disconnect()
+            FlextTargetLdapClient._logger.info(
+                f"LDAP connectivity validated for {self.settings.host}:{self.settings.port}",
+            )
+            return r[bool].ok(value=True)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            error_msg = f"Connection error: {e}"
+            FlextTargetLdapClient._logger.exception(error_msg)
+            return r[bool].fail(error_msg)
+
+    def delete_entry(self, dn: str) -> p.Result[bool]:
+        """Delete LDAP entry using flext-ldap API."""
+        try:
+            if not dn:
+                return r[bool].fail("DN required")
+            FlextTargetLdapClient._logger.info(
+                "Deleting LDAP entry using flext-ldap API: %s",
+                dn,
+            )
+            connect_result = self._api.connect(self.settings)
+            if connect_result.failure:
+                return r[bool].fail(f"Connection failed: {connect_result.error}")
+            try:
+                result = self._api.delete(dn)
+                if result.success:
+                    FlextTargetLdapClient._logger.debug(
+                        "Successfully deleted LDAP entry: %s",
+                        dn,
+                    )
+                    return r[bool].ok(value=True)
+                return r[bool].fail(result.error or "Delete failed")
+            finally:
+                self._api.disconnect()
+        except (RuntimeError, ValueError, TypeError) as e:
+            FlextTargetLdapClient._logger.exception("Failed to delete entry %s", dn)
+            return r[bool].fail(f"Delete entry failed: {e}")
+
+    def disconnect(self) -> p.Result[bool]:
+        """Disconnect LDAP session through flext-ldap."""
+        try:
+            self._api.disconnect()
+            self._current_session_id = None
+            return r[bool].ok(value=True)
+        except (RuntimeError, ValueError, TypeError) as e:
+            FlextTargetLdapClient._logger.exception(
+                "Failed to disconnect LDAP client",
+            )
+            return r[bool].fail(f"Disconnect failed: {e}")
+
+    def entry_exists(self, dn: str) -> p.Result[bool]:
+        """Check if LDAP entry exists using flext-ldap API."""
+        try:
+            if not dn:
+                return r[bool].fail("DN required")
+            FlextTargetLdapClient._logger.info("Checking if LDAP entry exists: %s", dn)
+            search_result = self.search_entry(
+                base_dn=dn,
+                search_filter="(objectClass=*)",
+                attributes=["dn"],
+            )
+            if search_result.success:
+                return r[bool].ok(bool(search_result.value))
+            return r[bool].ok(value=False)
+        except (RuntimeError, ValueError, TypeError) as e:
+            FlextTargetLdapClient._logger.exception(
+                "Failed to check entry existence: %s",
+                dn,
+            )
+            return r[bool].fail(f"Entry exists check failed: {e}")
+
+    def get_entry(
+        self,
+        dn: str,
+        attributes: t.StrSequence | None = None,
+    ) -> p.Result[m.TargetLdap.SearchEntry | None]:
+        """Get LDAP entry using flext-ldap API."""
+        try:
+            if not dn:
+                return r[m.TargetLdap.SearchEntry | None].fail("DN required")
+            FlextTargetLdapClient._logger.info("Getting LDAP entry: %s", dn)
+            search_result = self.search_entry(dn, "(objectClass=*)", attributes)
+            if search_result.success and search_result.value:
+                return r[m.TargetLdap.SearchEntry | None].ok(search_result.value[0])
+            return r[m.TargetLdap.SearchEntry | None].ok(None)
+        except (RuntimeError, ValueError, TypeError) as e:
+            FlextTargetLdapClient._logger.exception("Failed to get entry: %s", dn)
+            return r[m.TargetLdap.SearchEntry | None].fail(f"Get entry failed: {e}")
+
+    def modify_entry(
+        self,
+        dn: str,
+        changes: t.ContainerValueMapping,
+    ) -> p.Result[bool]:
+        """Modify LDAP entry using flext-ldap API."""
+        try:
+            FlextTargetLdapClient._logger.info(
+                "Modifying LDAP entry using flext-ldap API: %s",
+                dn,
+            )
+            connect_result = self._api.connect(self.settings)
+            if connect_result.failure:
+                return r[bool].fail(f"Connection failed: {connect_result.error}")
+            try:
+                result = self._api.modify(dn, self._build_modify_changes(changes))
+                if result.success:
+                    FlextTargetLdapClient._logger.debug(
+                        "Successfully modified LDAP entry: %s",
+                        dn,
+                    )
+                    return r[bool].ok(value=True)
+            finally:
+                self._api.disconnect()
+            error_msg = f"Failed to modify entry {dn}: {result.error}"
+            FlextTargetLdapClient._logger.error(error_msg)
+            return r[bool].fail(error_msg)
+        except (RuntimeError, ValueError, TypeError) as e:
+            FlextTargetLdapClient._logger.exception("Failed to modify entry %s", dn)
+            return r[bool].fail(f"Modify entry failed: {e}")
+
+    def search_entry(
+        self,
+        base_dn: str,
+        search_filter: str = "(objectClass=*)",
+        attributes: t.StrSequence | None = None,
+    ) -> p.Result[Sequence[m.TargetLdap.SearchEntry]]:
+        """Search LDAP entries using flext-ldap API."""
+        try:
+            if not base_dn:
+                return r[Sequence[m.TargetLdap.SearchEntry]].fail("Base DN required")
+            FlextTargetLdapClient._logger.info(
+                "Searching LDAP entries using flext-ldap API: %s with filter %s",
+                base_dn,
+                search_filter,
+            )
+            connect_result = self._api.connect(self.settings)
+            if connect_result.failure:
+                return r[Sequence[m.TargetLdap.SearchEntry]].fail(
+                    f"Connection failed: {connect_result.error}",
+                )
+            try:
+                search_options = m.Ldap.SearchOptions(
+                    base_dn=base_dn,
+                    filter_str=search_filter,
+                    attributes=attributes,
+                )
+                result = self._api.search(search_options)
+            finally:
+                self._api.disconnect()
+            if result.success and result.value:
+                entries: MutableSequence[m.TargetLdap.SearchEntry] = []
+                search_res = result.value
+                ldap_entries: Sequence[p.Ldif.Entry] = search_res.entries
+                for entry in ldap_entries:
+                    dn = str(entry.dn.value) if entry.dn is not None else ""
+                    attributes_model = entry.attributes
+                    attrs: t.MutableContainerValueMapping = {
+                        str(k): self._to_container_list(v)
+                        for k, v in (
+                            attributes_model.attributes.items()
+                            if attributes_model is not None
+                            else ()
+                        )
+                    }
+                    entries.append(
+                        m.TargetLdap.SearchEntry.model_validate({
+                            "dn": dn,
+                            "attributes": attrs,
+                        }),
+                    )
+                FlextTargetLdapClient._logger.debug(
+                    "Successfully found %d LDAP entries",
+                    len(entries),
+                )
+                return r[Sequence[m.TargetLdap.SearchEntry]].ok(entries)
+            FlextTargetLdapClient._logger.debug("No LDAP entries found")
+            return r[Sequence[m.TargetLdap.SearchEntry]].ok([])
+        except (RuntimeError, ValueError, TypeError) as e:
+            FlextTargetLdapClient._logger.exception(
+                "Failed to search entries in %s",
+                base_dn,
+            )
+            return r[Sequence[m.TargetLdap.SearchEntry]].fail(f"Search failed: {e}")
+
+
+__all__: list[str] = ["FlextTargetLdapClient"]
+"""Internal runtime adapters for the target-ldap service facade."""
+
+from __future__ import annotations
+
+from collections.abc import (
+    Mapping,
+)
+from pathlib import Path
+from typing import override
+
+from flext_target_ldap import FlextTargetLdap, FlextTargetLdapSink, m, p, t, u
+
+
+class FlextTargetLdapServiceRuntime:
+    """Service-runtime adapters used by the target-ldap facade."""
+
+    class Target(m.Meltano.SingerTargetBase):
+        """Minimal Singer target used by the service facade."""
+
+        name = "target-ldap"
+
+    class Sink(m.Meltano.SingerSinkBase):
+        """Singer sink adapter that delegates to the LDAP runtime sink."""
+
+        name = "target-ldap-sink"
+
+        _runtime_sink: FlextTargetLdapSink
+
+        @classmethod
+        def create(
+            cls,
+            *,
+            runtime_sink: FlextTargetLdapSink,
+            target: m.Meltano.SingerTargetBase,
+            stream_name: str,
+            schema: t.MutableMappingKV[str, t.ContainerValue],
+            key_properties: t.StrSequence,
+        ) -> FlextTargetLdapServiceRuntime.Sink:
+            """Create an adapter sink and attach the LDAP runtime sink."""
+            service_sink = cls(
+                target=target,
+                stream_name=stream_name,
+                schema=schema,
+                key_properties=key_properties,
+            )
+            service_sink._runtime_sink = runtime_sink
+            return service_sink
+
+        @override
+        def process_batch(
+            self,
+            context: Mapping[str, t.Container],
+        ) -> None:
+            """Singer batch hook is handled record-by-record by the runtime sink."""
+            _ = context
+
+        @override
+        def process_record(
+            self,
+            record: Mapping[str, t.Container],
+            context: Mapping[str, t.Container],
+        ) -> None:
+            """Delegate Singer record handling to the LDAP runtime sink."""
+            result = self._runtime_sink.process_record(
+                FlextTargetLdapServiceRuntime.normalize_singer_mapping(record),
+                FlextTargetLdapServiceRuntime.normalize_singer_mapping(context),
+            )
+            if result.failure:
+                msg = result.error or "LDAP runtime sink rejected the record"
+                raise RuntimeError(msg)
+
+    @classmethod
+    def create_sink(
+        cls,
+        *,
+        stream_name: str,
+        schema: t.FlatContainerMapping,
+        target_config: Mapping[str, t.Container],
+    ) -> p.Meltano.SingerDrainSink:
+        """Create the service-level Singer sink adapter."""
+        normalized_target_config = cls.normalize_singer_mapping(target_config)
+        runtime_target = FlextTargetLdap(
+            settings=normalized_target_config,
+            validate_config=False,
+        )
+        normalized_schema = cls.normalize_flat_schema(schema)
+        sink_class: type[FlextTargetLdapSink] = runtime_target.get_sink_class(
+            stream_name
+        )
+        runtime_sink = sink_class(
+            target=runtime_target,
+            stream_name=stream_name,
+            schema=normalized_schema,
+            key_properties=[],
+        )
+        return cls.Sink.create(
+            runtime_sink=runtime_sink,
+            target=cls.Target(
+                config=dict(normalized_target_config),
+                validate_config=False,
+            ),
+            stream_name=stream_name,
+            schema=dict(normalized_schema),
+            key_properties=[],
+        )
+
+    @classmethod
+    def normalize_singer_mapping(
+        cls,
+        source: Mapping[str, t.Container],
+    ) -> t.MutableMappingKV[str, t.ContainerValue]:
+        """Normalize a Singer payload mapping to the LDAP runtime contract."""
+        normalized: t.MutableMappingKV[str, t.ContainerValue] = {}
+        for key, value in source.items():
+            normalized_value = cls.normalize_singer_value(value)
+            if normalized_value is not None:
+                normalized[str(key)] = normalized_value
+        return normalized
+
+    @classmethod
+    def normalize_singer_value(
+        cls,
+        value: t.Container,
+    ) -> t.ContainerValue | None:
+        """Normalize a Singer payload value to the LDAP runtime contract."""
+        if value is None:
+            return None
+        if isinstance(value, Path):
+            return str(value)
+        if u.scalar(value):
+            return value
+        if u.mapping(value):
+            return cls.normalize_singer_mapping(value)
+        normalized_sequence: t.MutableSequenceOf[t.ContainerValue] = []
+        for item in value:
+            normalized_item = cls.normalize_singer_value(item)
+            if normalized_item is not None:
+                normalized_sequence.append(normalized_item)
+        return normalized_sequence
+
+    @staticmethod
+    def normalize_flat_schema(
+        schema: t.FlatContainerMapping,
+    ) -> t.MutableMappingKV[str, t.ContainerValue]:
+        """Normalize a flat Singer schema to the LDAP runtime contract."""
+        return {
+            key: (str(value) if isinstance(value, Path) else value)
+            for key, value in schema.items()
+        }
+
+
+__all__: list[str] = ["FlextTargetLdapServiceRuntime"]
+"""Data transformation engine for LDAP target.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+
+"""
+
+from __future__ import annotations
+
+from collections.abc import (
+    MutableSequence,
+    Sequence,
+)
+from typing import override
+
+from flext_meltano import u
+from flext_target_ldap import c, m, p, r, t
+
+logger = u.fetch_logger(__name__)
+
+
+class FlextTargetLdapTransformationEngine:
+    """Engine for transforming data using rules."""
+
+    @override
+    def __init__(self, rules: Sequence[m.TargetLdap.TransformationRule]) -> None:
+        """Initialize transformation engine."""
+        self.rules = rules
+
+    def get_statistics(self) -> t.IntMapping:
+        """Get transformation statistics."""
+        return {"total_rules": len(self.rules), "transformations_applied": 0}
+
+    def transform(
+        self,
+        data: t.ContainerValueMapping,
+    ) -> p.Result[m.TargetLdap.DataTransformationResult]:
+        """Transform data using rules."""
+        try:
+            transformed_data: t.MutableContainerValueMapping = dict(data)
+            applied_rules: MutableSequence[str] = []
+            for rule in self.rules:
+                if not rule.enabled:
+                    continue
+                for key, value in transformed_data.items():
+                    match value:
+                        case str() as text if rule.pattern in text:
+                            transformed_data[key] = text.replace(
+                                rule.pattern,
+                                rule.replacement,
+                            )
+                            applied_rules.append(rule.name)
+                        case list() as items:
+                            new_items: MutableSequence[t.ContainerValue] = []
+                            matched = False
+                            for item in items:
+                                if isinstance(item, str) and rule.pattern in item:
+                                    new_items.append(
+                                        item.replace(rule.pattern, rule.replacement),
+                                    )
+                                    matched = True
+                                else:
+                                    new_items.append(item)
+                            if matched:
+                                transformed_data[key] = new_items
+                                applied_rules.append(rule.name)
+                        case _:
+                            pass
+            result = m.TargetLdap.DataTransformationResult.model_validate({
+                "transformed_data": transformed_data,
+                "applied_rules": list(applied_rules),
+            })
+            return r[m.TargetLdap.DataTransformationResult].ok(result)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            return r[m.TargetLdap.DataTransformationResult].fail(
+                f"Transformation failed: {e}",
+            )
+
+
+class FlextTargetLdapMigrationValidator:
+    """Validator for migration data."""
+
+    @override
+    def __init__(self, *, strict_mode: bool = True) -> None:
+        """Initialize migration validator."""
+        self.strict_mode = strict_mode
+        self._stats = {
+            "entries_validated": 0,
+            "validation_errors": 0,
+            "validation_warnings": 0,
+        }
+
+    def get_validation_statistics(self) -> t.IntMapping:
+        """Get validation statistics."""
+        return self._stats.copy()
+
+    def validate(
+        self,
+        data: t.ContainerValueMapping | str,
+        attributes: t.ContainerValueMapping | None = None,
+        object_classes: Sequence[t.ContainerValue] | None = None,
+    ) -> p.Result[bool]:
+        """Validate migration data."""
+        try:
+            self._stats["entries_validated"] += 1
+            error_msg = None
+            match data:
+                case str() as dn:
+                    attrs = attributes or {}
+                    obj_classes = object_classes or []
+                    if not dn or not dn.strip():
+                        error_msg = "DN cannot be empty or whitespace"
+                    elif not obj_classes:
+                        error_msg = "Object classes must be a non-empty list"
+                    elif "person" in obj_classes and "sn" not in attrs:
+                        self._stats["validation_warnings"] += 1
+                        if self.strict_mode:
+                            error_msg = "person object class requires 'sn' attribute"
+                case _:
+                    if not data:
+                        error_msg = "Data is empty"
+            if error_msg:
+                self._stats["validation_errors"] += 1
+                return r[bool].fail(error_msg)
+            return r[bool].ok(value=True)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            self._stats["validation_errors"] += 1
+            return r[bool].fail(f"Validation failed: {e}")
+
+    def validate_entry(
+        self,
+        dn: str,
+        attributes: t.ContainerValueMapping,
+        object_classes: t.StrSequence,
+    ) -> p.Result[bool]:
+        """Validate individual LDAP entry - alias for validate method."""
+        return self.validate(dn, attributes, object_classes)
+
+
+__all__: t.StrSequence = [
+    "FlextTargetLdapMigrationValidator",
+    "FlextTargetLdapTransformationEngine",
+]
+"""Configuration for target-ldap using flext-core patterns.
+
+REFACTORED:
+Uses flext-core patterns for declarative configuration.
+Zero tolerance for code duplication.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+
+"""
+
+from __future__ import annotations
+
+from collections.abc import (
+    Mapping,
+)
+from typing import Annotated, ClassVar
+
+from flext_core import FlextSettings
+from flext_target_ldap import c, m, p, r, t, u
+
+
+@FlextSettings.auto_register("target-ldap")
+class FlextTargetLdapSettings(FlextSettings):
+    """LDAP target configuration with connection and operation settings."""
+
+    model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
+        env_prefix=c.ENV_PREFIX, extra="ignore"
+    )
+
+    connection: Annotated[
+        m.Ldap.ConnectionConfig,
+        u.Field(
+            description="LDAP server connection configuration",
+        ),
+    ]
+    base_dn: Annotated[
+        t.NonEmptyStr,
+        u.Field(
+            description="Base Distinguished Name for LDAP operations",
+        ),
+    ]
+    search_filter: Annotated[
+        str,
+        u.Field(
+            default=c.Ldap.Filters.ALL_ENTRIES_FILTER,
+            description="LDAP search filter expression",
+        ),
+    ]
+    search_scope: Annotated[
+        t.Ldap.Ldap3SearchScope,
+        u.Field(
+            default=c.Ldap.SearchDefaults.DEFAULT_SCOPE,
+            description="LDAP search scope (BASE, ONELEVEL, or SUBTREE)",
+        ),
+    ]
+    connect_timeout: Annotated[
+        t.PositiveInt,
+        u.Field(
+            default=c.TargetLdap.CONNECT_TIMEOUT,
+            description="Connection timeout in seconds",
+        ),
+    ]
+    receive_timeout: Annotated[
+        t.PositiveInt,
+        u.Field(
+            default=c.DEFAULT_TIMEOUT_SECONDS,
+            description="Receive timeout in seconds for LDAP responses",
+        ),
+    ]
+    batch_size: Annotated[
+        t.BatchSize,
+        u.Field(
+            default=c.DEFAULT_SIZE,
+            description="Maximum number of entries per batch operation",
+        ),
+    ]
+    max_records: Annotated[
+        int | None,
+        u.Field(
+            default=None,
+            description="Maximum total records to process, or None for unlimited",
+        ),
+    ]
+    create_missing_entries: Annotated[
+        bool,
+        u.Field(
+            default=c.TargetLdap.CREATE_MISSING_ENTRIES,
+            description="Whether to create LDAP entries that do not exist",
+        ),
+    ]
+    update_existing_entries: Annotated[
+        bool,
+        u.Field(
+            default=c.TargetLdap.UPDATE_EXISTING_ENTRIES,
+            description="Whether to update LDAP entries that already exist",
+        ),
+    ]
+    delete_removed_entries: Annotated[
+        bool,
+        u.Field(
+            default=c.TargetLdap.DELETE_REMOVED_ENTRIES,
+            description="Whether to delete LDAP entries removed from source",
+        ),
+    ]
+    attribute_mapping: Annotated[
+        t.StrMapping,
+        u.Field(
+            description="Mapping of source field names to LDAP attribute names",
+            default_factory=dict,
+        ),
+    ]
+    object_classes: Annotated[
+        t.StrSequence,
+        u.Field(
+            description="LDAP object classes to assign to created entries",
+            default_factory=lambda: list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
+        ),
+    ]
+
+    @staticmethod
+    def validate_ldap_config(
+        settings: Mapping[str, t.ContainerValue | m.ConfigMap],
+    ) -> p.Result[FlextTargetLdapSettings]:
+        """Validate LDAP configuration."""
+        try:
+            validated_config = FlextTargetLdapSettings.model_validate({
+                "connection": {
+                    "host": settings.get("host", c.LOCALHOST),
+                    "port": settings.get("port", c.Ldap.ConnectionDefaults.PORT),
+                    "use_ssl": settings.get("use_ssl", False),
+                    "bind_dn": settings.get("bind_dn", ""),
+                    "bind_password": settings.get("password", ""),
+                    "timeout": settings.get(
+                        "timeout",
+                        c.Ldap.ConnectionDefaults.TIMEOUT,
+                    ),
+                },
+                "base_dn": settings.get("base_dn", ""),
+                "search_filter": settings.get(
+                    "search_filter",
+                    c.Ldap.Filters.ALL_ENTRIES_FILTER,
+                ),
+                "search_scope": settings.get(
+                    "search_scope",
+                    c.Ldap.SearchDefaults.DEFAULT_SCOPE,
+                ),
+                "connect_timeout": settings.get(
+                    "connect_timeout",
+                    c.TargetLdap.CONNECT_TIMEOUT,
+                ),
+                "receive_timeout": settings.get(
+                    "receive_timeout",
+                    c.DEFAULT_TIMEOUT_SECONDS,
+                ),
+                "batch_size": settings.get("batch_size", c.DEFAULT_SIZE),
+                "max_records": settings.get("max_records"),
+                "create_missing_entries": settings.get(
+                    "create_missing_entries",
+                    c.TargetLdap.CREATE_MISSING_ENTRIES,
+                ),
+                "update_existing_entries": settings.get(
+                    "update_existing_entries",
+                    c.TargetLdap.UPDATE_EXISTING_ENTRIES,
+                ),
+                "delete_removed_entries": settings.get(
+                    "delete_removed_entries",
+                    c.TargetLdap.DELETE_REMOVED_ENTRIES,
+                ),
+                "attribute_mapping": settings.get("attribute_mapping", {}),
+                "object_classes": settings.get(
+                    "object_classes",
+                    list(c.TargetLdap.DEFAULT_OBJECT_CLASSES),
+                ),
+            })
+            return r[FlextTargetLdapSettings].ok(validated_config)
+        except c.ValidationError as e:
+            return r[FlextTargetLdapSettings].fail(
+                f"Configuration validation failed: {e}",
+            )
+"""Type aliases and project-specific types for the LDAP target."""
+
+from __future__ import annotations
+
+from collections.abc import (
+    Mapping,
+)
+
+from flext_ldap import FlextLdapTypes
+from flext_meltano import FlextMeltanoTypes
+from flext_target_ldap import m, u
+
+
+class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
+    """FLEXT Target LDAP Types.
+
+    Inherits standard types from FlextTypes and adds project-specific
+    domain types.
+    """
+
+    class TargetLdap:
+        """Target LDAP-specific types and centralized adapters."""
+
+        STRING_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.TextValue] = u.TypeAdapter(
+            FlextMeltanoTypes.TextValue,
+        )
+        INTEGER_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.IntegerValue] = u.TypeAdapter(
+            FlextMeltanoTypes.IntegerValue,
+        )
+        STR_MAPPING_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.StrMapping] = (
+            u.TypeAdapter(
+                FlextMeltanoTypes.StrMapping,
+            )
+        )
+        STR_SEQUENCE_ADAPTER: u.TypeAdapter[FlextMeltanoTypes.StrSequence] = (
+            u.TypeAdapter(
+                FlextMeltanoTypes.StrSequence,
+            )
+        )
+        CONFIG_MAP_ADAPTER: u.TypeAdapter[Mapping[str, FlextMeltanoTypes.ConfigMap]] = (
+            u.TypeAdapter(
+                Mapping[str, FlextMeltanoTypes.ConfigMap],
+            )
+        )
+        SINGER_MESSAGE_ADAPTER: u.TypeAdapter[
+            FlextMeltanoTypes.RecursiveContainerMapping
+        ] = u.TypeAdapter(
+            FlextMeltanoTypes.RecursiveContainerMapping,
+            config=m.ConfigDict(strict=False),
+        )
+        CONTAINER_VALUE_MAP_ADAPTER: u.TypeAdapter[
+            FlextMeltanoTypes.ContainerValueMapping
+        ] = u.TypeAdapter(
+            FlextMeltanoTypes.ContainerValueMapping,
+        )
+
+
+t = FlextTargetLdapTypes
+__all__: list[str] = ["FlextTargetLdapTypes", "t"]
+"""Singer target utilities for LDAP domain operations.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+
+"""
+
+from __future__ import annotations
+
+import re
+from collections.abc import (
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+from datetime import datetime
+
+from flext_ldap import FlextLdapUtilities
+from flext_meltano import u
+from flext_target_ldap import c, m, p, r, t
+
+
+class FlextTargetLdapUtilities(u, FlextLdapUtilities):
+    """Single unified utilities class for Singer target LDAP operations.
+
+    Follows FLEXT unified class pattern with nested helper classes for
+    domain-specific Singer target functionality with LDAP directory operations.
+
+    Constants are accessed via constants module:
+        c.Ldap.ConnectionDefaults.PORT (389)
+        c.LDAPS_DEFAULT_PORT (636)
+        c.DEFAULT_SIZE
+    """
+
+    @staticmethod
+    def coerce_container_value(
+        value: m.ConfigMap | t.ValueOrModel,
+    ) -> m.ConfigMap | t.ContainerValueList | t.Container | None:
+        """Coerce a container value to a normalized form for LDAP operations.
+
+        Recursively normalizes BaseModel, scalar, list, and Mapping values into
+        types suitable for LDAP attribute storage.
+
+        Args:
+            value: Value to coerce (ConfigMap, scalar, list, dict, or BaseModel)
+
+        Returns:
+            Normalized value, ConfigMap, list of container values, or None if
+            the value cannot be coerced.
+
+        """
+        if isinstance(value, m.BaseModel):
+            return FlextTargetLdapUtilities.coerce_container_value(value.model_dump())
+        if isinstance(value, (str, int, float, bool, datetime)):
+            return value
+        if isinstance(value, list):
+            normalized_list: MutableSequence[t.ContainerValue] = []
+            for item in value:
+                if isinstance(item, (str, int, float, bool, datetime, list, dict)):
+                    coerced_item = FlextTargetLdapUtilities.coerce_container_value(
+                        item,
+                    )
+                    if isinstance(coerced_item, (str, int, float, bool, datetime)):
+                        normalized_list.append(coerced_item)
+            return normalized_list
+        if isinstance(value, Mapping):
+            normalized_dict: MutableMapping[str, t.ValueOrModel] = {}
+            for key, item in value.items():
+                if isinstance(item, (str, int, float, bool, datetime, list, dict)):
+                    coerced_item = FlextTargetLdapUtilities.coerce_container_value(
+                        item,
+                    )
+                    if coerced_item is not None and isinstance(
+                        coerced_item,
+                        (str, int, float, bool),
+                    ):
+                        normalized_dict[str(key)] = coerced_item
+            return m.ConfigMap(root=normalized_dict)
+        return None
+
+    class TargetLdap:
+        """Singer protocol utilities for target operations."""
+
+        @staticmethod
+        def build_singer_catalog() -> t.ContainerValueMapping:
+            """Build the canonical Singer catalog for LDAP targets."""
+            return {
+                "streams": [
+                    {
+                        "tap_stream_id": "users",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "username": {"type": "string"},
+                                "email": {"type": "string"},
+                                "first_name": {"type": "string"},
+                                "last_name": {"type": "string"},
+                                "full_name": {"type": "string"},
+                                "phone": {"type": "string"},
+                                "department": {"type": "string"},
+                                "title": {"type": "string"},
+                            },
+                            "required": ["username"],
+                        },
+                    },
+                    {
+                        "tap_stream_id": "groups",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "description": {"type": "string"},
+                                "members": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                },
+                            },
+                            "required": ["name"],
+                        },
+                    },
+                    {
+                        "tap_stream_id": "organizational_units",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "description": {"type": "string"},
+                            },
+                            "required": ["name"],
+                        },
+                    },
+                ],
+            }
+
+        class TypeConversion:
+            """Type coercion utilities for Singer settings values to typed Python values."""
+
+            @staticmethod
+            def build_connection_config(
+                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
+            ) -> m.Ldap.ConnectionConfig:
+                """Build LDAP ConnectionConfig from a flat settings mapping."""
+                return m.Ldap.ConnectionConfig(
+                    host=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                        settings.get("host", "localhost"),
+                        default="localhost",
+                    ),
+                    port=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
+                        settings.get("port", c.Ldap.ConnectionDefaults.PORT),
+                        default=c.Ldap.ConnectionDefaults.PORT,
+                    ),
+                    use_ssl=bool(settings.get("use_ssl", False)),
+                    bind_dn=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                        settings.get("bind_dn", ""),
+                    ),
+                    bind_password=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                        settings.get("password", ""),
+                    ),
+                    timeout=FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_int(
+                        settings.get("timeout", 30),
+                        default=30,
+                    ),
+                )
+
+            @staticmethod
+            def to_str(
+                value: t.ContainerValue | m.ConfigMap | None,
+                default: str = "",
+            ) -> str:
+                """Coerce a settings value to str."""
+                if value is None:
+                    return default
+                try:
+                    return t.TargetLdap.STRING_ADAPTER.validate_python(value)
+                except c.ValidationError:
+                    return default
+
+            @staticmethod
+            def to_int(
+                value: t.ContainerValue | m.ConfigMap | None,
+                default: int = 0,
+            ) -> int:
+                """Coerce a settings value to int."""
+                if value is None:
+                    return default
+                match value:
+                    case bool():
+                        return default
+                    case int():
+                        return value
+                    case str() | float():
+                        try:
+                            return t.TargetLdap.INTEGER_ADAPTER.validate_python(value)
+                        except c.ValidationError:
+                            return default
+                    case _:
+                        return default
+
+            @staticmethod
+            def to_bool(
+                value: t.ContainerValue | m.ConfigMap | None,
+                *,
+                default: bool = False,
+            ) -> bool:
+                """Coerce a settings value to bool."""
+                if value is None:
+                    return default
+                if isinstance(value, bool):
+                    return value
+                if isinstance(value, str):
+                    return value.lower() in {"true", "1", "yes"}
+                if isinstance(value, int):
+                    return value != 0
+                return default
+
+            @staticmethod
+            def extract_attribute_mapping(
+                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
+            ) -> t.StrMapping:
+                """Extract attribute mapping from settings."""
+                raw = settings.get("attribute_mapping", {})
+                if isinstance(raw, Mapping):
+                    normalized_mapping: t.MutableMappingKV[str, str] = {}
+                    for key, value in raw.items():
+                        normalized_key = t.TargetLdap.STRING_ADAPTER.validate_python(
+                            key
+                        )
+                        normalized_value = t.TargetLdap.STRING_ADAPTER.validate_python(
+                            value,
+                        )
+                        normalized_mapping[normalized_key] = normalized_value
+                    return t.TargetLdap.STR_MAPPING_ADAPTER.validate_python(
+                        normalized_mapping,
+                    )
+                msg = f"Expected Mapping for 'attribute_mapping', got {type(raw).__name__}: {raw!r}"
+                raise TypeError(msg)
+
+            @staticmethod
+            def extract_object_classes(
+                settings: Mapping[str, m.ConfigMap | t.ContainerValue],
+            ) -> t.StrSequence:
+                """Extract object classes from settings."""
+                raw = settings.get("object_classes")
+                if isinstance(raw, list):
+                    normalized_object_classes = [
+                        t.TargetLdap.STRING_ADAPTER.validate_python(object_class)
+                        for object_class in raw
+                        if object_class
+                    ]
+                    return t.TargetLdap.STR_SEQUENCE_ADAPTER.validate_python(
+                        normalized_object_classes,
+                    )
+                if isinstance(raw, str):
+                    return [raw]
+                return ["top"]
+
+        class LdapDataProcessing:
+            """LDAP-specific data processing utilities."""
+
+            @staticmethod
+            def build_ldap_dn(
+                record: Mapping[str, m.ConfigMap],
+                dn_template: str,
+                base_dn: str,
+            ) -> p.Result[str]:
+                """Build LDAP Distinguished Name from record data.
+
+                Args:
+                record: Record data
+                dn_template: DN template with placeholders
+                base_dn: Base DN for the directory
+
+                Returns:
+                r[str]: Built DN or error
+
+                """
+                if not record or not dn_template or (not base_dn):
+                    return r[str].fail("Record, DN template, and base DN are required")
+                try:
+                    dn_rdn = dn_template
+                    for key, value in record.items():
+                        placeholder = f"{{{key}}}"
+                        if placeholder in dn_rdn:
+                            dn_rdn = dn_rdn.replace(placeholder, str(value))
+                    if "{" in dn_rdn and "}" in dn_rdn:
+                        return r[str].fail(f"Unresolved placeholders in DN: {dn_rdn}")
+                    full_dn = f"{dn_rdn},{base_dn}"
+                    if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                        full_dn
+                    ):
+                        return r[str].fail(f"Invalid DN format: {full_dn}")
+                    return r[str].ok(full_dn)
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+                    return r[str].fail(f"Error building DN: {e}")
+
+            @staticmethod
+            def convert_record_to_ldap_attributes(
+                record: Mapping[str, m.ConfigMap],
+                attribute_mapping: t.StrMapping | None = None,
+            ) -> p.Result[Mapping[str, Sequence[bytes]]]:
+                """Convert Singer record to LDAP attributes format.
+
+                Args:
+                record: Singer record data
+                attribute_mapping: Optional mapping from record keys to LDAP attributes
+
+                Returns:
+                r[Mapping[str, Sequence[bytes]]]: LDAP attributes or error
+
+                """
+                if not record:
+                    return r[Mapping[str, Sequence[bytes]]].fail(
+                        "Record cannot be empty"
+                    )
+                try:
+                    ldap_attrs: MutableMapping[str, Sequence[bytes]] = {}
+                    mapping = attribute_mapping or {}
+                    for key, value in record.items():
+                        ldap_attr = mapping.get(key, key)
+                        if isinstance(value, list):
+                            ldap_values = [str(item).encode("utf-8") for item in value]
+                            if ldap_values:
+                                ldap_attrs[ldap_attr] = ldap_values
+                        else:
+                            ldap_attrs[ldap_attr] = [str(value).encode("utf-8")]
+                    return r[Mapping[str, Sequence[bytes]]].ok(ldap_attrs)
+                except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+                    return r[Mapping[str, Sequence[bytes]]].fail(
+                        f"Error converting to LDAP attributes: {e}",
+                    )
+
+            @staticmethod
+            def extract_object_classes(
+                record: Mapping[str, m.ConfigMap],
+                default_object_classes: t.StrSequence | None = None,
+            ) -> t.StrSequence:
+                """Extract object classes for LDAP entry.
+
+                Args:
+                record: Singer record data
+                default_object_classes: Default object classes if not in record
+
+                Returns:
+                t.StrSequence: List of object classes
+
+                """
+                object_classes = record.get("objectClass") or record.get("objectclass")
+                if object_classes:
+                    if isinstance(object_classes, list):
+                        return [str(oc) for oc in object_classes if oc]
+                    return [str(object_classes)]
+                if default_object_classes:
+                    return default_object_classes
+                return ["top"]
+
+            @staticmethod
+            def sanitize_ldap_value(value: str) -> str:
+                """Sanitize value for LDAP attribute insertion.
+
+                Args:
+                value: Value to sanitize
+
+                Returns:
+                str: Sanitized value
+
+                """
+                if not value:
+                    return ""
+                ldap_escapes = {
+                    "\\": "\\5c",
+                    "*": "\\2a",
+                    "(": "\\28",
+                    ")": "\\29",
+                    "\x00": "\\00",
+                }
+                sanitized = value
+                for char, escape in ldap_escapes.items():
+                    sanitized = sanitized.replace(char, escape)
+                return sanitized.strip()
+
+            @staticmethod
+            def split(dn: str) -> bool:
+                """Validate LDAP Distinguished Name format.
+
+                Args:
+                dn: Distinguished Name to validate
+
+                Returns:
+                bool: True if valid, False otherwise
+
+                """
+                if not dn:
+                    return False
+                dn_pattern = "^[a-zA-Z][\\w\\-]*\\s*=\\s*[^,]+(?:\\s*,\\s*[a-zA-Z][\\w\\-]*\\s*=\\s*[^,]+)*$"
+                return bool(re.match(dn_pattern, dn.strip()))
+
+        class ConfigValidation:
+            """Configuration validation utilities."""
+
+            @staticmethod
+            def validate_ldap_connection_config(
+                settings: Mapping[str, m.ConfigMap],
+            ) -> p.Result[Mapping[str, m.ConfigMap]]:
+                """Validate LDAP connection configuration.
+
+                Args:
+                settings: Configuration dictionary
+
+                Returns:
+                r[Mapping[str, m.ConfigMap]]: Validated settings or error
+
+                """
+                required_fields = ["host", "bind_dn", "bind_password", "base_dn"]
+                missing_fields = [
+                    field for field in required_fields if field not in settings
+                ]
+                if missing_fields:
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        f"Missing required LDAP connection fields: {', '.join(missing_fields)}",
+                    )
+                host = settings["host"]
+                if not isinstance(host, str) or not host.strip():
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        "Host must be a non-empty string",
+                    )
+                bind_dn_raw = settings["bind_dn"]
+                bind_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                    bind_dn_raw
+                )
+                if not bind_dn:
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        "Bind DN must be a string",
+                    )
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    bind_dn
+                ):
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        f"Invalid bind DN format: {bind_dn}",
+                    )
+                base_dn_raw = settings["base_dn"]
+                base_dn = FlextTargetLdapUtilities.TargetLdap.TypeConversion.to_str(
+                    base_dn_raw
+                )
+                if not base_dn:
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        "Base DN must be a string",
+                    )
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    base_dn
+                ):
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        f"Invalid base DN format: {base_dn}",
+                    )
+                if not FlextTargetLdapUtilities.TargetLdap.LdapDataProcessing.split(
+                    base_dn,
+                ):
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        f"Invalid base DN format: {base_dn}",
+                    )
+                if "port" in settings:
+                    port_raw = settings["port"]
+                    try:
+                        port_int = t.TargetLdap.INTEGER_ADAPTER.validate_python(
+                            port_raw,
+                        )
+                    except c.ValidationError:
+                        return r[Mapping[str, m.ConfigMap]].fail(
+                            "Port must be a valid integer between 1 and 65535",
+                        )
+                    if not (0 < port_int <= c.MAX_PORT_NUMBER):
+                        return r[Mapping[str, m.ConfigMap]].fail(
+                            "Port must be a valid integer between 1 and 65535",
+                        )
+                use_ssl = settings.get("use_ssl", False)
+                use_tls = settings.get("use_tls", False)
+                if use_ssl and use_tls:
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        "Cannot use both SSL and TLS simultaneously",
+                    )
+                return r[Mapping[str, m.ConfigMap]].ok(settings)
+
+            @staticmethod
+            def validate_target_config(
+                settings: Mapping[str, m.ConfigMap],
+            ) -> p.Result[Mapping[str, m.ConfigMap]]:
+                """Validate target configuration.
+
+                Args:
+                settings: Target configuration
+
+                Returns:
+                r[Mapping[str, m.ConfigMap]]: Validated settings or error
+
+                """
+                ldap_result = FlextTargetLdapUtilities.TargetLdap.ConfigValidation.validate_ldap_connection_config(
+                    settings,
+                )
+                if ldap_result.failure:
+                    return ldap_result
+                operation_mode = settings.get("operation_mode", "upsert")
+                valid_modes = ["insert", "update", "upsert", "delete"]
+                if operation_mode not in valid_modes:
+                    return r[Mapping[str, m.ConfigMap]].fail(
+                        f"Invalid operation mode: {operation_mode}. Valid modes: {', '.join(valid_modes)}",
+                    )
+                if "dn_template" in settings:
+                    dn_template = settings["dn_template"]
+                    if not isinstance(dn_template, str) or not dn_template.strip():
+                        return r[Mapping[str, m.ConfigMap]].fail(
+                            "DN template must be a non-empty string",
+                        )
+                batch_size = settings.get(
+                    "batch_size",
+                    c.DEFAULT_SIZE,
+                )
+                match batch_size:
+                    case bool():
+                        return r[Mapping[str, m.ConfigMap]].fail(
+                            "Batch size must be a positive integer",
+                        )
+                    case int() if batch_size > 0:
+                        pass
+                    case _:
+                        return r[Mapping[str, m.ConfigMap]].fail(
+                            "Batch size must be a positive integer",
+                        )
+                return r[Mapping[str, m.ConfigMap]].ok(settings)
+
+
+u = FlextTargetLdapUtilities
+__all__: list[str] = ["FlextTargetLdapUtilities", "u"]
