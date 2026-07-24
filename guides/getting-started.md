@@ -100,14 +100,13 @@ docker run -v $(pwd)/data:/app/data flext:latest
 
 ```python
 from flext_core import FlextSettings
+from flext_core import u
 
-# Create dependency injection container
-container = FlextContainer()
+# Load settings
+settings = FlextSettings()
 
-# Register services (example)
-# container.bind(IService, ServiceImplementation())
-
-print("FLEXT application initialized!")
+# Show settings summary
+u.info(f"FLEXT application initialized with log level: {settings.log_level}")
 ```
 
 ### 2. Using flext-ldif for LDIF Processing
@@ -115,43 +114,43 @@ print("FLEXT application initialized!")
 ```python
 from flext_ldif import ldif
 
-# Initialize LDIF API
-
 # Parse LDIF content
 ldif_content = """dn: cn=test,dc=example,dc=com
 cn: test
 sn: user
 objectClass: inetOrgPerson"""
 
-result = ldif.parse(ldif_content)
+result = ldif.parse_string(ldif_content)
 if result.success:
-    entries = result.unwrap()
+    entries = result.unwrap().entries
     print(f"Successfully parsed {len(entries)} LDIF entries")
 else:
-    print(f"Failed to parse LDIF: {result.failure()}")
+    print(f"Failed to parse LDIF: {result.error}")
 ```
 
 ### 3. Railway-Oriented Error Handling
 
 ```python
 from __future__ import annotations
-from flext_core import FlextSettings
+from flext_core import p, r
+from flext_ldif import ldif
 
 
-def process_ldif_data(content: str) -> p.Result[str, Exception]:
+def process_ldif_data(content: str) -> p.Result[str]:
+    """Process LDIF content with railway-oriented error handling."""
     # Parse LDIF
-    parse_result = ldif.parse(content)
+    parse_result = ldif.parse_string(content)
     if parse_result.failure:
-        return r.failure(parse_result.failure())
+        return r[str].fail(str(parse_result.error))
 
-    entries = parse_result.unwrap()
+    entries = parse_result.unwrap().entries
 
     # Process entries
     try:
         processed_data = process_entries(entries)
-        return r.success(processed_data)
+        return r[str].ok(processed_data)
     except Exception as e:
-        return r.failure(e)
+        return r[str].fail(str(e))
 
 
 def process_entries(entries: list) -> str:
@@ -160,19 +159,20 @@ def process_entries(entries: list) -> str:
 
 
 # Usage
+ldif_content = """dn: cn=test,dc=example,dc=com
+cn: test
+sn: user
+objectClass: inetOrgPerson"""
 result = process_ldif_data(ldif_content)
 if result.success:
     print(f"Success: {result.unwrap()}")
 else:
-    print(f"Error: {result.failure()}")
+    print(f"Error: {result.error}")
 ```
 
 ### 4. CQRS Pattern with Commands and Queries
 
-```python
-from __future__ import annotations
-from flext_cli import u
-from flext_core import FlextSettings
+```text
 from dataclasses import dataclass
 
 
@@ -188,13 +188,13 @@ class GetUserQuery:
 
 
 class UserService:
-    def create_user(self, cmd: CreateUserCommand) -> p.Result[str, Exception]:
+    def create_user(self, cmd: CreateUserCommand):
         # Create user logic
-        return r.success(f"User {cmd.username} created")
+        return f"User {cmd.username} created"
 
-    def get_user(self, query: GetUserQuery) -> p.Result[str, Exception]:
+    def get_user(self, query: GetUserQuery):
         # Get user logic
-        return r.success(f"User {query.user_id} data")
+        return f"User {query.user_id} data"
 
 
 # Setup dispatcher
@@ -225,18 +225,16 @@ export FLEXT_LDIF_STRICT_VALIDATION=true
 ### Programmatic Configuration
 
 ```python
-from flext_ldif import FlextLdifSettings
+from flext_ldif import FlextLdif, FlextLdifSettings
 
 # Create custom configuration
 settings = FlextLdifSettings(
     default_encoding="utf-8",
     strict_validation=True,
-    servers_enabled=True,
-    batch_size=1000,
 )
 
 # Use configuration
-ldif = ldif(settings=settings)
+ldif_service = FlextLdif(settings=settings)
 ```
 
 ## Next Steps
