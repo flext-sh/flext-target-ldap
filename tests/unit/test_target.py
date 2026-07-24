@@ -95,9 +95,7 @@ class TestsFlextTargetLdapTarget:
 
     @pytest.mark.integration
     def test_process_record(
-        self,
-        real_target_config: t.TargetLdap.SettingsPayload,
-        real_base_dn: str,
+        self, real_target_config: t.TargetLdap.SettingsPayload, real_base_dn: str
     ) -> None:
         singer_record: t.TargetLdap.RecordPayload = {
             "username": "processrec",

@@ -39,19 +39,14 @@ def real_config(
 
 
 @pytest.fixture
-def config_file(
-    tmp_path: Path,
-    real_config: t.TargetLdap.SettingsPayload,
-) -> Path:
+def config_file(tmp_path: Path, real_config: t.TargetLdap.SettingsPayload) -> Path:
     config_path = tmp_path / "settings.json"
     u.Cli.json_write(config_path, real_config)
     return config_path
 
 
 def _run_target_cli(
-    monkeypatch: pytest.MonkeyPatch,
-    config_path: Path,
-    input_path: Path,
+    monkeypatch: pytest.MonkeyPatch, config_path: Path, input_path: Path
 ) -> None:
     """Run the real target CLI feeding a real file as stdin (no mock)."""
     with input_path.open(encoding="utf-8") as handle:
@@ -60,15 +55,11 @@ def _run_target_cli(
 
 
 def _search(
-    real_config: t.TargetLdap.SettingsPayload,
-    base_dn: str,
-    search_filter: str,
+    real_config: t.TargetLdap.SettingsPayload, base_dn: str, search_filter: str
 ) -> list[object]:
     client = FlextTargetLdapClient(settings=dict(real_config))
     result = client.search_entry(
-        base_dn=base_dn,
-        search_filter=search_filter,
-        attributes=["cn"],
+        base_dn=base_dn, search_filter=search_filter, attributes=["cn"]
     )
     tm.ok(result)
     return list(result.unwrap())

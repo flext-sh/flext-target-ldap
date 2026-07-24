@@ -42,20 +42,17 @@ def ldap_container() -> t.TargetLdap.SettingsPayload:
     container serves the test or the test is skipped.
     """
     docker = tk.shared(
-        _LDAP_CONTAINER_NAME,
-        workspace_root=Path(__file__).resolve().parents[2],
+        _LDAP_CONTAINER_NAME, workspace_root=Path(__file__).resolve().parents[2]
     )
     execute_result = docker.execute()
     if execute_result.failure:
         pytest.skip(
             f"OpenLDAP container {_LDAP_CONTAINER_NAME} unavailable: "
-            f"{execute_result.error}",
+            f"{execute_result.error}"
         )
     waited: float = 0.0
     while waited < _LDAP_BIND_READY_TIMEOUT:
-        server = ldap_u.Ldap.create_server_from_url(
-            f"ldap://{_LDAP_HOST}:{_LDAP_PORT}",
-        )
+        server = ldap_u.Ldap.create_server_from_url(f"ldap://{_LDAP_HOST}:{_LDAP_PORT}")
         connection = ldap_u.Ldap.create_connection(
             server,
             user=_LDAP_ADMIN_DN,
@@ -71,7 +68,7 @@ def ldap_container() -> t.TargetLdap.SettingsPayload:
     else:
         pytest.skip(
             f"OpenLDAP container {_LDAP_CONTAINER_NAME} did not become "
-            f"bind-ready within {_LDAP_BIND_READY_TIMEOUT}s",
+            f"bind-ready within {_LDAP_BIND_READY_TIMEOUT}s"
         )
     return {
         "connection": {
@@ -205,6 +202,6 @@ def singer_message_state() -> str:
 @pytest.fixture
 def ldap_target(
     mock_ldap_config: t.TargetLdap.SettingsPayload,
-    ) -> FlextTargetLdapTarget:
+) -> FlextTargetLdapTarget:
     """Return a real target instance carrying the test connection settings."""
     return FlextTargetLdapTarget(dict(mock_ldap_config))

@@ -27,10 +27,7 @@ def real_client(
 
 
 @pytest.fixture
-def people_ou(
-    real_client: FlextTargetLdapClient,
-    real_base_dn: str,
-) -> str:
+def people_ou(real_client: FlextTargetLdapClient, real_base_dn: str) -> str:
     """Ensure the people OU exists for entry tests."""
     ou_dn = f"ou=people,{real_base_dn}"
     real_client.add_entry(
@@ -84,9 +81,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_add_entry_persists_to_real_server(
-        self,
-        real_client: FlextTargetLdapClient,
-        people_ou: str,
+        self, real_client: FlextTargetLdapClient, people_ou: str
     ) -> None:
         dn = f"uid=addtest,{people_ou}"
         real_client.delete_entry(dn)
@@ -98,9 +93,7 @@ class TestsFlextTargetLdapClient:
         tm.ok(add_result)
         tm.that(add_result.value, eq=True)
         search_result = real_client.search_entry(
-            base_dn=people_ou,
-            search_filter="(uid=addtest)",
-            attributes=["cn", "sn"],
+            base_dn=people_ou, search_filter="(uid=addtest)", attributes=["cn", "sn"]
         )
         tm.ok(search_result)
         tm.that(len(search_result.unwrap()), eq=1)
@@ -108,9 +101,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_modify_entry_updates_real_server(
-        self,
-        real_client: FlextTargetLdapClient,
-        people_ou: str,
+        self, real_client: FlextTargetLdapClient, people_ou: str
     ) -> None:
         dn = f"uid=modtest,{people_ou}"
         real_client.delete_entry(dn)
@@ -120,15 +111,12 @@ class TestsFlextTargetLdapClient:
             attributes={"cn": "Mod Test", "sn": "Test"},
         )
         modify_result = real_client.modify_entry(
-            dn=dn,
-            changes={"mail": "mod@flext.local"},
+            dn=dn, changes={"mail": "mod@flext.local"}
         )
         tm.ok(modify_result)
         tm.that(modify_result.value, eq=True)
         search_result = real_client.search_entry(
-            base_dn=people_ou,
-            search_filter="(uid=modtest)",
-            attributes=["mail"],
+            base_dn=people_ou, search_filter="(uid=modtest)", attributes=["mail"]
         )
         tm.ok(search_result)
         tm.that(len(search_result.unwrap()), eq=1)
@@ -136,9 +124,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_delete_entry_removes_from_real_server(
-        self,
-        real_client: FlextTargetLdapClient,
-        people_ou: str,
+        self, real_client: FlextTargetLdapClient, people_ou: str
     ) -> None:
         dn = f"uid=deltest,{people_ou}"
         real_client.add_entry(
@@ -150,18 +136,14 @@ class TestsFlextTargetLdapClient:
         tm.ok(delete_result)
         tm.that(delete_result.value, eq=True)
         search_result = real_client.search_entry(
-            base_dn=people_ou,
-            search_filter="(uid=deltest)",
-            attributes=["cn"],
+            base_dn=people_ou, search_filter="(uid=deltest)", attributes=["cn"]
         )
         tm.ok(search_result)
         tm.that(len(search_result.unwrap()), eq=0)
 
     @pytest.mark.integration
     def test_search_entry_maps_real_results(
-        self,
-        real_client: FlextTargetLdapClient,
-        people_ou: str,
+        self, real_client: FlextTargetLdapClient, people_ou: str
     ) -> None:
         dn = f"uid=searchtest,{people_ou}"
         real_client.delete_entry(dn)
@@ -171,9 +153,7 @@ class TestsFlextTargetLdapClient:
             attributes={"cn": "Search Test", "sn": "Test"},
         )
         result = real_client.search_entry(
-            base_dn=people_ou,
-            search_filter="(uid=searchtest)",
-            attributes=["cn"],
+            base_dn=people_ou, search_filter="(uid=searchtest)", attributes=["cn"]
         )
         tm.ok(result)
         entries = result.unwrap()
