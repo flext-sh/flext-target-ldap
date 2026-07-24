@@ -172,7 +172,7 @@ else:
 
 ### 4. CQRS Pattern with Commands and Queries
 
-```text
+```python
 from dataclasses import dataclass
 
 
@@ -228,10 +228,7 @@ export FLEXT_LDIF_STRICT_VALIDATION=true
 from flext_ldif import FlextLdif, FlextLdifSettings
 
 # Create custom configuration
-settings = FlextLdifSettings(
-    default_encoding="utf-8",
-    strict_validation=True,
-)
+settings = FlextLdifSettings(default_encoding="utf-8", strict_validation=True)
 
 # Use configuration
 ldif_service = FlextLdif(settings=settings)
