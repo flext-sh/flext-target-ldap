@@ -20,7 +20,6 @@ from flext_tests import tm
 
 if TYPE_CHECKING:
     from flext_target_ldap._models.sinks import FlextTargetLdapTarget
-
     from tests import t
 
 
