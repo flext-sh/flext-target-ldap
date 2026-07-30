@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import os
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -16,11 +17,11 @@ import pytest
 from flext_cli import u as cli_u
 from flext_ldap import u as ldap_u
 from flext_tests import reset_settings as _shared_reset_settings, tk
-from tests import u
+from tests import m, u
 
 _LDAP_CONTAINER_NAME = "flext-openldap-test"
 _LDAP_ADMIN_DN = "cn=admin,dc=flext,dc=local"
-_LDAP_ADMIN_PASSWORD = "admin123"
+_LDAP_ADMIN_PASSWORD = os.environ.get("FLEXT_TEST_LDAP_ADMIN_PASSWORD", "admin123")
 _LDAP_BASE_DN = "dc=flext,dc=local"
 _LDAP_HOST = "localhost"
 _LDAP_PORT = 3390

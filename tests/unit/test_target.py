@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 from flext_target_ldap import FlextTargetLdap
 from flext_tests import tm
-from tests import u
+from tests import m, u
 from tests.base import s
 from tests.settings import TestsFlextTargetLdapSettings as TargetLdapTestSettings
 
