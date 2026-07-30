@@ -1,100 +1,76 @@
-# AUTO-GENERATED FILE — Regenerate with: make gen
+# @generated AUTO-GENERATED FILE — Regenerate with: make gen
 """Flext Target Ldap package."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import (
-    build_lazy_import_map,
-    install_lazy_exports,
-    merge_lazy_imports,
-)
-from flext_target_ldap.__version__ import (
-    __author__,
-    __author_email__,
-    __description__,
-    __license__,
-    __title__,
-    __url__,
-    __version__,
-    __version_info__,
-)
+from flext_core.lazy import build_lazy_import_map, install_lazy_exports
+
+from .__version__ import __author__ as __author__
+from .__version__ import __author_email__ as __author_email__
+from .__version__ import __description__ as __description__
+from .__version__ import __license__ as __license__
+from .__version__ import __title__ as __title__
+from .__version__ import __url__ as __url__
+from .__version__ import __version__ as __version__
+from .__version__ import __version_info__ as __version_info__
 
 if TYPE_CHECKING:
-    from flext_ldap import d as d, e as e, h as h, r as r, s as s, x as x
-    from flext_target_ldap._settings import (
-        FlextTargetLdapSettings as FlextTargetLdapSettings,
-        settings as settings,
-    )
-    from flext_target_ldap.api import (
-        FlextTargetLdap as FlextTargetLdap,
-        target_ldap as target_ldap,
-    )
-    from flext_target_ldap.application.orchestrator import (
-        FlextTargetLdapOrchestrator as FlextTargetLdapOrchestrator,
-    )
-    from flext_target_ldap.constants import (
-        FlextTargetLdapConstants as FlextTargetLdapConstants,
-        c as c,
-    )
-    from flext_target_ldap.models import (
-        FlextTargetLdapModels as FlextTargetLdapModels,
-        m as m,
-    )
-    from flext_target_ldap.protocols import (
-        FlextTargetLdapProtocols as FlextTargetLdapProtocols,
-        p,
-    )
-    from flext_target_ldap.typings import (
-        FlextTargetLdapTypes as FlextTargetLdapTypes,
-        t as t,
-    )
-    from flext_target_ldap.utilities import (
-        FlextTargetLdapUtilities as FlextTargetLdapUtilities,
-        u,
-    )
-_LAZY_IMPORTS = merge_lazy_imports(
-    (".application",),
-    build_lazy_import_map({
-        "._settings": ("FlextTargetLdapSettings", "settings"),
-        ".api": ("FlextTargetLdap", "target_ldap"),
-        ".application.orchestrator": ("FlextTargetLdapOrchestrator",),
-        ".constants": ("FlextTargetLdapConstants", "c"),
-        ".models": ("FlextTargetLdapModels", "m"),
-        ".protocols": ("FlextTargetLdapProtocols", "p"),
-        ".typings": ("FlextTargetLdapTypes", "t"),
-        ".utilities": ("FlextTargetLdapUtilities", "u"),
-        "flext_ldap": ("d", "e", "h", "r", "s", "x"),
-    }),
-    exclude_names=(
-        "cleanup_submodule_namespace",
-        "install_lazy_exports",
-        "lazy_getattr",
-        "logger",
-        "merge_lazy_imports",
-        "output",
-        "output_reporting",
-        "pytest_addoption",
-        "pytest_collect_file",
-        "pytest_collection_modifyitems",
-        "pytest_configure",
-        "pytest_runtest_setup",
-        "pytest_runtest_teardown",
-        "pytest_sessionfinish",
-        "pytest_sessionstart",
-        "pytest_terminal_summary",
-        "pytest_warning_recorded",
-    ),
-    module_name=__name__,
+    from flext_ldap import d as d
+    from flext_ldap import e as e
+    from flext_ldap import h as h
+    from flext_ldap import r as r
+    from flext_ldap import s as s
+    from flext_ldap import x as x
+
+    from ._config import FlextTargetLdapConfig as FlextTargetLdapConfig
+    from ._config import config as config
+    from ._settings import FlextTargetLdapSettings as FlextTargetLdapSettings
+    from ._settings import settings as settings
+    from .api import FlextTargetLdap as FlextTargetLdap
+    from .api import target_ldap as target_ldap
+    from .constants import FlextTargetLdapConstants as FlextTargetLdapConstants
+
+    c: type[FlextTargetLdapConstants]
+    from .models import FlextTargetLdapModels as FlextTargetLdapModels
+
+    m: type[FlextTargetLdapModels]
+    from .protocols import FlextTargetLdapProtocols as FlextTargetLdapProtocols
+
+    p: type[FlextTargetLdapProtocols]
+    from .typings import FlextTargetLdapTypes as FlextTargetLdapTypes
+
+    t: type[FlextTargetLdapTypes]
+    from .utilities import FlextTargetLdapUtilities as FlextTargetLdapUtilities
+
+    u: type[FlextTargetLdapUtilities]
+
+_LAZY_MODULES: dict[str, tuple[str, ...]] = {
+    "._config": ("FlextTargetLdapConfig", "config"),
+    "._settings": ("FlextTargetLdapSettings", "settings"),
+    ".api": ("FlextTargetLdap", "target_ldap"),
+    ".constants": ("FlextTargetLdapConstants", "c"),
+    ".models": ("FlextTargetLdapModels", "m"),
+    ".protocols": ("FlextTargetLdapProtocols", "p"),
+    ".typings": ("FlextTargetLdapTypes", "t"),
+    ".utilities": ("FlextTargetLdapUtilities", "u"),
+    "flext_ldap": ("d", "e", "h", "r", "s", "x"),
+}
+
+
+_LAZY_ALIAS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {}
+
+
+_LAZY_IMPORTS = build_lazy_import_map(
+    _LAZY_MODULES, alias_groups=_LAZY_ALIAS_GROUPS, sort_keys=False
 )
 
-
-__all__: tuple[str, ...] = (
+_PUBLIC_EXPORTS: tuple[str, ...] = (
     "FlextTargetLdap",
+    "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
-    "FlextTargetLdapOrchestrator",
     "FlextTargetLdapProtocols",
     "FlextTargetLdapSettings",
     "FlextTargetLdapTypes",
@@ -108,6 +84,7 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
+    "config",
     "d",
     "e",
     "h",
@@ -122,5 +99,6 @@ __all__: tuple[str, ...] = (
     "x",
 )
 
+__all__: tuple[str, ...] = tuple(_PUBLIC_EXPORTS)
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)

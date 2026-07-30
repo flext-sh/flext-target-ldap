@@ -1,5 +1,5 @@
-# AUTO-GENERATED FILE — Regenerate with: make gen
-"""Models package."""
+# @generated AUTO-GENERATED FILE — Regenerate with: make gen
+"""Flext Target Ldap. Models package."""
 
 from __future__ import annotations
 
@@ -8,19 +8,22 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_target_ldap._models.processing_result import (
+    from .processing_result import (
         FlextTargetLdapProcessingCounters as FlextTargetLdapProcessingCounters,
     )
-    from flext_target_ldap._models.sinks import (
-        FlextTargetLdapBaseSink as FlextTargetLdapBaseSink,
-        FlextTargetLdapGroupsSink as FlextTargetLdapGroupsSink,
+    from .sinks import FlextTargetLdapBaseSink as FlextTargetLdapBaseSink
+    from .sinks import FlextTargetLdapGroupsSink as FlextTargetLdapGroupsSink
+    from .sinks import (
         FlextTargetLdapOrganizationalUnitsSink as FlextTargetLdapOrganizationalUnitsSink,
-        FlextTargetLdapProcessingResult as FlextTargetLdapProcessingResult,
-        FlextTargetLdapSink as FlextTargetLdapSink,
-        FlextTargetLdapTarget as FlextTargetLdapTarget,
-        FlextTargetLdapUsersSink as FlextTargetLdapUsersSink,
     )
-_LAZY_IMPORTS = build_lazy_import_map({
+    from .sinks import (
+        FlextTargetLdapProcessingResult as FlextTargetLdapProcessingResult,
+    )
+    from .sinks import FlextTargetLdapSink as FlextTargetLdapSink
+    from .sinks import FlextTargetLdapTarget as FlextTargetLdapTarget
+    from .sinks import FlextTargetLdapUsersSink as FlextTargetLdapUsersSink
+
+_LAZY_MODULES: dict[str, tuple[str, ...]] = {
     ".processing_result": ("FlextTargetLdapProcessingCounters",),
     ".sinks": (
         "FlextTargetLdapBaseSink",
@@ -31,7 +34,27 @@ _LAZY_IMPORTS = build_lazy_import_map({
         "FlextTargetLdapTarget",
         "FlextTargetLdapUsersSink",
     ),
-})
+}
 
 
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)
+_LAZY_ALIAS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {}
+
+
+_LAZY_IMPORTS = build_lazy_import_map(
+    _LAZY_MODULES, alias_groups=_LAZY_ALIAS_GROUPS, sort_keys=False
+)
+
+_PUBLIC_EXPORTS: tuple[str, ...] = (
+    "FlextTargetLdapBaseSink",
+    "FlextTargetLdapGroupsSink",
+    "FlextTargetLdapOrganizationalUnitsSink",
+    "FlextTargetLdapProcessingCounters",
+    "FlextTargetLdapProcessingResult",
+    "FlextTargetLdapSink",
+    "FlextTargetLdapTarget",
+    "FlextTargetLdapUsersSink",
+)
+
+__all__: tuple[str, ...] = tuple(_PUBLIC_EXPORTS)
+
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)
