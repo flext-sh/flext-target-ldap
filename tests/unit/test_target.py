@@ -13,12 +13,6 @@ import pytest
 from pydantic import BaseModel
 
 from flext_target_ldap import FlextTargetLdap
-from flext_target_ldap._models.sinks import (
-    FlextTargetLdapBaseSink,
-    FlextTargetLdapGroupsSink,
-    FlextTargetLdapSink,
-    FlextTargetLdapUsersSink,
-)
 from flext_tests import tm
 from tests import u
 from tests.base import s
@@ -34,15 +28,15 @@ class TestsFlextTargetLdapTarget:
     @pytest.mark.parametrize(
         ("key", "expected_cls"),
         [
-            ("users", FlextTargetLdapUsersSink),
-            ("groups", FlextTargetLdapGroupsSink),
-            ("custom_stream", FlextTargetLdapBaseSink),
+            ("users", m.TargetLdap.UsersSink),
+            ("groups", m.TargetLdap.GroupsSink),
+            ("custom_stream", m.TargetLdap.BaseSink),
         ],
     )
     def test_get_sink_class(
         self,
         key: str,
-        expected_cls: type[FlextTargetLdapBaseSink],
+        expected_cls: type[m.TargetLdap.BaseSink],
         mock_ldap_config: t.TargetLdap.SettingsPayload,
     ) -> None:
         target = FlextTargetLdap(settings=mock_ldap_config)
@@ -73,8 +67,8 @@ class TestsFlextTargetLdapTarget:
         }
         target = FlextTargetLdap(settings=updated_settings)
         sink = target.get_sink("users")
-        tm.that(sink, is_=FlextTargetLdapUsersSink)
-        assert isinstance(sink, FlextTargetLdapUsersSink)
+        tm.that(sink, is_=m.TargetLdap.UsersSink)
+        assert isinstance(sink, m.TargetLdap.UsersSink)
         dn_result = sink.build_dn({"uid": "jdoe"})
         tm.ok(dn_result)
         tm.that(dn_result.value, eq="uid=jdoe,ou=people,dc=test,dc=com")
@@ -88,8 +82,8 @@ class TestsFlextTargetLdapTarget:
         }
         target = FlextTargetLdap(settings=updated_settings)
         sink = target.get_sink("users")
-        tm.that(sink, is_=FlextTargetLdapUsersSink)
-        assert isinstance(sink, FlextTargetLdapUsersSink)
+        tm.that(sink, is_=m.TargetLdap.UsersSink)
+        assert isinstance(sink, m.TargetLdap.UsersSink)
         object_classes = sink.resolve_object_classes({})
         tm.that(object_classes, eq=["customPerson", "top"])
 
@@ -104,8 +98,8 @@ class TestsFlextTargetLdapTarget:
         }
         target = FlextTargetLdap(settings=real_target_config)
         sink = target.get_sink("users")
-        tm.that(sink, is_=FlextTargetLdapBaseSink)
-        assert isinstance(sink, FlextTargetLdapBaseSink)
+        tm.that(sink, is_=m.TargetLdap.BaseSink)
+        assert isinstance(sink, m.TargetLdap.BaseSink)
         setup_result = sink.setup_client()
         tm.ok(setup_result)
         try:
@@ -124,8 +118,8 @@ class TestsFlextTargetLdapTarget:
     ) -> None:
         target = FlextTargetLdap(settings=mock_ldap_config)
         sink = target.get_sink("users")
-        tm.that(sink, is_=FlextTargetLdapBaseSink)
-        assert isinstance(sink, FlextTargetLdapBaseSink)
+        tm.that(sink, is_=m.TargetLdap.BaseSink)
+        assert isinstance(sink, m.TargetLdap.BaseSink)
         record: t.TargetLdap.RecordPayload = {
             "dn": "uid=jdoe,ou=users,dc=test,dc=com",
             "_sdc_deleted_at": "2024-01-15T10:30:00Z",
@@ -137,7 +131,7 @@ class TestsFlextTargetLdapTarget:
 
     def test_sink_process_record_delegates_to_target_handler(self) -> None:
         target = u.TargetLdap.Tests.ProcessTarget()
-        sink = FlextTargetLdapSink(
+        sink = m.TargetLdap.Sink(
             target=target,
             stream_name="users",
             schema={"type": "object"},

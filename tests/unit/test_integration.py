@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 from flext_target_ldap import FlextTargetLdap
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
 from flext_tests import tm
 from tests import u
 
@@ -57,7 +56,7 @@ def _run_target_cli(
 def _search(
     real_config: t.TargetLdap.SettingsPayload, base_dn: str, search_filter: str
 ) -> list[object]:
-    client = FlextTargetLdapClient(settings=dict(real_config))
+    client = u.TargetLdap.client()(settings=dict(real_config))
     result = client.search_entry(
         base_dn=base_dn, search_filter=search_filter, attributes=["cn"]
     )
@@ -78,7 +77,7 @@ class TestsFlextTargetLdapIntegration:
         tmp_path: Path,
     ) -> None:
         dn = f"uid=basicload,{real_base_dn}"
-        FlextTargetLdapClient(settings=dict(real_config)).delete_entry(dn)
+        u.TargetLdap.client()(settings=dict(real_config)).delete_entry(dn)
         input_path = tmp_path / "input.jsonl"
         _write_jsonl(
             input_path,
@@ -104,7 +103,7 @@ class TestsFlextTargetLdapIntegration:
         _run_target_cli(monkeypatch, config_file, input_path)
         entries = _search(real_config, real_base_dn, "(uid=basicload)")
         tm.that(len(entries), eq=1)
-        FlextTargetLdapClient(settings=dict(real_config)).delete_entry(dn)
+        u.TargetLdap.client()(settings=dict(real_config)).delete_entry(dn)
 
     @pytest.mark.integration
     def test_multi_stream_handling(
@@ -116,7 +115,7 @@ class TestsFlextTargetLdapIntegration:
         tmp_path: Path,
     ) -> None:
         user_dn = f"uid=multiuser,{real_base_dn}"
-        client = FlextTargetLdapClient(settings=dict(real_config))
+        client = u.TargetLdap.client()(settings=dict(real_config))
         client.delete_entry(user_dn)
         input_path = tmp_path / "multi_stream.jsonl"
         _write_jsonl(

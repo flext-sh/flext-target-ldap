@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
 from flext_tests import tm
 
 if TYPE_CHECKING:
@@ -14,20 +13,20 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def client(mock_ldap_config: t.TargetLdap.SettingsPayload) -> FlextTargetLdapClient:
-    return FlextTargetLdapClient(settings=mock_ldap_config)
+def client(mock_ldap_config: t.TargetLdap.SettingsPayload) -> u.TargetLdap.client():
+    return u.TargetLdap.client()(settings=mock_ldap_config)
 
 
 @pytest.fixture
 def real_client(
     real_connection_config: t.TargetLdap.SettingsPayload,
-) -> FlextTargetLdapClient:
+) -> u.TargetLdap.client():
     """Build a client bound to the real OpenLDAP container connection."""
-    return FlextTargetLdapClient(settings=real_connection_config)
+    return u.TargetLdap.client()(settings=real_connection_config)
 
 
 @pytest.fixture
-def people_ou(real_client: FlextTargetLdapClient, real_base_dn: str) -> str:
+def people_ou(real_client: u.TargetLdap.client(), real_base_dn: str) -> str:
     """Ensure the people OU exists for entry tests."""
     ou_dn = f"ou=people,{real_base_dn}"
     real_client.add_entry(
@@ -41,7 +40,7 @@ def people_ou(real_client: FlextTargetLdapClient, real_base_dn: str) -> str:
 class TestsFlextTargetLdapClient:
     """Behavior contract for test_client."""
 
-    def test_client_initialization(self, client: FlextTargetLdapClient) -> None:
+    def test_client_initialization(self, client: u.TargetLdap.client()) -> None:
         tm.that(client.host, eq="test.ldap.com")
         tm.that(client.port, eq=389)
         tm.that(client.bind_dn, eq="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com")
@@ -49,9 +48,9 @@ class TestsFlextTargetLdapClient:
         assert not client.use_ssl
         tm.that(client.timeout, eq=30)
 
-    def test_server_uri_construction(self, client: FlextTargetLdapClient) -> None:
+    def test_server_uri_construction(self, client: u.TargetLdap.client()) -> None:
         tm.that(client.server_uri, eq="ldap://test.ldap.com:389")
-        ssl_client = FlextTargetLdapClient(
+        ssl_client = u.TargetLdap.client()(
             settings={
                 "host": "test.ldap.com",
                 "port": 389,
@@ -65,7 +64,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_connect_reaches_real_ldap_server(
-        self, real_client: FlextTargetLdapClient
+        self, real_client: u.TargetLdap.client()
     ) -> None:
         result = real_client.connect()
         tm.ok(result)
@@ -73,7 +72,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_disconnect_reports_success(
-        self, real_client: FlextTargetLdapClient
+        self, real_client: u.TargetLdap.client()
     ) -> None:
         result = real_client.disconnect()
         tm.ok(result)
@@ -81,7 +80,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_add_entry_persists_to_real_server(
-        self, real_client: FlextTargetLdapClient, people_ou: str
+        self, real_client: u.TargetLdap.client(), people_ou: str
     ) -> None:
         dn = f"uid=addtest,{people_ou}"
         real_client.delete_entry(dn)
@@ -101,7 +100,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_modify_entry_updates_real_server(
-        self, real_client: FlextTargetLdapClient, people_ou: str
+        self, real_client: u.TargetLdap.client(), people_ou: str
     ) -> None:
         dn = f"uid=modtest,{people_ou}"
         real_client.delete_entry(dn)
@@ -124,7 +123,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_delete_entry_removes_from_real_server(
-        self, real_client: FlextTargetLdapClient, people_ou: str
+        self, real_client: u.TargetLdap.client(), people_ou: str
     ) -> None:
         dn = f"uid=deltest,{people_ou}"
         real_client.add_entry(
@@ -143,7 +142,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_search_entry_maps_real_results(
-        self, real_client: FlextTargetLdapClient, people_ou: str
+        self, real_client: u.TargetLdap.client(), people_ou: str
     ) -> None:
         dn = f"uid=searchtest,{people_ou}"
         real_client.delete_entry(dn)

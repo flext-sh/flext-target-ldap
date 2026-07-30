@@ -15,7 +15,6 @@ import pytest
 
 from flext_cli import u as cli_u
 from flext_ldap import u as ldap_u
-from flext_target_ldap._models.sinks import FlextTargetLdapTarget
 from flext_tests import reset_settings as _shared_reset_settings, tk
 from tests import u
 
@@ -202,6 +201,6 @@ def singer_message_state() -> str:
 @pytest.fixture
 def ldap_target(
     mock_ldap_config: t.TargetLdap.SettingsPayload,
-) -> FlextTargetLdapTarget:
+) -> m.TargetLdap.Target:
     """Return a real target instance carrying the test connection settings."""
-    return FlextTargetLdapTarget(dict(mock_ldap_config))
+    return m.TargetLdap.Target(dict(mock_ldap_config))

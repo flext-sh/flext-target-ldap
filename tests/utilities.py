@@ -9,7 +9,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, override
 
 from flext_target_ldap import FlextTargetLdapUtilities, p, r
-from flext_target_ldap._models.sinks import FlextTargetLdapTarget
 from flext_tests import FlextTestsUtilities
 
 if TYPE_CHECKING:
@@ -43,7 +42,7 @@ class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilitie
                     "object_classes": ["inetOrgPerson", "person", "top"],
                 }
 
-            class ProcessTarget(FlextTargetLdapTarget):
+            class ProcessTarget(m.TargetLdap.Target):
                 """Target stub that records delegated sink calls."""
 
                 def __init__(self) -> None:

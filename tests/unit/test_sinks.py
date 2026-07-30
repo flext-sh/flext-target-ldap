@@ -19,12 +19,11 @@ from flext_target_ldap._models.sinks import (
 from flext_tests import tm
 
 if TYPE_CHECKING:
-    from flext_target_ldap._models.sinks import FlextTargetLdapTarget
-    from tests import t
+        from tests import t
 
 
 @pytest.fixture
-def ldap_base_sink(ldap_target: FlextTargetLdapTarget) -> LDAPBaseSink:
+def ldap_base_sink(ldap_target: m.TargetLdap.Target) -> LDAPBaseSink:
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
@@ -38,7 +37,7 @@ def ldap_base_sink(ldap_target: FlextTargetLdapTarget) -> LDAPBaseSink:
 
 
 @pytest.fixture
-def users_sink(ldap_target: FlextTargetLdapTarget) -> UsersSink:
+def users_sink(ldap_target: m.TargetLdap.Target) -> UsersSink:
     ldap_target.settings = {
         **ldap_target.settings,
         "base_dn": "dc=example,dc=com",
@@ -57,7 +56,7 @@ def users_sink(ldap_target: FlextTargetLdapTarget) -> UsersSink:
 
 
 @pytest.fixture
-def groups_sink(ldap_target: FlextTargetLdapTarget) -> GroupsSink:
+def groups_sink(ldap_target: m.TargetLdap.Target) -> GroupsSink:
     ldap_target.settings = {
         **ldap_target.settings,
         "base_dn": "dc=example,dc=com",
@@ -72,7 +71,7 @@ def groups_sink(ldap_target: FlextTargetLdapTarget) -> GroupsSink:
 
 
 @pytest.fixture
-def ou_sink(ldap_target: FlextTargetLdapTarget) -> OrganizationalUnitsSink:
+def ou_sink(ldap_target: m.TargetLdap.Target) -> OrganizationalUnitsSink:
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"ou": {"type": "string"}, "description": {"type": "string"}}
@@ -86,7 +85,7 @@ def ou_sink(ldap_target: FlextTargetLdapTarget) -> OrganizationalUnitsSink:
 
 
 @pytest.fixture
-def generic_sink(ldap_target: FlextTargetLdapTarget) -> LDAPBaseSink:
+def generic_sink(ldap_target: m.TargetLdap.Target) -> LDAPBaseSink:
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
@@ -209,7 +208,7 @@ class TestsFlextTargetLdapSinks:
         tm.that(classes, eq=["inetOrgPerson", "organizationalPerson", "person", "top"])
 
     def test_users_get_object_classes_configured(
-        self, ldap_target: FlextTargetLdapTarget
+        self, ldap_target: m.TargetLdap.Target
     ) -> None:
         ldap_target.settings = {
             **ldap_target.settings,
@@ -325,7 +324,7 @@ class TestsFlextTargetLdapSinks:
         tm.that(generic_sink.resolve_object_classes({}), eq=["top"])
 
     def test_generic_get_object_classes_configured(
-        self, ldap_target: FlextTargetLdapTarget
+        self, ldap_target: m.TargetLdap.Target
     ) -> None:
         ldap_target.settings = {
             **ldap_target.settings,
