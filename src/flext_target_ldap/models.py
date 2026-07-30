@@ -17,6 +17,18 @@ from typing import TYPE_CHECKING, Annotated
 from flext_ldap import m
 from flext_meltano import FlextMeltanoModels
 from flext_target_ldap import t, u
+from flext_target_ldap._models.processing_result import (
+    FlextTargetLdapProcessingCounters,
+)
+from flext_target_ldap._models.sinks import (
+    FlextTargetLdapBaseSink,
+    FlextTargetLdapGroupsSink,
+    FlextTargetLdapOrganizationalUnitsSink,
+    FlextTargetLdapProcessingResult,
+    FlextTargetLdapSink,
+    FlextTargetLdapTarget,
+    FlextTargetLdapUsersSink,
+)
 
 if TYPE_CHECKING:
     from collections.abc import MutableSequence
@@ -32,6 +44,18 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
 
     class TargetLdap:
         """TargetLdap domain namespace."""
+
+        # Sink and target implementations are part of the public model
+        # surface: consumers (and their tests) reach them through this
+        # facade instead of importing the private _models package.
+        Sink = FlextTargetLdapSink
+        Target = FlextTargetLdapTarget
+        BaseSink = FlextTargetLdapBaseSink
+        UsersSink = FlextTargetLdapUsersSink
+        GroupsSink = FlextTargetLdapGroupsSink
+        OrganizationalUnitsSink = FlextTargetLdapOrganizationalUnitsSink
+        ProcessingCounters = FlextTargetLdapProcessingCounters
+        ProcessingResult = FlextTargetLdapProcessingResult
 
         class AttributeMapping(m.Entity):
             """LDAP attribute mapping configuration with validation.
