@@ -6,7 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from tests.models import m
+from flext_tests import tm
+from tests import m
 
 
 class TestsFlextTargetLdapTransformation:
@@ -14,12 +15,9 @@ class TestsFlextTargetLdapTransformation:
 
     def test_transformation_rule_creation(self) -> None:
         rule = m.TargetLdap.TransformationRule(
-            name="test_rule",
-            pattern="orclUser",
-            replacement="person",
-            enabled=True,
+            name="test_rule", pattern="orclUser", replacement="person", enabled=True
         )
-        assert rule.name == "test_rule"
+        tm.that(rule.name, eq="test_rule")
         assert rule.enabled
-        assert rule.pattern == "orclUser"
-        assert rule.replacement == "person"
+        tm.that(rule.pattern, eq="orclUser")
+        tm.that(rule.replacement, eq="person")

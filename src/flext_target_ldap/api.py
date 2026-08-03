@@ -7,21 +7,12 @@ Owns the public ``FlextTargetLdap`` surface. Legacy runtime logic lives here so
 from __future__ import annotations
 
 import sys
-from collections.abc import (
-    Callable,
-    Mapping,
-)
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextContainer
-from flext_target_ldap import (
-    FlextTargetLdapSettings,
-    c,
-    p,
-    t,
-    u,
-)
+from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
 from flext_target_ldap._models.sinks import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapGroupsSink,
@@ -39,7 +30,6 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     name = "target-ldap"
     config_class = FlextTargetLdapSettings
-    settings: t.TargetLdap.SettingsPayload
     _container_type: ClassVar[p.ContainerType] = FlextContainer
     logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
@@ -57,7 +47,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     @property
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
-        """Get or create orchestrator."""
+        """The or create orchestrator."""
         if self._orchestrator is None:
             settings = FlextTargetLdapSettings.model_validate(self.settings)
             self._orchestrator = FlextTargetLdapOrchestrator(settings)
@@ -65,17 +55,14 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     @property
     def singer_catalog(self) -> t.TargetLdap.CatalogPayload:
-        """Return the Singer catalog for this target."""
+        """The Singer catalog for this target."""
         return u.TargetLdap.build_singer_catalog()
 
     def get_sink(self, stream_name: str) -> FlextTargetLdapSink:
         """Return an instantiated sink for the given stream name."""
         sink_class = self.get_sink_class(stream_name)
         return sink_class(
-            target=self,
-            stream_name=stream_name,
-            schema={},
-            key_properties=[],
+            target=self, stream_name=stream_name, schema={}, key_properties=[]
         )
 
     def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:
@@ -88,8 +75,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         sink_class = sink_mapping.get(stream_name)
         if sink_class is None:
             self.logger.warning(
-                "No specific sink found for stream '%s', using base sink",
-                stream_name,
+                "No specific sink found for stream '%s', using base sink", stream_name
             )
             return FlextTargetLdapBaseSink
         self.logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
@@ -104,7 +90,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         validated_settings = FlextTargetLdapSettings.model_validate(self.settings)
         self.logger.info(
             "LDAP target setup completed for host: %s",
-            validated_settings.connection.host,
+            validated_settings.TargetLdap.host,
         )
 
     def teardown(self) -> None:
@@ -137,9 +123,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     @staticmethod
     def _construct_dn(
-        stream: str,
-        record: t.TargetLdap.RecordPayload,
-        base_dn: str,
+        stream: str, record: t.TargetLdap.RecordPayload, base_dn: str
     ) -> str:
         """Construct DN from record based on stream type."""
         if stream == "users":
@@ -155,7 +139,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def _process_record_message(
         record: t.TargetLdap.RecordPayload,
         stream: str,
-        cfg: FlextTargetLdapSettings,
+        cfg: t.TargetLdap.SettingsPayload,
         api: FlextTargetLdapClient,
         seen_dns: set[str],
     ) -> None:
@@ -171,7 +155,13 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         if object_classes is None:
             object_classes = attributes.pop("objectclass", None)
         if not dn_text.strip():
-            dn = FlextTargetLdap._construct_dn(stream, record, cfg.base_dn)
+            base_dn_value = cfg.get(c.TargetLdap.KEY_BASE_DN)
+            base_dn = (
+                base_dn_value
+                if isinstance(base_dn_value, str)
+                else c.TargetLdap.DEFAULT_BASE_DN
+            )
+            dn = FlextTargetLdap._construct_dn(stream, record, base_dn)
         else:
             dn = dn_text
         if record.get("_sdc_deleted_at"):
@@ -193,60 +183,73 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def run_cli(settings: str | None = None) -> None:
         """Process Singer JSONL; echo STATE lines to stdout."""
         try:
-            cfg: t.TargetLdap.SettingsPayload = (
-                FlextTargetLdap._load_config_from_file(settings) if settings else {}
-            )
-            validated_settings = FlextTargetLdapSettings.model_validate(cfg)
-            current_stream: str | None = None
-            api = FlextTargetLdapClient(validated_settings)
-            seen_dns: set[str] = set()
-            for line in sys.stdin:
-                try:
-                    raw = t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
-                    msg_type = raw.get("type")
-                    if msg_type == "STATE":
-                        FlextTargetLdap.logger.debug(line.strip())
-                        continue
-                    if msg_type == "SCHEMA":
-                        raw_stream = raw.get("stream")
-                        current_stream = (
-                            str(raw_stream) if raw_stream is not None else None
-                        )
-                        continue
-                    if msg_type != "RECORD":
-                        continue
-                    record_data = raw.get("record", {})
-                    raw_stream = raw.get("stream")
-                    stream = (
-                        str(raw_stream)
-                        if raw_stream is not None
-                        else (current_stream or "users")
-                    )
-                    if not isinstance(record_data, Mapping):
-                        continue
-                    normalized_record: t.TargetLdap.MutableRecordPayload = {}
-                    for key, value in record_data.items():
-                        normalized_record[key] = value
-                    FlextTargetLdap._process_record_message(
-                        normalized_record,
-                        stream,
-                        validated_settings,
-                        api,
-                        seen_dns,
-                    )
-                except c.Meltano.SINGER_SAFE_EXCEPTIONS:
-                    FlextTargetLdap.logger.exception("Malformed input line failed")
-                    raise
+            FlextTargetLdap._run_cli(settings)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS:
             FlextTargetLdap.logger.exception("Unexpected error in CLI execution")
             raise
 
     cli: ClassVar[Callable[..., None]] = run_cli
 
+    @staticmethod
+    def _run_cli(settings: str | None) -> None:
+        """Run target CLI processing without owning the exception boundary."""
+        cfg: t.TargetLdap.SettingsPayload = (
+            FlextTargetLdap._load_config_from_file(settings) if settings else {}
+        )
+        # NOTE (multi-agent): the Singer config payload is the flat public
+        # contract; the client resolves its connection section internally.
+        api = FlextTargetLdapClient(cfg)
+        current_stream: str | None = None
+        seen_dns: set[str] = set()
+        for line in sys.stdin:
+            current_stream = FlextTargetLdap._process_input_line(
+                line, current_stream, cfg, api, seen_dns
+            )
+
+    @staticmethod
+    def _process_input_line(
+        line: str,
+        current_stream: str | None,
+        settings: t.TargetLdap.SettingsPayload,
+        api: FlextTargetLdapClient,
+        seen_dns: set[str],
+    ) -> str | None:
+        """Process one Singer input line and return the current stream."""
+        raw = FlextTargetLdap._parse_input_line(line)
+        msg_type = raw.get("type")
+        if msg_type == "STATE":
+            FlextTargetLdap.logger.debug(line.strip())
+            return current_stream
+        if msg_type == "SCHEMA":
+            raw_stream = raw.get("stream")
+            return str(raw_stream) if raw_stream is not None else None
+        if msg_type != "RECORD":
+            return current_stream
+        record_data = raw.get("record", {})
+        raw_stream = raw.get("stream")
+        stream = (
+            str(raw_stream) if raw_stream is not None else (current_stream or "users")
+        )
+        if not isinstance(record_data, Mapping):
+            return current_stream
+        normalized_record: t.TargetLdap.MutableRecordPayload = {}
+        for key, value in record_data.items():
+            normalized_record[key] = value
+        FlextTargetLdap._process_record_message(
+            normalized_record, stream, settings, api, seen_dns
+        )
+        return current_stream
+
+    @staticmethod
+    def _parse_input_line(line: str) -> t.JsonMapping:
+        """Parse one Singer input line."""
+        try:
+            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS:
+            FlextTargetLdap.logger.exception("Malformed input line failed")
+            raise
+
 
 target_ldap = FlextTargetLdap
 
-__all__: list[str] = [
-    "FlextTargetLdap",
-    "target_ldap",
-]
+__all__: list[str] = ["FlextTargetLdap", "target_ldap"]

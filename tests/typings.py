@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from flext_tests import FlextTestsTypes
-
 from flext_target_ldap import FlextTargetLdapTypes
+from flext_tests import FlextTestsTypes
 
 
 class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
