@@ -1,8 +1,12 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
-# flext_target_ldap.application.orchestrator
+# flext_target_ldap.settings
 
-::: flext_target_ldap.application.orchestrator
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
+
+::: flext_target_ldap.settings
     options:
       show_root_heading: true
       show_root_full_path: false

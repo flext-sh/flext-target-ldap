@@ -2,6 +2,10 @@
 
 # flext_target_ldap.constants
 
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
+
 ::: flext_target_ldap.constants
     options:
       show_root_heading: true
