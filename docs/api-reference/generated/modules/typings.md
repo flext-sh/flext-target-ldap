@@ -1,10 +1,10 @@
-<!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
-
 # flext_target_ldap.typings
 
 <!-- TOC START -->
 - No sections found
 <!-- TOC END -->
+
+<!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
 ::: flext_target_ldap.typings
     options:

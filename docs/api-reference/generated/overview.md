@@ -16,11 +16,17 @@
   Database` (+3 more)
 - Project class: `integration`
 - Keywords: `data-integration`, `etl`, `flext`, `ldap`, `singer`, `target`
-- Main facades: _none_
-- Alias exports: _none_
-- Public symbol exports: _none_
+- Main facades: `FlextTargetLdap`, `FlextTargetLdapConfig`,
+  `FlextTargetLdapConstants`, `FlextTargetLdapModels`,
+  `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
+  `FlextTargetLdapUtilities`
+- Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
+- Public symbol exports: `FlextTargetLdap`, `FlextTargetLdapConfig`,
+  `FlextTargetLdapConstants`, `FlextTargetLdapModels`,
+  `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
+  `FlextTargetLdapUtilities`, `config`, `settings` (+1 more)
 - Exported module shortcuts: _none_
-- Generated module pages: `0`
+- Generated module pages: `6`
 
 ## Next Pages
 
