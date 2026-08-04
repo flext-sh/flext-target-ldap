@@ -265,19 +265,19 @@ class FlextTargetLdapClient:
 
     def fetch_entry(
         self, dn: str, attributes: t.StrSequence | None = None
-    ) -> p.Result[m.Ldif.Entry | None]:
+    ) -> p.Result[m.Ldif.Entry]:
         """Fetch the LDAP entry using the flext-ldap API."""
         try:
             if not dn:
-                return r[m.Ldif.Entry | None].fail("DN required")
+                return r[m.Ldif.Entry].fail("DN required")
             FlextTargetLdapClient.logger.info("Getting LDAP entry: %s", dn)
             search_result = self.search_entry(dn, "(objectClass=*)", attributes)
             if search_result.success and search_result.value:
-                return r[m.Ldif.Entry | None].ok(search_result.value[0])
-            return r[m.Ldif.Entry | None].ok(None)
+                return r[m.Ldif.Entry].ok(search_result.value[0])
+            return r[m.Ldif.Entry].fail(f"Entry not found: {dn}")
         except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception("Failed to get entry: %s", dn)
-            return r[m.Ldif.Entry | None].fail_op("Get entry", e)
+            return r[m.Ldif.Entry].fail_op("Get entry", e)
 
     def modify_entry(
         self, dn: str, changes: t.Ldap.OperationAttributes
