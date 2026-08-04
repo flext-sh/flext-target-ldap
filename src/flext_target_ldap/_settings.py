@@ -36,7 +36,9 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         use_tls: Annotated[bool, m.Field(default=False, description="Use TLS")]
         bind_dn: Annotated[str, m.Field(default="", description="Bind DN")]
         bind_password: Annotated[str, m.Field(default="", description="Bind password")]
-        timeout: Annotated[int, m.Field(default=30, description="Connection timeout (s)")]
+        timeout: Annotated[
+            int, m.Field(default=30, description="Connection timeout (s)")
+        ]
         auto_bind: Annotated[bool, m.Field(default=True, description="Auto bind")]
         auto_range: Annotated[bool, m.Field(default=True, description="Auto range")]
         base_dn: Annotated[str, m.Field(default="", description="Base DN")]
@@ -55,10 +57,14 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         receive_timeout: Annotated[
             int, m.Field(default=30, description="Receive timeout (s)")
         ]
-        batch_size: Annotated[int, m.Field(default=1000, description="Entries per batch")]
+        batch_size: Annotated[
+            int, m.Field(default=1000, description="Entries per batch")
+        ]
         max_records: Annotated[
             int | None,
-            m.Field(default=None, description="Max total records, or None for unlimited"),
+            m.Field(
+                default=None, description="Max total records, or None for unlimited"
+            ),
         ]
         create_missing_entries: Annotated[
             bool,
@@ -70,7 +76,9 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         ]
         delete_removed_entries: Annotated[
             bool,
-            m.Field(default=False, description="Delete LDAP entries removed from source"),
+            m.Field(
+                default=False, description="Delete LDAP entries removed from source"
+            ),
         ]
         attribute_mapping: Annotated[
             dict[str, str],

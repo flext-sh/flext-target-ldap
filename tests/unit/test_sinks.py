@@ -93,7 +93,9 @@ def generic_sink(ldap_target: m.TargetLdap.Target) -> m.TargetLdap.BaseSink:
 class TestsFlextTargetLdapSinks:
     """Behavior contract for test_sinks."""
 
-    def test_ldap_sink_initialization(self, ldap_base_sink: m.TargetLdap.BaseSink) -> None:
+    def test_ldap_sink_initialization(
+        self, ldap_base_sink: m.TargetLdap.BaseSink
+    ) -> None:
         tm.that(ldap_base_sink.stream_name, eq="test_stream")
         tm.that(ldap_base_sink.key_properties, eq=["dn"])
         properties = ldap_base_sink.schema.get("properties")
@@ -122,12 +124,16 @@ class TestsFlextTargetLdapSinks:
         assert result.error is not None
         assert expected_error in result.error
 
-    def test_resolve_object_classes_default(self, ldap_base_sink: m.TargetLdap.BaseSink) -> None:
+    def test_resolve_object_classes_default(
+        self, ldap_base_sink: m.TargetLdap.BaseSink
+    ) -> None:
         record: t.TargetLdap.RecordPayload = {}
         classes = ldap_base_sink.resolve_object_classes(record)
         tm.that(classes, eq=["top"])
 
-    def test_validate_entry_success(self, ldap_base_sink: m.TargetLdap.BaseSink) -> None:
+    def test_validate_entry_success(
+        self, ldap_base_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = ldap_base_sink.validate_entry(
             "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
         )
@@ -165,13 +171,17 @@ class TestsFlextTargetLdapSinks:
         tm.ok(result)
         tm.that(result.value, eq="uid=testuser,dc=example,dc=com")
 
-    def test_users_build_dn_missing_uid(self, users_sink: m.TargetLdap.UsersSink) -> None:
+    def test_users_build_dn_missing_uid(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         result = users_sink.build_dn({"cn": "Test User"})
         tm.fail(result)
         assert result.error is not None
         assert "No value found for RDN attribute 'uid'" in result.error
 
-    def test_users_build_attributes_basic(self, users_sink: m.TargetLdap.UsersSink) -> None:
+    def test_users_build_attributes_basic(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         result = users_sink.build_attributes({
             "uid": "testuser",
             "cn": "Test User",
@@ -187,7 +197,9 @@ class TestsFlextTargetLdapSinks:
         tm.that(result.value["sn"], eq=["User"])
         tm.that(result.value["givenName"], eq=["Test"])
 
-    def test_users_build_attributes_multivalued(self, users_sink: m.TargetLdap.UsersSink) -> None:
+    def test_users_build_attributes_multivalued(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         result = users_sink.build_attributes({
             "uid": "testuser",
             "emails": ["test1@example.com", "test2@example.com"],
@@ -198,7 +210,9 @@ class TestsFlextTargetLdapSinks:
         tm.that(result.value["mail"], eq=["test1@example.com", "test2@example.com"])
         tm.that(result.value["telephoneNumber"], eq=["123-456-7890", "098-765-4321"])
 
-    def test_users_get_object_classes_default(self, users_sink: m.TargetLdap.UsersSink) -> None:
+    def test_users_get_object_classes_default(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         classes = users_sink.resolve_object_classes({})
         tm.that(classes, eq=["inetOrgPerson", "organizationalPerson", "person", "top"])
 
@@ -221,18 +235,24 @@ class TestsFlextTargetLdapSinks:
         )
         tm.that(sink.resolve_object_classes({}), eq=["customUser", "top"])
 
-    def test_groups_build_dn_success(self, groups_sink: m.TargetLdap.GroupsSink) -> None:
+    def test_groups_build_dn_success(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         result = groups_sink.build_dn({"cn": "testgroup", "description": "Test Group"})
         tm.ok(result)
         tm.that(result.value, eq="cn=testgroup,dc=example,dc=com")
 
-    def test_groups_build_dn_missing_cn(self, groups_sink: m.TargetLdap.GroupsSink) -> None:
+    def test_groups_build_dn_missing_cn(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         result = groups_sink.build_dn({"description": "Test Group"})
         tm.fail(result)
         assert result.error is not None
         assert "No value found for RDN attribute 'cn'" in result.error
 
-    def test_groups_build_attributes_basic(self, groups_sink: m.TargetLdap.GroupsSink) -> None:
+    def test_groups_build_attributes_basic(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         result = groups_sink.build_attributes({
             "cn": "testgroup",
             "description": "Test Group",
@@ -247,20 +267,28 @@ class TestsFlextTargetLdapSinks:
             eq=["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
         )
 
-    def test_groups_get_object_classes_default(self, groups_sink: m.TargetLdap.GroupsSink) -> None:
+    def test_groups_get_object_classes_default(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         tm.that(groups_sink.resolve_object_classes({}), eq=["groupOfNames", "top"])
 
-    def test_ou_build_dn_success(self, ou_sink: m.TargetLdap.OrganizationalUnitsSink) -> None:
+    def test_ou_build_dn_success(
+        self, ou_sink: m.TargetLdap.OrganizationalUnitsSink
+    ) -> None:
         result = ou_sink.build_dn({"name": "testou", "description": "Test OU"})
         tm.ok(result)
         tm.that(result.value, has="testou")
 
-    def test_ou_build_dn_missing_ou(self, ou_sink: m.TargetLdap.OrganizationalUnitsSink) -> None:
+    def test_ou_build_dn_missing_ou(
+        self, ou_sink: m.TargetLdap.OrganizationalUnitsSink
+    ) -> None:
         result = ou_sink.build_dn({"description": "Test OU"})
         tm.fail(result)
         tm.that(result.error, none=False)
 
-    def test_ou_build_attributes_basic(self, ou_sink: m.TargetLdap.OrganizationalUnitsSink) -> None:
+    def test_ou_build_attributes_basic(
+        self, ou_sink: m.TargetLdap.OrganizationalUnitsSink
+    ) -> None:
         result = ou_sink.build_attributes({"ou": "testou", "description": "Test OU"})
         tm.fail(result)
 
@@ -269,23 +297,31 @@ class TestsFlextTargetLdapSinks:
     ) -> None:
         tm.that(ou_sink.resolve_object_classes({}), has="top")
 
-    def test_generic_build_dn_explicit(self, generic_sink: m.TargetLdap.BaseSink) -> None:
+    def test_generic_build_dn_explicit(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_dn({"dn": "cn=test,dc=example,dc=com"})
         tm.ok(result)
         tm.that(result.value, eq="cn=test,dc=example,dc=com")
 
-    def test_generic_build_dn_id_field(self, generic_sink: m.TargetLdap.BaseSink) -> None:
+    def test_generic_build_dn_id_field(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_dn({"id": "testentry", "cn": "Test Entry"})
         tm.ok(result)
         tm.that(result.value, eq="cn=testentry,dc=example,dc=com")
 
-    def test_generic_build_dn_no_identifier(self, generic_sink: m.TargetLdap.BaseSink) -> None:
+    def test_generic_build_dn_no_identifier(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_dn({"description": "Test Entry"})
         tm.fail(result)
         assert result.error is not None
         assert "No ID or name found for generic entry" in result.error
 
-    def test_generic_build_attributes_basic(self, generic_sink: m.TargetLdap.BaseSink) -> None:
+    def test_generic_build_attributes_basic(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_attributes({
             "id": "testentry",
             "cn": "Test Entry",

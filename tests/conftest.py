@@ -200,8 +200,6 @@ def singer_message_state() -> str:
 
 
 @pytest.fixture
-def ldap_target(
-    mock_ldap_config: t.TargetLdap.SettingsPayload,
-) -> m.TargetLdap.Target:
+def ldap_target(mock_ldap_config: t.TargetLdap.SettingsPayload) -> m.TargetLdap.Target:
     """Return a real target instance carrying the test connection settings."""
     return m.TargetLdap.Target(dict(mock_ldap_config))
