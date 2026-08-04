@@ -1,9 +1,9 @@
 # AUTO-GENERATED — DO NOT EDIT MANUALLY
 site_name: flext-target-ldap Documentation
 site_description: Generated documentation for flext-target-ldap
-site_url: https://github.com/client-atech/flext#readme
+site_url: https://github.com/flext-sh/flext-target-ldap/blob/main/README.md
 repo_name: flext-sh/flext
-repo_url: https://github.com/client-atech/flext
+repo_url: https://github.com/flext-sh/flext-target-ldap
 edit_uri: edit/main/flext-target-ldap/
 docs_dir: docs
 site_dir: .reports/docs/site

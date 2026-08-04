@@ -106,9 +106,7 @@ from flext_core import u
 settings = FlextSettings()
 
 # Show settings summary
-u.info(f"FLEXT application initialized with log level: {settings.log_level}")
-```
-
+u.info(f"FLEXT application initialized with log level: {settings.log_level}")```
 ### 2. Using flext-ldif for LDIF Processing
 
 ```python
@@ -125,9 +123,7 @@ if result.success:
     entries = result.unwrap().entries
     print(f"Successfully parsed {len(entries)} LDIF entries")
 else:
-    print(f"Failed to parse LDIF: {result.error}")
-```
-
+    print(f"Failed to parse LDIF: {result.error}")```
 ### 3. Railway-Oriented Error Handling
 
 ```python
@@ -167,9 +163,7 @@ result = process_ldif_data(ldif_content)
 if result.success:
     print(f"Success: {result.unwrap()}")
 else:
-    print(f"Error: {result.error}")
-```
-
+    print(f"Error: {result.error}")```
 ### 4. CQRS Pattern with Commands and Queries
 
 ```python
@@ -206,9 +200,7 @@ dispatcher.register_handler(GetUserQuery, user_service.get_user)
 
 # Use the dispatcher
 create_result = dispatcher.dispatch(CreateUserCommand("john", "john@example.com"))
-get_result = dispatcher.dispatch(GetUserQuery("user123"))
-```
-
+get_result = dispatcher.dispatch(GetUserQuery("user123"))```
 ## Configuration
 
 ### Basic Configuration
@@ -231,9 +223,7 @@ from flext_ldif import FlextLdif, FlextLdifSettings
 settings = FlextLdifSettings(default_encoding="utf-8", strict_validation=True)
 
 # Use configuration
-ldif_service = FlextLdif(settings=settings)
-```
-
+ldif_service = FlextLdif(settings=settings)```
 ## Next Steps
 
 ### Explore the Ecosystem
