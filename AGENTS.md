@@ -34,6 +34,11 @@ src/flext_target_ldap/
 
 - **`target.py` is a compatibility entrypoint only** — do not add behavior there; the implementation is in `api.py` + `singer/`/`application/`/`patterns/`.
 
+## Conventions (specific to this package)
+
+- Config/settings canonical pattern: ADR-012.
+- Codemod governance (ast-grep + make mod): ADR-014.
+
 ## Commands
 
 ```bash
