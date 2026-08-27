@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING, Annotated
 
 from flext_ldap import m
@@ -113,7 +112,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 t.MutableStrSequenceMapping,
                 u.Field(
                     description="LDAP attributes with values",
-                    default_factory=lambda: MappingProxyType({}),
+                    default_factory=dict,
                 ),
             ]
             entry_type: Annotated[
@@ -134,7 +133,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                     v.append("top")
                 return v
 
-            @u.computed_field(return_type=str)
+            @u.computed_field
             @property
             def parent_dn(self) -> str:
                 """Parent DN derived from the distinguished name."""
@@ -142,7 +141,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 parts = distinguished_name.split(",", 1)
                 return parts[1].strip() if len(parts) > 1 else ""
 
-            @u.computed_field(return_type=str)
+            @u.computed_field
             @property
             def rdn(self) -> str:
                 """Relative distinguished name derived from the DN."""
