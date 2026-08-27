@@ -16,7 +16,7 @@ import pytest
 
 from flext_cli import u as cli_u
 from flext_ldap import u as ldap_u
-from flext_tests import reset_settings as _shared_reset_settings, tk
+from flext_tests import tk
 from tests import m, u
 
 _LDAP_CONTAINER_NAME = "flext-openldap-test"
@@ -29,9 +29,6 @@ _LDAP_BIND_READY_TIMEOUT = 60.0
 
 if TYPE_CHECKING:
     from tests import t
-
-reset_settings = _shared_reset_settings
-
 
 @pytest.fixture(scope="session")
 def ldap_container() -> t.TargetLdap.SettingsPayload:
