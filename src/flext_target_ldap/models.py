@@ -111,8 +111,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             attributes: Annotated[
                 t.MutableStrSequenceMapping,
                 u.Field(
-                    description="LDAP attributes with values",
-                    default_factory=dict,
+                    description="LDAP attributes with values", default_factory=dict
                 ),
             ]
             entry_type: Annotated[

@@ -30,6 +30,7 @@ _LDAP_BIND_READY_TIMEOUT = 60.0
 if TYPE_CHECKING:
     from tests import t
 
+
 @pytest.fixture(scope="session")
 def ldap_container() -> t.TargetLdap.SettingsPayload:
     """Start the shared OpenLDAP container and return a real connection config.
