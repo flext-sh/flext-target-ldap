@@ -21,37 +21,37 @@ class FlextTargetLdapProtocols(p, FlextLdapProtocols):
 
             @property
             def bind_dn(self) -> str:
-                """Return the configured bind DN."""
+                """The configured bind DN."""
                 ...
 
             @property
             def host(self) -> str:
-                """Return the configured LDAP host."""
+                """The configured LDAP host."""
                 ...
 
             @property
             def password(self) -> str:
-                """Return the configured bind password."""
+                """The configured bind password."""
                 ...
 
             @property
             def port(self) -> int:
-                """Return the configured LDAP port."""
+                """The configured LDAP port."""
                 ...
 
             @property
             def server_uri(self) -> str:
-                """Return the effective LDAP server URI."""
+                """The effective LDAP server URI."""
                 ...
 
             @property
             def timeout(self) -> int:
-                """Return the configured connection timeout."""
+                """The configured connection timeout."""
                 ...
 
             @property
             def use_ssl(self) -> bool:
-                """Return whether LDAPS is enabled."""
+                """Whether LDAPS is enabled."""
                 ...
 
             def add_entry(
