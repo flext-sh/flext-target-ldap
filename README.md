@@ -55,7 +55,7 @@ slot registry verification).
   of the facade classes listed under Module Map above.
 - Public extensions exposed by this project: `FlextTargetLdap`,
   `FlextTargetLdapConfig`, `FlextTargetLdapConstants`, `FlextTargetLdapModels`,
-  `FlextTargetLdapProtocols`, `FlextTargetLdapSettings` (+2 more).
+  `FlextTargetLdapOrchestrator`, `FlextTargetLdapProtocols` (+3 more).
 - Library abstraction boundaries: see AGENTS.md §2.7.
 
 ## Quality Gates
