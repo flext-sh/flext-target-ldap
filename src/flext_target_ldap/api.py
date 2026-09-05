@@ -249,7 +249,4 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             FlextTargetLdap.logger.exception("Malformed input line failed")
             raise
 
-
-target_ldap = FlextTargetLdap
-
-__all__: list[str] = ["FlextTargetLdap", "target_ldap"]
+__all__: list[str] = ["FlextTargetLdap", ]
