@@ -24,8 +24,7 @@ def ldap_runtime() -> m.Tests.ContainerConfig:
     """Start and return the canonical shared OpenLDAP runtime."""
     container_name = c.Tests.CONNECTIVITY_MARKER_CONTAINERS["ldap"]
     docker = tk.shared(
-        container_name,
-        workspace_root=Path(__file__).resolve().parents[2],
+        container_name, workspace_root=Path(__file__).resolve().parents[2]
     )
     tm.ok(docker.execute())
     return tm.not_none(docker.target_config)
@@ -60,9 +59,7 @@ def ldap_runtime_client(
 
 
 @pytest.fixture
-def ldap_base_dn(
-    ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
-) -> str:
+def ldap_base_dn(ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload) -> str:
     """Return the configured base DN, failing when runtime config is incomplete."""
     base_dn = ldap_runtime_settings_payload.get(c.TargetLdap.KEY_BASE_DN)
     if not isinstance(base_dn, str) or not base_dn:

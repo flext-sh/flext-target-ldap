@@ -31,8 +31,7 @@ class TestsFlextTargetLdapClient:
         configured = settings.TargetLdap
         scheme = "ldaps" if configured.use_ssl else "ldap"
         tm.that(
-            ldap_client.server_uri,
-            eq=f"{scheme}://{configured.host}:{configured.port}",
+            ldap_client.server_uri, eq=f"{scheme}://{configured.host}:{configured.port}"
         )
 
     @pytest.mark.integration
@@ -49,9 +48,7 @@ class TestsFlextTargetLdapClient:
 
     @pytest.mark.integration
     def test_entry_lifecycle_is_observable_in_configured_runtime(
-        self,
-        ldap_runtime_client: p.TargetLdap.Client,
-        ldap_base_dn: str,
+        self, ldap_runtime_client: p.TargetLdap.Client, ldap_base_dn: str
     ) -> None:
         identifier = f"flext-target-ldap-{uuid4().hex}"
         dn = f"uid={identifier},{ldap_base_dn}"
@@ -65,9 +62,7 @@ class TestsFlextTargetLdapClient:
             tm.ok(added)
             created = True
 
-            changes: t.Ldap.OperationAttributes = {
-                "mail": f"{identifier}@flext.local"
-            }
+            changes: t.Ldap.OperationAttributes = {"mail": f"{identifier}@flext.local"}
             modified = ldap_runtime_client.modify_entry(dn=dn, changes=changes)
             tm.ok(modified)
 
