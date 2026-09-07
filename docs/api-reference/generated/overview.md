@@ -18,15 +18,16 @@
 - Keywords: `data-integration`, `etl`, `flext`, `ldap`, `singer`, `target`
 - Main facades: `FlextTargetLdap`, `FlextTargetLdapConfig`,
   `FlextTargetLdapConstants`, `FlextTargetLdapModels`,
-  `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
-  `FlextTargetLdapUtilities`
+  `FlextTargetLdapOrchestrator`, `FlextTargetLdapProtocols`,
+  `FlextTargetLdapSettings`, `FlextTargetLdapTypes` (+1 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
 - Public symbol exports: `FlextTargetLdap`, `FlextTargetLdapConfig`,
   `FlextTargetLdapConstants`, `FlextTargetLdapModels`,
-  `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
-  `FlextTargetLdapUtilities`, `config`, `settings` (+1 more)
-- Exported module shortcuts: _none_
-- Generated module pages: `6`
+  `FlextTargetLdapOrchestrator`, `FlextTargetLdapProtocols`,
+  `FlextTargetLdapSettings`, `FlextTargetLdapTypes`, `FlextTargetLdapUtilities`,
+  `config` (+2 more)
+- Exported module shortcuts: `application`
+- Generated module pages: `9`
 
 ## Next Pages
 

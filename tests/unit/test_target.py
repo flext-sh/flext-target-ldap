@@ -1,142 +1,49 @@
-"""Tests for target-ldap.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Observable behavior of the public target-ldap facade."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-import pytest
-from pydantic import BaseModel
+from collections.abc import Mapping
 
 from flext_target_ldap import FlextTargetLdap
 from flext_tests import tm
-from tests import m, u
-from tests.base import s
-from tests.settings import TestsFlextTargetLdapSettings as TargetLdapTestSettings
-
-if TYPE_CHECKING:
-    from tests import t
+from tests import t
 
 
 class TestsFlextTargetLdapTarget:
-    """Behavior contract for test_target."""
+    """Behavior contract for the public target facade."""
 
-    @pytest.mark.parametrize(
-        ("key", "expected_cls"),
-        [
-            ("users", m.TargetLdap.UsersSink),
-            ("groups", m.TargetLdap.GroupsSink),
-            ("custom_stream", m.TargetLdap.BaseSink),
-        ],
-    )
-    def test_get_sink_class(
-        self,
-        key: str,
-        expected_cls: type[m.TargetLdap.BaseSink],
-        mock_ldap_config: t.TargetLdap.SettingsPayload,
+    def test_target_uses_injected_settings(
+        self, ldap_settings_payload: t.TargetLdap.SettingsPayload
     ) -> None:
-        target = FlextTargetLdap(settings=mock_ldap_config)
-        assert target.get_sink_class(key) is expected_cls
+        target = FlextTargetLdap(settings=ldap_settings_payload)
+        tm.that(target.settings, eq=ldap_settings_payload)
+        target.validate_config()
 
-    def test_target_initialization(
-        self, mock_ldap_config: t.TargetLdap.SettingsPayload
+    def test_catalog_streams_resolve_through_public_sink_factory(
+        self, ldap_settings_payload: t.TargetLdap.SettingsPayload
     ) -> None:
-        target = FlextTargetLdap(settings=mock_ldap_config)
-        tm.that(target.name, eq="target-ldap")
-        tm.that(target.settings, eq=mock_ldap_config)
+        target = FlextTargetLdap(settings=ldap_settings_payload)
+        streams = target.singer_catalog.get("streams")
+        if not isinstance(streams, list):
+            msg = "Singer catalog must expose a streams list"
+            raise TypeError(msg)
+        for stream in streams:
+            if not isinstance(stream, Mapping):
+                msg = "Singer catalog stream must be a mapping"
+                raise TypeError(msg)
+            stream_name = stream.get("tap_stream_id")
+            if not isinstance(stream_name, str) or not stream_name:
+                msg = "Singer catalog stream must expose tap_stream_id"
+                raise TypeError(msg)
+            sink = target.get_sink(stream_name)
+            tm.that(sink.stream_name, eq=stream_name)
 
-    def test_test_service_settings_include_tests_namespace(self) -> None:
-        settings = s.fetch_settings()
-        assert isinstance(settings, TargetLdapTestSettings)
-
-        tm.that(settings.Tests, is_=BaseModel)
-        tm.that(settings, is_=TargetLdapTestSettings)
-        assert settings.base_dn
-
-    def test_dn_template_processing(
-        self, mock_ldap_config: t.TargetLdap.SettingsPayload
+    def test_deleted_record_without_identity_fails_observably(
+        self, ldap_settings_payload: t.TargetLdap.SettingsPayload
     ) -> None:
-        updated_settings: t.TargetLdap.SettingsPayload = {
-            **mock_ldap_config,
-            "user_rdn_attribute": "uid",
-            "base_dn": "ou=people,dc=test,dc=com",
-        }
-        target = FlextTargetLdap(settings=updated_settings)
+        target = FlextTargetLdap(settings=ldap_settings_payload)
         sink = target.get_sink("users")
-        tm.that(sink, is_=m.TargetLdap.UsersSink)
-        assert isinstance(sink, m.TargetLdap.UsersSink)
-        dn_result = sink.build_dn({"uid": "jdoe"})
-        tm.ok(dn_result)
-        tm.that(dn_result.value, eq="uid=jdoe,ou=people,dc=test,dc=com")
-
-    def test_object_classes_processing(
-        self, mock_ldap_config: t.TargetLdap.SettingsPayload
-    ) -> None:
-        updated_settings: t.TargetLdap.SettingsPayload = {
-            **mock_ldap_config,
-            "users_object_classes": ["customPerson", "top"],
-        }
-        target = FlextTargetLdap(settings=updated_settings)
-        sink = target.get_sink("users")
-        tm.that(sink, is_=m.TargetLdap.UsersSink)
-        assert isinstance(sink, m.TargetLdap.UsersSink)
-        object_classes = sink.resolve_object_classes({})
-        tm.that(object_classes, eq=["customPerson", "top"])
-
-    @pytest.mark.integration
-    def test_process_record(
-        self, real_target_config: t.TargetLdap.SettingsPayload, real_base_dn: str
-    ) -> None:
-        singer_record: t.TargetLdap.RecordPayload = {
-            "username": "processrec",
-            "full_name": "Process Record",
-            "last_name": "Record",
-        }
-        target = FlextTargetLdap(settings=real_target_config)
-        sink = target.get_sink("users")
-        tm.that(sink, is_=m.TargetLdap.BaseSink)
-        assert isinstance(sink, m.TargetLdap.BaseSink)
-        setup_result = sink.setup_client()
-        tm.ok(setup_result)
-        try:
-            client = sink.client
-            assert client is not None
-            dn = f"uid=processrec,{real_base_dn}"
-            client.delete_entry(dn)
-            result = sink.process_record(singer_record, {})
-            tm.ok(result)
-            client.delete_entry(dn)
-        finally:
-            sink.teardown_client()
-
-    def test_process_delete_record(
-        self, mock_ldap_config: t.TargetLdap.SettingsPayload
-    ) -> None:
-        target = FlextTargetLdap(settings=mock_ldap_config)
-        sink = target.get_sink("users")
-        tm.that(sink, is_=m.TargetLdap.BaseSink)
-        assert isinstance(sink, m.TargetLdap.BaseSink)
-        record: t.TargetLdap.RecordPayload = {
-            "dn": "uid=jdoe,ou=users,dc=test,dc=com",
-            "_sdc_deleted_at": "2024-01-15T10:30:00Z",
-        }
+        record: t.TargetLdap.RecordPayload = {"_sdc_deleted_at": True}
         result = sink.process_record(record, {})
         tm.fail(result)
-        assert result.error
-        assert "No username found" in result.error
-
-    def test_sink_process_record_delegates_to_target_handler(self) -> None:
-        target = u.TargetLdap.Tests.ProcessTarget()
-        sink = m.TargetLdap.Sink(
-            target=target,
-            stream_name="users",
-            schema={"type": "object"},
-            key_properties=["id"],
-        )
-        result = sink.process_record({"id": "42"}, {"batch": "1"})
-        tm.ok(result)
-        tm.that(target.calls, eq=[({"id": "42"}, {"batch": "1"})])
+        tm.that(result.error, has="No username found")

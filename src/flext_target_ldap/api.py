@@ -13,7 +13,9 @@ from typing import ClassVar, override
 
 from flext_core import FlextContainer
 from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
-from flext_target_ldap._models.sinks import (
+from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+
+from ._models.sinks import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapGroupsSink,
     FlextTargetLdapOrganizationalUnitsSink,
@@ -21,8 +23,7 @@ from flext_target_ldap._models.sinks import (
     FlextTargetLdapTarget,
     FlextTargetLdapUsersSink,
 )
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+from ._utilities.client import FlextTargetLdapClient
 
 
 class FlextTargetLdap(FlextTargetLdapTarget):
@@ -250,6 +251,4 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             raise
 
 
-target_ldap = FlextTargetLdap
-
-__all__: list[str] = ["FlextTargetLdap", "target_ldap"]
+__all__: list[str] = ["FlextTargetLdap"]
