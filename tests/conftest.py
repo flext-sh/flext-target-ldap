@@ -24,7 +24,7 @@ def ldap_runtime() -> m.Tests.ContainerConfig:
     """Start and return the canonical shared OpenLDAP runtime."""
     container_name = c.Tests.CONNECTIVITY_MARKER_CONTAINERS["ldap"]
     docker = tk.shared(
-        container_name, workspace_root=Path(__file__).resolve().parents[2]
+        container_name, repository_root=Path(__file__).resolve().parents[2]
     )
     tm.ok(docker.execute())
     return tm.not_none(docker.target_config)
