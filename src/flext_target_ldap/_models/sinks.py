@@ -18,7 +18,6 @@ from .processing_result import FlextTargetLdapProcessingCounters
 class FlextTargetLdapSink:
     """Base Sink class for Singer protocol compatibility."""
 
-    @override
     def __init__(
         self,
         target: FlextTargetLdapTarget,
@@ -48,12 +47,14 @@ class FlextTargetLdapTarget:
 
     settings: t.TargetLdap.SettingsPayload
 
-    @override
     def __init__(
-        self, settings: t.TargetLdap.SettingsPayload, **kwargs: t.Scalar
+        self,
+        *,
+        settings: t.TargetLdap.SettingsPayload | None = None,
+        **_kwargs: t.Scalar,
     ) -> None:
         """Initialize target with configuration."""
-        self.settings = settings
+        self.settings = settings or {}
 
     def process_record(
         self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload

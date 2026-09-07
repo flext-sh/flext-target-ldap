@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import ClassVar, override
+from typing import ClassVar
 
 from flext_ldap import ldap, u
 from flext_target_ldap import FlextTargetLdapSettings, c, m, p, r, t
@@ -67,7 +67,6 @@ class FlextTargetLdapClient:
         }
         return built_changes
 
-    @override
     def __init__(
         self,
         settings: (

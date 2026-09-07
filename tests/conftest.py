@@ -81,4 +81,4 @@ def ldap_target(
     ldap_settings_payload: t.TargetLdap.SettingsPayload,
 ) -> m.TargetLdap.Target:
     """Build the public target model from production settings."""
-    return m.TargetLdap.Target(dict(ldap_settings_payload))
+    return m.TargetLdap.Target(settings=dict(ldap_settings_payload))

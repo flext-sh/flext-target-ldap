@@ -19,7 +19,6 @@ from ._models.sinks import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapGroupsSink,
     FlextTargetLdapOrganizationalUnitsSink,
-    FlextTargetLdapSink,
     FlextTargetLdapTarget,
     FlextTargetLdapUsersSink,
 )
@@ -40,9 +39,12 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         *,
         settings: t.TargetLdap.SettingsPayload | None = None,
         validate_config: bool = True,
+        **kwargs: t.Scalar,
     ) -> None:
         """Initialize LDAP target."""
-        super().__init__(settings=settings or {}, validate_config=validate_config)
+        super().__init__(
+            settings=settings or {}, validate_config=validate_config, **kwargs
+        )
         self._orchestrator: FlextTargetLdapOrchestrator | None = None
         self._container: p.Container | None = None
 
@@ -59,14 +61,14 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """The Singer catalog for this target."""
         return u.TargetLdap.build_singer_catalog()
 
-    def get_sink(self, stream_name: str) -> FlextTargetLdapSink:
+    def get_sink(self, stream_name: str) -> FlextTargetLdapBaseSink:
         """Return an instantiated sink for the given stream name."""
         sink_class = self.get_sink_class(stream_name)
         return sink_class(
             target=self, stream_name=stream_name, schema={}, key_properties=[]
         )
 
-    def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:
+    def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapBaseSink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
             "users": FlextTargetLdapUsersSink,

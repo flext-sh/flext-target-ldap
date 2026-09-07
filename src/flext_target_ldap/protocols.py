@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_ldap import FlextLdapProtocols
-from flext_meltano import p, t
+from flext_ldap import FlextLdapProtocols, t
+from flext_meltano import p
 
 
 class FlextTargetLdapProtocols(p, FlextLdapProtocols):
