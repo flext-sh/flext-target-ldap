@@ -1,4 +1,4 @@
 version: 1
-workspace: flext-target-ldap
-database: flext-target-ldap
-issue_prefix: flext-target-ldap
+workspace: flext
+database: flext
+issue_prefix: flext

@@ -9,7 +9,7 @@ from flext_meltano import m, u
 from flext_target_ldap import FlextTargetLdap, p, t
 
 if TYPE_CHECKING:
-    from flext_target_ldap._models.sinks import FlextTargetLdapSink
+    from .._models.sinks import FlextTargetLdapSink
 
 
 class FlextTargetLdapServiceRuntime:
