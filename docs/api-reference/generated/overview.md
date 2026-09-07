@@ -25,7 +25,7 @@
   `FlextTargetLdapConstants`, `FlextTargetLdapModels`,
   `FlextTargetLdapOrchestrator`, `FlextTargetLdapProtocols`,
   `FlextTargetLdapSettings`, `FlextTargetLdapTypes`, `FlextTargetLdapUtilities`,
-  `config` (+3 more)
+  `config` (+2 more)
 - Exported module shortcuts: `application`
 - Generated module pages: `9`
 
