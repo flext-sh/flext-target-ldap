@@ -63,7 +63,7 @@ exclude_also = [
   "if _t.TYPE_CHECKING:",
   "if typing.TYPE_CHECKING:",
 ]
-fail_under = 20
+fail_under = 45
 precision = 2
 show_missing = true
 skip_covered = false
@@ -292,7 +292,7 @@ reportIncompatibleVariableOverride = "none"
 reportInconsistentConstructor = "error"
 reportInvalidTypeForm = "none"
 reportMissingImports = "error"
-reportMissingModuleSource = "none"
+reportMissingModuleSource = "error"
 reportMissingTypeStubs = "none"
 reportPrivateUsage = "warning"
 reportUnknownArgumentType = "none"
@@ -633,8 +633,8 @@ dev = [
   "pytest-xdist>=3.8.0",
   "pyupgrade>=3.21.2",
   "radon>=6.0.1",
-  "ruff>=0.16.5",
-  "rumdl>=0.2.62",
+  "ruff>=0.16.0",
+  "rumdl>=0.2.45",
   "types-cachetools>=7.0.0.20260713",
   "types-cffi>=2.1.0.20260827",
   "types-click>=7.1.8",
