@@ -608,10 +608,11 @@ def test_parse_invalid_ldif():
    # Check fixture scope and dependencies
 
    from __future__ import annotations
+
+
    @pytest.fixture(scope="function")
    def my_fixture():
        return "value"
-
    ```
 
 1. **Test Timeout**
