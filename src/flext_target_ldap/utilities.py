@@ -15,7 +15,7 @@ from flext_meltano import u
 from flext_target_ldap import c, t
 
 if TYPE_CHECKING:
-    from flext_target_ldap._utilities.client import FlextTargetLdapClient
+    from ._utilities.client import FlextTargetLdapClient
 
 
 class FlextTargetLdapUtilities(u, FlextLdapUtilities):
@@ -42,9 +42,7 @@ class FlextTargetLdapUtilities(u, FlextLdapUtilities):
             time. Consumers (and their tests) reach it here instead of
             importing the private ``_utilities`` package.
             """
-            from flext_target_ldap._utilities.client import (
-                FlextTargetLdapClient as _Client,
-            )
+            from ._utilities.client import FlextTargetLdapClient as _Client
 
             return _Client
 

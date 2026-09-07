@@ -10,16 +10,14 @@ from __future__ import annotations
 from typing import ClassVar, override
 
 from flext_target_ldap import c, p, r, t, u
-from flext_target_ldap._models.processing_result import (
-    FlextTargetLdapProcessingCounters,
-)
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
+
+from .._utilities.client import FlextTargetLdapClient
+from .processing_result import FlextTargetLdapProcessingCounters
 
 
 class FlextTargetLdapSink:
     """Base Sink class for Singer protocol compatibility."""
 
-    @override
     def __init__(
         self,
         target: FlextTargetLdapTarget,
@@ -49,12 +47,14 @@ class FlextTargetLdapTarget:
 
     settings: t.TargetLdap.SettingsPayload
 
-    @override
     def __init__(
-        self, settings: t.TargetLdap.SettingsPayload, **kwargs: t.Scalar
+        self,
+        *,
+        settings: t.TargetLdap.SettingsPayload | None = None,
+        **_kwargs: t.Scalar,
     ) -> None:
         """Initialize target with configuration."""
-        self.settings = settings
+        self.settings = settings or {}
 
     def process_record(
         self, _record: t.TargetLdap.RecordPayload, context: t.TargetLdap.RecordPayload
@@ -208,7 +208,7 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
                     c.TargetLdap.KEY_BIND_DN, c.TargetLdap.DEFAULT_BIND_DN
                 ),
                 c.TargetLdap.KEY_BIND_PASSWORD: self._target.settings.get(
-                    c.TargetLdap.KEY_PASSWORD, c.TargetLdap.DEFAULT_BIND_PASSWORD
+                    c.TargetLdap.KEY_BIND_PASSWORD, c.TargetLdap.DEFAULT_BIND_PASSWORD
                 ),
                 c.TargetLdap.KEY_TIMEOUT: self._target.settings.get(
                     c.TargetLdap.KEY_TIMEOUT, c.Ldap.TIMEOUT
