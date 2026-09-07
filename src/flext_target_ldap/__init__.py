@@ -3,28 +3,25 @@
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING
+
+from types import MappingProxyType
 
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
-from .__version__ import (
-    __author__ as __author__,
-    __author_email__ as __author_email__,
-    __description__ as __description__,
-    __license__ as __license__,
-    __title__ as __title__,
-    __url__ as __url__,
-    __version__ as __version__,
-    __version_info__ as __version_info__,
-)
+from .__version__ import __author__ as __author__
+from .__version__ import __author_email__ as __author_email__
+from .__version__ import __description__ as __description__
+from .__version__ import __license__ as __license__
+from .__version__ import __title__ as __title__
+from .__version__ import __url__ as __url__
+from .__version__ import __version__ as __version__
+from .__version__ import __version_info__ as __version_info__
 
 if TYPE_CHECKING:
-    from typing import TYPE_CHECKING
-
+    from . import application as application
     from flext_ldap import FlextLdapConstants, d, e, h, r, s, x
 
-    from . import application as application
     from ._config import FlextTargetLdapConfig, config
     from ._settings import FlextTargetLdapSettings, settings
     from .api import FlextTargetLdap, target_ldap
@@ -36,7 +33,6 @@ if TYPE_CHECKING:
     from .typings import FlextTargetLdapTypes, FlextTargetLdapTypes as t
     from .utilities import FlextTargetLdapUtilities, FlextTargetLdapUtilities as u
 __all__: tuple[str, ...] = (
-    "TYPE_CHECKING",
     "FlextLdapConstants",
     "FlextTargetLdap",
     "FlextTargetLdapConfig",
@@ -88,7 +84,6 @@ _LAZY_IMPORTS = MappingProxyType(
             ".typings": ("FlextTargetLdapTypes", "t"),
             ".utilities": ("FlextTargetLdapUtilities", "u"),
             "flext_ldap": ("FlextLdapConstants", "d", "e", "h", "r", "s", "x"),
-            "typing": ("TYPE_CHECKING",),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
