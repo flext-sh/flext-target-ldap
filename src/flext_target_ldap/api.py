@@ -251,4 +251,6 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             raise
 
 
-__all__: list[str] = ["FlextTargetLdap"]
+target_ldap = FlextTargetLdap
+
+__all__: list[str] = ["FlextTargetLdap", "target_ldap"]
