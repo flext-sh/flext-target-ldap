@@ -9,8 +9,12 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import ClassVar
 
-from flext_ldap import ldap, u
-from flext_target_ldap import FlextTargetLdapSettings, c, m, p, r, t
+from flext_ldap import ldap, m, r, u
+from flext_target_ldap.constants import c
+from flext_target_ldap.protocols import p
+from flext_target_ldap.typings import t
+
+from .._settings import FlextTargetLdapSettings
 
 
 class FlextTargetLdapClient:
@@ -125,15 +129,10 @@ class FlextTargetLdapClient:
                 "auto_bind": settings.TargetLdap.auto_bind,
                 "auto_range": settings.TargetLdap.auto_range,
             })
-        if isinstance(settings, Mapping):
-            connection_value = settings.get("connection")
-            if isinstance(connection_value, m.Ldap.ConnectionConfig):
-                return connection_value
-            if isinstance(connection_value, Mapping):
-                return m.Ldap.ConnectionConfig.model_validate(connection_value)
-            return m.Ldap.ConnectionConfig.model_validate(settings)
-        msg = f"Unsupported LDAP client settings type: {type(settings).__name__}"
-        raise TypeError(msg)
+        connection_value = settings.get("connection")
+        if isinstance(connection_value, Mapping):
+            return m.Ldap.ConnectionConfig.model_validate(connection_value)
+        return m.Ldap.ConnectionConfig.model_validate(settings)
 
     @property
     def port(self) -> int:

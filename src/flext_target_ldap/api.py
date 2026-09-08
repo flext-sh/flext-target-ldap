@@ -253,6 +253,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             raise
 
 
-target_ldap = FlextTargetLdap
+target_ldap: FlextTargetLdap = FlextTargetLdap()
+"""Process-wide FlextTargetLdap facade singleton resolved from the service container."""
 
 __all__: list[str] = ["FlextTargetLdap", "target_ldap"]

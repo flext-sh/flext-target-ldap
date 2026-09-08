@@ -9,7 +9,11 @@ from __future__ import annotations
 
 from typing import ClassVar, override
 
-from flext_target_ldap import c, p, r, t, u
+from flext_ldap import r
+from flext_target_ldap.constants import c
+from flext_target_ldap.protocols import p
+from flext_target_ldap.typings import t
+from flext_target_ldap.utilities import u
 
 from .._utilities.client import FlextTargetLdapClient
 from .processing_result import FlextTargetLdapProcessingCounters
@@ -100,6 +104,26 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             FlextTargetLdapProcessingResult()
         )
 
+    def _apply_attribute_mapping(
+        self,
+        attributes: dict[str, list[str]],
+        record: t.TargetLdap.RecordPayload,
+        field_mapping: t.MappingKV[str, str],
+    ) -> dict[str, list[str]]:
+        """Apply the fixed and configured field mappings onto ``attributes``."""
+        for singer_field, ldap_attr in field_mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(value)
+        mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
+            self._target.settings
+        )
+        for singer_field, mapped_attr in mapping.items():
+            value = record.get(singer_field)
+            if value is not None:
+                attributes[mapped_attr] = FlextTargetLdapClient.to_str_values(value)
+        return attributes
+
     def build_attributes(
         self, _record: t.TargetLdap.RecordPayload
     ) -> p.Result[t.Ldap.OperationAttributes]:
@@ -143,9 +167,10 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
         )
         if configured_classes is None:
             return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
-        return u.TargetLdap.TypeConversion.extract_object_classes({
+        classes: t.StrSequence = u.TargetLdap.TypeConversion.extract_object_classes({
             c.TargetLdap.KEY_OBJECT_CLASSES: configured_classes
         })
+        return classes
 
     def process_batch(self, context: t.TargetLdap.RecordPayload) -> None:
         """Process a batch of records."""
@@ -233,6 +258,30 @@ class FlextTargetLdapBaseSink(FlextTargetLdapSink):
             _ = self.client.disconnect()
             self.client = None
             logger.info(f"LDAP client disconnected for stream: {self.stream_name}")
+
+    def _persist_typed_entry(
+        self,
+        *,
+        label: str,
+        dn: str,
+        attributes: dict[str, list[str]],
+        default_object_classes: t.StrSequence,
+    ) -> p.Result[bool]:
+        """Split object classes from attributes and persist one entry."""
+        object_classes = FlextTargetLdapClient.to_str_values(
+            attributes.get("objectClass", list(default_object_classes))
+        )
+        attributes_dict: dict[str, list[str]] = {
+            key: FlextTargetLdapClient.to_str_values(value)
+            for key, value in attributes.items()
+            if key != "objectClass"
+        }
+        return self._persist_entry(
+            label=label,
+            dn=dn,
+            attributes_dict=attributes_dict,
+            object_classes=object_classes,
+        )
 
     def _persist_entry(
         self,
@@ -351,18 +400,7 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             "department": "departmentNumber",
             "title": "title",
         }
-        for singer_field, ldap_attr in field_mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(value)
-        mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-            self._target.settings
-        )
-        for singer_field, mapped_attr in mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[mapped_attr] = FlextTargetLdapClient.to_str_values(value)
-        return attributes
+        return self._apply_attribute_mapping(attributes, record, field_mapping)
 
     @override
     def resolve_object_classes(
@@ -372,9 +410,10 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
         configured = self._target.settings.get("users_object_classes")
         if configured is None:
             return ["inetOrgPerson", "organizationalPerson", "person", "top"]
-        return u.TargetLdap.TypeConversion.extract_object_classes({
+        classes: t.StrSequence = u.TargetLdap.TypeConversion.extract_object_classes({
             "object_classes": configured
         })
+        return classes
 
     @override
     def process_record(
@@ -391,19 +430,11 @@ class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
                 return r[bool].fail("No username found in record")
             base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
             attributes = self.build_user_attributes(_record)
-            object_classes = FlextTargetLdapClient.to_str_values(
-                attributes.get("objectClass", ["inetOrgPerson", "person"])
-            )
-            attributes_dict: dict[str, list[str]] = {
-                key: FlextTargetLdapClient.to_str_values(value)
-                for key, value in attributes.items()
-                if key != "objectClass"
-            }
-            return self._persist_entry(
+            return self._persist_typed_entry(
                 label="user",
                 dn=f"uid={username},{base_dn}",
-                attributes_dict=attributes_dict,
-                object_classes=object_classes,
+                attributes=attributes,
+                default_object_classes=("inetOrgPerson", "person"),
             )
 
         try:
@@ -447,9 +478,10 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
         """Get object classes for group entry."""
         configured = self._target.settings.get("groups_object_classes")
         if configured is not None:
-            return u.TargetLdap.TypeConversion.extract_object_classes({
+            classes: t.StrSequence = u.TargetLdap.TypeConversion.extract_object_classes({
                 "object_classes": configured
             })
+            return classes
         return ["groupOfNames", "top"]
 
     @override
@@ -465,19 +497,11 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
                 return r[bool].fail("No group name found in record")
             base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
             attributes = self._build_group_attributes(_record)
-            object_classes = FlextTargetLdapClient.to_str_values(
-                attributes.get("objectClass", ["groupOfNames"])
-            )
-            attributes_dict: dict[str, list[str]] = {
-                key: FlextTargetLdapClient.to_str_values(value)
-                for key, value in attributes.items()
-                if key != "objectClass"
-            }
-            return self._persist_entry(
+            return self._persist_typed_entry(
                 label="group",
                 dn=f"cn={group_name},{base_dn}",
-                attributes_dict=attributes_dict,
-                object_classes=object_classes,
+                attributes=attributes,
+                default_object_classes=("groupOfNames",),
             )
 
         try:
@@ -508,18 +532,7 @@ class FlextTargetLdapGroupsSink(FlextTargetLdapBaseSink):
             "description": "description",
             "members": "member",
         }
-        for singer_field, ldap_attr in field_mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(value)
-        mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-            self._target.settings
-        )
-        for singer_field, mapped_attr in mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[mapped_attr] = FlextTargetLdapClient.to_str_values(value)
-        return attributes
+        return self._apply_attribute_mapping(attributes, record, field_mapping)
 
 
 class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
@@ -572,18 +585,7 @@ class FlextTargetLdapOrganizationalUnitsSink(FlextTargetLdapBaseSink):
             object_classes.append("organizationalUnit")
         attributes: dict[str, list[str]] = {"objectClass": object_classes}
         field_mapping = {"name": "ou", "description": "description"}
-        for singer_field, ldap_attr in field_mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(value)
-        mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
-            self._target.settings
-        )
-        for singer_field, mapped_attr in mapping.items():
-            value = record.get(singer_field)
-            if value is not None:
-                attributes[mapped_attr] = FlextTargetLdapClient.to_str_values(value)
-        return attributes
+        return self._apply_attribute_mapping(attributes, record, field_mapping)
 
 
 __all__: t.StrSequence = (

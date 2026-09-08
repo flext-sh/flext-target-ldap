@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from flext_target_ldap import FlextTargetLdap, settings
-from flext_tests import tk, tm
+from flext_tests import FlextTestsDocker, tm
 from tests import c, m, p, t, u
 
 
@@ -23,7 +23,7 @@ def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
 def ldap_runtime() -> m.Tests.ContainerConfig:
     """Start and return the canonical shared OpenLDAP runtime."""
     container_name = c.Tests.CONNECTIVITY_MARKER_CONTAINERS["ldap"]
-    docker = tk.shared(
+    docker = FlextTestsDocker.shared(
         container_name, repository_root=Path(__file__).resolve().parents[2]
     )
     tm.ok(docker.execute())
