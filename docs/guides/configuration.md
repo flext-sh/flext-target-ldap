@@ -3,14 +3,14 @@
 
 # flext-target-ldap - Configuration
 
+> Project profile: `flext-target-ldap`
+
 <!-- TOC START -->
 - [Ownership order](#ownership-order)
 - [Documentation configuration](#documentation-configuration)
 - [Apply and validate](#apply-and-validate)
 - [Related guides](#related-guides)
 <!-- TOC END -->
-
-> Project profile: `flext-target-ldap`
 
 Configuration has one writable authority. Prefer typed `config/*.yaml` and
 settings; use `pyproject.toml` only for package and tool metadata that it owns.
