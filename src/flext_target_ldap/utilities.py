@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import u
+
 from flext_target_ldap import c, t
 
 if TYPE_CHECKING:

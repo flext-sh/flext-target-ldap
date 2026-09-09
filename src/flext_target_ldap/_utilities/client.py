@@ -10,6 +10,7 @@ from collections.abc import Mapping, Sequence
 from typing import ClassVar
 
 from flext_ldap import ldap, m, r, u
+
 from flext_target_ldap.constants import c
 from flext_target_ldap.protocols import p
 from flext_target_ldap.typings import t

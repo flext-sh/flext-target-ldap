@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from flext_target_ldap import FlextTargetLdap
 from flext_tests import tm
+
+from flext_target_ldap import FlextTargetLdap
 from tests import t
 
 

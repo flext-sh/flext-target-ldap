@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Annotated
 
 from flext_ldap import m
 from flext_meltano import FlextMeltanoModels
+
 from flext_target_ldap import t, u
 
 from ._models.processing_result import FlextTargetLdapProcessingCounters

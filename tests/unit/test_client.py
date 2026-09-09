@@ -5,9 +5,9 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
+from flext_tests import tm
 
 from flext_target_ldap import settings
-from flext_tests import tm
 from tests import p, t
 
 

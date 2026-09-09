@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, override
 
 from flext_meltano import m, u
+
 from flext_target_ldap import FlextTargetLdap, p, t
 
 if TYPE_CHECKING:

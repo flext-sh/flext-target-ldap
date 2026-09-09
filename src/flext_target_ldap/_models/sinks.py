@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import ClassVar, override
 
 from flext_ldap import r
+
 from flext_target_ldap.constants import c
 from flext_target_ldap.protocols import p
 from flext_target_ldap.typings import t
