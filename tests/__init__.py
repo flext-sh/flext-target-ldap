@@ -9,11 +9,10 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
+    from flext_target_ldap import FlextTargetLdapConstants
     from flext_tests import FlextTestsConstants, d, e, h, r, td, tf, tk, tm, tv, x
 
-    from flext_target_ldap import FlextTargetLdapConstants
-
-    from . import unit as unit
+    from . import unit
     from .base import (
         TestsFlextTargetLdapServiceBase,
         TestsFlextTargetLdapServiceBase as s,

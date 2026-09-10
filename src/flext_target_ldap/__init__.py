@@ -22,7 +22,7 @@ from .__version__ import (
 if TYPE_CHECKING:
     from flext_ldap import FlextLdapConstants, d, e, h, r, s, x
 
-    from . import application as application
+    from . import application
     from ._config import FlextTargetLdapConfig, config
     from ._settings import FlextTargetLdapSettings, settings
     from .api import FlextTargetLdap, target_ldap
