@@ -38,16 +38,20 @@ class FlextTargetLdapServiceRuntime:
             schema: t.TargetLdap.MutableSchemaPayload,
             key_properties: t.StrSequence,
         ) -> FlextTargetLdapServiceRuntime.Sink:
-            """Create an adapter sink and attach the LDAP runtime sink."""
-            schema_dict = t.json_dict_adapter().validate_python(schema)
-            service_sink = cls(
+            """Create an adapter sink and attach the LDAP runtime sink.
+
+            LDAP-specific: schema validated via TargetLdap adapter with
+            DN-normalized entries and hierarchical directory structure handling.
+            """
+            validated_schema = t.json_dict_adapter().validate_python(schema)
+            bound_sink = cls(
                 target=target,
                 stream_name=stream_name,
-                schema=schema_dict,
+                schema=validated_schema,
                 key_properties=key_properties,
             )
-            service_sink._runtime_sink = runtime_sink
-            return service_sink
+            bound_sink._runtime_sink = runtime_sink
+            return bound_sink
 
         @override
         def process_batch(self, context: t.JsonMapping) -> None:
