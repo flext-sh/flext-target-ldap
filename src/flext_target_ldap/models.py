@@ -15,11 +15,11 @@ from typing import TYPE_CHECKING, Annotated
 
 from flext_ldap import m
 from flext_meltano import FlextMeltanoModels
+
 from flext_target_ldap import t, u
-from flext_target_ldap._models.processing_result import (
-    FlextTargetLdapProcessingCounters,
-)
-from flext_target_ldap._models.sinks import (
+
+from ._models.processing_result import FlextTargetLdapProcessingCounters
+from ._models.sinks import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapGroupsSink,
     FlextTargetLdapOrganizationalUnitsSink,
@@ -111,8 +111,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             attributes: Annotated[
                 t.MutableStrSequenceMapping,
                 u.Field(
-                    description="LDAP attributes with values",
-                    default_factory=dict,
+                    description="LDAP attributes with values", default_factory=dict
                 ),
             ]
             entry_type: Annotated[

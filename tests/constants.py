@@ -8,8 +8,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import FlextTargetLdapConstants
 from flext_tests import FlextTestsConstants
+
+from flext_target_ldap import FlextTargetLdapConstants
 
 
 class TestsFlextTargetLdapConstants(FlextTargetLdapConstants, FlextTestsConstants):
