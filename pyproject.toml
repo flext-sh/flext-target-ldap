@@ -427,8 +427,18 @@ testpaths = ["tests"]
 exclude = [
   "**/.archive/**",
   "**/__pyrefly_virtual__/**",
+  ".agents/aihub-hooks",
+  ".agents/aihub-hooks/**",
   ".archive",
   ".archive/**",
+  ".claude/aihub-hooks",
+  ".claude/aihub-hooks/**",
+  ".codex/aihub-hooks",
+  ".codex/aihub-hooks/**",
+  ".cursor/aihub-hooks",
+  ".cursor/aihub-hooks/**",
+  ".gemini/aihub-hooks",
+  ".gemini/aihub-hooks/**",
   ".git",
   ".github/hooks",
   ".github/hooks/**",
@@ -540,6 +550,7 @@ split-on-trailing-comma = false
   "undocumented-public-function",
   "undocumented-public-method",
 ]
+"src/flext_target_ldap/_constants/base.py" = ["hardcoded-password-string"]
 
 [tool.tomlsort]
 all = true
