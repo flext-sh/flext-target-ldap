@@ -1,0 +1,4 @@
+ManagedArtifacts:
+  Ruff:
+    per_file_ignores:
+      src/flext_target_ldap/_constants/base.py: [hardcoded-password-string]
