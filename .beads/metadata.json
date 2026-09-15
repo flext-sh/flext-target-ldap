@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "flext_target_ldap",
+  "project_id": "42327cb1-a17b-4e14-a909-2e45e005b382"
+}
