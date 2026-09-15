@@ -29,7 +29,7 @@ def ldap_runtime() -> m.Tests.ContainerConfig:
     result = docker.execute()
     if result.failure:
         pytest.skip(f"Failed to start LDAP container: {result.error}")
-    return tm.not_none(result.value.target_config)
+    return docker.target_config  # type: ignore[return-value]
 
 
 @pytest.fixture
