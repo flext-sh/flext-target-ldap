@@ -1,5 +1,10 @@
 # Triagem Snyk Code (SAST) — flext-sh/flext-target-ldap
 
+<!-- TOC START -->
+- [Achados](#achados)
+- [Como triar](#como-triar)
+<!-- TOC END -->
+
 Gerado do scan Snyk da org Datacosmos (dump 2026-08-06).
 
 **1 achados** — critical 0, high 0, medium 0, low 1
