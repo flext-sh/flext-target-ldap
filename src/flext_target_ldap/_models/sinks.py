@@ -30,7 +30,7 @@ class FlextTargetLdapModels:
 
         def __init__(
             self,
-            target: FlextTargetLdapTarget,
+            target: FlextTargetLdapModels.FlextTargetLdapTarget,
             stream_name: str,
             schema: t.TargetLdap.SchemaPayload,
             key_properties: t.StrSequence,
@@ -95,7 +95,7 @@ class FlextTargetLdapModels:
         @override
         def __init__(
             self,
-            target: FlextTargetLdapTarget,
+            target: FlextTargetLdapModels.FlextTargetLdapTarget,
             stream_name: str,
             schema: t.TargetLdap.SchemaPayload,
             key_properties: t.StrSequence,
@@ -104,9 +104,7 @@ class FlextTargetLdapModels:
             super().__init__(target, stream_name, schema, key_properties)
             self._target = target
             self.client: FlextTargetLdapClient | None = None
-            self._processing_result: FlextTargetLdapProcessingResult = (
-                FlextTargetLdapProcessingResult()
-            )
+            self._processing_result: FlextTargetLdapModels.FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult()
 
         def _apply_attribute_mapping(
             self,
