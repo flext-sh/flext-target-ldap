@@ -4,17 +4,17 @@ Gerado do scan Snyk da org Datacosmos (dump 2026-08-06).
 
 **1 achados** — critical 0, high 0, medium 0, low 1
 
-| categoria | achados |
-|---|---|
-| Use of Hardcoded Passwords | 1 |
+| categoria                  | achados |
+| -------------------------- | ------- |
+| Use of Hardcoded Passwords | 1       |
 
 ## Achados
 
 Coluna **Decisão**: `corrigir` / `falso-positivo` / `risco-aceito`.
 
-| # | sev | categoria | arquivo | linha | CWE | Decisão |
-|---|---|---|---|---|---|---|
-| 1 | low | Use of Hardcoded Passwords | `tests/unit/test_client.py` | 61 | - | |
+| #   | sev | categoria                  | arquivo                     | linha | CWE | Decisão |
+| --- | --- | -------------------------- | --------------------------- | ----- | --- | ------- |
+| 1   | low | Use of Hardcoded Passwords | `tests/unit/test_client.py` | 61    | -   |         |
 
 ## Como triar
 
