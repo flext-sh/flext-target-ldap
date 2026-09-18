@@ -9,7 +9,7 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
 - Package: `flext_target_ldap`
-- Version: `0.12.0rc0`
+- Version: `0.12.0`
 - Description: FLEXT Target for LDAP directory loading
 - Doc summary: Flext Target Ldap package.
 - Classifiers: `Development Status :: 3 - Alpha`, `Intended Audience :: Developers`,
