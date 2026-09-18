@@ -19,6 +19,8 @@ Coluna **Decisão**: `corrigir` / `falso-positivo` / `risco-aceito`.
 ## Como triar
 
 1. Abrir `arquivo:linha` e seguir o fluxo de dados até o sink.
-2. Classificar: **corrigir** (entrada externa alcança o sink sem sanitização), **falso-positivo** (credencial de fixture, path de constante — registrar em `.snyk` com justificativa), **risco-aceito** (com prazo de revisão).
+2. Classificar: **corrigir** (entrada externa alcança o sink sem sanitização),
+   **falso-positivo** (credencial de fixture, path de constante — registrar em `.snyk`
+   com justificativa), **risco-aceito** (com prazo de revisão).
 
 Dados brutos: `~/snyk-violations/sast/flext-sh__flext-target-ldap.sast.json`
