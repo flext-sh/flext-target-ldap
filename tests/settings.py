@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, ClassVar
 
 from flext_tests import FlextTestsSettings
 
@@ -11,6 +11,8 @@ from flext_target_ldap import FlextTargetLdapSettings, c, m, t, u
 
 class TestsFlextTargetLdapSettings(FlextTargetLdapSettings, FlextTestsSettings):
     """Target LDAP settings extended with the shared test namespace."""
+
+    model_config: ClassVar[m.SettingsConfigDict]
 
     connection: Annotated[
         m.Ldap.ConnectionConfig,
