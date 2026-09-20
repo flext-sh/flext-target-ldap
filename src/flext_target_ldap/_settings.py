@@ -13,16 +13,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, ClassVar
 
 from flext_meltano import FlextMeltanoSettings, m
-from pydantic_settings import SettingsConfigDict
 
 
 class FlextTargetLdapSettings(FlextMeltanoSettings):
     """LDAP target settings; all project fields under ``settings.TargetLdap.*``."""
 
-    model_config = SettingsConfigDict(
+    model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
         env_prefix="FLEXT_TARGET_LDAP_", env_nested_delimiter="__", extra="ignore"
     )
 
