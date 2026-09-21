@@ -26,9 +26,7 @@ def ldap_runtime() -> m.Tests.ContainerConfig:
     docker = FlextTestsDocker.shared(
         container_name, repository_root=Path(__file__).resolve().parents[2]
     )
-    result = docker.execute()
-    if result.failure:
-        pytest.skip(f"Failed to start LDAP container: {result.error}")
+    tm.ok(docker.execute())
     return tm.not_none(docker.target_config)
 
 
