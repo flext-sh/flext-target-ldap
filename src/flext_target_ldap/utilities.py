@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
-from flext_ldap import FlextLdapUtilities
+from flext_ldap import u as _ldap_u
 from flext_meltano import u
 
 from flext_target_ldap import c, t
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from ._utilities.client import FlextTargetLdapClient
 
 
-class FlextTargetLdapUtilities(u, FlextLdapUtilities):
+class FlextTargetLdapUtilities(u, _ldap_u):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for
