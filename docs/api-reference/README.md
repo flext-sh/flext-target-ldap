@@ -29,7 +29,7 @@ This section is generated from public exports and real docstrings.
 
 - Primary facades: `FlextTargetLdap`, `FlextTargetLdapConfig`,
   `FlextTargetLdapConstants`, `FlextTargetLdapModels`, `FlextTargetLdapOrchestrator`,
-  `FlextTargetLdapProtocols` (+3 more)
+  `FlextTargetLdapProtocols` (+4 more)
 - Generated module pages: `9`
 
 Back to [project docs](../index.md).

@@ -20,8 +20,7 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_core import d, e, h, r, x
-    from flext_ldap import s
+    from flext_ldap import d, e, h, r, s, x
 
     from . import application
     from .__version__ import FlextTargetLdapVersion
@@ -87,8 +86,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".target": ("main",),
             ".typings": ("FlextTargetLdapTypes", "t"),
             ".utilities": ("FlextTargetLdapUtilities", "u"),
-            "flext_core": ("d", "e", "h", "r", "x"),
-            "flext_ldap": ("s",),
+            "flext_ldap": ("d", "e", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,

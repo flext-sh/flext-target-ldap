@@ -49,7 +49,9 @@ class FlextTargetLdapConfig(FlextSettings, FlextMeltanoConfig):
 
     TargetLdap: Annotated[
         _TargetLdapNamespace,
-        m.Field(description="Open namespace exposing ``config/*.yaml`` under ``TargetLdap``."),
+        m.Field(
+            description="Open namespace exposing ``config/*.yaml`` under ``TargetLdap``."
+        ),
     ] = _TargetLdapNamespace()
 
 
