@@ -14,7 +14,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated
 
 from flext_ldap import m
-from flext_meltano import FlextMeltanoModels
+from flext_meltano import m as _meltano_m
 
 from flext_target_ldap import t, u
 
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from collections.abc import MutableSequence
 
 
-class FlextTargetLdapModels(FlextMeltanoModels, m):
+class FlextTargetLdapModels(_meltano_m, m):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes

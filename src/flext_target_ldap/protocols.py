@@ -4,15 +4,15 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_ldap import FlextLdapProtocols, t
+from flext_ldap import p as _ldap_p, t
 from flext_meltano import p
 
 
-class FlextTargetLdapProtocols(p, FlextLdapProtocols):
+class FlextTargetLdapProtocols(p, _ldap_p):
     """MRO facade composing Meltano + LDAP protocol namespaces."""
 
     @runtime_checkable
-    class TargetLdap(FlextLdapProtocols.Ldap, Protocol):
+    class TargetLdap(_ldap_p.Ldap, Protocol):
         """Target LDAP domain protocol namespace."""
 
         @runtime_checkable
@@ -86,7 +86,7 @@ class FlextTargetLdapProtocols(p, FlextLdapProtocols):
                 base_dn: str,
                 search_filter: str = "(objectClass=*)",
                 attributes: t.StrSequence | None = None,
-            ) -> p.ResultView[t.SequenceOf[FlextLdapProtocols.Ldif.Entry]]:
+            ) -> p.ResultView[t.SequenceOf[_ldap_p.Ldif.Entry]]:
                 """Search entries through the target client."""
                 ...
 

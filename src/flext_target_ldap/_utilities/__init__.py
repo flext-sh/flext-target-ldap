@@ -13,7 +13,10 @@ if TYPE_CHECKING:
     from .service_runtime import FlextTargetLdapServiceRuntime
     from .settings import create_default_ldap_target_config, validate_ldap_target_config
 __all__: tuple[str, ...] = (
-    "FlextTargetLdapClient", "FlextTargetLdapServiceRuntime", "create_default_ldap_target_config", "validate_ldap_target_config",
+    "FlextTargetLdapClient",
+    "FlextTargetLdapServiceRuntime",
+    "create_default_ldap_target_config",
+    "validate_ldap_target_config",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
@@ -22,7 +25,8 @@ _LAZY_IMPORTS = MappingProxyType(
             ".client": ("FlextTargetLdapClient",),
             ".service_runtime": ("FlextTargetLdapServiceRuntime",),
             ".settings": (
-                "create_default_ldap_target_config", "validate_ldap_target_config",
+                "create_default_ldap_target_config",
+                "validate_ldap_target_config",
             ),
         }),
         alias_groups=MappingProxyType({}),
