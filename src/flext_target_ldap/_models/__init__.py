@@ -20,8 +20,14 @@ if TYPE_CHECKING:
         FlextTargetLdapUsersSink,
     )
 __all__: tuple[str, ...] = (
-    "FlextTargetLdapBaseSink", "FlextTargetLdapGroupsSink", "FlextTargetLdapOrganizationalUnitsSink", "FlextTargetLdapProcessingCounters",
-    "FlextTargetLdapProcessingResult", "FlextTargetLdapSink", "FlextTargetLdapTarget", "FlextTargetLdapUsersSink",
+    "FlextTargetLdapBaseSink",
+    "FlextTargetLdapGroupsSink",
+    "FlextTargetLdapOrganizationalUnitsSink",
+    "FlextTargetLdapProcessingCounters",
+    "FlextTargetLdapProcessingResult",
+    "FlextTargetLdapSink",
+    "FlextTargetLdapTarget",
+    "FlextTargetLdapUsersSink",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
@@ -29,10 +35,13 @@ _LAZY_IMPORTS = MappingProxyType(
         MappingProxyType({
             ".processing_result": ("FlextTargetLdapProcessingCounters",),
             ".sinks": (
-                "FlextTargetLdapBaseSink", "FlextTargetLdapGroupsSink",
+                "FlextTargetLdapBaseSink",
+                "FlextTargetLdapGroupsSink",
                 "FlextTargetLdapOrganizationalUnitsSink",
-                "FlextTargetLdapProcessingResult", "FlextTargetLdapSink",
-                "FlextTargetLdapTarget", "FlextTargetLdapUsersSink",
+                "FlextTargetLdapProcessingResult",
+                "FlextTargetLdapSink",
+                "FlextTargetLdapTarget",
+                "FlextTargetLdapUsersSink",
             ),
         }),
         alias_groups=MappingProxyType({}),
