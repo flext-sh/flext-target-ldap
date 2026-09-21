@@ -104,7 +104,9 @@ class FlextTargetLdapModels:
             super().__init__(target, stream_name, schema, key_properties)
             self._target = target
             self.client: FlextTargetLdapClient | None = None
-            self._processing_result: FlextTargetLdapModels.FlextTargetLdapProcessingResult = FlextTargetLdapProcessingResult()
+            self._processing_result: FlextTargetLdapModels.FlextTargetLdapProcessingResult = (
+                FlextTargetLdapProcessingResult()
+            )
 
         def _apply_attribute_mapping(
             self,

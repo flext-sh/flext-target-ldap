@@ -47,9 +47,12 @@ src/flext_target_ldap/
 
 ## Commands
 
+Run standard verbs from the active workspace root without project or file selectors:
+
 ```bash
-make check PROJECT=flext-target-ldap
-make test PROJECT=flext-target-ldap # tests/unit
+make setup
+make check
+make test
 ```
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-END -->
