@@ -20,7 +20,7 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import FlextLdapConstants, d, e, h, r, s, x
+    from flext_ldap import d, e, h, r, s, x
 
     from . import application
     from .__version__ import FlextTargetLdapVersion
@@ -35,41 +35,15 @@ if TYPE_CHECKING:
     from .typings import FlextTargetLdapTypes, FlextTargetLdapTypes as t
     from .utilities import FlextTargetLdapUtilities, FlextTargetLdapUtilities as u
 __all__: tuple[str, ...] = (
-    "FlextLdapConstants",
-    "FlextTargetLdap",
-    "FlextTargetLdapConfig",
-    "FlextTargetLdapConstants",
-    "FlextTargetLdapModels",
-    "FlextTargetLdapOrchestrator",
-    "FlextTargetLdapProtocols",
-    "FlextTargetLdapSettings",
-    "FlextTargetLdapTypes",
-    "FlextTargetLdapUtilities",
-    "FlextTargetLdapVersion",
-    "__author__",
-    "__author_email__",
-    "__description__",
-    "__license__",
-    "__title__",
-    "__url__",
-    "__version__",
-    "__version_info__",
-    "application",
-    "c",
-    "config",
-    "d",
-    "e",
-    "h",
-    "m",
-    "main",
-    "p",
-    "r",
-    "s",
-    "settings",
-    "t",
-    "target_ldap",
-    "u",
-    "x",
+    "FlextTargetLdap", "FlextTargetLdapConfig", "FlextTargetLdapConstants", "FlextTargetLdapModels",
+    "FlextTargetLdapOrchestrator", "FlextTargetLdapProtocols", "FlextTargetLdapSettings", "FlextTargetLdapTypes",
+    "FlextTargetLdapUtilities", "FlextTargetLdapVersion", "__author__", "__author_email__",
+    "__description__", "__license__", "__title__", "__url__",
+    "__version__", "__version_info__", "application", "c",
+    "config", "d", "e", "h",
+    "m", "main", "p", "r",
+    "s", "settings", "t", "target_ldap",
+    "u", "x",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
@@ -87,7 +61,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".target": ("main",),
             ".typings": ("FlextTargetLdapTypes", "t"),
             ".utilities": ("FlextTargetLdapUtilities", "u"),
-            "flext_ldap": ("FlextLdapConstants", "d", "e", "h", "r", "s", "x"),
+            "flext_ldap": ("d", "e", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
