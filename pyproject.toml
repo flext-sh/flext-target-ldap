@@ -45,7 +45,7 @@ email = "team@flext.dev"
 name = "FLEXT Team"
 
 [project.scripts]
-flext-target-ldap = "flext_target_ldap.cli:main"
+flext-target-ldap = "flext_target_ldap.target:main"
 
 [project.urls]
 Documentation = "https://github.com/flext-sh/flext-target-ldap/blob/main/README.md"
