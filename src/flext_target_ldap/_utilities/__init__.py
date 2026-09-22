@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from .client import FlextTargetLdapClient
     from .service_runtime import FlextTargetLdapServiceRuntime
     from .settings import create_default_ldap_target_config, validate_ldap_target_config
+
+
 __all__: tuple[str, ...] = (
     "FlextTargetLdapClient",
     "FlextTargetLdapServiceRuntime",
