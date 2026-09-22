@@ -21,12 +21,12 @@
 - Keywords: `data-integration`, `etl`, `flext`, `ldap`, `singer`, `target`
 - Main facades: `FlextTargetLdap`, `FlextTargetLdapConfig`, `FlextTargetLdapConstants`,
   `FlextTargetLdapModels`, `FlextTargetLdapOrchestrator`, `FlextTargetLdapProtocols`,
-  `FlextTargetLdapSettings`, `FlextTargetLdapTypes` (+2 more)
+  `FlextTargetLdapSettings`, `FlextTargetLdapTypes` (+1 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
 - Public symbol exports: `FlextTargetLdap`, `FlextTargetLdapConfig`,
   `FlextTargetLdapConstants`, `FlextTargetLdapModels`, `FlextTargetLdapOrchestrator`,
   `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
-  `FlextTargetLdapUtilities`, `FlextTargetLdapVersion` (+4 more)
+  `FlextTargetLdapUtilities`, `config` (+3 more)
 - Exported module shortcuts: `application`
 - Generated module pages: `9`
 
