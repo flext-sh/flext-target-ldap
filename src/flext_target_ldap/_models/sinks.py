@@ -178,8 +178,9 @@ class FlextTargetLdapModels:
             """Process a batch of records."""
             setup_result: p.Result[FlextTargetLdapClient] = self.setup_client()
             if not setup_result.success:
-                logger.error(f"Cannot process batch: {setup_result.error or ''}")
-                return
+                msg = f"Cannot process batch: {setup_result.error or ''}"
+                logger.error(msg)
+                raise RuntimeError(msg)
             try:
                 records_raw = context.get(c.TargetLdap.KEY_RECORDS, [])
                 records: list[t.TargetLdap.RecordPayload] = []
