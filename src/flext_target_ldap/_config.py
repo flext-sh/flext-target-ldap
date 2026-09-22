@@ -23,7 +23,7 @@ class _TargetLdapNamespace(m.BaseModel):
     model_config = m.ConfigDict(extra="allow", frozen=True)
 
 
-class FlextTargetLdapConfig(FlextSettings, FlextMeltanoConfig):
+class FlextTargetLdapConfig(FlextMeltanoConfig):
     """TargetLdap config auto-loaded model-less from ``config/*.yaml``.
 
     MRO carries ``FlextSettings`` FIRST (ENFORCE-042); the class stays a frozen,
