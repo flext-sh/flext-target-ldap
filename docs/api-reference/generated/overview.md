@@ -26,9 +26,9 @@
 - Public symbol exports: `FlextTargetLdap`, `FlextTargetLdapConfig`,
   `FlextTargetLdapConstants`, `FlextTargetLdapModels`, `FlextTargetLdapOrchestrator`,
   `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
-  `FlextTargetLdapUtilities`, `config` (+3 more)
+  `FlextTargetLdapUtilities`, `config` (+2 more)
 - Exported module shortcuts: `application`
-- Generated module pages: `9`
+- Generated module pages: `8`
 
 ## Next Pages
 
