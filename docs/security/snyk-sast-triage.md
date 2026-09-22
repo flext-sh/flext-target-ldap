@@ -1,6 +1,7 @@
 # Triagem Snyk Code (SAST) — flext-sh/flext-target-ldap
 
 <!-- TOC START -->
+
 - [Achados](#achados)
 - [Como triar](#como-triar)
 <!-- TOC END -->
