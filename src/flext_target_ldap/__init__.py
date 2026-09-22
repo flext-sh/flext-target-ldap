@@ -23,8 +23,7 @@ if TYPE_CHECKING:
     from flext_cli import cli
     from flext_ldap import ldap
     from flext_ldif import ldif
-    from flext_meltano import meltano, s
-    from pydantic_core import from_json, to_json, to_jsonable_python
+    from flext_meltano import main, meltano, s
 
     from flext_core import core, d, e, h, lazy_attribute, r, x
 
@@ -36,7 +35,6 @@ if TYPE_CHECKING:
     from .constants import FlextTargetLdapConstants, c
     from .models import FlextTargetLdapModels, m
     from .protocols import FlextTargetLdapProtocols, p
-    from .target import main
     from .typings import FlextTargetLdapTypes, t
     from .utilities import FlextTargetLdapUtilities, u
 __all__: tuple[str, ...] = (
@@ -64,7 +62,6 @@ __all__: tuple[str, ...] = (
     "core",
     "d",
     "e",
-    "from_json",
     "h",
     "lazy_attribute",
     "ldap",
@@ -78,8 +75,6 @@ __all__: tuple[str, ...] = (
     "settings",
     "t",
     "target_ldap",
-    "to_json",
-    "to_jsonable_python",
     "u",
     "x",
 )
@@ -95,15 +90,13 @@ _LAZY_IMPORTS = MappingProxyType(
             ".constants": ("FlextTargetLdapConstants", "c"),
             ".models": ("FlextTargetLdapModels", "m"),
             ".protocols": ("FlextTargetLdapProtocols", "p"),
-            ".target": ("main",),
             ".typings": ("FlextTargetLdapTypes", "t"),
             ".utilities": ("FlextTargetLdapUtilities", "u"),
             "flext_cli": ("cli",),
             "flext_core": ("core", "d", "e", "h", "lazy_attribute", "r", "x"),
             "flext_ldap": ("ldap",),
             "flext_ldif": ("ldif",),
-            "flext_meltano": ("meltano", "s"),
-            "pydantic_core": ("from_json", "to_json", "to_jsonable_python"),
+            "flext_meltano": ("main", "meltano", "s"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
