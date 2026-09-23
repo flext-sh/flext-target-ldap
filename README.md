@@ -57,7 +57,7 @@ verification).
   classes listed under Module Map above.
 - Public extensions exposed by this project: `FlextTargetLdap`, `FlextTargetLdapConfig`,
   `FlextTargetLdapConstants`, `FlextTargetLdapModels`, `FlextTargetLdapOrchestrator`,
-  `FlextTargetLdapProtocols` (+4 more).
+  `FlextTargetLdapProtocols` (+3 more).
 - Library abstraction boundaries: see AGENTS.md §2.7.
 
 ## Quality Gates

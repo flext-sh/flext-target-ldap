@@ -37,6 +37,8 @@ if TYPE_CHECKING:
     from .protocols import FlextTargetLdapProtocols, p
     from .typings import FlextTargetLdapTypes, t
     from .utilities import FlextTargetLdapUtilities, u
+
+
 __all__: tuple[str, ...] = (
     "FlextTargetLdap",
     "FlextTargetLdapConfig",

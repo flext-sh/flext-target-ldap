@@ -4,6 +4,7 @@
 
 - [Achados](#achados)
 - [Como triar](#como-triar)
+
 <!-- TOC END -->
 
 Gerado do scan Snyk da org Datacosmos (dump 2026-08-06).
