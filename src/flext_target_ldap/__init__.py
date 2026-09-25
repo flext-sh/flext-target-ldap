@@ -20,32 +20,18 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import adapters, ldap, ldif, servers
-    from flext_meltano import (
-        cli,
-        core,
-        d,
-        e,
-        h,
-        lazy_attribute,
-        main,
-        meltano,
-        r,
-        s,
-        services,
-        x,
-    )
+    from flext_meltano import d, e, h, r, s, x
 
     from . import application
     from ._config import FlextTargetLdapConfig, config
     from ._settings import FlextTargetLdapSettings, settings
     from .api import FlextTargetLdap, target_ldap
     from .application.orchestrator import FlextTargetLdapOrchestrator
-    from .constants import FlextTargetLdapConstants, c
-    from .models import FlextTargetLdapModels, m
-    from .protocols import FlextTargetLdapProtocols, p
-    from .typings import FlextTargetLdapTypes, t
-    from .utilities import FlextTargetLdapUtilities, u
+    from .constants import FlextTargetLdapConstants, FlextTargetLdapConstants as c
+    from .models import FlextTargetLdapModels, FlextTargetLdapModels as m
+    from .protocols import FlextTargetLdapProtocols, FlextTargetLdapProtocols as p
+    from .typings import FlextTargetLdapTypes, FlextTargetLdapTypes as t
+    from .utilities import FlextTargetLdapUtilities, FlextTargetLdapUtilities as u
 
 
 __all__: tuple[str, ...] = (
@@ -66,26 +52,16 @@ __all__: tuple[str, ...] = (
     "__url__",
     "__version__",
     "__version_info__",
-    "adapters",
     "application",
     "c",
-    "cli",
     "config",
-    "core",
     "d",
     "e",
     "h",
-    "lazy_attribute",
-    "ldap",
-    "ldif",
     "m",
-    "main",
-    "meltano",
     "p",
     "r",
     "s",
-    "servers",
-    "services",
     "settings",
     "t",
     "target_ldap",
@@ -106,21 +82,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("FlextTargetLdapProtocols", "p"),
             ".typings": ("FlextTargetLdapTypes", "t"),
             ".utilities": ("FlextTargetLdapUtilities", "u"),
-            "flext_ldap": ("adapters", "ldap", "ldif", "servers"),
-            "flext_meltano": (
-                "cli",
-                "core",
-                "d",
-                "e",
-                "h",
-                "lazy_attribute",
-                "main",
-                "meltano",
-                "r",
-                "s",
-                "services",
-                "x",
-            ),
+            "flext_meltano": ("d", "e", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
