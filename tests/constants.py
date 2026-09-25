@@ -8,6 +8,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from flext_tests import FlextTestsConstants
 
 from flext_target_ldap import FlextTargetLdapConstants
@@ -22,7 +24,7 @@ class TestsFlextTargetLdapConstants(FlextTargetLdapConstants, FlextTestsConstant
         class Tests(FlextTestsConstants.Tests):
             """Target LDAP-specific test constants."""
 
-            EXPECTED_DATA_COUNT: int = 3
+            EXPECTED_DATA_COUNT: ClassVar[int] = 3
 
 
 c = TestsFlextTargetLdapConstants
