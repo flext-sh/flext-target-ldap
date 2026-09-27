@@ -20,7 +20,7 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_ldap import FlextLdapConstants, d, e, h, r, s, x
+    from flext_meltano import d, e, h, r, s, x
 
     from . import application
     from ._config import FlextTargetLdapConfig, config
@@ -30,11 +30,11 @@ if TYPE_CHECKING:
     from .constants import FlextTargetLdapConstants, FlextTargetLdapConstants as c
     from .models import FlextTargetLdapModels, FlextTargetLdapModels as m
     from .protocols import FlextTargetLdapProtocols, FlextTargetLdapProtocols as p
-    from .target import main
     from .typings import FlextTargetLdapTypes, FlextTargetLdapTypes as t
     from .utilities import FlextTargetLdapUtilities, FlextTargetLdapUtilities as u
+
+
 __all__: tuple[str, ...] = (
-    "FlextLdapConstants",
     "FlextTargetLdap",
     "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
@@ -59,7 +59,6 @@ __all__: tuple[str, ...] = (
     "e",
     "h",
     "m",
-    "main",
     "p",
     "r",
     "s",
@@ -81,10 +80,9 @@ _LAZY_IMPORTS = MappingProxyType(
             ".constants": ("FlextTargetLdapConstants", "c"),
             ".models": ("FlextTargetLdapModels", "m"),
             ".protocols": ("FlextTargetLdapProtocols", "p"),
-            ".target": ("main",),
             ".typings": ("FlextTargetLdapTypes", "t"),
             ".utilities": ("FlextTargetLdapUtilities", "u"),
-            "flext_ldap": ("FlextLdapConstants", "d", "e", "h", "r", "s", "x"),
+            "flext_meltano": ("d", "e", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,

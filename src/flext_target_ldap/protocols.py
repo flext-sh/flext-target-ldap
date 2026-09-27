@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
 from flext_ldap import FlextLdapProtocols, t
-from flext_meltano import p
+from flext_meltano import FlextMeltanoProtocols
 
 
-class FlextTargetLdapProtocols(p, FlextLdapProtocols):
+class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     """MRO facade composing Meltano + LDAP protocol namespaces."""
 
     @runtime_checkable

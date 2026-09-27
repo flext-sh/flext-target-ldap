@@ -19,6 +19,8 @@ if TYPE_CHECKING:
         FlextTargetLdapTarget,
         FlextTargetLdapUsersSink,
     )
+
+
 __all__: tuple[str, ...] = (
     "FlextTargetLdapBaseSink",
     "FlextTargetLdapGroupsSink",

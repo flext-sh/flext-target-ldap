@@ -5,6 +5,15 @@
 !.beads/metadata.json
 !.beads/identity.toml
 
+# mise native dependency graphs
+!/.mise/
+/.mise/*
+!/.mise/locks/
+!/.mise/locks/**
+/.mise/locks/*.local/
+/mise*.local.lock
+/.mise*.local.lock
+
 # BLOCK: AI/Agent Local Data (NEVER track these)
 .claude/local/
 .claude/history/
@@ -12,6 +21,7 @@
 .claude/statsig/
 .claude/projects/
 .claude/shell-snapshots/
+.claude/worktrees/
 .claude/settings.local.json.bak
 
 # WHITELIST: Governed agent projections (every repository role)
@@ -24,7 +34,14 @@
 # Agent hooks and operator config (runtime state, never source)
 .github/hooks/
 */.hooks.json.agents-governance.json
+.claude/*.agents-governance.json
+.gemini/*.agents-governance.json
+.claude/settings.json
 .claude/settings.local.json
+.gemini/settings.json
+
+# Operator-private local config overrides
+/config/codegen-overrides.local.yaml
 
 # Gas City skill projections (runtime state, never source)
 .agents/skills/.gc-skill-ownership.json
@@ -47,6 +64,14 @@
 # AI Hub workspace projections (runtime state, never source)
 /.aihub/
 /.cursor/mcp.json
+
+# Banned residue (never source, any profile)
+*aihub-prior*
+
+# RESIDUE: never track backups or repo-local policy copies
+*.bak
+config/build-constraints.txt
+*aihub-prior*
 
 # Aider AI data
 .aider/
@@ -265,9 +290,6 @@ legado/
 *.tpl.rej
 
 # --- codegen conform: generated runtime ignores ---
-mise.lock
-.mise.lock
-**/.mise.lock
 .direnv/
 .reports/
 .venv
@@ -290,12 +312,12 @@ __pyrefly_virtual__/
 .dolt_dropped_databases/
 .doltcfg/
 .hypothesis/
+.mimosa/
 .mypy_cache/
 .omo/
 .pylance_cache/
 .pytest_cache/
-.test-tmp/
-.test-runtime/
+.flext-runtime/
 .testmondata
 .testmondata-wal
 .testmondata-shm
@@ -310,6 +332,11 @@ __pyrefly_virtual__/
 .turbo/
 .venv.*/
 *.egg-info/
+_tmp_*/
+*.bak/
+*.orig/
+*.rej/
+*.swp/
 build/
 dist/
 node_modules/
@@ -336,7 +363,7 @@ CLAUDE.local.md
 !.github/scripts/
 !.github/scripts/check-beads-policy.sh
 !.github/scripts/check-cqrs-compliance.sh
-!.github/scripts/install-git-hooks.sh
+!.github/scripts/flext-law-loop.sh
 !tests/fixtures/
 !tests/fixtures/ci/
 !tests/fixtures/ci/docker/
@@ -352,6 +379,7 @@ CLAUDE.local.md
 !.github/workflows/release.yml
 !.qlty/
 !.qlty/qlty.toml
+!.sonarcloud.properties
 !.vscode/settings.json
 !config/
 !config/gitleaks-release.toml
