@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated
 
-from flext_ldap import m
-from flext_meltano import m as _meltano_m
+from flext_ldap import FlextLdapModels
+from flext_meltano import FlextMeltanoModels
 
 from flext_target_ldap import t, u
 
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from collections.abc import MutableSequence
 
 
-class FlextTargetLdapModels(_meltano_m, m):
+class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
@@ -56,7 +56,7 @@ class FlextTargetLdapModels(_meltano_m, m):
         ProcessingCounters = FlextTargetLdapProcessingCounters
         ProcessingResult = FlextTargetLdapProcessingResult
 
-        class AttributeMapping(m.Entity):
+        class AttributeMapping(FlextLdapModels.Entity):
             """LDAP attribute mapping configuration with validation.
 
             Immutable value object defining how Singer fields map to LDAP attributes
@@ -91,7 +91,7 @@ class FlextTargetLdapModels(_meltano_m, m):
                 ),
             ]
 
-        class Entry(m.Entity):
+        class Entry(FlextLdapModels.Entity):
             """LDAP entry representation with validation and business rules.
 
             Immutable value object representing a complete LDAP entry with
@@ -153,7 +153,7 @@ class FlextTargetLdapModels(_meltano_m, m):
                 present: bool = u.Ldap.norm_in(object_class, self.object_classes)
                 return present
 
-        class TransformationRule(m.Value):
+        class TransformationRule(FlextLdapModels.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
             name: Annotated[
