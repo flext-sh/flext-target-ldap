@@ -39,6 +39,12 @@ def ldap_runtime_settings_payload(
     payload: t.MutableJsonMapping = dict(ldap_settings_payload)
     payload[c.TargetLdap.KEY_HOST] = ldap_runtime.host
     payload[c.TargetLdap.KEY_PORT] = tm.not_none(ldap_runtime.port)
+    # The production settings default base_dn/bind_dn/bind_password to ""
+    # (per-deployment knobs); the shared runtime provisions its own identity,
+    # so surface it like host/port. Anonymous binds cannot write entries.
+    payload[c.TargetLdap.KEY_BASE_DN] = c.TargetLdap.Tests.DOCKER_BASE_DN
+    payload[c.TargetLdap.KEY_BIND_DN] = c.TargetLdap.Tests.DOCKER_ADMIN_DN
+    payload[c.TargetLdap.KEY_BIND_PASSWORD] = c.TargetLdap.Tests.DOCKER_ADMIN_PASSWORD
     return t.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
 
 
