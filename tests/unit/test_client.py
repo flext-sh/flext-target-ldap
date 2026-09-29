@@ -34,6 +34,7 @@ class TestsFlextTargetLdapClient:
             ldap_client.server_uri, eq=f"{scheme}://{configured.host}:{configured.port}"
         )
 
+    @pytest.mark.docker
     @pytest.mark.integration
     def test_connect_and_disconnect_reach_configured_runtime(
         self, ldap_runtime_client: p.TargetLdap.Client
@@ -46,6 +47,7 @@ class TestsFlextTargetLdapClient:
         tm.ok(disconnected)
         tm.that(disconnected.value, eq=True)
 
+    @pytest.mark.docker
     @pytest.mark.integration
     def test_entry_lifecycle_is_observable_in_configured_runtime(
         self, ldap_runtime_client: p.TargetLdap.Client, ldap_base_dn: str
