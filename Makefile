@@ -97,6 +97,7 @@ override PYTEST_DIAG_ARGS := -rA --durations=0 --tb=long --showlocals
 override PYTEST_PARALLEL_WORKERS := 1
 override PYTEST_PARALLEL_WORKER_MEMORY_GB := 2
 override PYTEST_PARALLEL_DISTRIBUTION := load
+override PYTEST_PARALLEL_SCHEDULE_CHUNK := 1
 override PYTEST_PROFILE_SORT := cumulative
 override PYTEST_PROFILE_LIMIT := 50
 override PROCESS_TIMEOUT_COMMAND := timeout
@@ -1294,6 +1295,13 @@ _builtin_setup_submodules:
 	fi; \
 	managed=$$(printf '%s' "$$managed" | tr ' ' '\n' | sort -u | tr '\n' ' '); \
 	if [ -z "$$managed" ]; then exit 0; fi; \
+	absent=""; \
+	for path in $$managed; do \
+		[ -e "$$root/$$path/.git" ] || absent="$$absent $$path"; \
+	done; \
+	if [ -n "$$absent" ]; then \
+		git -C "$$root" submodule update --init --jobs "$${FLEXT_SUBMODULE_JOBS:-8}" -- $$absent; \
+	fi; \
 	validate_submodule() { \
 		superproject="$$1"; \
 		child_path="$$2"; \
@@ -1427,12 +1435,16 @@ endif
 # Setup always reconciles directly from the lock. The venv is created when
 # missing and is never cleared while present, because a concurrent lane may be
 # running against it.
+# Governed gitlinks are provisioned in every context, GitHub Actions included:
+# the workspace projections (Makefile, pyproject, .gitignore, dependabot, docs)
+# derive from the member checkouts, so a member-less CI checkout would render a
+# different workspace and break the gen fixed point (flext-gdm8w). The CI scope
+# (CODEGEN_SCOPE/SELECTED_PROJECTS) still limits which repository is gated.
+_builtin_setup_environment: _builtin_setup_submodules
 ifeq ($(MAKE_PROFILE),workspace)
-_builtin_setup_environment: $(if $(GITHUB_CI_SELF),,_builtin_setup_submodules)
 	@$(SETUP_ENVIRONMENT_RECIPE)
 	@$(UV) pip check --python "$(RUNTIME_VENV)"
 else
-_builtin_setup_environment: _builtin_setup_submodules
 	@$(SETUP_ENVIRONMENT_RECIPE)
 endif
 # End SECTION: setup environment
@@ -1450,7 +1462,7 @@ endif
 # (flext-62fbu). Like `setup`, it runs the declared pre-/post-upg lifecycle
 # hooks, post-upg inside the activated environment.
 .PHONY: _upg_lifecycle
-_upg_lifecycle: $(if $(GITHUB_CI_SELF),,_builtin_setup_submodules)
+_upg_lifecycle: _builtin_setup_submodules
 	@set -eu; \
 	case " $(CUSTOM_DECLARED_TARGETS) " in \
 		*" pre-upg "*) $(SELF_MAKE) pre-upg ;; \
@@ -1518,6 +1530,10 @@ _builtin-self-fmt: _builtin_fmt_all
 _builtin-self-fix: _builtin_fix_all
 
 _builtin-self-fix-enforcement: _builtin_fix_enforcement
+
+_builtin-self-fix-namespace: _builtin_fix_namespace
+
+_builtin-self-fix-accessors: _builtin_fix_accessors
 
 _builtin-self-build: _builtin_build_artifacts
 
@@ -1762,6 +1778,14 @@ _builtin_gen_all:
 _builtin_mod_apply: _builtin_require_environment
 	@$(PROJECT_FLEXT_INFRA) refactor mod --apply
 
+# Namespace and accessor migration are the same selector-free refactor surface
+# as `mod`: each public verb owns one fixed rewrite of every resolved consumer.
+_builtin_fix_namespace: _builtin_require_environment
+	@$(PROJECT_FLEXT_INFRA) refactor namespace-enforce --repository-root "$(PROJECT_ROOT)" --apply
+
+_builtin_fix_accessors: _builtin_require_environment
+	@$(PROJECT_FLEXT_INFRA) refactor accessor-migrate --repository-root "$(PROJECT_ROOT)" --apply
+
 # Selector-free public verbs map one-to-one to their canonical implementation;
 # each implementation owns one fixed operation.
 _builtin-build: _builtin_build_artifacts
@@ -1772,6 +1796,8 @@ _builtin-test-full: _builtin_test_full_all
 _builtin-fmt: _builtin_fmt_all
 _builtin-fix: _builtin_fix_all
 _builtin-fix-enforcement: _builtin_fix_enforcement
+_builtin-fix-namespace: _builtin_fix_namespace
+_builtin-fix-accessors: _builtin_fix_accessors
 _builtin-audit:
 	@$(UV) pip check --python "$(RUNTIME_VENV)"
 	@$(PROJECT_FLEXT_INFRA) codegen conform --root "$(PROJECT_ROOT)" --scope "$(CODEGEN_SCOPE)" --mode check
