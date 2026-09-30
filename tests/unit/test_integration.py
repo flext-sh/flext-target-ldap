@@ -14,6 +14,7 @@ from tests import p, t
 class TestsFlextTargetLdapIntegration:
     """Observable target-to-LDAP persistence contract."""
 
+    @pytest.mark.docker
     @pytest.mark.integration
     def test_public_target_persists_user_record(
         self,
