@@ -8,11 +8,17 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import os
 from typing import ClassVar
 
 from flext_tests import FlextTestsConstants
 
 from flext_target_ldap import FlextTargetLdapConstants
+
+
+def _docker_admin_password() -> str:
+    """Resolve the shared test OpenLDAP admin password (env override allowed)."""
+    return os.getenv("FLEXT_LDAP_TEST_DOCKER_ADMIN_PASSWORD", "") or "admin123"
 
 
 class TestsFlextTargetLdapConstants(FlextTargetLdapConstants, FlextTestsConstants):
@@ -25,6 +31,15 @@ class TestsFlextTargetLdapConstants(FlextTargetLdapConstants, FlextTestsConstant
             """Target LDAP-specific test constants."""
 
             EXPECTED_DATA_COUNT: ClassVar[int] = 3
+
+            # Identity provisioned by the shared OpenLDAP runtime
+            # (docker/docker-compose.openldap.yml ``LDAP_BASE_DN`` /
+            # ``LDAP_ADMIN_PASSWORD`` / healthcheck bind DN); mirrors the
+            # flext-ldap ``c.Ldap.Tests.DOCKER_*`` constants for the same
+            # container.
+            DOCKER_BASE_DN: ClassVar[str] = "dc=flext,dc=local"
+            DOCKER_ADMIN_DN: ClassVar[str] = "cn=admin,dc=flext,dc=local"
+            DOCKER_ADMIN_PASSWORD: ClassVar[str] = _docker_admin_password()
 
 
 c = TestsFlextTargetLdapConstants
