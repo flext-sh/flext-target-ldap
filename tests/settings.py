@@ -6,7 +6,7 @@ from typing import Annotated
 
 from flext_tests import FlextTestsSettings
 
-from flext_target_ldap import FlextTargetLdapSettings, c, m, t, u
+from flext_target_ldap import FlextTargetLdapSettings, c, m, p, t, u
 
 
 class TestsFlextTargetLdapSettings(FlextTargetLdapSettings, FlextTestsSettings):
@@ -15,7 +15,7 @@ class TestsFlextTargetLdapSettings(FlextTargetLdapSettings, FlextTestsSettings):
     connection: Annotated[
         m.Ldap.ConnectionConfig,
         u.Field(
-            default_factory=lambda: m.Ldap.ConnectionConfig(
+            default_factory=lambda: p.Ldap.ConnectionConfig(
                 host=c.TargetLdap.DEFAULT_HOST,
                 port=c.Ldap.PORT,
                 bind_dn=c.TargetLdap.DEFAULT_BIND_DN,
