@@ -21,13 +21,19 @@ def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
 
 @pytest.fixture(scope="session")
 def ldap_runtime() -> m.Tests.ContainerConfig:
-    """Start and return the canonical shared OpenLDAP runtime."""
+    """Ensure the canonical shared OpenLDAP runtime and return where it listens.
+
+    The shared entry declares the container port; the returned target carries
+    the host port Docker published for it.
+    """
     container_name = c.Tests.CONNECTIVITY_MARKER_CONTAINERS["ldap"]
     docker = FlextTestsDocker.shared(
         container_name, repository_root=Path(__file__).resolve().parents[2]
     )
-    tm.ok(docker.execute())
-    return tm.not_none(docker.target_config)
+    target = tm.not_none(docker.target_config)
+    info = tm.ok(docker.execute())
+    host_port = tm.ok(u.Tests.resolve_host_port(info, tm.not_none(target.port)))
+    return target.model_copy(update={"port": host_port})
 
 
 @pytest.fixture
