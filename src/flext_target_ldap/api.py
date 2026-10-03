@@ -12,17 +12,17 @@ from pathlib import Path
 from typing import ClassVar, override
 
 from flext_core import FlextContainer
-from flext_target_ldap import FlextTargetLdapSettings, c, p, settings, t, u
-from flext_target_ldap._models.sinks import (
+from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
+from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+
+from ._models.sinks import (
     FlextTargetLdapBaseSink,
     FlextTargetLdapGroupsSink,
     FlextTargetLdapOrganizationalUnitsSink,
-    FlextTargetLdapSink,
     FlextTargetLdapTarget,
     FlextTargetLdapUsersSink,
 )
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+from ._utilities.client import FlextTargetLdapClient
 
 
 class FlextTargetLdap(FlextTargetLdapTarget):
@@ -39,9 +39,12 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         *,
         settings: t.TargetLdap.SettingsPayload | None = None,
         validate_config: bool = True,
+        **kwargs: t.Scalar,
     ) -> None:
         """Initialize LDAP target."""
-        super().__init__(settings=settings or {}, validate_config=validate_config)
+        super().__init__(
+            settings=settings or {}, validate_config=validate_config, **kwargs
+        )
         self._orchestrator: FlextTargetLdapOrchestrator | None = None
         self._container: p.Container | None = None
 
@@ -49,7 +52,8 @@ class FlextTargetLdap(FlextTargetLdapTarget):
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
         """The or create orchestrator."""
         if self._orchestrator is None:
-            self._orchestrator = FlextTargetLdapOrchestrator()
+            settings = FlextTargetLdapSettings.model_validate(self.settings)
+            self._orchestrator = FlextTargetLdapOrchestrator(settings)
         return self._orchestrator
 
     @property
@@ -57,14 +61,14 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         """The Singer catalog for this target."""
         return u.TargetLdap.build_singer_catalog()
 
-    def get_sink(self, stream_name: str) -> FlextTargetLdapSink:
+    def get_sink(self, stream_name: str) -> FlextTargetLdapBaseSink:
         """Return an instantiated sink for the given stream name."""
         sink_class = self.get_sink_class(stream_name)
         return sink_class(
             target=self, stream_name=stream_name, schema={}, key_properties=[]
         )
 
-    def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapSink]:
+    def get_sink_class(self, stream_name: str) -> type[FlextTargetLdapBaseSink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
             "users": FlextTargetLdapUsersSink,
@@ -86,7 +90,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
         self.logger.info("Orchestrator initialized successfully")
         self._container = self._container_type.shared()
         self.logger.info("DI container initialized successfully")
-        validated_settings = FlextTargetLdapSettings.model_validate(settings)
+        validated_settings = FlextTargetLdapSettings.model_validate(self.settings)
         self.logger.info(
             "LDAP target setup completed for host: %s",
             validated_settings.TargetLdap.host,
@@ -104,7 +108,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
 
     def validate_config(self) -> None:
         """Validate the target configuration."""
-        _ = FlextTargetLdapSettings.model_validate(settings)
+        _ = FlextTargetLdapSettings.model_validate(self.settings)
         self.logger.info("LDAP target configuration validated successfully")
 
     @staticmethod
@@ -249,6 +253,7 @@ class FlextTargetLdap(FlextTargetLdapTarget):
             raise
 
 
-target_ldap = FlextTargetLdap
+target_ldap: FlextTargetLdap = FlextTargetLdap()
+"""Process-wide FlextTargetLdap facade singleton resolved from the service container."""
 
 __all__: list[str] = ["FlextTargetLdap", "target_ldap"]

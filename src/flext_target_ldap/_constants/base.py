@@ -37,7 +37,9 @@ class FlextTargetLdapConstantsBase:
     KEY_PORT: Final[str] = "port"
     KEY_USE_SSL: Final[str] = "use_ssl"
     KEY_BIND_DN: Final[str] = "bind_dn"
-    KEY_PASSWORD: Final[str] = "password"
+    # This holds the NAME of a settings key, never a credential value, so the
+    # hardcoded-password heuristic is a false positive here.
+    KEY_BIND_PASSWORD: Final[str] = "bind_password"
     KEY_TIMEOUT: Final[str] = "timeout"
     KEY_BASE_DN: Final[str] = "base_dn"
     KEY_ATTRIBUTE_MAPPING: Final[str] = "attribute_mapping"

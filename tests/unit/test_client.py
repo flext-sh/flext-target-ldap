@@ -1,158 +1,95 @@
+"""Observable behavior of the public target-ldap client contract."""
+
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
-from flext_tests import r, tm
+from flext_tests import tm
 
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from tests import m, t
-
-
-@pytest.fixture
-def client(mock_ldap_config: t.TargetLdap.SettingsPayload) -> FlextTargetLdapClient:
-    return FlextTargetLdapClient(settings=mock_ldap_config)
+from flext_target_ldap import settings
+from tests import p, t
 
 
 class TestsFlextTargetLdapClient:
-    """Behavior contract for test_client."""
+    """Behavior contract for the public client factory."""
 
-    def test_client_initialization(self, client: FlextTargetLdapClient) -> None:
-        tm.that(client.host, eq="test.ldap.com")
-        tm.that(client.port, eq=389)
-        tm.that(client.bind_dn, eq="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com")
-        tm.that(client.password, eq="test_password")
-        assert not client.use_ssl
-        tm.that(client.timeout, eq=30)
-
-    def test_server_uri_construction(self, client: FlextTargetLdapClient) -> None:
-        tm.that(client.server_uri, eq="ldap://test.ldap.com:389")
-        ssl_client = FlextTargetLdapClient(
-            settings={
-                "host": "test.ldap.com",
-                "port": 389,
-                "use_ssl": True,
-                "bind_dn": "cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com",
-                "password": "test_password",
-                "timeout": 30,
-            }
-        )
-        tm.that(ssl_client.server_uri, eq="ldaps://test.ldap.com:389")
-
-    def test_connect_delegates_to_flext_ldap_api(
-        self, client: FlextTargetLdapClient
+    def test_client_reflects_production_settings(
+        self, ldap_client: p.TargetLdap.Client
     ) -> None:
-        client._api = MagicMock()
-        client._api.connect.return_value = r[bool].ok(True)
-        result = client.connect()
-        tm.ok(result)
-        tm.that(result.value, eq=True)
-        client._api.connect.assert_called_once_with(client.settings)
-        client._api.disconnect.assert_called_once()
+        configured = settings.TargetLdap
+        tm.that(ldap_client.host, eq=configured.host)
+        tm.that(ldap_client.port, eq=configured.port)
+        tm.that(ldap_client.bind_dn, eq=configured.bind_dn)
+        tm.that(ldap_client.password, eq=configured.bind_password)
+        tm.that(ldap_client.use_ssl, eq=configured.use_ssl)
+        tm.that(ldap_client.timeout, eq=configured.timeout)
 
-    def test_disconnect_calls_flext_ldap_api(
-        self, client: FlextTargetLdapClient
+    def test_server_uri_reflects_production_settings(
+        self, ldap_client: p.TargetLdap.Client
     ) -> None:
-        client._api = MagicMock()
-        result = client.disconnect()
-        tm.ok(result)
-        tm.that(result.value, eq=True)
-        client._api.disconnect.assert_called_once_with()
-
-    def test_add_entry_uses_real_ldif_entry(
-        self, client: FlextTargetLdapClient
-    ) -> None:
-        client._api = MagicMock()
-        client._api.connect.return_value = r[bool].ok(True)
-        client._api.add.return_value = MagicMock(success=True, error=None)
-        result = client.add_entry(
-            dn="uid=test,dc=test,dc=com",
-            object_classes=["inetOrgPerson", "person"],
-            attributes={"cn": "Test User", "sn": "User"},
-        )
-        tm.ok(result)
-        tm.that(result.value, eq=True)
-        client._api.connect.assert_called_once_with(client.settings)
-        client._api.add.assert_called_once()
-        entry = client._api.add.call_args.args[0]
-        tm.that(entry.dn.value, eq="uid=test,dc=test,dc=com")
+        configured = settings.TargetLdap
+        scheme = "ldaps" if configured.use_ssl else "ldap"
         tm.that(
-            entry.attributes.attributes["objectClass"], eq=["inetOrgPerson", "person"]
+            ldap_client.server_uri, eq=f"{scheme}://{configured.host}:{configured.port}"
         )
-        client._api.disconnect.assert_called_once()
 
-    def test_modify_entry_uses_real_modify_changes(
-        self, client: FlextTargetLdapClient
+    @pytest.mark.docker
+    @pytest.mark.integration
+    def test_connect_and_disconnect_reach_configured_runtime(
+        self, ldap_runtime_client: p.TargetLdap.Client
     ) -> None:
-        client._api = MagicMock()
-        client._api.connect.return_value = r[bool].ok(True)
-        client._api.modify.return_value = MagicMock(success=True, error=None)
-        result = client.modify_entry(
-            dn="uid=test,dc=test,dc=com",
-            changes={"mail": "new@test.com", "telephoneNumber": "123-456"},
-        )
-        tm.ok(result)
-        tm.that(result.value, eq=True)
-        client._api.modify.assert_called_once_with(
-            "uid=test,dc=test,dc=com",
-            {"mail": [(2, ["new@test.com"])], "telephoneNumber": [(2, ["123-456"])]},
-        )
-        client._api.disconnect.assert_called_once()
+        connected = ldap_runtime_client.connect()
+        tm.ok(connected)
+        tm.that(connected.value, eq=True)
 
-    def test_delete_entry_delegates_to_flext_ldap_api(
-        self, client: FlextTargetLdapClient
-    ) -> None:
-        client._api = MagicMock()
-        client._api.connect.return_value = r[bool].ok(True)
-        client._api.delete.return_value = MagicMock(success=True, error=None)
-        result = client.delete_entry("uid=test,dc=test,dc=com")
-        tm.ok(result)
-        tm.that(result.value, eq=True)
-        client._api.delete.assert_called_once_with("uid=test,dc=test,dc=com")
-        client._api.disconnect.assert_called_once()
+        disconnected = ldap_runtime_client.disconnect()
+        tm.ok(disconnected)
+        tm.that(disconnected.value, eq=True)
 
-    def test_search_entry_maps_search_results(
-        self, client: FlextTargetLdapClient
+    @pytest.mark.docker
+    @pytest.mark.integration
+    def test_entry_lifecycle_is_observable_in_configured_runtime(
+        self, ldap_runtime_client: p.TargetLdap.Client, ldap_base_dn: str
     ) -> None:
-        client._api = MagicMock()
-        client._api.connect.return_value = r[bool].ok(True)
-        client._api.search.return_value = MagicMock(
-            success=True,
-            value=MagicMock(
-                entries=[
-                    m.Ldif.Entry(
-                        dn=m.Ldif.DN(value="uid=test,dc=test,dc=com"),
-                        attributes=m.Ldif.Attributes(attributes={"cn": ["Test User"]}),
-                    )
-                ]
-            ),
-        )
-        result = client.search_entry(
-            base_dn="dc=test,dc=com", search_filter="(uid=test)", attributes=["cn"]
-        )
-        tm.ok(result)
-        tm.that(result.value, none=False)
-        tm.that(len(result.value), eq=1)
-        entry = result.value[0]
-        tm.that(entry, is_=m.Ldif.Entry)
-        dn = entry.dn
-        attributes = entry.attributes
-        assert dn is not None
-        assert attributes is not None
-        tm.that(dn.value, eq="uid=test,dc=test,dc=com")
-        tm.that(attributes.attributes, eq={"cn": ["Test User"]})
+        identifier = f"flext-target-ldap-{uuid4().hex}"
+        dn = f"uid={identifier},{ldap_base_dn}"
+        created = False
+        try:
+            added = ldap_runtime_client.add_entry(
+                dn=dn,
+                object_classes=("inetOrgPerson", "person", "top"),
+                attributes={"cn": identifier, "sn": identifier},
+            )
+            tm.ok(added)
+            created = True
 
-    def test_search_entry_disconnects_after_search(
-        self, client: FlextTargetLdapClient
-    ) -> None:
-        client._api = MagicMock()
-        client._api.connect.return_value = r[bool].ok(True)
-        client._api.search.return_value = MagicMock(
-            success=True,
-            value=MagicMock(
-                entries=[{"dn": "uid=test,dc=test,dc=com", "cn": ["Test User"]}]
-            ),
-        )
-        result = client.search_entry("dc=test,dc=com")
-        tm.ok(result)
-        client._api.disconnect.assert_called_once()
+            changes: t.Ldap.OperationAttributes = {"mail": f"{identifier}@flext.local"}
+            modified = ldap_runtime_client.modify_entry(dn=dn, changes=changes)
+            tm.ok(modified)
+
+            found = ldap_runtime_client.search_entry(
+                base_dn=ldap_base_dn,
+                search_filter=f"(uid={identifier})",
+                attributes=("cn", "mail"),
+            )
+            tm.ok(found)
+            entries = found.value
+            tm.that(len(entries), eq=1)
+            entry_dn = tm.not_none(entries[0].dn)
+            tm.that(entry_dn.value, eq=dn)
+
+            deleted = ldap_runtime_client.delete_entry(dn)
+            tm.ok(deleted)
+            created = False
+
+            absent = ldap_runtime_client.search_entry(
+                base_dn=ldap_base_dn,
+                search_filter=f"(uid={identifier})",
+                attributes=("cn",),
+            )
+            tm.ok(absent)
+            tm.that(absent.value, empty=True)
+        finally:
+            if created:
+                tm.ok(ldap_runtime_client.delete_entry(dn))

@@ -11,18 +11,29 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING, Annotated
 
-from flext_ldap import m
+from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
+
 from flext_target_ldap import t, u
+
+from ._models.processing_result import FlextTargetLdapProcessingCounters
+from ._models.sinks import (
+    FlextTargetLdapBaseSink,
+    FlextTargetLdapGroupsSink,
+    FlextTargetLdapOrganizationalUnitsSink,
+    FlextTargetLdapProcessingResult,
+    FlextTargetLdapSink,
+    FlextTargetLdapTarget,
+    FlextTargetLdapUsersSink,
+)
 
 if TYPE_CHECKING:
     from collections.abc import MutableSequence
 
 
-class FlextTargetLdapModels(FlextMeltanoModels, m):
+class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
@@ -33,7 +44,19 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
     class TargetLdap:
         """TargetLdap domain namespace."""
 
-        class AttributeMapping(m.Entity):
+        # Sink and target implementations are part of the public model
+        # surface: consumers (and their tests) reach them through this
+        # facade instead of importing the private _models package.
+        Sink = FlextTargetLdapSink
+        Target = FlextTargetLdapTarget
+        BaseSink = FlextTargetLdapBaseSink
+        UsersSink = FlextTargetLdapUsersSink
+        GroupsSink = FlextTargetLdapGroupsSink
+        OrganizationalUnitsSink = FlextTargetLdapOrganizationalUnitsSink
+        ProcessingCounters = FlextTargetLdapProcessingCounters
+        ProcessingResult = FlextTargetLdapProcessingResult
+
+        class AttributeMapping(FlextLdapModels.Entity):
             """LDAP attribute mapping configuration with validation.
 
             Immutable value object defining how Singer fields map to LDAP attributes
@@ -68,7 +91,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 ),
             ]
 
-        class Entry(m.Entity):
+        class Entry(FlextLdapModels.Entity):
             """LDAP entry representation with validation and business rules.
 
             Immutable value object representing a complete LDAP entry with
@@ -88,8 +111,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
             attributes: Annotated[
                 t.MutableStrSequenceMapping,
                 u.Field(
-                    description="LDAP attributes with values",
-                    default_factory=lambda: MappingProxyType({}),
+                    description="LDAP attributes with values", default_factory=dict
                 ),
             ]
             entry_type: Annotated[
@@ -110,7 +132,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                     v.append("top")
                 return v
 
-            @u.computed_field(return_type=str)
+            @u.computed_field
             @property
             def parent_dn(self) -> str:
                 """Parent DN derived from the distinguished name."""
@@ -118,7 +140,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 parts = distinguished_name.split(",", 1)
                 return parts[1].strip() if len(parts) > 1 else ""
 
-            @u.computed_field(return_type=str)
+            @u.computed_field
             @property
             def rdn(self) -> str:
                 """Relative distinguished name derived from the DN."""
@@ -131,7 +153,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, m):
                 present: bool = u.Ldap.norm_in(object_class, self.object_classes)
                 return present
 
-        class TransformationRule(m.Value):
+        class TransformationRule(FlextLdapModels.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
             name: Annotated[

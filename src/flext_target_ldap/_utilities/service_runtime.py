@@ -5,11 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, override
 
-from flext_meltano import u
-from flext_target_ldap import FlextTargetLdap, m, p, t
+from flext_meltano import m, u
+
+from flext_target_ldap import FlextTargetLdap, p, t
 
 if TYPE_CHECKING:
-    from flext_target_ldap._models.sinks import FlextTargetLdapSink
+    from .._models.sinks import FlextTargetLdapSink
 
 
 class FlextTargetLdapServiceRuntime:
@@ -32,21 +33,25 @@ class FlextTargetLdapServiceRuntime:
             cls,
             *,
             runtime_sink: FlextTargetLdapSink,
-            target: p.Meltano.SingerTargetBase,
+            target: m.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.TargetLdap.MutableSchemaPayload,
             key_properties: t.StrSequence,
         ) -> FlextTargetLdapServiceRuntime.Sink:
-            """Create an adapter sink and attach the LDAP runtime sink."""
-            schema_dict = t.json_dict_adapter().validate_python(schema)
-            service_sink = cls(
+            """Create an adapter sink and attach the LDAP runtime sink.
+
+            LDAP-specific: schema validated via TargetLdap adapter with
+            DN-normalized entries and hierarchical directory structure handling.
+            """
+            validated_schema = t.json_dict_adapter().validate_python(schema)
+            bound_sink = cls(
                 target=target,
                 stream_name=stream_name,
-                schema=schema_dict,
+                schema=validated_schema,
                 key_properties=key_properties,
             )
-            service_sink._runtime_sink = runtime_sink
-            return service_sink
+            bound_sink._runtime_sink = runtime_sink
+            return bound_sink
 
         @override
         def process_batch(self, context: t.JsonMapping) -> None:
@@ -104,7 +109,7 @@ class FlextTargetLdapServiceRuntime:
     ) -> t.TargetLdap.MutableSchemaPayload:
         """Normalize a flat Singer schema to the LDAP runtime contract."""
         return {
-            key: u.Cli.json_normalize_value(
+            key: u.Cli.normalize_json_value(
                 str(value) if isinstance(value, Path) else value
             )
             for key, value in schema.items()

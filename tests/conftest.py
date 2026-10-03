@@ -1,101 +1,96 @@
-"""Pytest configuration and fixtures for target-ldap tests.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Typed public fixtures for target-ldap tests."""
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from pathlib import Path
 
 import pytest
-from flext_tests import reset_settings as _shared_reset_settings
+from flext_tests import FlextTestsDocker, tm
 
-from flext_cli import u as cli_u
-from tests import t, u
-
-reset_settings = _shared_reset_settings
+from flext_target_ldap import FlextTargetLdap, settings
+from tests import c, m, p, t, u
 
 
 @pytest.fixture
-def mock_ldap_config() -> t.TargetLdap.SettingsPayload:
-    """Create mock LDAP configuration for testing."""
-    return u.TargetLdap.Tests.build_mock_ldap_config(
-        bind_dn="cn=REDACTED_LDAP_BIND_PASSWORD,dc=test,dc=com"
+def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
+    """Return the flat target payload derived from the production settings SSOT."""
+    return t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+        settings.TargetLdap.model_dump(mode="json")
     )
 
 
-@pytest.fixture
-def sample_user_record() -> t.TargetLdap.RecordPayload:
-    """Sample LDAP user record for testing."""
-    return {
-        "dn": "uid=jdoe,ou=users,dc=test,dc=com",
-        "uid": "jdoe",
-        "cn": "John Doe",
-        "sn": "Doe",
-        "givenName": "John",
-        "mail": "jdoe@test.com",
-        "objectClass": ["inetOrgPerson", "person", "top"],
-    }
+@pytest.fixture(scope="session")
+def ldap_runtime() -> m.Tests.ContainerConfig:
+    """Ensure the canonical shared OpenLDAP runtime and return where it listens.
+
+    The shared entry declares the container port; the returned target carries
+    the host port Docker published for it.
+    """
+    container_name = c.Tests.CONNECTIVITY_MARKER_CONTAINERS["ldap"]
+    docker = FlextTestsDocker.shared(
+        container_name, repository_root=Path(__file__).resolve().parents[2]
+    )
+    target = tm.not_none(docker.target_config)
+    info = tm.ok(docker.execute())
+    host_port = tm.ok(u.Tests.resolve_host_port(info, tm.not_none(target.port)))
+    return target.model_copy(update={"port": host_port})
 
 
 @pytest.fixture
-def singer_message_record(sample_user_record: t.TargetLdap.RecordPayload) -> str:
-    """Singer RECORD message for testing."""
-    message: dict[str, t.JsonValue] = {
-        "type": "RECORD",
-        "stream": "users",
-        "record": dict(sample_user_record),
-        "time_extracted": "2024-01-01T12:00:00Z",
-    }
-    rendered: str = cli_u.Cli.json_dumps(message).unwrap()
-    return rendered
+def ldap_runtime_settings_payload(
+    ldap_settings_payload: t.TargetLdap.SettingsPayload,
+    ldap_runtime: m.Tests.ContainerConfig,
+) -> t.TargetLdap.SettingsPayload:
+    """Bind production settings to the canonical shared LDAP endpoint."""
+    payload: t.MutableJsonMapping = dict(ldap_settings_payload)
+    payload[c.TargetLdap.KEY_HOST] = ldap_runtime.host
+    payload[c.TargetLdap.KEY_PORT] = tm.not_none(ldap_runtime.port)
+    # The production settings default base_dn/bind_dn/bind_password to ""
+    # (per-deployment knobs); the shared runtime provisions its own identity,
+    # so surface it like host/port. Anonymous binds cannot write entries.
+    payload[c.TargetLdap.KEY_BASE_DN] = c.TargetLdap.Tests.DOCKER_BASE_DN
+    payload[c.TargetLdap.KEY_BIND_DN] = c.TargetLdap.Tests.DOCKER_ADMIN_DN
+    payload[c.TargetLdap.KEY_BIND_PASSWORD] = c.TargetLdap.Tests.DOCKER_ADMIN_PASSWORD
+    return t.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
 
 
 @pytest.fixture
-def singer_message_schema() -> str:
-    """Singer SCHEMA message for testing."""
-    message: dict[str, t.JsonValue] = {
-        "type": "SCHEMA",
-        "stream": "users",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "dn": {"type": "string"},
-                "uid": {"type": "string"},
-                "cn": {"type": "string"},
-                "mail": {"type": ["string", "null"]},
-                "objectClass": {"type": "array", "items": {"type": "string"}},
-            },
-        },
-        "key_properties": ["dn"],
-    }
-    rendered: str = cli_u.Cli.json_dumps(message).unwrap()
-    return rendered
+def ldap_client(
+    ldap_settings_payload: t.TargetLdap.SettingsPayload,
+) -> p.TargetLdap.Client:
+    """Build the public client contract from production settings."""
+    return u.TargetLdap.client()(settings=ldap_settings_payload)
 
 
 @pytest.fixture
-def singer_message_state() -> str:
-    """Singer STATE message for testing."""
-    message: dict[str, t.JsonValue] = {
-        "type": "STATE",
-        "value": {
-            "bookmarks": {
-                "users": {
-                    "replication_key": "modifyTimestamp",
-                    "replication_key_value": "20240101120000Z",
-                }
-            }
-        },
-    }
-    rendered: str = cli_u.Cli.json_dumps(message).unwrap()
-    return rendered
+def ldap_runtime_client(
+    ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
+) -> p.TargetLdap.Client:
+    """Build the public client contract for the shared LDAP runtime."""
+    return u.TargetLdap.client()(settings=ldap_runtime_settings_payload)
 
 
 @pytest.fixture
-def mock_target(mock_ldap_config: t.TargetLdap.SettingsPayload) -> MagicMock:
-    """Mock target instance for testing."""
-    target = MagicMock()
-    target.settings = dict(mock_ldap_config)
-    return target
+def ldap_base_dn(ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload) -> str:
+    """Return the configured base DN, failing when runtime config is incomplete."""
+    base_dn = ldap_runtime_settings_payload.get(c.TargetLdap.KEY_BASE_DN)
+    if not isinstance(base_dn, str) or not base_dn:
+        msg = "settings.TargetLdap.base_dn must name the LDAP integration base"
+        raise ValueError(msg)
+    return base_dn
+
+
+@pytest.fixture
+def target_ldap(
+    ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
+) -> FlextTargetLdap:
+    """Build the public target facade for the shared LDAP runtime."""
+    return FlextTargetLdap(settings=ldap_runtime_settings_payload)
+
+
+@pytest.fixture
+def ldap_target(
+    ldap_settings_payload: t.TargetLdap.SettingsPayload,
+) -> m.TargetLdap.Target:
+    """Build the public target model from production settings."""
+    return m.TargetLdap.Target(settings=dict(ldap_settings_payload))

@@ -7,30 +7,24 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
 
 import pytest
 from flext_tests import tm
 
-from flext_target_ldap._models.sinks import (
-    FlextTargetLdapBaseSink as LDAPBaseSink,
-    FlextTargetLdapGroupsSink as GroupsSink,
-    FlextTargetLdapOrganizationalUnitsSink as OrganizationalUnitsSink,
-    FlextTargetLdapUsersSink as UsersSink,
-)
+from tests import m
 
 if TYPE_CHECKING:
     from tests import t
 
 
 @pytest.fixture
-def ldap_base_sink(mock_target: MagicMock) -> LDAPBaseSink:
-    mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
+def ldap_base_sink(ldap_target: m.TargetLdap.Target) -> m.TargetLdap.BaseSink:
+    ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
     }
-    return LDAPBaseSink(
-        target=mock_target,
+    return m.TargetLdap.BaseSink(
+        target=ldap_target,
         stream_name="test_stream",
         schema=schema,
         key_properties=["dn"],
@@ -38,9 +32,9 @@ def ldap_base_sink(mock_target: MagicMock) -> LDAPBaseSink:
 
 
 @pytest.fixture
-def users_sink(mock_target: MagicMock) -> UsersSink:
-    mock_target.settings = {
-        **mock_target.settings,
+def users_sink(ldap_target: m.TargetLdap.Target) -> m.TargetLdap.UsersSink:
+    ldap_target.settings = {
+        **ldap_target.settings,
         "base_dn": "dc=example,dc=com",
         "user_rdn_attribute": "uid",
     }
@@ -51,34 +45,34 @@ def users_sink(mock_target: MagicMock) -> UsersSink:
             "mail": {"type": "string"},
         }
     }
-    return UsersSink(
-        target=mock_target, stream_name="users", schema=schema, key_properties=["uid"]
+    return m.TargetLdap.UsersSink(
+        target=ldap_target, stream_name="users", schema=schema, key_properties=["uid"]
     )
 
 
 @pytest.fixture
-def groups_sink(mock_target: MagicMock) -> GroupsSink:
-    mock_target.settings = {
-        **mock_target.settings,
+def groups_sink(ldap_target: m.TargetLdap.Target) -> m.TargetLdap.GroupsSink:
+    ldap_target.settings = {
+        **ldap_target.settings,
         "base_dn": "dc=example,dc=com",
         "group_rdn_attribute": "cn",
     }
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"cn": {"type": "string"}, "member": {"type": "array"}}
     }
-    return GroupsSink(
-        target=mock_target, stream_name="groups", schema=schema, key_properties=["cn"]
+    return m.TargetLdap.GroupsSink(
+        target=ldap_target, stream_name="groups", schema=schema, key_properties=["cn"]
     )
 
 
 @pytest.fixture
-def ou_sink(mock_target: MagicMock) -> OrganizationalUnitsSink:
-    mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
+def ou_sink(ldap_target: m.TargetLdap.Target) -> m.TargetLdap.OrganizationalUnitsSink:
+    ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"ou": {"type": "string"}, "description": {"type": "string"}}
     }
-    return OrganizationalUnitsSink(
-        target=mock_target,
+    return m.TargetLdap.OrganizationalUnitsSink(
+        target=ldap_target,
         stream_name="organizational_units",
         schema=schema,
         key_properties=["ou"],
@@ -86,20 +80,22 @@ def ou_sink(mock_target: MagicMock) -> OrganizationalUnitsSink:
 
 
 @pytest.fixture
-def generic_sink(mock_target: MagicMock) -> LDAPBaseSink:
-    mock_target.settings = {**mock_target.settings, "base_dn": "dc=example,dc=com"}
+def generic_sink(ldap_target: m.TargetLdap.Target) -> m.TargetLdap.BaseSink:
+    ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}
     }
-    return LDAPBaseSink(
-        target=mock_target, stream_name="generic", schema=schema, key_properties=["id"]
+    return m.TargetLdap.BaseSink(
+        target=ldap_target, stream_name="generic", schema=schema, key_properties=["id"]
     )
 
 
 class TestsFlextTargetLdapSinks:
     """Behavior contract for test_sinks."""
 
-    def test_ldap_sink_initialization(self, ldap_base_sink: LDAPBaseSink) -> None:
+    def test_ldap_sink_initialization(
+        self, ldap_base_sink: m.TargetLdap.BaseSink
+    ) -> None:
         tm.that(ldap_base_sink.stream_name, eq="test_stream")
         tm.that(ldap_base_sink.key_properties, eq=["dn"])
         properties = ldap_base_sink.schema.get("properties")
@@ -115,7 +111,7 @@ class TestsFlextTargetLdapSinks:
     )
     def test_base_sink_validation_failures(
         self,
-        ldap_base_sink: LDAPBaseSink,
+        ldap_base_sink: m.TargetLdap.BaseSink,
         record: t.TargetLdap.RecordPayload,
         expected_error: str,
     ) -> None:
@@ -125,17 +121,19 @@ class TestsFlextTargetLdapSinks:
         else:
             result = ldap_base_sink.build_attributes(record)
         assert result.failure
-        assert result.error is not None and expected_error in result.error
+        assert result.error is not None
+        assert expected_error in result.error
 
-    def test_resolve_object_classes_default(self, ldap_base_sink: LDAPBaseSink) -> None:
+    def test_resolve_object_classes_default(
+        self, ldap_base_sink: m.TargetLdap.BaseSink
+    ) -> None:
         record: t.TargetLdap.RecordPayload = {}
         classes = ldap_base_sink.resolve_object_classes(record)
         tm.that(classes, eq=["top"])
 
-    def test_validate_entry_success(self, ldap_base_sink: LDAPBaseSink) -> None:
-        mock_client = MagicMock()
-        mock_client.validate_dn.return_value.success = True
-        ldap_base_sink.client = mock_client
+    def test_validate_entry_success(
+        self, ldap_base_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = ldap_base_sink.validate_entry(
             "cn=test,dc=example,dc=com", {"cn": ["test"]}, ["person", "top"]
         )
@@ -156,7 +154,7 @@ class TestsFlextTargetLdapSinks:
     )
     def test_validate_entry_failure_cases(
         self,
-        ldap_base_sink: LDAPBaseSink,
+        ldap_base_sink: m.TargetLdap.BaseSink,
         dn: str,
         attributes: t.Ldap.OperationAttributes,
         object_classes: list[str],
@@ -164,23 +162,26 @@ class TestsFlextTargetLdapSinks:
     ) -> None:
         result = ldap_base_sink.validate_entry(dn, attributes, object_classes)
         tm.fail(result)
-        assert result.error is not None and expected_message in result.error
+        assert result.error is not None
+        assert expected_message in result.error
 
-    def test_users_build_dn_success(self, users_sink: UsersSink) -> None:
+    def test_users_build_dn_success(self, users_sink: m.TargetLdap.UsersSink) -> None:
         record = {"uid": "testuser", "cn": "Test User"}
         result = users_sink.build_dn(record)
         tm.ok(result)
         tm.that(result.value, eq="uid=testuser,dc=example,dc=com")
 
-    def test_users_build_dn_missing_uid(self, users_sink: UsersSink) -> None:
+    def test_users_build_dn_missing_uid(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         result = users_sink.build_dn({"cn": "Test User"})
         tm.fail(result)
-        assert (
-            result.error is not None
-            and "No value found for RDN attribute 'uid'" in result.error
-        )
+        assert result.error is not None
+        assert "No value found for RDN attribute 'uid'" in result.error
 
-    def test_users_build_attributes_basic(self, users_sink: UsersSink) -> None:
+    def test_users_build_attributes_basic(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         result = users_sink.build_attributes({
             "uid": "testuser",
             "cn": "Test User",
@@ -196,7 +197,9 @@ class TestsFlextTargetLdapSinks:
         tm.that(result.value["sn"], eq=["User"])
         tm.that(result.value["givenName"], eq=["Test"])
 
-    def test_users_build_attributes_multivalued(self, users_sink: UsersSink) -> None:
+    def test_users_build_attributes_multivalued(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         result = users_sink.build_attributes({
             "uid": "testuser",
             "emails": ["test1@example.com", "test2@example.com"],
@@ -207,19 +210,23 @@ class TestsFlextTargetLdapSinks:
         tm.that(result.value["mail"], eq=["test1@example.com", "test2@example.com"])
         tm.that(result.value["telephoneNumber"], eq=["123-456-7890", "098-765-4321"])
 
-    def test_users_get_object_classes_default(self, users_sink: UsersSink) -> None:
+    def test_users_get_object_classes_default(
+        self, users_sink: m.TargetLdap.UsersSink
+    ) -> None:
         classes = users_sink.resolve_object_classes({})
         tm.that(classes, eq=["inetOrgPerson", "organizationalPerson", "person", "top"])
 
-    def test_users_get_object_classes_configured(self, mock_target: MagicMock) -> None:
-        mock_target.settings = {
-            **mock_target.settings,
+    def test_users_get_object_classes_configured(
+        self, ldap_target: m.TargetLdap.Target
+    ) -> None:
+        ldap_target.settings = {
+            **ldap_target.settings,
             "base_dn": "dc=example,dc=com",
             "user_rdn_attribute": "uid",
             "users_object_classes": ["customUser", "top"],
         }
-        sink = UsersSink(
-            target=mock_target,
+        sink = m.TargetLdap.UsersSink(
+            target=ldap_target,
             stream_name="users",
             schema={
                 "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}}
@@ -228,20 +235,24 @@ class TestsFlextTargetLdapSinks:
         )
         tm.that(sink.resolve_object_classes({}), eq=["customUser", "top"])
 
-    def test_groups_build_dn_success(self, groups_sink: GroupsSink) -> None:
+    def test_groups_build_dn_success(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         result = groups_sink.build_dn({"cn": "testgroup", "description": "Test Group"})
         tm.ok(result)
         tm.that(result.value, eq="cn=testgroup,dc=example,dc=com")
 
-    def test_groups_build_dn_missing_cn(self, groups_sink: GroupsSink) -> None:
+    def test_groups_build_dn_missing_cn(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         result = groups_sink.build_dn({"description": "Test Group"})
         tm.fail(result)
-        assert (
-            result.error is not None
-            and "No value found for RDN attribute 'cn'" in result.error
-        )
+        assert result.error is not None
+        assert "No value found for RDN attribute 'cn'" in result.error
 
-    def test_groups_build_attributes_basic(self, groups_sink: GroupsSink) -> None:
+    def test_groups_build_attributes_basic(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         result = groups_sink.build_attributes({
             "cn": "testgroup",
             "description": "Test Group",
@@ -256,60 +267,72 @@ class TestsFlextTargetLdapSinks:
             eq=["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
         )
 
-    def test_groups_get_object_classes_default(self, groups_sink: GroupsSink) -> None:
+    def test_groups_get_object_classes_default(
+        self, groups_sink: m.TargetLdap.GroupsSink
+    ) -> None:
         tm.that(groups_sink.resolve_object_classes({}), eq=["groupOfNames", "top"])
 
-    def test_ou_build_dn_success(self, ou_sink: OrganizationalUnitsSink) -> None:
+    def test_ou_build_dn_success(
+        self, ou_sink: m.TargetLdap.OrganizationalUnitsSink
+    ) -> None:
         result = ou_sink.build_dn({"name": "testou", "description": "Test OU"})
         tm.ok(result)
         tm.that(result.value, has="testou")
 
-    def test_ou_build_dn_missing_ou(self, ou_sink: OrganizationalUnitsSink) -> None:
+    def test_ou_build_dn_missing_ou(
+        self, ou_sink: m.TargetLdap.OrganizationalUnitsSink
+    ) -> None:
         result = ou_sink.build_dn({"description": "Test OU"})
         tm.fail(result)
         tm.that(result.error, none=False)
 
-    def test_ou_build_attributes_basic(self, ou_sink: OrganizationalUnitsSink) -> None:
+    def test_ou_build_attributes_basic(
+        self, ou_sink: m.TargetLdap.OrganizationalUnitsSink
+    ) -> None:
         result = ou_sink.build_attributes({"ou": "testou", "description": "Test OU"})
         tm.fail(result)
 
     def test_ou_get_object_classes_default(
-        self, ou_sink: OrganizationalUnitsSink
+        self, ou_sink: m.TargetLdap.OrganizationalUnitsSink
     ) -> None:
         tm.that(ou_sink.resolve_object_classes({}), has="top")
 
-    def test_generic_build_dn_explicit(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_dn_explicit(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_dn({"dn": "cn=test,dc=example,dc=com"})
         tm.ok(result)
         tm.that(result.value, eq="cn=test,dc=example,dc=com")
 
-    def test_generic_build_dn_id_field(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_dn_id_field(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_dn({"id": "testentry", "cn": "Test Entry"})
         tm.ok(result)
         tm.that(result.value, eq="cn=testentry,dc=example,dc=com")
 
-    def test_generic_build_dn_no_identifier(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_dn_no_identifier(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_dn({"description": "Test Entry"})
         tm.fail(result)
-        assert (
-            result.error is not None
-            and "No ID or name found for generic entry" in result.error
-        )
+        assert result.error is not None
+        assert "No ID or name found for generic entry" in result.error
 
-    def test_generic_build_attributes_basic(self, generic_sink: LDAPBaseSink) -> None:
+    def test_generic_build_attributes_basic(
+        self, generic_sink: m.TargetLdap.BaseSink
+    ) -> None:
         result = generic_sink.build_attributes({
             "id": "testentry",
             "cn": "Test Entry",
             "description": "A test entry",
         })
         tm.fail(result)
-        assert (
-            result.error is not None
-            and "must be implemented in subclass" in result.error
-        )
+        assert result.error is not None
+        assert "must be implemented in subclass" in result.error
 
     def test_generic_get_object_classes_from_record(
-        self, generic_sink: LDAPBaseSink
+        self, generic_sink: m.TargetLdap.BaseSink
     ) -> None:
         tm.that(
             generic_sink.resolve_object_classes({
@@ -319,7 +342,7 @@ class TestsFlextTargetLdapSinks:
         )
 
     def test_generic_get_object_classes_single_value(
-        self, generic_sink: LDAPBaseSink
+        self, generic_sink: m.TargetLdap.BaseSink
     ) -> None:
         tm.that(
             generic_sink.resolve_object_classes({"object_classes": "customClass"}),
@@ -327,20 +350,20 @@ class TestsFlextTargetLdapSinks:
         )
 
     def test_generic_get_object_classes_default(
-        self, generic_sink: LDAPBaseSink
+        self, generic_sink: m.TargetLdap.BaseSink
     ) -> None:
         tm.that(generic_sink.resolve_object_classes({}), eq=["top"])
 
     def test_generic_get_object_classes_configured(
-        self, mock_target: MagicMock
+        self, ldap_target: m.TargetLdap.Target
     ) -> None:
-        mock_target.settings = {
-            **mock_target.settings,
+        ldap_target.settings = {
+            **ldap_target.settings,
             "base_dn": "dc=example,dc=com",
             "generic_object_classes": ["customGeneric", "top"],
         }
-        sink = LDAPBaseSink(
-            target=mock_target,
+        sink = m.TargetLdap.BaseSink(
+            target=ldap_target,
             stream_name="generic",
             schema={"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}},
             key_properties=["id"],
