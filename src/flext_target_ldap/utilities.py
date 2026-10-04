@@ -16,7 +16,7 @@ from flext_meltano import FlextMeltanoUtilities
 from flext_target_ldap import c, t
 
 if TYPE_CHECKING:
-    from ._utilities.client import FlextTargetLdapClient
+    from flext_target_ldap._utilities.client import FlextTargetLdapClient
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -43,13 +43,19 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             time. Consumers (and their tests) reach it here instead of
             importing the private ``_utilities`` package.
             """
-            from ._utilities.client import FlextTargetLdapClient as _Client
+            from flext_target_ldap._utilities.client import (
+                FlextTargetLdapClient as _Client,
+            )
 
             return _Client
 
         @staticmethod
         def build_singer_catalog() -> t.TargetLdap.CatalogPayload:
-            """Build the canonical Singer catalog for LDAP targets."""
+            """Build the canonical Singer catalog for LDAP targets.
+
+            Returns:
+                The resulting ``t.TargetLdap.CatalogPayload``.
+            """
             return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                 "streams": [
                     {
@@ -95,7 +101,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                             "required": ["name"],
                         },
                     },
-                ]
+                ],
             })
 
         class TypeConversion:
@@ -105,7 +111,14 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             def extract_attribute_mapping(
                 settings: t.TargetLdap.SettingsPayload,
             ) -> t.StrMapping:
-                """Extract attribute mapping from settings."""
+                """Extract attribute mapping from settings.
+
+                Returns:
+                    The resulting ``t.StrMapping``.
+
+                Raises:
+                    TypeError: If Expected Mapping for 'attribute_mapping', got.
+                """
                 raw = settings.get(c.TargetLdap.KEY_ATTRIBUTE_MAPPING, {})
                 if isinstance(raw, Mapping):
                     normalized_mapping: t.MutableMappingKV[str, str] = {}
@@ -121,7 +134,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             def extract_object_classes(
                 settings: t.TargetLdap.SettingsPayload,
             ) -> t.StrSequence:
-                """Extract object classes from settings."""
+                """Extract object classes from settings.
+
+                Returns:
+                    The resulting ``t.StrSequence``.
+                """
                 raw = settings.get(c.TargetLdap.KEY_OBJECT_CLASSES)
                 if isinstance(raw, list):
                     return [str(object_class) for object_class in raw if object_class]

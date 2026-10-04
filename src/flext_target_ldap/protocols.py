@@ -1,4 +1,9 @@
-"""Target LDAP protocol facade via MRO composition."""
+"""Target LDAP protocol facade via MRO composition.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+src/flext_target_ldap/protocols
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -76,7 +81,9 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
                 ...
 
             def modify_entry(
-                self, dn: str, changes: t.Ldap.OperationAttributes
+                self,
+                dn: str,
+                changes: t.Ldap.OperationAttributes,
             ) -> p.ResultView[bool]:
                 """Modify one entry through the target client."""
                 ...

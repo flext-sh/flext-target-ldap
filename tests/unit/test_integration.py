@@ -1,4 +1,9 @@
-"""End-to-end behavior through the public target-ldap facade."""
+"""End-to-end behavior through the public target-ldap facade.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+tests/unit/test_integration
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -14,14 +19,15 @@ from tests import p, t
 class TestsFlextTargetLdapIntegration:
     """Observable target-to-LDAP persistence contract."""
 
+    @staticmethod
     @pytest.mark.docker
     @pytest.mark.integration
     def test_public_target_persists_user_record(
-        self,
         target_ldap: FlextTargetLdap,
         ldap_runtime_client: p.TargetLdap.Client,
         ldap_base_dn: str,
     ) -> None:
+        """Test public target persists user record."""
         identifier = f"flext-target-ldap-{uuid4().hex}"
         dn = f"uid={identifier},{ldap_base_dn}"
         record: t.TargetLdap.RecordPayload = {

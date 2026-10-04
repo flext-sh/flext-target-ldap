@@ -1,38 +1,29 @@
 # AUTO-GENERATED FILE — Regenerate with: make gen
-"""Tests package."""
+"""Tests package.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import build_lazy_import_map, install_lazy_exports
+from flext_core import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_tests import api, td, tf, tk, tm, tv
+    from flext_tests import api, td, tf, tk, tm
 
     from flext_target_ldap import d, e, h, r, x
-
-    from . import unit
-    from .base import (
-        TestsFlextTargetLdapServiceBase,
-        TestsFlextTargetLdapServiceBase as s,
-    )
-    from .constants import (
-        TestsFlextTargetLdapConstants,
-        TestsFlextTargetLdapConstants as c,
-    )
-    from .models import TestsFlextTargetLdapModels, TestsFlextTargetLdapModels as m
-    from .protocols import (
-        TestsFlextTargetLdapProtocols,
-        TestsFlextTargetLdapProtocols as p,
-    )
-    from .settings import TestsFlextTargetLdapSettings
-    from .typings import TestsFlextTargetLdapTypes, TestsFlextTargetLdapTypes as t
-    from .utilities import (
-        TestsFlextTargetLdapUtilities,
-        TestsFlextTargetLdapUtilities as u,
-    )
+    from tests import unit
+    from tests.base import TestsFlextTargetLdapServiceBase, s
+    from tests.constants import TestsFlextTargetLdapConstants, c
+    from tests.models import TestsFlextTargetLdapModels, m
+    from tests.protocols import TestsFlextTargetLdapProtocols, p
+    from tests.settings import TestsFlextTargetLdapSettings
+    from tests.typings import TestsFlextTargetLdapTypes, t
+    from tests.utilities import TestsFlextTargetLdapUtilities, u
 
 
 __all__: tuple[str, ...] = (
@@ -57,7 +48,6 @@ __all__: tuple[str, ...] = (
     "tf",
     "tk",
     "tm",
-    "tv",
     "u",
     "unit",
     "x",
@@ -75,11 +65,11 @@ _LAZY_IMPORTS = MappingProxyType(
             ".unit": ("unit",),
             ".utilities": ("TestsFlextTargetLdapUtilities", "u"),
             "flext_target_ldap": ("d", "e", "h", "r", "x"),
-            "flext_tests": ("api", "td", "tf", "tk", "tm", "tv"),
+            "flext_tests": ("api", "td", "tf", "tk", "tm"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
-    )
+    ),
 )
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)

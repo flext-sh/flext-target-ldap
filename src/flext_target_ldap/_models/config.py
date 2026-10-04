@@ -29,10 +29,12 @@ class FlextTargetLdapConfigModels:
         bind_password: str = Field(description="Default bind password.")
         timeout: int = Field(ge=1, description="Default connection timeout in seconds.")
         connect_timeout: int = Field(
-            ge=1, description="Default connect timeout in seconds."
+            ge=1,
+            description="Default connect timeout in seconds.",
         )
         receive_timeout: int = Field(
-            ge=1, description="Default receive timeout in seconds."
+            ge=1,
+            description="Default receive timeout in seconds.",
         )
         auto_bind: bool = Field(description="Whether to auto-bind by default.")
         auto_range: bool = Field(description="Whether to auto-range by default.")
@@ -53,13 +55,13 @@ class FlextTargetLdapConfigModels:
 
         batch_size: int = Field(ge=1, description="Entries per batch.")
         create_missing_entries: bool = Field(
-            description="Whether to create LDAP entries that do not exist."
+            description="Whether to create LDAP entries that do not exist.",
         )
         update_existing_entries: bool = Field(
-            description="Whether to update LDAP entries that already exist."
+            description="Whether to update LDAP entries that already exist.",
         )
         delete_removed_entries: bool = Field(
-            description="Whether to delete LDAP entries removed from source."
+            description="Whether to delete LDAP entries removed from source.",
         )
 
     class ObjectClasses(BaseModel):
@@ -68,7 +70,7 @@ class FlextTargetLdapConfigModels:
         model_config = ConfigDict(frozen=True, extra="forbid")
 
         default: tuple[str, ...] = Field(
-            description="Default object classes for new LDAP entries."
+            description="Default object classes for new LDAP entries.",
         )
 
     class TargetLdap(BaseModel):
@@ -77,16 +79,16 @@ class FlextTargetLdapConfigModels:
         model_config = ConfigDict(frozen=True, extra="forbid")
 
         connection: FlextTargetLdapConfigModels.Connection = Field(
-            description="LDAP connection defaults."
+            description="LDAP connection defaults.",
         )
         search: FlextTargetLdapConfigModels.Search = Field(
-            description="LDAP search defaults."
+            description="LDAP search defaults.",
         )
         operations: FlextTargetLdapConfigModels.Operations = Field(
-            description="LDAP target operation defaults."
+            description="LDAP target operation defaults.",
         )
         object_classes: FlextTargetLdapConfigModels.ObjectClasses = Field(
-            description="LDAP object-class defaults."
+            description="LDAP object-class defaults.",
         )
 
     class Root(BaseModel):
@@ -95,7 +97,7 @@ class FlextTargetLdapConfigModels:
         model_config = ConfigDict(frozen=True, extra="ignore")
 
         TargetLdap: FlextTargetLdapConfigModels.TargetLdap = Field(
-            description="LDAP target business-rule config namespace."
+            description="LDAP target business-rule config namespace.",
         )
 
 

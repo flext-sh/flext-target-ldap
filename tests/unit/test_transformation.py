@@ -14,9 +14,14 @@ from tests import m
 class TestsFlextTargetLdapTransformation:
     """Behavior contract for test_transformation."""
 
-    def test_transformation_rule_creation(self) -> None:
+    @staticmethod
+    def test_transformation_rule_creation() -> None:
+        """Test transformation rule creation."""
         rule = m.TargetLdap.TransformationRule(
-            name="test_rule", pattern="orclUser", replacement="person", enabled=True
+            name="test_rule",
+            pattern="orclUser",
+            replacement="person",
+            enabled=True,
         )
         tm.that(rule.name, eq="test_rule")
         assert rule.enabled

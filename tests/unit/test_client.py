@@ -1,4 +1,9 @@
-"""Observable behavior of the public target-ldap client contract."""
+"""Observable behavior of the public target-ldap client contract.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+tests/unit/test_client
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -14,9 +19,11 @@ from tests import p, t
 class TestsFlextTargetLdapClient:
     """Behavior contract for the public client factory."""
 
+    @staticmethod
     def test_client_reflects_production_settings(
-        self, ldap_client: p.TargetLdap.Client
+        ldap_client: p.TargetLdap.Client,
     ) -> None:
+        """Test client reflects production settings."""
         configured = settings.TargetLdap
         tm.that(ldap_client.host, eq=configured.host)
         tm.that(ldap_client.port, eq=configured.port)
@@ -25,20 +32,25 @@ class TestsFlextTargetLdapClient:
         tm.that(ldap_client.use_ssl, eq=configured.use_ssl)
         tm.that(ldap_client.timeout, eq=configured.timeout)
 
+    @staticmethod
     def test_server_uri_reflects_production_settings(
-        self, ldap_client: p.TargetLdap.Client
+        ldap_client: p.TargetLdap.Client,
     ) -> None:
+        """Test server uri reflects production settings."""
         configured = settings.TargetLdap
         scheme = "ldaps" if configured.use_ssl else "ldap"
         tm.that(
-            ldap_client.server_uri, eq=f"{scheme}://{configured.host}:{configured.port}"
+            ldap_client.server_uri,
+            eq=f"{scheme}://{configured.host}:{configured.port}",
         )
 
+    @staticmethod
     @pytest.mark.docker
     @pytest.mark.integration
     def test_connect_and_disconnect_reach_configured_runtime(
-        self, ldap_runtime_client: p.TargetLdap.Client
+        ldap_runtime_client: p.TargetLdap.Client,
     ) -> None:
+        """Test connect and disconnect reach configured runtime."""
         connected = ldap_runtime_client.connect()
         tm.ok(connected)
         tm.that(connected.value, eq=True)
@@ -47,11 +59,14 @@ class TestsFlextTargetLdapClient:
         tm.ok(disconnected)
         tm.that(disconnected.value, eq=True)
 
+    @staticmethod
     @pytest.mark.docker
     @pytest.mark.integration
     def test_entry_lifecycle_is_observable_in_configured_runtime(
-        self, ldap_runtime_client: p.TargetLdap.Client, ldap_base_dn: str
+        ldap_runtime_client: p.TargetLdap.Client,
+        ldap_base_dn: str,
     ) -> None:
+        """Test entry lifecycle is observable in configured runtime."""
         identifier = f"flext-target-ldap-{uuid4().hex}"
         dn = f"uid={identifier},{ldap_base_dn}"
         created = False

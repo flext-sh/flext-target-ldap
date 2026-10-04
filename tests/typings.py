@@ -1,4 +1,9 @@
-"""Test types facade via MRO composition."""
+"""Test types facade via MRO composition.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+tests/typings
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,9 @@
-"""LDAP target type facade via MRO composition."""
+"""LDAP target type facade via MRO composition.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+src/flext_target_ldap/typings
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

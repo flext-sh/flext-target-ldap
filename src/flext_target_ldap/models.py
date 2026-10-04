@@ -17,17 +17,10 @@ from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
 from flext_target_ldap import t, u
-
-from ._models.processing_result import FlextTargetLdapProcessingCounters
-from ._models.sinks import (
-    FlextTargetLdapBaseSink,
-    FlextTargetLdapGroupsSink,
-    FlextTargetLdapOrganizationalUnitsSink,
-    FlextTargetLdapProcessingResult,
-    FlextTargetLdapSink,
-    FlextTargetLdapTarget,
-    FlextTargetLdapUsersSink,
+from flext_target_ldap._models.processing_result import (
+    FlextTargetLdapProcessingCounters,
 )
+from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 
 if TYPE_CHECKING:
     from collections.abc import MutableSequence
@@ -47,14 +40,16 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         # Sink and target implementations are part of the public model
         # surface: consumers (and their tests) reach them through this
         # facade instead of importing the private _models package.
-        Sink = FlextTargetLdapSink
-        Target = FlextTargetLdapTarget
-        BaseSink = FlextTargetLdapBaseSink
-        UsersSink = FlextTargetLdapUsersSink
-        GroupsSink = FlextTargetLdapGroupsSink
-        OrganizationalUnitsSink = FlextTargetLdapOrganizationalUnitsSink
+        Sink = FlextTargetLdapModelsSinks.FlextTargetLdapSink
+        Target = FlextTargetLdapModelsSinks.FlextTargetLdapTarget
+        BaseSink = FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink
+        UsersSink = FlextTargetLdapModelsSinks.FlextTargetLdapUsersSink
+        GroupsSink = FlextTargetLdapModelsSinks.FlextTargetLdapGroupsSink
+        OrganizationalUnitsSink = (
+            FlextTargetLdapModelsSinks.FlextTargetLdapOrganizationalUnitsSink
+        )
         ProcessingCounters = FlextTargetLdapProcessingCounters
-        ProcessingResult = FlextTargetLdapProcessingResult
+        ProcessingResult = FlextTargetLdapModelsSinks.FlextTargetLdapProcessingResult
 
         class AttributeMapping(FlextLdapModels.Entity):
             """LDAP attribute mapping configuration with validation.
@@ -68,7 +63,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 u.Field(..., description="Singer field name from source data"),
             ]
             ldap_attribute_name: Annotated[
-                t.NonEmptyStr, u.Field(..., description="Target LDAP attribute name")
+                t.NonEmptyStr,
+                u.Field(..., description="Target LDAP attribute name"),
             ]
             is_required: Annotated[
                 bool,
@@ -87,7 +83,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             default_value: Annotated[
                 str | None,
                 u.Field(
-                    default=None, description="Default value if source field is missing"
+                    default=None,
+                    description="Default value if source field is missing",
                 ),
             ]
 
@@ -99,7 +96,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             """
 
             distinguished_name: Annotated[
-                t.NonEmptyStr, u.Field(..., description="LDAP Distinguished Name (DN)")
+                t.NonEmptyStr,
+                u.Field(..., description="LDAP Distinguished Name (DN)"),
             ]
             object_classes: Annotated[
                 MutableSequence[str],
@@ -111,7 +109,8 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             attributes: Annotated[
                 t.MutableStrSequenceMapping,
                 u.Field(
-                    description="LDAP attributes with values", default_factory=dict
+                    description="LDAP attributes with values",
+                    default_factory=dict,
                 ),
             ]
             entry_type: Annotated[
@@ -125,9 +124,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             @u.field_validator("object_classes")
             @classmethod
             def validate_object_classes(
-                cls, v: MutableSequence[str]
+                cls,
+                v: MutableSequence[str],
             ) -> MutableSequence[str]:
-                """Validate object classes contain 'top'."""
+                """Validate object classes contain 'top'.
+
+                Returns:
+                    The resulting ``MutableSequence[str]``.
+                """
                 if "top" not in v:
                     v.append("top")
                 return v
@@ -149,7 +153,11 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 return rdn_part
 
             def has_object_class(self, object_class: str) -> bool:
-                """Check if entry has a specific object class."""
+                """Check if entry has a specific object class.
+
+                Returns:
+                    The resulting ``bool``.
+                """
                 present: bool = u.Ldap.norm_in(object_class, self.object_classes)
                 return present
 
