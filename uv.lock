@@ -584,7 +584,7 @@ dependencies = [
 [[package]]
 name = "flext-ldif"
 version = "0.12.0"
-source = { git = "https://github.com/flext-sh/flext-ldif.git?rev=0.12.0-dev#be5a63770afe4da575c847e36e7bc238ffa86227" }
+source = { git = "https://github.com/flext-sh/flext-ldif.git?rev=0.12.0-dev#168d0384effb539f72db0f9a54317f59c14933f7" }
 dependencies = [
     { name = "annotated-types" },
     { name = "beartype" },
