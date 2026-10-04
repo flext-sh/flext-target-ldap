@@ -1,4 +1,9 @@
-"""Runtime settings for flext-target-ldap tests."""
+"""Runtime settings for flext-target-ldap tests.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+tests/settings
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

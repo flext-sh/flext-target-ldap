@@ -1,4 +1,9 @@
-"""Compatibility entrypoint for target-ldap CLI."""
+"""Compatibility entrypoint for target-ldap CLI.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+src/flext_target_ldap/target
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

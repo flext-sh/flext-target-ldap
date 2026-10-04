@@ -22,7 +22,9 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
     """LDAP target settings; all project fields under ``settings.TargetLdap.*``."""
 
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
-        env_prefix="FLEXT_TARGET_LDAP_", env_nested_delimiter="__", extra="ignore"
+        env_prefix="FLEXT_TARGET_LDAP_",
+        env_nested_delimiter="__",
+        extra="ignore",
     )
 
     class _TargetLdap(m.BaseModel):
@@ -35,33 +37,40 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         bind_dn: Annotated[str, m.Field(default="", description="Bind DN")]
         bind_password: Annotated[str, m.Field(default="", description="Bind password")]
         timeout: Annotated[
-            int, m.Field(default=30, description="Connection timeout (s)")
+            int,
+            m.Field(default=30, description="Connection timeout (s)"),
         ]
         auto_bind: Annotated[bool, m.Field(default=True, description="Auto bind")]
         auto_range: Annotated[bool, m.Field(default=True, description="Auto range")]
         base_dn: Annotated[str, m.Field(default="", description="Base DN")]
         search_filter: Annotated[
-            str, m.Field(default="(objectClass=*)", description="LDAP search filter")
+            str,
+            m.Field(default="(objectClass=*)", description="LDAP search filter"),
         ]
         search_scope: Annotated[
             str,
             m.Field(
-                default="SUBTREE", description="Search scope (BASE/ONELEVEL/SUBTREE)"
+                default="SUBTREE",
+                description="Search scope (BASE/ONELEVEL/SUBTREE)",
             ),
         ]
         connect_timeout: Annotated[
-            int, m.Field(default=30, description="Connect timeout (s)")
+            int,
+            m.Field(default=30, description="Connect timeout (s)"),
         ]
         receive_timeout: Annotated[
-            int, m.Field(default=30, description="Receive timeout (s)")
+            int,
+            m.Field(default=30, description="Receive timeout (s)"),
         ]
         batch_size: Annotated[
-            int, m.Field(default=1000, description="Entries per batch")
+            int,
+            m.Field(default=1000, description="Entries per batch"),
         ]
         max_records: Annotated[
             int | None,
             m.Field(
-                default=None, description="Max total records, or None for unlimited"
+                default=None,
+                description="Max total records, or None for unlimited",
             ),
         ]
         create_missing_entries: Annotated[
@@ -75,13 +84,15 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         delete_removed_entries: Annotated[
             bool,
             m.Field(
-                default=False, description="Delete LDAP entries removed from source"
+                default=False,
+                description="Delete LDAP entries removed from source",
             ),
         ]
         attribute_mapping: Annotated[
             dict[str, str],
             m.Field(
-                default_factory=dict, description="Source field -> LDAP attribute map"
+                default_factory=dict,
+                description="Source field -> LDAP attribute map",
             ),
         ]
         object_classes: Annotated[
@@ -93,7 +104,8 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         TargetLdap: _TargetLdap
     else:
         TargetLdap: _TargetLdap = m.Field(
-            default_factory=_TargetLdap, description="Namespaced LDAP target settings."
+            default_factory=_TargetLdap,
+            description="Namespaced LDAP target settings.",
         )
 
 

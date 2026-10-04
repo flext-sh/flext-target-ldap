@@ -17,34 +17,47 @@ from __future__ import annotations
 from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
 
 
-def validate_ldap_target_config(
-    settings: t.JsonMapping,
-) -> p.Result[FlextTargetLdapSettings]:
-    """Validate raw target settings with the canonical settings model."""
-    return u.try_(
-        lambda: FlextTargetLdapSettings.model_validate(settings),
-        catch=(ValueError, TypeError, RuntimeError),
-        op_name="Configuration validation",
-    )
+class FlextTargetLdapUtilitiesSettings:
+    """Canonical namespace owner."""
+
+    @staticmethod
+    def validate_ldap_target_config(
+        settings: t.JsonMapping,
+    ) -> p.Result[FlextTargetLdapSettings]:
+        """Validate raw target settings with the canonical settings model.
+
+        Returns:
+            The resulting ``p.Result[FlextTargetLdapSettings]``.
+        """
+        return u.try_(
+            lambda: FlextTargetLdapSettings.model_validate(settings),
+            catch=(ValueError, TypeError, RuntimeError),
+            op_name="Configuration validation",
+        )
+
+    @staticmethod
+    def create_default_ldap_target_config(
+        host: str,
+        base_dn: str,
+        *,
+        port: int = c.Ldap.PORT,
+        use_ssl: bool = False,
+    ) -> p.Result[FlextTargetLdapSettings]:
+        """Create the minimal canonical target settings payload.
+
+        Returns:
+            The resulting ``p.Result[FlextTargetLdapSettings]``.
+        """
+        return u.try_(
+            lambda: FlextTargetLdapSettings.model_validate({
+                "host": host,
+                "base_dn": base_dn,
+                "port": port,
+                "use_ssl": use_ssl,
+            }),
+            catch=(ValueError, TypeError, RuntimeError),
+            op_name="Default configuration creation",
+        )
 
 
-def create_default_ldap_target_config(
-    host: str, base_dn: str, *, port: int = c.Ldap.PORT, use_ssl: bool = False
-) -> p.Result[FlextTargetLdapSettings]:
-    """Create the minimal canonical target settings payload."""
-    return u.try_(
-        lambda: FlextTargetLdapSettings.model_validate({
-            "host": host,
-            "base_dn": base_dn,
-            "port": port,
-            "use_ssl": use_ssl,
-        }),
-        catch=(ValueError, TypeError, RuntimeError),
-        op_name="Default configuration creation",
-    )
-
-
-__all__: list[str] = [
-    "create_default_ldap_target_config",
-    "validate_ldap_target_config",
-]
+__all__: list[str] = ["FlextTargetLdapUtilitiesSettings"]

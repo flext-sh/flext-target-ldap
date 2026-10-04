@@ -11,11 +11,10 @@ from typing import ClassVar
 
 from flext_ldap import ldap, m, r, u
 
+from flext_target_ldap._settings import FlextTargetLdapSettings
 from flext_target_ldap.constants import c
 from flext_target_ldap.protocols import p
 from flext_target_ldap.typings import t
-
-from .._settings import FlextTargetLdapSettings
 
 
 class FlextTargetLdapClient:
@@ -66,7 +65,7 @@ class FlextTargetLdapClient:
                 (
                     c.Ldap.ModifyOperation.REPLACE,
                     FlextTargetLdapClient.to_str_values(value),
-                )
+                ),
             ]
             for key, value in changes.items()
         }
@@ -88,7 +87,7 @@ class FlextTargetLdapClient:
         self._api = ldap
         self._current_session_id: str | None = None
         FlextTargetLdapClient.logger.info(
-            f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}"
+            f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",
         )
 
     @property
@@ -115,7 +114,11 @@ class FlextTargetLdapClient:
             | t.TargetLdap.SettingsPayload
         ),
     ) -> m.Ldap.ConnectionConfig:
-        """Resolve any supported settings payload to the connection model."""
+        """Resolve any supported settings payload to the connection model.
+
+        Returns:
+            The resulting ``m.Ldap.ConnectionConfig``.
+        """
         if isinstance(settings, m.Ldap.ConnectionConfig):
             return settings
         if isinstance(settings, FlextTargetLdapSettings):
@@ -165,11 +168,16 @@ class FlextTargetLdapClient:
         attributes: t.Ldap.OperationAttributes,
         object_classes: t.StrSequence | None = None,
     ) -> p.Result[bool]:
-        """Add LDAP entry using flext-ldap API."""
+        """Add LDAP entry using flext-ldap API.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
 
         def _run_add_entry() -> p.Result[bool]:
             FlextTargetLdapClient.logger.info(
-                "Adding LDAP entry using flext-ldap API: %s", dn
+                "Adding LDAP entry using flext-ldap API: %s",
+                dn,
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
@@ -190,14 +198,18 @@ class FlextTargetLdapClient:
             return r[bool].fail_op("Add entry", e)
 
     def connect(self) -> p.Result[bool]:
-        """Validate connectivity to LDAP server using flext-ldap API."""
+        """Validate connectivity to LDAP server using flext-ldap API.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         try:
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
                 return r[bool].fail_op("Connection", connect_result.error)
             self._api.disconnect()
             FlextTargetLdapClient.logger.info(
-                f"LDAP connectivity validated for {self.settings.host}:{self.settings.port}"
+                f"LDAP connectivity validated for {self.settings.host}:{self.settings.port}",
             )
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
@@ -206,13 +218,18 @@ class FlextTargetLdapClient:
             return r[bool].fail(error_msg)
 
     def delete_entry(self, dn: str) -> p.Result[bool]:
-        """Delete LDAP entry using flext-ldap API."""
+        """Delete LDAP entry using flext-ldap API.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
 
         def _run_delete_entry() -> p.Result[bool]:
             if not dn:
                 return r[bool].fail("DN required")
             FlextTargetLdapClient.logger.info(
-                "Deleting LDAP entry using flext-ldap API: %s", dn
+                "Deleting LDAP entry using flext-ldap API: %s",
+                dn,
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
@@ -221,7 +238,8 @@ class FlextTargetLdapClient:
                 result = self._api.delete(dn)
                 if result.success:
                     FlextTargetLdapClient.logger.debug(
-                        "Successfully deleted LDAP entry: %s", dn
+                        "Successfully deleted LDAP entry: %s",
+                        dn,
                     )
                     return r[bool].ok(value=True)
                 return r[bool].fail(result.error or "Delete failed")
@@ -235,7 +253,11 @@ class FlextTargetLdapClient:
             return r[bool].fail_op("Delete entry", e)
 
     def disconnect(self) -> p.Result[bool]:
-        """Disconnect LDAP session through flext-ldap."""
+        """Disconnect LDAP session through flext-ldap.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         try:
             self._api.disconnect()
             self._current_session_id = None
@@ -245,27 +267,40 @@ class FlextTargetLdapClient:
             return r[bool].fail_op("Disconnect", e)
 
     def entry_exists(self, dn: str) -> p.Result[bool]:
-        """Check if LDAP entry exists using flext-ldap API."""
+        """Check if LDAP entry exists using flext-ldap API.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         try:
             if not dn:
                 return r[bool].fail("DN required")
             FlextTargetLdapClient.logger.info("Checking if LDAP entry exists: %s", dn)
             search_result = self.search_entry(
-                base_dn=dn, search_filter="(objectClass=*)", attributes=["dn"]
+                base_dn=dn,
+                search_filter="(objectClass=*)",
+                attributes=["dn"],
             )
             if search_result.success:
                 return r[bool].ok(bool(search_result.value))
             return r[bool].ok(value=False)
         except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception(
-                "Failed to check entry existence: %s", dn
+                "Failed to check entry existence: %s",
+                dn,
             )
             return r[bool].fail_op("Entry exists check", e)
 
     def fetch_entry(
-        self, dn: str, attributes: t.StrSequence | None = None
+        self,
+        dn: str,
+        attributes: t.StrSequence | None = None,
     ) -> p.Result[m.Ldif.Entry]:
-        """Fetch the LDAP entry using the flext-ldap API."""
+        """Fetch the LDAP entry using the flext-ldap API.
+
+        Returns:
+            The resulting ``p.Result[m.Ldif.Entry]``.
+        """
         try:
             if not dn:
                 return r[m.Ldif.Entry].fail("DN required")
@@ -279,13 +314,20 @@ class FlextTargetLdapClient:
             return r[m.Ldif.Entry].fail_op("Get entry", e)
 
     def modify_entry(
-        self, dn: str, changes: t.Ldap.OperationAttributes
+        self,
+        dn: str,
+        changes: t.Ldap.OperationAttributes,
     ) -> p.Result[bool]:
-        """Modify LDAP entry using flext-ldap API."""
+        """Modify LDAP entry using flext-ldap API.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
 
         def _run_modify_entry() -> p.Result[bool]:
             FlextTargetLdapClient.logger.info(
-                "Modifying LDAP entry using flext-ldap API: %s", dn
+                "Modifying LDAP entry using flext-ldap API: %s",
+                dn,
             )
             connect_result = self._api.connect(self.settings)
             if connect_result.failure:
@@ -294,7 +336,8 @@ class FlextTargetLdapClient:
                 result = self._api.modify(dn, self._build_modify_changes(changes))
                 if result.success:
                     FlextTargetLdapClient.logger.debug(
-                        "Successfully modified LDAP entry: %s", dn
+                        "Successfully modified LDAP entry: %s",
+                        dn,
                     )
                     return r[bool].ok(value=True)
             finally:
@@ -315,7 +358,11 @@ class FlextTargetLdapClient:
         search_filter: str = "(objectClass=*)",
         attributes: t.StrSequence | None = None,
     ) -> p.Result[list[m.Ldif.Entry]]:
-        """Search LDAP entries using flext-ldap API."""
+        """Search LDAP entries using flext-ldap API.
+
+        Returns:
+            The resulting ``p.Result[list[m.Ldif.Entry]]``.
+        """
 
         def _run_search_entry() -> p.Result[list[m.Ldif.Entry]]:
             if not base_dn:
@@ -330,7 +377,9 @@ class FlextTargetLdapClient:
                 return r[list[m.Ldif.Entry]].fail_op("Connection", connect_result.error)
             try:
                 search_options = m.Ldap.SearchOptions(
-                    base_dn=base_dn, filter_str=search_filter, attributes=attributes
+                    base_dn=base_dn,
+                    filter_str=search_filter,
+                    attributes=attributes,
                 )
                 result = self._api.search(search_options)
             finally:
@@ -339,7 +388,8 @@ class FlextTargetLdapClient:
                 search_res = result.value
                 entries: list[m.Ldif.Entry] = list(search_res.entries)
                 FlextTargetLdapClient.logger.debug(
-                    "Successfully found %d LDAP entries", len(entries)
+                    "Successfully found %d LDAP entries",
+                    len(entries),
                 )
                 return r[list[m.Ldif.Entry]].ok(entries)
             FlextTargetLdapClient.logger.debug("No LDAP entries found")
@@ -349,7 +399,8 @@ class FlextTargetLdapClient:
             return _run_search_entry()
         except c.EXC_RUNTIME_TYPE as e:
             FlextTargetLdapClient.logger.exception(
-                "Failed to search entries in %s", base_dn
+                "Failed to search entries in %s",
+                base_dn,
             )
             return r[list[m.Ldif.Entry]].fail_op("Search", e)
 

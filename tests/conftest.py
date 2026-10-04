@@ -1,4 +1,9 @@
-"""Typed public fixtures for target-ldap tests."""
+"""Typed public fixtures for target-ldap tests.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+tests/conftest
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -15,7 +20,7 @@ from tests import c, m, p, t, u
 def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
     """Return the flat target payload derived from the production settings SSOT."""
     return t.Cli.JSON_MAPPING_ADAPTER.validate_python(
-        settings.TargetLdap.model_dump(mode="json")
+        settings.TargetLdap.model_dump(mode="json"),
     )
 
 
@@ -25,10 +30,14 @@ def ldap_runtime() -> m.Tests.ContainerConfig:
 
     The shared entry declares the container port; the returned target carries
     the host port Docker published for it.
+
+    Returns:
+        The resulting ``m.Tests.ContainerConfig``.
     """
     container_name = c.Tests.CONNECTIVITY_MARKER_CONTAINERS["ldap"]
     docker = FlextTestsDocker.shared(
-        container_name, repository_root=Path(__file__).resolve().parents[2]
+        container_name,
+        repository_root=Path(__file__).resolve().parents[2],
     )
     target = tm.not_none(docker.target_config)
     info = tm.ok(docker.execute())
@@ -41,7 +50,11 @@ def ldap_runtime_settings_payload(
     ldap_settings_payload: t.TargetLdap.SettingsPayload,
     ldap_runtime: m.Tests.ContainerConfig,
 ) -> t.TargetLdap.SettingsPayload:
-    """Bind production settings to the canonical shared LDAP endpoint."""
+    """Bind production settings to the canonical shared LDAP endpoint.
+
+    Returns:
+        The resulting ``t.TargetLdap.SettingsPayload``.
+    """
     payload: t.MutableJsonMapping = dict(ldap_settings_payload)
     payload[c.TargetLdap.KEY_HOST] = ldap_runtime.host
     payload[c.TargetLdap.KEY_PORT] = tm.not_none(ldap_runtime.port)
@@ -58,7 +71,11 @@ def ldap_runtime_settings_payload(
 def ldap_client(
     ldap_settings_payload: t.TargetLdap.SettingsPayload,
 ) -> p.TargetLdap.Client:
-    """Build the public client contract from production settings."""
+    """Build the public client contract from production settings.
+
+    Returns:
+        The resulting ``p.TargetLdap.Client``.
+    """
     return u.TargetLdap.client()(settings=ldap_settings_payload)
 
 
@@ -66,13 +83,21 @@ def ldap_client(
 def ldap_runtime_client(
     ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
 ) -> p.TargetLdap.Client:
-    """Build the public client contract for the shared LDAP runtime."""
+    """Build the public client contract for the shared LDAP runtime.
+
+    Returns:
+        The resulting ``p.TargetLdap.Client``.
+    """
     return u.TargetLdap.client()(settings=ldap_runtime_settings_payload)
 
 
 @pytest.fixture
 def ldap_base_dn(ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload) -> str:
-    """Return the configured base DN, failing when runtime config is incomplete."""
+    """Return the configured base DN, failing when runtime config is incomplete.
+
+    Raises:
+        ValueError: If settings.TargetLdap.base_dn must name the LDAP integration base.
+    """
     base_dn = ldap_runtime_settings_payload.get(c.TargetLdap.KEY_BASE_DN)
     if not isinstance(base_dn, str) or not base_dn:
         msg = "settings.TargetLdap.base_dn must name the LDAP integration base"
@@ -84,7 +109,11 @@ def ldap_base_dn(ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload) ->
 def target_ldap(
     ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
 ) -> FlextTargetLdap:
-    """Build the public target facade for the shared LDAP runtime."""
+    """Build the public target facade for the shared LDAP runtime.
+
+    Returns:
+        The resulting ``FlextTargetLdap``.
+    """
     return FlextTargetLdap(settings=ldap_runtime_settings_payload)
 
 
@@ -92,5 +121,9 @@ def target_ldap(
 def ldap_target(
     ldap_settings_payload: t.TargetLdap.SettingsPayload,
 ) -> m.TargetLdap.Target:
-    """Build the public target model from production settings."""
+    """Build the public target model from production settings.
+
+    Returns:
+        The resulting ``m.TargetLdap.Target``.
+    """
     return m.TargetLdap.Target(settings=dict(ldap_settings_payload))

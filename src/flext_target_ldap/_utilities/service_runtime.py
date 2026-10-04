@@ -1,4 +1,9 @@
-"""Internal runtime adapters for the target-ldap service facade."""
+"""Internal runtime adapters for the target-ldap service facade.
+
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
+src/flext_target_ldap/_utilities/service_runtime
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -10,7 +15,7 @@ from flext_meltano import m, u
 from flext_target_ldap import FlextTargetLdap, p, t
 
 if TYPE_CHECKING:
-    from .._models.sinks import FlextTargetLdapSink
+    from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 
 
 class FlextTargetLdapServiceRuntime:
@@ -26,13 +31,13 @@ class FlextTargetLdapServiceRuntime:
 
         name = "target-ldap-sink"
 
-        _runtime_sink: FlextTargetLdapSink
+        _runtime_sink: FlextTargetLdapModelsSinks.FlextTargetLdapSink
 
         @classmethod
         def create(
             cls,
             *,
-            runtime_sink: FlextTargetLdapSink,
+            runtime_sink: FlextTargetLdapModelsSinks.FlextTargetLdapSink,
             target: m.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.TargetLdap.MutableSchemaPayload,
@@ -42,6 +47,9 @@ class FlextTargetLdapServiceRuntime:
 
             LDAP-specific: schema validated via TargetLdap adapter with
             DN-normalized entries and hierarchical directory structure handling.
+
+            Returns:
+                The resulting ``FlextTargetLdapServiceRuntime.Sink``.
             """
             validated_schema = t.json_dict_adapter().validate_python(schema)
             bound_sink = cls(
@@ -60,7 +68,11 @@ class FlextTargetLdapServiceRuntime:
 
         @override
         def process_record(self, record: t.JsonMapping, context: t.JsonMapping) -> None:
-            """Delegate Singer record handling to the LDAP runtime sink."""
+            """Delegate Singer record handling to the LDAP runtime sink.
+
+            Raises:
+                RuntimeError: If ``result.failure``.
+            """
             result = self._runtime_sink.process_record(
                 u.normalize_to_json_mapping(record),
                 u.normalize_to_json_mapping(context),
@@ -77,14 +89,21 @@ class FlextTargetLdapServiceRuntime:
         schema: t.FlatContainerMapping,
         target_config: t.JsonMapping,
     ) -> p.Meltano.SingerDrainSink:
-        """Create the service-level Singer sink adapter."""
+        """Create the service-level Singer sink adapter.
+
+        Returns:
+            The resulting ``p.Meltano.SingerDrainSink``.
+        """
         normalized_target_config = u.normalize_to_json_mapping(target_config)
         runtime_target = FlextTargetLdap(
-            settings=normalized_target_config, validate_config=False
+            settings=normalized_target_config,
+            validate_config=False,
         )
         normalized_schema = cls.normalize_flat_schema(schema)
-        sink_class: type[FlextTargetLdapSink] = runtime_target.get_sink_class(
-            stream_name
+        sink_class: type[FlextTargetLdapModelsSinks.FlextTargetLdapSink] = (
+            runtime_target.get_sink_class(
+                stream_name,
+            )
         )
         runtime_sink = sink_class(
             target=runtime_target,
@@ -107,10 +126,14 @@ class FlextTargetLdapServiceRuntime:
     def normalize_flat_schema(
         schema: t.FlatContainerMapping,
     ) -> t.TargetLdap.MutableSchemaPayload:
-        """Normalize a flat Singer schema to the LDAP runtime contract."""
+        """Normalize a flat Singer schema to the LDAP runtime contract.
+
+        Returns:
+            The resulting ``t.TargetLdap.MutableSchemaPayload``.
+        """
         return {
             key: u.Cli.normalize_json_value(
-                str(value) if isinstance(value, Path) else value
+                str(value) if isinstance(value, Path) else value,
             )
             for key, value in schema.items()
         }

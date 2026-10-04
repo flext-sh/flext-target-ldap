@@ -17,7 +17,11 @@ from flext_target_ldap import FlextTargetLdapConstants
 
 
 def _docker_admin_password() -> str:
-    """Resolve the shared test OpenLDAP admin password (env override allowed)."""
+    """Resolve the shared test OpenLDAP admin password (env override allowed).
+
+    Returns:
+        The resulting ``str``.
+    """
     return os.getenv("FLEXT_LDAP_TEST_DOCKER_ADMIN_PASSWORD", "") or "admin123"
 
 
