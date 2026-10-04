@@ -382,7 +382,9 @@ class FlextTargetLdapModelsSinks:
                 if add_result.success:
                     self._processing_result.add_success()
                     FlextTargetLdapModelsSinks.logger.debug(
-                        "%s entry added successfully: %s", label.capitalize(), dn,
+                        "%s entry added successfully: %s",
+                        label.capitalize(),
+                        dn,
                     )
                     return r[bool].ok(value=True)
                 if self._target.settings.get("update_existing_entries", False):

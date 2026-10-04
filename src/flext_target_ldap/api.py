@@ -61,7 +61,8 @@ class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
         return u.TargetLdap.build_singer_catalog()
 
     def get_sink(
-        self, stream_name: str,
+        self,
+        stream_name: str,
     ) -> FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink:
         """Return an instantiated sink for the given stream name."""
         sink_class = self.get_sink_class(stream_name)
@@ -73,7 +74,8 @@ class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
         )
 
     def get_sink_class(
-        self, stream_name: str,
+        self,
+        stream_name: str,
     ) -> type[FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
