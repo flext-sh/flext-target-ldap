@@ -63,7 +63,7 @@ def ldap_runtime_settings_payload(
     # so surface it like host/port. Anonymous binds cannot write entries.
     payload[c.TargetLdap.KEY_BASE_DN] = c.TargetLdap.Tests.DOCKER_BASE_DN
     payload[c.TargetLdap.KEY_BIND_DN] = c.TargetLdap.Tests.DOCKER_ADMIN_DN
-    payload[c.TargetLdap.KEY_BIND_PASSWORD] = c.TargetLdap.Tests.DOCKER_ADMIN_PASSWORD
+    payload[c.TargetLdap.KEY_BIND_CREDENTIAL] = c.TargetLdap.Tests.DOCKER_ADMIN_PASSWORD
     return t.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
 
 

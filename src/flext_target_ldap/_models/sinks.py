@@ -151,8 +151,8 @@ class FlextTargetLdapModelsSinks:
                         )
                 return attributes
 
+            @staticmethod
             def build_attributes(
-                self,
                 _record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes from record. Override in subclasses.
@@ -305,8 +305,8 @@ class FlextTargetLdapModelsSinks:
                             c.TargetLdap.KEY_BIND_DN,
                             c.TargetLdap.DEFAULT_BIND_DN,
                         ),
-                        c.TargetLdap.KEY_BIND_PASSWORD: self._target.settings.get(
-                            c.TargetLdap.KEY_BIND_PASSWORD,
+                        c.TargetLdap.KEY_BIND_CREDENTIAL: self._target.settings.get(
+                            c.TargetLdap.KEY_BIND_CREDENTIAL,
                             c.TargetLdap.DEFAULT_BIND_PASSWORD,
                         ),
                         c.TargetLdap.KEY_TIMEOUT: self._target.settings.get(
@@ -579,8 +579,8 @@ class FlextTargetLdapModelsSinks:
             """LDAP sink for group entries."""
 
             @override
+            @staticmethod
             def build_attributes(
-                self,
                 _record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes for group entry.

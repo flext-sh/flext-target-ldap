@@ -40,8 +40,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
             The client consumes ``m``, whose namespace composes the sink
             models, so it is resolved on access rather than at module import
-            time. Consumers (and their tests) reach it here instead of
-            importing the private ``_utilities`` package.
+            time (strict import order law: later-order sibling modules are
+            imported lazily inside the using function). Consumers (and their
+            tests) reach it here instead of importing the private
+            ``_utilities`` package directly.
             """
             from flext_target_ldap._utilities.client import (
                 FlextTargetLdapClient as _Client,
