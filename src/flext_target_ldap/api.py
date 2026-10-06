@@ -81,7 +81,9 @@ class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
         sink_mapping = {
             "users": FlextTargetLdapModelsSinks.FlextTargetLdapUsersSink,
             "groups": FlextTargetLdapModelsSinks.FlextTargetLdapGroupsSink,
-            "organizational_units": FlextTargetLdapModelsSinks.FlextTargetLdapOrganizationalUnitsSink,
+            "organizational_units": (
+                FlextTargetLdapModelsSinks.FlextTargetLdapOrganizationalUnitsSink
+            ),
         }
         sink_class = sink_mapping.get(stream_name)
         if sink_class is None:
@@ -90,7 +92,11 @@ class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
                 stream_name,
             )
             return FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink
-        self.logger.info(f"Using {sink_class.__name__} for stream '{stream_name}'")
+        self.logger.info(
+            "Using %s for stream '%s'",
+            sink_class.__name__,
+            stream_name,
+        )
         return sink_class
 
     def setup(self) -> None:

@@ -105,7 +105,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             })
 
         class TypeConversion:
-            """Type coercion utilities for Singer settings values to typed Python values."""
+            """Type coercion utilities for Singer settings to typed Python values."""
 
             @staticmethod
             def extract_attribute_mapping(
@@ -127,7 +127,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                         normalized_value = str(value)
                         normalized_mapping[normalized_key] = normalized_value
                     return normalized_mapping
-                msg = f"Expected Mapping for 'attribute_mapping', got {type(raw).__name__}: {raw!r}"
+                msg = (
+                    f"Expected Mapping for 'attribute_mapping', "
+                    f"got {type(raw).__name__}: {raw!r}"
+                )
                 raise TypeError(msg)
 
             @staticmethod

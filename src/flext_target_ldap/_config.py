@@ -12,7 +12,9 @@ from __future__ import annotations
 
 from typing import Annotated, Self
 
-from flext_meltano import FlextMeltanoConfig, m
+from flext_meltano import FlextMeltanoConfig
+
+from flext_target_ldap import m
 
 
 class _TargetLdapNamespace(m.BaseModel):
@@ -45,12 +47,14 @@ class FlextTargetLdapConfig(FlextMeltanoConfig):
     TargetLdap: Annotated[
         _TargetLdapNamespace,
         m.Field(
-            description="Open namespace exposing ``config/*.yaml`` under ``TargetLdap``.",
+            description=(
+                "Open namespace exposing ``config/*.yaml`` under ``TargetLdap``."
+            ),
         ),
     ] = _TargetLdapNamespace()
 
 
 config: FlextTargetLdapConfig = FlextTargetLdapConfig.fetch_global()
-"""Pre-instantiated frozen config singleton — ``from flext_target_ldap import config``."""
+"""Pre-instantiated frozen config — ``from flext_target_ldap import config``."""
 
 __all__: list[str] = ["FlextTargetLdapConfig", "config"]
