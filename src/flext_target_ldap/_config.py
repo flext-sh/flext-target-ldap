@@ -14,8 +14,10 @@ from typing import Annotated, Self
 
 from flext_meltano import FlextMeltanoConfig
 
-import flext_target_ldap._models._target_ldap_namespace
 from flext_target_ldap import m
+from flext_target_ldap._models._target_ldap_namespace import (
+    FlextTargetLdapModelsTargetLdapNamespace,
+)
 
 
 class FlextTargetLdapConfig(FlextMeltanoConfig):
@@ -40,13 +42,13 @@ class FlextTargetLdapConfig(FlextMeltanoConfig):
     __hash__ = object.__hash__
 
     TargetLdap: Annotated[
-        flext_target_ldap._models._target_ldap_namespace._TargetLdapNamespace,
+        FlextTargetLdapModelsTargetLdapNamespace,
         m.Field(
             description=(
                 "Open namespace exposing ``config/*.yaml`` under ``TargetLdap``."
             ),
         ),
-    ] = flext_target_ldap._models._target_ldap_namespace._TargetLdapNamespace()
+    ] = FlextTargetLdapModelsTargetLdapNamespace()
 
 
 config: FlextTargetLdapConfig = FlextTargetLdapConfig.fetch_global()
