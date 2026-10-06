@@ -1,6 +1,6 @@
 """LDAP Target Configuration - PEP8 Consolidation.
 
-This module consolidates all LDAP target configuration classes with descriptive PEP8 names,
+This module consolidates all LDAP target configuration classes with clear PEP8 names,
 removing duplication and using proper flext-core + flext-ldap integration.
 
 Architecture: Clean Architecture configuration layer

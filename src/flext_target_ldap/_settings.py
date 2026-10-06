@@ -110,6 +110,6 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
 
 
 settings: FlextTargetLdapSettings = FlextTargetLdapSettings.fetch_global()
-"""Pre-instantiated project settings singleton — ``from flext_target_ldap import settings``."""
+"""Pre-instantiated settings singleton — ``from flext_target_ldap import settings``."""
 
 __all__: list[str] = ["FlextTargetLdapSettings", "settings"]

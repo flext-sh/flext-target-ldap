@@ -87,7 +87,8 @@ class FlextTargetLdapClient:
         self._api = ldap
         self._current_session_id: str | None = None
         FlextTargetLdapClient.logger.info(
-            f"Initialized LDAP client using flext-ldap API for {self.settings.host}:{self.settings.port}",
+            f"Initialized LDAP client using flext-ldap API "
+            f"for {self.settings.host}:{self.settings.port}",
         )
 
     @property
@@ -209,7 +210,8 @@ class FlextTargetLdapClient:
                 return r[bool].fail_op("Connection", connect_result.error)
             self._api.disconnect()
             FlextTargetLdapClient.logger.info(
-                f"LDAP connectivity validated for {self.settings.host}:{self.settings.port}",
+                f"LDAP connectivity validated "
+                f"for {self.settings.host}:{self.settings.port}",
             )
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:

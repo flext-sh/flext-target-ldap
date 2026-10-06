@@ -1,4 +1,4 @@
-"""FLEXT Target LDAP Models - Consolidated domain models following [Project]Models patterns.
+"""FLEXT Target LDAP Models - Consolidated domain models following Models patterns.
 
 This module implements the FlextTargetLdapModels class that extends FlextModels,
 providing unified LDAP target domain models with nested classes for composition
@@ -77,7 +77,9 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 str | None,
                 u.Field(
                     default=None,
-                    description="Optional transformation rule (e.g., 'lowercase', 'uppercase')",
+                    description=(
+                        "Optional transformation rule (e.g., 'lowercase', 'uppercase')"
+                    ),
                 ),
             ]
             default_value: Annotated[

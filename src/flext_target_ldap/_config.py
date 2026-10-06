@@ -42,12 +42,14 @@ class FlextTargetLdapConfig(FlextMeltanoConfig):
     TargetLdap: Annotated[
         flext_target_ldap._models._target_ldap_namespace._TargetLdapNamespace,
         m.Field(
-            description="Open namespace exposing ``config/*.yaml`` under ``TargetLdap``.",
+            description=(
+                "Open namespace exposing ``config/*.yaml`` under ``TargetLdap``."
+            ),
         ),
     ] = flext_target_ldap._models._target_ldap_namespace._TargetLdapNamespace()
 
 
 config: FlextTargetLdapConfig = FlextTargetLdapConfig.fetch_global()
-"""Pre-instantiated frozen config singleton — ``from flext_target_ldap import config``."""
+"""Pre-instantiated frozen config — ``from flext_target_ldap import config``."""
 
 __all__: list[str] = ["FlextTargetLdapConfig", "config"]
