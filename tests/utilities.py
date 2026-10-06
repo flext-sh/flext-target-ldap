@@ -12,7 +12,7 @@ from flext_target_ldap import FlextTargetLdapUtilities
 
 
 class TestsFlextTargetLdapUtilities(FlextTestsUtilities, FlextTargetLdapUtilities):
-    """Test utilities for flext-target-ldap extending both test and project utilities."""
+    """Test utilities for flext-target-ldap extending test and project utilities."""
 
 
 u = TestsFlextTargetLdapUtilities

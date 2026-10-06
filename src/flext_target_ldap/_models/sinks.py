@@ -34,7 +34,9 @@ class FlextTargetLdapModelsSinks:
 
             def __init__(
                 self,
-                target: FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapTarget,
+                target: (
+                    FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapTarget
+                ),
                 stream_name: str,
                 schema: t.TargetLdap.SchemaPayload,
                 key_properties: t.StrSequence,
@@ -87,11 +89,12 @@ class FlextTargetLdapModelsSinks:
                 """
                 context_keys = tuple(sorted(key for key in context))
                 return r[bool].fail(
-                    f"Target does not implement process_record for context keys: {context_keys}",
+                    f"Target does not implement process_record "
+                    f"for context keys: {context_keys}",
                 )
 
         class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
-            """Result of LDAP processing operations - mutable for performance tracking."""
+            """Result of LDAP processing operations - mutable for perf tracking."""
 
             @override
             def __init__(self) -> None:
@@ -107,7 +110,9 @@ class FlextTargetLdapModelsSinks:
             @override
             def __init__(
                 self,
-                target: FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapTarget,
+                target: (
+                    FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapTarget
+                ),
                 stream_name: str,
                 schema: t.TargetLdap.SchemaPayload,
                 key_properties: t.StrSequence,
@@ -180,7 +185,8 @@ class FlextTargetLdapModelsSinks:
                 if isinstance(entry_id, str) and entry_id:
                     return r[str].ok(f"{c.TargetLdap.KEY_CN}={entry_id},{base_dn}")
                 return r[str].fail(
-                    "build_dn must be implemented in subclass: No ID or name found for generic entry",
+                    "build_dn must be implemented in subclass: "
+                    "No ID or name found for generic entry",
                 )
 
             def resolve_object_classes(
@@ -232,7 +238,8 @@ class FlextTargetLdapModelsSinks:
                             item for item in records_raw if isinstance(item, dict)
                         )
                     FlextTargetLdapModelsSinks.logger.info(
-                        f"Processing batch of {len(records)} records for stream: {self.stream_name}",
+                        f"Processing batch of {len(records)} records "
+                        f"for stream: {self.stream_name}",
                     )
                     for record in records:
                         if isinstance(record, dict):
@@ -241,7 +248,9 @@ class FlextTargetLdapModelsSinks:
                                 normalized_record[k] = v
                             self.process_record(normalized_record, context)
                     FlextTargetLdapModelsSinks.logger.info(
-                        f"Batch processing completed. Success: {self._processing_result.success_count}, Errors: {self._processing_result.error_count}",
+                        f"Batch processing completed. "
+                        f"Success: {self._processing_result.success_count}, "
+                        f"Errors: {self._processing_result.error_count}",
                     )
                 finally:
                     self.teardown_client()
