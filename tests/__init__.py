@@ -10,7 +10,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core import build_lazy_import_map, install_lazy_exports
+from flext_core import install_lazy_exports
 
 if TYPE_CHECKING:
     from flext_tests import api, td, tf, tk, tm
@@ -53,23 +53,34 @@ __all__: tuple[str, ...] = (
     "x",
 )
 
-_LAZY_IMPORTS = MappingProxyType(
-    build_lazy_import_map(
-        MappingProxyType({
-            ".base": ("TestsFlextTargetLdapServiceBase", "s"),
-            ".constants": ("TestsFlextTargetLdapConstants", "c"),
-            ".models": ("TestsFlextTargetLdapModels", "m"),
-            ".protocols": ("TestsFlextTargetLdapProtocols", "p"),
-            ".settings": ("TestsFlextTargetLdapSettings",),
-            ".typings": ("TestsFlextTargetLdapTypes", "t"),
-            ".unit": ("unit",),
-            ".utilities": ("TestsFlextTargetLdapUtilities", "u"),
-            "flext_target_ldap": ("d", "e", "h", "r", "x"),
-            "flext_tests": ("api", "td", "tf", "tk", "tm"),
-        }),
-        alias_groups=MappingProxyType({}),
-        sort_keys=False,
-    ),
+install_lazy_exports(
+    __name__,
+    globals(),
+    MappingProxyType({
+        "TestsFlextTargetLdapConstants": ".constants",
+        "TestsFlextTargetLdapModels": ".models",
+        "TestsFlextTargetLdapProtocols": ".protocols",
+        "TestsFlextTargetLdapServiceBase": ".base",
+        "TestsFlextTargetLdapSettings": ".settings",
+        "TestsFlextTargetLdapTypes": ".typings",
+        "TestsFlextTargetLdapUtilities": ".utilities",
+        "api": "flext_tests",
+        "c": ".constants",
+        "d": "flext_target_ldap",
+        "e": "flext_target_ldap",
+        "h": "flext_target_ldap",
+        "m": ".models",
+        "p": ".protocols",
+        "r": "flext_target_ldap",
+        "s": ".base",
+        "t": ".typings",
+        "td": "flext_tests",
+        "tf": "flext_tests",
+        "tk": "flext_tests",
+        "tm": "flext_tests",
+        "u": ".utilities",
+        "unit": ".unit",
+        "x": "flext_target_ldap",
+    }),
+    public_exports=__all__,
 )
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)
