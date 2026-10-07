@@ -8,15 +8,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING
 
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
 from flext_target_ldap import c, t
-
-if TYPE_CHECKING:
-    from flext_target_ldap._utilities.client import FlextTargetLdapClient
+from flext_target_ldap._utilities import FlextTargetLdapClient
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -38,16 +35,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         def client() -> type[FlextTargetLdapClient]:
             """Return the canonical LDAP client implementation.
 
-            The client consumes ``m``, whose namespace composes the sink
-            models, so it is resolved on access rather than at module import
-            time. Consumers (and their tests) reach it here instead of
-            importing the private ``_utilities`` package.
+            Consumers (and their tests) reach it here instead of importing
+            the private ``_utilities`` package directly.
             """
-            from flext_target_ldap._utilities.client import (
-                FlextTargetLdapClient as _Client,
-            )
-
-            return _Client
+            return FlextTargetLdapClient
 
         @staticmethod
         def build_singer_catalog() -> t.TargetLdap.CatalogPayload:
