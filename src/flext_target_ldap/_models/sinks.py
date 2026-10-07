@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar, override
+from typing import TYPE_CHECKING, ClassVar, override
 
 from flext_ldap import r
 
@@ -19,6 +19,9 @@ from flext_target_ldap.constants import c
 from flext_target_ldap.protocols import p
 from flext_target_ldap.typings import t
 from flext_target_ldap.utilities import u
+
+if TYPE_CHECKING:
+    from flext_target_ldap._models import FlextTargetLdapModelsSinks as _Sinks
 
 
 class FlextTargetLdapModelsSinks:
@@ -121,7 +124,9 @@ class FlextTargetLdapModelsSinks:
                 super().__init__(target, stream_name, schema, key_properties)
                 self._target = target
                 self.client: FlextTargetLdapClient | None = None
-                self._processing_result: FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapProcessingResult = FlextTargetLdapModelsSinks.FlextTargetLdapProcessingResult()
+                self._processing_result: _Sinks.FlextTargetLdapProcessingResult = (
+                    FlextTargetLdapModelsSinks.FlextTargetLdapProcessingResult()
+                )
 
             def _apply_attribute_mapping(
                 self,
@@ -151,8 +156,8 @@ class FlextTargetLdapModelsSinks:
                         )
                 return attributes
 
+            @staticmethod
             def build_attributes(
-                self,
                 _record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes from record. Override in subclasses.
@@ -305,8 +310,8 @@ class FlextTargetLdapModelsSinks:
                             c.TargetLdap.KEY_BIND_DN,
                             c.TargetLdap.DEFAULT_BIND_DN,
                         ),
-                        c.TargetLdap.KEY_BIND_PASSWORD: self._target.settings.get(
-                            c.TargetLdap.KEY_BIND_PASSWORD,
+                        c.TargetLdap.KEY_BIND_CREDENTIAL: self._target.settings.get(
+                            c.TargetLdap.KEY_BIND_CREDENTIAL,
                             c.TargetLdap.DEFAULT_BIND_PASSWORD,
                         ),
                         c.TargetLdap.KEY_TIMEOUT: self._target.settings.get(
@@ -579,8 +584,8 @@ class FlextTargetLdapModelsSinks:
             """LDAP sink for group entries."""
 
             @override
+            @staticmethod
             def build_attributes(
-                self,
                 _record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes for group entry.
