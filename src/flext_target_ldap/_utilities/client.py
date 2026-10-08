@@ -11,10 +11,8 @@ from typing import ClassVar
 
 from flext_ldap import ldap, m, r, u
 
+from flext_core import c, p, t
 from flext_target_ldap._settings import FlextTargetLdapSettings
-from flext_target_ldap.constants import c
-from flext_target_ldap.protocols import p
-from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapClient:

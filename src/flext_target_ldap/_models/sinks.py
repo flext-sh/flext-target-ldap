@@ -11,14 +11,11 @@ from typing import TYPE_CHECKING, ClassVar, override
 
 from flext_ldap import r
 
+from flext_core import c, p, t, u
 from flext_target_ldap._models.processing_result import (
     FlextTargetLdapProcessingCounters,
 )
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from flext_target_ldap.constants import c
-from flext_target_ldap.protocols import p
-from flext_target_ldap.typings import t
-from flext_target_ldap.utilities import u
 
 if TYPE_CHECKING:
     from flext_target_ldap._models import FlextTargetLdapModelsSinks as _Sinks
