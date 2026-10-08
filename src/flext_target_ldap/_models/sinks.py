@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, ClassVar, override
+from typing import TYPE_CHECKING, override
 
 from flext_ldap import r, u
 
@@ -485,14 +485,9 @@ class FlextTargetLdapModelsSinks:
         class FlextTargetLdapUsersSink(FlextTargetLdapBaseSink):
             """LDAP sink for user entries."""
 
-            _USER_FIELD_MAP: ClassVar[t.StrMapping] = {
-                "emails": "mail",
-                "phone_numbers": "telephoneNumber",
-            }
-
             @override
+            @staticmethod
             def build_attributes(
-                self,
                 _record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes for user entry.
@@ -501,8 +496,12 @@ class FlextTargetLdapModelsSinks:
                     The resulting ``p.Result[t.Ldap.OperationAttributes]``.
                 """
                 attrs: dict[str, list[str]] = {}
+                field_map = {
+                    "emails": "mail",
+                    "phone_numbers": "telephoneNumber",
+                }
                 for k, v in _record.items():
-                    target_key = self._USER_FIELD_MAP.get(k, k)
+                    target_key = field_map.get(k, k)
                     attrs[target_key] = FlextTargetLdapClient.to_str_values(v)
                 return r[t.Ldap.OperationAttributes].ok(attrs)
 
