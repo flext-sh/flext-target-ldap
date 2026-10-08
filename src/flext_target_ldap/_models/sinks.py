@@ -252,11 +252,9 @@ class FlextTargetLdapModelsSinks:
                 )
                 if configured_classes is None:
                     return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
-                classes: t.StrSequence = (
-                    self.extract_object_classes({
-                        c.TargetLdap.KEY_OBJECT_CLASSES: configured_classes,
-                    })
-                )
+                classes: t.StrSequence = self.extract_object_classes({
+                    c.TargetLdap.KEY_OBJECT_CLASSES: configured_classes,
+                })
                 return classes
 
             def process_batch(self, context: t.TargetLdap.RecordPayload) -> None:
@@ -570,11 +568,9 @@ class FlextTargetLdapModelsSinks:
                 configured = self._target.settings.get("users_object_classes")
                 if configured is None:
                     return ["inetOrgPerson", "organizationalPerson", "person", "top"]
-                classes: t.StrSequence = (
-                    self.extract_object_classes({
-                        "object_classes": configured,
-                    })
-                )
+                classes: t.StrSequence = self.extract_object_classes({
+                    "object_classes": configured,
+                })
                 return classes
 
             @override
@@ -661,11 +657,9 @@ class FlextTargetLdapModelsSinks:
                 """
                 configured = self._target.settings.get("groups_object_classes")
                 if configured is not None:
-                    classes: t.StrSequence = (
-                        self.extract_object_classes({
-                            "object_classes": configured,
-                        })
-                    )
+                    classes: t.StrSequence = self.extract_object_classes({
+                        "object_classes": configured,
+                    })
                     return classes
                 return ["groupOfNames", "top"]
 
