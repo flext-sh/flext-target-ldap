@@ -35,7 +35,7 @@ class TestsFlextTargetLdapIntegration:
             "full_name": identifier,
             "last_name": identifier,
         }
-        sink = target_ldap.get_sink("users")
+        sink = target_ldap.resolve_sink("users")
         created = False
         setup = sink.setup_client()
         tm.ok(setup)

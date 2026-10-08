@@ -17,6 +17,14 @@ if TYPE_CHECKING:
     from tests import t
 
 
+def _update_target_settings(
+    target: m.TargetLdap.Target,
+    updates: t.TargetLdap.SettingsPayload,
+) -> None:
+    """Merge one settings update into the target's settings payload."""
+    target.settings = {**target.settings, **updates}
+
+
 @pytest.fixture
 def ldap_base_sink(ldap_target: m.TargetLdap.Target) -> m.TargetLdap.BaseSink:
     """Provide ``ldap_base_sink``.
@@ -275,12 +283,14 @@ class TestsFlextTargetLdapSinks:
         ldap_target: m.TargetLdap.Target,
     ) -> None:
         """Test users get object classes configured."""
-        ldap_target.settings = {
-            **ldap_target.settings,
-            "base_dn": "dc=example,dc=com",
-            "user_rdn_attribute": "uid",
-            "users_object_classes": ["customUser", "top"],
-        }
+        _update_target_settings(
+            ldap_target,
+            {
+                "base_dn": "dc=example,dc=com",
+                "user_rdn_attribute": "uid",
+                "users_object_classes": ["customUser", "top"],
+            },
+        )
         sink = m.TargetLdap.UsersSink(
             target=ldap_target,
             stream_name="users",
@@ -445,11 +455,13 @@ class TestsFlextTargetLdapSinks:
         ldap_target: m.TargetLdap.Target,
     ) -> None:
         """Test generic get object classes configured."""
-        ldap_target.settings = {
-            **ldap_target.settings,
-            "base_dn": "dc=example,dc=com",
-            "generic_object_classes": ["customGeneric", "top"],
-        }
+        _update_target_settings(
+            ldap_target,
+            {
+                "base_dn": "dc=example,dc=com",
+                "generic_object_classes": ["customGeneric", "top"],
+            },
+        )
         sink = m.TargetLdap.BaseSink(
             target=ldap_target,
             stream_name="generic",

@@ -51,7 +51,7 @@ class TestsFlextTargetLdapTarget:
             if not isinstance(stream_name, str) or not stream_name:
                 msg = "Singer catalog stream must expose tap_stream_id"
                 raise TypeError(msg)
-            sink = target.get_sink(stream_name)
+            sink = target.resolve_sink(stream_name)
             tm.that(sink.stream_name, eq=stream_name)
 
     @staticmethod
@@ -60,7 +60,7 @@ class TestsFlextTargetLdapTarget:
     ) -> None:
         """Test deleted record without identity fails observably."""
         target = FlextTargetLdap(settings=ldap_settings_payload)
-        sink = target.get_sink("users")
+        sink = target.resolve_sink("users")
         record: t.TargetLdap.RecordPayload = {"_sdc_deleted_at": True}
         result = sink.process_record(record, {})
         tm.fail(result)

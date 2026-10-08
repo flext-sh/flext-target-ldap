@@ -101,7 +101,7 @@ class FlextTargetLdapServiceRuntime:
         )
         normalized_schema = cls.normalize_flat_schema(schema)
         sink_class: type[FlextTargetLdapModelsSinks.FlextTargetLdapSink] = (
-            runtime_target.get_sink_class(
+            runtime_target.resolve_sink_class(
                 stream_name,
             )
         )
