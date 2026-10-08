@@ -7,12 +7,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_target_ldap import c, t
+from flext_target_ldap import t
 from flext_target_ldap._utilities import FlextTargetLdapClient
 
 
@@ -94,51 +92,6 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
                     },
                 ],
             })
-
-        class TypeConversion:
-            """Type coercion utilities for Singer settings to typed Python values."""
-
-            @staticmethod
-            def extract_attribute_mapping(
-                settings: t.TargetLdap.SettingsPayload,
-            ) -> t.StrMapping:
-                """Extract attribute mapping from settings.
-
-                Returns:
-                    The resulting ``t.StrMapping``.
-
-                Raises:
-                    TypeError: If Expected Mapping for 'attribute_mapping', got.
-                """
-                raw = settings.get(c.TargetLdap.KEY_ATTRIBUTE_MAPPING, {})
-                if isinstance(raw, Mapping):
-                    normalized_mapping: t.MutableMappingKV[str, str] = {}
-                    for key, value in raw.items():
-                        normalized_key = key
-                        normalized_value = str(value)
-                        normalized_mapping[normalized_key] = normalized_value
-                    return normalized_mapping
-                msg = (
-                    f"Expected Mapping for 'attribute_mapping', "
-                    f"got {type(raw).__name__}: {raw!r}"
-                )
-                raise TypeError(msg)
-
-            @staticmethod
-            def extract_object_classes(
-                settings: t.TargetLdap.SettingsPayload,
-            ) -> t.StrSequence:
-                """Extract object classes from settings.
-
-                Returns:
-                    The resulting ``t.StrSequence``.
-                """
-                raw = settings.get(c.TargetLdap.KEY_OBJECT_CLASSES)
-                if isinstance(raw, list):
-                    return [str(object_class) for object_class in raw if object_class]
-                if isinstance(raw, str):
-                    return [raw]
-                return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
 
 
 u = FlextTargetLdapUtilities

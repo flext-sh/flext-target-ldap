@@ -7,11 +7,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, ClassVar, override
 
-from flext_ldap import r
+from flext_ldap import r, u
 
-from flext_core import c, p, t, u
+from flext_target_ldap import c, p, t
 from flext_target_ldap._models.processing_result import (
     FlextTargetLdapProcessingCounters,
 )
@@ -125,6 +126,43 @@ class FlextTargetLdapModelsSinks:
                     FlextTargetLdapModelsSinks.FlextTargetLdapProcessingResult()
                 )
 
+            @staticmethod
+            def extract_attribute_mapping(
+                settings: t.TargetLdap.SettingsPayload,
+            ) -> t.StrMapping:
+                """Extract the configured Singer-to-LDAP attribute mapping.
+
+                Returns:
+                    The resulting ``t.StrMapping``.
+
+                Raises:
+                    TypeError: If the configured mapping is not a Mapping.
+                """
+                raw = settings.get(c.TargetLdap.KEY_ATTRIBUTE_MAPPING, {})
+                if isinstance(raw, Mapping):
+                    return {key: str(value) for key, value in raw.items()}
+                msg = (
+                    f"Expected Mapping for 'attribute_mapping', "
+                    f"got {type(raw).__name__}: {raw!r}"
+                )
+                raise TypeError(msg)
+
+            @staticmethod
+            def extract_object_classes(
+                settings: t.TargetLdap.SettingsPayload,
+            ) -> t.StrSequence:
+                """Extract configured object classes.
+
+                Returns:
+                    The resulting ``t.StrSequence``.
+                """
+                raw = settings.get(c.TargetLdap.KEY_OBJECT_CLASSES)
+                if isinstance(raw, list):
+                    return [str(object_class) for object_class in raw if object_class]
+                if isinstance(raw, str):
+                    return [raw]
+                return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
+
             def _apply_attribute_mapping(
                 self,
                 attributes: dict[str, list[str]],
@@ -142,7 +180,7 @@ class FlextTargetLdapModelsSinks:
                         attributes[ldap_attr] = FlextTargetLdapClient.to_str_values(
                             value,
                         )
-                mapping = u.TargetLdap.TypeConversion.extract_attribute_mapping(
+                mapping = self.extract_attribute_mapping(
                     self._target.settings,
                 )
                 for singer_field, mapped_attr in mapping.items():
@@ -215,7 +253,7 @@ class FlextTargetLdapModelsSinks:
                 if configured_classes is None:
                     return [c.TargetLdap.DEFAULT_OBJECT_CLASS]
                 classes: t.StrSequence = (
-                    u.TargetLdap.TypeConversion.extract_object_classes({
+                    self.extract_object_classes({
                         c.TargetLdap.KEY_OBJECT_CLASSES: configured_classes,
                     })
                 )
@@ -498,7 +536,7 @@ class FlextTargetLdapModelsSinks:
                     ["inetOrgPerson", "person"],
                 )
                 object_classes = list(
-                    u.TargetLdap.TypeConversion.extract_object_classes({
+                    self.extract_object_classes({
                         "object_classes": configured_object_classes,
                     }),
                 )
@@ -533,7 +571,7 @@ class FlextTargetLdapModelsSinks:
                 if configured is None:
                     return ["inetOrgPerson", "organizationalPerson", "person", "top"]
                 classes: t.StrSequence = (
-                    u.TargetLdap.TypeConversion.extract_object_classes({
+                    self.extract_object_classes({
                         "object_classes": configured,
                     })
                 )
@@ -624,7 +662,7 @@ class FlextTargetLdapModelsSinks:
                 configured = self._target.settings.get("groups_object_classes")
                 if configured is not None:
                     classes: t.StrSequence = (
-                        u.TargetLdap.TypeConversion.extract_object_classes({
+                        self.extract_object_classes({
                             "object_classes": configured,
                         })
                     )
@@ -681,7 +719,7 @@ class FlextTargetLdapModelsSinks:
                     ["groupOfNames"],
                 )
                 object_classes = list(
-                    u.TargetLdap.TypeConversion.extract_object_classes({
+                    self.extract_object_classes({
                         "object_classes": configured_object_classes,
                     }),
                 )
@@ -749,7 +787,7 @@ class FlextTargetLdapModelsSinks:
                     ["organizationalUnit"],
                 )
                 object_classes = list(
-                    u.TargetLdap.TypeConversion.extract_object_classes({
+                    self.extract_object_classes({
                         "object_classes": configured_object_classes,
                     }),
                 )
