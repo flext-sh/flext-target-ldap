@@ -13,6 +13,7 @@ import pytest
 from flext_tests import FlextTestsDocker, tm
 
 from flext_target_ldap import FlextTargetLdap, settings
+from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks as Sinks
 from tests import c, m, p, t, u
 
 
@@ -120,10 +121,10 @@ def target_ldap(
 @pytest.fixture
 def ldap_target(
     ldap_settings_payload: t.TargetLdap.SettingsPayload,
-) -> m.TargetLdap.Target:
+) -> Sinks.FlextTargetLdapModels.Target:
     """Build the public target model from production settings.
 
     Returns:
-        The resulting ``m.TargetLdap.Target``.
+        The resulting ``Sinks.FlextTargetLdapModels.Target``.
     """
-    return m.TargetLdap.Target(settings=dict(ldap_settings_payload))
+    return Sinks.FlextTargetLdapModels.Target(settings=dict(ldap_settings_payload))
