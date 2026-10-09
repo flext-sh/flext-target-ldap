@@ -17,6 +17,10 @@ from flext_target_ldap import FlextTargetLdap, p, t
 if TYPE_CHECKING:
     from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 
+    type FlextTargetLdapRuntimeSink = (
+        FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapSink
+    )
+
 
 class FlextTargetLdapServiceRuntime:
     """Service-runtime adapters used by the target-ldap facade."""
@@ -31,13 +35,15 @@ class FlextTargetLdapServiceRuntime:
 
         name = "target-ldap-sink"
 
-        _runtime_sink: FlextTargetLdapModelsSinks.FlextTargetLdapSink
+        _runtime_sink: (
+            FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapSink
+        )
 
         @classmethod
         def create(
             cls,
             *,
-            runtime_sink: FlextTargetLdapModelsSinks.FlextTargetLdapSink,
+            runtime_sink: FlextTargetLdapRuntimeSink,
             target: m.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.TargetLdap.MutableSchemaPayload,
@@ -100,10 +106,10 @@ class FlextTargetLdapServiceRuntime:
             validate_config=False,
         )
         normalized_schema = cls.normalize_flat_schema(schema)
-        sink_class: type[FlextTargetLdapModelsSinks.FlextTargetLdapSink] = (
-            runtime_target.resolve_sink_class(
-                stream_name,
-            )
+        sink_class: type[
+            FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapSink
+        ] = runtime_target.resolve_sink_class(
+            stream_name,
         )
         runtime_sink = sink_class(
             target=runtime_target,

@@ -22,7 +22,9 @@ from flext_target_ldap._utilities.client import FlextTargetLdapClient
 from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
 
 
-class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
+class FlextTargetLdap(
+    FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapTarget,
+):
     """LDAP target facade for Singer using flext-core patterns."""
 
     name = "target-ldap"
@@ -63,7 +65,7 @@ class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
     def resolve_sink(
         self,
         stream_name: str,
-    ) -> FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink:
+    ) -> FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapBaseSink:
         """Return an instantiated sink for the given stream name."""
         sink_class = self.resolve_sink_class(stream_name)
         return sink_class(
@@ -76,13 +78,17 @@ class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
     def resolve_sink_class(
         self,
         stream_name: str,
-    ) -> type[FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink]:
+    ) -> type[FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapBaseSink]:
         """Return the appropriate sink class for the stream."""
         sink_mapping = {
-            "users": FlextTargetLdapModelsSinks.FlextTargetLdapUsersSink,
-            "groups": FlextTargetLdapModelsSinks.FlextTargetLdapGroupsSink,
+            "users": (
+                FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapUsersSink
+            ),
+            "groups": (
+                FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapGroupsSink
+            ),
             "organizational_units": (
-                FlextTargetLdapModelsSinks.FlextTargetLdapOrganizationalUnitsSink
+                FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapOrganizationalUnitsSink
             ),
         }
         sink_class = sink_mapping.get(stream_name)
@@ -91,7 +97,9 @@ class FlextTargetLdap(FlextTargetLdapModelsSinks.FlextTargetLdapTarget):
                 "No specific sink found for stream '%s', using base sink",
                 stream_name,
             )
-            return FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink
+            return (
+                FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapBaseSink
+            )
         self.logger.info(
             "Using %s for stream '%s'",
             sink_class.__name__,
