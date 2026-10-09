@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from flext_ldap import r, u
 
@@ -17,9 +17,6 @@ from flext_target_ldap._models.processing_result import (
     FlextTargetLdapProcessingCounters,
 )
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
-
-if TYPE_CHECKING:
-    from flext_target_ldap._models import FlextTargetLdapModelsSinks as _Sinks
 
 
 class FlextTargetLdapModelsSinks:
@@ -122,8 +119,9 @@ class FlextTargetLdapModelsSinks:
                 super().__init__(target, stream_name, schema, key_properties)
                 self._target = target
                 self.client: FlextTargetLdapClient | None = None
-                self._processing_result: _Sinks.FlextTargetLdapProcessingResult = (
-                    FlextTargetLdapModelsSinks.FlextTargetLdapProcessingResult()
+                result_models = FlextTargetLdapModelsSinks.FlextTargetLdapModels
+                self._processing_result = (
+                    result_models.FlextTargetLdapProcessingResult()
                 )
 
             @staticmethod
