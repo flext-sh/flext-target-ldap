@@ -18,12 +18,14 @@ if TYPE_CHECKING:
     from flext_target_ldap import t
 
 
-class FlextTargetLdapConstants(
-    FlextMeltanoConstants,
-    FlextLdapConstants,
-    FlextTargetLdapConstantsBase,
-):
-    """LDAP target constant facade."""
+class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
+    """LDAP target constant facade.
+
+    The domain constants live in the nested ``TargetLdap`` namespace, which
+    derives ``FlextTargetLdapConstantsBase`` directly; the facade itself does
+    not re-derive that base, so its ``Final`` members cannot collide with the
+    inherited core chain under MRO.
+    """
 
     class TargetLdap(FlextTargetLdapConstantsBase):
         """LDAP target constant namespace."""
