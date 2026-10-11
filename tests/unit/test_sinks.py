@@ -9,9 +9,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_tests import tm
 
 from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks as Sinks
+from tests import tm
 
 if TYPE_CHECKING:
     from tests import t

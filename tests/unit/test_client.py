@@ -10,10 +10,9 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-from flext_tests import tm
 
 from flext_target_ldap import settings
-from tests import p, t
+from tests import p, t, tm
 
 
 class TestsFlextTargetLdapClient:
