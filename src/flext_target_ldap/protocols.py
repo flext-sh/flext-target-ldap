@@ -23,6 +23,42 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
         """Target LDAP domain protocol namespace."""
 
         @runtime_checkable
+        class Sink(Protocol):
+            """Public LDAP sink transformation and validation contract."""
+
+            stream_name: str
+            schema: t.TargetLdap.SchemaPayload
+            key_properties: t.StrSequence
+
+            def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.ResultView[str]:
+                """Build the entry DN from a Singer record."""
+                ...
+
+            def build_attributes(
+                self,
+                record: t.TargetLdap.RecordPayload,
+                /,
+            ) -> p.ResultView[t.Ldap.OperationAttributes]:
+                """Build LDAP operation attributes from a Singer record."""
+                ...
+
+            def resolve_object_classes(
+                self,
+                record: t.TargetLdap.RecordPayload,
+            ) -> t.StrSequence:
+                """Resolve the declared LDAP object classes."""
+                ...
+
+            def validate_entry(
+                self,
+                dn: str,
+                attributes: t.Ldap.OperationAttributes,
+                object_classes: t.StrSequence,
+            ) -> p.ResultView[bool]:
+                """Validate one LDAP entry before writing it."""
+                ...
+
+        @runtime_checkable
         class Client(Protocol):
             """Public contract for the target LDAP client facade."""
 

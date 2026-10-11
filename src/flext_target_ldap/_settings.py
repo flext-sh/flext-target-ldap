@@ -75,7 +75,7 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
             m.Field(
                 description="Source field -> LDAP attribute map",
             ),
-        ] = m.Field(default_factory=dict)
+        ] = m.Field(default_factory=dict[str, str])
         object_classes: Annotated[
             list[str], m.Field(description="LDAP object classes")
         ] = m.Field(default_factory=lambda: ["top"])
