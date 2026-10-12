@@ -12,9 +12,8 @@ from __future__ import annotations
 
 from typing import Annotated, Self
 
-from flext_meltano import FlextMeltanoConfig
+from flext_meltano import FlextMeltanoConfig, m
 
-from flext_target_ldap import m
 from flext_target_ldap._models._target_ldap_namespace import (
     FlextTargetLdapModelsTargetLdapNamespace,
 )
