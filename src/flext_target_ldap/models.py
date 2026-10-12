@@ -34,7 +34,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     Integrates with flext-core patterns for enterprise LDAP data loading.
     """
 
-    class TargetLdap:
+    class TargetLdap(FlextTargetLdapProcessingCounters, FlextTargetLdapModelsSinks):
         """TargetLdap domain namespace."""
 
         # Sink and target implementations are part of the public model
