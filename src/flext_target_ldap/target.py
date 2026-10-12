@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import FlextTargetLdap
+from flext_target_ldap.api import FlextTargetLdap
 
 
 def main() -> None:

@@ -19,6 +19,7 @@ from flext_core import FlextContainer
 from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
 from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
+from flext_target_ldap._utilities.service_runtime import FlextTargetLdapServiceRuntime
 from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
 
 
@@ -106,6 +107,41 @@ class FlextTargetLdap(
             stream_name,
         )
         return sink_class
+
+    def create_sink(
+        self,
+        stream_name: str,
+        schema: t.JsonMapping,
+    ) -> p.Meltano.SingerDrainSink:
+        """Create the service-level Singer sink for one stream.
+
+        The facade owns the sink creation (ADR-006); the runtime helper only
+        builds the LDAP runtime sink and adapter from the resolved target.
+
+        Returns:
+            The resulting ``p.Meltano.SingerDrainSink``.
+        """
+        normalized_target_config = u.normalize_to_json_mapping(self.settings)
+        normalized_schema = FlextTargetLdapServiceRuntime.normalize_flat_schema(
+            schema,
+        )
+        sink_class = self.resolve_sink_class(stream_name)
+        runtime_sink = sink_class(
+            target=self,
+            stream_name=stream_name,
+            schema=normalized_schema,
+            key_properties=[],
+        )
+        return FlextTargetLdapServiceRuntime.Sink.create(
+            runtime_sink=runtime_sink,
+            target=FlextTargetLdapServiceRuntime.Target(
+                config=t.json_dict_adapter().validate_python(normalized_target_config),
+                validate_config=False,
+            ),
+            stream_name=stream_name,
+            schema=normalized_schema,
+            key_properties=[],
+        )
 
     def setup(self) -> None:
         """Set up the LDAP target."""

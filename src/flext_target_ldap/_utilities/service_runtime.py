@@ -10,9 +10,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, override
 
-from flext_meltano import m, u
+from flext_meltano import u
 
-from flext_target_ldap import FlextTargetLdap, p, t
+from flext_target_ldap import m, t
 
 if TYPE_CHECKING:
     from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
@@ -86,47 +86,6 @@ class FlextTargetLdapServiceRuntime:
             if result.failure:
                 msg = result.error or "LDAP runtime sink rejected the record"
                 raise RuntimeError(msg)
-
-    @classmethod
-    def create_sink(
-        cls,
-        *,
-        stream_name: str,
-        schema: t.FlatContainerMapping,
-        target_config: t.JsonMapping,
-    ) -> p.Meltano.SingerDrainSink:
-        """Create the service-level Singer sink adapter.
-
-        Returns:
-            The resulting ``p.Meltano.SingerDrainSink``.
-        """
-        normalized_target_config = u.normalize_to_json_mapping(target_config)
-        runtime_target = FlextTargetLdap(
-            settings=normalized_target_config,
-            validate_config=False,
-        )
-        normalized_schema = cls.normalize_flat_schema(schema)
-        sink_class: type[
-            FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapSink
-        ] = runtime_target.resolve_sink_class(
-            stream_name,
-        )
-        runtime_sink = sink_class(
-            target=runtime_target,
-            stream_name=stream_name,
-            schema=normalized_schema,
-            key_properties=[],
-        )
-        return cls.Sink.create(
-            runtime_sink=runtime_sink,
-            target=cls.Target(
-                config=t.json_dict_adapter().validate_python(normalized_target_config),
-                validate_config=False,
-            ),
-            stream_name=stream_name,
-            schema=normalized_schema,
-            key_properties=[],
-        )
 
     @staticmethod
     def normalize_flat_schema(
