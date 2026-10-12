@@ -15,7 +15,7 @@ from flext_meltano import u
 from flext_target_ldap import m, t
 
 if TYPE_CHECKING:
-    from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
+    from flext_target_ldap._models import FlextTargetLdapModelsSinks
 
     type FlextTargetLdapRuntimeSink = (
         FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapSink
@@ -57,7 +57,7 @@ class FlextTargetLdapServiceRuntime:
             Returns:
                 The resulting ``FlextTargetLdapServiceRuntime.Sink``.
             """
-            validated_schema = t.json_dict_adapter().validate_python(schema)
+            validated_schema = u.json_dict_adapter().validate_python(schema)
             bound_sink = cls(
                 target=target,
                 stream_name=stream_name,

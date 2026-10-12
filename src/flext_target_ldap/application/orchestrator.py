@@ -36,13 +36,13 @@ class FlextTargetLdapOrchestrator:
         """
         if isinstance(settings, FlextTargetLdapSettings):
             self._typed_config = settings
-            self.settings = t.json_dict_adapter().validate_python(
+            self.settings = u.json_dict_adapter().validate_python(
                 settings.model_dump(mode="python"),
             )
         else:
             self._typed_config = None
             empty_settings: t.TargetLdap.SettingsPayload = {}
-            self.settings = t.json_dict_adapter().validate_python(
+            self.settings = u.json_dict_adapter().validate_python(
                 settings if settings is not None else empty_settings,
             )
         logger.debug("Initialized LDAP target orchestrator")

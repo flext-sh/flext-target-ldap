@@ -13,10 +13,8 @@ from typing import override
 from flext_ldap import r, u
 
 from flext_target_ldap import c, p, t
-from flext_target_ldap._models.processing_result import (
-    FlextTargetLdapProcessingCounters,
-)
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
+from flext_target_ldap._models import FlextTargetLdapProcessingCounters
+from flext_target_ldap._utilities import FlextTargetLdapClient
 
 
 class FlextTargetLdapModelsSinks:

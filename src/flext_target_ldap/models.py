@@ -18,10 +18,10 @@ from flext_meltano import FlextMeltanoModels
 
 from flext_core import u
 from flext_target_ldap import t
-from flext_target_ldap._models.processing_result import (
+from flext_target_ldap._models import (
+    FlextTargetLdapModelsSinks,
     FlextTargetLdapProcessingCounters,
 )
-from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 
 if TYPE_CHECKING:
     from collections.abc import MutableSequence

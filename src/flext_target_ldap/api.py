@@ -17,10 +17,12 @@ from typing import ClassVar, override
 
 from flext_core import FlextContainer
 from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
-from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from flext_target_ldap._utilities.service_runtime import FlextTargetLdapServiceRuntime
-from flext_target_ldap.application.orchestrator import FlextTargetLdapOrchestrator
+from flext_target_ldap._models import FlextTargetLdapModelsSinks
+from flext_target_ldap._utilities import (
+    FlextTargetLdapClient,
+    FlextTargetLdapServiceRuntime,
+)
+from flext_target_ldap.application import FlextTargetLdapOrchestrator
 
 
 class FlextTargetLdap(
@@ -135,7 +137,7 @@ class FlextTargetLdap(
         return FlextTargetLdapServiceRuntime.Sink.create(
             runtime_sink=runtime_sink,
             target=FlextTargetLdapServiceRuntime.Target(
-                config=t.json_dict_adapter().validate_python(normalized_target_config),
+                config=u.json_dict_adapter().validate_python(normalized_target_config),
                 validate_config=False,
             ),
             stream_name=stream_name,
