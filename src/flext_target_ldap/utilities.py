@@ -28,7 +28,11 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
         c.DEFAULT_SIZE
     """
 
-    class TargetLdap(FlextTargetLdapClient, FlextTargetLdapServiceRuntime, FlextTargetLdapUtilitiesSettings):
+    class TargetLdap(
+        FlextTargetLdapClient,
+        FlextTargetLdapServiceRuntime,
+        FlextTargetLdapUtilitiesSettings,
+    ):
         """Singer protocol utilities for target operations."""
 
         @staticmethod
