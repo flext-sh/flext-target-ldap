@@ -11,11 +11,9 @@ from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
 from flext_target_ldap import t
-from flext_target_ldap._utilities import (
-    FlextTargetLdapClient,
-    FlextTargetLdapServiceRuntime,
-    FlextTargetLdapUtilitiesSettings,
-)
+from flext_target_ldap._utilities.client import FlextTargetLdapClient
+from flext_target_ldap._utilities.service_runtime import FlextTargetLdapServiceRuntime
+from flext_target_ldap._utilities.settings import FlextTargetLdapUtilitiesSettings
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):

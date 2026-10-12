@@ -49,13 +49,13 @@ name = "Marlon Santa Cruz"
 email = "team@flext.dev"
 name = "FLEXT Team"
 
+[project.scripts]
+flext-target-ldap = "flext_target_ldap.target:main"
+
 [project.urls]
 Documentation = "https://github.com/flext-sh/flext-target-ldap/blob/main/README.md"
 Homepage = "https://github.com/flext-sh/flext-target-ldap"
 Repository = "https://github.com/flext-sh/flext-target-ldap"
-
-[project.scripts]
-flext-target-ldap = "flext_target_ldap.target:main"
 
 [dependency-groups]
 codegen = [
@@ -457,7 +457,6 @@ runtime-evaluated-base-classes = [
   "flext_meltano.FlextMeltanoSettings",
   "flext_meltano.m.BaseModel",
   "flext_target_ldap.FlextTargetLdapSettings",
-  "flext_target_ldap.m.BaseModel",
   "flext_tests.FlextTestsServiceBase",
   "flext_tests.FlextTestsSettings",
   "pydantic.BaseModel",

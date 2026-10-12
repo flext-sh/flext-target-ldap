@@ -17,11 +17,11 @@ from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
 from flext_target_ldap import t
-from flext_target_ldap._models import (
-    FlextTargetLdapConfigModels,
-    FlextTargetLdapModelsSinks,
+from flext_target_ldap._models.config import FlextTargetLdapConfigModels
+from flext_target_ldap._models.processing_result import (
     FlextTargetLdapProcessingCounters,
 )
+from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
