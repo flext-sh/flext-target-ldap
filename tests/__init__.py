@@ -77,7 +77,6 @@ install_lazy_exports(
         "tk": "flext_tests",
         "tm": "flext_tests",
         "u": ".utilities",
-        "unit": ".unit",
         "x": "flext_target_ldap",
     }),
     public_exports=__all__,
