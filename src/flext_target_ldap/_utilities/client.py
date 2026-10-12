@@ -35,7 +35,7 @@ class FlextTargetLdapClient:
         attributes: t.Ldap.OperationAttributes,
         object_classes: t.StrSequence | None = None,
     ) -> m.Ldif.Entry:
-        entry_attributes: dict[str, t.StrSequence] = {
+        entry_attributes: t.MutableMappingKV[str, t.StrSequence] = {
             key: FlextTargetLdapClient.to_str_values(value)
             for key, value in attributes.items()
         }
@@ -56,8 +56,10 @@ class FlextTargetLdapClient:
     @staticmethod
     def _build_modify_changes(
         changes: t.Ldap.OperationAttributes,
-    ) -> dict[str, t.SequenceOf[tuple[int, t.StrSequence]]]:
-        built_changes: dict[str, t.SequenceOf[tuple[int, t.StrSequence]]] = {
+    ) -> t.MutableMappingKV[str, t.SequenceOf[tuple[int, t.StrSequence]]]:
+        built_changes: t.MutableMappingKV[
+            str, t.SequenceOf[tuple[int, t.StrSequence]]
+        ] = {
             key: [
                 (
                     c.Ldap.ModifyOperation.REPLACE,

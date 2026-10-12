@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoSettings, m
+from flext_meltano import FlextMeltanoSettings, m, t
 
 
 class FlextTargetLdapSettings(FlextMeltanoSettings):
@@ -71,7 +71,7 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
             ),
         ] = False
         attribute_mapping: Annotated[
-            dict[str, str],
+            t.StrMapping,
             m.Field(
                 description="Source field -> LDAP attribute map",
             ),

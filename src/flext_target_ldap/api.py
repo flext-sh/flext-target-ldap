@@ -223,7 +223,7 @@ class FlextTargetLdap(
         """Process a RECORD message."""
         dn_value = record.get("dn")
         dn_text = "" if dn_value is None else str(dn_value)
-        attributes: dict[str, list[str]] = {
+        attributes: t.MutableStrSequenceMapping = {
             key: api.to_str_values(value)
             for key, value in record.items()
             if key not in {"dn", "_sdc_deleted_at"}
@@ -350,7 +350,4 @@ class FlextTargetLdap(
             raise
 
 
-target_ldap: FlextTargetLdap = FlextTargetLdap()
-"""Process-wide FlextTargetLdap facade singleton resolved from the service container."""
-
-__all__: list[str] = ["FlextTargetLdap", "target_ldap"]
+__all__: list[str] = ["FlextTargetLdap"]

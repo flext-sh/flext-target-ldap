@@ -161,14 +161,14 @@ class FlextTargetLdapModelsSinks:
 
             def _apply_attribute_mapping(
                 self,
-                attributes: dict[str, list[str]],
+                attributes: t.MutableStrSequenceMapping,
                 record: t.TargetLdap.RecordPayload,
                 field_mapping: t.MappingKV[str, str],
-            ) -> dict[str, list[str]]:
+            ) -> t.MutableStrSequenceMapping:
                 """Apply the fixed and configured field mappings onto ``attributes``.
 
                 Returns:
-                    The resulting ``dict[str, list[str]]``.
+                    The resulting ``t.MutableStrSequenceMapping``.
                 """
                 for singer_field, ldap_attr in field_mapping.items():
                     value = record.get(singer_field)
@@ -378,7 +378,7 @@ class FlextTargetLdapModelsSinks:
                 *,
                 label: str,
                 dn: str,
-                attributes: dict[str, list[str]],
+                attributes: t.MutableStrSequenceMapping,
                 default_object_classes: t.StrSequence,
             ) -> p.Result[bool]:
                 """Split object classes from attributes and persist one entry.
@@ -389,7 +389,7 @@ class FlextTargetLdapModelsSinks:
                 object_classes = FlextTargetLdapClient.to_str_values(
                     attributes.get("objectClass", list(default_object_classes)),
                 )
-                attributes_dict: dict[str, list[str]] = {
+                attributes_dict: t.MutableStrSequenceMapping = {
                     key: FlextTargetLdapClient.to_str_values(value)
                     for key, value in attributes.items()
                     if key != "objectClass"
@@ -406,7 +406,7 @@ class FlextTargetLdapModelsSinks:
                 *,
                 label: str,
                 dn: str,
-                attributes_dict: dict[str, list[str]],
+                attributes_dict: t.MutableStrSequenceMapping,
                 object_classes: t.StrSequence | None = None,
             ) -> p.Result[bool]:
                 """Add an LDAP entry; on conflict modify it when configured to do so.
@@ -491,7 +491,7 @@ class FlextTargetLdapModelsSinks:
                 Returns:
                     The resulting ``p.Result[t.Ldap.OperationAttributes]``.
                 """
-                attrs: dict[str, list[str]] = {}
+                attrs: t.MutableStrSequenceMapping = {}
                 field_map = {
                     "emails": "mail",
                     "phone_numbers": "telephoneNumber",
@@ -518,11 +518,11 @@ class FlextTargetLdapModelsSinks:
             def build_user_attributes(
                 self,
                 record: t.TargetLdap.RecordPayload,
-            ) -> dict[str, list[str]]:
+            ) -> t.MutableStrSequenceMapping:
                 """Build LDAP attributes for user entry.
 
                 Returns:
-                    The resulting ``dict[str, list[str]]``.
+                    The resulting ``t.MutableStrSequenceMapping``.
                 """
                 configured_object_classes = self._target.settings.get(
                     "object_classes",
@@ -537,7 +537,9 @@ class FlextTargetLdapModelsSinks:
                     object_classes.append("inetOrgPerson")
                 if "person" not in object_classes:
                     object_classes.append("person")
-                attributes: dict[str, list[str]] = {"objectClass": object_classes}
+                attributes: t.MutableStrSequenceMapping = {
+                    "objectClass": object_classes
+                }
                 field_mapping = {
                     "username": "uid",
                     "email": "mail",
@@ -619,7 +621,7 @@ class FlextTargetLdapModelsSinks:
                 Returns:
                     The resulting ``p.Result[t.Ldap.OperationAttributes]``.
                 """
-                attrs: dict[str, list[str]] = {}
+                attrs: t.MutableStrSequenceMapping = {}
                 field_map = {"members": "member"}
                 for k, v in _record.items():
                     target_key = field_map.get(k, k)
@@ -697,11 +699,11 @@ class FlextTargetLdapModelsSinks:
             def _build_group_attributes(
                 self,
                 record: t.TargetLdap.RecordPayload,
-            ) -> dict[str, list[str]]:
+            ) -> t.MutableStrSequenceMapping:
                 """Build LDAP attributes for group entry.
 
                 Returns:
-                    The resulting ``dict[str, list[str]]``.
+                    The resulting ``t.MutableStrSequenceMapping``.
                 """
                 configured_object_classes = self._target.settings.get(
                     "group_object_classes",
@@ -714,7 +716,9 @@ class FlextTargetLdapModelsSinks:
                 )
                 if "groupOfNames" not in object_classes:
                     object_classes.append("groupOfNames")
-                attributes: dict[str, list[str]] = {"objectClass": object_classes}
+                attributes: t.MutableStrSequenceMapping = {
+                    "objectClass": object_classes
+                }
                 field_mapping = {
                     "name": "cn",
                     "description": "description",
@@ -744,7 +748,7 @@ class FlextTargetLdapModelsSinks:
                         return r[bool].fail("No OU name found in record")
                     base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
                     attributes = self._build_ou_attributes(_record)
-                    attributes_dict: dict[str, list[str]] = {
+                    attributes_dict: t.MutableStrSequenceMapping = {
                         key: FlextTargetLdapClient.to_str_values(value)
                         for key, value in attributes.items()
                     }
@@ -765,11 +769,11 @@ class FlextTargetLdapModelsSinks:
             def _build_ou_attributes(
                 self,
                 record: t.TargetLdap.RecordPayload,
-            ) -> dict[str, list[str]]:
+            ) -> t.MutableStrSequenceMapping:
                 """Build LDAP attributes for OU entry.
 
                 Returns:
-                    The resulting ``dict[str, list[str]]``.
+                    The resulting ``t.MutableStrSequenceMapping``.
                 """
                 configured_object_classes = self._target.settings.get(
                     "object_classes",
@@ -782,27 +786,39 @@ class FlextTargetLdapModelsSinks:
                 )
                 if "organizationalUnit" not in object_classes:
                     object_classes.append("organizationalUnit")
-                attributes: dict[str, list[str]] = {"objectClass": object_classes}
+                attributes: t.MutableStrSequenceMapping = {
+                    "objectClass": object_classes
+                }
                 field_mapping = {"name": "ou", "description": "description"}
                 return self._apply_attribute_mapping(attributes, record, field_mapping)
 
-    FlextTargetLdapSink = FlextTargetLdapModels.FlextTargetLdapSink
+    FlextTargetLdapSink: type[FlextTargetLdapModels.FlextTargetLdapSink] = (
+        FlextTargetLdapModels.FlextTargetLdapSink
+    )
 
-    FlextTargetLdapTarget = FlextTargetLdapModels.FlextTargetLdapTarget
+    FlextTargetLdapTarget: type[FlextTargetLdapModels.FlextTargetLdapTarget] = (
+        FlextTargetLdapModels.FlextTargetLdapTarget
+    )
 
-    FlextTargetLdapProcessingResult = (
+    FlextTargetLdapProcessingResult: type[
         FlextTargetLdapModels.FlextTargetLdapProcessingResult
+    ] = FlextTargetLdapModels.FlextTargetLdapProcessingResult
+
+    FlextTargetLdapBaseSink: type[FlextTargetLdapModels.FlextTargetLdapBaseSink] = (
+        FlextTargetLdapModels.FlextTargetLdapBaseSink
     )
 
-    FlextTargetLdapBaseSink = FlextTargetLdapModels.FlextTargetLdapBaseSink
+    FlextTargetLdapUsersSink: type[FlextTargetLdapModels.FlextTargetLdapUsersSink] = (
+        FlextTargetLdapModels.FlextTargetLdapUsersSink
+    )
 
-    FlextTargetLdapUsersSink = FlextTargetLdapModels.FlextTargetLdapUsersSink
+    FlextTargetLdapGroupsSink: type[FlextTargetLdapModels.FlextTargetLdapGroupsSink] = (
+        FlextTargetLdapModels.FlextTargetLdapGroupsSink
+    )
 
-    FlextTargetLdapGroupsSink = FlextTargetLdapModels.FlextTargetLdapGroupsSink
-
-    FlextTargetLdapOrganizationalUnitsSink = (
+    FlextTargetLdapOrganizationalUnitsSink: type[
         FlextTargetLdapModels.FlextTargetLdapOrganizationalUnitsSink
-    )
+    ] = FlextTargetLdapModels.FlextTargetLdapOrganizationalUnitsSink
 
 
 __all__: t.StrSequence = ("FlextTargetLdapModelsSinks",)
