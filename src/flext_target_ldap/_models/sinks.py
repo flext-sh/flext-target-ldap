@@ -51,7 +51,8 @@ class FlextTargetLdapModelsSinks:
                 """Process a record using the target.
 
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of processing the record.
+
                 """
                 return u.guard_result(
                     lambda: self.target.process_record(_record, context),
@@ -80,8 +81,13 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Process a record with the concrete target runtime.
 
+                Args:
+                    _record: Singer record payload to process.
+                    context: Singer record context metadata.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    A failure result; the base target never processes records.
+
                 """
                 context_keys = tuple(sorted(key for key in context))
                 return r[bool].fail(
@@ -128,11 +134,15 @@ class FlextTargetLdapModelsSinks:
             ) -> t.StrMapping:
                 """Extract the configured Singer-to-LDAP attribute mapping.
 
+                Args:
+                    settings: Flat target settings payload.
+
                 Returns:
-                    The resulting ``t.StrMapping``.
+                    The configured attribute mapping keyed by Singer field.
 
                 Raises:
                     TypeError: If the configured mapping is not a Mapping.
+
                 """
                 raw = settings.get(c.TargetLdap.KEY_ATTRIBUTE_MAPPING, {})
                 if isinstance(raw, Mapping):
@@ -149,8 +159,14 @@ class FlextTargetLdapModelsSinks:
             ) -> t.StrSequence:
                 """Extract configured object classes.
 
+                Args:
+                    settings: Flat target settings payload holding the
+                        ``object_classes`` entry.
+
                 Returns:
-                    The resulting ``t.StrSequence``.
+                    The configured object classes, the single configured
+                    class, or the default object class.
+
                 """
                 raw = settings.get(c.TargetLdap.KEY_OBJECT_CLASSES)
                 if isinstance(raw, list):
@@ -167,8 +183,15 @@ class FlextTargetLdapModelsSinks:
             ) -> t.MutableStrSequenceMapping:
                 """Apply the fixed and configured field mappings onto ``attributes``.
 
+                Args:
+                    attributes: Attribute mapping to mutate in place.
+                    record: Singer record supplying the source values.
+                    field_mapping: Fixed Singer-to-LDAP field mapping for
+                        the sink type.
+
                 Returns:
-                    The resulting ``t.MutableStrSequenceMapping``.
+                    The updated attribute mapping.
+
                 """
                 for singer_field, ldap_attr in field_mapping.items():
                     value = record.get(singer_field)
@@ -193,8 +216,12 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes from record. Override in subclasses.
 
+                Args:
+                    _record: Singer record payload to convert.
+
                 Returns:
-                    The resulting ``p.Result[t.Ldap.OperationAttributes]``.
+                    A failure result; subclasses must provide attributes.
+
                 """
                 return r[t.Ldap.OperationAttributes].fail(
                     "build_attributes must be implemented in subclass",
@@ -203,8 +230,13 @@ class FlextTargetLdapModelsSinks:
             def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.Result[str]:
                 """Build distinguished name from record. Override in subclasses.
 
+                Args:
+                    record: Singer record payload to derive the DN from.
+
                 Returns:
-                    The resulting ``p.Result[str]``.
+                    The constructed DN, or a failure result when the record
+                    carries no usable identifier.
+
                 """
                 dn = record.get(c.TargetLdap.KEY_DN)
                 if isinstance(dn, str) and dn:
@@ -231,8 +263,14 @@ class FlextTargetLdapModelsSinks:
             ) -> t.StrSequence:
                 """Get object classes for entry.
 
+                Args:
+                    record: Singer record payload that may carry object
+                        classes.
+
                 Returns:
-                    The resulting ``t.StrSequence``.
+                    The object classes for the entry: from the record when
+                    present, otherwise from target settings or the default.
+
                 """
                 record_classes = record.get(c.TargetLdap.KEY_OBJECT_CLASSES)
                 if isinstance(record_classes, list):
@@ -256,8 +294,13 @@ class FlextTargetLdapModelsSinks:
             def process_batch(self, context: t.TargetLdap.RecordPayload) -> None:
                 """Process a batch of records.
 
+                Args:
+                    context: Batch context holding the records under the
+                        ``records`` key.
+
                 Raises:
-                    RuntimeError: If Cannot process batch.
+                    RuntimeError: If the LDAP client cannot be set up.
+
                 """
                 setup_result: p.Result[FlextTargetLdapClient] = self.setup_client()
                 if not setup_result.success:
@@ -297,8 +340,14 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Process a single record. Override in subclasses.
 
+                Args:
+                    _record: Singer record payload to process.
+                    context: Singer record context metadata.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of processing the record; a failure result
+                    when the LDAP client is not initialized.
+
                 """
                 if not self.client:
                     self._processing_result.add_error("LDAP client not initialized")
@@ -319,7 +368,9 @@ class FlextTargetLdapModelsSinks:
                 """Set up LDAP client connection.
 
                 Returns:
-                    The resulting ``p.Result[FlextTargetLdapClient]``.
+                    The connected LDAP client, or a failure result when
+                    connection or setup fails.
+
                 """
                 try:
                     connection_config = {
@@ -383,8 +434,17 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Split object classes from attributes and persist one entry.
 
+                Args:
+                    label: Entry kind used in log messages.
+                    dn: Distinguished name of the entry.
+                    attributes: Entry attributes; ``objectClass`` is split
+                        out before persisting.
+                    default_object_classes: Object classes used when the
+                        attributes carry none.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of persisting the entry.
+
                 """
                 object_classes = FlextTargetLdapClient.to_str_values(
                     attributes.get("objectClass", list(default_object_classes)),
@@ -411,8 +471,15 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Add an LDAP entry; on conflict modify it when configured to do so.
 
+                Args:
+                    label: Entry kind used in log messages.
+                    dn: Distinguished name of the entry.
+                    attributes_dict: Entry attributes without object classes.
+                    object_classes: Object classes for the entry.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of the add or modify operation.
+
                 """
                 if not self.client:
                     self._processing_result.add_error("LDAP client not initialized")
@@ -458,8 +525,16 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Validate LDAP entry before writing.
 
+                Args:
+                    dn: Distinguished name of the entry.
+                    attributes: Entry attributes.
+                    object_classes: Object classes for the entry.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of validation; a failure result when the
+                    DN, attributes, or object classes are empty or the DN
+                    fails client validation.
+
                 """
                 if not dn:
                     return r[bool].fail("DN cannot be empty")
@@ -488,8 +563,12 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes for user entry.
 
+                Args:
+                    _record: Singer record payload to convert.
+
                 Returns:
-                    The resulting ``p.Result[t.Ldap.OperationAttributes]``.
+                    The LDAP attributes for the user entry.
+
                 """
                 attrs: t.MutableStrSequenceMapping = {}
                 field_map = {
@@ -505,8 +584,13 @@ class FlextTargetLdapModelsSinks:
             def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.Result[str]:
                 """Build DN for user entry.
 
+                Args:
+                    record: Singer record payload to derive the DN from.
+
                 Returns:
-                    The resulting ``p.Result[str]``.
+                    The user DN, or a failure result when the RDN
+                    attribute has no value in the record.
+
                 """
                 rdn_attr = str(self._target.settings.get("user_rdn_attribute", "uid"))
                 uid = record.get(rdn_attr)
@@ -522,7 +606,9 @@ class FlextTargetLdapModelsSinks:
                 """Build LDAP attributes for user entry.
 
                 Returns:
-                    The resulting ``t.MutableStrSequenceMapping``.
+                    The user attributes including object classes and the
+                    mapped Singer fields.
+
                 """
                 configured_object_classes = self._target.settings.get(
                     "object_classes",
@@ -559,8 +645,14 @@ class FlextTargetLdapModelsSinks:
             ) -> t.StrSequence:
                 """Get object classes for user entry.
 
+                Args:
+                    record: Singer record payload that may carry object
+                        classes.
+
                 Returns:
-                    The resulting ``t.StrSequence``.
+                    The object classes for the user entry: from settings
+                    when configured, otherwise the user defaults.
+
                 """
                 configured = self._target.settings.get("users_object_classes")
                 if configured is None:
@@ -578,8 +670,13 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Process a user record.
 
+                Args:
+                    _record: Singer record payload to persist.
+                    context: Singer record context metadata.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of persisting the user entry.
+
                 """
 
                 def _run_process_record() -> p.Result[bool]:
@@ -618,8 +715,12 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes for group entry.
 
+                Args:
+                    _record: Singer record payload to convert.
+
                 Returns:
-                    The resulting ``p.Result[t.Ldap.OperationAttributes]``.
+                    The LDAP attributes for the group entry.
+
                 """
                 attrs: t.MutableStrSequenceMapping = {}
                 field_map = {"members": "member"}
@@ -632,8 +733,13 @@ class FlextTargetLdapModelsSinks:
             def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.Result[str]:
                 """Build DN for group entry.
 
+                Args:
+                    record: Singer record payload to derive the DN from.
+
                 Returns:
-                    The resulting ``p.Result[str]``.
+                    The group DN, or a failure result when the RDN
+                    attribute has no value in the record.
+
                 """
                 rdn_attr = str(self._target.settings.get("group_rdn_attribute", "cn"))
                 cn = record.get(rdn_attr)
@@ -649,8 +755,14 @@ class FlextTargetLdapModelsSinks:
             ) -> t.StrSequence:
                 """Get object classes for group entry.
 
+                Args:
+                    record: Singer record payload that may carry object
+                        classes.
+
                 Returns:
-                    The resulting ``t.StrSequence``.
+                    The object classes for the group entry: from settings
+                    when configured, otherwise the group defaults.
+
                 """
                 configured = self._target.settings.get("groups_object_classes")
                 if configured is not None:
@@ -668,8 +780,13 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Process a group record.
 
+                Args:
+                    _record: Singer record payload to persist.
+                    context: Singer record context metadata.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of persisting the group entry.
+
                 """
 
                 def _run_process_record() -> p.Result[bool]:
@@ -703,7 +820,9 @@ class FlextTargetLdapModelsSinks:
                 """Build LDAP attributes for group entry.
 
                 Returns:
-                    The resulting ``t.MutableStrSequenceMapping``.
+                    The group attributes including object classes and the
+                    mapped Singer fields.
+
                 """
                 configured_object_classes = self._target.settings.get(
                     "group_object_classes",
@@ -737,8 +856,13 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Process an organizational unit record.
 
+                Args:
+                    _record: Singer record payload to persist.
+                    context: Singer record context metadata.
+
                 Returns:
-                    The resulting ``p.Result[bool]``.
+                    The outcome of persisting the OU entry.
+
                 """
 
                 def _run_process_record() -> p.Result[bool]:
@@ -773,7 +897,9 @@ class FlextTargetLdapModelsSinks:
                 """Build LDAP attributes for OU entry.
 
                 Returns:
-                    The resulting ``t.MutableStrSequenceMapping``.
+                    The OU attributes including object classes and the
+                    mapped Singer fields.
+
                 """
                 configured_object_classes = self._target.settings.get(
                     "object_classes",

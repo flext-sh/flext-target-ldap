@@ -1,7 +1,7 @@
-"""LDAP Target Client - PEP8 Consolidation.
+"""LDAP client delegating all directory operations to flext-ldap.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
@@ -25,6 +25,15 @@ class FlextTargetLdapClient:
 
     @staticmethod
     def to_str_values(value: t.JsonValue | t.StrSequence) -> list[str]:
+        """Convert a value or sequence of values to a list of strings.
+
+        Args:
+            value: JSON scalar or sequence of scalars from a Singer record.
+
+        Returns:
+            The value's string form as a single-item list, or the string
+            form of each item for sequences.
+        """
         if isinstance(value, Sequence) and not isinstance(value, str | bytes):
             return [str(item) for item in value]
         return [str(value)]
@@ -35,6 +44,16 @@ class FlextTargetLdapClient:
         attributes: t.Ldap.OperationAttributes,
         object_classes: t.StrSequence | None = None,
     ) -> m.Ldif.Entry:
+        """Build an LDIF entry model for an LDAP operation.
+
+        Args:
+            dn: Distinguished name of the entry.
+            attributes: Entry attributes to stringify.
+            object_classes: Optional object classes added as attributes.
+
+        Returns:
+            The LDIF entry ready for the flext-ldap API.
+        """
         entry_attributes: t.MutableMappingKV[str, t.StrSequence] = {
             key: FlextTargetLdapClient.to_str_values(value)
             for key, value in attributes.items()
@@ -57,6 +76,14 @@ class FlextTargetLdapClient:
     def _build_modify_changes(
         changes: t.Ldap.OperationAttributes,
     ) -> t.MutableMappingKV[str, t.SequenceOf[tuple[int, t.StrSequence]]]:
+        """Build LDAP modify operations replacing each changed attribute.
+
+        Args:
+            changes: Attribute values to write.
+
+        Returns:
+            The replace operations keyed by attribute name.
+        """
         built_changes: t.MutableMappingKV[
             str, t.SequenceOf[tuple[int, t.StrSequence]]
         ] = {
@@ -116,8 +143,11 @@ class FlextTargetLdapClient:
     ) -> m.Ldap.ConnectionConfig:
         """Resolve any supported settings payload to the connection model.
 
+        Args:
+            settings: Typed settings, connection model, or flat payload.
+
         Returns:
-            The resulting ``m.Ldap.ConnectionConfig``.
+            The resolved LDAP connection configuration.
         """
         if isinstance(settings, m.Ldap.ConnectionConfig):
             return settings
@@ -170,8 +200,14 @@ class FlextTargetLdapClient:
     ) -> p.Result[bool]:
         """Add LDAP entry using flext-ldap API.
 
+        Args:
+            dn: Distinguished name of the entry to add.
+            attributes: Entry attributes to write.
+            object_classes: Optional object classes for the entry.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the add operation.
+
         """
 
         def _run_add_entry() -> p.Result[bool]:
@@ -201,7 +237,8 @@ class FlextTargetLdapClient:
         """Validate connectivity to LDAP server using flext-ldap API.
 
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the connectivity check.
+
         """
         try:
             connect_result = self._api.connect(self.settings)
@@ -221,8 +258,12 @@ class FlextTargetLdapClient:
     def delete_entry(self, dn: str) -> p.Result[bool]:
         """Delete LDAP entry using flext-ldap API.
 
+        Args:
+            dn: Distinguished name of the entry to delete.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the delete operation.
+
         """
 
         def _run_delete_entry() -> p.Result[bool]:
@@ -257,7 +298,8 @@ class FlextTargetLdapClient:
         """Disconnect LDAP session through flext-ldap.
 
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the disconnect operation.
+
         """
         try:
             self._api.disconnect()
@@ -270,8 +312,13 @@ class FlextTargetLdapClient:
     def entry_exists(self, dn: str) -> p.Result[bool]:
         """Check if LDAP entry exists using flext-ldap API.
 
+        Args:
+            dn: Distinguished name of the entry to look up.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            Whether the entry exists, or a failure result when the
+            existence check errors.
+
         """
         try:
             if not dn:
@@ -299,8 +346,14 @@ class FlextTargetLdapClient:
     ) -> p.Result[m.Ldif.Entry]:
         """Fetch the LDAP entry using the flext-ldap API.
 
+        Args:
+            dn: Distinguished name of the entry to fetch.
+            attributes: Optional attribute names restricting the fetch.
+
         Returns:
-            The resulting ``p.Result[m.Ldif.Entry]``.
+            The fetched LDIF entry, or a failure result when the entry
+            is not found.
+
         """
         try:
             if not dn:
@@ -321,8 +374,13 @@ class FlextTargetLdapClient:
     ) -> p.Result[bool]:
         """Modify LDAP entry using flext-ldap API.
 
+        Args:
+            dn: Distinguished name of the entry to modify.
+            changes: Attribute values to replace on the entry.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the modify operation.
+
         """
 
         def _run_modify_entry() -> p.Result[bool]:
@@ -361,8 +419,15 @@ class FlextTargetLdapClient:
     ) -> p.Result[list[m.Ldif.Entry]]:
         """Search LDAP entries using flext-ldap API.
 
+        Args:
+            base_dn: Subtree root for the search.
+            search_filter: LDAP search filter.
+            attributes: Optional attribute names restricting each entry.
+
         Returns:
-            The resulting ``p.Result[list[m.Ldif.Entry]]``.
+            The matching entries, empty when none match, or a failure
+            result when the search errors.
+
         """
 
         def _run_search_entry() -> p.Result[list[m.Ldif.Entry]]:

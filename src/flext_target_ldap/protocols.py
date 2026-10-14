@@ -1,7 +1,6 @@
 """Target LDAP protocol facade via MRO composition.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
-src/flext_target_ldap/protocols
 SPDX-License-Identifier: MIT
 """
 

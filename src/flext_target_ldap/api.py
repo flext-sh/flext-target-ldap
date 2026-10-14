@@ -4,7 +4,6 @@ Owns the public ``FlextTargetLdap`` surface. Legacy runtime logic lives here so
 ``gen-init`` can keep ``api.py`` as the single canonical owner of the facade.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
-src/flext_target_ldap/api
 SPDX-License-Identifier: MIT
 """
 
@@ -54,7 +53,7 @@ class FlextTargetLdap(
 
     @property
     def orchestrator(self) -> FlextTargetLdapOrchestrator:
-        """The or create orchestrator."""
+        """The orchestrator for this target, created on first access."""
         if self._orchestrator is None:
             settings = FlextTargetLdapSettings.model_validate(self.settings)
             self._orchestrator = FlextTargetLdapOrchestrator(settings)
@@ -69,7 +68,14 @@ class FlextTargetLdap(
         self,
         stream_name: str,
     ) -> FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapBaseSink:
-        """Return an instantiated sink for the given stream name."""
+        """Return an instantiated sink for the given stream name.
+
+        Args:
+            stream_name: Name of the Singer stream to resolve.
+
+        Returns:
+            A sink instance bound to this target for the stream.
+        """
         sink_class = self.resolve_sink_class(stream_name)
         return sink_class(
             target=self,
@@ -82,7 +88,15 @@ class FlextTargetLdap(
         self,
         stream_name: str,
     ) -> type[FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapBaseSink]:
-        """Return the appropriate sink class for the stream."""
+        """Return the appropriate sink class for the stream.
+
+        Args:
+            stream_name: Name of the Singer stream to map.
+
+        Returns:
+            The sink class handling the stream; the base sink when the
+            stream has no dedicated mapping.
+        """
         sink_mapping = {
             "users": (
                 FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapUsersSink
@@ -120,8 +134,12 @@ class FlextTargetLdap(
         The facade owns the sink creation (ADR-006); the runtime helper only
         builds the LDAP runtime sink and adapter from the resolved target.
 
+        Args:
+            stream_name: Name of the Singer stream the sink drains.
+            schema: Flattened Singer schema for the stream.
+
         Returns:
-            The resulting ``p.Meltano.SingerDrainSink``.
+            The service-level Singer sink for the stream.
         """
         normalized_target_config = u.normalize_to_json_mapping(self.settings)
         normalized_schema = FlextTargetLdapServiceRuntime.normalize_flat_schema(
@@ -176,11 +194,15 @@ class FlextTargetLdap(
     def _load_config_from_file(config_path: str) -> t.TargetLdap.SettingsPayload:
         """Load configuration from JSON file.
 
+        Args:
+            config_path: Path to the JSON configuration file.
+
         Returns:
-            The resulting ``t.TargetLdap.SettingsPayload``.
+            The parsed settings payload from the file.
 
         Raises:
-            RuntimeError: If Failed to load configuration from.
+            RuntimeError: If the configuration file cannot be read or
+                parsed as a JSON mapping.
         """
         read = u.Cli.files_read_text(Path(config_path))
         if read.failure:
@@ -200,8 +222,13 @@ class FlextTargetLdap(
     ) -> str:
         """Construct DN from record based on stream type.
 
+        Args:
+            stream: Singer stream name selecting the RDN convention.
+            record: Singer record supplying the RDN value.
+            base_dn: Base DN appended after the RDN.
+
         Returns:
-            The resulting ``str``.
+            The DN constructed for the record.
         """
         if stream == "users":
             uid = record.get("uid") or record.get("username") or "user"
@@ -220,7 +247,16 @@ class FlextTargetLdap(
         api: FlextTargetLdapClient,
         seen_dns: set[str],
     ) -> None:
-        """Process a RECORD message."""
+        """Process a RECORD message.
+
+        Args:
+            record: Singer record payload to write to LDAP.
+            stream: Singer stream name used to derive the DN.
+            cfg: Flat target settings payload.
+            api: LDAP client used to add, modify, or delete entries.
+            seen_dns: DNs already written in this run; a repeat switches
+                the operation from add to modify.
+        """
         dn_value = record.get("dn")
         dn_text = "" if dn_value is None else str(dn_value)
         attributes: t.MutableStrSequenceMapping = {
@@ -258,10 +294,14 @@ class FlextTargetLdap(
 
     @staticmethod
     def run_cli(settings: str | None = None) -> None:
-        """Process Singer JSONL; echo STATE lines to stdout.
+        """Process Singer JSONL from stdin; echo STATE lines to stdout.
+
+        Args:
+            settings: Optional path to a JSON configuration file.
 
         Raises:
-            SINGER_SAFE_EXCEPTIONS: If a ``c.Meltano.SINGER_SAFE_EXCEPTIONS`` is caught.
+            SINGER_SAFE_EXCEPTIONS: Re-raised after logging when CLI
+                processing fails.
         """
         try:
             FlextTargetLdap._run_cli(settings)
@@ -301,8 +341,16 @@ class FlextTargetLdap(
     ) -> str | None:
         """Process one Singer input line and return the current stream.
 
+        Args:
+            line: Raw Singer JSONL line from stdin.
+            current_stream: Stream name carried over from previous lines.
+            settings: Flat target settings payload.
+            api: LDAP client used to write RECORD messages.
+            seen_dns: DNs already written in this run.
+
         Returns:
-            The resulting ``str | None``.
+            The stream name to carry forward, or ``None`` when the line
+            carries no stream information.
         """
         raw = FlextTargetLdap._parse_input_line(line)
         msg_type = raw.get("type")
@@ -337,11 +385,15 @@ class FlextTargetLdap(
     def _parse_input_line(line: str) -> t.JsonMapping:
         """Parse one Singer input line.
 
+        Args:
+            line: Raw Singer JSONL line from stdin.
+
         Returns:
-            The resulting ``t.JsonMapping``.
+            The parsed JSON mapping for the line.
 
         Raises:
-            SINGER_SAFE_EXCEPTIONS: If a ``c.Meltano.SINGER_SAFE_EXCEPTIONS`` is caught.
+            SINGER_SAFE_EXCEPTIONS: Re-raised after logging when the line
+                is not valid JSON.
         """
         try:
             return t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
