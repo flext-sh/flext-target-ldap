@@ -50,6 +50,10 @@ class FlextTargetLdapModelsSinks:
             ) -> p.Result[bool]:
                 """Process a record using the target.
 
+                Args:
+                    _record: Singer record payload to process.
+                    context: Singer record context metadata.
+
                 Returns:
                     The outcome of processing the record.
 
@@ -605,6 +609,9 @@ class FlextTargetLdapModelsSinks:
             ) -> t.MutableStrSequenceMapping:
                 """Build LDAP attributes for user entry.
 
+                Args:
+                    record: Singer record supplying the field values.
+
                 Returns:
                     The user attributes including object classes and the
                     mapped Singer fields.
@@ -819,6 +826,9 @@ class FlextTargetLdapModelsSinks:
             ) -> t.MutableStrSequenceMapping:
                 """Build LDAP attributes for group entry.
 
+                Args:
+                    record: Singer record supplying the field values.
+
                 Returns:
                     The group attributes including object classes and the
                     mapped Singer fields.
@@ -895,6 +905,9 @@ class FlextTargetLdapModelsSinks:
                 record: t.TargetLdap.RecordPayload,
             ) -> t.MutableStrSequenceMapping:
                 """Build LDAP attributes for OU entry.
+
+                Args:
+                    record: Singer record supplying the field values.
 
                 Returns:
                     The OU attributes including object classes and the

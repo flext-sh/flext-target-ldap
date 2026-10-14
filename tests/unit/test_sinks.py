@@ -33,6 +33,7 @@ def ldap_base_sink(
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.BaseSink``.
+
     """
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
@@ -54,6 +55,7 @@ def users_sink(
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.UsersSink``.
+
     """
     ldap_target.settings = {
         **ldap_target.settings,
@@ -83,6 +85,7 @@ def groups_sink(
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.GroupsSink``.
+
     """
     ldap_target.settings = {
         **ldap_target.settings,
@@ -108,6 +111,7 @@ def ou_sink(
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.OrganizationalUnitsSink``.
+
     """
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
@@ -129,6 +133,7 @@ def generic_sink(
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.BaseSink``.
+
     """
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {

@@ -75,6 +75,7 @@ class FlextTargetLdap(
 
         Returns:
             A sink instance bound to this target for the stream.
+
         """
         sink_class = self.resolve_sink_class(stream_name)
         return sink_class(
@@ -96,6 +97,7 @@ class FlextTargetLdap(
         Returns:
             The sink class handling the stream; the base sink when the
             stream has no dedicated mapping.
+
         """
         sink_mapping = {
             "users": (
@@ -140,6 +142,7 @@ class FlextTargetLdap(
 
         Returns:
             The service-level Singer sink for the stream.
+
         """
         normalized_target_config = u.normalize_to_json_mapping(self.settings)
         normalized_schema = FlextTargetLdapServiceRuntime.normalize_flat_schema(
@@ -203,6 +206,7 @@ class FlextTargetLdap(
         Raises:
             RuntimeError: If the configuration file cannot be read or
                 parsed as a JSON mapping.
+
         """
         read = u.Cli.files_read_text(Path(config_path))
         if read.failure:
@@ -229,6 +233,7 @@ class FlextTargetLdap(
 
         Returns:
             The DN constructed for the record.
+
         """
         if stream == "users":
             uid = record.get("uid") or record.get("username") or "user"
@@ -256,6 +261,7 @@ class FlextTargetLdap(
             api: LDAP client used to add, modify, or delete entries.
             seen_dns: DNs already written in this run; a repeat switches
                 the operation from add to modify.
+
         """
         dn_value = record.get("dn")
         dn_text = "" if dn_value is None else str(dn_value)
@@ -302,6 +308,7 @@ class FlextTargetLdap(
         Raises:
             SINGER_SAFE_EXCEPTIONS: Re-raised after logging when CLI
                 processing fails.
+
         """
         try:
             FlextTargetLdap._run_cli(settings)
@@ -351,6 +358,7 @@ class FlextTargetLdap(
         Returns:
             The stream name to carry forward, or ``None`` when the line
             carries no stream information.
+
         """
         raw = FlextTargetLdap._parse_input_line(line)
         msg_type = raw.get("type")
@@ -394,6 +402,7 @@ class FlextTargetLdap(
         Raises:
             SINGER_SAFE_EXCEPTIONS: Re-raised after logging when the line
                 is not valid JSON.
+
         """
         try:
             return t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)

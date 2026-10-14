@@ -33,6 +33,7 @@ class FlextTargetLdapClient:
         Returns:
             The value's string form as a single-item list, or the string
             form of each item for sequences.
+
         """
         if isinstance(value, Sequence) and not isinstance(value, str | bytes):
             return [str(item) for item in value]
@@ -53,6 +54,7 @@ class FlextTargetLdapClient:
 
         Returns:
             The LDIF entry ready for the flext-ldap API.
+
         """
         entry_attributes: t.MutableMappingKV[str, t.StrSequence] = {
             key: FlextTargetLdapClient.to_str_values(value)
@@ -83,6 +85,7 @@ class FlextTargetLdapClient:
 
         Returns:
             The replace operations keyed by attribute name.
+
         """
         built_changes: t.MutableMappingKV[
             str, t.SequenceOf[tuple[int, t.StrSequence]]
@@ -148,6 +151,7 @@ class FlextTargetLdapClient:
 
         Returns:
             The resolved LDAP connection configuration.
+
         """
         if isinstance(settings, m.Ldap.ConnectionConfig):
             return settings

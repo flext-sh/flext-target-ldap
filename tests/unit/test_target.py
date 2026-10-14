@@ -35,6 +35,7 @@ class TestsFlextTargetLdapTarget:
             TypeError: If Singer catalog must expose a streams list; or if Singer
                 catalog stream must be a mapping; or if Singer catalog stream must
                 expose tap_stream_id.
+
         """
         target = FlextTargetLdap(settings=ldap_settings_payload)
         streams = target.singer_catalog.get("streams")
