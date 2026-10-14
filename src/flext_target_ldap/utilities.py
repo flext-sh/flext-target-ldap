@@ -22,9 +22,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     Follows FLEXT unified class pattern with nested helper classes for
     domain-specific Singer target functionality with LDAP directory operations.
 
-    Constants are accessed via constants module:
-        c.Ldap.PORT (389)
-        c.LDAPS_DEFAULT_PORT (636)
+    Constants are accessed via the constants module:
+        c.Ldap.PORT
+        c.LDAPS_DEFAULT_PORT
         c.DEFAULT_SIZE
     """
 
@@ -49,7 +49,9 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
             """Build the canonical Singer catalog for LDAP targets.
 
             Returns:
-                The resulting ``t.TargetLdap.CatalogPayload``.
+                The Singer catalog payload with the users, groups, and
+                organizational_units streams.
+
             """
             return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
                 "streams": [

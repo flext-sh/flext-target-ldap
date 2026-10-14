@@ -1,7 +1,6 @@
 """Internal runtime adapters for the target-ldap service facade.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
-src/flext_target_ldap/_utilities/service_runtime
 SPDX-License-Identifier: MIT
 """
 
@@ -54,8 +53,16 @@ class FlextTargetLdapServiceRuntime:
             LDAP-specific: schema validated via TargetLdap adapter with
             DN-normalized entries and hierarchical directory structure handling.
 
+            Args:
+                runtime_sink: LDAP runtime sink handling record writes.
+                target: Singer target owning the sink.
+                stream_name: Name of the Singer stream.
+                schema: Singer schema for the stream.
+                key_properties: Singer key properties for the stream.
+
             Returns:
-                The resulting ``FlextTargetLdapServiceRuntime.Sink``.
+                The adapter sink bound to the runtime sink.
+
             """
             validated_schema = u.json_dict_adapter().validate_python(schema)
             bound_sink = cls(
@@ -76,8 +83,13 @@ class FlextTargetLdapServiceRuntime:
         def process_record(self, record: t.JsonMapping, context: t.JsonMapping) -> None:
             """Delegate Singer record handling to the LDAP runtime sink.
 
+            Args:
+                record: Singer record payload to process.
+                context: Singer record context metadata.
+
             Raises:
-                RuntimeError: If ``result.failure``.
+                RuntimeError: If the LDAP runtime sink rejects the record.
+
             """
             result = self._runtime_sink.process_record(
                 u.normalize_to_json_mapping(record),
@@ -93,8 +105,12 @@ class FlextTargetLdapServiceRuntime:
     ) -> t.TargetLdap.MutableSchemaPayload:
         """Normalize a flat Singer schema to the LDAP runtime contract.
 
+        Args:
+            schema: Flat Singer schema mapping to normalize.
+
         Returns:
-            The resulting ``t.TargetLdap.MutableSchemaPayload``.
+            The schema values normalized to the runtime payload types.
+
         """
         return {
             key: u.Cli.normalize_json_value(

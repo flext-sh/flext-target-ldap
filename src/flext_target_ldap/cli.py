@@ -20,7 +20,8 @@ class FlextTargetLdapCli:
             args: Optional CLI arguments; the first names a Singer settings file.
 
         Returns:
-            The resulting ``int``.
+            The CLI exit code.
+
         """
         _ = cls
         FlextTargetLdap.run_cli(args[0] if args else None)
@@ -34,7 +35,8 @@ def main(args: t.StrSequence | None = None) -> int:
         args: Optional CLI arguments forwarded to ``FlextTargetLdapCli.run``.
 
     Returns:
-        The resulting ``int``.
+        The CLI exit code.
+
     """
     return FlextTargetLdapCli.run(args)
 

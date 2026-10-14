@@ -1,11 +1,4 @@
-"""LDAP Target Configuration - PEP8 Consolidation.
-
-This module consolidates all LDAP target configuration classes with clear PEP8 names,
-removing duplication and using proper flext-core + flext-ldap integration.
-
-Architecture: Clean Architecture configuration layer
-Patterns: "FlextSettings", FlextModels, r validation
-Integration: Complete flext-ldap connection settings reuse
+"""LDAP target settings utilities.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -30,8 +23,13 @@ class FlextTargetLdapUtilitiesSettings:
     ) -> p.Result[FlextTargetLdapSettings]:
         """Validate raw target settings with the canonical settings model.
 
+        Args:
+            settings: Raw settings payload to validate.
+
         Returns:
-            The resulting ``p.Result[FlextTargetLdapSettings]``.
+            The validated settings, or a failure result when validation
+            fails.
+
         """
         return u.try_(
             lambda: FlextTargetLdapSettings.model_validate(settings),
@@ -49,8 +47,16 @@ class FlextTargetLdapUtilitiesSettings:
     ) -> p.Result[FlextTargetLdapSettings]:
         """Create the minimal canonical target settings payload.
 
+        Args:
+            host: LDAP server host.
+            base_dn: Base DN for directory operations.
+            port: LDAP server port.
+            use_ssl: Whether to connect over LDAPS.
+
         Returns:
-            The resulting ``p.Result[FlextTargetLdapSettings]``.
+            The validated settings, or a failure result when validation
+            fails.
+
         """
         return u.try_(
             lambda: FlextTargetLdapSettings.model_validate({

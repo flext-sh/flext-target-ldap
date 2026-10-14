@@ -137,8 +137,14 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             ) -> t.MutableSequenceOf[str]:
                 """Validate object classes contain 'top'.
 
+                Appends the required ``top`` class when it is absent.
+
+                Args:
+                    v: Object classes declared on the entry.
+
                 Returns:
-                    The resulting ``t.MutableSequenceOf[str]``.
+                    The object classes, with ``top`` ensured.
+
                 """
                 if "top" not in v:
                     v.append("top")

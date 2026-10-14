@@ -30,7 +30,7 @@ class FlextTargetLdapOrchestrator:
         """Initialize LDAP target orchestrator.
 
         Args:
-        settings: Configuration dictionary
+            settings: Typed settings or flat configuration payload.
 
         """
         if isinstance(settings, FlextTargetLdapSettings):
@@ -55,10 +55,10 @@ class FlextTargetLdapOrchestrator:
         """Orchestrate data loading to LDAP target.
 
         Args:
-        records: Records to load to LDAP
+            records: Records to load to LDAP.
 
         Returns:
-        r with loading status
+            Result with the loaded record count and completion status.
 
         """
         try:
@@ -87,7 +87,7 @@ class FlextTargetLdapOrchestrator:
         """Validate LDAP target configuration.
 
         Returns:
-        r indicating validation success
+            Result indicating validation success.
 
         """
         try:
