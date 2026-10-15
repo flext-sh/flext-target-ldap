@@ -10,16 +10,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import override
+from typing import ClassVar, override
 
 from flext_target_ldap import FlextTargetLdapSettings, c, p, r, t, u
-
-logger: p.Logger = u.fetch_logger(__name__)
 
 
 class FlextTargetLdapOrchestrator:
     """Application orchestrator for LDAP target operations."""
 
+    logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
     settings: t.TargetLdap.SettingsPayload
     _typed_config: FlextTargetLdapSettings | None
 
@@ -31,21 +30,23 @@ class FlextTargetLdapOrchestrator:
         """Initialize LDAP target orchestrator.
 
         Args:
-        settings: Configuration dictionary
+            settings: Typed settings or flat configuration payload.
 
         """
         if isinstance(settings, FlextTargetLdapSettings):
             self._typed_config = settings
-            self.settings = t.json_dict_adapter().validate_python(
+            self.settings = u.json_dict_adapter().validate_python(
                 settings.model_dump(mode="python"),
             )
         else:
             self._typed_config = None
             empty_settings: t.TargetLdap.SettingsPayload = {}
-            self.settings = t.json_dict_adapter().validate_python(
+            self.settings = u.json_dict_adapter().validate_python(
                 settings if settings is not None else empty_settings,
             )
-        logger.debug("Initialized LDAP target orchestrator")
+        FlextTargetLdapOrchestrator.logger.debug(
+            "Initialized LDAP target orchestrator",
+        )
 
     @staticmethod
     def orchestrate_data_loading(
@@ -54,14 +55,16 @@ class FlextTargetLdapOrchestrator:
         """Orchestrate data loading to LDAP target.
 
         Args:
-        records: Records to load to LDAP
+            records: Records to load to LDAP.
 
         Returns:
-        r with loading status
+            Result with the loaded record count and completion status.
 
         """
         try:
-            logger.info("Starting LDAP data loading orchestration")
+            FlextTargetLdapOrchestrator.logger.info(
+                "Starting LDAP data loading orchestration",
+            )
             processed_count = 0
             for _record in records:
                 processed_count += 1
@@ -69,17 +72,22 @@ class FlextTargetLdapOrchestrator:
                 "loaded_records": processed_count,
                 "status": "completed",
             }
-            logger.info("LDAP data loading completed: %d records", processed_count)
+            FlextTargetLdapOrchestrator.logger.info(
+                "LDAP data loading completed: %d records",
+                processed_count,
+            )
             return r[t.HeaderMapping].ok(result_dict)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            logger.exception("LDAP data loading orchestration failed")
+            FlextTargetLdapOrchestrator.logger.exception(
+                "LDAP data loading orchestration failed",
+            )
             return r[t.HeaderMapping].fail_op("Data loading orchestration", e)
 
     def validate_target_configuration(self) -> p.Result[bool]:
         """Validate LDAP target configuration.
 
         Returns:
-        r indicating validation success
+            Result indicating validation success.
 
         """
         try:

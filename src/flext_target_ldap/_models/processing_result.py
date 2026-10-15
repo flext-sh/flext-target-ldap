@@ -1,7 +1,6 @@
 """Shared processing result counters for LDAP sinks.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
-src/flext_target_ldap/_models/processing_result
 SPDX-License-Identifier: MIT
 """
 

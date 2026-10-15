@@ -9,16 +9,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_tests import tm
 
-from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks as Sinks
+from flext_target_ldap import FlextTargetLdap
+from tests import m, p, tm
 
 if TYPE_CHECKING:
     from tests import t
 
 
 def _update_target_settings(
-    target: Sinks.FlextTargetLdapModels.Target,
+    target: FlextTargetLdap,
     updates: t.TargetLdap.SettingsPayload,
 ) -> None:
     """Merge one settings update into the target's settings payload."""
@@ -27,18 +27,19 @@ def _update_target_settings(
 
 @pytest.fixture
 def ldap_base_sink(
-    ldap_target: Sinks.FlextTargetLdapModels.Target,
-) -> Sinks.FlextTargetLdapModels.BaseSink:
+    ldap_target: FlextTargetLdap,
+) -> p.TargetLdap.Sink:
     """Provide ``ldap_base_sink``.
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.BaseSink``.
+
     """
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
     }
-    return Sinks.FlextTargetLdapModels.BaseSink(
+    return m.TargetLdap.BaseSink(
         target=ldap_target,
         stream_name="test_stream",
         schema=schema,
@@ -48,12 +49,13 @@ def ldap_base_sink(
 
 @pytest.fixture
 def users_sink(
-    ldap_target: Sinks.FlextTargetLdapModels.Target,
-) -> Sinks.FlextTargetLdapModels.UsersSink:
+    ldap_target: FlextTargetLdap,
+) -> p.TargetLdap.Sink:
     """Provide ``users_sink``.
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.UsersSink``.
+
     """
     ldap_target.settings = {
         **ldap_target.settings,
@@ -67,7 +69,7 @@ def users_sink(
             "mail": {"type": "string"},
         },
     }
-    return Sinks.FlextTargetLdapModels.UsersSink(
+    return m.TargetLdap.UsersSink(
         target=ldap_target,
         stream_name="users",
         schema=schema,
@@ -77,12 +79,13 @@ def users_sink(
 
 @pytest.fixture
 def groups_sink(
-    ldap_target: Sinks.FlextTargetLdapModels.Target,
-) -> Sinks.FlextTargetLdapModels.GroupsSink:
+    ldap_target: FlextTargetLdap,
+) -> p.TargetLdap.Sink:
     """Provide ``groups_sink``.
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.GroupsSink``.
+
     """
     ldap_target.settings = {
         **ldap_target.settings,
@@ -92,7 +95,7 @@ def groups_sink(
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"cn": {"type": "string"}, "member": {"type": "array"}},
     }
-    return Sinks.FlextTargetLdapModels.GroupsSink(
+    return m.TargetLdap.GroupsSink(
         target=ldap_target,
         stream_name="groups",
         schema=schema,
@@ -102,18 +105,19 @@ def groups_sink(
 
 @pytest.fixture
 def ou_sink(
-    ldap_target: Sinks.FlextTargetLdapModels.Target,
-) -> Sinks.FlextTargetLdapModels.OrganizationalUnitsSink:
+    ldap_target: FlextTargetLdap,
+) -> p.TargetLdap.Sink:
     """Provide ``ou_sink``.
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.OrganizationalUnitsSink``.
+
     """
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
     }
-    return Sinks.FlextTargetLdapModels.OrganizationalUnitsSink(
+    return m.TargetLdap.OrganizationalUnitsSink(
         target=ldap_target,
         stream_name="organizational_units",
         schema=schema,
@@ -123,18 +127,19 @@ def ou_sink(
 
 @pytest.fixture
 def generic_sink(
-    ldap_target: Sinks.FlextTargetLdapModels.Target,
-) -> Sinks.FlextTargetLdapModels.BaseSink:
+    ldap_target: FlextTargetLdap,
+) -> p.TargetLdap.Sink:
     """Provide ``generic_sink``.
 
     Returns:
         The resulting ``Sinks.FlextTargetLdapModels.BaseSink``.
+
     """
     ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
     schema: t.TargetLdap.SchemaPayload = {
         "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
     }
-    return Sinks.FlextTargetLdapModels.BaseSink(
+    return m.TargetLdap.BaseSink(
         target=ldap_target,
         stream_name="generic",
         schema=schema,
@@ -147,7 +152,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_ldap_sink_initialization(
-        ldap_base_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        ldap_base_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test ldap sink initialization."""
         tm.that(ldap_base_sink.stream_name, eq="test_stream")
@@ -165,7 +170,7 @@ class TestsFlextTargetLdapSinks:
         ],
     )
     def test_base_sink_validation_failures(
-        ldap_base_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        ldap_base_sink: p.TargetLdap.Sink,
         record: t.TargetLdap.RecordPayload,
         expected_error: str,
     ) -> None:
@@ -181,7 +186,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_resolve_object_classes_default(
-        ldap_base_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        ldap_base_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test resolve object classes default."""
         record: t.TargetLdap.RecordPayload = {}
@@ -190,7 +195,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_validate_entry_success(
-        ldap_base_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        ldap_base_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test validate entry success."""
         result = ldap_base_sink.validate_entry(
@@ -215,7 +220,7 @@ class TestsFlextTargetLdapSinks:
         ],
     )
     def test_validate_entry_failure_cases(
-        ldap_base_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        ldap_base_sink: p.TargetLdap.Sink,
         dn: str,
         attributes: t.Ldap.OperationAttributes,
         object_classes: list[str],
@@ -229,7 +234,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_users_build_dn_success(
-        users_sink: Sinks.FlextTargetLdapModels.UsersSink,
+        users_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test users build dn success."""
         record = {"uid": "testuser", "cn": "Test User"}
@@ -239,7 +244,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_users_build_dn_missing_uid(
-        users_sink: Sinks.FlextTargetLdapModels.UsersSink,
+        users_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test users build dn missing uid."""
         result = users_sink.build_dn({"cn": "Test User"})
@@ -249,7 +254,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_users_build_attributes_basic(
-        users_sink: Sinks.FlextTargetLdapModels.UsersSink,
+        users_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test users build attributes basic."""
         result = users_sink.build_attributes({
@@ -269,7 +274,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_users_build_attributes_multivalued(
-        users_sink: Sinks.FlextTargetLdapModels.UsersSink,
+        users_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test users build attributes multivalued."""
         result = users_sink.build_attributes({
@@ -284,7 +289,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_users_get_object_classes_default(
-        users_sink: Sinks.FlextTargetLdapModels.UsersSink,
+        users_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test users get object classes default."""
         classes = users_sink.resolve_object_classes({})
@@ -292,7 +297,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_users_get_object_classes_configured(
-        ldap_target: Sinks.FlextTargetLdapModels.Target,
+        ldap_target: FlextTargetLdap,
     ) -> None:
         """Test users get object classes configured."""
         _update_target_settings(
@@ -303,7 +308,7 @@ class TestsFlextTargetLdapSinks:
                 "users_object_classes": ["customUser", "top"],
             },
         )
-        sink = Sinks.FlextTargetLdapModels.UsersSink(
+        sink = m.TargetLdap.UsersSink(
             target=ldap_target,
             stream_name="users",
             schema={
@@ -315,7 +320,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_groups_build_dn_success(
-        groups_sink: Sinks.FlextTargetLdapModels.GroupsSink,
+        groups_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test groups build dn success."""
         result = groups_sink.build_dn({"cn": "testgroup", "description": "Test Group"})
@@ -324,7 +329,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_groups_build_dn_missing_cn(
-        groups_sink: Sinks.FlextTargetLdapModels.GroupsSink,
+        groups_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test groups build dn missing cn."""
         result = groups_sink.build_dn({"description": "Test Group"})
@@ -334,7 +339,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_groups_build_attributes_basic(
-        groups_sink: Sinks.FlextTargetLdapModels.GroupsSink,
+        groups_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test groups build attributes basic."""
         result = groups_sink.build_attributes({
@@ -353,14 +358,14 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_groups_get_object_classes_default(
-        groups_sink: Sinks.FlextTargetLdapModels.GroupsSink,
+        groups_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test groups get object classes default."""
         tm.that(groups_sink.resolve_object_classes({}), eq=["groupOfNames", "top"])
 
     @staticmethod
     def test_ou_build_dn_success(
-        ou_sink: Sinks.FlextTargetLdapModels.OrganizationalUnitsSink,
+        ou_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test ou build dn success."""
         result = ou_sink.build_dn({"name": "testou", "description": "Test OU"})
@@ -369,7 +374,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_ou_build_dn_missing_ou(
-        ou_sink: Sinks.FlextTargetLdapModels.OrganizationalUnitsSink,
+        ou_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test ou build dn missing ou."""
         result = ou_sink.build_dn({"description": "Test OU"})
@@ -378,7 +383,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_ou_build_attributes_basic(
-        ou_sink: Sinks.FlextTargetLdapModels.OrganizationalUnitsSink,
+        ou_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test ou build attributes basic."""
         result = ou_sink.build_attributes({"ou": "testou", "description": "Test OU"})
@@ -386,14 +391,14 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_ou_get_object_classes_default(
-        ou_sink: Sinks.FlextTargetLdapModels.OrganizationalUnitsSink,
+        ou_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test ou get object classes default."""
         tm.that(ou_sink.resolve_object_classes({}), has="top")
 
     @staticmethod
     def test_generic_build_dn_explicit(
-        generic_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        generic_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test generic build dn explicit."""
         result = generic_sink.build_dn({"dn": "cn=test,dc=example,dc=com"})
@@ -402,7 +407,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_generic_build_dn_id_field(
-        generic_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        generic_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test generic build dn id field."""
         result = generic_sink.build_dn({"id": "testentry", "cn": "Test Entry"})
@@ -411,7 +416,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_generic_build_dn_no_identifier(
-        generic_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        generic_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test generic build dn no identifier."""
         result = generic_sink.build_dn({"description": "Test Entry"})
@@ -421,7 +426,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_generic_build_attributes_basic(
-        generic_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        generic_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test generic build attributes basic."""
         result = generic_sink.build_attributes({
@@ -435,7 +440,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_generic_get_object_classes_from_record(
-        generic_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        generic_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test generic get object classes from record."""
         tm.that(
@@ -447,7 +452,7 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_generic_get_object_classes_single_value(
-        generic_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        generic_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test generic get object classes single value."""
         tm.that(
@@ -457,14 +462,14 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     def test_generic_get_object_classes_default(
-        generic_sink: Sinks.FlextTargetLdapModels.BaseSink,
+        generic_sink: p.TargetLdap.Sink,
     ) -> None:
         """Test generic get object classes default."""
         tm.that(generic_sink.resolve_object_classes({}), eq=["top"])
 
     @staticmethod
     def test_generic_get_object_classes_configured(
-        ldap_target: Sinks.FlextTargetLdapModels.Target,
+        ldap_target: FlextTargetLdap,
     ) -> None:
         """Test generic get object classes configured."""
         _update_target_settings(
@@ -474,7 +479,7 @@ class TestsFlextTargetLdapSinks:
                 "generic_object_classes": ["customGeneric", "top"],
             },
         )
-        sink = Sinks.FlextTargetLdapModels.BaseSink(
+        sink = m.TargetLdap.BaseSink(
             target=ldap_target,
             stream_name="generic",
             schema={"properties": {"dn": {"type": "string"}, "cn": {"type": "string"}}},
