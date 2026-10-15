@@ -52,3 +52,6 @@ class FlextTargetLdapConstantsBase:
 
     # Allowed operation modes
     DEFAULT_BASE_DN: Final[str] = "dc=example,dc=com"
+
+
+__all__: list[str] = ["FlextTargetLdapConstantsBase"]
