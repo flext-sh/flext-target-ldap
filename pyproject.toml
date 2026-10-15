@@ -57,6 +57,8 @@ Documentation = "https://github.com/flext-sh/flext-target-ldap/blob/main/README.
 Homepage = "https://github.com/flext-sh/flext-target-ldap"
 Repository = "https://github.com/flext-sh/flext-target-ldap"
 
+[project.optional-dependencies]
+
 [dependency-groups]
 dev = [
   "actionlint-py>=1.7.12.24",
