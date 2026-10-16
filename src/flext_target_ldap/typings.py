@@ -9,6 +9,8 @@ from __future__ import annotations
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
 
+from flext_target_ldap._typings.base import FlextTargetLdapTypingsBase
+
 
 class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     """MRO facade composing Meltano + LDAP type namespaces."""
@@ -16,12 +18,12 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     class TargetLdap:
         """Target LDAP domain type namespace."""
 
-        type SettingsPayload = FlextMeltanoTypes.JsonMapping
-        type RecordPayload = FlextMeltanoTypes.JsonMapping
-        type MutableRecordPayload = FlextMeltanoTypes.MutableJsonMapping
-        type SchemaPayload = FlextMeltanoTypes.JsonMapping
-        type MutableSchemaPayload = FlextMeltanoTypes.MutableJsonMapping
-        type CatalogPayload = FlextMeltanoTypes.JsonMapping
+        SettingsPayload = FlextTargetLdapTypingsBase.SettingsPayload
+        RecordPayload = FlextTargetLdapTypingsBase.RecordPayload
+        MutableRecordPayload = FlextTargetLdapTypingsBase.MutableRecordPayload
+        SchemaPayload = FlextTargetLdapTypingsBase.SchemaPayload
+        MutableSchemaPayload = FlextTargetLdapTypingsBase.MutableSchemaPayload
+        CatalogPayload = FlextTargetLdapTypingsBase.CatalogPayload
 
 
 t = FlextTargetLdapTypes
