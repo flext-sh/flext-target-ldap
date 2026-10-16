@@ -1,7 +1,6 @@
 """Target LDAP constants facade.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
-src/flext_target_ldap/constants
 SPDX-License-Identifier: MIT
 """
 

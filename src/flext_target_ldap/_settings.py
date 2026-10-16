@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoSettings, m
+from flext_meltano import FlextMeltanoSettings, m, t
 
 
 class FlextTargetLdapSettings(FlextMeltanoSettings):
@@ -30,75 +30,55 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
     class _TargetLdap(m.BaseModel):
         """Namespaced LDAP target settings (connection + operation)."""
 
-        host: Annotated[str, m.Field(default="localhost", description="LDAP host")]
-        port: Annotated[int, m.Field(default=389, description="LDAP port")]
-        use_ssl: Annotated[bool, m.Field(default=False, description="Use SSL")]
-        use_tls: Annotated[bool, m.Field(default=False, description="Use TLS")]
-        bind_dn: Annotated[str, m.Field(default="", description="Bind DN")]
-        bind_password: Annotated[str, m.Field(default="", description="Bind password")]
-        timeout: Annotated[
-            int,
-            m.Field(default=30, description="Connection timeout (s)"),
-        ]
-        auto_bind: Annotated[bool, m.Field(default=True, description="Auto bind")]
-        auto_range: Annotated[bool, m.Field(default=True, description="Auto range")]
-        base_dn: Annotated[str, m.Field(default="", description="Base DN")]
-        search_filter: Annotated[
-            str,
-            m.Field(default="(objectClass=*)", description="LDAP search filter"),
-        ]
+        host: Annotated[str, m.Field(description="LDAP host")] = "localhost"
+        port: Annotated[int, m.Field(description="LDAP port")] = 389
+        use_ssl: Annotated[bool, m.Field(description="Use SSL")] = False
+        use_tls: Annotated[bool, m.Field(description="Use TLS")] = False
+        bind_dn: Annotated[str, m.Field(description="Bind DN")] = ""
+        bind_password: Annotated[str, m.Field(description="Bind password")] = ""
+        timeout: Annotated[int, m.Field(description="Connection timeout (s)")] = 30
+        auto_bind: Annotated[bool, m.Field(description="Auto bind")] = True
+        auto_range: Annotated[bool, m.Field(description="Auto range")] = True
+        base_dn: Annotated[str, m.Field(description="Base DN")] = ""
+        search_filter: Annotated[str, m.Field(description="LDAP search filter")] = (
+            "(objectClass=*)"
+        )
         search_scope: Annotated[
             str,
             m.Field(
-                default="SUBTREE",
                 description="Search scope (BASE/ONELEVEL/SUBTREE)",
             ),
-        ]
-        connect_timeout: Annotated[
-            int,
-            m.Field(default=30, description="Connect timeout (s)"),
-        ]
-        receive_timeout: Annotated[
-            int,
-            m.Field(default=30, description="Receive timeout (s)"),
-        ]
-        batch_size: Annotated[
-            int,
-            m.Field(default=1000, description="Entries per batch"),
-        ]
+        ] = "SUBTREE"
+        connect_timeout: Annotated[int, m.Field(description="Connect timeout (s)")] = 30
+        receive_timeout: Annotated[int, m.Field(description="Receive timeout (s)")] = 30
+        batch_size: Annotated[int, m.Field(description="Entries per batch")] = 1000
         max_records: Annotated[
             int | None,
             m.Field(
-                default=None,
                 description="Max total records, or None for unlimited",
             ),
-        ]
+        ] = None
         create_missing_entries: Annotated[
-            bool,
-            m.Field(default=True, description="Create LDAP entries that do not exist"),
-        ]
+            bool, m.Field(description="Create LDAP entries that do not exist")
+        ] = True
         update_existing_entries: Annotated[
-            bool,
-            m.Field(default=True, description="Update LDAP entries that already exist"),
-        ]
+            bool, m.Field(description="Update LDAP entries that already exist")
+        ] = True
         delete_removed_entries: Annotated[
             bool,
             m.Field(
-                default=False,
                 description="Delete LDAP entries removed from source",
             ),
-        ]
+        ] = False
         attribute_mapping: Annotated[
-            dict[str, str],
+            t.StrMapping,
             m.Field(
-                default_factory=dict,
                 description="Source field -> LDAP attribute map",
             ),
-        ]
+        ] = m.Field(default_factory=dict[str, str])
         object_classes: Annotated[
-            list[str],
-            m.Field(default_factory=lambda: ["top"], description="LDAP object classes"),
-        ]
+            list[str], m.Field(description="LDAP object classes")
+        ] = m.Field(default_factory=lambda: ["top"])
 
     if TYPE_CHECKING:
         TargetLdap: _TargetLdap

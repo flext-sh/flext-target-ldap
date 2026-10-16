@@ -21,6 +21,7 @@ def _docker_admin_password() -> str:
 
     Returns:
         The resulting ``str``.
+
     """
     return os.getenv("FLEXT_LDAP_TEST_DOCKER_ADMIN_PASSWORD", "") or "admin123"
 

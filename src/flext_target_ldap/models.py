@@ -11,19 +11,17 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
-from flext_target_ldap import t, u
+from flext_target_ldap import t
+from flext_target_ldap._models.config import FlextTargetLdapConfigModels
 from flext_target_ldap._models.processing_result import (
     FlextTargetLdapProcessingCounters,
 )
 from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
-
-if TYPE_CHECKING:
-    from collections.abc import MutableSequence
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
@@ -34,7 +32,11 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     Integrates with flext-core patterns for enterprise LDAP data loading.
     """
 
-    class TargetLdap:
+    class TargetLdap(
+        FlextTargetLdapConfigModels,
+        FlextTargetLdapProcessingCounters,
+        FlextTargetLdapModelsSinks,
+    ):
         """TargetLdap domain namespace."""
 
         # Sink and target implementations are part of the public model
@@ -60,22 +62,24 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             singer_field_name: Annotated[
                 t.NonEmptyStr,
-                u.Field(..., description="Singer field name from source data"),
+                FlextMeltanoModels.Field(
+                    ..., description="Singer field name from source data"
+                ),
             ]
             ldap_attribute_name: Annotated[
                 t.NonEmptyStr,
-                u.Field(..., description="Target LDAP attribute name"),
+                FlextMeltanoModels.Field(..., description="Target LDAP attribute name"),
             ]
             is_required: Annotated[
                 bool,
-                u.Field(
+                FlextMeltanoModels.Field(
                     default=False,
                     description="Whether this attribute is required for LDAP entry",
                 ),
             ]
             transformation_rule: Annotated[
                 str | None,
-                u.Field(
+                FlextMeltanoModels.Field(
                     default=None,
                     description=(
                         "Optional transformation rule (e.g., 'lowercase', 'uppercase')"
@@ -84,7 +88,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
             ]
             default_value: Annotated[
                 str | None,
-                u.Field(
+                FlextMeltanoModels.Field(
                     default=None,
                     description="Default value if source field is missing",
                 ),
@@ -99,46 +103,54 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
 
             distinguished_name: Annotated[
                 t.NonEmptyStr,
-                u.Field(..., description="LDAP Distinguished Name (DN)"),
+                FlextMeltanoModels.Field(
+                    ..., description="LDAP Distinguished Name (DN)"
+                ),
             ]
             object_classes: Annotated[
-                MutableSequence[str],
-                u.Field(
+                t.MutableSequenceOf[str],
+                FlextMeltanoModels.Field(
                     description="LDAP object classes for this entry",
                     default_factory=list,
                 ),
             ]
             attributes: Annotated[
                 t.MutableStrSequenceMapping,
-                u.Field(
+                FlextMeltanoModels.Field(
                     description="LDAP attributes with values",
                     default_factory=dict,
                 ),
             ]
             entry_type: Annotated[
                 str,
-                u.Field(
+                FlextMeltanoModels.Field(
                     default="generic",
                     description="Type of LDAP entry (user, group, ou, etc.)",
                 ),
             ]
 
-            @u.field_validator("object_classes")
+            @FlextMeltanoModels.field_validator("object_classes")
             @classmethod
             def validate_object_classes(
                 cls,
-                v: MutableSequence[str],
-            ) -> MutableSequence[str]:
+                v: t.MutableSequenceOf[str],
+            ) -> t.MutableSequenceOf[str]:
                 """Validate object classes contain 'top'.
 
+                Appends the required ``top`` class when it is absent.
+
+                Args:
+                    v: Object classes declared on the entry.
+
                 Returns:
-                    The resulting ``MutableSequence[str]``.
+                    The object classes, with ``top`` ensured.
+
                 """
                 if "top" not in v:
                     v.append("top")
                 return v
 
-            @u.computed_field
+            @FlextMeltanoModels.computed_field
             @property
             def parent_dn(self) -> str:
                 """Parent DN derived from the distinguished name."""
@@ -146,7 +158,7 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 parts = distinguished_name.split(",", 1)
                 return parts[1].strip() if len(parts) > 1 else ""
 
-            @u.computed_field
+            @FlextMeltanoModels.computed_field
             @property
             def rdn(self) -> str:
                 """Relative distinguished name derived from the DN."""
@@ -154,36 +166,31 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
                 rdn_part: str = distinguished_name.split(",", 1)[0].strip()
                 return rdn_part
 
-            def has_object_class(self, object_class: str) -> bool:
-                """Check if entry has a specific object class.
-
-                Returns:
-                    The resulting ``bool``.
-                """
-                present: bool = u.Ldap.norm_in(object_class, self.object_classes)
-                return present
-
         class TransformationRule(FlextLdapModels.Value):
             """Rule for transforming LDAP data with pattern matching and replacement."""
 
             name: Annotated[
                 t.NonEmptyStr,
-                u.Field(description="Unique name identifying this transformation rule"),
+                FlextMeltanoModels.Field(
+                    description="Unique name identifying this transformation rule"
+                ),
             ]
             pattern: Annotated[
                 t.NonEmptyStr,
-                u.Field(description="Regex pattern to match in source data"),
+                FlextMeltanoModels.Field(
+                    description="Regex pattern to match in source data"
+                ),
             ]
             replacement: Annotated[
                 str,
-                u.Field(
+                FlextMeltanoModels.Field(
                     default="",
                     description="Replacement string applied when pattern matches",
                 ),
             ]
             enabled: Annotated[
                 bool,
-                u.Field(
+                FlextMeltanoModels.Field(
                     default=True,
                     description="Whether this transformation rule is active",
                 ),

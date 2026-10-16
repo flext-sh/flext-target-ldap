@@ -13,7 +13,6 @@ import pytest
 from flext_tests import FlextTestsDocker, tm
 
 from flext_target_ldap import FlextTargetLdap, settings
-from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks as Sinks
 from tests import c, m, p, t, u
 
 
@@ -34,6 +33,7 @@ def ldap_runtime() -> m.Tests.ContainerConfig:
 
     Returns:
         The resulting ``m.Tests.ContainerConfig``.
+
     """
     container_name = c.Tests.CONNECTIVITY_MARKER_CONTAINERS["ldap"]
     docker = FlextTestsDocker.shared(
@@ -55,6 +55,7 @@ def ldap_runtime_settings_payload(
 
     Returns:
         The resulting ``t.TargetLdap.SettingsPayload``.
+
     """
     payload: t.MutableJsonMapping = dict(ldap_settings_payload)
     payload[c.TargetLdap.KEY_HOST] = ldap_runtime.host
@@ -76,6 +77,7 @@ def ldap_client(
 
     Returns:
         The resulting ``p.TargetLdap.Client``.
+
     """
     return u.TargetLdap.client()(settings=ldap_settings_payload)
 
@@ -88,6 +90,7 @@ def ldap_runtime_client(
 
     Returns:
         The resulting ``p.TargetLdap.Client``.
+
     """
     return u.TargetLdap.client()(settings=ldap_runtime_settings_payload)
 
@@ -98,6 +101,7 @@ def ldap_base_dn(ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload) ->
 
     Raises:
         ValueError: If settings.TargetLdap.base_dn must name the LDAP integration base.
+
     """
     base_dn = ldap_runtime_settings_payload.get(c.TargetLdap.KEY_BASE_DN)
     if not isinstance(base_dn, str) or not base_dn:
@@ -114,6 +118,7 @@ def target_ldap(
 
     Returns:
         The resulting ``FlextTargetLdap``.
+
     """
     return FlextTargetLdap(settings=ldap_runtime_settings_payload)
 
@@ -121,10 +126,11 @@ def target_ldap(
 @pytest.fixture
 def ldap_target(
     ldap_settings_payload: t.TargetLdap.SettingsPayload,
-) -> Sinks.FlextTargetLdapModels.Target:
-    """Build the public target model from production settings.
+) -> FlextTargetLdap:
+    """Build the public target API from production settings.
 
     Returns:
-        The resulting ``Sinks.FlextTargetLdapModels.Target``.
+        The resulting ``FlextTargetLdap``.
+
     """
-    return Sinks.FlextTargetLdapModels.Target(settings=dict(ldap_settings_payload))
+    return FlextTargetLdap(settings=ldap_settings_payload)
