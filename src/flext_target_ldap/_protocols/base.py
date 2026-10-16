@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_ldap import FlextLdapProtocols
+from flext_ldap import p
 
 from flext_target_ldap import t
 
@@ -125,7 +125,7 @@ class FlextTargetLdapProtocolsBase:
             base_dn: str,
             search_filter: str = "(objectClass=*)",
             attributes: t.StrSequence | None = None,
-        ) -> p.ResultView[t.SequenceOf[FlextLdapProtocols.Ldif.Entry]]:
+        ) -> p.ResultView[t.SequenceOf[p.Ldif.Entry]]:
             """Search entries through the target client."""
             ...
 
