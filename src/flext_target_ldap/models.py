@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """FLEXT Target LDAP Models - Consolidated domain models following Models patterns.
 
 This module implements the FlextTargetLdapModels class that extends FlextModels,
@@ -17,11 +18,11 @@ from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
 from flext_target_ldap import t
-from flext_target_ldap._models.config import FlextTargetLdapConfigModels
-from flext_target_ldap._models.processing_result import (
+from flext_target_ldap._models import (
+    FlextTargetLdapConfigModels,
+    FlextTargetLdapModelsSinks,
     FlextTargetLdapProcessingCounters,
 )
-from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 
 
 class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
