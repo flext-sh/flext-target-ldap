@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import runtime_checkable
 
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoProtocols
