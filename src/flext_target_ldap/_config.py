@@ -13,7 +13,6 @@ from __future__ import annotations
 from typing import Annotated
 
 from flext_meltano import FlextMeltanoConfig, m
-from flext_meltano.models import FlextMeltanoModelsConfig
 
 
 class FlextTargetLdapConfig(FlextMeltanoConfig):
@@ -24,13 +23,13 @@ class FlextTargetLdapConfig(FlextMeltanoConfig):
     """
 
     TargetLdap: Annotated[
-        FlextMeltanoModelsConfig.MeltanoNamespace,
+        m.Meltano.MeltanoNamespace,
         m.Field(
             description=(
                 "Open namespace exposing ``config/*.yaml`` under ``TargetLdap``."
             ),
         ),
-    ] = FlextMeltanoModelsConfig.MeltanoNamespace()
+    ] = m.Meltano.MeltanoNamespace()
 
 
 config: FlextTargetLdapConfig = FlextTargetLdapConfig.fetch_global()
