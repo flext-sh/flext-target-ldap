@@ -27,7 +27,7 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
         extra="ignore",
     )
 
-    class _TargetLdap(m.BaseModel):
+    class _TargetLdap(m.StrictModel):
         """Namespaced LDAP target settings (connection + operation)."""
 
         host: Annotated[str, m.Field(description="LDAP host")] = "localhost"
