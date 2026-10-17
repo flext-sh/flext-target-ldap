@@ -19,11 +19,8 @@ class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     """MRO facade composing Meltano + LDAP protocol namespaces."""
 
     @runtime_checkable
-    class TargetLdap(FlextLdapProtocols.Ldap, Protocol):
+    class TargetLdap(FlextTargetLdapProtocolsBase):
         """Target LDAP domain protocol namespace."""
-
-        Sink = FlextTargetLdapProtocolsBase.Sink
-        Client = FlextTargetLdapProtocolsBase.Client
 
 
 p = FlextTargetLdapProtocols
