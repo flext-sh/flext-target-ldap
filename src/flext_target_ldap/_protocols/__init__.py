@@ -1,7 +1,7 @@
 # AUTO-GENERATED FILE — Regenerate with: make gen
 """Flext Target Ldap. Protocols package.
 
-Copyright (c) 2026 FLEXT Team. All rights reserved.
+Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 

@@ -61,6 +61,7 @@ Repository = "https://github.com/flext-sh/flext-target-ldap"
 
 [dependency-groups]
 dev = [
+  "flext-infra @ git+https://github.com/flext-sh/flext-infra.git@0.12.0-dev",
   "mkdocstrings-python>=2.0.9",
   "actionlint-py>=1.7.12.24",
   "bandit>=1.9.4",
@@ -461,6 +462,7 @@ runtime-evaluated-base-classes = [
   "flext_meltano.FlextMeltanoSettings",
   "flext_meltano.m.BaseModel",
   "flext_target_ldap.FlextTargetLdapSettings",
+  "flext_tests.FlextTestsModels.Tests",
   "flext_tests.FlextTestsServiceBase",
   "flext_tests.FlextTestsSettings",
   "pydantic.BaseModel",

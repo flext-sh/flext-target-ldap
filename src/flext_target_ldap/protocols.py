@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Target LDAP protocol facade via MRO composition.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
@@ -11,7 +12,7 @@ from typing import Protocol, runtime_checkable
 from flext_ldap import FlextLdapProtocols
 from flext_meltano import FlextMeltanoProtocols
 
-from flext_target_ldap._protocols.base import FlextTargetLdapProtocolsBase
+from flext_target_ldap._protocols import FlextTargetLdapProtocolsBase
 
 
 class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):

@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Singer target utilities for LDAP domain operations.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -10,10 +11,12 @@ from __future__ import annotations
 from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_target_ldap._utilities.catalog import FlextTargetLdapUtilitiesCatalog
-from flext_target_ldap._utilities.client import FlextTargetLdapClient
-from flext_target_ldap._utilities.service_runtime import FlextTargetLdapServiceRuntime
-from flext_target_ldap._utilities.settings import FlextTargetLdapUtilitiesSettings
+from flext_target_ldap._utilities import (
+    FlextTargetLdapClient,
+    FlextTargetLdapServiceRuntime,
+    FlextTargetLdapUtilitiesCatalog,
+    FlextTargetLdapUtilitiesSettings,
+)
 
 
 class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
@@ -29,10 +32,10 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     """
 
     class TargetLdap(
+        FlextTargetLdapUtilitiesCatalog,
         FlextTargetLdapClient,
         FlextTargetLdapServiceRuntime,
         FlextTargetLdapUtilitiesSettings,
-        FlextTargetLdapUtilitiesCatalog,
     ):
         """Singer protocol utilities for target operations."""
 
