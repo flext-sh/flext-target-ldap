@@ -12,7 +12,7 @@ from flext_meltano import m
 class FlextTargetLdapConfigModels:
     """Field-only declarations for the TargetLdap config singleton."""
 
-    class ConfigRoot(m.BaseModel):
+    class ConfigRoot(m.FrozenModel):
         """Validated root loaded by the private config composition."""
 
         model_config = m.ConfigDict(frozen=True, extra="ignore")
