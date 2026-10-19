@@ -19,7 +19,7 @@ from tests import c, m, p, t, u
 @pytest.fixture
 def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
     """Return the flat target payload derived from the production settings SSOT."""
-    return t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+    return u.Cli.JSON_MAPPING_ADAPTER.validate_python(
         settings.TargetLdap.model_dump(mode="json"),
     )
 
@@ -66,7 +66,7 @@ def ldap_runtime_settings_payload(
     payload[c.TargetLdap.KEY_BASE_DN] = c.TargetLdap.Tests.DOCKER_BASE_DN
     payload[c.TargetLdap.KEY_BIND_DN] = c.TargetLdap.Tests.DOCKER_ADMIN_DN
     payload[c.TargetLdap.KEY_BIND_CREDENTIAL] = c.TargetLdap.Tests.DOCKER_ADMIN_PASSWORD
-    return t.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
+    return u.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
 
 
 @pytest.fixture

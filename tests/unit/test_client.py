@@ -90,8 +90,7 @@ class TestsFlextTargetLdapClient:
             tm.ok(found)
             entries = found.value
             tm.that(len(entries), eq=1)
-            entry_dn = tm.not_none(entries[0].dn)
-            tm.that(entry_dn.value, eq=dn)
+            tm.that(entries[0].dn_str, eq=dn)
 
             deleted = ldap_runtime_client.delete_entry(dn)
             tm.ok(deleted)
