@@ -70,7 +70,7 @@ class FlextTargetLdapOrchestrator:
                 processed_count += 1
             result_dict: t.HeaderMapping = {
                 "loaded_records": processed_count,
-                "status": "completed",
+                "status": c.Status.COMPLETED.value,
             }
             FlextTargetLdapOrchestrator.logger.info(
                 "LDAP data loading completed: %d records",
