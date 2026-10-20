@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
 from flext_meltano import FlextMeltanoSettings, m, t, u
+from typing_extensions import TypeForm
 
 
 class FlextTargetLdapSettings(FlextMeltanoSettings):
@@ -75,7 +76,7 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
             m.Field(
                 description="Source field -> LDAP attribute map",
             ),
-        ] = m.Field(default_factory=u.empty(t.StrMapping))
+        ] = m.Field(default_factory=u.empty(TypeForm(t.StrMapping)))
         object_classes: Annotated[
             t.StrSequence, m.Field(description="LDAP object classes")
         ] = m.Field(default_factory=lambda: ["top"])

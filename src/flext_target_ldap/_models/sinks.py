@@ -340,13 +340,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 _record: t.TargetLdap.RecordPayload,
-                context: t.TargetLdap.RecordPayload,
+                _context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a single record. Override in subclasses.
 
                 Args:
                     _record: Singer record payload to process.
-                    context: Singer record context metadata.
+                    _context: Singer record context metadata.
 
                 Returns:
                     The outcome of processing the record; a failure result
@@ -648,12 +648,12 @@ class FlextTargetLdapModelsSinks:
             @override
             def resolve_object_classes(
                 self,
-                record: t.TargetLdap.RecordPayload,
+                _record: t.TargetLdap.RecordPayload,
             ) -> t.StrSequence:
                 """Get object classes for user entry.
 
                 Args:
-                    record: Singer record payload that may carry object
+                    _record: Singer record payload that may carry object
                         classes.
 
                 Returns:
@@ -673,13 +673,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 _record: t.TargetLdap.RecordPayload,
-                context: t.TargetLdap.RecordPayload,
+                _context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a user record.
 
                 Args:
                     _record: Singer record payload to persist.
-                    context: Singer record context metadata.
+                    _context: Singer record context metadata.
 
                 Returns:
                     The outcome of persisting the user entry.
@@ -758,12 +758,12 @@ class FlextTargetLdapModelsSinks:
             @override
             def resolve_object_classes(
                 self,
-                record: t.TargetLdap.RecordPayload,
+                _record: t.TargetLdap.RecordPayload,
             ) -> t.StrSequence:
                 """Get object classes for group entry.
 
                 Args:
-                    record: Singer record payload that may carry object
+                    _record: Singer record payload that may carry object
                         classes.
 
                 Returns:
@@ -783,13 +783,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 _record: t.TargetLdap.RecordPayload,
-                context: t.TargetLdap.RecordPayload,
+                _context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a group record.
 
                 Args:
                     _record: Singer record payload to persist.
-                    context: Singer record context metadata.
+                    _context: Singer record context metadata.
 
                 Returns:
                     The outcome of persisting the group entry.
@@ -862,13 +862,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 _record: t.TargetLdap.RecordPayload,
-                context: t.TargetLdap.RecordPayload,
+                _context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process an organizational unit record.
 
                 Args:
                     _record: Singer record payload to persist.
-                    context: Singer record context metadata.
+                    _context: Singer record context metadata.
 
                 Returns:
                     The outcome of persisting the OU entry.
