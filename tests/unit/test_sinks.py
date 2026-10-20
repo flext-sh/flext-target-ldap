@@ -181,7 +181,7 @@ class TestsFlextTargetLdapSinks:
         else:
             result = ldap_base_sink.build_attributes(record)
         assert result.failure
-        assert result.error is not None
+        tm.not_none(result.error)
         assert expected_error in result.error
 
     @staticmethod
@@ -229,7 +229,7 @@ class TestsFlextTargetLdapSinks:
         """Test validate entry failure cases."""
         result = ldap_base_sink.validate_entry(dn, attributes, object_classes)
         tm.fail(result)
-        assert result.error is not None
+        tm.not_none(result.error)
         assert expected_message in result.error
 
     @staticmethod
@@ -249,7 +249,7 @@ class TestsFlextTargetLdapSinks:
         """Test users build dn missing uid."""
         result = users_sink.build_dn({"cn": "Test User"})
         tm.fail(result)
-        assert result.error is not None
+        tm.not_none(result.error)
         assert "No value found for RDN attribute 'uid'" in result.error
 
     @staticmethod
@@ -334,7 +334,7 @@ class TestsFlextTargetLdapSinks:
         """Test groups build dn missing cn."""
         result = groups_sink.build_dn({"description": "Test Group"})
         tm.fail(result)
-        assert result.error is not None
+        tm.not_none(result.error)
         assert "No value found for RDN attribute 'cn'" in result.error
 
     @staticmethod
@@ -421,7 +421,7 @@ class TestsFlextTargetLdapSinks:
         """Test generic build dn no identifier."""
         result = generic_sink.build_dn({"description": "Test Entry"})
         tm.fail(result)
-        assert result.error is not None
+        tm.not_none(result.error)
         assert "No ID or name found for generic entry" in result.error
 
     @staticmethod
@@ -435,7 +435,7 @@ class TestsFlextTargetLdapSinks:
             "description": "A test entry",
         })
         tm.fail(result)
-        assert result.error is not None
+        tm.not_none(result.error)
         assert "must be implemented in subclass" in result.error
 
     @staticmethod
