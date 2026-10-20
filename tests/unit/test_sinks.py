@@ -180,9 +180,7 @@ class TestsFlextTargetLdapSinks:
             result = ldap_base_sink.build_dn(record)
         else:
             result = ldap_base_sink.build_attributes(record)
-        tm.fail(result)
-        tm.not_none(result.error)
-        assert expected_error in result.error
+        tm.that(tm.fail(result), has=expected_error)
 
     @staticmethod
     def test_resolve_object_classes_default(
@@ -228,9 +226,7 @@ class TestsFlextTargetLdapSinks:
     ) -> None:
         """Test validate entry failure cases."""
         result = ldap_base_sink.validate_entry(dn, attributes, object_classes)
-        tm.fail(result)
-        tm.not_none(result.error)
-        assert expected_message in result.error
+        tm.that(tm.fail(result), has=expected_message)
 
     @staticmethod
     def test_users_build_dn_success(
@@ -248,9 +244,7 @@ class TestsFlextTargetLdapSinks:
     ) -> None:
         """Test users build dn missing uid."""
         result = users_sink.build_dn({"cn": "Test User"})
-        tm.fail(result)
-        tm.not_none(result.error)
-        assert "No value found for RDN attribute 'uid'" in result.error
+        tm.that(tm.fail(result), has="No value found for RDN attribute 'uid'")
 
     @staticmethod
     def test_users_build_attributes_basic(
@@ -333,9 +327,7 @@ class TestsFlextTargetLdapSinks:
     ) -> None:
         """Test groups build dn missing cn."""
         result = groups_sink.build_dn({"description": "Test Group"})
-        tm.fail(result)
-        tm.not_none(result.error)
-        assert "No value found for RDN attribute 'cn'" in result.error
+        tm.that(tm.fail(result), has="No value found for RDN attribute 'cn'")
 
     @staticmethod
     def test_groups_build_attributes_basic(
@@ -420,9 +412,7 @@ class TestsFlextTargetLdapSinks:
     ) -> None:
         """Test generic build dn no identifier."""
         result = generic_sink.build_dn({"description": "Test Entry"})
-        tm.fail(result)
-        tm.not_none(result.error)
-        assert "No ID or name found for generic entry" in result.error
+        tm.that(tm.fail(result), has="No ID or name found for generic entry")
 
     @staticmethod
     def test_generic_build_attributes_basic(
@@ -434,9 +424,7 @@ class TestsFlextTargetLdapSinks:
             "cn": "Test Entry",
             "description": "A test entry",
         })
-        tm.fail(result)
-        tm.not_none(result.error)
-        assert "must be implemented in subclass" in result.error
+        tm.that(tm.fail(result), has="must be implemented in subclass")
 
     @staticmethod
     def test_generic_get_object_classes_from_record(
