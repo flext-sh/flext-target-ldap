@@ -10,10 +10,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from flext_tests import FlextTestsDocker, tm
+from flext_tests import FlextTestsDocker
 
 from flext_target_ldap import FlextTargetLdap, settings
-from tests import c, m, p, t, u
+from tests import c, m, p, t, tm, u
 
 
 @pytest.fixture
