@@ -215,7 +215,7 @@ class FlextTargetLdapModelsSinks:
                 return attributes
 
             @staticmethod
-            def build_attributes(  # ruff: ignore[unused-method-argument]
+            def build_attributes(
                 record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes from record. Override in subclasses.
@@ -227,6 +227,7 @@ class FlextTargetLdapModelsSinks:
                     A failure result; subclasses must provide attributes.
 
                 """
+                del record
                 return r[t.Ldap.OperationAttributes].fail(
                     "build_attributes must be implemented in subclass",
                 )
@@ -340,13 +341,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 record: t.TargetLdap.RecordPayload,
-                _context: t.TargetLdap.RecordPayload,
+                context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a single record. Override in subclasses.
 
                 Args:
                     record: Singer record payload to process.
-                    _context: Singer record context metadata.
+                    context: Singer record context metadata.
 
                 Returns:
                     The outcome of processing the record; a failure result
@@ -673,13 +674,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 record: t.TargetLdap.RecordPayload,
-                _context: t.TargetLdap.RecordPayload,
+                context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a user record.
 
                 Args:
                     record: Singer record payload to persist.
-                    _context: Singer record context metadata.
+                    context: Singer record context metadata.
 
                 Returns:
                     The outcome of persisting the user entry.
@@ -688,9 +689,7 @@ class FlextTargetLdapModelsSinks:
 
                 def _run_process_record() -> p.Result[bool]:
                     username = (
-                        record.get("username")
-                        or record.get("uid")
-                        or record.get("cn")
+                        record.get("username") or record.get("uid") or record.get("cn")
                     )
                     if not username:
                         self._processing_result.add_error("No username found in record")
@@ -783,13 +782,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 record: t.TargetLdap.RecordPayload,
-                _context: t.TargetLdap.RecordPayload,
+                context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a group record.
 
                 Args:
                     record: Singer record payload to persist.
-                    _context: Singer record context metadata.
+                    context: Singer record context metadata.
 
                 Returns:
                     The outcome of persisting the group entry.
@@ -862,13 +861,13 @@ class FlextTargetLdapModelsSinks:
             def process_record(
                 self,
                 record: t.TargetLdap.RecordPayload,
-                _context: t.TargetLdap.RecordPayload,
+                context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process an organizational unit record.
 
                 Args:
                     record: Singer record payload to persist.
-                    _context: Singer record context metadata.
+                    context: Singer record context metadata.
 
                 Returns:
                     The outcome of persisting the OU entry.
