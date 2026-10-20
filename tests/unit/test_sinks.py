@@ -180,7 +180,7 @@ class TestsFlextTargetLdapSinks:
             result = ldap_base_sink.build_dn(record)
         else:
             result = ldap_base_sink.build_attributes(record)
-        assert result.failure
+        tm.fail(result)
         tm.not_none(result.error)
         assert expected_error in result.error
 

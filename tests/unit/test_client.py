@@ -52,11 +52,11 @@ class TestsFlextTargetLdapClient:
         """Test connect and disconnect reach configured runtime."""
         connected = ldap_runtime_client.connect()
         tm.ok(connected)
-        tm.that(connected.value, eq=True)
+        tm.ok(connected.value)
 
         disconnected = ldap_runtime_client.disconnect()
         tm.ok(disconnected)
-        tm.that(disconnected.value, eq=True)
+        tm.ok(disconnected.value)
 
     @staticmethod
     @pytest.mark.docker
