@@ -22,8 +22,13 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def ldap_base_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a base sink with a DN-keyed schema."""
+    def ldap_base_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+        """Provide a base sink with a DN-keyed schema.
+
+        Returns:
+            The base sink bound to the target.
+
+        """
         ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
@@ -37,8 +42,13 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def users_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a user sink keyed by uid."""
+    def users_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+        """Provide a user sink keyed by uid.
+
+        Returns:
+            The user sink bound to the target.
+
+        """
         ldap_target.settings = {
             **ldap_target.settings,
             "base_dn": "dc=example,dc=com",
@@ -60,8 +70,13 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def groups_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a group sink keyed by cn."""
+    def groups_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+        """Provide a group sink keyed by cn.
+
+        Returns:
+            The group sink bound to the target.
+
+        """
         ldap_target.settings = {
             **ldap_target.settings,
             "base_dn": "dc=example,dc=com",
@@ -79,8 +94,13 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def ou_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide an organizational-unit sink keyed by ou."""
+    def ou_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+        """Provide an organizational-unit sink keyed by ou.
+
+        Returns:
+            The organizational-unit sink bound to the target.
+
+        """
         ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
@@ -94,8 +114,13 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def generic_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a generic sink keyed by id."""
+    def generic_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+        """Provide a generic sink keyed by id.
+
+        Returns:
+            The generic sink bound to the target.
+
+        """
         ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
@@ -265,6 +290,7 @@ class TestsFlextTargetLdapSinks:
 
         @staticmethod
         def test_users_get_object_classes_configured(
+            *,
             ldap_target: FlextTargetLdap,
         ) -> None:
             """Test users get object classes configured."""
@@ -447,6 +473,7 @@ class TestsFlextTargetLdapSinks:
 
         @staticmethod
         def test_generic_get_object_classes_configured(
+            *,
             ldap_target: FlextTargetLdap,
         ) -> None:
             """Test generic get object classes configured."""
