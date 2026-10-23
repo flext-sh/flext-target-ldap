@@ -147,7 +147,7 @@ def generic_sink(
     )
 
 
-class TestsFlextTargetLdapSinks:
+class TestsFlextTargetLdapSinks:  # ruff: ignore[too-many-public-methods]
     """Behavior contract for test_sinks."""
 
     @staticmethod

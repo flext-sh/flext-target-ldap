@@ -22,6 +22,6 @@ class TestsFlextTargetLdapTransformation:
             enabled=True,
         )
         tm.that(rule.name, eq="test_rule")
-        assert rule.enabled
+        tm.that(rule.enabled, truth=True)
         tm.that(rule.pattern, eq="orclUser")
         tm.that(rule.replacement, eq="person")
