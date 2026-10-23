@@ -147,8 +147,8 @@ def generic_sink(
     )
 
 
-class TestsFlextTargetLdapSinks:  # ruff: ignore[too-many-public-methods]
-    """Behavior contract for test_sinks."""
+class TestsBaseSink:
+    """Behavior contract for base sink initialization and validation."""
 
     @staticmethod
     def test_ldap_sink_initialization(
@@ -227,6 +227,10 @@ class TestsFlextTargetLdapSinks:  # ruff: ignore[too-many-public-methods]
         """Test validate entry failure cases."""
         result = ldap_base_sink.validate_entry(dn, attributes, object_classes)
         tm.that(tm.fail(result), has=expected_message)
+
+
+class TestsUsersSink:
+    """Behavior contract for user entries and object classes."""
 
     @staticmethod
     def test_users_build_dn_success(
@@ -312,6 +316,10 @@ class TestsFlextTargetLdapSinks:  # ruff: ignore[too-many-public-methods]
         )
         tm.that(sink.resolve_object_classes({}), eq=["customUser", "top"])
 
+
+class TestsGroupsSink:
+    """Behavior contract for group entries and object classes."""
+
     @staticmethod
     def test_groups_build_dn_success(
         groups_sink: p.TargetLdap.Sink,
@@ -355,6 +363,10 @@ class TestsFlextTargetLdapSinks:  # ruff: ignore[too-many-public-methods]
         """Test groups get object classes default."""
         tm.that(groups_sink.resolve_object_classes({}), eq=["groupOfNames", "top"])
 
+
+class TestsOrganizationalUnitsSink:
+    """Behavior contract for organizational unit entries and object classes."""
+
     @staticmethod
     def test_ou_build_dn_success(
         ou_sink: p.TargetLdap.Sink,
@@ -387,6 +399,10 @@ class TestsFlextTargetLdapSinks:  # ruff: ignore[too-many-public-methods]
     ) -> None:
         """Test ou get object classes default."""
         tm.that(ou_sink.resolve_object_classes({}), has="top")
+
+
+class TestsGenericSink:
+    """Behavior contract for generic entry identifiers and object classes."""
 
     @staticmethod
     def test_generic_build_dn_explicit(
