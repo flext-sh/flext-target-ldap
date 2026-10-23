@@ -6,15 +6,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import pytest
 
 from flext_target_ldap import FlextTargetLdap
-from tests import m, p, tm
-
-if TYPE_CHECKING:
-    from tests import t
+from tests import m, p, t, tm
 
 
 class TestsFlextTargetLdapSinks:
@@ -249,8 +244,7 @@ class TestsFlextTargetLdapSinks:
             """Test users build dn success."""
             record = {"uid": "testuser", "cn": "Test User"}
             result = users_sink.build_dn(record)
-            tm.ok(result)
-            tm.that(result.value, eq="uid=testuser,dc=example,dc=com")
+            tm.ok(result, eq="uid=testuser,dc=example,dc=com")
 
         @staticmethod
         def test_users_build_dn_missing_uid(
@@ -344,8 +338,7 @@ class TestsFlextTargetLdapSinks:
                 "cn": "testgroup",
                 "description": "Test Group",
             })
-            tm.ok(result)
-            tm.that(result.value, eq="cn=testgroup,dc=example,dc=com")
+            tm.ok(result, eq="cn=testgroup,dc=example,dc=com")
 
         @staticmethod
         def test_groups_build_dn_missing_cn(
@@ -432,8 +425,7 @@ class TestsFlextTargetLdapSinks:
         ) -> None:
             """Test generic build dn explicit."""
             result = generic_sink.build_dn({"dn": "cn=test,dc=example,dc=com"})
-            tm.ok(result)
-            tm.that(result.value, eq="cn=test,dc=example,dc=com")
+            tm.ok(result, eq="cn=test,dc=example,dc=com")
 
         @staticmethod
         def test_generic_build_dn_id_field(
@@ -441,8 +433,7 @@ class TestsFlextTargetLdapSinks:
         ) -> None:
             """Test generic build dn id field."""
             result = generic_sink.build_dn({"id": "testentry", "cn": "Test Entry"})
-            tm.ok(result)
-            tm.that(result.value, eq="cn=testentry,dc=example,dc=com")
+            tm.ok(result, eq="cn=testentry,dc=example,dc=com")
 
         @staticmethod
         def test_generic_build_dn_no_identifier(
