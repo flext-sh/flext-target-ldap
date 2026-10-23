@@ -21,15 +21,26 @@ class TestsFlextTargetLdapSinks:
     """Behavior contract for test_sinks."""
 
     @staticmethod
+    def configure_target(
+        updates: t.TargetLdap.SettingsPayload,
+        target: FlextTargetLdap,
+    ) -> None:
+        """Merge settings into the existing target used by a sink."""
+        target.settings = {**target.settings, **updates}
+
+    @staticmethod
     @pytest.fixture
-    def ldap_base_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+    def ldap_base_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
         """Provide a base sink with a DN-keyed schema.
 
         Returns:
             The base sink bound to the target.
 
         """
-        ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
+        TestsFlextTargetLdapSinks.configure_target(
+            {"base_dn": "dc=example,dc=com"},
+            ldap_target,
+        )
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
         }
@@ -42,18 +53,20 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def users_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+    def users_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
         """Provide a user sink keyed by uid.
 
         Returns:
             The user sink bound to the target.
 
         """
-        ldap_target.settings = {
-            **ldap_target.settings,
-            "base_dn": "dc=example,dc=com",
-            "user_rdn_attribute": "uid",
-        }
+        TestsFlextTargetLdapSinks.configure_target(
+            {
+                "base_dn": "dc=example,dc=com",
+                "user_rdn_attribute": "uid",
+            },
+            ldap_target,
+        )
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {
                 "uid": {"type": "string"},
@@ -70,18 +83,20 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def groups_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+    def groups_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
         """Provide a group sink keyed by cn.
 
         Returns:
             The group sink bound to the target.
 
         """
-        ldap_target.settings = {
-            **ldap_target.settings,
-            "base_dn": "dc=example,dc=com",
-            "group_rdn_attribute": "cn",
-        }
+        TestsFlextTargetLdapSinks.configure_target(
+            {
+                "base_dn": "dc=example,dc=com",
+                "group_rdn_attribute": "cn",
+            },
+            ldap_target,
+        )
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {"cn": {"type": "string"}, "member": {"type": "array"}},
         }
@@ -94,14 +109,17 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def ou_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+    def ou_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
         """Provide an organizational-unit sink keyed by ou.
 
         Returns:
             The organizational-unit sink bound to the target.
 
         """
-        ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
+        TestsFlextTargetLdapSinks.configure_target(
+            {"base_dn": "dc=example,dc=com"},
+            ldap_target,
+        )
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
         }
@@ -114,14 +132,17 @@ class TestsFlextTargetLdapSinks:
 
     @staticmethod
     @pytest.fixture
-    def generic_sink(*, ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
+    def generic_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
         """Provide a generic sink keyed by id.
 
         Returns:
             The generic sink bound to the target.
 
         """
-        ldap_target.settings = {**ldap_target.settings, "base_dn": "dc=example,dc=com"}
+        TestsFlextTargetLdapSinks.configure_target(
+            {"base_dn": "dc=example,dc=com"},
+            ldap_target,
+        )
         schema: t.TargetLdap.SchemaPayload = {
             "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
         }
@@ -290,16 +311,17 @@ class TestsFlextTargetLdapSinks:
 
         @staticmethod
         def test_users_get_object_classes_configured(
-            *,
             ldap_target: FlextTargetLdap,
         ) -> None:
             """Test users get object classes configured."""
-            ldap_target.settings = {
-                **ldap_target.settings,
-                "base_dn": "dc=example,dc=com",
-                "user_rdn_attribute": "uid",
-                "users_object_classes": ["customUser", "top"],
-            }
+            TestsFlextTargetLdapSinks.configure_target(
+                {
+                    "base_dn": "dc=example,dc=com",
+                    "user_rdn_attribute": "uid",
+                    "users_object_classes": ["customUser", "top"],
+                },
+                ldap_target,
+            )
             sink = m.TargetLdap.UsersSink(
                 target=ldap_target,
                 stream_name="users",
@@ -473,15 +495,16 @@ class TestsFlextTargetLdapSinks:
 
         @staticmethod
         def test_generic_get_object_classes_configured(
-            *,
             ldap_target: FlextTargetLdap,
         ) -> None:
             """Test generic get object classes configured."""
-            ldap_target.settings = {
-                **ldap_target.settings,
-                "base_dn": "dc=example,dc=com",
-                "generic_object_classes": ["customGeneric", "top"],
-            }
+            TestsFlextTargetLdapSinks.configure_target(
+                {
+                    "base_dn": "dc=example,dc=com",
+                    "generic_object_classes": ["customGeneric", "top"],
+                },
+                ldap_target,
+            )
             sink = m.TargetLdap.BaseSink(
                 target=ldap_target,
                 stream_name="generic",
