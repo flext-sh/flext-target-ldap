@@ -260,7 +260,6 @@ project-excludes = [
   "**/site-packages/**",
   "**/site/**",
   "**/target/**",
-  "**/typings/**",
   "**/venv/**",
 ]
 project-includes = ["src/**/*.py*", "tests/**/*.py*"]
@@ -416,6 +415,7 @@ reportIncompatibleMethodOverride = "error"
 reportInconsistentConstructor = "error"
 reportMissingImports = "error"
 reportMissingModuleSource = "error"
+reportMissingTypeStubs = "none"
 reportPrivateUsage = "error"
 reportUnnecessaryCast = "error"
 reportUnnecessaryComparison = "error"
@@ -428,7 +428,7 @@ typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
 
 [[tool.pyright.executionEnvironments]]
-extraPaths = ["src"]
+extraPaths = ["src", "."]
 reportPrivateUsage = "error"
 root = "src"
 
