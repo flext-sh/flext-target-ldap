@@ -15,15 +15,8 @@ from flext_target_ldap._typings.base import FlextTargetLdapTypingsBase
 class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
     """MRO facade composing Meltano + LDAP type namespaces."""
 
-    class TargetLdap:
+    class TargetLdap(FlextTargetLdapTypingsBase):
         """Target LDAP domain type namespace."""
-
-        SettingsPayload = FlextTargetLdapTypingsBase.SettingsPayload
-        RecordPayload = FlextTargetLdapTypingsBase.RecordPayload
-        MutableRecordPayload = FlextTargetLdapTypingsBase.MutableRecordPayload
-        SchemaPayload = FlextTargetLdapTypingsBase.SchemaPayload
-        MutableSchemaPayload = FlextTargetLdapTypingsBase.MutableSchemaPayload
-        CatalogPayload = FlextTargetLdapTypingsBase.CatalogPayload
 
 
 t = FlextTargetLdapTypes
