@@ -50,8 +50,7 @@ class TestsFlextTargetLdapIntegration:
             )
             tm.ok(found)
             tm.that(len(found.value), eq=1)
-            entry_dn = tm.not_none(found.value[0].dn)
-            tm.that(entry_dn.value, eq=dn)
+            tm.that(found.value[0].dn_str, eq=dn)
         finally:
             sink.teardown_client()
             if created:

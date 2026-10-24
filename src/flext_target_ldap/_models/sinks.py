@@ -45,13 +45,13 @@ class FlextTargetLdapModelsSinks:
 
             def process_record(
                 self,
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
                 context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a record using the target.
 
                 Args:
-                    _record: Singer record payload to process.
+                    record: Singer record payload to process.
                     context: Singer record context metadata.
 
                 Returns:
@@ -59,7 +59,7 @@ class FlextTargetLdapModelsSinks:
 
                 """
                 return u.guard_result(
-                    lambda: self.target.process_record(_record, context),
+                    lambda: self.target.process_record(record, context),
                     catch=c.Meltano.SINGER_SAFE_EXCEPTIONS,
                     op_name="Record processing",
                 )
@@ -80,13 +80,13 @@ class FlextTargetLdapModelsSinks:
 
             @staticmethod
             def process_record(
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
                 context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a record with the concrete target runtime.
 
                 Args:
-                    _record: Singer record payload to process.
+                    record: Singer record payload to process.
                     context: Singer record context metadata.
 
                 Returns:
@@ -96,7 +96,7 @@ class FlextTargetLdapModelsSinks:
                 context_keys = tuple(sorted(key for key in context))
                 return r[bool].fail(
                     f"Target does not implement process_record "
-                    f"for context keys: {context_keys}",
+                    f"for record {record!r} and context keys: {context_keys}",
                 )
 
         class FlextTargetLdapProcessingResult(FlextTargetLdapProcessingCounters):
@@ -216,17 +216,18 @@ class FlextTargetLdapModelsSinks:
 
             @staticmethod
             def build_attributes(
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes from record. Override in subclasses.
 
                 Args:
-                    _record: Singer record payload to convert.
+                    record: Singer record payload to convert.
 
                 Returns:
                     A failure result; subclasses must provide attributes.
 
                 """
+                del record
                 return r[t.Ldap.OperationAttributes].fail(
                     "build_attributes must be implemented in subclass",
                 )
@@ -339,13 +340,13 @@ class FlextTargetLdapModelsSinks:
             @override
             def process_record(
                 self,
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
                 context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a single record. Override in subclasses.
 
                 Args:
-                    _record: Singer record payload to process.
+                    record: Singer record payload to process.
                     context: Singer record context metadata.
 
                 Returns:
@@ -358,7 +359,7 @@ class FlextTargetLdapModelsSinks:
                     return r[bool].fail("LDAP client not initialized")
                 try:
                     FlextTargetLdapModelsSinks.logger.debug(
-                        f"Processing record: {_record!r}",
+                        f"Processing record: {record!r}",
                     )
                     self._processing_result.add_success()
                     return r[bool].ok(value=True)
@@ -563,12 +564,12 @@ class FlextTargetLdapModelsSinks:
             @override
             @staticmethod
             def build_attributes(
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes for user entry.
 
                 Args:
-                    _record: Singer record payload to convert.
+                    record: Singer record payload to convert.
 
                 Returns:
                     The LDAP attributes for the user entry.
@@ -579,7 +580,7 @@ class FlextTargetLdapModelsSinks:
                     "emails": "mail",
                     "phone_numbers": "telephoneNumber",
                 }
-                for k, v in _record.items():
+                for k, v in record.items():
                     target_key = field_map.get(k, k)
                     attrs[target_key] = FlextTargetLdapClient.to_str_values(v)
                 return r[t.Ldap.OperationAttributes].ok(attrs)
@@ -672,13 +673,13 @@ class FlextTargetLdapModelsSinks:
             @override
             def process_record(
                 self,
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
                 context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a user record.
 
                 Args:
-                    _record: Singer record payload to persist.
+                    record: Singer record payload to persist.
                     context: Singer record context metadata.
 
                 Returns:
@@ -688,15 +689,13 @@ class FlextTargetLdapModelsSinks:
 
                 def _run_process_record() -> p.Result[bool]:
                     username = (
-                        _record.get("username")
-                        or _record.get("uid")
-                        or _record.get("cn")
+                        record.get("username") or record.get("uid") or record.get("cn")
                     )
                     if not username:
                         self._processing_result.add_error("No username found in record")
                         return r[bool].fail("No username found in record")
                     base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
-                    attributes = self.build_user_attributes(_record)
+                    attributes = self.build_user_attributes(record)
                     return self._persist_typed_entry(
                         label="user",
                         dn=f"uid={username},{base_dn}",
@@ -718,12 +717,12 @@ class FlextTargetLdapModelsSinks:
             @override
             @staticmethod
             def build_attributes(
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
             ) -> p.Result[t.Ldap.OperationAttributes]:
                 """Build LDAP attributes for group entry.
 
                 Args:
-                    _record: Singer record payload to convert.
+                    record: Singer record payload to convert.
 
                 Returns:
                     The LDAP attributes for the group entry.
@@ -731,7 +730,7 @@ class FlextTargetLdapModelsSinks:
                 """
                 attrs: t.MutableStrSequenceMapping = {}
                 field_map = {"members": "member"}
-                for k, v in _record.items():
+                for k, v in record.items():
                     target_key = field_map.get(k, k)
                     attrs[target_key] = FlextTargetLdapClient.to_str_values(v)
                 return r[t.Ldap.OperationAttributes].ok(attrs)
@@ -782,13 +781,13 @@ class FlextTargetLdapModelsSinks:
             @override
             def process_record(
                 self,
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
                 context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process a group record.
 
                 Args:
-                    _record: Singer record payload to persist.
+                    record: Singer record payload to persist.
                     context: Singer record context metadata.
 
                 Returns:
@@ -797,14 +796,14 @@ class FlextTargetLdapModelsSinks:
                 """
 
                 def _run_process_record() -> p.Result[bool]:
-                    group_name = _record.get("name") or _record.get("cn")
+                    group_name = record.get("name") or record.get("cn")
                     if not group_name:
                         self._processing_result.add_error(
                             "No group name found in record",
                         )
                         return r[bool].fail("No group name found in record")
                     base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
-                    attributes = self._build_group_attributes(_record)
+                    attributes = self._build_group_attributes(record)
                     return self._persist_typed_entry(
                         label="group",
                         dn=f"cn={group_name},{base_dn}",
@@ -861,13 +860,13 @@ class FlextTargetLdapModelsSinks:
             @override
             def process_record(
                 self,
-                _record: t.TargetLdap.RecordPayload,
+                record: t.TargetLdap.RecordPayload,
                 context: t.TargetLdap.RecordPayload,
             ) -> p.Result[bool]:
                 """Process an organizational unit record.
 
                 Args:
-                    _record: Singer record payload to persist.
+                    record: Singer record payload to persist.
                     context: Singer record context metadata.
 
                 Returns:
@@ -876,12 +875,12 @@ class FlextTargetLdapModelsSinks:
                 """
 
                 def _run_process_record() -> p.Result[bool]:
-                    ou_name = _record.get("name") or _record.get("ou")
+                    ou_name = record.get("name") or record.get("ou")
                     if not ou_name:
                         self._processing_result.add_error("No OU name found in record")
                         return r[bool].fail("No OU name found in record")
                     base_dn = self._target.settings.get("base_dn", "dc=example,dc=com")
-                    attributes = self._build_ou_attributes(_record)
+                    attributes = self._build_ou_attributes(record)
                     attributes_dict: t.MutableStrSequenceMapping = {
                         key: FlextTargetLdapClient.to_str_values(value)
                         for key, value in attributes.items()

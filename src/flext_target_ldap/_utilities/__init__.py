@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
+    from flext_target_ldap._utilities.catalog import FlextTargetLdapUtilitiesCatalog
     from flext_target_ldap._utilities.client import FlextTargetLdapClient
     from flext_target_ldap._utilities.service_runtime import (
         FlextTargetLdapServiceRuntime,
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
 __all__: tuple[str, ...] = (
     "FlextTargetLdapClient",
     "FlextTargetLdapServiceRuntime",
+    "FlextTargetLdapUtilitiesCatalog",
     "FlextTargetLdapUtilitiesSettings",
 )
 
@@ -32,6 +34,7 @@ install_lazy_exports(
     MappingProxyType({
         "FlextTargetLdapClient": ".client",
         "FlextTargetLdapServiceRuntime": ".service_runtime",
+        "FlextTargetLdapUtilitiesCatalog": ".catalog",
         "FlextTargetLdapUtilitiesSettings": ".settings",
     }),
     public_exports=__all__,

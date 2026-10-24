@@ -214,7 +214,7 @@ class FlextTargetLdap(
             msg = f"Failed to load configuration from {config_path}: {read.error}"
             raise RuntimeError(msg)
         try:
-            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(read.value)
+            return u.Cli.JSON_MAPPING_ADAPTER.validate_json(read.value)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to load configuration from {config_path}: {exc}"
             raise RuntimeError(msg) from exc
@@ -367,12 +367,12 @@ class FlextTargetLdap(
             FlextTargetLdap.logger.debug(line.strip())
             return current_stream
         if msg_type == "SCHEMA":
-            raw_stream = raw.get("stream")
+            raw_stream = raw.get(c.ProcessingMode.STREAM)
             return str(raw_stream) if raw_stream is not None else None
         if msg_type != "RECORD":
             return current_stream
         record_data = raw.get("record", {})
-        raw_stream = raw.get("stream")
+        raw_stream = raw.get(c.ProcessingMode.STREAM)
         stream = (
             str(raw_stream) if raw_stream is not None else (current_stream or "users")
         )
@@ -406,7 +406,7 @@ class FlextTargetLdap(
 
         """
         try:
-            return t.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
+            return u.Cli.JSON_MAPPING_ADAPTER.validate_json(line)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS:
             FlextTargetLdap.logger.exception("Malformed input line failed")
             raise
