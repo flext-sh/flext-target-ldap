@@ -367,12 +367,12 @@ class FlextTargetLdap(
             FlextTargetLdap.logger.debug(line.strip())
             return current_stream
         if msg_type == "SCHEMA":
-            raw_stream = raw.get("stream")
+            raw_stream = raw.get(c.ProcessingMode.STREAM)
             return str(raw_stream) if raw_stream is not None else None
         if msg_type != "RECORD":
             return current_stream
         record_data = raw.get("record", {})
-        raw_stream = raw.get("stream")
+        raw_stream = raw.get(c.ProcessingMode.STREAM)
         stream = (
             str(raw_stream) if raw_stream is not None else (current_stream or "users")
         )
