@@ -43,7 +43,7 @@ src/flext_target_ldap/
 
 ## Conventions (specific to this package)
 
-- Config/settings canonical pattern: ADR-012.
+- Config/settings canonical pattern: ADR-005 (SSOT) and ADR-024 (DI config contract).
 - Codemod governance (ast-grep + make mod): ADR-014.
 
 ## Commands
@@ -53,7 +53,7 @@ Run standard verbs from the active workspace root without project or file select
 ```bash
 make setup
 make check
-make test
+make tests
 ```
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-END -->
