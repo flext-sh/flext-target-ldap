@@ -6,6 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from flext_cli import u
+
 from flext_target_ldap import t
 from flext_target_ldap._utilities.client import FlextTargetLdapClient
 
@@ -31,7 +33,7 @@ class FlextTargetLdapUtilitiesCatalog:
             organizational_units streams.
 
         """
-        return t.Cli.JSON_MAPPING_ADAPTER.validate_python({
+        return u.Cli.JSON_MAPPING_ADAPTER.validate_python({
             "streams": [
                 {
                     "tap_stream_id": "users",
