@@ -34,7 +34,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     class TargetLdap(
         FlextTargetLdapConfigModels,
         FlextTargetLdapModelsEntities,
-        FlextTargetLdapProcessingCounters,
         FlextTargetLdapModelsSinks,
     ):
         """TargetLdap domain namespace."""
@@ -52,9 +51,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
         )
         ProcessingCounters = FlextTargetLdapProcessingCounters
         ProcessingResult = FlextTargetLdapModelsSinks.FlextTargetLdapProcessingResult
-        AttributeMapping = FlextTargetLdapModelsEntities.AttributeMapping
-        Entry = FlextTargetLdapModelsEntities.Entry
-        TransformationRule = FlextTargetLdapModelsEntities.TransformationRule
 
 
 m = FlextTargetLdapModels

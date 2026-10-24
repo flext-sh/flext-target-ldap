@@ -12,8 +12,6 @@ from typing import TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
 
-from flext_target_ldap.__version__ import __version__
-
 if TYPE_CHECKING:
     from flext_meltano import d, e, h, r, s, x
 
@@ -26,6 +24,7 @@ if TYPE_CHECKING:
         __license__,
         __title__,
         __url__,
+        __version__,
         __version_info__,
     )
     from flext_target_ldap._config import FlextTargetLdapConfig, config
@@ -114,3 +113,6 @@ install_lazy_exports(
     }),
     public_exports=__all__,
 )
+
+if not TYPE_CHECKING:
+    from flext_target_ldap.__version__ import __version__

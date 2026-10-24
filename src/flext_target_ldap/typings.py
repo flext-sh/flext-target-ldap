@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """LDAP target type facade via MRO composition.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
@@ -9,7 +10,7 @@ from __future__ import annotations
 from flext_ldap import FlextLdapTypes
 from flext_meltano import FlextMeltanoTypes
 
-from flext_target_ldap._typings.base import FlextTargetLdapTypingsBase
+from flext_target_ldap._typings import FlextTargetLdapTypingsBase
 
 
 class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):

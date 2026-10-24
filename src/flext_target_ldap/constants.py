@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Target LDAP constants facade.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
@@ -11,7 +12,7 @@ from typing import TYPE_CHECKING
 from flext_ldap import FlextLdapConstants
 from flext_meltano import FlextMeltanoConstants
 
-from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
+from flext_target_ldap._constants import FlextTargetLdapConstantsBase
 
 if TYPE_CHECKING:
     from flext_target_ldap import t
