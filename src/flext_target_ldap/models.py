@@ -12,8 +12,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TypeAlias
-
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
@@ -36,24 +34,10 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     class TargetLdap(
         FlextTargetLdapConfigModels,
         FlextTargetLdapModelsEntities,
+        FlextTargetLdapModelsSinks,
+        FlextTargetLdapProcessingCounters,
     ):
         """TargetLdap domain namespace."""
-
-        # Sink and target implementations are part of the public model
-        # surface: consumers (and their tests) reach them through this
-        # facade instead of importing the private _models package.
-        Sink: TypeAlias = FlextTargetLdapModelsSinks.FlextTargetLdapSink
-        Target: TypeAlias = FlextTargetLdapModelsSinks.FlextTargetLdapTarget
-        BaseSink: TypeAlias = FlextTargetLdapModelsSinks.FlextTargetLdapBaseSink
-        UsersSink: TypeAlias = FlextTargetLdapModelsSinks.FlextTargetLdapUsersSink
-        GroupsSink: TypeAlias = FlextTargetLdapModelsSinks.FlextTargetLdapGroupsSink
-        OrganizationalUnitsSink: TypeAlias = (
-            FlextTargetLdapModelsSinks.FlextTargetLdapOrganizationalUnitsSink
-        )
-        ProcessingCounters: TypeAlias = FlextTargetLdapProcessingCounters
-        ProcessingResult: TypeAlias = (
-            FlextTargetLdapModelsSinks.FlextTargetLdapProcessingResult
-        )
 
 
 m = FlextTargetLdapModels

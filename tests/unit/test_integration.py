@@ -30,7 +30,9 @@ class TestsFlextTargetLdapIntegration:
         profile = u.TargetLdap.entry_profile("users")
         identifier = f"flext-target-ldap-{uuid4().hex}"
         dn = f"{profile.rdn_attribute}={identifier},{ldap_base_dn}"
-        record: t.TargetLdap.RecordPayload = dict.fromkeys(profile.field_mapping, identifier)
+        record: t.TargetLdap.RecordPayload = dict.fromkeys(
+            profile.field_mapping, identifier
+        )
         sink = FlextTargetLdapSinks.runtime_sink(
             stream_name="users",
             schema={},

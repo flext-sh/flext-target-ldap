@@ -58,11 +58,13 @@ class FlextTargetLdapConfigModels:
 
         model_config = m.ConfigDict(frozen=True, extra="ignore")
 
-        default_entry_profile: EntryProfile = m.Field(
+        default_entry_profile: FlextTargetLdapConfigModels.EntryProfile = m.Field(
             description="Entry profile of streams without a declared profile",
         )
-        entry_profiles: t.MappingKV[str, EntryProfile] = m.Field(
-            description="Entry profiles keyed by Singer stream name",
+        entry_profiles: t.MappingKV[str, FlextTargetLdapConfigModels.EntryProfile] = (
+            m.Field(
+                description="Entry profiles keyed by Singer stream name",
+            )
         )
 
 
