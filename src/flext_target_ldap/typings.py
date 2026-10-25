@@ -21,5 +21,4 @@ class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
 
 
 t = FlextTargetLdapTypes
-
 __all__: list[str] = ["FlextTargetLdapTypes", "t"]

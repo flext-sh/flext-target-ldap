@@ -15,17 +15,11 @@ from flext_core.lazy import install_lazy_exports
 if TYPE_CHECKING:
     from flext_target_ldap._models.config import FlextTargetLdapConfigModels
     from flext_target_ldap._models.entities import FlextTargetLdapModelsEntities
-    from flext_target_ldap._models.processing_result import (
-        FlextTargetLdapProcessingCounters,
-    )
-    from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
 
 
 __all__: tuple[str, ...] = (
     "FlextTargetLdapConfigModels",
     "FlextTargetLdapModelsEntities",
-    "FlextTargetLdapModelsSinks",
-    "FlextTargetLdapProcessingCounters",
 )
 
 install_lazy_exports(
@@ -34,8 +28,6 @@ install_lazy_exports(
     MappingProxyType({
         "FlextTargetLdapConfigModels": ".config",
         "FlextTargetLdapModelsEntities": ".entities",
-        "FlextTargetLdapModelsSinks": ".sinks",
-        "FlextTargetLdapProcessingCounters": ".processing_result",
     }),
     public_exports=__all__,
 )

@@ -7,15 +7,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from flext_ldap import FlextLdapConstants
 from flext_meltano import FlextMeltanoConstants
 
 from flext_target_ldap._constants import FlextTargetLdapConstantsBase
-
-if TYPE_CHECKING:
-    from flext_target_ldap import t
 
 
 class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
@@ -32,5 +27,4 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
 
 c = FlextTargetLdapConstants
-
-__all__: t.StrSequence = ("FlextTargetLdapConstants", "c")
+__all__: list[str] = ["FlextTargetLdapConstants", "c"]

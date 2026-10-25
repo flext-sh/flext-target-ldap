@@ -17,6 +17,46 @@ class FlextTargetLdapProtocolsBase:
     """Public LDAP sink and client protocol contracts for the target."""
 
     @runtime_checkable
+    class Directory(Protocol):
+        """Directory write capability a target sink consumes.
+
+        Sinks receive it by injection and never know which client or server
+        implements it.
+        """
+
+        def add_entry(
+            self,
+            dn: str,
+            attributes: t.Ldap.OperationAttributes,
+            object_classes: t.StrSequence | None = None,
+        ) -> p.ResultView[bool]:
+            """Add one entry."""
+            ...
+
+        def modify_entry(
+            self,
+            dn: str,
+            changes: t.Ldap.OperationAttributes,
+        ) -> p.ResultView[bool]:
+            """Replace the given attributes of one entry."""
+            ...
+
+        def delete_entry(self, dn: str) -> p.ResultView[bool]:
+            """Delete one entry."""
+            ...
+
+    @runtime_checkable
+    class DirectoryFactory(Protocol):
+        """Builds the directory capability from the flat target settings."""
+
+        def __call__(
+            self,
+            settings: t.TargetLdap.SettingsPayload,
+        ) -> FlextTargetLdapProtocolsBase.Directory:
+            """Build the directory bound to the given settings."""
+            ...
+
+    @runtime_checkable
     class Sink(Protocol):
         """Public LDAP sink transformation and validation contract."""
 
@@ -52,8 +92,16 @@ class FlextTargetLdapProtocolsBase:
             """Validate one LDAP entry before writing it."""
             ...
 
+        def process_record(
+            self,
+            record: t.TargetLdap.RecordPayload,
+            context: t.TargetLdap.RecordPayload,
+        ) -> p.ResultView[bool]:
+            """Write one Singer record to the directory."""
+            ...
+
     @runtime_checkable
-    class Client(Protocol):
+    class Client(Directory, Protocol):
         """Public contract for the target LDAP client facade."""
 
         @property
@@ -91,33 +139,12 @@ class FlextTargetLdapProtocolsBase:
             """Whether LDAPS is enabled."""
             ...
 
-        def add_entry(
-            self,
-            dn: str,
-            attributes: t.Ldap.OperationAttributes,
-            object_classes: t.StrSequence | None = None,
-        ) -> p.ResultView[bool]:
-            """Add one entry through the target client."""
-            ...
-
         def connect(self) -> p.ResultView[bool]:
             """Validate connectivity to the configured LDAP server."""
             ...
 
-        def delete_entry(self, dn: str) -> p.ResultView[bool]:
-            """Delete one entry through the target client."""
-            ...
-
         def disconnect(self) -> p.ResultView[bool]:
             """Disconnect the target client."""
-            ...
-
-        def modify_entry(
-            self,
-            dn: str,
-            changes: t.Ldap.OperationAttributes,
-        ) -> p.ResultView[bool]:
-            """Modify one entry through the target client."""
             ...
 
         def search_entry(

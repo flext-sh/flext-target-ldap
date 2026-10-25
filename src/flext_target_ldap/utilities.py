@@ -12,9 +12,8 @@ from flext_ldap import FlextLdapUtilities
 from flext_meltano import FlextMeltanoUtilities
 
 from flext_target_ldap._utilities import (
-    FlextTargetLdapClient,
     FlextTargetLdapServiceRuntime,
-    FlextTargetLdapUtilitiesCatalog,
+    FlextTargetLdapUtilitiesEntries,
     FlextTargetLdapUtilitiesSettings,
 )
 
@@ -32,8 +31,7 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
     """
 
     class TargetLdap(
-        FlextTargetLdapUtilitiesCatalog,
-        FlextTargetLdapClient,
+        FlextTargetLdapUtilitiesEntries,
         FlextTargetLdapServiceRuntime,
         FlextTargetLdapUtilitiesSettings,
     ):
@@ -41,5 +39,4 @@ class FlextTargetLdapUtilities(FlextMeltanoUtilities, FlextLdapUtilities):
 
 
 u = FlextTargetLdapUtilities
-
 __all__: list[str] = ["FlextTargetLdapUtilities", "u"]

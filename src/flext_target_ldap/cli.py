@@ -1,4 +1,7 @@
-"""CLI entry point for flext-target-ldap.
+"""Console entry point for flext-target-ldap.
+
+Drains the Singer message stream from stdin through the target service's
+``cli_main`` provided by ``FlextMeltanoTargetServiceBase``.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -9,36 +12,23 @@ from __future__ import annotations
 from flext_target_ldap import FlextTargetLdap, t
 
 
-class FlextTargetLdapCli:
-    """CLI wrapper bound to the target-ldap facade."""
-
-    @classmethod
-    def run(cls, args: t.StrSequence | None = None) -> int:
-        """Execute the canonical target-ldap CLI entry point.
-
-        Args:
-            args: Optional CLI arguments; the first names a Singer settings file.
-
-        Returns:
-            The CLI exit code.
-
-        """
-        _ = cls
-        FlextTargetLdap.run_cli(args[0] if args else None)
-        return 0
-
-
 def main(args: t.StrSequence | None = None) -> int:
-    """Provide CLI entry point.
+    """Run the target-ldap Singer CLI.
 
     Args:
-        args: Optional CLI arguments forwarded to ``FlextTargetLdapCli.run``.
+        args: CLI arguments; the target base accepts and ignores them.
 
     Returns:
-        The CLI exit code.
+        Exit code 0 once every message is written; any failed message raises
+        ``SystemExit(1)`` from the base.
 
     """
-    return FlextTargetLdapCli.run(args)
+    exit_code: int = FlextTargetLdap().cli_main(args)
+    return exit_code
 
 
-__all__: list[str] = ["FlextTargetLdapCli", "main"]
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
+__all__: list[str] = ["main"]

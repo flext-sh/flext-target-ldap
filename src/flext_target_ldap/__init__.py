@@ -15,7 +15,6 @@ from flext_core.lazy import install_lazy_exports
 if TYPE_CHECKING:
     from flext_meltano import d, e, h, r, s, x
 
-    from flext_target_ldap import application as application
     from flext_target_ldap.__version__ import (
         FlextTargetLdapVersion,
         __author__,
@@ -30,7 +29,7 @@ if TYPE_CHECKING:
     from flext_target_ldap._config import FlextTargetLdapConfig, config
     from flext_target_ldap._settings import FlextTargetLdapSettings, settings
     from flext_target_ldap.api import FlextTargetLdap
-    from flext_target_ldap.cli import FlextTargetLdapCli, main
+    from flext_target_ldap.cli import main
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
     from flext_target_ldap.models import FlextTargetLdapModels, m
     from flext_target_ldap.protocols import FlextTargetLdapProtocols, p
@@ -40,7 +39,6 @@ if TYPE_CHECKING:
 
 __all__: tuple[str, ...] = (
     "FlextTargetLdap",
-    "FlextTargetLdapCli",
     "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
@@ -57,7 +55,6 @@ __all__: tuple[str, ...] = (
     "__url__",
     "__version__",
     "__version_info__",
-    "application",
     "c",
     "config",
     "d",
@@ -79,7 +76,6 @@ install_lazy_exports(
     globals(),
     MappingProxyType({
         "FlextTargetLdap": ".api",
-        "FlextTargetLdapCli": ".cli",
         "FlextTargetLdapConfig": "._config",
         "FlextTargetLdapConstants": ".constants",
         "FlextTargetLdapModels": ".models",
@@ -95,7 +91,6 @@ install_lazy_exports(
         "__title__": ".__version__",
         "__url__": ".__version__",
         "__version_info__": ".__version__",
-        "application": ".application",
         "c": ".constants",
         "config": "._config",
         "d": "flext_meltano",

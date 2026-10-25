@@ -1,3 +1,61 @@
 TargetLdap:
   name: flext-target-ldap
   version: "0.20.0-dev"
+  # Entry profile for streams without a declared profile: the record DN or its
+  # first identity field names the entry, and every non-control field is written.
+  default_entry_profile:
+    label: entry
+    identity_label: ID or name
+    rdn_attribute: cn
+    identity_fields: [id, cn, name]
+    default_object_classes: [top]
+    required_object_classes: []
+    object_classes_setting: generic_object_classes
+    field_mapping: {}
+    include_unmapped_fields: true
+  # Per-stream entry profiles: every stream is written by the same sink, driven
+  # only by these declarations.
+  entry_profiles:
+    users:
+      label: user
+      identity_label: username
+      rdn_attribute: uid
+      identity_fields: [username, uid, cn]
+      default_object_classes: [inetOrgPerson, person]
+      required_object_classes: [inetOrgPerson, person]
+      object_classes_setting: object_classes
+      field_mapping:
+        username: uid
+        email: mail
+        first_name: givenName
+        last_name: sn
+        full_name: cn
+        phone: telephoneNumber
+        department: departmentNumber
+        title: title
+      include_unmapped_fields: false
+    groups:
+      label: group
+      identity_label: group name
+      rdn_attribute: cn
+      identity_fields: [name, cn]
+      default_object_classes: [groupOfNames]
+      required_object_classes: [groupOfNames]
+      object_classes_setting: group_object_classes
+      field_mapping:
+        name: cn
+        description: description
+        members: member
+      include_unmapped_fields: false
+    organizational_units:
+      label: OU
+      identity_label: OU name
+      rdn_attribute: ou
+      identity_fields: [name, ou]
+      default_object_classes: [organizationalUnit]
+      required_object_classes: [organizationalUnit]
+      object_classes_setting: object_classes
+      field_mapping:
+        name: ou
+        description: description
+      include_unmapped_fields: false

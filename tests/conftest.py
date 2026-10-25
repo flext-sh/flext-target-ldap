@@ -12,7 +12,8 @@ from pathlib import Path
 import pytest
 from flext_tests import FlextTestsDocker
 
-from flext_target_ldap import FlextTargetLdap, settings
+from flext_target_ldap import settings
+from flext_target_ldap.services import FlextTargetLdapClient
 from tests import c, m, p, t, tm, u
 
 
@@ -26,7 +27,7 @@ def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
 
 @pytest.fixture(scope="session")
 def ldap_runtime() -> m.Tests.ContainerConfig:
-    """Ensure the canonical shared OpenLDAP runtime and return where it listens.
+    """Ensure the canonical shared LDAP runtime and return where it listens.
 
     The shared entry declares the container port; the returned target carries
     the host port Docker published for it.
@@ -79,7 +80,7 @@ def ldap_client(
         The resulting ``p.TargetLdap.Client``.
 
     """
-    return u.TargetLdap.client()(settings=ldap_settings_payload)
+    return FlextTargetLdapClient(settings=ldap_settings_payload)
 
 
 @pytest.fixture
@@ -92,7 +93,7 @@ def ldap_runtime_client(
         The resulting ``p.TargetLdap.Client``.
 
     """
-    return u.TargetLdap.client()(settings=ldap_runtime_settings_payload)
+    return FlextTargetLdapClient(settings=ldap_runtime_settings_payload)
 
 
 @pytest.fixture
@@ -108,29 +109,3 @@ def ldap_base_dn(ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload) ->
         msg = "settings.TargetLdap.base_dn must name the LDAP integration base"
         raise ValueError(msg)
     return base_dn
-
-
-@pytest.fixture
-def target_ldap(
-    ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
-) -> FlextTargetLdap:
-    """Build the public target facade for the shared LDAP runtime.
-
-    Returns:
-        The resulting ``FlextTargetLdap``.
-
-    """
-    return FlextTargetLdap(settings=ldap_runtime_settings_payload)
-
-
-@pytest.fixture
-def ldap_target(
-    ldap_settings_payload: t.TargetLdap.SettingsPayload,
-) -> FlextTargetLdap:
-    """Build the public target API from production settings.
-
-    Returns:
-        The resulting ``FlextTargetLdap``.
-
-    """
-    return FlextTargetLdap(settings=ldap_settings_payload)

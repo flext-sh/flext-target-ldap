@@ -16,30 +16,72 @@
 ## Overview
 
 Singer **target** (loader) for LDAP directory loading. Thin driver over `flext-meltano`
-(ADR-006), delegating writes to `flext-ldap`.
+(ADR-006, amended 2026-10-25): `FlextTargetLdap` subclasses
+`FlextMeltanoTargetServiceBase` and declares only `target_name` and `sink_factory`.
+Writes are delegated to `flext-ldap` through an injected directory capability.
 
 ## Structure
 
 ```text
 src/flext_target_ldap/
-├── api.py            # FlextTargetLdap (public implementation)
-├── target.py         # CLI compatibility wrapper → FlextTargetLdap.run_cli()
-├── singer/ application/ patterns/   # supporting domain modules
-├── constants.py typings.py protocols.py models.py utilities.py   # AUTO-GENERATED facets
-└── _constants/ _models/ _utilities/
+├── api.py               # FlextTargetLdap: composition root (target_name, sink_factory)
+├── cli.py               # console entry point: main() -> FlextTargetLdap().cli_main()
+├── config/target-ldap.yaml   # stream entry profiles (business rules)
+├── services/client.py   # FlextTargetLdapClient: concrete flext-ldap directory adapter
+├── services/sinks.py    # FlextTargetLdapSinks: one profile-driven sink + create_sink
+├── constants.py typings.py protocols.py models.py utilities.py   # AUTO-GENERATED
+└── _constants/ _models/ _protocols/ _typings/ _utilities/
 ```
 
 ## Code Map
 
-| Symbol            | Kind  | Location    | Role                                            |
-| ----------------- | ----- | ----------- | ----------------------------------------------- |
-| `FlextTargetLdap` | class | `api.py`    | public loader; uses meltano target abstractions |
-| CLI wrapper       | code  | `target.py` | `run_cli()` only                                |
+| Symbol                            | Kind  | Location                | Role                                                 |
+| --------------------------------- | ----- | ----------------------- | ---------------------------------------------------- |
+| `FlextTargetLdap`                 | class | `api.py`                | binds `sink_factory` and the concrete directory      |
+| `FlextTargetLdapSinks`            | class | `services/sinks.py`     | profile-driven stream sink and `create_sink`         |
+| `FlextTargetLdapClient`           | class | `services/client.py`    | add, modify, delete, search through `flext-ldap`     |
+| `p.TargetLdap.Directory`          | proto | `_protocols/base.py`    | the add/modify/delete capability a sink consumes     |
+| `FlextTargetLdapUtilitiesEntries` | class | `_utilities/entries.py` | stateless `u.TargetLdap` profile and entry mapping   |
+| `main`                            | code  | `cli.py`                | the single console entry point                       |
+
+## Singer contract
+
+- stdin is routed only by `u.Meltano.process_stdin` through the base `cli_main`.
+  The target owns no message parsing.
+- SCHEMA registers the stream sink built by `sink_factory`.
+- One sink class serves every stream. The stream's entry profile in
+  `config/target-ldap.yaml` declares its RDN attribute, identity fields, object
+  classes and field mapping; a stream without a declared profile uses the declared
+  default profile.
+- RECORD is written immediately: an explicit `dn` wins, otherwise the DN is derived
+  from the profile. The sink adds the entry, modifies it when the DN was already
+  written in this run, and deletes it when `_sdc_deleted_at` is set. When an add fails
+  and `update_existing_entries` is true, the sink modifies the entry; any other
+  failure fails the record.
+- STATE flushes every registered sink.
+
+### Failure behavior (changed 2026-10-25, bead `flext-pawp5`)
+
+- A RECORD without `stream` fails validation; there is no stream default.
+- A line that is not valid JSON fails; a RECORD whose `record` is not a mapping fails.
+- Blank lines and JSON lines that are not objects are skipped by the `flext-meltano`
+  router, not by this target.
+- Failures surface as `r.fail` through the base drain, and `cli_main` exits with
+  status 1.
+- The console script reads no configuration-file argument: the base `cli_main` ignores
+  its arguments, and `sink_factory` receives the service `settings_overrides`.
 
 ## Anti-Patterns / Gotchas
 
-- **`target.py` is a compatibility entrypoint only** — do not add behavior there; the
-  implementation is in `api.py` + `singer/`/`application/`/`patterns/`.
+- **`api.py` is a pure MRO facade** (ADR-028): no method or function definitions.
+  Stateful behavior belongs in `services/`; stateless behavior belongs in
+  `u.TargetLdap` (`_utilities/`, static methods only).
+- **Directory access is injected, never looked up** (operator order 2026-10-25,
+  tracker key `operator-order-2026-10-25-servers-di-never-registry`). Sinks and `u`
+  consume `p.TargetLdap.Directory` and never name a concrete client, server, or
+  registry. `api.py` is the only place that binds `FlextTargetLdapClient`.
+- **No stream-to-class registry.** Stream behavior is data in
+  `config/target-ldap.yaml`; adding a stream adds a profile, never a sink class.
 
 ## Conventions (specific to this package)
 

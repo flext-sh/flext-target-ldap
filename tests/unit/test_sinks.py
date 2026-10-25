@@ -1,4 +1,7 @@
-"""Tests for target-ldap sinks.
+"""Observable behavior of the profile-driven target-ldap stream sink.
+
+Expectations derive from the stream entry profiles the sink reads
+(``u.TargetLdap.entry_profile``), never from copied config values.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -8,197 +11,67 @@ from __future__ import annotations
 
 import pytest
 
-from flext_target_ldap import FlextTargetLdap
-from tests import m, p, t, tm
+from flext_target_ldap.services import FlextTargetLdapClient, FlextTargetLdapSinks
+from tests import c, p, t, tm, u
 
 
 class TestsFlextTargetLdapSinks:
-    """Behavior contract for test_sinks."""
+    """Behavior contract for the stream sink."""
 
     @staticmethod
-    def configure_target(
+    def build_sink(
+        stream_name: str,
+        payload: t.TargetLdap.SettingsPayload,
         updates: t.TargetLdap.SettingsPayload,
-        target: FlextTargetLdap,
-    ) -> None:
-        """Merge settings into the existing target used by a sink."""
-        target.settings = {**target.settings, **updates}
-
-    @staticmethod
-    @pytest.fixture
-    def ldap_base_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a base sink with a DN-keyed schema.
+    ) -> p.TargetLdap.Sink:
+        """Build the stream sink over a client bound to the merged settings.
 
         Returns:
-            The base sink bound to the target.
+            The stream sink.
 
         """
-        TestsFlextTargetLdapSinks.configure_target(
-            {"base_dn": "dc=example,dc=com"},
-            ldap_target,
-        )
-        schema: t.TargetLdap.SchemaPayload = {
-            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
+        settings: t.TargetLdap.SettingsPayload = {
+            **payload,
+            "base_dn": c.TargetLdap.Tests.SAMPLE_BASE_DN,
+            **updates,
         }
-        return m.TargetLdap.BaseSink(
-            target=ldap_target,
-            stream_name="test_stream",
-            schema=schema,
-            key_properties=["dn"],
+        return FlextTargetLdapSinks.runtime_sink(
+            stream_name=stream_name,
+            schema={"properties": {"dn": {"type": "string"}}},
+            target_config=settings,
+            directory=FlextTargetLdapClient(settings=settings),
         )
 
-    @staticmethod
-    @pytest.fixture
-    def users_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a user sink keyed by uid.
-
-        Returns:
-            The user sink bound to the target.
-
-        """
-        TestsFlextTargetLdapSinks.configure_target(
-            {
-                "base_dn": "dc=example,dc=com",
-                "user_rdn_attribute": "uid",
-            },
-            ldap_target,
-        )
-        schema: t.TargetLdap.SchemaPayload = {
-            "properties": {
-                "uid": {"type": "string"},
-                "cn": {"type": "string"},
-                "mail": {"type": "string"},
-            },
-        }
-        return m.TargetLdap.UsersSink(
-            target=ldap_target,
-            stream_name="users",
-            schema=schema,
-            key_properties=["uid"],
-        )
-
-    @staticmethod
-    @pytest.fixture
-    def groups_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a group sink keyed by cn.
-
-        Returns:
-            The group sink bound to the target.
-
-        """
-        TestsFlextTargetLdapSinks.configure_target(
-            {
-                "base_dn": "dc=example,dc=com",
-                "group_rdn_attribute": "cn",
-            },
-            ldap_target,
-        )
-        schema: t.TargetLdap.SchemaPayload = {
-            "properties": {"cn": {"type": "string"}, "member": {"type": "array"}},
-        }
-        return m.TargetLdap.GroupsSink(
-            target=ldap_target,
-            stream_name="groups",
-            schema=schema,
-            key_properties=["cn"],
-        )
-
-    @staticmethod
-    @pytest.fixture
-    def ou_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide an organizational-unit sink keyed by ou.
-
-        Returns:
-            The organizational-unit sink bound to the target.
-
-        """
-        TestsFlextTargetLdapSinks.configure_target(
-            {"base_dn": "dc=example,dc=com"},
-            ldap_target,
-        )
-        schema: t.TargetLdap.SchemaPayload = {
-            "properties": {"ou": {"type": "string"}, "description": {"type": "string"}},
-        }
-        return m.TargetLdap.OrganizationalUnitsSink(
-            target=ldap_target,
-            stream_name="organizational_units",
-            schema=schema,
-            key_properties=["ou"],
-        )
-
-    @staticmethod
-    @pytest.fixture
-    def generic_sink(ldap_target: FlextTargetLdap) -> p.TargetLdap.Sink:
-        """Provide a generic sink keyed by id.
-
-        Returns:
-            The generic sink bound to the target.
-
-        """
-        TestsFlextTargetLdapSinks.configure_target(
-            {"base_dn": "dc=example,dc=com"},
-            ldap_target,
-        )
-        schema: t.TargetLdap.SchemaPayload = {
-            "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
-        }
-        return m.TargetLdap.BaseSink(
-            target=ldap_target,
-            stream_name="generic",
-            schema=schema,
-            key_properties=["id"],
-        )
-
-    class TestsBaseSink:
-        """Behavior contract for base sink initialization and validation."""
+    class TestsEntryValidation:
+        """Behavior contract for entry validation and sink identity."""
 
         @staticmethod
-        def test_ldap_sink_initialization(
-            ldap_base_sink: p.TargetLdap.Sink,
+        def test_sink_binds_stream_and_schema(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
         ) -> None:
-            """Test ldap sink initialization."""
-            tm.that(ldap_base_sink.stream_name, eq="test_stream")
-            tm.that(ldap_base_sink.key_properties, eq=["dn"])
-            properties = ldap_base_sink.schema.get("properties")
+            """Test the sink carries its stream and schema."""
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "test_stream",
+                ldap_settings_payload,
+                {},
+            )
+            tm.that(sink.stream_name, eq="test_stream")
+            properties = sink.schema.get("properties")
             tm.that(properties, is_=dict)
             tm.that(properties, has="dn")
 
         @staticmethod
-        @pytest.mark.parametrize(
-            ("record", "expected_error"),
-            [
-                ({"description": "no id fields"}, "must be implemented in subclass"),
-                ({"cn": "test"}, "must be implemented in subclass"),
-            ],
-        )
-        def test_base_sink_validation_failures(
-            ldap_base_sink: p.TargetLdap.Sink,
-            record: t.TargetLdap.RecordPayload,
-            expected_error: str,
-        ) -> None:
-            """Test base sink validation failures."""
-            description = record.get("description")
-            if isinstance(description, str) and "id fields" in description:
-                result = ldap_base_sink.build_dn(record)
-            else:
-                result = ldap_base_sink.build_attributes(record)
-            tm.that(tm.fail(result), has=expected_error)
-
-        @staticmethod
-        def test_resolve_object_classes_default(
-            ldap_base_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test resolve object classes default."""
-            record: t.TargetLdap.RecordPayload = {}
-            classes = ldap_base_sink.resolve_object_classes(record)
-            tm.that(classes, eq=["top"])
-
-        @staticmethod
         def test_validate_entry_success(
-            ldap_base_sink: p.TargetLdap.Sink,
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
         ) -> None:
             """Test validate entry success."""
-            result = ldap_base_sink.validate_entry(
-                "cn=test,dc=example,dc=com",
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "test_stream",
+                ldap_settings_payload,
+                {},
+            )
+            result = sink.validate_entry(
+                f"cn=test,{c.TargetLdap.Tests.SAMPLE_BASE_DN}",
                 {"cn": ["test"]},
                 ["person", "top"],
             )
@@ -224,285 +97,260 @@ class TestsFlextTargetLdapSinks:
             ],
         )
         def test_validate_entry_failure_cases(
-            ldap_base_sink: p.TargetLdap.Sink,
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
             dn: str,
             attributes: t.Ldap.OperationAttributes,
             object_classes: list[str],
             expected_message: str,
         ) -> None:
             """Test validate entry failure cases."""
-            result = ldap_base_sink.validate_entry(dn, attributes, object_classes)
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "test_stream",
+                ldap_settings_payload,
+                {},
+            )
+            result = sink.validate_entry(dn, attributes, object_classes)
             tm.that(tm.fail(result), has=expected_message)
 
-    class TestsUsersSink:
-        """Behavior contract for user entries and object classes."""
+    class TestsDeclaredStreams:
+        """Behavior contract for streams with a declared entry profile."""
 
         @staticmethod
-        def test_users_build_dn_success(
-            users_sink: p.TargetLdap.Sink,
+        @pytest.mark.parametrize(
+            "stream_name",
+            ["users", "groups", "organizational_units"],
+        )
+        def test_build_dn_uses_profile_rdn(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+            stream_name: str,
         ) -> None:
-            """Test users build dn success."""
-            record = {"uid": "testuser", "cn": "Test User"}
-            result = users_sink.build_dn(record)
-            tm.ok(result, eq="uid=testuser,dc=example,dc=com")
-
-        @staticmethod
-        def test_users_build_dn_missing_uid(
-            users_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test users build dn missing uid."""
-            result = users_sink.build_dn({"cn": "Test User"})
-            tm.that(tm.fail(result), has="No value found for RDN attribute 'uid'")
-
-        @staticmethod
-        def test_users_build_attributes_basic(
-            users_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test users build attributes basic."""
-            result = users_sink.build_attributes({
-                "uid": "testuser",
-                "cn": "Test User",
-                "mail": "test@example.com",
-                "sn": "User",
-                "givenName": "Test",
-            })
-            tm.ok(result)
-            tm.that(result.value, none=False)
-            tm.that(result.value["uid"], eq=["testuser"])
-            tm.that(result.value["cn"], eq=["Test User"])
-            tm.that(result.value["mail"], eq=["test@example.com"])
-            tm.that(result.value["sn"], eq=["User"])
-            tm.that(result.value["givenName"], eq=["Test"])
-
-        @staticmethod
-        def test_users_build_attributes_multivalued(
-            users_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test users build attributes multivalued."""
-            result = users_sink.build_attributes({
-                "uid": "testuser",
-                "emails": ["test1@example.com", "test2@example.com"],
-                "phone_numbers": ["123-456-7890", "098-765-4321"],
-            })
-            tm.ok(result)
-            tm.that(result.value, none=False)
-            tm.that(result.value["mail"], eq=["test1@example.com", "test2@example.com"])
-            tm.that(
-                result.value["telephoneNumber"],
-                eq=["123-456-7890", "098-765-4321"],
+            """Test the DN uses the profile RDN and first identity field."""
+            profile = u.TargetLdap.entry_profile(stream_name)
+            base_dn = c.TargetLdap.Tests.SAMPLE_BASE_DN
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                stream_name,
+                ldap_settings_payload,
+                {},
+            )
+            record: t.TargetLdap.RecordPayload = {
+                profile.identity_fields[0]: "entry1",
+            }
+            tm.ok(
+                sink.build_dn(record),
+                eq=f"{profile.rdn_attribute}=entry1,{base_dn}",
             )
 
         @staticmethod
-        def test_users_get_object_classes_default(
-            users_sink: p.TargetLdap.Sink,
+        @pytest.mark.parametrize(
+            "stream_name",
+            ["users", "groups", "organizational_units"],
+        )
+        def test_build_dn_without_identity_fails(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+            stream_name: str,
         ) -> None:
-            """Test users get object classes default."""
-            classes = users_sink.resolve_object_classes({})
-            tm.that(
-                classes,
-                eq=["inetOrgPerson", "organizationalPerson", "person", "top"],
+            """Test a record without any identity field has no DN."""
+            profile = u.TargetLdap.entry_profile(stream_name)
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                stream_name,
+                ldap_settings_payload,
+                {},
+            )
+            result = sink.build_dn({"unmapped_field": "value"})
+            tm.that(tm.fail(result), has=f"No {profile.identity_label} found")
+
+        @staticmethod
+        def test_explicit_dn_wins(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test an explicit record ``dn`` is used as is."""
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "users",
+                ldap_settings_payload,
+                {},
+            )
+            explicit_dn = f"uid=explicit,{c.TargetLdap.Tests.SAMPLE_BASE_DN}"
+            tm.ok(
+                sink.build_dn({"dn": explicit_dn, "username": "x"}),
+                eq=explicit_dn,
             )
 
         @staticmethod
-        def test_users_get_object_classes_configured(
-            ldap_target: FlextTargetLdap,
+        @pytest.mark.parametrize(
+            "stream_name",
+            ["users", "groups", "organizational_units"],
+        )
+        def test_build_attributes_follows_field_mapping(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+            stream_name: str,
         ) -> None:
-            """Test users get object classes configured."""
-            TestsFlextTargetLdapSinks.configure_target(
-                {
-                    "base_dn": "dc=example,dc=com",
-                    "user_rdn_attribute": "uid",
-                    "users_object_classes": ["customUser", "top"],
-                },
-                ldap_target,
+            """Test mapped record fields become their declared attributes."""
+            profile = u.TargetLdap.entry_profile(stream_name)
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                stream_name,
+                ldap_settings_payload,
+                {},
             )
-            sink = m.TargetLdap.UsersSink(
-                target=ldap_target,
-                stream_name="users",
-                schema={
-                    "properties": {"uid": {"type": "string"}, "cn": {"type": "string"}},
-                },
-                key_properties=["uid"],
+            record: t.TargetLdap.RecordPayload = {
+                field: f"value-{field}" for field in profile.field_mapping
+            }
+            attributes = tm.ok(sink.build_attributes(record))
+            for field, attribute in profile.field_mapping.items():
+                tm.that(attributes[attribute], eq=[f"value-{field}"])
+
+        @staticmethod
+        def test_build_attributes_keeps_multiple_values(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test list values stay multi-valued attributes."""
+            profile = u.TargetLdap.entry_profile("users")
+            field = next(iter(profile.field_mapping))
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "users",
+                ldap_settings_payload,
+                {},
             )
-            tm.that(sink.resolve_object_classes({}), eq=["customUser", "top"])
-
-    class TestsGroupsSink:
-        """Behavior contract for group entries and object classes."""
+            attributes = tm.ok(sink.build_attributes({field: ["one", "two"]}))
+            tm.that(attributes[profile.field_mapping[field]], eq=["one", "two"])
 
         @staticmethod
-        def test_groups_build_dn_success(
-            groups_sink: p.TargetLdap.Sink,
+        @pytest.mark.parametrize(
+            "stream_name",
+            ["users", "groups", "organizational_units"],
+        )
+        def test_object_classes_include_required(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+            stream_name: str,
         ) -> None:
-            """Test groups build dn success."""
-            result = groups_sink.build_dn({
-                "cn": "testgroup",
-                "description": "Test Group",
-            })
-            tm.ok(result, eq="cn=testgroup,dc=example,dc=com")
-
-        @staticmethod
-        def test_groups_build_dn_missing_cn(
-            groups_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test groups build dn missing cn."""
-            result = groups_sink.build_dn({"description": "Test Group"})
-            tm.that(tm.fail(result), has="No value found for RDN attribute 'cn'")
-
-        @staticmethod
-        def test_groups_build_attributes_basic(
-            groups_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test groups build attributes basic."""
-            result = groups_sink.build_attributes({
-                "cn": "testgroup",
-                "description": "Test Group",
-                "members": [
-                    "uid=user1,dc=example,dc=com",
-                    "uid=user2,dc=example,dc=com",
-                ],
-            })
-            tm.ok(result)
-            tm.that(result.value, none=False)
-            tm.that(result.value["cn"], eq=["testgroup"])
-            tm.that(result.value["description"], eq=["Test Group"])
-            tm.that(
-                result.value["member"],
-                eq=["uid=user1,dc=example,dc=com", "uid=user2,dc=example,dc=com"],
-            )
-
-        @staticmethod
-        def test_groups_get_object_classes_default(
-            groups_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test groups get object classes default."""
-            tm.that(groups_sink.resolve_object_classes({}), eq=["groupOfNames", "top"])
-
-    class TestsOrganizationalUnitsSink:
-        """Behavior contract for organizational unit entries and object classes."""
-
-        @staticmethod
-        def test_ou_build_dn_success(
-            ou_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test ou build dn success."""
-            result = ou_sink.build_dn({"name": "testou", "description": "Test OU"})
-            tm.ok(result)
-            tm.that(result.value, has="testou")
-
-        @staticmethod
-        def test_ou_build_dn_missing_ou(
-            ou_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test ou build dn missing ou."""
-            result = ou_sink.build_dn({"description": "Test OU"})
-            tm.fail(result)
-            tm.that(result.error, none=False)
-
-        @staticmethod
-        def test_ou_build_attributes_basic(
-            ou_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test ou build attributes basic."""
-            result = ou_sink.build_attributes({
-                "ou": "testou",
-                "description": "Test OU",
-            })
-            tm.fail(result)
-
-        @staticmethod
-        def test_ou_get_object_classes_default(
-            ou_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test ou get object classes default."""
-            tm.that(ou_sink.resolve_object_classes({}), has="top")
-
-    class TestsGenericSink:
-        """Behavior contract for generic entry identifiers and object classes."""
-
-        @staticmethod
-        def test_generic_build_dn_explicit(
-            generic_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test generic build dn explicit."""
-            result = generic_sink.build_dn({"dn": "cn=test,dc=example,dc=com"})
-            tm.ok(result, eq="cn=test,dc=example,dc=com")
-
-        @staticmethod
-        def test_generic_build_dn_id_field(
-            generic_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test generic build dn id field."""
-            result = generic_sink.build_dn({"id": "testentry", "cn": "Test Entry"})
-            tm.ok(result, eq="cn=testentry,dc=example,dc=com")
-
-        @staticmethod
-        def test_generic_build_dn_no_identifier(
-            generic_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test generic build dn no identifier."""
-            result = generic_sink.build_dn({"description": "Test Entry"})
-            tm.that(tm.fail(result), has="No ID or name found for generic entry")
-
-        @staticmethod
-        def test_generic_build_attributes_basic(
-            generic_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test generic build attributes basic."""
-            result = generic_sink.build_attributes({
-                "id": "testentry",
-                "cn": "Test Entry",
-                "description": "A test entry",
-            })
-            tm.that(tm.fail(result), has="must be implemented in subclass")
-
-        @staticmethod
-        def test_generic_get_object_classes_from_record(
-            generic_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test generic get object classes from record."""
-            tm.that(
-                generic_sink.resolve_object_classes({
-                    "object_classes": ["customClass", "top"],
-                }),
-                eq=["customClass", "top"],
-            )
-
-        @staticmethod
-        def test_generic_get_object_classes_single_value(
-            generic_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test generic get object classes single value."""
-            tm.that(
-                generic_sink.resolve_object_classes({"object_classes": "customClass"}),
-                eq=["customClass"],
-            )
-
-        @staticmethod
-        def test_generic_get_object_classes_default(
-            generic_sink: p.TargetLdap.Sink,
-        ) -> None:
-            """Test generic get object classes default."""
-            tm.that(generic_sink.resolve_object_classes({}), eq=["top"])
-
-        @staticmethod
-        def test_generic_get_object_classes_configured(
-            ldap_target: FlextTargetLdap,
-        ) -> None:
-            """Test generic get object classes configured."""
-            TestsFlextTargetLdapSinks.configure_target(
-                {
-                    "base_dn": "dc=example,dc=com",
-                    "generic_object_classes": ["customGeneric", "top"],
-                },
-                ldap_target,
-            )
-            sink = m.TargetLdap.BaseSink(
-                target=ldap_target,
-                stream_name="generic",
-                schema={
-                    "properties": {"dn": {"type": "string"}, "cn": {"type": "string"}},
-                },
-                key_properties=["id"],
+            """Test every entry carries the profile's required classes."""
+            profile = u.TargetLdap.entry_profile(stream_name)
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                stream_name,
+                ldap_settings_payload,
+                {},
             )
             classes = sink.resolve_object_classes({})
-            tm.that(classes, eq=["customGeneric", "top"])
+            for required in profile.required_object_classes:
+                tm.that(classes, has=required)
+
+        @staticmethod
+        def test_object_classes_follow_configured_setting(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test the profile's settings key adds configured classes."""
+            profile = u.TargetLdap.entry_profile("users")
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "users",
+                ldap_settings_payload,
+                {profile.object_classes_setting: ["customUser", "top"]},
+            )
+            classes = sink.resolve_object_classes({})
+            tm.that(classes, has="customUser")
+            for required in profile.required_object_classes:
+                tm.that(classes, has=required)
+
+    class TestsUndeclaredStream:
+        """Behavior contract for streams that use the default profile."""
+
+        @staticmethod
+        def test_build_dn_from_identity_field(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test the default profile derives the DN from its identity."""
+            profile = u.TargetLdap.entry_profile("generic")
+            base_dn = c.TargetLdap.Tests.SAMPLE_BASE_DN
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "generic",
+                ldap_settings_payload,
+                {},
+            )
+            tm.ok(
+                sink.build_dn({profile.identity_fields[0]: "testentry"}),
+                eq=f"{profile.rdn_attribute}=testentry,{base_dn}",
+            )
+
+        @staticmethod
+        def test_build_dn_without_identity_fails(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test a record without identity has no DN."""
+            profile = u.TargetLdap.entry_profile("generic")
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "generic",
+                ldap_settings_payload,
+                {},
+            )
+            result = sink.build_dn({"description": "Test Entry"})
+            tm.that(tm.fail(result), has=f"No {profile.identity_label} found")
+
+        @staticmethod
+        def test_build_attributes_writes_every_field(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test the default profile writes every non-control field."""
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "generic",
+                ldap_settings_payload,
+                {},
+            )
+            attributes = tm.ok(
+                sink.build_attributes({
+                    "dn": f"cn=testentry,{c.TargetLdap.Tests.SAMPLE_BASE_DN}",
+                    "cn": "Test Entry",
+                    "description": "A test entry",
+                }),
+            )
+            tm.that(attributes["cn"], eq=["Test Entry"])
+            tm.that(attributes["description"], eq=["A test entry"])
+            tm.that(attributes, lacks="dn")
+
+        @staticmethod
+        @pytest.mark.parametrize(
+            ("declared", "expected"),
+            [
+                (["customClass", "top"], ["customClass", "top"]),
+                ("customClass", ["customClass"]),
+            ],
+        )
+        def test_object_classes_from_record(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+            declared: t.JsonValue,
+            expected: list[str],
+        ) -> None:
+            """Test record-declared object classes win."""
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "generic",
+                ldap_settings_payload,
+                {},
+            )
+            classes = sink.resolve_object_classes({"object_classes": declared})
+            tm.that(classes, eq=expected)
+
+        @staticmethod
+        def test_object_classes_default(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test the default profile's classes apply when none are set."""
+            profile = u.TargetLdap.entry_profile("generic")
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "generic",
+                ldap_settings_payload,
+                {},
+            )
+            tm.that(
+                sink.resolve_object_classes({}),
+                eq=list(profile.default_object_classes),
+            )
+
+        @staticmethod
+        def test_object_classes_configured(
+            ldap_settings_payload: t.TargetLdap.SettingsPayload,
+        ) -> None:
+            """Test the default profile's settings key sets the classes."""
+            profile = u.TargetLdap.entry_profile("generic")
+            sink = TestsFlextTargetLdapSinks.build_sink(
+                "generic",
+                ldap_settings_payload,
+                {profile.object_classes_setting: ["customGeneric", "top"]},
+            )
+            tm.that(sink.resolve_object_classes({}), eq=["customGeneric", "top"])
