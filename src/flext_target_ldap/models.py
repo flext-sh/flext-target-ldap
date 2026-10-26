@@ -12,8 +12,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapModels
-from flext_meltano import FlextMeltanoModels
+from flext_ldap import m
+from flext_meltano import m as flext_meltano_m
 
 from flext_target_ldap._models import (
     FlextTargetLdapConfigModels,
@@ -21,7 +21,7 @@ from flext_target_ldap._models import (
 )
 
 
-class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
+class FlextTargetLdapModels(flext_meltano_m, m):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
