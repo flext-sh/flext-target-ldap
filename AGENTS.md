@@ -83,6 +83,12 @@ src/flext_target_ldap/
 - **No stream-to-class registry.** Stream behavior is data in
   `config/target-ldap.yaml`; adding a stream adds a profile, never a sink class.
 
+### ADR-028 Decision 16: CA/DI and quality
+
+The injected `p.TargetLdap.Directory` and the `api.py` composition root above are this
+member's declaration for [FLEXT ADR-028 Decision 16](https://github.com/flext-sh/flext/blob/0.12.0-dev/docs/architecture/adr/028-facade-boundary-orchestrators-declarative-enforcement.md#decision-16).
+Current implementation and gate evidence is tracked in Bead `flext-pawp5`.
+
 ## Conventions (specific to this package)
 
 - Config/settings canonical pattern: ADR-005 (SSOT) and ADR-024 (DI config contract).

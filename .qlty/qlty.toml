@@ -18,6 +18,7 @@ exclude_patterns = [
   "**/src/flext_target_ldap/constants.py",
   "**/src/flext_target_ldap/models.py",
   "**/src/flext_target_ldap/protocols.py",
+  "**/src/flext_target_ldap/services/__init__.py",
   "**/src/flext_target_ldap/typings.py",
   "**/src/flext_target_ldap/utilities.py",
   "**/tests/__init__.py",

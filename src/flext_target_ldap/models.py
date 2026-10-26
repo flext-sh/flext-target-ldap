@@ -18,8 +18,6 @@ from flext_meltano import FlextMeltanoModels
 from flext_target_ldap._models import (
     FlextTargetLdapConfigModels,
     FlextTargetLdapModelsEntities,
-    FlextTargetLdapModelsSinks,
-    FlextTargetLdapProcessingCounters,
 )
 
 
@@ -34,8 +32,6 @@ class FlextTargetLdapModels(FlextMeltanoModels, FlextLdapModels):
     class TargetLdap(
         FlextTargetLdapConfigModels,
         FlextTargetLdapModelsEntities,
-        FlextTargetLdapModelsSinks,
-        FlextTargetLdapProcessingCounters,
     ):
         """TargetLdap domain namespace."""
 

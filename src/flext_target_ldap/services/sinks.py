@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from flext_target_ldap import c, m, p, r, t, u
+from flext_target_ldap import c, p, r, t, u
 
 
 class FlextTargetLdapSinks:
@@ -28,7 +28,6 @@ class FlextTargetLdapSinks:
             self,
             *,
             directory: p.TargetLdap.Directory,
-            profile: m.TargetLdap.EntryProfile,
             settings: t.TargetLdap.SettingsPayload,
             stream_name: str,
             schema: t.TargetLdap.SchemaPayload,
@@ -36,7 +35,7 @@ class FlextTargetLdapSinks:
         ) -> None:
             """Bind the sink to its directory, entry profile, and settings."""
             self.directory = directory
-            self.profile = profile
+            self.profile = u.TargetLdap.entry_profile(stream_name)
             self.settings = settings
             self.stream_name = stream_name
             self.schema = schema
@@ -127,8 +126,22 @@ class FlextTargetLdapSinks:
             _ = context
             dn_result = self.build_dn(record)
             if dn_result.failure:
-                return r[bool].from_failure(dn_result)
-            dn = dn_result.value
+                result = r[bool].from_failure(dn_result)
+            else:
+                result = self._process_record_with_dn(record, dn_result.value)
+            return result
+
+        def _process_record_with_dn(
+            self,
+            record: t.TargetLdap.RecordPayload,
+            dn: str,
+        ) -> p.Result[bool]:
+            """Apply the delete-or-write behavior after resolving the record DN.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+
+            """
             if record.get(c.TargetLdap.KEY_DELETED_AT):
                 return self._delete_entry(dn)
             attributes = u.TargetLdap.entry_attributes(
@@ -223,7 +236,6 @@ class FlextTargetLdapSinks:
         """
         return FlextTargetLdapSinks.Sink(
             directory=directory,
-            profile=u.TargetLdap.entry_profile(stream_name),
             settings=target_config,
             stream_name=stream_name,
             schema=schema,
