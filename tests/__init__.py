@@ -13,9 +13,22 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_tests import api, td, tf, tk, tm
+    from flext_tests import api, install_local_packages, td, tf, tk, tm
 
-    from flext_target_ldap import d, e, h, r, x
+    from flext_target_ldap import (
+        cli,
+        config,
+        d,
+        e,
+        h,
+        ldap,
+        ldif,
+        main,
+        meltano,
+        r,
+        settings,
+        x,
+    )
     from tests.base import TestsFlextTargetLdapServiceBase, s
     from tests.constants import TestsFlextTargetLdapConstants, c
     from tests.models import TestsFlextTargetLdapModels, m
@@ -35,13 +48,21 @@ __all__: tuple[str, ...] = (
     "TestsFlextTargetLdapUtilities",
     "api",
     "c",
+    "cli",
+    "config",
     "d",
     "e",
     "h",
+    "install_local_packages",
+    "ldap",
+    "ldif",
     "m",
+    "main",
+    "meltano",
     "p",
     "r",
     "s",
+    "settings",
     "t",
     "td",
     "tf",
@@ -64,13 +85,21 @@ install_lazy_exports(
         "TestsFlextTargetLdapUtilities": ".utilities",
         "api": "flext_tests",
         "c": ".constants",
+        "cli": "flext_target_ldap",
+        "config": "flext_target_ldap",
         "d": "flext_target_ldap",
         "e": "flext_target_ldap",
         "h": "flext_target_ldap",
+        "install_local_packages": "flext_tests",
+        "ldap": "flext_target_ldap",
+        "ldif": "flext_target_ldap",
         "m": ".models",
+        "main": "flext_target_ldap",
+        "meltano": "flext_target_ldap",
         "p": ".protocols",
         "r": "flext_target_ldap",
         "s": ".base",
+        "settings": "flext_target_ldap",
         "t": ".typings",
         "td": "flext_tests",
         "tf": "flext_tests",
