@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import ClassVar
 
 from flext_ldap import ldap
@@ -87,7 +88,7 @@ class FlextTargetLdapClient:
         self,
         dn: str,
         attributes: t.Ldap.OperationAttributes,
-        object_classes: t.StrSequence | None = None,
+        object_classes: Sequence[str] | None = None,
     ) -> p.Result[bool]:
         """Add one LDAP entry.
 
@@ -197,7 +198,7 @@ class FlextTargetLdapClient:
         self,
         base_dn: str,
         search_filter: str = "(objectClass=*)",
-        attributes: t.StrSequence | None = None,
+        attributes: Sequence[str] | None = None,
     ) -> p.Result[list[m.Ldif.Entry]]:
         """Search LDAP entries.
 

@@ -9,10 +9,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import FlextTargetLdap, t
+from collections.abc import Sequence
+
+from flext_target_ldap import FlextTargetLdap
 
 
-def main(args: t.StrSequence | None = None) -> int:
+def main(args: Sequence[str] | None = None) -> int:
     """Run the target-ldap Singer CLI.
 
     Args:

@@ -6,7 +6,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import m, t
+from collections.abc import Mapping, Sequence
+
+from flext_meltano import m
 
 
 class FlextModelsTargetLdapConfig:
@@ -34,19 +36,19 @@ class FlextModelsTargetLdapConfig:
             description="Name of the missing identity in failure messages",
         )
         rdn_attribute: str = m.Field(description="RDN attribute of a derived DN")
-        identity_fields: t.StrSequence = m.Field(
+        identity_fields: Sequence[str] = m.Field(
             description="Record fields supplying the RDN value, in precedence order",
         )
-        default_object_classes: t.StrSequence = m.Field(
+        default_object_classes: Sequence[str] = m.Field(
             description="Object classes used when neither record nor settings set any",
         )
-        required_object_classes: t.StrSequence = m.Field(
+        required_object_classes: Sequence[str] = m.Field(
             description="Object classes every entry of the stream carries",
         )
         object_classes_setting: str = m.Field(
             description="Settings key holding the configured object classes",
         )
-        field_mapping: t.StrMapping = m.Field(
+        field_mapping: Mapping[str, str] = m.Field(
             description="Record field to LDAP attribute mapping",
         )
         include_unmapped_fields: bool = m.Field(
@@ -61,7 +63,7 @@ class FlextModelsTargetLdapConfig:
         default_entry_profile: FlextModelsTargetLdapConfig.EntryProfile = m.Field(
             description="Entry profile of streams without a declared profile",
         )
-        entry_profiles: t.MappingKV[str, FlextModelsTargetLdapConfig.EntryProfile] = (
+        entry_profiles: Mapping[str, FlextModelsTargetLdapConfig.EntryProfile] = (
             m.Field(
                 description="Entry profiles keyed by Singer stream name",
             )

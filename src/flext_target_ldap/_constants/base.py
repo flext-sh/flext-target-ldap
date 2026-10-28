@@ -19,7 +19,7 @@ class FlextTargetLdapConstantsBase:
     CREATE_MISSING_ENTRIES: Final[bool] = True
     UPDATE_EXISTING_ENTRIES: Final[bool] = True
     DELETE_REMOVED_ENTRIES: Final[bool] = False
-    DEFAULT_OBJECT_CLASSES: Final[tuple[str], ...] = ("top",)
+    DEFAULT_OBJECT_CLASSES: Final[tuple[str, ...]] = ("top",)
 
     # Canonical defaults (DEFAULT_TIMEOUT_SECONDS comes from c via MRO)
     DEFAULT_HOST: Final[str] = "localhost"
@@ -42,13 +42,13 @@ class FlextTargetLdapConstantsBase:
     KEY_OBJECT_CLASS_ATTRIBUTE: Final[str] = "objectClass"
 
     # Record keys that declare object classes, in precedence order
-    RECORD_OBJECT_CLASS_KEYS: Final[tuple[str], ...] = (
+    RECORD_OBJECT_CLASS_KEYS: Final[tuple[str, ...]] = (
         "object_classes",
         "objectClass",
         "objectclass",
     )
     # Record keys that steer the write and are never written as attributes
-    RECORD_CONTROL_KEYS: Final[tuple[str], ...] = (
+    RECORD_CONTROL_KEYS: Final[tuple[str, ...]] = (
         KEY_DN,
         KEY_DELETED_AT,
         *RECORD_OBJECT_CLASS_KEYS,

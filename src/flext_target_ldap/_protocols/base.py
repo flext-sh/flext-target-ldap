@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
 from flext_ldap import p
@@ -28,7 +29,7 @@ class FlextTargetLdapProtocolsBase:
             self,
             dn: str,
             attributes: t.Ldap.OperationAttributes,
-            object_classes: t.StrSequence | None = None,
+            object_classes: Sequence[str] | None = None,
         ) -> p.ResultView[bool]:
             """Add one entry."""
             ...
@@ -62,7 +63,7 @@ class FlextTargetLdapProtocolsBase:
 
         stream_name: str
         schema: t.TargetLdap.SchemaPayload
-        key_properties: t.StrSequence
+        key_properties: Sequence[str]
 
         def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.ResultView[str]:
             """Build the entry DN from a Singer record."""
@@ -79,7 +80,7 @@ class FlextTargetLdapProtocolsBase:
         def resolve_object_classes(
             self,
             record: t.TargetLdap.RecordPayload,
-        ) -> t.StrSequence:
+        ) -> Sequence[str]:
             """Resolve the declared LDAP object classes."""
             ...
 
@@ -87,7 +88,7 @@ class FlextTargetLdapProtocolsBase:
             self,
             dn: str,
             attributes: t.Ldap.OperationAttributes,
-            object_classes: t.StrSequence,
+            object_classes: Sequence[str],
         ) -> p.ResultView[bool]:
             """Validate one LDAP entry before writing it."""
             ...
@@ -151,8 +152,8 @@ class FlextTargetLdapProtocolsBase:
             self,
             base_dn: str,
             search_filter: str = "(objectClass=*)",
-            attributes: t.StrSequence | None = None,
-        ) -> p.ResultView[t.SequenceOf[p.Ldif.Entry]]:
+            attributes: Sequence[str] | None = None,
+        ) -> p.ResultView[Sequence[p.Ldif.Entry]]:
             """Search entries through the target client."""
             ...
 

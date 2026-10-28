@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 from flext_target_ldap import FlextTargetLdapSettings, c, config, m, p, r, t
 
@@ -19,7 +19,7 @@ class FlextTargetLdapUtilitiesEntries:
     """Profile, DN, attribute, and directory-operation mapping utilities."""
 
     @staticmethod
-    def to_str_values(value: t.JsonValue | t.StrSequence) -> list[str]:
+    def to_str_values(value: t.JsonValue | Sequence[str]) -> list[str]:
         """Convert a value or sequence of values to a list of strings.
 
         Args:
@@ -141,7 +141,7 @@ class FlextTargetLdapUtilitiesEntries:
         return classes
 
     @staticmethod
-    def attribute_mapping(settings: t.TargetLdap.SettingsPayload) -> t.StrMapping:
+    def attribute_mapping(settings: t.TargetLdap.SettingsPayload) -> Mapping[str, str]:
         """Return the configured record-field to LDAP-attribute mapping.
 
         Args:
@@ -204,7 +204,7 @@ class FlextTargetLdapUtilitiesEntries:
     def validate_entry(
         dn: str,
         attributes: t.Ldap.OperationAttributes,
-        object_classes: t.StrSequence,
+        object_classes: Sequence[str],
     ) -> p.Result[bool]:
         """Validate one LDAP entry before writing it.
 
@@ -229,7 +229,7 @@ class FlextTargetLdapUtilitiesEntries:
     def ldif_entry(
         dn: str,
         attributes: t.Ldap.OperationAttributes,
-        object_classes: t.StrSequence | None = None,
+        object_classes: Sequence[str] | None = None,
     ) -> m.Ldif.Entry:
         """Build the LDIF entry model of an add operation.
 
@@ -242,7 +242,7 @@ class FlextTargetLdapUtilitiesEntries:
             The LDIF entry ready for the flext-ldap API.
 
         """
-        entry_attributes: t.MutableMappingKV[str, t.StrSequence] = {
+        entry_attributes: MutableMapping[str, Sequence[str]] = {
             key: FlextTargetLdapUtilitiesEntries.to_str_values(value)
             for key, value in attributes.items()
         }
@@ -265,7 +265,7 @@ class FlextTargetLdapUtilitiesEntries:
     @staticmethod
     def modify_changes(
         changes: t.Ldap.OperationAttributes,
-    ) -> t.MutableMappingKV[str, t.SequenceOf[tuple[int, t.StrSequence]]]:
+    ) -> MutableMapping[str, Sequence[tuple[int, Sequence[str]]]]:
         """Build modify operations replacing each changed attribute.
 
         Args:

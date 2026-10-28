@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import MutableSequence
 from typing import Annotated
 
 from flext_ldap import FlextLdapModels
@@ -70,7 +71,7 @@ class FlextModelsTargetLdapEntities:
             FlextMeltanoModels.Field(..., description="LDAP Distinguished Name (DN)"),
         ]
         object_classes: Annotated[
-            t.MutableSequenceOf[str],
+            MutableSequence[str],
             FlextMeltanoModels.Field(
                 description="LDAP object classes for this entry",
                 default_factory=list,
@@ -95,8 +96,8 @@ class FlextModelsTargetLdapEntities:
         @classmethod
         def validate_object_classes(
             cls,
-            v: t.MutableSequenceOf[str],
-        ) -> t.MutableSequenceOf[str]:
+            v: MutableSequence[str],
+        ) -> MutableSequence[str]:
             """Validate object classes contain 'top'.
 
             Appends the required ``top`` class when it is absent.

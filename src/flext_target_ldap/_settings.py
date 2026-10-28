@@ -13,9 +13,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoSettings, m, t, u
+from flext_meltano import FlextMeltanoSettings, m, u
 from typing_extensions import TypeForm
 
 
@@ -72,13 +73,13 @@ class FlextTargetLdapSettings(FlextMeltanoSettings):
             ),
         ] = False
         attribute_mapping: Annotated[
-            t.StrMapping,
+            Mapping[str, str],
             m.Field(
                 description="Source field -> LDAP attribute map",
             ),
-        ] = m.Field(default_factory=u.empty(TypeForm(t.StrMapping)))
+        ] = m.Field(default_factory=u.empty(TypeForm(Mapping[str, str])))
         object_classes: Annotated[
-            t.StrSequence, m.Field(description="LDAP object classes")
+            Sequence[str], m.Field(description="LDAP object classes")
         ] = m.Field(default_factory=lambda: ["top"])
 
     if TYPE_CHECKING:

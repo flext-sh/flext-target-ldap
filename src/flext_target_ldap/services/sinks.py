@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import ClassVar
 
 from flext_target_ldap import c, p, r, t, u
@@ -31,7 +32,7 @@ class FlextTargetLdapSinks:
             settings: t.TargetLdap.SettingsPayload,
             stream_name: str,
             schema: t.TargetLdap.SchemaPayload,
-            key_properties: t.StrSequence,
+            key_properties: Sequence[str],
         ) -> None:
             """Bind the sink to its directory, entry profile, and settings."""
             self.directory = directory
@@ -77,7 +78,7 @@ class FlextTargetLdapSinks:
         def resolve_object_classes(
             self,
             record: t.TargetLdap.RecordPayload,
-        ) -> t.StrSequence:
+        ) -> Sequence[str]:
             """Resolve the object classes of a record's entry.
 
             Args:
@@ -93,7 +94,7 @@ class FlextTargetLdapSinks:
         def validate_entry(
             dn: str,
             attributes: t.Ldap.OperationAttributes,
-            object_classes: t.StrSequence,
+            object_classes: Sequence[str],
         ) -> p.Result[bool]:
             """Validate one LDAP entry before writing it.
 

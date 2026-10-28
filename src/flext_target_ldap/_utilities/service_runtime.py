@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 from typing import override
 
@@ -37,7 +38,7 @@ class FlextTargetLdapServiceRuntime:
             target: m.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.TargetLdap.MutableSchemaPayload,
-            key_properties: t.StrSequence,
+            key_properties: Sequence[str],
         ) -> FlextTargetLdapServiceRuntime.Sink:
             """Create an adapter sink and attach the LDAP runtime sink.
 
