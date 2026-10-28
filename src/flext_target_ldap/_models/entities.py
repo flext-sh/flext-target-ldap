@@ -14,7 +14,7 @@ from flext_meltano import FlextMeltanoModels
 from flext_target_ldap import t
 
 
-class FlextTargetLdapModelsEntities:
+class FlextModelsTargetLdapEntities:
     """LDAP target entity models composed into ``m.TargetLdap``."""
 
     class AttributeMapping(FlextLdapModels.Entity):
@@ -159,4 +159,4 @@ class FlextTargetLdapModelsEntities:
         ]
 
 
-__all__: list[str] = ["FlextTargetLdapModelsEntities"]
+__all__: list[str] = ["FlextModelsTargetLdapEntities"]

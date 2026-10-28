@@ -9,7 +9,7 @@ from __future__ import annotations
 from flext_meltano import m, t
 
 
-class FlextTargetLdapConfigModels:
+class FlextModelsTargetLdapConfig:
     """Field-only declarations for the TargetLdap config singleton."""
 
     class ConfigRoot(m.FrozenModel):
@@ -58,14 +58,14 @@ class FlextTargetLdapConfigModels:
 
         model_config = m.ConfigDict(frozen=True, extra="ignore")
 
-        default_entry_profile: FlextTargetLdapConfigModels.EntryProfile = m.Field(
+        default_entry_profile: FlextModelsTargetLdapConfig.EntryProfile = m.Field(
             description="Entry profile of streams without a declared profile",
         )
-        entry_profiles: t.MappingKV[str, FlextTargetLdapConfigModels.EntryProfile] = (
+        entry_profiles: t.MappingKV[str, FlextModelsTargetLdapConfig.EntryProfile] = (
             m.Field(
                 description="Entry profiles keyed by Singer stream name",
             )
         )
 
 
-__all__: list[str] = ["FlextTargetLdapConfigModels"]
+__all__: list[str] = ["FlextModelsTargetLdapConfig"]
