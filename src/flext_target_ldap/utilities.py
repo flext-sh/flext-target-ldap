@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import u
+from flext_ldap import u as flext_ldap_u
 from flext_meltano import u as flext_meltano_u
 
 from flext_target_ldap._utilities import (
@@ -18,7 +18,7 @@ from flext_target_ldap._utilities import (
 )
 
 
-class FlextTargetLdapUtilities(flext_meltano_u, u):
+class FlextTargetLdapUtilities(flext_meltano_u, flext_ldap_u):
     """Single unified utilities class for Singer target LDAP operations.
 
     Follows FLEXT unified class pattern with nested helper classes for

@@ -13,9 +13,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import ClassVar
 
-from flext_ldap import ldap
-
-from flext_target_ldap import FlextTargetLdapSettings, m, p, r, t, u
+from flext_target_ldap import FlextTargetLdapSettings, ldap, m, p, r, t, u
 
 
 class FlextTargetLdapClient:

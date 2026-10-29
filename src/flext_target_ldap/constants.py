@@ -7,13 +7,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import c
+from flext_ldap import c as flext_ldap_c
 from flext_meltano import c as flext_meltano_c
 
 from flext_target_ldap._constants import FlextTargetLdapConstantsBase
 
 
-class FlextTargetLdapConstants(flext_meltano_c, c):
+class FlextTargetLdapConstants(flext_meltano_c, flext_ldap_c):
     """LDAP target constant facade.
 
     The domain constants live in the nested ``TargetLdap`` namespace, which

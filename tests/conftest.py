@@ -12,9 +12,8 @@ from pathlib import Path
 import pytest
 from flext_tests import FlextTestsDocker
 
-from flext_target_ldap import settings
 from flext_target_ldap.services import FlextTargetLdapClient
-from tests import c, m, p, t, tm, u
+from tests import c, m, p, settings, t, tm, u
 
 
 @pytest.fixture

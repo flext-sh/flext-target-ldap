@@ -11,8 +11,7 @@ from uuid import uuid4
 
 import pytest
 
-from flext_target_ldap import settings
-from tests import p, t, tm
+from tests import p, settings, t, tm
 
 
 class TestsFlextTargetLdapClient:
