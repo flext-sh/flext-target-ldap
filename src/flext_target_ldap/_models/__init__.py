@@ -13,26 +13,21 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_target_ldap._models.config import FlextTargetLdapConfigModels
-    from flext_target_ldap._models.processing_result import (
-        FlextTargetLdapProcessingCounters,
-    )
-    from flext_target_ldap._models.sinks import FlextTargetLdapModelsSinks
+    from flext_target_ldap._models.config import FlextModelsTargetLdapConfig
+    from flext_target_ldap._models.entities import FlextModelsTargetLdapEntities
 
 
 __all__: tuple[str, ...] = (
-    "FlextTargetLdapConfigModels",
-    "FlextTargetLdapModelsSinks",
-    "FlextTargetLdapProcessingCounters",
+    "FlextModelsTargetLdapConfig",
+    "FlextModelsTargetLdapEntities",
 )
 
 install_lazy_exports(
     __name__,
     globals(),
     MappingProxyType({
-        "FlextTargetLdapConfigModels": ".config",
-        "FlextTargetLdapModelsSinks": ".sinks",
-        "FlextTargetLdapProcessingCounters": ".processing_result",
+        "FlextModelsTargetLdapConfig": ".config",
+        "FlextModelsTargetLdapEntities": ".entities",
     }),
     public_exports=__all__,
 )

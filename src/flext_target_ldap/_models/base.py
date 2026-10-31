@@ -7,5 +7,5 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 
-class FlextTargetLdapModelsBase:
+class FlextModelsTargetLdapBase:
     """Base family holder for flext-target-ldap models."""

@@ -17,7 +17,7 @@ from flext_target_ldap import FlextTargetLdapConstants
 
 
 def _docker_admin_password() -> str:
-    """Resolve the shared test OpenLDAP admin password (env override allowed).
+    """Resolve the shared test LDAP admin password (env override allowed).
 
     Returns:
         The resulting ``str``.
@@ -36,9 +36,13 @@ class TestsFlextTargetLdapConstants(FlextTargetLdapConstants, FlextTestsConstant
             """Target LDAP-specific test constants."""
 
             EXPECTED_DATA_COUNT: ClassVar[int] = 3
+            # Console script declared in ``pyproject.toml`` ``[project.scripts]``.
+            CONSOLE_SCRIPT: ClassVar[str] = "flext-target-ldap"
+            # Base DN fixed by sink scenarios that never reach a directory.
+            SAMPLE_BASE_DN: ClassVar[str] = "dc=example,dc=com"
 
-            # Identity provisioned by the shared OpenLDAP runtime
-            # (docker/docker-compose.openldap.yml ``LDAP_BASE_DN`` /
+            # Identity provisioned by the shared LDAP test container
+            # (its compose file ``LDAP_BASE_DN`` /
             # ``LDAP_ADMIN_PASSWORD`` / healthcheck bind DN); mirrors the
             # flext-ldap ``c.Ldap.Tests.DOCKER_*`` constants for the same
             # container.

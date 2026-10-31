@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """LDAP target type facade via MRO composition.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
@@ -6,24 +7,18 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import FlextLdapTypes
-from flext_meltano import FlextMeltanoTypes
+from flext_ldap import t as flext_ldap_t
+from flext_meltano import t as flext_meltano_t
+
+from flext_target_ldap._typings import FlextTargetLdapTypingsBase
 
 
-class FlextTargetLdapTypes(FlextMeltanoTypes, FlextLdapTypes):
+class FlextTargetLdapTypes(flext_meltano_t, flext_ldap_t):
     """MRO facade composing Meltano + LDAP type namespaces."""
 
-    class TargetLdap:
+    class TargetLdap(FlextTargetLdapTypingsBase):
         """Target LDAP domain type namespace."""
-
-        type SettingsPayload = FlextMeltanoTypes.JsonMapping
-        type RecordPayload = FlextMeltanoTypes.JsonMapping
-        type MutableRecordPayload = FlextMeltanoTypes.MutableJsonMapping
-        type SchemaPayload = FlextMeltanoTypes.JsonMapping
-        type MutableSchemaPayload = FlextMeltanoTypes.MutableJsonMapping
-        type CatalogPayload = FlextMeltanoTypes.JsonMapping
 
 
 t = FlextTargetLdapTypes
-
 __all__: list[str] = ["FlextTargetLdapTypes", "t"]

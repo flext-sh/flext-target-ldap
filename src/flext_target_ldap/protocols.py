@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Target LDAP protocol facade via MRO composition.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
@@ -6,133 +7,17 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from flext_ldap import p as flext_ldap_p
+from flext_meltano import p as flext_meltano_p
 
-from flext_ldap import FlextLdapProtocols
-from flext_meltano import FlextMeltanoProtocols
-
-from flext_target_ldap import t
+from flext_target_ldap._protocols import FlextTargetLdapProtocolsBase
 
 
-class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
+class FlextTargetLdapProtocols(flext_meltano_p, flext_ldap_p):
     """MRO facade composing Meltano + LDAP protocol namespaces."""
 
-    @runtime_checkable
-    class TargetLdap(FlextLdapProtocols.Ldap, Protocol):
+    class TargetLdap(FlextTargetLdapProtocolsBase):
         """Target LDAP domain protocol namespace."""
-
-        @runtime_checkable
-        class Sink(Protocol):
-            """Public LDAP sink transformation and validation contract."""
-
-            stream_name: str
-            schema: t.TargetLdap.SchemaPayload
-            key_properties: t.StrSequence
-
-            def build_dn(self, record: t.TargetLdap.RecordPayload) -> p.ResultView[str]:
-                """Build the entry DN from a Singer record."""
-                ...
-
-            def build_attributes(
-                self,
-                record: t.TargetLdap.RecordPayload,
-                /,
-            ) -> p.ResultView[t.Ldap.OperationAttributes]:
-                """Build LDAP operation attributes from a Singer record."""
-                ...
-
-            def resolve_object_classes(
-                self,
-                record: t.TargetLdap.RecordPayload,
-            ) -> t.StrSequence:
-                """Resolve the declared LDAP object classes."""
-                ...
-
-            def validate_entry(
-                self,
-                dn: str,
-                attributes: t.Ldap.OperationAttributes,
-                object_classes: t.StrSequence,
-            ) -> p.ResultView[bool]:
-                """Validate one LDAP entry before writing it."""
-                ...
-
-        @runtime_checkable
-        class Client(Protocol):
-            """Public contract for the target LDAP client facade."""
-
-            @property
-            def bind_dn(self) -> str:
-                """The configured bind DN."""
-                ...
-
-            @property
-            def host(self) -> str:
-                """The configured LDAP host."""
-                ...
-
-            @property
-            def password(self) -> str:
-                """The configured bind password."""
-                ...
-
-            @property
-            def port(self) -> int:
-                """The configured LDAP port."""
-                ...
-
-            @property
-            def server_uri(self) -> str:
-                """The effective LDAP server URI."""
-                ...
-
-            @property
-            def timeout(self) -> int:
-                """The configured connection timeout."""
-                ...
-
-            @property
-            def use_ssl(self) -> bool:
-                """Whether LDAPS is enabled."""
-                ...
-
-            def add_entry(
-                self,
-                dn: str,
-                attributes: t.Ldap.OperationAttributes,
-                object_classes: t.StrSequence | None = None,
-            ) -> p.ResultView[bool]:
-                """Add one entry through the target client."""
-                ...
-
-            def connect(self) -> p.ResultView[bool]:
-                """Validate connectivity to the configured LDAP server."""
-                ...
-
-            def delete_entry(self, dn: str) -> p.ResultView[bool]:
-                """Delete one entry through the target client."""
-                ...
-
-            def disconnect(self) -> p.ResultView[bool]:
-                """Disconnect the target client."""
-                ...
-
-            def modify_entry(
-                self,
-                dn: str,
-                changes: t.Ldap.OperationAttributes,
-            ) -> p.ResultView[bool]:
-                """Modify one entry through the target client."""
-                ...
-
-            def search_entry(
-                self,
-                base_dn: str,
-                search_filter: str = "(objectClass=*)",
-                attributes: t.StrSequence | None = None,
-            ) -> p.ResultView[t.SequenceOf[FlextLdapProtocols.Ldif.Entry]]:
-                """Search entries through the target client."""
-                ...
 
 
 p = FlextTargetLdapProtocols

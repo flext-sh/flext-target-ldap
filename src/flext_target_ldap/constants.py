@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Target LDAP constants facade.
 
 Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
@@ -6,18 +7,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from flext_ldap import c as flext_ldap_c
+from flext_meltano import c as flext_meltano_c
 
-from flext_ldap import FlextLdapConstants
-from flext_meltano import FlextMeltanoConstants
-
-from flext_target_ldap._constants.base import FlextTargetLdapConstantsBase
-
-if TYPE_CHECKING:
-    from flext_target_ldap import t
+from flext_target_ldap._constants import FlextTargetLdapConstantsBase
 
 
-class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
+class FlextTargetLdapConstants(flext_meltano_c, flext_ldap_c):
     """LDAP target constant facade.
 
     The domain constants live in the nested ``TargetLdap`` namespace, which
@@ -31,5 +27,4 @@ class FlextTargetLdapConstants(FlextMeltanoConstants, FlextLdapConstants):
 
 
 c = FlextTargetLdapConstants
-
-__all__: t.StrSequence = ("FlextTargetLdapConstants", "c")
+__all__: list[str] = ["FlextTargetLdapConstants", "c"]

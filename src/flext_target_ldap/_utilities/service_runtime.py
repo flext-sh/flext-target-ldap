@@ -6,19 +6,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, override
+from typing import override
 
 from flext_meltano import u
 
-from flext_target_ldap import m, t
-
-if TYPE_CHECKING:
-    from flext_target_ldap._models import FlextTargetLdapModelsSinks
-
-    type FlextTargetLdapRuntimeSink = (
-        FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapSink
-    )
+from flext_target_ldap import c, m, p, t
 
 
 class FlextTargetLdapServiceRuntime:
@@ -27,26 +21,24 @@ class FlextTargetLdapServiceRuntime:
     class Target(m.Meltano.SingerTargetBase):
         """Minimal Singer target used by the service facade."""
 
-        name = "target-ldap"
+        name = c.TargetLdap.TARGET_NAME
 
     class Sink(m.Meltano.SingerSinkBase):
         """Singer sink adapter that delegates to the LDAP runtime sink."""
 
         name = "target-ldap-sink"
 
-        _runtime_sink: (
-            FlextTargetLdapModelsSinks.FlextTargetLdapModels.FlextTargetLdapSink
-        )
+        _runtime_sink: p.TargetLdap.Sink
 
         @classmethod
         def create(
             cls,
             *,
-            runtime_sink: FlextTargetLdapRuntimeSink,
+            runtime_sink: p.TargetLdap.Sink,
             target: m.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.TargetLdap.MutableSchemaPayload,
-            key_properties: t.StrSequence,
+            key_properties: Sequence[str],
         ) -> FlextTargetLdapServiceRuntime.Sink:
             """Create an adapter sink and attach the LDAP runtime sink.
 

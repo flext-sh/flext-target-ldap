@@ -10,23 +10,23 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from flext_tests import FlextTestsDocker, tm
+from flext_tests import FlextTestsDocker
 
-from flext_target_ldap import FlextTargetLdap, settings
-from tests import c, m, p, t, u
+from flext_target_ldap.services import FlextTargetLdapClient
+from tests import c, m, p, settings, t, tm, u
 
 
 @pytest.fixture
 def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
     """Return the flat target payload derived from the production settings SSOT."""
-    return t.Cli.JSON_MAPPING_ADAPTER.validate_python(
+    return u.Cli.JSON_MAPPING_ADAPTER.validate_python(
         settings.TargetLdap.model_dump(mode="json"),
     )
 
 
 @pytest.fixture(scope="session")
 def ldap_runtime() -> m.Tests.ContainerConfig:
-    """Ensure the canonical shared OpenLDAP runtime and return where it listens.
+    """Ensure the canonical shared LDAP runtime and return where it listens.
 
     The shared entry declares the container port; the returned target carries
     the host port Docker published for it.
@@ -66,7 +66,7 @@ def ldap_runtime_settings_payload(
     payload[c.TargetLdap.KEY_BASE_DN] = c.TargetLdap.Tests.DOCKER_BASE_DN
     payload[c.TargetLdap.KEY_BIND_DN] = c.TargetLdap.Tests.DOCKER_ADMIN_DN
     payload[c.TargetLdap.KEY_BIND_CREDENTIAL] = c.TargetLdap.Tests.DOCKER_ADMIN_PASSWORD
-    return t.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
+    return u.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
 
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def ldap_client(
         The resulting ``p.TargetLdap.Client``.
 
     """
-    return u.TargetLdap.client()(settings=ldap_settings_payload)
+    return FlextTargetLdapClient(settings=ldap_settings_payload)
 
 
 @pytest.fixture
@@ -92,7 +92,7 @@ def ldap_runtime_client(
         The resulting ``p.TargetLdap.Client``.
 
     """
-    return u.TargetLdap.client()(settings=ldap_runtime_settings_payload)
+    return FlextTargetLdapClient(settings=ldap_runtime_settings_payload)
 
 
 @pytest.fixture
@@ -108,29 +108,3 @@ def ldap_base_dn(ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload) ->
         msg = "settings.TargetLdap.base_dn must name the LDAP integration base"
         raise ValueError(msg)
     return base_dn
-
-
-@pytest.fixture
-def target_ldap(
-    ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
-) -> FlextTargetLdap:
-    """Build the public target facade for the shared LDAP runtime.
-
-    Returns:
-        The resulting ``FlextTargetLdap``.
-
-    """
-    return FlextTargetLdap(settings=ldap_runtime_settings_payload)
-
-
-@pytest.fixture
-def ldap_target(
-    ldap_settings_payload: t.TargetLdap.SettingsPayload,
-) -> FlextTargetLdap:
-    """Build the public target API from production settings.
-
-    Returns:
-        The resulting ``FlextTargetLdap``.
-
-    """
-    return FlextTargetLdap(settings=ldap_settings_payload)

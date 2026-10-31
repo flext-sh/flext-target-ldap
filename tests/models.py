@@ -11,22 +11,22 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsModels
 
-from flext_target_ldap import FlextTargetLdapModels
+from flext_target_ldap import FlextModelsTargetLdap
 
 
-class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
+class TestsFlextTargetLdapModels(FlextTestsModels, FlextModelsTargetLdap):
     """Models for flext-target-ldap tests using COMPOSITION INHERITANCE.
 
     MANDATORY: Inherits from BOTH:
     1. TestsFlextModels - for test infrastructure (.Tests.*)
-    2. FlextTargetLdapModels - for domain models
+    2. FlextModelsTargetLdap - for domain models
 
     Access patterns:
     - m.TargetLdap.Tests.* (project-local Domain.Tests fixtures)
     - m.* (Target LDAP domain models via shared MRO)
     """
 
-    class TargetLdap(FlextTargetLdapModels.TargetLdap):
+    class TargetLdap(FlextModelsTargetLdap.TargetLdap):
         """Target LDAP domain test models namespace."""
 
         class Tests(FlextTestsModels.Tests):

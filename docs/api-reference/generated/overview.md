@@ -19,16 +19,16 @@
   :: Authentication/Directory :: LDAP, Typing :: Typed
 - Project class: `integration`
 - Keywords: `data-integration`, `etl`, `flext`, `ldap`, `singer`, `target`
-- Main facades: `FlextTargetLdap`, `FlextTargetLdapCli`, `FlextTargetLdapConfig`,
-  `FlextTargetLdapConstants`, `FlextTargetLdapModels`, `FlextTargetLdapProtocols`,
-  `FlextTargetLdapSettings`, `FlextTargetLdapTypes` (+2 more)
-- Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `FlextTargetLdap`, `FlextTargetLdapCli`,
-  `FlextTargetLdapConfig`, `FlextTargetLdapConstants`, `FlextTargetLdapModels`,
+- Main facades: `FlextTargetLdap`, `FlextTargetLdapConfig`, `FlextTargetLdapConstants`,
   `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
-  `FlextTargetLdapUtilities`, `FlextTargetLdapVersion` (+3 more)
-- Exported module shortcuts: `application`
-- Generated module pages: `8`
+  `FlextTargetLdapUtilities`, `FlextTargetLdapVersion`
+- Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
+- Public symbol exports: `FlextModelsTargetLdap`, `FlextTargetLdap`,
+  `FlextTargetLdapConfig`, `FlextTargetLdapConstants`, `FlextTargetLdapProtocols`,
+  `FlextTargetLdapSettings`, `FlextTargetLdapTypes`, `FlextTargetLdapUtilities`,
+  `FlextTargetLdapVersion`, `config` (+2 more)
+- Exported module shortcuts: _none_
+- Generated module pages: `7`
 
 ## Next Pages
 
