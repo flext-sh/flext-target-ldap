@@ -16,13 +16,13 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoSettings, m, p, t, u
+from flext_meltano import FlextMeltanoSettings, m, t, u
 
 
 class FlextTargetLdapSettings(FlextMeltanoSettings):
     """LDAP target settings; all project fields under ``settings.TargetLdap.*``."""
 
-    model_config: ClassVar[p.SettingsConfigDict] = m.SettingsConfigDict(
+    model_config: ClassVar[t.SettingsConfigDict] = m.SettingsConfigDict(
         env_prefix="FLEXT_TARGET_LDAP_",
         env_nested_delimiter="__",
         extra="ignore",
