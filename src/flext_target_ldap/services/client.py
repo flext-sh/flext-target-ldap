@@ -22,7 +22,7 @@ class FlextTargetLdapClient:
     """Directory client using the flext-ldap API for every operation."""
 
     logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
-    settings: m.Ldap.ConnectionConfig
+    settings: p.Ldap.ConnectionConfig
 
     def __init__(
         self,
@@ -199,7 +199,7 @@ class FlextTargetLdapClient:
         base_dn: str,
         search_filter: str = "(objectClass=*)",
         attributes: Sequence[str] | None = None,
-    ) -> p.Result[list[m.Ldif.Entry]]:
+    ) -> p.Result[list[p.Ldif.Entry]]:
         """Search LDAP entries.
 
         Args:
@@ -213,10 +213,10 @@ class FlextTargetLdapClient:
 
         """
         if not base_dn:
-            return r[list[m.Ldif.Entry]].fail("Base DN required")
+            return r[list[p.Ldif.Entry]].fail("Base DN required")
         connect_result = self._api.connect(self.settings)
         if connect_result.failure:
-            return r[list[m.Ldif.Entry]].fail_op("Connection", connect_result.error)
+            return r[list[p.Ldif.Entry]].fail_op("Connection", connect_result.error)
         try:
             result = self._api.search(
                 m.Ldap.SearchOptions(
@@ -228,8 +228,8 @@ class FlextTargetLdapClient:
         finally:
             self._api.disconnect()
         if result.failure:
-            return r[list[m.Ldif.Entry]].fail_op("Search", result.error)
-        return r[list[m.Ldif.Entry]].ok(list(result.value.entries))
+            return r[list[p.Ldif.Entry]].fail_op("Search", result.error)
+        return r[list[p.Ldif.Entry]].ok(list(result.value.entries))
 
 
 __all__: list[str] = ["FlextTargetLdapClient"]

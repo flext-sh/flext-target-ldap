@@ -20,7 +20,7 @@ class TestsFlextTargetLdapSettings(FlextTargetLdapSettings, FlextTestsSettings):
     connection: Annotated[
         m.Ldap.ConnectionConfig,
         m.Field(
-            default_factory=lambda: m.Ldap.ConnectionConfig(
+            default_factory=lambda: p.Ldap.ConnectionConfig(
                 host=c.TargetLdap.DEFAULT_HOST,
                 port=c.Ldap.PORT,
                 bind_dn=c.TargetLdap.DEFAULT_BIND_DN,

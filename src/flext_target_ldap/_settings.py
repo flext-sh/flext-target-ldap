@@ -22,7 +22,7 @@ from flext_meltano import FlextMeltanoSettings, m, t, u
 class FlextTargetLdapSettings(FlextMeltanoSettings):
     """LDAP target settings; all project fields under ``settings.TargetLdap.*``."""
 
-    model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
+    model_config: ClassVar[p.SettingsConfigDict] = m.SettingsConfigDict(
         env_prefix="FLEXT_TARGET_LDAP_",
         env_nested_delimiter="__",
         extra="ignore",

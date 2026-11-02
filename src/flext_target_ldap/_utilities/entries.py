@@ -35,7 +35,7 @@ class FlextTargetLdapUtilitiesEntries:
         return [str(value)]
 
     @staticmethod
-    def entry_profile(stream_name: str) -> m.TargetLdap.EntryProfile:
+    def entry_profile(stream_name: str) -> p.TargetLdap.EntryProfile:
         """Return the declared entry profile of a Singer stream.
 
         Args:
@@ -54,7 +54,7 @@ class FlextTargetLdapUtilitiesEntries:
     @staticmethod
     def record_dn(
         record: t.TargetLdap.RecordPayload,
-        profile: m.TargetLdap.EntryProfile,
+        profile: p.TargetLdap.EntryProfile,
         settings: t.TargetLdap.SettingsPayload,
     ) -> p.Result[str]:
         """Resolve the DN of a record: its explicit ``dn`` or the profile RDN.
@@ -103,7 +103,7 @@ class FlextTargetLdapUtilitiesEntries:
     @staticmethod
     def object_classes(
         record: t.TargetLdap.RecordPayload,
-        profile: m.TargetLdap.EntryProfile,
+        profile: p.TargetLdap.EntryProfile,
         settings: t.TargetLdap.SettingsPayload,
     ) -> list[str]:
         """Resolve the object classes of a record's entry.
@@ -166,7 +166,7 @@ class FlextTargetLdapUtilitiesEntries:
     @staticmethod
     def entry_attributes(
         record: t.TargetLdap.RecordPayload,
-        profile: m.TargetLdap.EntryProfile,
+        profile: p.TargetLdap.EntryProfile,
         settings: t.TargetLdap.SettingsPayload,
     ) -> t.MutableStrSequenceMapping:
         """Map a record to the LDAP attributes of its entry.
@@ -230,7 +230,7 @@ class FlextTargetLdapUtilitiesEntries:
         dn: str,
         attributes: t.Ldap.OperationAttributes,
         object_classes: Sequence[str] | None = None,
-    ) -> m.Ldif.Entry:
+    ) -> p.Ldif.Entry:
         """Build the LDIF entry model of an add operation.
 
         Args:
@@ -292,7 +292,7 @@ class FlextTargetLdapUtilitiesEntries:
             | m.Ldap.ConnectionConfig
             | t.TargetLdap.SettingsPayload
         ),
-    ) -> m.Ldap.ConnectionConfig:
+    ) -> p.Ldap.ConnectionConfig:
         """Resolve any supported settings payload to the connection model.
 
         Args:
