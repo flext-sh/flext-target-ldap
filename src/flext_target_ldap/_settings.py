@@ -16,7 +16,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoSettings, m, t, u
+from flext_meltano import FlextMeltanoSettings, m, p, t, u
 
 
 class FlextTargetLdapSettings(FlextMeltanoSettings):
