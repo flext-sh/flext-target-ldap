@@ -7,20 +7,29 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
     from flext_target_ldap._protocols.base import FlextTargetLdapProtocolsBase
+    from flext_target_ldap._protocols.config import FlextTargetLdapProtocolsConfig
+    from flext_target_ldap._protocols.entities import FlextTargetLdapProtocolsEntities
 
 
-__all__: tuple[str, ...] = ("FlextTargetLdapProtocolsBase",)
+__all__: tuple[str, ...] = (
+    "FlextTargetLdapProtocolsBase",
+    "FlextTargetLdapProtocolsConfig",
+    "FlextTargetLdapProtocolsEntities",
+)
 
 install_lazy_exports(
     __name__,
     globals(),
-    MappingProxyType({"FlextTargetLdapProtocolsBase": ".base"}),
+    {
+        "FlextTargetLdapProtocolsBase": ".base",
+        "FlextTargetLdapProtocolsConfig": ".config",
+        "FlextTargetLdapProtocolsEntities": ".entities",
+    },
     public_exports=__all__,
 )

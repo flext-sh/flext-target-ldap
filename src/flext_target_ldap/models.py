@@ -1,7 +1,7 @@
 # AUTO-GENERATED FILE — Regenerate with: make gen
 """FLEXT Target LDAP Models - Consolidated domain models following Models patterns.
 
-This module implements the FlextModelsTargetLdap class that extends FlextModels,
+This module implements the FlextTargetLdapModels class that extends FlextModels,
 providing unified LDAP target domain models with nested classes for composition
 and validation reuse. Follows the FLEXT ecosystem unified models standard.
 
@@ -16,12 +16,12 @@ from flext_ldap import m as flext_ldap_m
 from flext_meltano import m as flext_meltano_m
 
 from flext_target_ldap._models import (
-    FlextModelsTargetLdapConfig,
-    FlextModelsTargetLdapEntities,
+    FlextTargetLdapModelsConfig,
+    FlextTargetLdapModelsEntities,
 )
 
 
-class FlextModelsTargetLdap(flext_meltano_m, flext_ldap_m):
+class FlextTargetLdapModels(flext_meltano_m, flext_ldap_m):
     """Unified LDAP target models extending FlextModels with nested domain classes.
 
     This class consolidates all LDAP target domain models using nested classes
@@ -30,11 +30,11 @@ class FlextModelsTargetLdap(flext_meltano_m, flext_ldap_m):
     """
 
     class TargetLdap(
-        FlextModelsTargetLdapConfig,
-        FlextModelsTargetLdapEntities,
+        FlextTargetLdapModelsConfig,
+        FlextTargetLdapModelsEntities,
     ):
         """TargetLdap domain namespace."""
 
 
-m = FlextModelsTargetLdap
-__all__: list[str] = ["FlextModelsTargetLdap", "m"]
+m = FlextTargetLdapModels
+__all__: list[str] = ["FlextTargetLdapModels", "m"]

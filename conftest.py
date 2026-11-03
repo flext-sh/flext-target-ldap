@@ -8,22 +8,8 @@ Copyright (c) 2026 Marlon Santa Cruz. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
-
 from pathlib import Path
 
 from flext_tests import install_local_packages
 
-
-class FlextTargetLdapPytestBootstrap:
-    """Bind this checkout's local tiers through the shared bootstrap owner."""
-
-    @staticmethod
-    def main() -> None:
-        """Install this checkout's local tier packages before collection."""
-        install_local_packages(Path(__file__).resolve().parent)
-
-
-FlextTargetLdapPytestBootstrap.main()
-
-__all__: list[str] = ["FlextTargetLdapPytestBootstrap"]
+install_local_packages(Path(__file__).resolve().parent)

@@ -19,11 +19,11 @@
   :: Authentication/Directory :: LDAP, Typing :: Typed
 - Project class: `integration`
 - Keywords: `data-integration`, `etl`, `flext`, `ldap`, `singer`, `target`
-- Main facades: `FlextTargetLdap`, `FlextTargetLdapConfig`, `FlextTargetLdapConstants`,
-  `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`, `FlextTargetLdapTypes`,
-  `FlextTargetLdapUtilities`, `FlextTargetLdapVersion`
+- Main facades: `FlextTargetLdapModels`, `FlextTargetLdap`, `FlextTargetLdapConfig`,
+  `FlextTargetLdapConstants`, `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`,
+  `FlextTargetLdapTypes`, `FlextTargetLdapUtilities` (+1 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `FlextModelsTargetLdap`, `FlextTargetLdap`,
+- Public symbol exports: `FlextTargetLdapModels`, `FlextTargetLdap`,
   `FlextTargetLdapConfig`, `FlextTargetLdapConstants`, `FlextTargetLdapProtocols`,
   `FlextTargetLdapSettings`, `FlextTargetLdapTypes`, `FlextTargetLdapUtilities`,
   `FlextTargetLdapVersion`, `config` (+2 more)

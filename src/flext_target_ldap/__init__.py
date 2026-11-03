@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
@@ -31,17 +30,17 @@ if TYPE_CHECKING:
     from flext_target_ldap.api import FlextTargetLdap
     from flext_target_ldap.cli import main
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
-    from flext_target_ldap.models import FlextModelsTargetLdap, m
+    from flext_target_ldap.models import FlextTargetLdapModels, m
     from flext_target_ldap.protocols import FlextTargetLdapProtocols, p
     from flext_target_ldap.typings import FlextTargetLdapTypes, t
     from flext_target_ldap.utilities import FlextTargetLdapUtilities, u
 
 
 __all__: tuple[str, ...] = (
-    "FlextModelsTargetLdap",
     "FlextTargetLdap",
     "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
+    "FlextTargetLdapModels",
     "FlextTargetLdapProtocols",
     "FlextTargetLdapSettings",
     "FlextTargetLdapTypes",
@@ -74,11 +73,11 @@ __all__: tuple[str, ...] = (
 install_lazy_exports(
     __name__,
     globals(),
-    MappingProxyType({
-        "FlextModelsTargetLdap": ".models",
+    {
         "FlextTargetLdap": ".api",
         "FlextTargetLdapConfig": "._config",
         "FlextTargetLdapConstants": ".constants",
+        "FlextTargetLdapModels": ".models",
         "FlextTargetLdapProtocols": ".protocols",
         "FlextTargetLdapSettings": "._settings",
         "FlextTargetLdapTypes": ".typings",
@@ -105,7 +104,7 @@ install_lazy_exports(
         "t": ".typings",
         "u": ".utilities",
         "x": "flext_meltano",
-    }),
+    },
     public_exports=__all__,
 )
 

@@ -11,7 +11,7 @@ from collections.abc import Mapping, Sequence
 from flext_meltano import m
 
 
-class FlextModelsTargetLdapConfig:
+class FlextTargetLdapModelsConfig:
     """Field-only declarations for the TargetLdap config singleton."""
 
     class ConfigRoot(m.FrozenModel):
@@ -60,14 +60,14 @@ class FlextModelsTargetLdapConfig:
 
         model_config = m.ConfigDict(frozen=True, extra="ignore")
 
-        default_entry_profile: FlextModelsTargetLdapConfig.EntryProfile = m.Field(
+        default_entry_profile: FlextTargetLdapModelsConfig.EntryProfile = m.Field(
             description="Entry profile of streams without a declared profile",
         )
-        entry_profiles: Mapping[str, FlextModelsTargetLdapConfig.EntryProfile] = (
+        entry_profiles: Mapping[str, FlextTargetLdapModelsConfig.EntryProfile] = (
             m.Field(
                 description="Entry profiles keyed by Singer stream name",
             )
         )
 
 
-__all__: list[str] = ["FlextModelsTargetLdapConfig"]
+__all__: list[str] = ["FlextTargetLdapModelsConfig"]

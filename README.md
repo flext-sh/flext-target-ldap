@@ -55,9 +55,9 @@ required validation.
 - Parent FLEXT chain: read this project's `pyproject.toml` `dependencies` array filtered
   by `flext-*`. The FLEXT cascade is encoded in the inheritance lists of the facade
   classes listed under Module Map above.
-- Public extensions exposed by this project: `FlextTargetLdap`, `FlextTargetLdapConfig`,
-  `FlextTargetLdapConstants`, `FlextTargetLdapProtocols`, `FlextTargetLdapSettings`,
-  `FlextTargetLdapTypes` (+2 more).
+- Public extensions exposed by this project: `FlextTargetLdapModels`, `FlextTargetLdap`,
+  `FlextTargetLdapConfig`, `FlextTargetLdapConstants`, `FlextTargetLdapProtocols`,
+  `FlextTargetLdapSettings` (+3 more).
 - Library abstraction boundaries: see the project `AGENTS.md` and the referenced parent
   architecture rules.
 

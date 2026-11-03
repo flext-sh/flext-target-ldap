@@ -10,13 +10,21 @@ from __future__ import annotations
 from flext_ldap import p as flext_ldap_p
 from flext_meltano import p as flext_meltano_p
 
-from flext_target_ldap._protocols import FlextTargetLdapProtocolsBase
+from flext_target_ldap._protocols import (
+    FlextTargetLdapProtocolsBase,
+    FlextTargetLdapProtocolsConfig,
+    FlextTargetLdapProtocolsEntities,
+)
 
 
 class FlextTargetLdapProtocols(flext_meltano_p, flext_ldap_p):
     """MRO facade composing Meltano + LDAP protocol namespaces."""
 
-    class TargetLdap(FlextTargetLdapProtocolsBase):
+    class TargetLdap(
+        FlextTargetLdapProtocolsBase,
+        FlextTargetLdapProtocolsConfig,
+        FlextTargetLdapProtocolsEntities,
+    ):
         """Target LDAP domain protocol namespace."""
 
 
