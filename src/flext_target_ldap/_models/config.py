@@ -7,24 +7,30 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from typing import Annotated
 
 from flext_meltano import m
+
+from flext_target_ldap import p, t
 
 
 class FlextTargetLdapModelsConfig:
     """Field-only declarations for the TargetLdap config singleton."""
 
-    class ConfigRoot(m.FrozenModel):
+    class ConfigRoot(m.StrictModel):
         """Validated root loaded by the private config composition."""
 
-        model_config = m.ConfigDict(frozen=True, extra="ignore")
+        model_config = m.ConfigDict(extra="ignore")
 
         class ConfigNamespace(m.BaseModel):
             """Open namespace loaded from ``config/target-ldap.yaml``."""
 
             model_config = m.ConfigDict(frozen=True, extra="allow")
 
-        TargetLdap: ConfigNamespace = m.Field(
+        TargetLdap: Annotated[
+            p.TargetLdap.ConfigRootConfigNamespace,
+            t.schema_for_model(FlextTargetLdapModelsConfig.ConfigRoot.ConfigNamespace),
+        ] = m.Field(
             description="Open namespace exposing ``config/*.yaml`` under TargetLdap.",
         )
 
@@ -58,7 +64,7 @@ class FlextTargetLdapModelsConfig:
     class Rules(m.FrozenModel):
         """TargetLdap business rules from ``config/target-ldap.yaml``."""
 
-        model_config = m.ConfigDict(frozen=True, extra="ignore")
+        model_config = m.ConfigDict(extra="ignore")
 
         default_entry_profile: FlextTargetLdapModelsConfig.EntryProfile = m.Field(
             description="Entry profile of streams without a declared profile",

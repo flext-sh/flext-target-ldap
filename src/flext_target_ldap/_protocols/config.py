@@ -18,22 +18,17 @@ class FlextTargetLdapProtocolsConfig:
     """Own the structural contracts declared by its model source."""
 
     @runtime_checkable
-    class ConfigRoot(FlextMeltanoProtocols.Model, Protocol):
+    class ConfigRoot(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def TargetLdap(
-            self,
-        ) -> FlextTargetLdapProtocolsConfig.ConfigRootConfigNamespace:
-            """Open namespace exposing ``config/*.yaml`` under TargetLdap."""
-            ...
+        TargetLdap: FlextTargetLdapProtocolsConfig.ConfigRootConfigNamespace
 
     @runtime_checkable
-    class ConfigRootConfigNamespace(FlextMeltanoProtocols.Model, Protocol):
+    class ConfigRootConfigNamespace(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
     @runtime_checkable
-    class EntryProfile(FlextMeltanoProtocols.Model, Protocol):
+    class EntryProfile(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
@@ -82,7 +77,7 @@ class FlextTargetLdapProtocolsConfig:
             ...
 
     @runtime_checkable
-    class Rules(FlextMeltanoProtocols.Model, Protocol):
+    class Rules(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property

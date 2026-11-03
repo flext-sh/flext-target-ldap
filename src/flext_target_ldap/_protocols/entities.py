@@ -13,17 +13,17 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from flext_meltano import FlextMeltanoProtocols
 
-from flext_target_ldap import t
-
 if TYPE_CHECKING:
     from flext_core import p
+
+    from flext_target_ldap import t
 
 
 class FlextTargetLdapProtocolsEntities:
     """Own the structural contracts declared by its model source."""
 
     @runtime_checkable
-    class AttributeMapping(FlextMeltanoProtocols.Model, Protocol):
+    class AttributeMapping(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
@@ -31,33 +31,14 @@ class FlextTargetLdapProtocolsEntities:
             """List of uncommitted domain events for event sourcing."""
             ...
 
-        @property
-        def singer_field_name(self) -> t.NonEmptyStr:
-            """Singer field name from source data."""
-            ...
-
-        @property
-        def ldap_attribute_name(self) -> t.NonEmptyStr:
-            """Target LDAP attribute name."""
-            ...
-
-        @property
-        def is_required(self) -> bool:
-            """Whether this attribute is required for LDAP entry."""
-            ...
-
-        @property
-        def transformation_rule(self) -> str | None:
-            """Optional transformation rule (e.g., 'lowercase', 'uppercase')."""
-            ...
-
-        @property
-        def default_value(self) -> str | None:
-            """Default value if source field is missing."""
-            ...
+        singer_field_name: t.NonEmptyStr
+        ldap_attribute_name: t.NonEmptyStr
+        is_required: bool
+        transformation_rule: str | None
+        default_value: str | None
 
     @runtime_checkable
-    class Entry(FlextMeltanoProtocols.Model, Protocol):
+    class Entry(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
@@ -65,28 +46,13 @@ class FlextTargetLdapProtocolsEntities:
             """List of uncommitted domain events for event sourcing."""
             ...
 
-        @property
-        def distinguished_name(self) -> t.NonEmptyStr:
-            """LDAP Distinguished Name (DN)."""
-            ...
-
-        @property
-        def object_classes(self) -> MutableSequence[str]:
-            """LDAP object classes for this entry."""
-            ...
-
-        @property
-        def attributes(self) -> t.MutableStrSequenceMapping:
-            """LDAP attributes with values."""
-            ...
-
-        @property
-        def entry_type(self) -> str:
-            """Type of LDAP entry (user, group, ou, etc.)."""
-            ...
+        distinguished_name: t.NonEmptyStr
+        object_classes: MutableSequence[str]
+        attributes: t.MutableStrSequenceMapping
+        entry_type: str
 
     @runtime_checkable
-    class TransformationRule(FlextMeltanoProtocols.Model, Protocol):
+    class TransformationRule(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
         @property
