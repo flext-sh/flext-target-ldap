@@ -14,11 +14,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import ClassVar
 
-from flext_target_ldap.constants import c
-from flext_target_ldap.protocols import p
-from flext_target_ldap.result import r
-from flext_target_ldap.typings import t
-from flext_target_ldap.utilities import u
+from flext_target_ldap import c, p, r, t, u
 
 
 class FlextTargetLdapSinks:

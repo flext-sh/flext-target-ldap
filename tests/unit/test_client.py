@@ -9,9 +9,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-import pytest
-
-from tests import p, settings, t, tm
+from tests import c, p, settings, t, tm
 
 
 class TestsFlextTargetLdapClient:
@@ -43,8 +41,8 @@ class TestsFlextTargetLdapClient:
         )
 
     @staticmethod
-    @pytest.mark.docker
-    @pytest.mark.integration
+    @c.Tests.MARK.docker
+    @c.Tests.MARK.integration
     def test_connect_and_disconnect_reach_configured_runtime(
         ldap_runtime_client: p.TargetLdap.Client,
     ) -> None:
@@ -58,8 +56,8 @@ class TestsFlextTargetLdapClient:
         tm.ok(disconnected.value)
 
     @staticmethod
-    @pytest.mark.docker
-    @pytest.mark.integration
+    @c.Tests.MARK.docker
+    @c.Tests.MARK.integration
     def test_entry_lifecycle_is_observable_in_configured_runtime(
         ldap_runtime_client: p.TargetLdap.Client,
         ldap_base_dn: str,

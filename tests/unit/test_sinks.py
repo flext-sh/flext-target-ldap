@@ -9,8 +9,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import pytest
-
 from flext_target_ldap.services import FlextTargetLdapClient, FlextTargetLdapSinks
 from tests import c, p, t, tm, u
 
@@ -78,7 +76,7 @@ class TestsFlextTargetLdapSinks:
             tm.ok(result)
 
         @staticmethod
-        @pytest.mark.parametrize(
+        @c.Tests.MARK.parametrize(
             ("dn", "attributes", "object_classes", "expected_message"),
             [
                 ("", {"cn": ["test"]}, ["person"], "DN cannot be empty"),
@@ -116,7 +114,7 @@ class TestsFlextTargetLdapSinks:
         """Behavior contract for streams with a declared entry profile."""
 
         @staticmethod
-        @pytest.mark.parametrize(
+        @c.Tests.MARK.parametrize(
             "stream_name",
             ["users", "groups", "organizational_units"],
         )
@@ -141,7 +139,7 @@ class TestsFlextTargetLdapSinks:
             )
 
         @staticmethod
-        @pytest.mark.parametrize(
+        @c.Tests.MARK.parametrize(
             "stream_name",
             ["users", "groups", "organizational_units"],
         )
@@ -176,7 +174,7 @@ class TestsFlextTargetLdapSinks:
             )
 
         @staticmethod
-        @pytest.mark.parametrize(
+        @c.Tests.MARK.parametrize(
             "stream_name",
             ["users", "groups", "organizational_units"],
         )
@@ -214,7 +212,7 @@ class TestsFlextTargetLdapSinks:
             tm.that(attributes[profile.field_mapping[field]], eq=["one", "two"])
 
         @staticmethod
-        @pytest.mark.parametrize(
+        @c.Tests.MARK.parametrize(
             "stream_name",
             ["users", "groups", "organizational_units"],
         )
@@ -305,7 +303,7 @@ class TestsFlextTargetLdapSinks:
             tm.that(attributes, lacks="dn")
 
         @staticmethod
-        @pytest.mark.parametrize(
+        @c.Tests.MARK.parametrize(
             ("declared", "expected"),
             [
                 (["customClass", "top"], ["customClass", "top"]),
