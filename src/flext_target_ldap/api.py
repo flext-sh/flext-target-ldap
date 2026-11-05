@@ -16,8 +16,11 @@ from typing import Annotated, ClassVar
 
 from flext_meltano import FlextMeltanoTargetServiceBase
 
-from flext_target_ldap import c, m, p, t
+from flext_target_ldap.constants import c
+from flext_target_ldap.models import m
+from flext_target_ldap.protocols import p
 from flext_target_ldap.services import FlextTargetLdapClient, FlextTargetLdapSinks
+from flext_target_ldap.typings import t
 
 
 class FlextTargetLdap(FlextMeltanoTargetServiceBase):

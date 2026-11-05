@@ -12,7 +12,7 @@ from typing import Annotated
 from flext_ldap import FlextLdapModels
 from flext_meltano import FlextMeltanoModels
 
-from flext_target_ldap import t
+from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapModelsEntities:

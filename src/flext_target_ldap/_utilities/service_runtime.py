@@ -10,9 +10,11 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import override
 
-from flext_meltano import u
-
-from flext_target_ldap import c, m, p, t
+from flext_target_ldap.constants import c
+from flext_target_ldap.models import m
+from flext_target_ldap.protocols import p
+from flext_target_ldap.typings import t
+from flext_target_ldap.utilities import u
 
 
 class FlextTargetLdapServiceRuntime:

@@ -11,7 +11,7 @@ from typing import Protocol, runtime_checkable
 
 from flext_ldap import p
 
-from flext_target_ldap import t
+from flext_target_ldap.typings import t
 
 
 class FlextTargetLdapProtocolsBase:
