@@ -9,18 +9,16 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-import pytest
-
 from flext_target_ldap.services import FlextTargetLdapSinks
-from tests import p, t, tm, u
+from tests import c, p, t, tm, u
 
 
 class TestsFlextTargetLdapIntegration:
     """Observable target-to-LDAP persistence contract."""
 
     @staticmethod
-    @pytest.mark.docker
-    @pytest.mark.integration
+    @c.Tests.MARK.docker
+    @c.Tests.MARK.integration
     def test_users_record_is_added_modified_and_deleted(
         ldap_runtime_settings_payload: t.TargetLdap.SettingsPayload,
         ldap_runtime_client: p.TargetLdap.Client,

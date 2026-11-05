@@ -11,7 +11,8 @@ from typing import Annotated
 
 from flext_tests import FlextTestsSettings
 
-from flext_target_ldap import FlextTargetLdapSettings, c, m, t
+from flext_target_ldap import FlextTargetLdapSettings
+from tests import c, m, t
 
 
 class TestsFlextTargetLdapSettings(FlextTargetLdapSettings, FlextTestsSettings):
