@@ -7,17 +7,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
 
-from flext_target_ldap.__version__ import __version__
-
 if TYPE_CHECKING:
     from flext_meltano import d, e, h, r, s, x
 
-    from flext_target_ldap import _constants, _models, _utilities, application
     from flext_target_ldap.__version__ import (
         FlextTargetLdapVersion,
         __author__,
@@ -26,12 +22,13 @@ if TYPE_CHECKING:
         __license__,
         __title__,
         __url__,
+        __version__,
         __version_info__,
     )
     from flext_target_ldap._config import FlextTargetLdapConfig, config
     from flext_target_ldap._settings import FlextTargetLdapSettings, settings
     from flext_target_ldap.api import FlextTargetLdap
-    from flext_target_ldap.cli import FlextTargetLdapCli, main
+    from flext_target_ldap.cli import main
     from flext_target_ldap.constants import FlextTargetLdapConstants, c
     from flext_target_ldap.models import FlextTargetLdapModels, m
     from flext_target_ldap.protocols import FlextTargetLdapProtocols, p
@@ -41,7 +38,6 @@ if TYPE_CHECKING:
 
 __all__: tuple[str, ...] = (
     "FlextTargetLdap",
-    "FlextTargetLdapCli",
     "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
@@ -58,10 +54,6 @@ __all__: tuple[str, ...] = (
     "__url__",
     "__version__",
     "__version_info__",
-    "_constants",
-    "_models",
-    "_utilities",
-    "application",
     "c",
     "config",
     "d",
@@ -81,9 +73,8 @@ __all__: tuple[str, ...] = (
 install_lazy_exports(
     __name__,
     globals(),
-    MappingProxyType({
+    {
         "FlextTargetLdap": ".api",
-        "FlextTargetLdapCli": ".cli",
         "FlextTargetLdapConfig": "._config",
         "FlextTargetLdapConstants": ".constants",
         "FlextTargetLdapModels": ".models",
@@ -99,10 +90,6 @@ install_lazy_exports(
         "__title__": ".__version__",
         "__url__": ".__version__",
         "__version_info__": ".__version__",
-        "_constants": "._constants",
-        "_models": "._models",
-        "_utilities": "._utilities",
-        "application": ".application",
         "c": ".constants",
         "config": "._config",
         "d": "flext_meltano",
@@ -117,6 +104,9 @@ install_lazy_exports(
         "t": ".typings",
         "u": ".utilities",
         "x": "flext_meltano",
-    }),
+    },
     public_exports=__all__,
 )
+
+if not TYPE_CHECKING:
+    from flext_target_ldap.__version__ import __version__

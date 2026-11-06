@@ -9,10 +9,7 @@ from __future__ import annotations
 
 from uuid import uuid4
 
-import pytest
-
-from flext_target_ldap import settings
-from tests import p, t, tm
+from tests import c, p, settings, t, tm
 
 
 class TestsFlextTargetLdapClient:
@@ -44,23 +41,23 @@ class TestsFlextTargetLdapClient:
         )
 
     @staticmethod
-    @pytest.mark.docker
-    @pytest.mark.integration
+    @c.Tests.MARK.docker
+    @c.Tests.MARK.integration
     def test_connect_and_disconnect_reach_configured_runtime(
         ldap_runtime_client: p.TargetLdap.Client,
     ) -> None:
         """Test connect and disconnect reach configured runtime."""
         connected = ldap_runtime_client.connect()
         tm.ok(connected)
-        tm.that(connected.value, eq=True)
+        tm.ok(connected.value)
 
         disconnected = ldap_runtime_client.disconnect()
         tm.ok(disconnected)
-        tm.that(disconnected.value, eq=True)
+        tm.ok(disconnected.value)
 
     @staticmethod
-    @pytest.mark.docker
-    @pytest.mark.integration
+    @c.Tests.MARK.docker
+    @c.Tests.MARK.integration
     def test_entry_lifecycle_is_observable_in_configured_runtime(
         ldap_runtime_client: p.TargetLdap.Client,
         ldap_base_dn: str,
@@ -90,8 +87,7 @@ class TestsFlextTargetLdapClient:
             tm.ok(found)
             entries = found.value
             tm.that(len(entries), eq=1)
-            entry_dn = tm.not_none(entries[0].dn)
-            tm.that(entry_dn.value, eq=dn)
+            tm.that(entries[0].dn_str, eq=dn)
 
             deleted = ldap_runtime_client.delete_entry(dn)
             tm.ok(deleted)
