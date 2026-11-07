@@ -33,7 +33,7 @@ class FlextTargetLdapServiceRuntime:
             cls,
             *,
             runtime_sink: p.TargetLdap.Sink,
-            target: p.Meltano.SingerTargetBase,
+            target: m.Meltano.SingerTargetBase,
             stream_name: str,
             schema: t.TargetLdap.MutableSchemaPayload,
             key_properties: Sequence[str],
