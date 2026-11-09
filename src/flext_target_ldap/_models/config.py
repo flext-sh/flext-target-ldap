@@ -7,11 +7,8 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Annotated
 
 from flext_meltano import m
-
-from flext_target_ldap import p, t
 
 
 class FlextTargetLdapModelsConfig:
@@ -27,10 +24,7 @@ class FlextTargetLdapModelsConfig:
 
             model_config = m.ConfigDict(frozen=True, extra="allow")
 
-        TargetLdap: Annotated[
-            p.TargetLdap.ConfigRootConfigNamespace,
-            t.schema_for_model(FlextTargetLdapModelsConfig.ConfigRoot.ConfigNamespace),
-        ] = m.Field(
+        TargetLdap: FlextTargetLdapModelsConfig.ConfigRoot.ConfigNamespace = m.Field(
             description="Open namespace exposing ``config/*.yaml`` under TargetLdap.",
         )
 
