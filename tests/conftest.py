@@ -13,7 +13,7 @@ import pytest
 from flext_tests import FlextTestsDocker
 
 from flext_target_ldap.services import FlextTargetLdapClient
-from tests import c, p, settings, t, tm, u
+from tests import c, m, p, settings, t, tm, u
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def ldap_settings_payload() -> t.TargetLdap.SettingsPayload:
 
 
 @pytest.fixture(scope="session")
-def ldap_runtime() -> p.Tests.ContainerConfig:
+def ldap_runtime() -> m.Tests.ContainerConfig:
     """Ensure the canonical shared LDAP runtime and return where it listens.
 
     The shared entry declares the container port; the returned target carries
@@ -49,7 +49,7 @@ def ldap_runtime() -> p.Tests.ContainerConfig:
 @pytest.fixture
 def ldap_runtime_settings_payload(
     ldap_settings_payload: t.TargetLdap.SettingsPayload,
-    ldap_runtime: p.Tests.ContainerConfig,
+    ldap_runtime: m.Tests.ContainerConfig,
 ) -> t.TargetLdap.SettingsPayload:
     """Bind production settings to the canonical shared LDAP endpoint.
 
