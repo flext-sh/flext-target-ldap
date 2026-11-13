@@ -7,7 +7,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import FlextTargetLdapSettings, c, p, t, u
+from flext_meltano import u
+
+from flext_target_ldap import FlextTargetLdapSettings, c, p, t
 
 
 class FlextTargetLdapUtilitiesSettings:

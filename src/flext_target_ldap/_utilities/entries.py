@@ -12,7 +12,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping, Sequence
 
-from flext_target_ldap import FlextTargetLdapSettings, c, config, m, p, r, t
+from flext_meltano import r
+
+from flext_target_ldap import FlextTargetLdapSettings, c, config, m, p, t
 
 
 class FlextTargetLdapUtilitiesEntries:
