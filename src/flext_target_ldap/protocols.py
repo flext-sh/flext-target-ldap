@@ -7,8 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_ldap import p as flext_ldap_p
-from flext_meltano import p as flext_meltano_p
+from flext_ldap import FlextLdapProtocols
+from flext_meltano import FlextMeltanoProtocols
 
 from flext_target_ldap._protocols import (
     FlextTargetLdapProtocolsBase,
@@ -17,7 +17,7 @@ from flext_target_ldap._protocols import (
 )
 
 
-class FlextTargetLdapProtocols(flext_meltano_p, flext_ldap_p):
+class FlextTargetLdapProtocols(FlextMeltanoProtocols, FlextLdapProtocols):
     """MRO facade composing Meltano + LDAP protocol namespaces."""
 
     class TargetLdap(
