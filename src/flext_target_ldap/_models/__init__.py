@@ -29,16 +29,8 @@ install_lazy_exports(
         "FlextTargetLdapModelsEntities": ".entities",
     },
     public_exports=__all__,
-    deferred_members={
-        "FlextTargetLdapModelsConfig": (
-            "ConfigRoot",
-            "EntryProfile",
-            "Rules",
-        ),
-        "FlextTargetLdapModelsEntities": (
-            "AttributeMapping",
-            "Entry",
-            "TransformationRule",
-        ),
-    },
+    deferred_members=(
+        "FlextTargetLdapModelsConfig",
+        "FlextTargetLdapModelsEntities",
+    ),
 )
