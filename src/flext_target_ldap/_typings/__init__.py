@@ -22,14 +22,5 @@ install_lazy_exports(
     globals(),
     {"FlextTargetLdapTypingsBase": ".base"},
     public_exports=__all__,
-    deferred_members={
-        "FlextTargetLdapTypingsBase": (
-            "SettingsPayload",
-            "RecordPayload",
-            "MutableRecordPayload",
-            "SchemaPayload",
-            "MutableSchemaPayload",
-            "CatalogPayload",
-        ),
-    },
+    deferred_members=("FlextTargetLdapTypingsBase",),
 )

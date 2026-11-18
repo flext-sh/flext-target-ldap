@@ -32,23 +32,9 @@ install_lazy_exports(
         "FlextTargetLdapProtocolsEntities": ".entities",
     },
     public_exports=__all__,
-    deferred_members={
-        "FlextTargetLdapProtocolsBase": (
-            "Directory",
-            "DirectoryFactory",
-            "Sink",
-            "Client",
-        ),
-        "FlextTargetLdapProtocolsConfig": (
-            "ConfigRoot",
-            "ConfigRootConfigNamespace",
-            "EntryProfile",
-            "Rules",
-        ),
-        "FlextTargetLdapProtocolsEntities": (
-            "AttributeMapping",
-            "Entry",
-            "TransformationRule",
-        ),
-    },
+    deferred_members=(
+        "FlextTargetLdapProtocolsBase",
+        "FlextTargetLdapProtocolsConfig",
+        "FlextTargetLdapProtocolsEntities",
+    ),
 )

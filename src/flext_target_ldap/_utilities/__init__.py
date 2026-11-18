@@ -34,28 +34,9 @@ install_lazy_exports(
         "FlextTargetLdapUtilitiesSettings": ".settings",
     },
     public_exports=__all__,
-    deferred_members={
-        "FlextTargetLdapServiceRuntime": (
-            "Target",
-            "Sink",
-            "normalize_flat_schema",
-        ),
-        "FlextTargetLdapUtilitiesEntries": (
-            "to_str_values",
-            "entry_profile",
-            "record_dn",
-            "object_class_list",
-            "object_classes",
-            "attribute_mapping",
-            "entry_attributes",
-            "validate_entry",
-            "ldif_entry",
-            "modify_changes",
-            "connection_config",
-        ),
-        "FlextTargetLdapUtilitiesSettings": (
-            "validate_ldap_target_config",
-            "create_default_ldap_target_config",
-        ),
-    },
+    deferred_members=(
+        "FlextTargetLdapServiceRuntime",
+        "FlextTargetLdapUtilitiesEntries",
+        "FlextTargetLdapUtilitiesSettings",
+    ),
 )
