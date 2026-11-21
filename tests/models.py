@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsModels
 
-from flext_target_ldap import FlextTargetLdapModels
+from tests import FlextTargetLdapModels
 
 
 class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
@@ -22,15 +22,12 @@ class TestsFlextTargetLdapModels(FlextTestsModels, FlextTargetLdapModels):
     2. FlextTargetLdapModels - for domain models
 
     Access patterns:
-    - m.TargetLdap.Tests.* (project-local Domain.Tests fixtures)
+    - m.Tests.* (project-local Domain.Tests fixtures)
     - m.* (Target LDAP domain models via shared MRO)
     """
 
-    class TargetLdap(FlextTargetLdapModels.TargetLdap):
-        """Target LDAP domain test models namespace."""
-
-        class Tests(FlextTestsModels.Tests):
-            """Target LDAP-specific test fixtures."""
+    class Tests(FlextTestsModels.Tests):
+        """Target LDAP-specific test fixtures."""
 
 
 m = TestsFlextTargetLdapModels

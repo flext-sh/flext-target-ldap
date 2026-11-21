@@ -30,7 +30,7 @@ class TestsFlextTargetLdapSinks:
         """
         settings: t.TargetLdap.SettingsPayload = {
             **payload,
-            "base_dn": c.TargetLdap.Tests.SAMPLE_BASE_DN,
+            "base_dn": c.Tests.SAMPLE_BASE_DN,
             **updates,
         }
         return FlextTargetLdapSinks.runtime_sink(
@@ -69,7 +69,7 @@ class TestsFlextTargetLdapSinks:
                 {},
             )
             result = sink.validate_entry(
-                f"cn=test,{c.TargetLdap.Tests.SAMPLE_BASE_DN}",
+                f"cn=test,{c.Tests.SAMPLE_BASE_DN}",
                 {"cn": ["test"]},
                 ["person", "top"],
             )
@@ -124,7 +124,7 @@ class TestsFlextTargetLdapSinks:
         ) -> None:
             """Test the DN uses the profile RDN and first identity field."""
             profile = u.TargetLdap.entry_profile(stream_name)
-            base_dn = c.TargetLdap.Tests.SAMPLE_BASE_DN
+            base_dn = c.Tests.SAMPLE_BASE_DN
             sink = TestsFlextTargetLdapSinks.build_sink(
                 stream_name,
                 ldap_settings_payload,
@@ -167,7 +167,7 @@ class TestsFlextTargetLdapSinks:
                 ldap_settings_payload,
                 {},
             )
-            explicit_dn = f"uid=explicit,{c.TargetLdap.Tests.SAMPLE_BASE_DN}"
+            explicit_dn = f"uid=explicit,{c.Tests.SAMPLE_BASE_DN}"
             tm.ok(
                 sink.build_dn({"dn": explicit_dn, "username": "x"}),
                 eq=explicit_dn,
@@ -256,7 +256,7 @@ class TestsFlextTargetLdapSinks:
         ) -> None:
             """Test the default profile derives the DN from its identity."""
             profile = u.TargetLdap.entry_profile("generic")
-            base_dn = c.TargetLdap.Tests.SAMPLE_BASE_DN
+            base_dn = c.Tests.SAMPLE_BASE_DN
             sink = TestsFlextTargetLdapSinks.build_sink(
                 "generic",
                 ldap_settings_payload,
@@ -293,7 +293,7 @@ class TestsFlextTargetLdapSinks:
             )
             attributes = tm.ok(
                 sink.build_attributes({
-                    "dn": f"cn=testentry,{c.TargetLdap.Tests.SAMPLE_BASE_DN}",
+                    "dn": f"cn=testentry,{c.Tests.SAMPLE_BASE_DN}",
                     "cn": "Test Entry",
                     "description": "A test entry",
                 }),

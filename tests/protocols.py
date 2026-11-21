@@ -11,17 +11,14 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsProtocols
 
-from flext_target_ldap import FlextTargetLdapProtocols
+from tests import FlextTargetLdapProtocols
 
 
 class TestsFlextTargetLdapProtocols(FlextTestsProtocols, FlextTargetLdapProtocols):
     """Test protocols combining TestsFlextProtocols and FlextTargetLdapProtocols."""
 
-    class TargetLdap(FlextTargetLdapProtocols.TargetLdap):
-        """TargetLdap test protocols namespace."""
-
-        class Tests(FlextTestsProtocols.Tests):
-            """TargetLdap-specific test protocols."""
+    class Tests(FlextTestsProtocols.Tests):
+        """TargetLdap-specific test protocols."""
 
 
 p = TestsFlextTargetLdapProtocols

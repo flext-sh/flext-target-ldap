@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_tests import api, td, tf, tk, tm
+    from flext_tests import api, d, e, h, r, td, tf, tk, tm, x
 
     from flext_target_ldap import (
         FlextTargetLdap,
@@ -25,14 +25,10 @@ if TYPE_CHECKING:
         FlextTargetLdapUtilities,
         FlextTargetLdapVersion,
         config,
-        d,
-        e,
-        h,
         main,
-        r,
         settings,
-        x,
     )
+    from flext_target_ldap.services import FlextTargetLdapClient, FlextTargetLdapSinks
     from tests.base import TestsFlextTargetLdapServiceBase, s
     from tests.constants import TestsFlextTargetLdapConstants, c
     from tests.models import TestsFlextTargetLdapModels, m
@@ -44,11 +40,13 @@ if TYPE_CHECKING:
 
 __all__: tuple[str, ...] = (
     "FlextTargetLdap",
+    "FlextTargetLdapClient",
     "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
     "FlextTargetLdapProtocols",
     "FlextTargetLdapSettings",
+    "FlextTargetLdapSinks",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
     "FlextTargetLdapVersion",
@@ -85,11 +83,13 @@ install_lazy_exports(
     globals(),
     {
         "FlextTargetLdap": "flext_target_ldap",
+        "FlextTargetLdapClient": "flext_target_ldap.services",
         "FlextTargetLdapConfig": "flext_target_ldap",
         "FlextTargetLdapConstants": "flext_target_ldap",
         "FlextTargetLdapModels": "flext_target_ldap",
         "FlextTargetLdapProtocols": "flext_target_ldap",
         "FlextTargetLdapSettings": "flext_target_ldap",
+        "FlextTargetLdapSinks": "flext_target_ldap.services",
         "FlextTargetLdapTypes": "flext_target_ldap",
         "FlextTargetLdapUtilities": "flext_target_ldap",
         "FlextTargetLdapVersion": "flext_target_ldap",
@@ -103,13 +103,13 @@ install_lazy_exports(
         "api": "flext_tests",
         "c": ".constants",
         "config": "flext_target_ldap",
-        "d": "flext_target_ldap",
-        "e": "flext_target_ldap",
-        "h": "flext_target_ldap",
+        "d": "flext_tests",
+        "e": "flext_tests",
+        "h": "flext_tests",
         "m": ".models",
         "main": "flext_target_ldap",
         "p": ".protocols",
-        "r": "flext_target_ldap",
+        "r": "flext_tests",
         "s": ".base",
         "settings": "flext_target_ldap",
         "t": ".typings",
@@ -118,7 +118,7 @@ install_lazy_exports(
         "tk": "flext_tests",
         "tm": "flext_tests",
         "u": ".utilities",
-        "x": "flext_target_ldap",
+        "x": "flext_tests",
     },
     public_exports=__all__,
 )
