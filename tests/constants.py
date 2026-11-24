@@ -13,7 +13,7 @@ from typing import ClassVar
 
 from flext_tests import FlextTestsConstants
 
-from flext_target_ldap import FlextTargetLdapConstants
+from tests import FlextTargetLdapConstants
 
 
 def _docker_admin_password() -> str:
@@ -29,26 +29,23 @@ def _docker_admin_password() -> str:
 class TestsFlextTargetLdapConstants(FlextTargetLdapConstants, FlextTestsConstants):
     """Test constants for flext-target-ldap."""
 
-    class TargetLdap(FlextTargetLdapConstants.TargetLdap):
-        """Target LDAP domain test constants namespace."""
+    class Tests(FlextTestsConstants.Tests):
+        """Target LDAP-specific test constants."""
 
-        class Tests(FlextTestsConstants.Tests):
-            """Target LDAP-specific test constants."""
+        EXPECTED_DATA_COUNT: ClassVar[int] = 3
+        # Console script declared in ``pyproject.toml`` ``[project.scripts]``.
+        CONSOLE_SCRIPT: ClassVar[str] = "flext-target-ldap"
+        # Base DN fixed by sink scenarios that never reach a directory.
+        SAMPLE_BASE_DN: ClassVar[str] = "dc=example,dc=com"
 
-            EXPECTED_DATA_COUNT: ClassVar[int] = 3
-            # Console script declared in ``pyproject.toml`` ``[project.scripts]``.
-            CONSOLE_SCRIPT: ClassVar[str] = "flext-target-ldap"
-            # Base DN fixed by sink scenarios that never reach a directory.
-            SAMPLE_BASE_DN: ClassVar[str] = "dc=example,dc=com"
-
-            # Identity provisioned by the shared LDAP test container
-            # (its compose file ``LDAP_BASE_DN`` /
-            # ``LDAP_ADMIN_PASSWORD`` / healthcheck bind DN); mirrors the
-            # flext-ldap ``c.Ldap.Tests.DOCKER_*`` constants for the same
-            # container.
-            DOCKER_BASE_DN: ClassVar[str] = "dc=flext,dc=local"
-            DOCKER_ADMIN_DN: ClassVar[str] = "cn=admin,dc=flext,dc=local"
-            DOCKER_ADMIN_PASSWORD: ClassVar[str] = _docker_admin_password()
+        # Identity provisioned by the shared LDAP test container
+        # (its compose file ``LDAP_BASE_DN`` /
+        # ``LDAP_ADMIN_PASSWORD`` / healthcheck bind DN); mirrors the
+        # flext-ldap ``c.Tests.DOCKER_*`` constants for the same
+        # container.
+        DOCKER_BASE_DN: ClassVar[str] = "dc=flext,dc=local"
+        DOCKER_ADMIN_DN: ClassVar[str] = "cn=admin,dc=flext,dc=local"
+        DOCKER_ADMIN_PASSWORD: ClassVar[str] = _docker_admin_password()
 
 
 c = TestsFlextTargetLdapConstants

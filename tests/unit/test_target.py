@@ -7,9 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_ldap import FlextTargetLdap
 from flext_target_ldap.services import FlextTargetLdapClient, FlextTargetLdapSinks
-from tests import c, m, t, tm, u
+from tests import FlextTargetLdap, c, m, t, tm, u
 
 
 class TestsFlextTargetLdapTarget:
@@ -24,7 +23,7 @@ class TestsFlextTargetLdapTarget:
 
         """
         result = u.Cli.run_raw(
-            [c.TargetLdap.Tests.CONSOLE_SCRIPT],
+            [c.Tests.CONSOLE_SCRIPT],
             options=m.Cli.ProcessOptions(
                 input_data=message_lines,
                 remove_env_keys=("PYTHONPATH",),

@@ -9,17 +9,14 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsTypes
 
-from flext_target_ldap import FlextTargetLdapTypes
+from tests import FlextTargetLdapTypes
 
 
 class TestsFlextTargetLdapTypes(FlextTestsTypes, FlextTargetLdapTypes):
     """Test types facade for flext-target-ldap."""
 
-    class TargetLdap(FlextTargetLdapTypes.TargetLdap):
-        """TargetLdap test types namespace."""
-
-        class Tests(FlextTestsTypes.Tests):
-            """TargetLdap-specific test type aliases."""
+    class Tests(FlextTestsTypes.Tests):
+        """TargetLdap-specific test type aliases."""
 
 
 t = TestsFlextTargetLdapTypes

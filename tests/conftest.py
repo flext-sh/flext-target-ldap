@@ -63,9 +63,9 @@ def ldap_runtime_settings_payload(
     # The production settings default base_dn/bind_dn/bind_password to ""
     # (per-deployment knobs); the shared runtime provisions its own identity,
     # so surface it like host/port. Anonymous binds cannot write entries.
-    payload[c.TargetLdap.KEY_BASE_DN] = c.TargetLdap.Tests.DOCKER_BASE_DN
-    payload[c.TargetLdap.KEY_BIND_DN] = c.TargetLdap.Tests.DOCKER_ADMIN_DN
-    payload[c.TargetLdap.KEY_BIND_CREDENTIAL] = c.TargetLdap.Tests.DOCKER_ADMIN_PASSWORD
+    payload[c.TargetLdap.KEY_BASE_DN] = c.Tests.DOCKER_BASE_DN
+    payload[c.TargetLdap.KEY_BIND_DN] = c.Tests.DOCKER_ADMIN_DN
+    payload[c.TargetLdap.KEY_BIND_CREDENTIAL] = c.Tests.DOCKER_ADMIN_PASSWORD
     return u.Cli.JSON_MAPPING_ADAPTER.validate_python(payload)
 
 
