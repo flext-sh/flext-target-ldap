@@ -33,6 +33,7 @@ if TYPE_CHECKING:
         settings,
         x,
     )
+    from flext_target_ldap.services import FlextTargetLdapClient, FlextTargetLdapSinks
     from tests.base import TestsFlextTargetLdapServiceBase, s
     from tests.constants import TestsFlextTargetLdapConstants, c
     from tests.models import TestsFlextTargetLdapModels, m
@@ -44,11 +45,13 @@ if TYPE_CHECKING:
 
 __all__: tuple[str, ...] = (
     "FlextTargetLdap",
+    "FlextTargetLdapClient",
     "FlextTargetLdapConfig",
     "FlextTargetLdapConstants",
     "FlextTargetLdapModels",
     "FlextTargetLdapProtocols",
     "FlextTargetLdapSettings",
+    "FlextTargetLdapSinks",
     "FlextTargetLdapTypes",
     "FlextTargetLdapUtilities",
     "FlextTargetLdapVersion",
@@ -85,11 +88,13 @@ install_lazy_exports(
     globals(),
     {
         "FlextTargetLdap": "flext_target_ldap",
+        "FlextTargetLdapClient": "flext_target_ldap.services",
         "FlextTargetLdapConfig": "flext_target_ldap",
         "FlextTargetLdapConstants": "flext_target_ldap",
         "FlextTargetLdapModels": "flext_target_ldap",
         "FlextTargetLdapProtocols": "flext_target_ldap",
         "FlextTargetLdapSettings": "flext_target_ldap",
+        "FlextTargetLdapSinks": "flext_target_ldap.services",
         "FlextTargetLdapTypes": "flext_target_ldap",
         "FlextTargetLdapUtilities": "flext_target_ldap",
         "FlextTargetLdapVersion": "flext_target_ldap",
