@@ -44,7 +44,7 @@ class TestsFlextTargetLdapTarget:
         """Test the declared sink factory builds the Singer drain sink."""
         sink = FlextTargetLdap.sink_factory(
             stream_name="users",
-            schema={},
+            schema={"properties": {"dn": {"type": "string"}}},
             target_config=ldap_settings_payload,
         )
         tm.that(sink, is_=u.TargetLdap.Sink)
